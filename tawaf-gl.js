@@ -477,7 +477,7 @@ let W = CONTAINED ? CONTAINER.clientWidth : window.innerWidth;
 let H = CONTAINED ? CONTAINER.clientHeight : window.innerHeight;
 const aspect = W / H;
 const frustum = 2; // world units from center to edge vertically
-const radius = frustum * 1.45; // orbital radius in world units — scaled up for larger drawing fill
+const radius = frustum * 1.6; // orbital radius in world units — scaled up for larger drawing fill
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#020204');
