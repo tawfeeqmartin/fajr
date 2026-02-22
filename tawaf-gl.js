@@ -899,13 +899,17 @@ const ATEN_REIGN_FRAG = `
         vec3 r4 = uRing4 + b4;
 
         // 5 concentric color bands — Turrell Aten Reign structure.
-        // Wider smoothstep zones = softer boundaries (perceived as steps in a gradient).
         // Ring radii tuned so ring 4 is fully visible within CSS mask solid zone (82%).
         vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.08, 0.20, dist));  // ring 1: soft transition
-        color = mix(color, r2, smoothstep(0.24, 0.36, dist));  // ring 2: soft transition
-        color = mix(color, r3, smoothstep(0.40, 0.52, dist));  // ring 3: soft transition
-        color = mix(color, r4, smoothstep(0.56, 0.70, dist));  // ring 4: widest — fades into depth
+        color = mix(color, r1, smoothstep(0.08, 0.20, dist));
+        color = mix(color, r2, smoothstep(0.24, 0.36, dist));
+        color = mix(color, r3, smoothstep(0.40, 0.52, dist));
+        color = mix(color, r4, smoothstep(0.56, 0.70, dist));
+
+        // Kaaba hotspot — concentrated luminous core at the very center.
+        // The sacred source from which all light emanates.
+        float hotspot = 1.0 - smoothstep(0.0, 0.08, dist);
+        color += hotspot * 0.15; // bright white bloom at center
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -1452,12 +1456,12 @@ const kaabaGlowGeo = new THREE.BufferGeometry();
 kaabaGlowGeo.setAttribute('position', new THREE.BufferAttribute(kaabaGlowPositions, 3));
 kaabaGlowGeo.setDrawRange(0, 0);
 const kaabaGlowMat = new THREE.PointsMaterial({
-    size: 1.45, sizeAttenuation: false,
-    transparent: true, opacity: 0.0,   // hidden — glow invisible on luminous bg
-    blending: THREE.NormalBlending,
+    size: 8, sizeAttenuation: false,
+    transparent: true, opacity: 0.3,
+    blending: THREE.AdditiveBlending,  // additive — glow adds to the luminous center
     depthTest: false,
     map: glowTexture,
-    color: 0x333333,
+    color: 0xfff8f0,  // warm white
 });
 const kaabaGlowPoints = new THREE.Points(kaabaGlowGeo, kaabaGlowMat);
 kaabaGlowPoints.position.z = -0.005; // sit just behind the main trail
@@ -1467,11 +1471,11 @@ liveGroup.add(kaabaGlowPoints);
 const tipGlowGeo = new THREE.BufferGeometry();
 tipGlowGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0.02]), 3));
 const tipGlowMat = new THREE.PointsMaterial({
-    size: 40,
+    size: 45,
     map: glowTexture,
     transparent: true,
-    opacity: 0.0,   // hidden — glow invisible on luminous bg
-    blending: THREE.NormalBlending,
+    opacity: 0.4,
+    blending: THREE.AdditiveBlending,  // additive — hot point of sacred light
     depthTest: false,
     sizeAttenuation: false,
 });
@@ -1658,7 +1662,8 @@ function updateClockHands(now, night, blending) {
     tipGlowGeo.attributes.position.needsUpdate = true;
     // Pulse synced with Kaaba glow — flares with the cube
     const glowPulse = 0.75 + 0.25 * Math.sin(performance.now() * 0.003);
-    tipGlowMat.opacity = 0;  // hidden in luminous mode
+    // Pen tip glow — hot point of radiance at the drawing nib
+    tipGlowMat.opacity = glowPulse * 0.35;
     tipGlowMat.size = 35;
     tipGlowMat.needsUpdate = true;
 
@@ -1666,12 +1671,12 @@ function updateClockHands(now, night, blending) {
 
     // Trail colors: prayer palette gradient from transparent (old) to bright (new)
     const epiDrawCount = Math.min(epicycleTrailCount, EPICYCLE_TRAIL_MAX);
-    // Epicycle trail: luminous — lighter than bg, radiates light
-    const epiS = Math.max((palette.s - 15) / 100, 0.05);
-    const epiL = Math.min((palette.l + 20) / 100, 0.95);
+    // Epicycle trail: Kaaba sacred geometry — bright and prominent as focal point
+    const epiS = Math.max((palette.s - 25) / 100, 0.03);
+    const epiL = Math.min((palette.l + 30) / 100, 0.97);
     _tmpColor.setHSL(baseH / 360, epiS, epiL);
     for (let i = 0; i < epiDrawCount; i++) {
-        const brightness = i / epiDrawCount;
+        const brightness = 0.3 + 0.7 * (i / epiDrawCount); // minimum 30% brightness — never fully invisible
         epicycleTrailColors[i * 4]     = _tmpColor.r * brightness;
         epicycleTrailColors[i * 4 + 1] = _tmpColor.g * brightness;
         epicycleTrailColors[i * 4 + 2] = _tmpColor.b * brightness;
@@ -1681,8 +1686,9 @@ function updateClockHands(now, night, blending) {
     epicycleTrailGeo.attributes.position.needsUpdate = true;
     epicycleTrailGeo.attributes.color.needsUpdate = true;
     // Kaaba glow/pulse — slow breathing on the entire cube drawing
-    const kaabaPulse = 0.7 + 0.3 * Math.sin(performance.now() * 0.003); // ~0.3 Hz breathe
-    epicycleTrailMat.opacity = kaabaPulse * 0.8;
+    // The Kaaba is the sacred source — it must be clearly visible as the center of radiance
+    const kaabaPulse = 0.85 + 0.15 * Math.sin(performance.now() * 0.002); // gentle breathe, always bright
+    epicycleTrailMat.opacity = kaabaPulse;
     epicycleTrailMat.blending = THREE.NormalBlending;
     epicycleTrailMat.needsUpdate = true;
 
@@ -1695,9 +1701,10 @@ function updateClockHands(now, night, blending) {
     kaabaGlowGeo.setDrawRange(0, epiDrawCount);
     kaabaGlowGeo.attributes.position.needsUpdate = true;
     // Pulse the glow — brighter than the main trail, synced breathing
-    kaabaGlowMat.size = 1.45;
-    kaabaGlowMat.opacity = 0;  // hidden — bloom provides the glow
-    kaabaGlowMat.color.setHSL(baseH / 360, 0.15, 0.90);
+    // Kaaba glow halo — soft radiance emanating from the sacred center
+    kaabaGlowMat.size = 5;  // moderate glow — Kaaba diamond shape stays visible within
+    kaabaGlowMat.opacity = kaabaPulse * 0.2;  // gentle, not overwhelming
+    kaabaGlowMat.color.setHSL(baseH / 360, 0.08, 0.95);  // near-white warm glow
     kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
