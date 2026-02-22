@@ -163,7 +163,7 @@ body::after{display:none;
   position:relative;
   width:var(--clock-size);height:var(--clock-size);
   border-radius:50%;overflow:hidden;
-  background:transparent;
+  background:#030108;
   flex-shrink:0;
   transition:box-shadow 1.5s ease;
 }
@@ -819,7 +819,7 @@ function setNightMode(on){
     r.style.setProperty('--text-muted','#6b6b6b');
     r.style.setProperty('--border','#e5e3dd');
   }
-  document.querySelector('.clock-sticky').style.background='#0c0c12';
+  document.querySelector('.clock-sticky').style.background='';
   const pc=document.getElementById('prayerCard');
   if(pc){pc.style.background=on?'#141418':'#fff';pc.style.borderColor=on?'rgba(255,255,255,.08)':'var(--border)';}
   if(window._clockSetNight) window._clockSetNight(on);
@@ -1768,7 +1768,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=14';
+_cs.type='module';_cs.src='tawaf-gl.js?v=15';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
