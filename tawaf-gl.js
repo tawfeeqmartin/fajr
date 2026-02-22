@@ -31,19 +31,19 @@ const STARTUP_PRESET = Object.freeze({
     // The visual IS the light itself — traces are barely perceptible.
     // "Subtract. Soften. Slow. Lighten. Desaturate. Dissolve."
     night: Object.freeze({
-        alphaMul: 3.0,
-        alphaMax: 0.10,        // traces are whispers — barely visible structure
-        bloomStrength: 0.06,   // almost none — Turrell light is uniform, not glowing
-        bloomThreshold: 0.60,
-        bloomRadius: 0.9,      // wide, gentle
+        alphaMul: 2.0,
+        alphaMax: 0.05,        // traces are barely there — gossamer threads in light
+        bloomStrength: 0.03,   // whisper of bloom — Turrell light is uniform, not point-source
+        bloomThreshold: 0.70,
+        bloomRadius: 1.2,      // wide, diffuse — no visible glow halos
         bg: '#eae7f0',
     }),
     day: Object.freeze({
-        alphaMul: 3.0,
-        alphaMax: 0.10,        // same ghostly traces
-        bloomStrength: 0.04,
-        bloomThreshold: 0.65,
-        bloomRadius: 0.9,
+        alphaMul: 2.0,
+        alphaMax: 0.05,        // same gossamer traces
+        bloomStrength: 0.02,
+        bloomThreshold: 0.75,
+        bloomRadius: 1.2,
         bg: '#f8f7f4',
     }),
     shared: Object.freeze({
@@ -51,7 +51,7 @@ const STARTUP_PRESET = Object.freeze({
         radiusPower: 2.0,
         midDipStrength: 0.55,
         velCap: 1.5,
-        connAlphaMul: 0.02,    // connection lines nearly invisible
+        connAlphaMul: 0.008,   // connection lines barely perceptible
         noiseSigma: 0.0003,
         hueJitter: 10,
         pathGradient: 16,
@@ -98,40 +98,46 @@ const PRAYER_PALETTES = {
 // Each prayer gets a multi-chromatic progression. Center is luminous but TINTED,
 // not white. You should feel bathed in color — "visitors' faces washed in purple."
 const PRAYER_RING_PALETTES = {
+    // Turrell Aten Reign: QUASI-MONOCHROMATIC per prayer.
+    // Each prayer is "a blue piece" or "a violet piece" — max 25° hue range.
+    // Adjacent rings differ by only 5-8° hue. You perceive ONE color family
+    // deepening from luminous center to saturated edge.
+    // Center: L:93, S:15 (near-white aperture). Edge: L:28, S:72 (deep immersion).
+    // Saturation climbs center→edge. Lightness drops center→edge.
     fajr: [
-        [35,  28, 91],   // ring 0: warm peach aperture — not white, colored
-        [345, 32, 85],   // ring 1: pale blush pink
-        [280, 35, 80],   // ring 2: soft lavender
-        [220, 42, 74],   // ring 3: cerulean — fajr identity
-        [242, 38, 66],   // ring 4: deeper blue-violet
+        [200, 15, 93],   // ring 0: pale luminous blue-white aperture
+        [205, 32, 80],   // ring 1: soft cerulean
+        [212, 52, 65],   // ring 2: medium cerulean — fajr identity
+        [218, 64, 46],   // ring 3: rich cerulean-blue
+        [225, 72, 28],   // ring 4: deep blue — the depth you look into
     ],
     dhuhr: [
-        [50,  30, 91],   // ring 0: luminous warm gold tint
-        [35,  38, 85],   // ring 1: soft peach
-        [48,  45, 79],   // ring 2: warm gold — dhuhr identity
-        [28,  42, 73],   // ring 3: amber-orange
-        [12,  36, 67],   // ring 4: deeper terracotta
+        [45,  18, 93],   // ring 0: luminous warm white aperture
+        [42,  36, 80],   // ring 1: soft gold
+        [38,  54, 65],   // ring 2: warm amber — dhuhr identity
+        [34,  64, 46],   // ring 3: deep amber
+        [28,  70, 28],   // ring 4: rich sienna — the depth
     ],
     asr: [
-        [40,  28, 91],   // ring 0: warm cream aperture
-        [15,  36, 85],   // ring 1: pale salmon
-        [30,  45, 78],   // ring 2: coral — asr identity
-        [348, 38, 73],   // ring 3: dusty rose
-        [330, 34, 66],   // ring 4: deeper mauve
+        [25,  18, 93],   // ring 0: warm peach-white aperture
+        [22,  36, 80],   // ring 1: soft peach
+        [18,  52, 65],   // ring 2: coral — asr identity
+        [14,  62, 46],   // ring 3: deep coral
+        [8,   68, 28],   // ring 4: rich terracotta — the depth
     ],
     maghrib: [
-        [30,  25, 91],   // ring 0: warm tinted aperture
-        [348, 35, 84],   // ring 1: soft pink
-        [325, 45, 78],   // ring 2: rose — maghrib identity
-        [295, 40, 72],   // ring 3: orchid
-        [272, 36, 64],   // ring 4: deeper violet
+        [340, 15, 93],   // ring 0: pale rose-white aperture
+        [338, 34, 80],   // ring 1: soft rose
+        [335, 50, 65],   // ring 2: medium rose — maghrib identity
+        [330, 62, 46],   // ring 3: rich rose-magenta
+        [322, 68, 28],   // ring 4: deep magenta — the depth
     ],
     isha: [
-        [30,  22, 90],   // ring 0: warm ivory aperture
-        [340, 28, 84],   // ring 1: pale rose
-        [290, 38, 78],   // ring 2: soft lilac
-        [265, 44, 71],   // ring 3: lavender — isha identity
-        [242, 38, 62],   // ring 4: deeper indigo
+        [270, 15, 93],   // ring 0: pale lavender-white aperture
+        [268, 32, 80],   // ring 1: soft lavender
+        [265, 50, 65],   // ring 2: medium violet — isha identity
+        [260, 62, 46],   // ring 3: rich violet
+        [252, 70, 28],   // ring 4: deep indigo — the depth
     ],
 };
 
@@ -572,8 +578,8 @@ composer.addPass(bloomPass);
 const TurrellApertureShader = {
     uniforms: {
         tDiffuse:    { value: null },
-        uGlow:       { value: 0.12 },    // center brightening intensity
-        uDeepen:     { value: 0.08 },    // edge deepening intensity
+        uGlow:       { value: 0.20 },    // stronger center aperture radiance
+        uDeepen:     { value: 0.14 },    // deeper edge immersion
         uEdgeColor:  { value: new THREE.Color(0.5, 0.45, 0.55) }, // deeper prayer tint at edges
     },
     vertexShader: `
@@ -868,12 +874,12 @@ const ATEN_REIGN_FRAG = `
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
         // You can't see them change; your adaptation shifts and suddenly the color is different.
-        // Periods: ~30s (center) to ~90s (edge). Amplitudes tiny — atmospheric drift.
-        float b0 = sin(uTime * 0.20) * 0.008;
-        float b1 = sin(uTime * 0.14 + 1.2) * 0.012;
-        float b2 = sin(uTime * 0.09 + 2.5) * 0.015;
-        float b3 = sin(uTime * 0.07 + 3.8) * 0.018;
-        float b4 = sin(uTime * 0.04 + 5.0) * 0.020;
+        // Periods: ~45s (center) to ~120s (edge). Amplitudes subtle but real.
+        float b0 = sin(uTime * 0.14) * 0.015;
+        float b1 = sin(uTime * 0.10 + 1.2) * 0.020;
+        float b2 = sin(uTime * 0.07 + 2.5) * 0.025;
+        float b3 = sin(uTime * 0.05 + 3.8) * 0.030;
+        float b4 = sin(uTime * 0.03 + 5.0) * 0.035;
 
         vec3 r0 = uRing0 + b0;
         vec3 r1 = uRing1 + b1;
@@ -881,15 +887,14 @@ const ATEN_REIGN_FRAG = `
         vec3 r3 = uRing3 + b3;
         vec3 r4 = uRing4 + b4;
 
-        // 5 concentric color bands — each ring owns a DISTINCT zone.
-        // Turrell's Aten Reign: each ellipse is a clearly visible color band.
-        // Bands are spaced to fill the visible area (CSS mask keeps to ~80% radius).
-        // Ring 4 must be visible at full opacity before the mask starts fading.
+        // 5 concentric color bands — Turrell Aten Reign structure.
+        // Wider smoothstep zones = softer boundaries (perceived as steps in a gradient).
+        // Ring radii tuned so ring 4 is fully visible within CSS mask solid zone (82%).
         vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.08, 0.16, dist));  // ring 1 starts early
-        color = mix(color, r2, smoothstep(0.22, 0.30, dist));  // ring 2
-        color = mix(color, r3, smoothstep(0.38, 0.48, dist));  // ring 3
-        color = mix(color, r4, smoothstep(0.56, 0.66, dist));  // ring 4 fully visible by 66%
+        color = mix(color, r1, smoothstep(0.08, 0.20, dist));  // ring 1: soft transition
+        color = mix(color, r2, smoothstep(0.24, 0.36, dist));  // ring 2: soft transition
+        color = mix(color, r3, smoothstep(0.40, 0.52, dist));  // ring 3: soft transition
+        color = mix(color, r4, smoothstep(0.56, 0.70, dist));  // ring 4: widest — fades into depth
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -1847,11 +1852,11 @@ function applyDayNight() {
     // ── VIGNETTE — amplifies the Aten Reign depth ──
     // Center glow: strong aperture radiance, the "inner light" of Quaker practice.
     // Edge: reinforces ring 4's rich prayer color — like Turrell's Skyspace surround.
-    vignettePass.uniforms.uGlow.value = 0.15;       // center aperture radiance
-    vignettePass.uniforms.uDeepen.value = 0.10;     // subtle edge deepening — rings do the work
-    // Edge color from ring 4 — deepest ring, slightly richer
+    vignettePass.uniforms.uGlow.value = 0.25;       // strong center aperture radiance
+    vignettePass.uniforms.uDeepen.value = 0.18;     // deeper edge immersion into color
+    // Edge color from ring 4 — deepest ring, pushed even richer
     const [r4h, r4s, r4l] = rings[4];
-    const edgeColor = new THREE.Color().setHSL(r4h / 360, r4s * 1.1 / 100, r4l * 0.9 / 100);
+    const edgeColor = new THREE.Color().setHSL(r4h / 360, Math.min(r4s * 1.2, 100) / 100, r4l * 0.8 / 100);
     vignettePass.uniforms.uEdgeColor.value.copy(edgeColor);
 
     // ── Trace materials: subtle structure within the luminous color field.
@@ -1869,8 +1874,8 @@ function applyDayNight() {
         const traceL = Math.min(96, pair.l + 15);  // luminous — lighter than most rings
         const traceS = Math.max(8, pair.s - 12);   // desaturated — ghost-like
         const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
-        const traceAlpha = baseAlpha * depthScale * radiusScale * 0.30; // ghostly
-        const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale * 0.08;
+        const traceAlpha = baseAlpha * depthScale * radiusScale * 0.18; // gossamer — rings dominate
+        const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale * 0.04;
 
         obj.rosetteLine.material.opacity = traceAlpha;
         obj.rosetteLine.material.blending = THREE.NormalBlending;
@@ -1914,7 +1919,7 @@ function applyDayNight() {
         blurredLayer.mesh.visible = true;
         blurredLayer.mesh.material.blending = THREE.AdditiveBlending;
         blurredLayer.mesh.material.premultipliedAlpha = false;
-        blurredLayer.mesh.material.opacity = blurredLayer.opacity * 0.50;  // Ganzfeld atmospheric wash — volume color presence
+        blurredLayer.mesh.material.opacity = blurredLayer.opacity * 0.25;  // subtle atmospheric wash — rings must dominate
         blurredLayer.mesh.material.needsUpdate = true;
     }
 
@@ -1947,10 +1952,10 @@ function updateBodyColors() {
     const pName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
     const outerRings = PRAYER_RING_PALETTES[pName] || PRAYER_RING_PALETTES.isha;
     const [pgH, pgS, pgL] = outerRings[4]; // ring 4 = outermost
-    // Page bg: continuation of the Aten Reign outer field.
-    // Must be close enough to ring 4 that the mask dissolve is invisible.
-    // Higher saturation than before — the page is PART OF the light field, not neutral.
-    const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.45)}%, ${Math.round(Math.min(pgL + 16, 88))}%)`;
+    // Page bg: luminous continuation of the outer light field.
+    // Like the softly lit museum architecture beyond Turrell's rings.
+    // Same hue as ring 4 but MUCH lighter — page should feel heavenly, not heavy.
+    const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.18)}%, ${Math.round(Math.min(pgL + 40, 91))}%)`;
     document.documentElement.style.setProperty('--bg', pageTint);
     // dialHero background: transparent — the Aten Reign shader fills the canvas completely,
     // and where the CSS mask fades, the page bg shows through directly. No intermediate layer.
