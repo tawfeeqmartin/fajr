@@ -480,6 +480,7 @@ const frustum = 2; // world units from center to edge vertically
 const radius = frustum * 1.6; // orbital radius in world units — scaled up for larger drawing fill
 
 const scene = new THREE.Scene();
+// Initial bg — will be overridden by prayer palette tint in applyDayNight()
 scene.background = new THREE.Color('#020204');
 
 const camera = new THREE.OrthographicCamera(
@@ -1669,7 +1670,11 @@ function isNightTime() { return true;
 function applyDayNight() {
     const night = isNightTime();
     const preset = night ? PRESETS.night : PRESETS.day;
-    scene.background = new THREE.Color(preset.bg);
+
+    // Turrell-tinted background: deep, rich version of current prayer palette
+    // Even darkness has color — like a Turrell Skyspace at dusk
+    const palette = artwork ? artwork.palette : (currentVars ? PRAYER_PALETTES[currentVars.prayerPeriod] : PRAYER_PALETTES.isha);
+    scene.background = new THREE.Color().setHSL(palette.h / 360, palette.s * 0.4 / 100, 3 / 100);
 
     // Bloom
     bloomPass.strength = preset.bloomStrength;
@@ -1781,6 +1786,8 @@ let lastPrayerPeriod = null;
 let currentVars = null;
 let lastDayNight = null;
 let lastFrameTime = 0;
+let _turrellSeeded = false;  // true once we've auto-seeded the atmospheric base layer
+let _firstPaintTime = 0;     // timestamp of first frame with trace geometry
 
 function getVirtualTime() {
     const now = Date.now();
@@ -1825,6 +1832,8 @@ function update(timestamp) {
     const periodKey = `${vars.dateStr}-${vars.prayerPeriod}-${manualSeedOffset}-${vars.locKey}`;
     if (periodKey !== lastPrayerPeriod) {
         lastPrayerPeriod = periodKey;
+        _turrellSeeded = true;  // prayer transition handles its own blur layer
+        _firstPaintTime = 0;
 
         // Push current traces as a blurred historical layer (if any exist)
         if (traceObjects.length > 0) {
@@ -1849,10 +1858,11 @@ function update(timestamp) {
             const quadMat = new THREE.MeshBasicMaterial({
                 map: blurredRT.texture,
                 transparent: true,
-                premultipliedAlpha: true,
+                premultipliedAlpha: false,
                 opacity: 1.0,
                 depthTest: false,
                 depthWrite: false,
+                blending: THREE.AdditiveBlending,
             });
             const quadMesh = new THREE.Mesh(quadGeo, quadMat);
             // Position slightly behind z=0 so it renders behind live drawing
@@ -1894,6 +1904,58 @@ function update(timestamp) {
 
     // Update trace reveal
     updateTraceDrawRange(vars.prayerProgress);
+
+    // ── Auto-seed Turrell atmosphere on first load ──────────────
+    // After ~10 seconds of drawing, capture the current trace, blur it,
+    // and display as a soft atmospheric base layer BEHIND the live drawing.
+    // This ensures the Turrell glow is present from first visit — users
+    // shouldn't have to wait for a prayer transition to see the beauty.
+    if (!_turrellSeeded && traceObjects.length > 0) {
+        if (_firstPaintTime === 0) _firstPaintTime = timestamp;
+        if (timestamp - _firstPaintTime > 10000) {
+            _turrellSeeded = true;
+
+            // Set full draw range so the snapshot captures complete geometry
+            for (const obj of traceObjects) {
+                obj.rosetteLine.geometry.setDrawRange(0, obj.totalRosetteVerts);
+                obj.connectSegments.geometry.setDrawRange(0, obj.totalConnectVerts);
+            }
+
+            // Dispose any existing blurred layer (shouldn't exist, but safety)
+            disposeBlurredLayer();
+
+            // Capture + blur the current trace
+            const blurredRT = renderGroupBlurred(traceGroup);
+
+            // Create the atmospheric quad behind the live drawing
+            const aspect2 = W / H;
+            const quadW = frustum * aspect2 * 2;
+            const quadH = frustum * 2;
+            const quadGeo = new THREE.PlaneGeometry(quadW, quadH);
+            const quadMat = new THREE.MeshBasicMaterial({
+                map: blurredRT.texture,
+                transparent: true,
+                premultipliedAlpha: false,
+                opacity: 0.0,  // fade in from 0 for a gentle entrance
+                depthTest: false,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const quadMesh = new THREE.Mesh(quadGeo, quadMat);
+            quadMesh.position.set(0, 0, -0.1);
+            quadMesh.renderOrder = -1;
+            scene.add(quadMesh);
+
+            blurredLayer = {
+                mesh: quadMesh,
+                opacity: 0.0,  // start invisible, fade in gently
+                fadeTarget: PRESETS.turrell.fadeTarget,
+            };
+
+            // Restore the draw range to current progress (don't jump)
+            updateTraceDrawRange(vars.prayerProgress);
+        }
+    }
 
     // Fade blurred previous prayer layer toward target opacity
     if (blurredLayer) {
