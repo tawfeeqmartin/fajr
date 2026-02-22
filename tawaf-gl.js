@@ -1663,28 +1663,27 @@ function updateClockHands(now, night, blending) {
     tipGlowGeo.attributes.position.needsUpdate = true;
     // Pulse synced with Kaaba glow — flares with the cube
     const glowPulse = 0.75 + 0.25 * Math.sin(performance.now() * 0.003);
-    // Pen tip glow — TURRELL MODE: hidden. Additive point breaks homogeneous field.
-    tipGlowPoint.visible = (THEME_MODE === 'orbiter');
-    if (tipGlowPoint.visible) {
-        tipGlowMat.opacity = glowPulse * 0.35;
-        tipGlowMat.size = 35;
-        tipGlowMat.needsUpdate = true;
-    }
+    // Pen tip glow — sacred light at the drawing nib
+    tipGlowPoint.visible = true;
+    tipGlowMat.opacity = glowPulse * 0.3;
+    tipGlowMat.size = 30;
+    tipGlowMat.color.setHSL(baseH / 360, 0.15, 0.95);
+    tipGlowMat.needsUpdate = true;
 
     // (tip glow trail removed)
 
     // Trail colors: prayer palette gradient from transparent (old) to bright (new)
     const epiDrawCount = Math.min(epicycleTrailCount, EPICYCLE_TRAIL_MAX);
-    // Epicycle trail: Kaaba sacred geometry — bright and prominent as focal point
+    // Epicycle trail: Kaaba outline — black like the physical Kaaba (Kiswa)
     const epiS = Math.max((palette.s - 25) / 100, 0.03);
     const epiL = Math.min((palette.l + 30) / 100, 0.97);
-    _tmpColor.setHSL(baseH / 360, epiS, epiL);
     for (let i = 0; i < epiDrawCount; i++) {
-        const brightness = 0.3 + 0.7 * (i / epiDrawCount); // minimum 30% brightness — never fully invisible
-        epicycleTrailColors[i * 4]     = _tmpColor.r * brightness;
-        epicycleTrailColors[i * 4 + 1] = _tmpColor.g * brightness;
-        epicycleTrailColors[i * 4 + 2] = _tmpColor.b * brightness;
-        epicycleTrailColors[i * 4 + 3] = brightness;
+        const t = i / epiDrawCount;
+        const alpha = 0.3 + 0.7 * t; // fade from transparent (old) to opaque (new)
+        epicycleTrailColors[i * 4]     = 0.02; // near-black
+        epicycleTrailColors[i * 4 + 1] = 0.02;
+        epicycleTrailColors[i * 4 + 2] = 0.04; // hint of warmth
+        epicycleTrailColors[i * 4 + 3] = alpha;
     }
     epicycleTrailGeo.setDrawRange(0, epiDrawCount);
     epicycleTrailGeo.attributes.position.needsUpdate = true;
@@ -1696,23 +1695,18 @@ function updateClockHands(now, night, blending) {
     epicycleTrailMat.blending = THREE.NormalBlending;
     epicycleTrailMat.needsUpdate = true;
 
-    // --- Kaaba glow halo layer ---
-    // TURRELL MODE: disabled. Additive glow particles create visible texture
-    // that breaks the homogeneous color field. The Kaaba trail line itself
-    // is sufficient — the shader's smooth ring 0 provides center radiance.
-    kaabaGlowPoints.visible = (THEME_MODE === 'orbiter');
-    if (kaabaGlowPoints.visible) {
-        kaabaGlowPositions.set(epicycleTrailPositions.subarray(0, epiDrawCount * 3), 0);
-        for (let i = 0; i < epiDrawCount; i++) {
-            kaabaGlowPositions[i * 3 + 2] = -0.005;
-        }
-        kaabaGlowGeo.setDrawRange(0, epiDrawCount);
-        kaabaGlowGeo.attributes.position.needsUpdate = true;
-        kaabaGlowMat.size = 5;
-        kaabaGlowMat.opacity = kaabaPulse * 0.2;
-        kaabaGlowMat.color.setHSL(baseH / 360, 0.08, 0.95);
-        kaabaGlowMat.needsUpdate = true;
+    // --- Kaaba glow halo layer — soft light outlining the sacred geometry ---
+    kaabaGlowPoints.visible = true;
+    kaabaGlowPositions.set(epicycleTrailPositions.subarray(0, epiDrawCount * 3), 0);
+    for (let i = 0; i < epiDrawCount; i++) {
+        kaabaGlowPositions[i * 3 + 2] = -0.005;
     }
+    kaabaGlowGeo.setDrawRange(0, epiDrawCount);
+    kaabaGlowGeo.attributes.position.needsUpdate = true;
+    kaabaGlowMat.size = 6;
+    kaabaGlowMat.opacity = kaabaPulse * 0.25;
+    kaabaGlowMat.color.setHSL(baseH / 360, 0.12, 0.92);
+    kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
     const visibleCircles = Math.min(numEpiCoeffs, EPICYCLE_CIRCLE_POOL, pen.circleCount);
@@ -1728,7 +1722,7 @@ function updateClockHands(now, night, blending) {
             }
             circle.geo.attributes.position.needsUpdate = true;
             circle.mat.opacity = 0.08 * (1 - i / visibleCircles) * kaabaPulse;
-            circle.mat.color.setHSL(baseH / 360, 0.2, 0.4);  // tinted, darker than bg
+            circle.mat.color.setHSL(baseH / 360, 0.08, 0.15);  // near-black, matching Kaaba
             circle.mat.blending = THREE.NormalBlending;
             circle.mat.needsUpdate = true;
             circle.line.visible = true;
@@ -1751,7 +1745,7 @@ function updateClockHands(now, night, blending) {
         epicycleArmGeo.setDrawRange(0, armCount + 1);
         epicycleArmGeo.attributes.position.needsUpdate = true;
         epicycleArmMat.opacity = 0.06 * kaabaPulse;
-        epicycleArmMat.color.setHSL(baseH / 360, 0.1, 0.88);
+        epicycleArmMat.color.setHSL(baseH / 360, 0.08, 0.15);  // near-black arm
         epicycleArmMat.blending = THREE.NormalBlending;
         epicycleArmMat.needsUpdate = true;
         epicycleArmLine.visible = true;
@@ -1791,8 +1785,10 @@ function updateClockHands(now, night, blending) {
             hg.posArr[1] = tip.y;
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            hg.mat.opacity = 0;  // hidden in luminous mode
-            hg.mat.size = 32;
+            hg.mat.opacity = 0.2;
+            hg.mat.size = 28;
+            hg.mat.color.setHSL(baseH / 360, 0.12, 0.93);
+            hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
         } else {
             // --- Hour / Minute: circle + orbiting dot + glow ---
@@ -1819,8 +1815,10 @@ function updateClockHands(now, night, blending) {
             hg.posArr[1] = dot.posArr[1];
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            hg.mat.opacity = 0;  // hidden in luminous mode
-            hg.mat.size = [55, 42][h];
+            hg.mat.opacity = 0.18;
+            hg.mat.size = [45, 35][h];
+            hg.mat.color.setHSL(baseH / 360, 0.12, 0.93);
+            hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
         }
     }
