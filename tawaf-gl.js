@@ -1072,9 +1072,9 @@ for (let i = 0; i < MAX_PAIRS; i++) {
 
 // Clock hand lines (hr, min, sec)
 const handDefs = [
-    { alpha: 0.55 }, // hour
-    { alpha: 0.45 }, // minute
-    { alpha: 0.35 }, // second
+    { alpha: 0.85 }, // hour
+    { alpha: 0.75 }, // minute
+    { alpha: 0.65 }, // second
 ];
 const liveHands = handDefs.map(def => {
     const posArr = new Float32Array(6); // 2 verts × 3 (origin + tip)
@@ -1410,9 +1410,9 @@ function updateClockHands(now, night, blending) {
     const pS = night ? palette.s : Math.min(palette.s + 15, 100);  // boost saturation in day for contrast
     const pL = night ? palette.l : Math.max(palette.l - 15, 15);  // darken in day for readability against #f8f7f4
     const handConfigs = [
-        [hrAngle,  hrR,  pS, pL, night ? 0.8 : 0.60],
-        [minAngle, minR, pS, pL, night ? 0.7 : 0.50],
-        [secAngle, secR, pS, pL, night ? 0.6 : 0.40],
+        [hrAngle,  hrR,  pS, pL, night ? 0.95 : 0.85],
+        [minAngle, minR, pS, pL, night ? 0.85 : 0.75],
+        [secAngle, secR, pS, pL, night ? 0.75 : 0.65],
     ];
 
     for (let i = 0; i < 3; i++) {

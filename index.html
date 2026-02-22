@@ -322,7 +322,7 @@ footer a:hover{color:var(--text)}
 .clock-fs-overlay canvas{z-index:20}
 /* Hide landing page content instantly when loading #clock */
 html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,.clock-direct footer{display:none!important}
-.clock-fs-overlay canvas{width:min(100vw,100vh - 80px)!important;height:min(100vw,100vh - 80px)!important;max-width:100vw;max-height:calc(100vh - 80px);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;overflow:hidden}
+.clock-fs-overlay canvas{width:min(92vw, calc(100vh - 120px))!important;height:min(92vw, calc(100vh - 120px))!important;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;overflow:hidden;box-shadow:0 0 80px 20px rgba(0,0,0,0.15)}
 .clock-fs-close{position:fixed;top:calc(env(safe-area-inset-top,12px) + 12px);left:16px;z-index:210;background:none;border:none;color:rgba(26,26,26,.6);font-size:1.5rem;cursor:pointer;padding:8px;transition:opacity .5s ease}
 .fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker{opacity:0;pointer-events:none}
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + 88px);left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(26,26,26,.65);transition:opacity .5s ease}
@@ -1770,7 +1770,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=12';
+_cs.type='module';_cs.src='tawaf-gl.js?v=13';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
