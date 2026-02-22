@@ -482,7 +482,11 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color('#020204');
 
 const camera = new THREE.OrthographicCamera(
-    -frustum * aspect, frustum * aspect, frustum, -frustum, 0.1, 100
+    aspect >= 1 ? -frustum * aspect : -frustum,
+    aspect >= 1 ?  frustum * aspect :  frustum,
+    aspect >= 1 ?  frustum          :  frustum / aspect,
+    aspect >= 1 ? -frustum          : -frustum / aspect,
+    0.1, 100
 );
 camera.position.set(0, 0, 10);
 camera.lookAt(0, 0, 0);
@@ -1954,8 +1958,19 @@ function onResize() {
     W = CONTAINED ? CONTAINER.clientWidth : window.innerWidth;
     H = CONTAINED ? CONTAINER.clientHeight : window.innerHeight;
     const aspect = W / H;
-    camera.left = -frustum * aspect;
-    camera.right = frustum * aspect;
+    if (aspect >= 1) {
+        // Landscape / square — fit vertically, expand horizontally
+        camera.left   = -frustum * aspect;
+        camera.right  =  frustum * aspect;
+        camera.top    =  frustum;
+        camera.bottom = -frustum;
+    } else {
+        // Portrait (fullscreen phone) — fit horizontally, expand vertically
+        camera.left   = -frustum;
+        camera.right  =  frustum;
+        camera.top    =  frustum / aspect;
+        camera.bottom = -frustum / aspect;
+    }
     camera.updateProjectionMatrix();
     renderer.setSize(W, H);
     composer.setSize(W, H);
@@ -1968,8 +1983,8 @@ function onResize() {
     // Resize blurred quad to match new frustum
     if (blurredLayer) {
         const newAspect = W / H;
-        const quadW = frustum * newAspect * 2;
-        const quadH = frustum * 2;
+        const quadW = newAspect >= 1 ? frustum * newAspect * 2 : frustum * 2;
+        const quadH = newAspect >= 1 ? frustum * 2 : (frustum / newAspect) * 2;
         blurredLayer.mesh.geometry.dispose();
         blurredLayer.mesh.geometry = new THREE.PlaneGeometry(quadW, quadH);
     }
