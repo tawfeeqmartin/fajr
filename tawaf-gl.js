@@ -632,47 +632,20 @@ const TurrellApertureShader = {
                 float fAspect = max(uAspect, 1.0) / max(1.0 / uAspect, 1.0);
                 flareUV.x *= fAspect;
 
-                // 1. Screen wash — the whole image floods with light (camera iris overload)
-                float wash = uFlare * 0.25;
+                // 1. Gentle luminance bloom — subtle brightening of the field
+                float wash = uFlare * 0.05;
                 texel.rgb = mix(texel.rgb, uFlareColor, wash);
 
-                // 2. Radial burst from source — concentrated bright disc
+                // 2. Soft radial glow from source — wide, diffuse
                 float flareDist = length(flareUV);
-                float burst = exp(-flareDist * flareDist * 18.0) * uFlare;
-                texel.rgb += uFlareColor * burst * 0.55;
+                float burst = exp(-flareDist * flareDist * 8.0) * uFlare;
+                texel.rgb += uFlareColor * burst * 0.12;
 
-                // 3. Anamorphic streak — wide horizontal line through source
-                float streakY = exp(-flareUV.y * flareUV.y * 800.0); // narrow vertical
-                float streakX = exp(-flareUV.x * flareUV.x * 1.5);   // wide horizontal
-                float streak = streakX * streakY * uFlare * 0.35;
+                // 3. Subtle anamorphic streak — barely there horizontal
+                float streakY = exp(-flareUV.y * flareUV.y * 1200.0);
+                float streakX = exp(-flareUV.x * flareUV.x * 0.8);
+                float streak = streakX * streakY * uFlare * 0.06;
                 texel.rgb += uFlareColor * streak;
-
-                // 4. Ghost reflections — 3 discs along source→center axis
-                vec2 ghostAxis = normalize(vec2(0.5, 0.5) - uFlarePos);
-                for (int i = 0; i < 3; i++) {
-                    float gOff = 0.15 + float(i) * 0.12;
-                    vec2 gPos = uFlarePos + ghostAxis * gOff;
-                    vec2 gUV = vUv - gPos;
-                    gUV.x *= fAspect;
-                    float gDist = length(gUV);
-                    float gSize = 0.04 + float(i) * 0.025;
-                    // Ring ghost — bright ring, dim center (classic lens ghost)
-                    float ring = smoothstep(gSize - 0.015, gSize, gDist) *
-                                 (1.0 - smoothstep(gSize, gSize + 0.015, gDist));
-                    float ghostIntensity = ring * uFlare * 0.18;
-                    // Subtle chromatic shift per ghost
-                    vec3 gColor = uFlareColor;
-                    if (i == 0) gColor *= vec3(1.0, 0.95, 0.88);      // warm
-                    else if (i == 1) gColor *= vec3(0.92, 0.96, 1.0);  // cool
-                    else gColor *= vec3(1.0, 0.92, 0.98);              // rose
-                    texel.rgb += gColor * ghostIntensity;
-                }
-
-                // 5. Subtle starburst — 6-point radial rays from source
-                float angle = atan(flareUV.y, flareUV.x);
-                float rays = pow(abs(cos(angle * 3.0)), 40.0); // 6 rays
-                float rayFalloff = exp(-flareDist * 6.0);
-                texel.rgb += uFlareColor * rays * rayFalloff * uFlare * 0.2;
             }
 
             gl_FragColor = texel;
@@ -1714,8 +1687,8 @@ for (let i = 0; i < 4; i++) {
 // Flare animation state
 let flareActive = false;
 let flareStartTime = 0;
-const FLARE_DURATION = 2.8; // seconds — sharp attack, slow ethereal fade
-const FLARE_ATTACK = 0.15;  // seconds to peak
+const FLARE_DURATION = 4.0; // seconds — soft bloom, long meditative fade
+const FLARE_ATTACK = 0.6;   // seconds to peak — gentle rise, not a flash
 
 function triggerTawafFlare(sourceX, sourceY) {
     flareActive = true;
@@ -1766,37 +1739,37 @@ function updateTawafFlare() {
         return;
     }
 
-    // Envelope: sharp attack → slow exponential decay
+    // Envelope: gentle rise → long meditative fade
     let envelope;
     if (elapsed < FLARE_ATTACK) {
-        // Attack: cubic ease-in for a sharp flash
+        // Attack: smooth ease-in — a breath of light, not a flash
         const t = elapsed / FLARE_ATTACK;
         envelope = t * t * (3 - 2 * t); // smoothstep
     } else {
-        // Decay: exponential falloff — ethereal fade
+        // Decay: slow exponential — light lingers like an afterimage
         const decayT = (elapsed - FLARE_ATTACK) / (FLARE_DURATION - FLARE_ATTACK);
-        envelope = Math.exp(-decayT * 3.5) * (1 - decayT * 0.3);
+        envelope = Math.exp(-decayT * 2.0) * (1 - decayT * 0.15);
     }
 
     // ── Drive the post-processing shader flare ──
     // This creates the cinematic screen-space wash, streaks, ghosts, and starburst
     vignettePass.uniforms.uFlare.value = envelope;
 
-    // Main disc: scales up slightly during flash, then shrinks
-    const discScale = 1.0 + envelope * 0.6;
+    // Main disc: subtle glow, barely visible
+    const discScale = 0.6 + envelope * 0.3;
     flareDisc.scale.set(discScale, discScale, 1);
-    flareDiscMat.opacity = envelope * 0.75;
+    flareDiscMat.opacity = envelope * 0.12;
     flareDiscMat.needsUpdate = true;
 
-    // Streak: widens during flash
-    const streakW = 3.5 + envelope * 2.5;
-    flareStreak.scale.set(streakW, 0.12 + envelope * 0.08, 1);
-    flareStreakMat.opacity = envelope * 0.45;
+    // Streak: whisper-thin horizontal
+    const streakW = 2.0 + envelope * 1.0;
+    flareStreak.scale.set(streakW, 0.06 + envelope * 0.03, 1);
+    flareStreakMat.opacity = envelope * 0.08;
     flareStreakMat.needsUpdate = true;
 
-    // Ghosts: staggered timing, lower intensity
+    // Ghosts: barely perceptible
     for (let i = 0; i < flareGhosts.length; i++) {
-        const delay = i * 0.06; // slight stagger
+        const delay = i * 0.08;
         const ghostT = Math.max(0, elapsed - delay);
         let gEnv;
         if (ghostT < FLARE_ATTACK) {
@@ -1806,7 +1779,7 @@ function updateTawafFlare() {
             const dt = (ghostT - FLARE_ATTACK) / (FLARE_DURATION - FLARE_ATTACK);
             gEnv = Math.exp(-dt * 4.0);
         }
-        flareGhosts[i].mat.opacity = gEnv * 0.25;
+        flareGhosts[i].mat.opacity = gEnv * 0.04;
         flareGhosts[i].mat.needsUpdate = true;
     }
 }
