@@ -1471,6 +1471,26 @@ const kaabaGlowPoints = new THREE.Points(kaabaGlowGeo, kaabaGlowMat);
 kaabaGlowPoints.position.z = -0.005; // sit just behind the main trail
 liveGroup.add(kaabaGlowPoints);
 
+// --- Solid black Kaaba fill (Kiswa) — the sacred dark anchor at the center of light ---
+const kaabaHalfDiag = 50 * _kaaba_gs; // 0.2275 — half-diagonal of the diamond
+const kaabaFillShape = new THREE.Shape();
+kaabaFillShape.moveTo(0, kaabaHalfDiag);       // top
+kaabaFillShape.lineTo(kaabaHalfDiag, 0);        // right
+kaabaFillShape.lineTo(0, -kaabaHalfDiag);       // bottom
+kaabaFillShape.lineTo(-kaabaHalfDiag, 0);       // left
+kaabaFillShape.closePath();
+const kaabaFillGeo = new THREE.ShapeGeometry(kaabaFillShape);
+const kaabaFillMat = new THREE.MeshBasicMaterial({
+    color: 0x050505,        // near-black — the Kiswa
+    transparent: true,
+    opacity: 0.92,
+    depthTest: false,
+    side: THREE.DoubleSide,
+});
+const kaabaFillMesh = new THREE.Mesh(kaabaFillGeo, kaabaFillMat);
+kaabaFillMesh.position.z = 0.005; // behind trail (0.01) but in front of glow (-0.005)
+liveGroup.add(kaabaFillMesh);
+
 // --- Pen tip hot glow ---
 const tipGlowGeo = new THREE.BufferGeometry();
 tipGlowGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0.02]), 3));
