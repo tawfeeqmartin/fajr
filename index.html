@@ -131,7 +131,7 @@
 </script>
 <script>
 // Instant dark screen if opening in clock mode — prevents landing page flash
-if(location.hash==='#clock'){document.documentElement.classList.add('clock-direct');document.documentElement.style.cssText='background:#5d6278;overflow:hidden';}
+if(location.hash==='#clock'){document.documentElement.classList.add('clock-direct');document.documentElement.style.cssText='background:var(--bg,#f8f7f4);overflow:hidden';}
 </script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -163,7 +163,7 @@ body::after{display:none;
   position:relative;
   width:var(--clock-size);height:var(--clock-size);
   border-radius:50%;overflow:hidden;
-  background:hsl(210,22%,92%);
+  background:transparent;
   flex-shrink:0;
   transition:box-shadow 1.5s ease;
   -webkit-mask-image:radial-gradient(circle,#000 82%,rgba(0,0,0,0.6) 88%,rgba(0,0,0,0.2) 94%,transparent 100%);
@@ -1636,8 +1636,8 @@ function openClockFullscreen() {
   // Reset to default dial (slate) for consistent look
   if(window.switchDial) window.switchDial(6);
 
-  // Dark background matching the clock
-  overlay.style.background = '#0c0c12';
+  // Match page background — Turrell mode is luminous, not dark
+  overlay.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f8f7f4';
 
   // Move canvas into fullscreen overlay
   overlay.appendChild(canvas);
@@ -1781,7 +1781,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=22';
+_cs.type='module';_cs.src='tawaf-gl.js?v=23';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

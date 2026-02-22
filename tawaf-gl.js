@@ -23,6 +23,10 @@ let _isFullscreen = false;
 
 const TWO_PI = Math.PI * 2;
 
+// Theme mode: 'turrell' = pure Aten Reign rings only (no orbiter traces)
+//             'orbiter' = orbital traces + blur layers (future theme)
+const THEME_MODE = 'turrell';
+
 // ── STARTUP PRESET (canonical — saved 2026-02-21) ──────────────
 // These are the locked-in startup values. GUI tweaks are ephemeral.
 // To save new defaults: update STARTUP_PRESET, then Object.assign into PRESETS on load.
@@ -376,7 +380,7 @@ function generateArtwork(variables) {
     // Near-rational perturbation + center-distance dimming allow more revs
     const totalRevolutions = 70 + Math.floor(rng() * 80);
 
-    return { pairs, totalRevolutions, seed, palette, variables, qibla };
+    return { pairs, totalRevolutions, seed, palette, prayerPeriod, variables, qibla };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1859,10 +1863,9 @@ function applyDayNight() {
     const edgeColor = new THREE.Color().setHSL(r4h / 360, Math.min(r4s * 1.2, 100) / 100, r4l * 0.8 / 100);
     vignettePass.uniforms.uEdgeColor.value.copy(edgeColor);
 
-    // ── Trace materials: subtle structure within the luminous color field.
-    // With bolder Aten Reign rings, traces should be VISIBLE but not overpowering.
-    // SubtractiveBlending on light bg would darken — use NormalBlending with near-bg colors.
-    for (const obj of traceObjects) {
+    // ── Trace materials (orbiter mode only) ──
+    if (THEME_MODE !== 'orbiter') { /* skip trace updates in turrell mode */ }
+    else for (const obj of traceObjects) {
         const pair = obj.pair;
         const d = pair.depth !== undefined ? pair.depth : 0.5;
         const depthScale = 1.0 - d * PRESETS.shared.depthFactor;
@@ -1887,40 +1890,36 @@ function applyDayNight() {
         obj.connectSegments.material.needsUpdate = true;
     }
 
-    // Historical trace layers (kept for compatibility — empty array)
-    for (const layer of traceLayers) {
-        for (let j = 0; j < layer.traceObjects.length; j++) {
-            const obj = layer.traceObjects[j];
-            const pair = obj.pair;
-            const d = pair.depth !== undefined ? pair.depth : 0.5;
-            const depthScale = 1.0 - d * PRESETS.shared.depthFactor;
-            const avgR = (pair.r1 + pair.r2) / 2;
-            const radiusScale = Math.pow(avgR, PRESETS.shared.radiusPower) * 4.0;
-            const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
-            const traceAlpha = baseAlpha * depthScale * radiusScale;
-            const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale;
-
-            layer.origOpacities[j].rosetteAlpha = traceAlpha;
-            layer.origOpacities[j].connectAlpha = connAlpha;
-
-            obj.rosetteLine.material.opacity = traceAlpha * layer.opacity;
-            obj.rosetteLine.material.blending = THREE.NormalBlending;
-            obj.rosetteLine.material.needsUpdate = true;
-
-            obj.connectSegments.material.blending = THREE.NormalBlending;
-            obj.connectSegments.material.opacity = connAlpha * layer.opacity;
-            obj.connectSegments.material.needsUpdate = true;
+    // Historical trace layers + blurred layer (orbiter mode only)
+    if (THEME_MODE === 'orbiter') {
+        for (const layer of traceLayers) {
+            for (let j = 0; j < layer.traceObjects.length; j++) {
+                const obj = layer.traceObjects[j];
+                const pair = obj.pair;
+                const d = pair.depth !== undefined ? pair.depth : 0.5;
+                const depthScale = 1.0 - d * PRESETS.shared.depthFactor;
+                const avgR = (pair.r1 + pair.r2) / 2;
+                const radiusScale = Math.pow(avgR, PRESETS.shared.radiusPower) * 4.0;
+                const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
+                const traceAlpha = baseAlpha * depthScale * radiusScale;
+                const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale;
+                layer.origOpacities[j].rosetteAlpha = traceAlpha;
+                layer.origOpacities[j].connectAlpha = connAlpha;
+                obj.rosetteLine.material.opacity = traceAlpha * layer.opacity;
+                obj.rosetteLine.material.blending = THREE.NormalBlending;
+                obj.rosetteLine.material.needsUpdate = true;
+                obj.connectSegments.material.blending = THREE.NormalBlending;
+                obj.connectSegments.material.opacity = connAlpha * layer.opacity;
+                obj.connectSegments.material.needsUpdate = true;
+            }
         }
-    }
-
-    // Blurred atmospheric layer — ADDITIVE: can only brighten, never darken.
-    // Turrell's atmospheric light adds luminosity to the rings, not darkness.
-    if (blurredLayer) {
-        blurredLayer.mesh.visible = true;
-        blurredLayer.mesh.material.blending = THREE.AdditiveBlending;
-        blurredLayer.mesh.material.premultipliedAlpha = false;
-        blurredLayer.mesh.material.opacity = blurredLayer.opacity * 0.25;  // subtle atmospheric wash — rings must dominate
-        blurredLayer.mesh.material.needsUpdate = true;
+        if (blurredLayer) {
+            blurredLayer.mesh.visible = true;
+            blurredLayer.mesh.material.blending = THREE.AdditiveBlending;
+            blurredLayer.mesh.material.premultipliedAlpha = false;
+            blurredLayer.mesh.material.opacity = blurredLayer.opacity * 0.25;
+            blurredLayer.mesh.material.needsUpdate = true;
+        }
     }
 
     updateBodyColors();
@@ -1957,12 +1956,13 @@ function updateBodyColors() {
     // Same hue as ring 4 but MUCH lighter — page should feel heavenly, not heavy.
     const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.18)}%, ${Math.round(Math.min(pgL + 40, 91))}%)`;
     document.documentElement.style.setProperty('--bg', pageTint);
-    // dialHero background: transparent — the Aten Reign shader fills the canvas completely,
-    // and where the CSS mask fades, the page bg shows through directly. No intermediate layer.
+    // dialHero background: transparent — Aten Reign shader fills the canvas,
+    // CSS mask fades reveal the page bg directly.
     const heroEl = document.getElementById('dialHero');
-    if (heroEl) {
-        heroEl.style.background = 'transparent';
-    }
+    if (heroEl) heroEl.style.background = 'transparent';
+    // Keep fullscreen overlay bg in sync (Turrell mode is luminous, not dark)
+    const fsOverlay = document.getElementById('clockFullscreen');
+    if (fsOverlay && fsOverlay.classList.contains('active')) fsOverlay.style.background = pageTint;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2024,157 +2024,126 @@ function update(timestamp) {
     const periodKey = `${vars.dateStr}-${vars.prayerPeriod}-${manualSeedOffset}-${vars.locKey}`;
     if (periodKey !== lastPrayerPeriod) {
         lastPrayerPeriod = periodKey;
-        _turrellSeeded = true;  // prayer transition handles its own blur layer
+        _turrellSeeded = true;
         _firstPaintTime = 0;
 
-        // Push current traces as a blurred historical layer (if any exist)
-        if (traceObjects.length > 0) {
-            // Set draw range to full so the frozen layer is complete before capture
-            for (const obj of traceObjects) {
-                obj.rosetteLine.geometry.setDrawRange(0, obj.totalRosetteVerts);
-                obj.connectSegments.geometry.setDrawRange(0, obj.totalConnectVerts);
+        if (THEME_MODE === 'orbiter') {
+            // Push current traces as a blurred historical layer (if any exist)
+            if (traceObjects.length > 0) {
+                for (const obj of traceObjects) {
+                    obj.rosetteLine.geometry.setDrawRange(0, obj.totalRosetteVerts);
+                    obj.connectSegments.geometry.setDrawRange(0, obj.totalConnectVerts);
+                }
+                disposeBlurredLayer();
+                const blurredRT = renderGroupBlurred(traceGroup);
+                const aspect2 = W / H;
+                const quadW = frustum * aspect2 * 2;
+                const quadH = frustum * 2;
+                const quadGeo = new THREE.PlaneGeometry(quadW, quadH);
+                const quadMat = new THREE.MeshBasicMaterial({
+                    map: blurredRT.texture,
+                    transparent: true,
+                    premultipliedAlpha: false,
+                    opacity: 1.0,
+                    depthTest: false,
+                    depthWrite: false,
+                    blending: THREE.NormalBlending,
+                });
+                const quadMesh = new THREE.Mesh(quadGeo, quadMat);
+                quadMesh.position.set(0, 0, -0.1);
+                quadMesh.renderOrder = -1;
+                scene.add(quadMesh);
+                blurredLayer = { mesh: quadMesh, opacity: 1.0, fadeTarget: PRESETS.turrell.fadeTarget };
+                disposeTraceLayer({ traceObjects: [...traceObjects], group: traceGroup });
+                traceGroup = new THREE.Group();
+                scene.add(traceGroup);
+                traceObjects = [];
             }
-
-            // Dispose any existing blurred layer first (cap at 1 previous layer)
+        } else {
+            // Turrell mode: dispose any lingering traces/blur from previous sessions
+            if (traceObjects.length > 0) {
+                disposeTraceLayer({ traceObjects: [...traceObjects], group: traceGroup });
+                traceGroup = new THREE.Group();
+                scene.add(traceGroup);
+                traceObjects = [];
+            }
             disposeBlurredLayer();
-
-            // Render the current traceGroup to an offscreen target and blur it
-            const blurredRT = renderGroupBlurred(traceGroup);
-
-            // Create a fullscreen textured quad from the blurred texture.
-            // Size in world units: cover the full camera frustum.
-            const aspect2 = W / H;
-            const quadW = frustum * aspect2 * 2;
-            const quadH = frustum * 2;
-            const quadGeo = new THREE.PlaneGeometry(quadW, quadH);
-            const quadMat = new THREE.MeshBasicMaterial({
-                map: blurredRT.texture,
-                transparent: true,
-                premultipliedAlpha: false,
-                opacity: 1.0,
-                depthTest: false,
-                depthWrite: false,
-                blending: THREE.NormalBlending,
-            });
-            const quadMesh = new THREE.Mesh(quadGeo, quadMat);
-            // Position slightly behind z=0 so it renders behind live drawing
-            quadMesh.position.set(0, 0, -0.1);
-            quadMesh.renderOrder = -1;
-            scene.add(quadMesh);
-
-            blurredLayer = {
-                mesh: quadMesh,
-                opacity: 1.0,
-                fadeTarget: PRESETS.turrell.fadeTarget,
-            };
-
-            // Dispose the original geometry — we only need the blurred quad now
-            disposeTraceLayer({ traceObjects: [...traceObjects], group: traceGroup });
-
-            // Create a fresh group for the new prayer
-            traceGroup = new THREE.Group();
-            scene.add(traceGroup);
-            traceObjects = [];
         }
 
         const modVars = { ...vars };
         if (manualSeedOffset > 0) modVars.dateStr = `${vars.dateStr}-v${manualSeedOffset}`;
         artwork = generateArtwork(modVars);
-        buildTraceGeometry(artwork);
+        if (THEME_MODE === 'orbiter') buildTraceGeometry(artwork);
     }
 
     // Detect day/night transition
     const dayNight = isNightTime() ? 'night' : 'day';
     if (dayNight !== lastDayNight) {
-        if (lastDayNight !== null && artwork) {
-            // Rebuild traces with new blending mode
+        if (THEME_MODE === 'orbiter' && lastDayNight !== null && artwork) {
             buildTraceGeometry(artwork);
         }
         applyDayNight();
         lastDayNight = dayNight;
     }
 
-    // Update trace reveal
-    updateTraceDrawRange(vars.prayerProgress);
+    if (THEME_MODE === 'orbiter') {
+        // Update trace reveal
+        updateTraceDrawRange(vars.prayerProgress);
 
-    // ── Auto-seed Turrell atmosphere on first load ──────────────
-    // After ~10 seconds of drawing, capture the current trace, blur it,
-    // and display as a soft atmospheric base layer BEHIND the live drawing.
-    // This ensures the Turrell glow is present from first visit — users
-    // shouldn't have to wait for a prayer transition to see the beauty.
-    if (!_turrellSeeded && traceObjects.length > 0) {
-        if (_firstPaintTime === 0) _firstPaintTime = timestamp;
-        if (timestamp - _firstPaintTime > 10000) {
-            _turrellSeeded = true;
-
-            // Set full draw range so the snapshot captures complete geometry
-            for (const obj of traceObjects) {
-                obj.rosetteLine.geometry.setDrawRange(0, obj.totalRosetteVerts);
-                obj.connectSegments.geometry.setDrawRange(0, obj.totalConnectVerts);
+        // Auto-seed Turrell atmosphere on first load
+        if (!_turrellSeeded && traceObjects.length > 0) {
+            if (_firstPaintTime === 0) _firstPaintTime = timestamp;
+            if (timestamp - _firstPaintTime > 10000) {
+                _turrellSeeded = true;
+                for (const obj of traceObjects) {
+                    obj.rosetteLine.geometry.setDrawRange(0, obj.totalRosetteVerts);
+                    obj.connectSegments.geometry.setDrawRange(0, obj.totalConnectVerts);
+                }
+                disposeBlurredLayer();
+                const blurredRT = renderGroupBlurred(traceGroup);
+                const aspect2 = W / H;
+                const quadW = frustum * aspect2 * 2;
+                const quadH = frustum * 2;
+                const quadGeo = new THREE.PlaneGeometry(quadW, quadH);
+                const quadMat = new THREE.MeshBasicMaterial({
+                    map: blurredRT.texture, transparent: true, premultipliedAlpha: false,
+                    opacity: 0.0, depthTest: false, depthWrite: false, blending: THREE.NormalBlending,
+                });
+                const quadMesh = new THREE.Mesh(quadGeo, quadMat);
+                quadMesh.position.set(0, 0, -0.1);
+                quadMesh.renderOrder = -1;
+                scene.add(quadMesh);
+                blurredLayer = { mesh: quadMesh, opacity: 0.0, fadeTarget: PRESETS.turrell.fadeTarget };
+                updateTraceDrawRange(vars.prayerProgress);
             }
-
-            // Dispose any existing blurred layer (shouldn't exist, but safety)
-            disposeBlurredLayer();
-
-            // Capture + blur the current trace
-            const blurredRT = renderGroupBlurred(traceGroup);
-
-            // Create the atmospheric quad behind the live drawing
-            const aspect2 = W / H;
-            const quadW = frustum * aspect2 * 2;
-            const quadH = frustum * 2;
-            const quadGeo = new THREE.PlaneGeometry(quadW, quadH);
-            const quadMat = new THREE.MeshBasicMaterial({
-                map: blurredRT.texture,
-                transparent: true,
-                premultipliedAlpha: false,
-                opacity: 0.0,  // fade in from 0 for a gentle entrance
-                depthTest: false,
-                depthWrite: false,
-                blending: THREE.NormalBlending,
-            });
-            const quadMesh = new THREE.Mesh(quadGeo, quadMat);
-            quadMesh.position.set(0, 0, -0.1);
-            quadMesh.renderOrder = -1;
-            scene.add(quadMesh);
-
-            blurredLayer = {
-                mesh: quadMesh,
-                opacity: 0.0,  // start invisible, fade in gently
-                fadeTarget: PRESETS.turrell.fadeTarget,
-            };
-
-            // Restore the draw range to current progress (don't jump)
-            updateTraceDrawRange(vars.prayerProgress);
         }
-    }
 
-    // Fade blurred previous prayer layer toward target opacity
-    if (blurredLayer) {
-        blurredLayer.fadeTarget = PRESETS.turrell.fadeTarget;
-        blurredLayer.opacity += (blurredLayer.fadeTarget - blurredLayer.opacity) * PRESETS.turrell.fadeRate;
-        blurredLayer.mesh.material.opacity = blurredLayer.opacity;
-    }
-
-    // Legacy traceLayers fade (kept for compatibility — array is always empty now)
-    for (let i = 0; i < traceLayers.length; i++) {
-        const layer = traceLayers[i];
-        const fromEnd = traceLayers.length - 1 - i;
-        layer.fadeTarget = fromEnd === 0 ? 0.15 : fromEnd === 1 ? 0.05 : 0.02;
-        layer.opacity += (layer.fadeTarget - layer.opacity) * 0.002;
-        for (let j = 0; j < layer.traceObjects.length; j++) {
-            const obj = layer.traceObjects[j];
-            const orig = layer.origOpacities[j];
-            obj.rosetteLine.material.opacity = orig.rosetteAlpha * layer.opacity;
-            obj.connectSegments.material.opacity = orig.connectAlpha * layer.opacity;
+        // Fade blurred layer
+        if (blurredLayer) {
+            blurredLayer.fadeTarget = PRESETS.turrell.fadeTarget;
+            blurredLayer.opacity += (blurredLayer.fadeTarget - blurredLayer.opacity) * PRESETS.turrell.fadeRate;
+            blurredLayer.mesh.material.opacity = blurredLayer.opacity;
         }
-    }
 
-    // Rotate trace dial — 1 revolution per minute
-    const _s = now.getSeconds() + now.getMilliseconds() / 1000;
-    traceGroup.rotation.z = TWO_PI * (_s / 60);
-    // Rotate blurred previous layer at the same rate
-    if (blurredLayer) blurredLayer.mesh.rotation.z = traceGroup.rotation.z;
+        // Legacy traceLayers fade
+        for (let i = 0; i < traceLayers.length; i++) {
+            const layer = traceLayers[i];
+            const fromEnd = traceLayers.length - 1 - i;
+            layer.fadeTarget = fromEnd === 0 ? 0.15 : fromEnd === 1 ? 0.05 : 0.02;
+            layer.opacity += (layer.fadeTarget - layer.opacity) * 0.002;
+            for (let j = 0; j < layer.traceObjects.length; j++) {
+                const obj = layer.traceObjects[j];
+                const orig = layer.origOpacities[j];
+                obj.rosetteLine.material.opacity = orig.rosetteAlpha * layer.opacity;
+                obj.connectSegments.material.opacity = orig.connectAlpha * layer.opacity;
+            }
+        }
+
+        // Rotate trace dial
+        const _s = now.getSeconds() + now.getMilliseconds() / 1000;
+        traceGroup.rotation.z = TWO_PI * (_s / 60);
+        if (blurredLayer) blurredLayer.mesh.rotation.z = traceGroup.rotation.z;
+    }
     // Rebuild live overlay
     updateLiveElements(vars.prayerProgress, now);
 
