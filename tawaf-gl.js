@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v55: ATMOSPHERIC Turrell — desaturated luminous rings, wide soft transitions, Ganzfeld volume color
+// v56: Seven Heavens — 7 concentric bands (سبع سماوات), wider rings, glow at hand tips
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -93,54 +93,57 @@ const PRAYER_PALETTES = {
     isha:    { h: 262, s: 45, l: 72, name: 'Isha',    ar: 'عشاء'    },
 };
 
-// Multi-chromatic ring palettes — each prayer has 5 DISTINCT hues.
-// Turrell's Aten Reign: "peach to pink, lavender to deep purple to electric blue"
-// Adjacent rings have DIFFERENT hues — simultaneous color contrast, not a monochrome gradient.
-// [h, s, l] per ring, center (0) to edge (4).
-// Turrell Aten Reign: "pulsing spectrum... peach to tan to pink, pale yellow
-// to banana yellow to gray to white, lavender to deep purple to electric blue"
-// Each prayer gets a multi-chromatic progression. Center is luminous but TINTED,
-// not white. You should feel bathed in color — "visitors' faces washed in purple."
+// 7 concentric ring palettes — the Seven Heavens (سبع سماوات).
+// Each prayer has 7 DISTINCT hues radiating from luminous center to immersive edge.
+// Turrell Aten Reign structure with Islamic cosmological depth.
+// [h, s, l] per ring, center (0) to edge (6).
+// Saturation climbs: S:25 (tinted light) → S:60 (immersive color).
+// Lightness descends: L:88 (luminous) → L:32 (deep heaven).
 const PRAYER_RING_PALETTES = {
-    // Turrell Aten Reign: "peach to tan to pink, lavender to deep purple to electric blue"
-    // Adjacent rings have DIFFERENT hues — 8-12° shifts create simultaneous color contrast.
-    // Saturation climbs steadily: center is TINTED light (S:22), edge is immersive color (S:55).
-    // Lightness descends: center is luminous (L:88), edge is deep (L:42).
-    // The effect: you look FROM tinted light INTO saturated color. Depth through chroma.
     fajr: [
-        [195, 28, 85],   // ring 0: pale sky — visibly tinted cerulean
-        [205, 35, 75],   // ring 1: cerulean atmosphere
-        [215, 42, 63],   // ring 2: steel blue — fajr identity
-        [225, 50, 50],   // ring 3: deepening blue
-        [238, 55, 40],   // ring 4: indigo depth — you look into this
+        [190, 25, 88],   // 1st heaven: pale dawn sky
+        [198, 30, 80],   // 2nd heaven: soft cerulean
+        [206, 36, 72],   // 3rd heaven: morning blue
+        [214, 42, 63],   // 4th heaven: steel blue
+        [222, 48, 53],   // 5th heaven: deepening azure
+        [232, 54, 42],   // 6th heaven: twilight blue
+        [242, 60, 32],   // 7th heaven: indigo depth
     ],
     dhuhr: [
-        [48,  28, 85],   // ring 0: pale gold — visibly tinted
-        [42,  35, 75],   // ring 1: warm gold atmosphere
-        [35,  42, 63],   // ring 2: amber — dhuhr identity
-        [26,  50, 50],   // ring 3: deepening sienna
-        [16,  55, 40],   // ring 4: burnt umber depth
+        [50,  25, 88],   // 1st heaven: pale sunlight
+        [46,  30, 80],   // 2nd heaven: warm gold
+        [42,  36, 72],   // 3rd heaven: golden amber
+        [36,  42, 63],   // 4th heaven: deep amber
+        [28,  48, 53],   // 5th heaven: sienna warmth
+        [20,  54, 42],   // 6th heaven: burnt umber
+        [12,  60, 32],   // 7th heaven: earth depth
     ],
     asr: [
-        [30,  28, 85],   // ring 0: pale peach — visibly tinted
-        [22,  35, 75],   // ring 1: soft coral atmosphere
-        [14,  42, 63],   // ring 2: terracotta — asr identity
-        [4,   50, 50],   // ring 3: deepening rust
-        [352, 55, 40],   // ring 4: deep crimson depth
+        [32,  25, 88],   // 1st heaven: pale peach
+        [26,  30, 80],   // 2nd heaven: soft coral
+        [20,  36, 72],   // 3rd heaven: warm terracotta
+        [14,  42, 63],   // 4th heaven: deep terracotta
+        [6,   48, 53],   // 5th heaven: deepening rust
+        [358, 54, 42],   // 6th heaven: dark rust
+        [350, 60, 32],   // 7th heaven: crimson depth
     ],
     maghrib: [
-        [345, 28, 85],   // ring 0: pale rose — visibly tinted
-        [338, 35, 75],   // ring 1: soft rose atmosphere
-        [328, 42, 63],   // ring 2: magenta — maghrib identity
-        [315, 50, 50],   // ring 3: deepening plum
-        [300, 55, 40],   // ring 4: deep purple depth
+        [348, 25, 88],   // 1st heaven: pale rose
+        [342, 30, 80],   // 2nd heaven: soft rose
+        [335, 36, 72],   // 3rd heaven: warm magenta
+        [328, 42, 63],   // 4th heaven: deep rose
+        [320, 48, 53],   // 5th heaven: deepening plum
+        [310, 54, 42],   // 6th heaven: dark plum
+        [300, 60, 32],   // 7th heaven: purple depth
     ],
     isha: [
-        [275, 28, 85],   // ring 0: pale lavender — visibly tinted
-        [268, 35, 75],   // ring 1: soft lavender atmosphere
-        [260, 42, 63],   // ring 2: violet — isha identity
-        [250, 50, 50],   // ring 3: deepening purple
-        [240, 55, 40],   // ring 4: deep indigo depth
+        [278, 25, 88],   // 1st heaven: pale lavender
+        [272, 30, 80],   // 2nd heaven: soft lavender
+        [266, 36, 72],   // 3rd heaven: warm violet
+        [260, 42, 63],   // 4th heaven: violet
+        [252, 48, 53],   // 5th heaven: deepening purple
+        [244, 54, 42],   // 6th heaven: dark purple
+        [236, 60, 32],   // 7th heaven: deep indigo
     ],
 };
 
@@ -873,6 +876,8 @@ const ATEN_REIGN_FRAG = `
     uniform vec3 uRing2;
     uniform vec3 uRing3;
     uniform vec3 uRing4;
+    uniform vec3 uRing5;
+    uniform vec3 uRing6;
     uniform float uTime;
     uniform float uAspect;
     varying vec2 vUv;
@@ -883,37 +888,32 @@ const ATEN_REIGN_FRAG = `
         float dist = length(uv);
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
-        // You can't see them change; your adaptation shifts and suddenly the color is different.
-        // Periods: ~45s (center) to ~120s (edge). Amplitudes subtle but real.
         float b0 = sin(uTime * 0.14) * 0.015;
-        float b1 = sin(uTime * 0.10 + 1.2) * 0.020;
-        float b2 = sin(uTime * 0.07 + 2.5) * 0.025;
-        float b3 = sin(uTime * 0.05 + 3.8) * 0.030;
-        float b4 = sin(uTime * 0.03 + 5.0) * 0.035;
+        float b1 = sin(uTime * 0.11 + 0.9) * 0.018;
+        float b2 = sin(uTime * 0.09 + 1.8) * 0.020;
+        float b3 = sin(uTime * 0.07 + 2.7) * 0.022;
+        float b4 = sin(uTime * 0.06 + 3.6) * 0.025;
+        float b5 = sin(uTime * 0.04 + 4.5) * 0.028;
+        float b6 = sin(uTime * 0.03 + 5.4) * 0.030;
 
         vec3 r0 = uRing0 + b0;
         vec3 r1 = uRing1 + b1;
         vec3 r2 = uRing2 + b2;
         vec3 r3 = uRing3 + b3;
         vec3 r4 = uRing4 + b4;
+        vec3 r5 = uRing5 + b5;
+        vec3 r6 = uRing6 + b6;
 
-        // 5 concentric color bands — Turrell Aten Reign structure.
-        // Each band has a solid core with soft feathered edges (~8% UV transition).
-        // You perceive DISTINCT color steps that bleed gently into each other.
+        // 7 concentric color bands — the Seven Heavens (سبع سماوات).
+        // Wider bands with soft feathered edges. Rings extend well beyond the
+        // clip area so on portrait phones the outer heavens wrap the screen vertically.
         vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.08, 0.18, dist));
-        color = mix(color, r2, smoothstep(0.20, 0.32, dist));
-        color = mix(color, r3, smoothstep(0.34, 0.48, dist));
-        color = mix(color, r4, smoothstep(0.50, 0.65, dist));
-
-        // Turrell: NO visible light source. The center is simply the lightest
-        // tint of the prayer color. The Kaaba IS the center — but the light has no source.
-
-        // Edge: beyond ring 4, gently lighten toward the page background.
-        // CSS mask dissolves from 60-82% radius, so we lighten the color zone before the mask.
-        float edgeFade = smoothstep(0.45, 0.72, dist);
-        vec3 edgeTint = mix(r4, r0, 0.55); // lighten substantially toward center color
-        color = mix(color, edgeTint, edgeFade * 0.65);
+        color = mix(color, r1, smoothstep(0.04, 0.16, dist));
+        color = mix(color, r2, smoothstep(0.16, 0.30, dist));
+        color = mix(color, r3, smoothstep(0.30, 0.46, dist));
+        color = mix(color, r4, smoothstep(0.46, 0.64, dist));
+        color = mix(color, r5, smoothstep(0.64, 0.84, dist));
+        color = mix(color, r6, smoothstep(0.84, 1.10, dist));
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -926,6 +926,8 @@ const atenReignMat = new THREE.ShaderMaterial({
         uRing2: { value: new THREE.Color(0.88, 0.87, 0.90) },
         uRing3: { value: new THREE.Color(0.82, 0.80, 0.85) },
         uRing4: { value: new THREE.Color(0.75, 0.72, 0.80) },
+        uRing5: { value: new THREE.Color(0.68, 0.64, 0.74) },
+        uRing6: { value: new THREE.Color(0.60, 0.56, 0.68) },
         uTime:  { value: 0.0 },
         uAspect: { value: W / H },
     },
@@ -1831,12 +1833,12 @@ function updateClockHands(now, night, blending) {
             dot.mat.opacity = 1.0;
             dot.mat.color.setHSL(baseH / 360, epiS, epiL);
             dot.mat.needsUpdate = true;
-            hg.posArr[0] = dot.posArr[0];
-            hg.posArr[1] = dot.posArr[1];
+            hg.posArr[0] = tip.x;
+            hg.posArr[1] = tip.y;
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            hg.mat.opacity = 0.18;
-            hg.mat.size = [45, 35][h];
+            hg.mat.opacity = 0.25;
+            hg.mat.size = [50, 40][h];
             hg.mat.color.setHSL(baseH / 360, 0.12, 0.93);
             hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
@@ -1879,8 +1881,8 @@ function applyDayNight() {
     const prayerName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
     const rings = PRAYER_RING_PALETTES[prayerName] || PRAYER_RING_PALETTES.isha;
 
-    const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4'];
-    for (let i = 0; i < 5; i++) {
+    const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4', 'uRing5', 'uRing6'];
+    for (let i = 0; i < 7; i++) {
         const [rh, rs, rl] = rings[i];
         _ringColor.setHSL(rh / 360, rs / 100, rl / 100);
         atenReignMat.uniforms[ringUniforms[i]].value.copy(_ringColor);
@@ -1897,10 +1899,10 @@ function applyDayNight() {
     // Center glow: strong aperture radiance, the "inner light" of Quaker practice.
     // Edge: reinforces ring 4's rich prayer color — like Turrell's Skyspace surround.
     vignettePass.uniforms.uGlow.value = 0.06;        // subtle aperture warmth at center
-    vignettePass.uniforms.uDeepen.value = 0.15;     // edge immersion — reinforces ring 4 depth
-    // Edge color from ring 4 — deepest ring, pushed even richer
-    const [r4h, r4s, r4l] = rings[4];
-    const edgeColor = new THREE.Color().setHSL(r4h / 360, Math.min(r4s * 1.3, 100) / 100, r4l * 0.7 / 100);
+    vignettePass.uniforms.uDeepen.value = 0.15;     // edge immersion — reinforces 7th heaven depth
+    // Edge color from ring 6 (7th heaven) — deepest ring, pushed even richer
+    const [r6h, r6s, r6l] = rings[6];
+    const edgeColor = new THREE.Color().setHSL(r6h / 360, Math.min(r6s * 1.3, 100) / 100, r6l * 0.7 / 100);
     vignettePass.uniforms.uEdgeColor.value.copy(edgeColor);
 
     // ── Trace materials (orbiter mode only) ──
@@ -1990,11 +1992,10 @@ function updateBodyColors() {
     // The page IS the continuation of the outer light field. No visible boundary.
     const pName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
     const outerRings = PRAYER_RING_PALETTES[pName] || PRAYER_RING_PALETTES.isha;
-    const [pgH, pgS, pgL] = outerRings[4]; // ring 4 = outermost
-    // Page bg: the museum wall beyond the rings — same hue family as ring 4
-    // but much lighter. Slightly more saturated than before for smoother dissolve
-    // through the wider CSS mask gradient.
-    const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.28)}%, ${Math.round(Math.min(pgL + 38, 87))}%)`;
+    const [pgH, pgS, pgL] = outerRings[6]; // ring 6 = 7th heaven (outermost)
+    // Page bg: the museum wall beyond the rings — same hue family as outermost ring
+    // but much lighter for seamless dissolve through the CSS mask.
+    const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.28)}%, ${Math.round(Math.min(pgL + 48, 90))}%)`;
     document.documentElement.style.setProperty('--bg', pageTint);
     // dialHero background: transparent — Aten Reign shader fills the canvas,
     // CSS mask fades reveal the page bg directly.
