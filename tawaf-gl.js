@@ -477,7 +477,7 @@ let W = CONTAINED ? CONTAINER.clientWidth : window.innerWidth;
 let H = CONTAINED ? CONTAINER.clientHeight : window.innerHeight;
 const aspect = W / H;
 const frustum = 2; // world units from center to edge vertically
-const radius = frustum * 1.15; // orbital radius in world units — scaled up to fill circular cutout
+const radius = frustum * 1.45; // orbital radius in world units — scaled up for larger drawing fill
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#020204');
@@ -1394,9 +1394,10 @@ function updateClockHands(now, night, blending) {
     const minAngle = -TWO_PI * (m / 60) + Math.PI / 2;
     const hrAngle  = -TWO_PI * (h / 12) + Math.PI / 2;
 
-    const secR = radius * 0.75;
-    const minR = radius * 0.60;
-    const hrR  = radius * 0.40;
+    // Hand lengths fixed (not scaled with radius) — keeps hands the same size as drawing scales up
+    const secR = 1.725;
+    const minR = 1.38;
+    const hrR  = 0.92;
 
     const palette = artwork ? artwork.palette : PRAYER_PALETTES.isha;
     const baseH = palette.h;
@@ -1959,8 +1960,10 @@ function updateUI(now, vars) {
 // ═══════════════════════════════════════════════════════════════
 
 function onResize() {
-    W = _isFullscreen ? window.innerWidth : (CONTAINED ? CONTAINER.clientWidth : window.innerWidth);
-    H = _isFullscreen ? window.innerHeight : (CONTAINED ? CONTAINER.clientHeight : window.innerHeight);
+    // In fullscreen the canvas is a circle (square CSS) — use its actual rendered size, not window size
+    const canvasEl = renderer.domElement;
+    W = _isFullscreen ? canvasEl.clientWidth : (CONTAINED ? CONTAINER.clientWidth : window.innerWidth);
+    H = _isFullscreen ? canvasEl.clientHeight : (CONTAINED ? CONTAINER.clientHeight : window.innerHeight);
     const aspect = W / H;
     if (aspect >= 1) {
         // Landscape / square — fit vertically, expand horizontally
