@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v57: Turrell luminance lift at ring borders + tawaf lens flare (every 7th circuit)
+// v58: Clock-synced tawaf (7 circuits = 60s, flare on minute) + hr/min glow sprites
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -1363,7 +1363,7 @@ const centerDot = makeClockDot(4, 0.3, 0.03);
 const EPICYCLE_SAMPLE_COUNT = 1500;
 const EPICYCLE_TRAIL_MAX = 2000;
 const EPICYCLE_CIRCLE_POOL = 30;
-const EPICYCLE_CYCLE = 7;   // seconds per full drawing cycle (7 = tawaf circuits)
+const EPICYCLE_CYCLE = 60 / 7;  // ~8.571 seconds per circuit — 7 circuits = 60 seconds exactly (synced with second hand)
 const EPICYCLE_PAUSE = 2;   // seconds to hold the completed drawing
 
 // Pre-compute DFT coefficients for Kaaba geometric outline
@@ -1909,22 +1909,22 @@ function updateClockHands(now, night, blending) {
     const lumeBlend = THREE.NormalBlending;
     const activeTex = dotTexture;
 
-    // --- Epicycle hour numeral ---
-    const epicycleNow = performance.now() / 1000;
-    const epicycleDt = epicycleLastRealTime > 0 ? Math.min(epicycleNow - epicycleLastRealTime, 0.1) : 0;
-    epicycleLastRealTime = epicycleNow;
+    // --- Epicycle hour numeral (clock-synced tawaf) ---
+    // Derive tawaf phase from wall-clock seconds so 7 circuits = exactly 60 seconds.
+    // The tawaf completes its 7th circuit precisely when the second hand hits 12 (minute boundary).
+    // Tawaf direction is opposite to second hand (anti-clockwise) — handled by the negative sign in evaluateEpicycles.
+    const tawafSeconds = s; // s = fractional seconds from the clock hand computation above
+    const tawafPhase = (tawafSeconds / 60) * 7; // 0→7 over 60 seconds
+    const tawafCurrentCircuit = Math.floor(tawafPhase); // which circuit (0-6)
+    epicycleTime = (tawafPhase - tawafCurrentCircuit) * TWO_PI; // position within current circuit
 
-    // Advance epicycle animation — continuous loop, never clears trail
-    epicycleTime += (epicycleDt / EPICYCLE_CYCLE) * TWO_PI;
-    if (epicycleTime >= TWO_PI) {
-        epicycleTime -= TWO_PI; // seamless loop, trail persists
-        // Tawaf circuit tracking — 7 circuits = 1 complete tawaf
-        tawafCircuitCount++;
-        if (tawafCircuitCount >= 7) {
-            tawafCircuitCount = 0;
-            // Fire lens flare at the noon-facing (topmost) tip of the Kaaba diamond
-            triggerTawafFlare(0, kaabaHalfDiag);
-        }
+    // Detect minute boundary (tawaf completion) — fire lens flare
+    if (tawafSeconds < 0.5 && tawafLastWrap) {
+        // Second hand just crossed 12 — 7th circuit complete
+        triggerTawafFlare(0, kaabaHalfDiag);
+        tawafLastWrap = false;
+    } else if (tawafSeconds > 59) {
+        tawafLastWrap = true; // arm the trigger for the next crossing
     }
 
     // Evaluate epicycles — Kaaba outline
@@ -2086,10 +2086,19 @@ function updateClockHands(now, night, blending) {
             hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
         } else {
-            // --- Hour / Minute: hide circle, dot, and glow sprite ---
+            // --- Hour / Minute: hide circle + dot, show glow sprite at hand tip ---
             circle.line.visible = false;
             dot.points.visible = false;
-            hg.mat.opacity = 0;
+            hg.posArr[0] = tip.x;
+            hg.posArr[1] = tip.y;
+            hg.posArr[2] = 0.025;
+            hg.geo.attributes.position.needsUpdate = true;
+            const glowSize = h === 0 ? 38 : 30; // hour bigger, minute smaller
+            const glowOpacity = h === 0 ? 0.15 : 0.18;
+            hg.mat.opacity = glowOpacity;
+            hg.mat.size = glowSize;
+            hg.mat.color.setHSL(baseH / 360, 0.15, 0.91);
+            hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
         }
     }
