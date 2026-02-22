@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v50: Turrell Skyspace — luminous bg, soft dissolving edge, no star overlay
+// v55: ATMOSPHERIC Turrell — desaturated luminous rings, wide soft transitions, Ganzfeld volume color
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -27,22 +27,23 @@ const TWO_PI = Math.PI * 2;
 // These are the locked-in startup values. GUI tweaks are ephemeral.
 // To save new defaults: update STARTUP_PRESET, then Object.assign into PRESETS on load.
 const STARTUP_PRESET = Object.freeze({
-    // Turrell Skyspace approach: ALL prayers are luminous. No dark mode.
-    // Difference between prayers is HUE, not brightness.
+    // Turrell Ganzfeld: luminous, desaturated color field.
+    // The visual IS the light itself — traces are barely perceptible.
+    // "Subtract. Soften. Slow. Lighten. Desaturate. Dissolve."
     night: Object.freeze({
-        alphaMul: 6.0,         // high multiplier — traces must contrast against light bg
-        alphaMax: 0.28,        // cap per-segment opacity
-        bloomStrength: 0.03,   // barely perceptible — Turrell is clean light, not glow
-        bloomThreshold: 0.85,
-        bloomRadius: 0.15,
-        bg: '#eae7f0',         // (unused — bg computed from palette)
+        alphaMul: 3.0,
+        alphaMax: 0.10,        // traces are whispers — barely visible structure
+        bloomStrength: 0.06,   // almost none — Turrell light is uniform, not glowing
+        bloomThreshold: 0.60,
+        bloomRadius: 0.9,      // wide, gentle
+        bg: '#eae7f0',
     }),
     day: Object.freeze({
-        alphaMul: 6.0,
-        alphaMax: 0.28,
-        bloomStrength: 0.03,
-        bloomThreshold: 0.85,
-        bloomRadius: 0.15,
+        alphaMul: 3.0,
+        alphaMax: 0.10,        // same ghostly traces
+        bloomStrength: 0.04,
+        bloomThreshold: 0.65,
+        bloomRadius: 0.9,
         bg: '#f8f7f4',
     }),
     shared: Object.freeze({
@@ -50,18 +51,18 @@ const STARTUP_PRESET = Object.freeze({
         radiusPower: 2.0,
         midDipStrength: 0.55,
         velCap: 1.5,
-        connAlphaMul: 0.06,    // slightly higher connection opacity
+        connAlphaMul: 0.02,    // connection lines nearly invisible
         noiseSigma: 0.0003,
         hueJitter: 10,
         pathGradient: 16,
     }),
     turrell: Object.freeze({
-        glowIntensity: 0.04,   // barely there — the light IS the scene, not an effect
-        blurPasses: 6,         // 1–12: enough to dissolve traces into soft color
-        blurScale: 0.8,        // wider blur — more Ganzfeld dissolution
-        tintStrength: 0.45,    // stronger tint — want the prayer color to come through
-        fadeTarget: 0.12,      // very subtle — just a whisper of depth, not a dark cloud
-        fadeRate: 0.003,       // fade-in
+        glowIntensity: 0.02,   // barely there — let the rings speak
+        blurPasses: 8,         // enough dissolution
+        blurScale: 1.2,        // moderate kernels
+        tintStrength: 0.45,    // light tint — blur is atmospheric texture, not color override
+        fadeTarget: 0.15,      // whisper of atmosphere — rings dominate, blur adds life
+        fadeRate: 0.002,       // slow build
     }),
 });
 
@@ -80,11 +81,58 @@ const RATIO_BANK = [
 ];
 
 const PRAYER_PALETTES = {
-    fajr:    { h: 210, s: 35, l: 72, name: 'Fajr',    ar: 'فجر'    },  // pale cerulean — predawn Skyspace, Aten Reign top ring
-    dhuhr:   { h: 45,  s: 30, l: 78, name: 'Dhuhr',   ar: 'ظهر'    },  // warm cream — noon light flooding through aperture
-    asr:     { h: 25,  s: 35, l: 70, name: 'Asr',     ar: 'عصر'    },  // soft peach — late afternoon Turrell warmth
-    maghrib: { h: 330, s: 30, l: 65, name: 'Maghrib', ar: 'مغرب'   },  // soft rose — sunset Skyspace
-    isha:    { h: 250, s: 25, l: 55, name: 'Isha',    ar: 'عشاء'    },  // soft lavender — night Skyspace, still luminous
+    // Base palette for traces/UI — used for non-ring elements.
+    fajr:    { h: 210, s: 50, l: 80, name: 'Fajr',    ar: 'فجر'    },
+    dhuhr:   { h: 42,  s: 45, l: 82, name: 'Dhuhr',   ar: 'ظهر'    },
+    asr:     { h: 25,  s: 50, l: 78, name: 'Asr',     ar: 'عصر'    },
+    maghrib: { h: 338, s: 48, l: 74, name: 'Maghrib', ar: 'مغرب'   },
+    isha:    { h: 262, s: 45, l: 72, name: 'Isha',    ar: 'عشاء'    },
+};
+
+// Multi-chromatic ring palettes — each prayer has 5 DISTINCT hues.
+// Turrell's Aten Reign: "peach to pink, lavender to deep purple to electric blue"
+// Adjacent rings have DIFFERENT hues — simultaneous color contrast, not a monochrome gradient.
+// [h, s, l] per ring, center (0) to edge (4).
+// Turrell Aten Reign: "pulsing spectrum... peach to tan to pink, pale yellow
+// to banana yellow to gray to white, lavender to deep purple to electric blue"
+// Each prayer gets a multi-chromatic progression. Center is luminous but TINTED,
+// not white. You should feel bathed in color — "visitors' faces washed in purple."
+const PRAYER_RING_PALETTES = {
+    fajr: [
+        [35,  28, 91],   // ring 0: warm peach aperture — not white, colored
+        [345, 32, 85],   // ring 1: pale blush pink
+        [280, 35, 80],   // ring 2: soft lavender
+        [220, 42, 74],   // ring 3: cerulean — fajr identity
+        [242, 38, 66],   // ring 4: deeper blue-violet
+    ],
+    dhuhr: [
+        [50,  30, 91],   // ring 0: luminous warm gold tint
+        [35,  38, 85],   // ring 1: soft peach
+        [48,  45, 79],   // ring 2: warm gold — dhuhr identity
+        [28,  42, 73],   // ring 3: amber-orange
+        [12,  36, 67],   // ring 4: deeper terracotta
+    ],
+    asr: [
+        [40,  28, 91],   // ring 0: warm cream aperture
+        [15,  36, 85],   // ring 1: pale salmon
+        [30,  45, 78],   // ring 2: coral — asr identity
+        [348, 38, 73],   // ring 3: dusty rose
+        [330, 34, 66],   // ring 4: deeper mauve
+    ],
+    maghrib: [
+        [30,  25, 91],   // ring 0: warm tinted aperture
+        [348, 35, 84],   // ring 1: soft pink
+        [325, 45, 78],   // ring 2: rose — maghrib identity
+        [295, 40, 72],   // ring 3: orchid
+        [272, 36, 64],   // ring 4: deeper violet
+    ],
+    isha: [
+        [30,  22, 90],   // ring 0: warm ivory aperture
+        [340, 28, 84],   // ring 1: pale rose
+        [290, 38, 78],   // ring 2: soft lilac
+        [265, 44, 71],   // ring 3: lavender — isha identity
+        [242, 38, 62],   // ring 4: deeper indigo
+    ],
 };
 
 // prettier-ignore
@@ -483,8 +531,8 @@ const frustum = 2; // world units from center to edge vertically
 const radius = frustum * 1.6; // orbital radius in world units — scaled up for larger drawing fill
 
 const scene = new THREE.Scene();
-// Initial bg — luminous, will be palette-tinted by applyDayNight()
-scene.background = new THREE.Color('#edeae6');
+// No scene.background — Aten Reign quad provides the concentric ring background
+scene.background = null;
 
 const camera = new THREE.OrthographicCamera(
     aspect >= 1 ? -frustum * aspect : -frustum,
@@ -519,12 +567,14 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
-// Turrell vignette — darkening at edges like looking into a Ganzfeld chamber
-const VignetteShader = {
+// Turrell Skyspace aperture — you look INTO light. Center radiates, edges deepen.
+// Inverted vignette: center brightens (aperture glow), edges saturate deeper.
+const TurrellApertureShader = {
     uniforms: {
-        tDiffuse: { value: null },
-        uDarkness: { value: 0.6 },
-        uOffset: { value: 1.2 },
+        tDiffuse:    { value: null },
+        uGlow:       { value: 0.12 },    // center brightening intensity
+        uDeepen:     { value: 0.08 },    // edge deepening intensity
+        uEdgeColor:  { value: new THREE.Color(0.5, 0.45, 0.55) }, // deeper prayer tint at edges
     },
     vertexShader: `
         varying vec2 vUv;
@@ -535,19 +585,29 @@ const VignetteShader = {
     `,
     fragmentShader: `
         uniform sampler2D tDiffuse;
-        uniform float uDarkness;
-        uniform float uOffset;
+        uniform float uGlow;
+        uniform float uDeepen;
+        uniform vec3 uEdgeColor;
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             vec2 uv = (vUv - 0.5) * 2.0;
-            float vignette = 1.0 - smoothstep(uOffset - 0.5, uOffset, length(uv));
-            texel.rgb *= mix(1.0, vignette, uDarkness);
+            float dist = length(uv);
+
+            // Center glow — Turrell Ganzfeld: gentle radiance from the center of the field
+            float glow = 1.0 - smoothstep(0.0, 1.4, dist * 0.5);
+            texel.rgb += glow * uGlow;
+
+            // Edge deepening — looking deeper into the color field
+            // Subtle shift toward a richer version of the prayer color
+            float edge = smoothstep(0.5, 1.5, dist);
+            texel.rgb = mix(texel.rgb, uEdgeColor, edge * uDeepen);
+
             gl_FragColor = texel;
         }
     `,
 };
-const vignettePass = new ShaderPass(VignetteShader);
+const vignettePass = new ShaderPass(TurrellApertureShader);
 composer.addPass(vignettePass);
 
 // ═══════════════════════════════════════════════════════════════
@@ -701,6 +761,7 @@ function renderGroupBlurred(captureGroup) {
     scene.background = null;
 
     liveGroup.visible = false;
+    atenReignQuad.visible = false;  // hide Aten Reign bg during capture
     if (blurredLayer) blurredLayer.mesh.visible = false;
 
     // Render captureGroup to blurTargetA
@@ -717,6 +778,7 @@ function renderGroupBlurred(captureGroup) {
 
     // Restore visibility
     liveGroup.visible = true;
+    atenReignQuad.visible = true;
     if (blurredLayer) blurredLayer.mesh.visible = true;
     scene.background = prevBg;
 
@@ -725,7 +787,8 @@ function renderGroupBlurred(captureGroup) {
     //    Turrell's light has no edges. 4 passes at increasing radii
     //    completely melt any line structure into a soft color field.
     const palette = artwork ? artwork.palette : PRAYER_PALETTES.isha;
-    _blurTintColor.setHSL(palette.h / 360, (palette.s * 0.8) / 100, (palette.l * 1.4) / 100);
+    // Tint toward a luminous version of the prayer color — between bg and trace lightness
+    _blurTintColor.setHSL(palette.h / 360, (palette.s * 0.5) / 100, Math.min(0.85, (palette.l + 15) / 100));
 
     bokehMat.uniforms.uResolution.value.set(W, H);
     bokehMat.uniforms.uTintColor.value.copy(_blurTintColor);
@@ -781,6 +844,86 @@ function disposeBlurredLayer() {
 // Pre-allocated Color objects for renderGroupBlurred — avoids per-frame allocation
 const _blurPrevClearColor = new THREE.Color();
 const _blurTintColor = new THREE.Color();
+
+// ═══════════════════════════════════════════════════════════════
+// ATEN REIGN BACKGROUND — concentric rings of luminous color
+// ═══════════════════════════════════════════════════════════════
+// Inspired by James Turrell's "Aten Reign" (Guggenheim, 2013).
+// Concentric ellipses of luminous color breathe independently,
+// creating depth through color alone — you look INTO light.
+// Center: near-white aperture. Edges: richer, deeper prayer color.
+// Each ring shifts hue slightly for the multi-chromatic field effect.
+
+const ATEN_REIGN_FRAG = `
+    uniform vec3 uRing0;
+    uniform vec3 uRing1;
+    uniform vec3 uRing2;
+    uniform vec3 uRing3;
+    uniform vec3 uRing4;
+    uniform float uTime;
+    varying vec2 vUv;
+    void main() {
+        vec2 uv = (vUv - 0.5) * 2.0;
+        float dist = length(uv);
+
+        // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
+        // You can't see them change; your adaptation shifts and suddenly the color is different.
+        // Periods: ~30s (center) to ~90s (edge). Amplitudes tiny — atmospheric drift.
+        float b0 = sin(uTime * 0.20) * 0.008;
+        float b1 = sin(uTime * 0.14 + 1.2) * 0.012;
+        float b2 = sin(uTime * 0.09 + 2.5) * 0.015;
+        float b3 = sin(uTime * 0.07 + 3.8) * 0.018;
+        float b4 = sin(uTime * 0.04 + 5.0) * 0.020;
+
+        vec3 r0 = uRing0 + b0;
+        vec3 r1 = uRing1 + b1;
+        vec3 r2 = uRing2 + b2;
+        vec3 r3 = uRing3 + b3;
+        vec3 r4 = uRing4 + b4;
+
+        // 5 concentric color bands — each ring owns a DISTINCT zone.
+        // Turrell's Aten Reign: each ellipse is a clearly visible color band.
+        // Bands are spaced to fill the visible area (CSS mask keeps to ~80% radius).
+        // Ring 4 must be visible at full opacity before the mask starts fading.
+        vec3 color = r0;
+        color = mix(color, r1, smoothstep(0.08, 0.16, dist));  // ring 1 starts early
+        color = mix(color, r2, smoothstep(0.22, 0.30, dist));  // ring 2
+        color = mix(color, r3, smoothstep(0.38, 0.48, dist));  // ring 3
+        color = mix(color, r4, smoothstep(0.56, 0.66, dist));  // ring 4 fully visible by 66%
+
+        gl_FragColor = vec4(color, 1.0);
+    }
+`;
+
+const atenReignMat = new THREE.ShaderMaterial({
+    uniforms: {
+        uRing0: { value: new THREE.Color(0.97, 0.96, 0.95) },
+        uRing1: { value: new THREE.Color(0.93, 0.92, 0.94) },
+        uRing2: { value: new THREE.Color(0.88, 0.87, 0.90) },
+        uRing3: { value: new THREE.Color(0.82, 0.80, 0.85) },
+        uRing4: { value: new THREE.Color(0.75, 0.72, 0.80) },
+        uTime:  { value: 0.0 },
+    },
+    vertexShader: BLUR_VERT,  // reuse the pass-through vertex shader
+    fragmentShader: ATEN_REIGN_FRAG,
+    depthTest: false,
+    depthWrite: false,
+});
+
+// Fullscreen quad covering the camera frustum — slightly oversized for safety
+const _atenAspect = W / H;
+const _atenW = frustum * (_atenAspect >= 1 ? _atenAspect : 1) * 2.4;
+const _atenH = frustum * (_atenAspect >= 1 ? 1 : 1 / _atenAspect) * 2.4;
+const atenReignQuad = new THREE.Mesh(
+    new THREE.PlaneGeometry(_atenW, _atenH),
+    atenReignMat
+);
+atenReignQuad.position.set(0, 0, -0.5);
+atenReignQuad.renderOrder = -10;
+scene.add(atenReignQuad);
+
+// Pre-allocated Color for ring computation
+const _ringColor = new THREE.Color();
 
 // Groups
 let traceGroup = new THREE.Group();
@@ -844,13 +987,14 @@ function buildTraceGeometry(artwork) {
         const avgR = (pair.r1 + pair.r2) / 2;
         const radiusScale = Math.pow(avgR, PRESETS.shared.radiusPower) * 4.0;
 
-        // --- Colors (Turrell luminous mode) ---
-        // Traces are DARKER than the luminous bg — visible through contrast
+        // --- Colors (Turrell Ganzfeld mode) ---
+        // Traces are ghostly — barely visible structure within the luminous color field.
+        // The blur layer does the heavy lifting; traces just seed the atmosphere.
         const preset = night ? PRESETS.night : PRESETS.day;
-        const traceL = Math.max(pair.l - 40, 20);
-        const traceS = Math.min(pair.s + 15, 80);
+        const traceL = Math.min(96, pair.l + 18);
+        const traceS = Math.max(8, pair.s - 15);
         const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
-        const traceAlpha = baseAlpha * depthScale * radiusScale;
+        const traceAlpha = baseAlpha * depthScale * radiusScale * 0.45; // ghostly but perceivable — structure within the light field
 
         const color = hslToColor(pair.h, traceS, traceL);
 
@@ -1349,9 +1493,9 @@ function updateLiveElements(progress, now) {
             my += Math.sin(a3) * pair.r3 * radius;
         }
 
-        // Dot colors: darker than bg for visibility in luminous field
-        const dotL = Math.max(pair.l - 30, 20);
-        const dotS = Math.min(pair.s + 10, 80);
+        // Dot colors: luminous — bright points of light within the color field
+        const dotL = Math.min(97, pair.l + 25);
+        const dotS = Math.max(5, pair.s - 15);
         _tmpColor.setHSL(pair.h / 360, dotS / 100, dotL / 100);
 
         const base = pi * 9; // 3 dots × 3 components
@@ -1409,9 +1553,9 @@ function updateClockHands(now, night, blending) {
     const baseH = palette.h;
 
     // Hand configs: [angle, radius, saturation, lightness, opacity]
-    // Hands are darker than the luminous bg — readable, elegant
-    const pS = Math.min(palette.s + 15, 85);
-    const pL = Math.max(palette.l - 30, 15);  // darkened for contrast against luminous bg
+    // Hands: luminous — brighter than bg, high opacity for readability
+    const pS = Math.max(palette.s - 10, 8);
+    const pL = Math.min(palette.l + 18, 93);  // brighter than bg — hands are light within the field
     const handConfigs = [
         [hrAngle,  hrR,  pS, pL, 0.85],
         [minAngle, minR, pS, pL, 0.75],
@@ -1505,9 +1649,9 @@ function updateClockHands(now, night, blending) {
 
     // Trail colors: prayer palette gradient from transparent (old) to bright (new)
     const epiDrawCount = Math.min(epicycleTrailCount, EPICYCLE_TRAIL_MAX);
-    // Epicycle trail: darker than bg for visibility
-    const epiS = Math.min((palette.s + 20) / 100, 0.85);
-    const epiL = Math.max((palette.l - 35) / 100, 0.12);
+    // Epicycle trail: luminous — lighter than bg, radiates light
+    const epiS = Math.max((palette.s - 15) / 100, 0.05);
+    const epiL = Math.min((palette.l + 20) / 100, 0.95);
     _tmpColor.setHSL(baseH / 360, epiS, epiL);
     for (let i = 0; i < epiDrawCount; i++) {
         const brightness = i / epiDrawCount;
@@ -1535,8 +1679,8 @@ function updateClockHands(now, night, blending) {
     kaabaGlowGeo.attributes.position.needsUpdate = true;
     // Pulse the glow — brighter than the main trail, synced breathing
     kaabaGlowMat.size = 1.45;
-    kaabaGlowMat.opacity = 0;  // hidden in luminous mode
-    kaabaGlowMat.color.setHSL(baseH / 360, 0.3, 0.4);
+    kaabaGlowMat.opacity = 0;  // hidden — bloom provides the glow
+    kaabaGlowMat.color.setHSL(baseH / 360, 0.15, 0.90);
     kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
@@ -1576,7 +1720,7 @@ function updateClockHands(now, night, blending) {
         epicycleArmGeo.setDrawRange(0, armCount + 1);
         epicycleArmGeo.attributes.position.needsUpdate = true;
         epicycleArmMat.opacity = 0.06 * kaabaPulse;
-        epicycleArmMat.color.setHSL(baseH / 360, 0.2, 0.4);
+        epicycleArmMat.color.setHSL(baseH / 360, 0.1, 0.88);
         epicycleArmMat.blending = THREE.NormalBlending;
         epicycleArmMat.needsUpdate = true;
         epicycleArmLine.visible = true;
@@ -1677,24 +1821,42 @@ function applyDayNight() {
 
     const palette = artwork ? artwork.palette : (currentVars ? PRAYER_PALETTES[currentVars.prayerPeriod] : PRAYER_PALETTES.isha);
 
-    // Background: LUMINOUS — 88-92% lightness, gently tinted with prayer color.
-    // Turrell's walls glow. The bg IS the light. Not darkness with glow on top.
-    const bgL = 0.90 - ((100 - palette.l) / 100 * 0.04); // 86-90%, dimmer prayers barely lower
-    const bgS = palette.s * 0.18 / 100;                   // very desaturated — just a whisper of hue
-    scene.background = new THREE.Color().setHSL(palette.h / 360, bgS, bgL);
+    // ── ATEN REIGN MULTI-CHROMATIC RINGS ──
+    // Each ring has its own DISTINCT hue — simultaneous color contrast.
+    // Turrell: "peach to pink, lavender to deep purple to electric blue"
+    const pH = palette.h;
+    const pS = palette.s;
+    const pL = palette.l;
+    const prayerName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
+    const rings = PRAYER_RING_PALETTES[prayerName] || PRAYER_RING_PALETTES.isha;
 
-    // Bloom — barely perceptible. The light is the scene, not an effect.
+    const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4'];
+    for (let i = 0; i < 5; i++) {
+        const [rh, rs, rl] = rings[i];
+        _ringColor.setHSL(rh / 360, rs / 100, rl / 100);
+        atenReignMat.uniforms[ringUniforms[i]].value.copy(_ringColor);
+    }
+
+    // scene.background stays null — Aten Reign quad handles everything
+
+    // Bloom — near-zero. Turrell light is perceptually uniform. No point-source glow.
     bloomPass.strength = preset.bloomStrength;
     bloomPass.threshold = preset.bloomThreshold;
     bloomPass.radius = preset.bloomRadius;
 
-    // Vignette — almost none. Turrell Skyspaces are boundless, not tunnels.
-    vignettePass.uniforms.uDarkness.value = 0.06;
-    vignettePass.uniforms.uOffset.value = 1.8;
+    // ── VIGNETTE — amplifies the Aten Reign depth ──
+    // Center glow: strong aperture radiance, the "inner light" of Quaker practice.
+    // Edge: reinforces ring 4's rich prayer color — like Turrell's Skyspace surround.
+    vignettePass.uniforms.uGlow.value = 0.15;       // center aperture radiance
+    vignettePass.uniforms.uDeepen.value = 0.10;     // subtle edge deepening — rings do the work
+    // Edge color from ring 4 — deepest ring, slightly richer
+    const [r4h, r4s, r4l] = rings[4];
+    const edgeColor = new THREE.Color().setHSL(r4h / 360, r4s * 1.1 / 100, r4l * 0.9 / 100);
+    vignettePass.uniforms.uEdgeColor.value.copy(edgeColor);
 
-    // ── Trace materials: DARKER than bg, normal blending ──────────
-    // The traces are like subtle geometric patterns seen through luminous air.
-    // They must CONTRAST against the light bg — darker, slightly more saturated.
+    // ── Trace materials: subtle structure within the luminous color field.
+    // With bolder Aten Reign rings, traces should be VISIBLE but not overpowering.
+    // SubtractiveBlending on light bg would darken — use NormalBlending with near-bg colors.
     for (const obj of traceObjects) {
         const pair = obj.pair;
         const d = pair.depth !== undefined ? pair.depth : 0.5;
@@ -1702,12 +1864,13 @@ function applyDayNight() {
         const avgR = (pair.r1 + pair.r2) / 2;
         const radiusScale = Math.pow(avgR, PRESETS.shared.radiusPower) * 4.0;
 
-        // Traces: bring lightness DOWN so they read against the luminous bg
-        const traceL = Math.max(pair.l - 40, 20);
-        const traceS = Math.min(pair.s + 15, 80);
+        // Traces: gossamer threads within the color field — barely perceptible.
+        // They add life and structure but should never dominate the rings.
+        const traceL = Math.min(96, pair.l + 15);  // luminous — lighter than most rings
+        const traceS = Math.max(8, pair.s - 12);   // desaturated — ghost-like
         const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
-        const traceAlpha = baseAlpha * depthScale * radiusScale;
-        const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale;
+        const traceAlpha = baseAlpha * depthScale * radiusScale * 0.30; // ghostly
+        const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale * 0.08;
 
         obj.rosetteLine.material.opacity = traceAlpha;
         obj.rosetteLine.material.blending = THREE.NormalBlending;
@@ -1745,12 +1908,13 @@ function applyDayNight() {
         }
     }
 
-    // Blurred atmospheric layer — gentle color wash, not glow
+    // Blurred atmospheric layer — ADDITIVE: can only brighten, never darken.
+    // Turrell's atmospheric light adds luminosity to the rings, not darkness.
     if (blurredLayer) {
         blurredLayer.mesh.visible = true;
-        blurredLayer.mesh.material.blending = THREE.NormalBlending;
-        blurredLayer.mesh.material.premultipliedAlpha = true;
-        blurredLayer.mesh.material.opacity = blurredLayer.opacity;
+        blurredLayer.mesh.material.blending = THREE.AdditiveBlending;
+        blurredLayer.mesh.material.premultipliedAlpha = false;
+        blurredLayer.mesh.material.opacity = blurredLayer.opacity * 0.50;  // Ganzfeld atmospheric wash — volume color presence
         blurredLayer.mesh.material.needsUpdate = true;
     }
 
@@ -1777,6 +1941,23 @@ function updateBodyColors() {
         btn.style.color = btnClr;
         btn.style.borderColor = btnBrd;
     });
+
+    // Skyspace page tinting — page bg MATCHES outer ring for seamless dissolve.
+    // The page IS the continuation of the outer light field. No visible boundary.
+    const pName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
+    const outerRings = PRAYER_RING_PALETTES[pName] || PRAYER_RING_PALETTES.isha;
+    const [pgH, pgS, pgL] = outerRings[4]; // ring 4 = outermost
+    // Page bg: continuation of the Aten Reign outer field.
+    // Must be close enough to ring 4 that the mask dissolve is invisible.
+    // Higher saturation than before — the page is PART OF the light field, not neutral.
+    const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.45)}%, ${Math.round(Math.min(pgL + 16, 88))}%)`;
+    document.documentElement.style.setProperty('--bg', pageTint);
+    // dialHero background: transparent — the Aten Reign shader fills the canvas completely,
+    // and where the CSS mask fades, the page bg shows through directly. No intermediate layer.
+    const heroEl = document.getElementById('dialHero');
+    if (heroEl) {
+        heroEl.style.background = 'transparent';
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1992,6 +2173,9 @@ function update(timestamp) {
     // Rebuild live overlay
     updateLiveElements(vars.prayerProgress, now);
 
+    // Animate Aten Reign breathing
+    atenReignMat.uniforms.uTime.value = timestamp * 0.001;
+
     // Render
     composer.render();
 
@@ -2053,6 +2237,15 @@ function onResize() {
     blurTargetA.setSize(W, H);
     blurTargetB.setSize(W, H);
     bokehMat.uniforms.uResolution.value.set(W, H);
+
+    // Resize Aten Reign background quad to match new frustum
+    {
+        const newAspect = W / H;
+        const aqW = frustum * (newAspect >= 1 ? newAspect : 1) * 2.4;
+        const aqH = frustum * (newAspect >= 1 ? 1 : 1 / newAspect) * 2.4;
+        atenReignQuad.geometry.dispose();
+        atenReignQuad.geometry = new THREE.PlaneGeometry(aqW, aqH);
+    }
 
     // Resize blurred quad to match new frustum
     if (blurredLayer) {
