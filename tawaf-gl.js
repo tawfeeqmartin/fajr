@@ -585,6 +585,7 @@ const TurrellApertureShader = {
         uGlow:       { value: 0.20 },    // stronger center aperture radiance
         uDeepen:     { value: 0.14 },    // deeper edge immersion
         uEdgeColor:  { value: new THREE.Color(0.5, 0.45, 0.55) }, // deeper prayer tint at edges
+        uAspect:     { value: W / H },
     },
     vertexShader: `
         varying vec2 vUv;
@@ -598,10 +599,13 @@ const TurrellApertureShader = {
         uniform float uGlow;
         uniform float uDeepen;
         uniform vec3 uEdgeColor;
+        uniform float uAspect;
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             vec2 uv = (vUv - 0.5) * 2.0;
+            // Correct for non-square viewport — keeps glow/deepening circular
+            uv *= vec2(max(uAspect, 1.0), max(1.0 / uAspect, 1.0));
             float dist = length(uv);
 
             // Center glow — Turrell Ganzfeld: gentle radiance from the center of the field
@@ -871,9 +875,12 @@ const ATEN_REIGN_FRAG = `
     uniform vec3 uRing3;
     uniform vec3 uRing4;
     uniform float uTime;
+    uniform float uAspect;
     varying vec2 vUv;
     void main() {
         vec2 uv = (vUv - 0.5) * 2.0;
+        // Correct for non-square viewport — keeps rings circular
+        uv *= vec2(max(uAspect, 1.0), max(1.0 / uAspect, 1.0));
         float dist = length(uv);
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
@@ -912,6 +919,7 @@ const atenReignMat = new THREE.ShaderMaterial({
         uRing3: { value: new THREE.Color(0.82, 0.80, 0.85) },
         uRing4: { value: new THREE.Color(0.75, 0.72, 0.80) },
         uTime:  { value: 0.0 },
+        uAspect: { value: W / H },
     },
     vertexShader: BLUR_VERT,  // reuse the pass-through vertex shader
     fragmentShader: ATEN_REIGN_FRAG,
@@ -2206,6 +2214,11 @@ function onResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(W, H);
     composer.setSize(W, H);
+
+    // Update aspect ratio for ring and vignette shaders (keeps circles circular)
+    const newAspectRatio = W / H;
+    atenReignMat.uniforms.uAspect.value = newAspectRatio;
+    vignettePass.uniforms.uAspect.value = newAspectRatio;
 
     // Resize blur render targets to match new resolution
     blurTargetA.setSize(W, H);
