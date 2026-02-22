@@ -136,8 +136,8 @@ if(location.hash==='#clock'){document.documentElement.classList.add('clock-direc
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0c0c12;--bg-alt:#111114;--text:#e8e4dc;--text-muted:#8a8a8a;
-  --gold:#c8a44e;--border:rgba(255,255,255,.08);
+  --bg:#f8f7f4;--bg-alt:#f0efe9;--text:#1a1a1a;--text-muted:#6b6b6b;
+  --gold:#c8a44e;--border:#e5e3dd;
   --font:'Inter',system-ui,-apple-system,sans-serif;
   --clock-size:min(480px,85vw);
 }
@@ -804,7 +804,6 @@ function playDialSurah(){
 // NIGHT MODE
 // ══════════════════════════════════════════
 function setNightMode(on){
-  on=true; // forced dark — all prayer periods use dark background
   if(pageNight===on)return;
   pageNight=on;
   const r=document.documentElement;
@@ -821,7 +820,7 @@ function setNightMode(on){
     r.style.setProperty('--text-muted','#6b6b6b');
     r.style.setProperty('--border','#e5e3dd');
   }
-  document.querySelector('.clock-sticky').style.background=on?'#0c0c12':'var(--bg)';
+  document.querySelector('.clock-sticky').style.background='#0c0c12';
   const pc=document.getElementById('prayerCard');
   if(pc){pc.style.background=on?'#141418':'#fff';pc.style.borderColor=on?'rgba(255,255,255,.08)':'var(--border)';}
   if(window._clockSetNight) window._clockSetNight(on);
@@ -1766,7 +1765,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=8';
+_cs.type='module';_cs.src='tawaf-gl.js?v=9';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
