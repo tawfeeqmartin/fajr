@@ -1688,7 +1688,12 @@ function closeClockFullscreen() {
   const canvas = overlay.querySelector('canvas');
   if(!canvas) return;
 
-  // Move canvas back
+  // Move canvas back — clear fullscreen inline styles so #dialHero sizing takes over
+  canvas.style.width = '';
+  canvas.style.height = '';
+  canvas.style.position = '';
+  canvas.style.top = '';
+  canvas.style.left = '';
   document.getElementById('dialHero').appendChild(canvas);
   overlay.classList.remove('active');
   document.body.style.overflow = '';
@@ -1702,6 +1707,12 @@ function closeClockFullscreen() {
   // Pass snap night mode to clock engine so it snaps blend before buildAll
   const wantNight = window._fsLastNight || false;
   if(window._clockSetFullscreen) window._clockSetFullscreen(false, wantNight);
+  // Force re-resize after layout settles (canvas just moved back from fullscreen overlay)
+  requestAnimationFrame(() => {
+    if(window._clockOnResize) window._clockOnResize();
+    // Belt-and-suspenders: some mobile browsers need an extra frame
+    requestAnimationFrame(() => { if(window._clockOnResize) window._clockOnResize(); });
+  });
   fsStopClock();
 
   // Restore landing page theme-color + show content
@@ -1768,7 +1779,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=17';
+_cs.type='module';_cs.src='tawaf-gl.js?v=18';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
