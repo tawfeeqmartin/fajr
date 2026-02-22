@@ -15,6 +15,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 const CONTAINER = window._clockContainer || null;
 const CONTAINED = !!CONTAINER;
+let _isFullscreen = false;
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS & CONFIG
@@ -1958,8 +1959,8 @@ function updateUI(now, vars) {
 // ═══════════════════════════════════════════════════════════════
 
 function onResize() {
-    W = CONTAINED ? CONTAINER.clientWidth : window.innerWidth;
-    H = CONTAINED ? CONTAINER.clientHeight : window.innerHeight;
+    W = _isFullscreen ? window.innerWidth : (CONTAINED ? CONTAINER.clientWidth : window.innerWidth);
+    H = _isFullscreen ? window.innerHeight : (CONTAINED ? CONTAINER.clientHeight : window.innerHeight);
     const aspect = W / H;
     if (aspect >= 1) {
         // Landscape / square — fit vertically, expand horizontally
@@ -2095,6 +2096,7 @@ window._clockSetNight = function(on, snap) {
 };
 
 window._clockSetFullscreen = function(on, snapNight) {
+    _isFullscreen = !!on;
     if (snapNight !== undefined) {
         forceNight = snapNight ? true : false;
         applyDayNight();
