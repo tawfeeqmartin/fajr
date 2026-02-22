@@ -1660,7 +1660,7 @@ function updateClockHands(now, night, blending) {
 // ═══════════════════════════════════════════════════════════════
 
 let forceNight = null; // null = auto, true = force night, false = force day
-function isNightTime() {
+function isNightTime() { return true;
     if (forceNight !== null) return forceNight;
     return currentVars && (currentVars.prayerPeriod === 'maghrib' || currentVars.prayerPeriod === 'isha');
 }
