@@ -102,46 +102,45 @@ const PRAYER_PALETTES = {
 // Each prayer gets a multi-chromatic progression. Center is luminous but TINTED,
 // not white. You should feel bathed in color — "visitors' faces washed in purple."
 const PRAYER_RING_PALETTES = {
-    // Turrell Aten Reign: QUASI-MONOCHROMATIC per prayer.
-    // Each prayer is "a blue piece" or "a violet piece" — max 25° hue range.
-    // Adjacent rings differ by only 5-8° hue. You perceive ONE color family
-    // deepening from luminous center to saturated edge.
-    // Center: L:93, S:15 (near-white aperture). Edge: L:28, S:72 (deep immersion).
-    // Saturation climbs center→edge. Lightness drops center→edge.
+    // Turrell Aten Reign: "peach to tan to pink, lavender to deep purple to electric blue"
+    // Adjacent rings have DIFFERENT hues — 8-12° shifts create simultaneous color contrast.
+    // Saturation climbs steadily: center is TINTED light (S:22), edge is immersive color (S:55).
+    // Lightness descends: center is luminous (L:88), edge is deep (L:42).
+    // The effect: you look FROM tinted light INTO saturated color. Depth through chroma.
     fajr: [
-        [200, 15, 93],   // ring 0: pale luminous blue-white aperture
-        [205, 32, 80],   // ring 1: soft cerulean
-        [212, 52, 65],   // ring 2: medium cerulean — fajr identity
-        [218, 64, 46],   // ring 3: rich cerulean-blue
-        [225, 72, 28],   // ring 4: deep blue — the depth you look into
+        [195, 28, 85],   // ring 0: pale sky — visibly tinted cerulean
+        [205, 35, 75],   // ring 1: cerulean atmosphere
+        [215, 42, 63],   // ring 2: steel blue — fajr identity
+        [225, 50, 50],   // ring 3: deepening blue
+        [238, 55, 40],   // ring 4: indigo depth — you look into this
     ],
     dhuhr: [
-        [45,  18, 93],   // ring 0: luminous warm white aperture
-        [42,  36, 80],   // ring 1: soft gold
-        [38,  54, 65],   // ring 2: warm amber — dhuhr identity
-        [34,  64, 46],   // ring 3: deep amber
-        [28,  70, 28],   // ring 4: rich sienna — the depth
+        [48,  28, 85],   // ring 0: pale gold — visibly tinted
+        [42,  35, 75],   // ring 1: warm gold atmosphere
+        [35,  42, 63],   // ring 2: amber — dhuhr identity
+        [26,  50, 50],   // ring 3: deepening sienna
+        [16,  55, 40],   // ring 4: burnt umber depth
     ],
     asr: [
-        [25,  18, 93],   // ring 0: warm peach-white aperture
-        [22,  36, 80],   // ring 1: soft peach
-        [18,  52, 65],   // ring 2: coral — asr identity
-        [14,  62, 46],   // ring 3: deep coral
-        [8,   68, 28],   // ring 4: rich terracotta — the depth
+        [30,  28, 85],   // ring 0: pale peach — visibly tinted
+        [22,  35, 75],   // ring 1: soft coral atmosphere
+        [14,  42, 63],   // ring 2: terracotta — asr identity
+        [4,   50, 50],   // ring 3: deepening rust
+        [352, 55, 40],   // ring 4: deep crimson depth
     ],
     maghrib: [
-        [340, 15, 93],   // ring 0: pale rose-white aperture
-        [338, 34, 80],   // ring 1: soft rose
-        [335, 50, 65],   // ring 2: medium rose — maghrib identity
-        [330, 62, 46],   // ring 3: rich rose-magenta
-        [322, 68, 28],   // ring 4: deep magenta — the depth
+        [345, 28, 85],   // ring 0: pale rose — visibly tinted
+        [338, 35, 75],   // ring 1: soft rose atmosphere
+        [328, 42, 63],   // ring 2: magenta — maghrib identity
+        [315, 50, 50],   // ring 3: deepening plum
+        [300, 55, 40],   // ring 4: deep purple depth
     ],
     isha: [
-        [270, 15, 93],   // ring 0: pale lavender-white aperture
-        [268, 32, 80],   // ring 1: soft lavender
-        [265, 50, 65],   // ring 2: medium violet — isha identity
-        [260, 62, 46],   // ring 3: rich violet
-        [252, 70, 28],   // ring 4: deep indigo — the depth
+        [275, 28, 85],   // ring 0: pale lavender — visibly tinted
+        [268, 35, 75],   // ring 1: soft lavender atmosphere
+        [260, 42, 63],   // ring 2: violet — isha identity
+        [250, 50, 50],   // ring 3: deepening purple
+        [240, 55, 40],   // ring 4: deep indigo depth
     ],
 };
 
@@ -899,17 +898,22 @@ const ATEN_REIGN_FRAG = `
         vec3 r4 = uRing4 + b4;
 
         // 5 concentric color bands — Turrell Aten Reign structure.
-        // Ring radii tuned so ring 4 is fully visible within CSS mask solid zone (82%).
+        // Each band has a solid core with soft feathered edges (~8% UV transition).
+        // You perceive DISTINCT color steps that bleed gently into each other.
         vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.08, 0.20, dist));
-        color = mix(color, r2, smoothstep(0.24, 0.36, dist));
-        color = mix(color, r3, smoothstep(0.40, 0.52, dist));
-        color = mix(color, r4, smoothstep(0.56, 0.70, dist));
+        color = mix(color, r1, smoothstep(0.08, 0.18, dist));
+        color = mix(color, r2, smoothstep(0.20, 0.32, dist));
+        color = mix(color, r3, smoothstep(0.34, 0.48, dist));
+        color = mix(color, r4, smoothstep(0.50, 0.65, dist));
 
-        // Kaaba hotspot — concentrated luminous core at the very center.
-        // The sacred source from which all light emanates.
-        float hotspot = 1.0 - smoothstep(0.0, 0.08, dist);
-        color += hotspot * 0.15; // bright white bloom at center
+        // Turrell: NO visible light source. The center is simply the lightest
+        // tint of the prayer color. The Kaaba IS the center — but the light has no source.
+
+        // Edge: beyond ring 4, gently lighten toward the page background.
+        // CSS mask dissolves from 60-82% radius, so we lighten the color zone before the mask.
+        float edgeFade = smoothstep(0.45, 0.72, dist);
+        vec3 edgeTint = mix(r4, r0, 0.55); // lighten substantially toward center color
+        color = mix(color, edgeTint, edgeFade * 0.65);
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -1504,53 +1508,50 @@ function updateLiveElements(progress, now) {
     const pairCount = artwork.pairs.length;
 
     // --- Update orbiter dots ---
-    for (let pi = 0; pi < pairCount; pi++) {
-        const pair = artwork.pairs[pi];
-        const { x1, y1, x2, y2 } = orbiterXY(pair, t, radius);
-        let mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-        if (pair.r3 > 0) {
-            const a3 = -pair.speed3 * t + pair.offset;
-            mx += Math.cos(a3) * pair.r3 * radius;
-            my += Math.sin(a3) * pair.r3 * radius;
+    // TURRELL MODE: hide ALL orbiter dots and connection lines.
+    // The color field IS the art — no visual noise.
+    if (THEME_MODE === 'turrell') {
+        liveDotGeo.setDrawRange(0, 0);
+        for (let i = 0; i < MAX_PAIRS; i++) liveConnLines[i].line.visible = false;
+    } else {
+        for (let pi = 0; pi < pairCount; pi++) {
+            const pair = artwork.pairs[pi];
+            const { x1, y1, x2, y2 } = orbiterXY(pair, t, radius);
+            let mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+            if (pair.r3 > 0) {
+                const a3 = -pair.speed3 * t + pair.offset;
+                mx += Math.cos(a3) * pair.r3 * radius;
+                my += Math.sin(a3) * pair.r3 * radius;
+            }
+            const dotL = Math.min(97, pair.l + 25);
+            const dotS = Math.max(5, pair.s - 15);
+            _tmpColor.setHSL(pair.h / 360, dotS / 100, dotL / 100);
+            const base = pi * 9;
+            liveDotPosArray[base]     = x1; liveDotPosArray[base + 1] = y1; liveDotPosArray[base + 2] = 0;
+            liveDotColorArray[base]   = _tmpColor.r * 0.5; liveDotColorArray[base + 1] = _tmpColor.g * 0.5; liveDotColorArray[base + 2] = _tmpColor.b * 0.5;
+            liveDotPosArray[base + 3] = x2; liveDotPosArray[base + 4] = y2; liveDotPosArray[base + 5] = 0;
+            liveDotColorArray[base + 3] = _tmpColor.r * 0.5; liveDotColorArray[base + 4] = _tmpColor.g * 0.5; liveDotColorArray[base + 5] = _tmpColor.b * 0.5;
+            liveDotPosArray[base + 6] = mx; liveDotPosArray[base + 7] = my; liveDotPosArray[base + 8] = 0;
+            liveDotColorArray[base + 6] = _tmpColor.r * 0.6; liveDotColorArray[base + 7] = _tmpColor.g * 0.6; liveDotColorArray[base + 8] = _tmpColor.b * 0.6;
+            const conn = liveConnLines[pi];
+            conn.posArr[0] = mx; conn.posArr[1] = my; conn.posArr[2] = 0;
+            conn.posArr[3] = 0;  conn.posArr[4] = 0;  conn.posArr[5] = 0;
+            conn.geo.attributes.position.needsUpdate = true;
+            conn.mat.color.copy(_tmpColor);
+            conn.mat.opacity = 0.10;
+            conn.mat.blending = blending;
+            conn.mat.needsUpdate = true;
+            conn.line.visible = true;
         }
-
-        // Dot colors: luminous — bright points of light within the color field
-        const dotL = Math.min(97, pair.l + 25);
-        const dotS = Math.max(5, pair.s - 15);
-        _tmpColor.setHSL(pair.h / 360, dotS / 100, dotL / 100);
-
-        const base = pi * 9; // 3 dots × 3 components
-        // Inner orbiter
-        liveDotPosArray[base]     = x1; liveDotPosArray[base + 1] = y1; liveDotPosArray[base + 2] = 0;
-        liveDotColorArray[base]   = _tmpColor.r * 0.5; liveDotColorArray[base + 1] = _tmpColor.g * 0.5; liveDotColorArray[base + 2] = _tmpColor.b * 0.5;
-        // Outer orbiter
-        liveDotPosArray[base + 3] = x2; liveDotPosArray[base + 4] = y2; liveDotPosArray[base + 5] = 0;
-        liveDotColorArray[base + 3] = _tmpColor.r * 0.5; liveDotColorArray[base + 4] = _tmpColor.g * 0.5; liveDotColorArray[base + 5] = _tmpColor.b * 0.5;
-        // Midpoint
-        liveDotPosArray[base + 6] = mx; liveDotPosArray[base + 7] = my; liveDotPosArray[base + 8] = 0;
-        liveDotColorArray[base + 6] = _tmpColor.r * 0.6; liveDotColorArray[base + 7] = _tmpColor.g * 0.6; liveDotColorArray[base + 8] = _tmpColor.b * 0.6;
-
-        // --- Update connecting line (orbiter midpoint → center Kaaba) ---
-        const conn = liveConnLines[pi];
-        conn.posArr[0] = mx; conn.posArr[1] = my; conn.posArr[2] = 0;
-        conn.posArr[3] = 0;  conn.posArr[4] = 0;  conn.posArr[5] = 0;
-        conn.geo.attributes.position.needsUpdate = true;
-        conn.mat.color.copy(_tmpColor);
-        conn.mat.opacity = 0.10;
-        conn.mat.blending = blending;
-        conn.mat.needsUpdate = true;
-        conn.line.visible = true;
+        for (let i = pairCount; i < MAX_PAIRS; i++) liveConnLines[i].line.visible = false;
+        liveDotGeo.setDrawRange(0, pairCount * 3);
+        liveDotGeo.attributes.position.needsUpdate = true;
+        liveDotGeo.attributes.color.needsUpdate = true;
+        liveDotMat.size = 5;
+        liveDotMat.opacity = 0.5;
+        liveDotMat.blending = blending;
+        liveDotMat.needsUpdate = true;
     }
-    // Hide unused connecting lines
-    for (let i = pairCount; i < MAX_PAIRS; i++) liveConnLines[i].line.visible = false;
-
-    liveDotGeo.setDrawRange(0, pairCount * 3);
-    liveDotGeo.attributes.position.needsUpdate = true;
-    liveDotGeo.attributes.color.needsUpdate = true;
-    liveDotMat.size = 5;
-    liveDotMat.opacity = 0.5;
-    liveDotMat.blending = blending;
-    liveDotMat.needsUpdate = true;
 
     // --- Update clock hands ---
     updateClockHands(now, night, blending);
@@ -1662,10 +1663,13 @@ function updateClockHands(now, night, blending) {
     tipGlowGeo.attributes.position.needsUpdate = true;
     // Pulse synced with Kaaba glow — flares with the cube
     const glowPulse = 0.75 + 0.25 * Math.sin(performance.now() * 0.003);
-    // Pen tip glow — hot point of radiance at the drawing nib
-    tipGlowMat.opacity = glowPulse * 0.35;
-    tipGlowMat.size = 35;
-    tipGlowMat.needsUpdate = true;
+    // Pen tip glow — TURRELL MODE: hidden. Additive point breaks homogeneous field.
+    tipGlowPoint.visible = (THEME_MODE === 'orbiter');
+    if (tipGlowPoint.visible) {
+        tipGlowMat.opacity = glowPulse * 0.35;
+        tipGlowMat.size = 35;
+        tipGlowMat.needsUpdate = true;
+    }
 
     // (tip glow trail removed)
 
@@ -1692,20 +1696,23 @@ function updateClockHands(now, night, blending) {
     epicycleTrailMat.blending = THREE.NormalBlending;
     epicycleTrailMat.needsUpdate = true;
 
-    // --- Kaaba glow halo layer update ---
-    // Copy XY positions from main trail using bulk typed-array copy, then fix z
-    kaabaGlowPositions.set(epicycleTrailPositions.subarray(0, epiDrawCount * 3), 0);
-    for (let i = 0; i < epiDrawCount; i++) {
-        kaabaGlowPositions[i * 3 + 2] = -0.005;
+    // --- Kaaba glow halo layer ---
+    // TURRELL MODE: disabled. Additive glow particles create visible texture
+    // that breaks the homogeneous color field. The Kaaba trail line itself
+    // is sufficient — the shader's smooth ring 0 provides center radiance.
+    kaabaGlowPoints.visible = (THEME_MODE === 'orbiter');
+    if (kaabaGlowPoints.visible) {
+        kaabaGlowPositions.set(epicycleTrailPositions.subarray(0, epiDrawCount * 3), 0);
+        for (let i = 0; i < epiDrawCount; i++) {
+            kaabaGlowPositions[i * 3 + 2] = -0.005;
+        }
+        kaabaGlowGeo.setDrawRange(0, epiDrawCount);
+        kaabaGlowGeo.attributes.position.needsUpdate = true;
+        kaabaGlowMat.size = 5;
+        kaabaGlowMat.opacity = kaabaPulse * 0.2;
+        kaabaGlowMat.color.setHSL(baseH / 360, 0.08, 0.95);
+        kaabaGlowMat.needsUpdate = true;
     }
-    kaabaGlowGeo.setDrawRange(0, epiDrawCount);
-    kaabaGlowGeo.attributes.position.needsUpdate = true;
-    // Pulse the glow — brighter than the main trail, synced breathing
-    // Kaaba glow halo — soft radiance emanating from the sacred center
-    kaabaGlowMat.size = 5;  // moderate glow — Kaaba diamond shape stays visible within
-    kaabaGlowMat.opacity = kaabaPulse * 0.2;  // gentle, not overwhelming
-    kaabaGlowMat.color.setHSL(baseH / 360, 0.08, 0.95);  // near-white warm glow
-    kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
     const visibleCircles = Math.min(numEpiCoeffs, EPICYCLE_CIRCLE_POOL, pen.circleCount);
@@ -1871,11 +1878,11 @@ function applyDayNight() {
     // ── VIGNETTE — amplifies the Aten Reign depth ──
     // Center glow: strong aperture radiance, the "inner light" of Quaker practice.
     // Edge: reinforces ring 4's rich prayer color — like Turrell's Skyspace surround.
-    vignettePass.uniforms.uGlow.value = 0.25;       // strong center aperture radiance
-    vignettePass.uniforms.uDeepen.value = 0.18;     // deeper edge immersion into color
+    vignettePass.uniforms.uGlow.value = 0.06;        // subtle aperture warmth at center
+    vignettePass.uniforms.uDeepen.value = 0.15;     // edge immersion — reinforces ring 4 depth
     // Edge color from ring 4 — deepest ring, pushed even richer
     const [r4h, r4s, r4l] = rings[4];
-    const edgeColor = new THREE.Color().setHSL(r4h / 360, Math.min(r4s * 1.2, 100) / 100, r4l * 0.8 / 100);
+    const edgeColor = new THREE.Color().setHSL(r4h / 360, Math.min(r4s * 1.3, 100) / 100, r4l * 0.7 / 100);
     vignettePass.uniforms.uEdgeColor.value.copy(edgeColor);
 
     // ── Trace materials (orbiter mode only) ──
@@ -1966,10 +1973,10 @@ function updateBodyColors() {
     const pName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
     const outerRings = PRAYER_RING_PALETTES[pName] || PRAYER_RING_PALETTES.isha;
     const [pgH, pgS, pgL] = outerRings[4]; // ring 4 = outermost
-    // Page bg: luminous continuation of the outer light field.
-    // Like the softly lit museum architecture beyond Turrell's rings.
-    // Same hue as ring 4 but MUCH lighter — page should feel heavenly, not heavy.
-    const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.18)}%, ${Math.round(Math.min(pgL + 40, 91))}%)`;
+    // Page bg: the museum wall beyond the rings — same hue family as ring 4
+    // but much lighter. Slightly more saturated than before for smoother dissolve
+    // through the wider CSS mask gradient.
+    const pageTint = `hsl(${pgH}, ${Math.round(pgS * 0.28)}%, ${Math.round(Math.min(pgL + 38, 87))}%)`;
     document.documentElement.style.setProperty('--bg', pageTint);
     // dialHero background: transparent — Aten Reign shader fills the canvas,
     // CSS mask fades reveal the page bg directly.
