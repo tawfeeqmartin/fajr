@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v56: Seven Heavens — 7 concentric bands (سبع سماوات), wider rings, glow at hand tips
+// v57: Turrell luminance lift at ring borders + tawaf lens flare (every 7th circuit)
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -588,6 +588,9 @@ const TurrellApertureShader = {
         uDeepen:     { value: 0.14 },    // deeper edge immersion
         uEdgeColor:  { value: new THREE.Color(0.5, 0.45, 0.55) }, // deeper prayer tint at edges
         uAspect:     { value: W / H },
+        uFlare:      { value: 0.0 },     // tawaf lens flare intensity (0 = off, 1 = peak)
+        uFlarePos:   { value: new THREE.Vector2(0.5, 0.2) }, // flare source in UV space
+        uFlareColor: { value: new THREE.Color(1.0, 0.97, 0.92) }, // warm prayer-tinted white
     },
     vertexShader: `
         varying vec2 vUv;
@@ -602,6 +605,9 @@ const TurrellApertureShader = {
         uniform float uDeepen;
         uniform vec3 uEdgeColor;
         uniform float uAspect;
+        uniform float uFlare;
+        uniform vec2 uFlarePos;
+        uniform vec3 uFlareColor;
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
@@ -618,6 +624,56 @@ const TurrellApertureShader = {
             // Subtle shift toward a richer version of the prayer color
             float edge = smoothstep(0.5, 1.5, dist);
             texel.rgb = mix(texel.rgb, uEdgeColor, edge * uDeepen);
+
+            // ── TAWAF LENS FLARE (post-processing, screen-space) ──
+            // Fires every 7 circuits. Cinematic camera-lens light event.
+            if (uFlare > 0.001) {
+                vec2 flareUV = vUv - uFlarePos;
+                float fAspect = max(uAspect, 1.0) / max(1.0 / uAspect, 1.0);
+                flareUV.x *= fAspect;
+
+                // 1. Screen wash — the whole image floods with light (camera iris overload)
+                float wash = uFlare * 0.25;
+                texel.rgb = mix(texel.rgb, uFlareColor, wash);
+
+                // 2. Radial burst from source — concentrated bright disc
+                float flareDist = length(flareUV);
+                float burst = exp(-flareDist * flareDist * 18.0) * uFlare;
+                texel.rgb += uFlareColor * burst * 0.55;
+
+                // 3. Anamorphic streak — wide horizontal line through source
+                float streakY = exp(-flareUV.y * flareUV.y * 800.0); // narrow vertical
+                float streakX = exp(-flareUV.x * flareUV.x * 1.5);   // wide horizontal
+                float streak = streakX * streakY * uFlare * 0.35;
+                texel.rgb += uFlareColor * streak;
+
+                // 4. Ghost reflections — 3 discs along source→center axis
+                vec2 ghostAxis = normalize(vec2(0.5, 0.5) - uFlarePos);
+                for (int i = 0; i < 3; i++) {
+                    float gOff = 0.15 + float(i) * 0.12;
+                    vec2 gPos = uFlarePos + ghostAxis * gOff;
+                    vec2 gUV = vUv - gPos;
+                    gUV.x *= fAspect;
+                    float gDist = length(gUV);
+                    float gSize = 0.04 + float(i) * 0.025;
+                    // Ring ghost — bright ring, dim center (classic lens ghost)
+                    float ring = smoothstep(gSize - 0.015, gSize, gDist) *
+                                 (1.0 - smoothstep(gSize, gSize + 0.015, gDist));
+                    float ghostIntensity = ring * uFlare * 0.18;
+                    // Subtle chromatic shift per ghost
+                    vec3 gColor = uFlareColor;
+                    if (i == 0) gColor *= vec3(1.0, 0.95, 0.88);      // warm
+                    else if (i == 1) gColor *= vec3(0.92, 0.96, 1.0);  // cool
+                    else gColor *= vec3(1.0, 0.92, 0.98);              // rose
+                    texel.rgb += gColor * ghostIntensity;
+                }
+
+                // 5. Subtle starburst — 6-point radial rays from source
+                float angle = atan(flareUV.y, flareUV.x);
+                float rays = pow(abs(cos(angle * 3.0)), 40.0); // 6 rays
+                float rayFalloff = exp(-flareDist * 6.0);
+                texel.rgb += uFlareColor * rays * rayFalloff * uFlare * 0.2;
+            }
 
             gl_FragColor = texel;
         }
@@ -914,6 +970,23 @@ const ATEN_REIGN_FRAG = `
         color = mix(color, r4, smoothstep(0.46, 0.64, dist));
         color = mix(color, r5, smoothstep(0.64, 0.84, dist));
         color = mix(color, r6, smoothstep(0.84, 1.10, dist));
+
+        // Turrell luminance lift at ring boundaries — visible bright seams
+        // between color bands, like light bleeding between adjacent Skyspace panels.
+        // Wide Gaussian peaks at each transition midpoint; intensity scales with
+        // the local lightness so inner (brighter) seams glow more.
+        float w = 12.0; // peak width (lower = wider, softer seam)
+        float edge01 = exp(-pow((dist - 0.10) * w, 2.0));
+        float edge12 = exp(-pow((dist - 0.23) * w, 2.0));
+        float edge23 = exp(-pow((dist - 0.38) * w, 2.0));
+        float edge34 = exp(-pow((dist - 0.55) * w, 2.0));
+        float edge45 = exp(-pow((dist - 0.74) * w, 2.0));
+        float edge56 = exp(-pow((dist - 0.97) * w, 2.0));
+        float liftMask = (edge01 + edge12 + edge23 + edge34 + edge45 + edge56);
+        // Lift relative to local luminance — brighter zones get brighter seams
+        float localLum = dot(color, vec3(0.299, 0.587, 0.114));
+        float lift = liftMask * (0.06 + localLum * 0.10);
+        color += lift;
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -1518,6 +1591,226 @@ let epicyclePauseTimer = 0;
 let epicycleTrailCount = 0;
 let epicycleLastRealTime = 0;
 
+// ═══════════════════════════════════════════════════════════════
+// TAWAF LENS FLARE — cinematic light event on every 7th circuit
+// ═══════════════════════════════════════════════════════════════
+// Tawaf = 7 circuits around the Kaaba. On the 7th circuit's completion,
+// when the pen tip reaches the topmost (noon-facing) vertex of the diamond,
+// a cinematic lens flare fires from that point.
+
+let tawafCircuitCount = 0;   // 0–6, resets after firing
+let tawafLastWrap = false;    // edge-detect the epicycleTime wrap
+
+// Flare textures — procedural generation
+function createFlareDiscTexture(size = 256) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    const cx = size / 2;
+    // Bright core with wide soft falloff — classic anamorphic disc
+    const grad = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
+    grad.addColorStop(0,    'rgba(255,255,250,1)');
+    grad.addColorStop(0.03, 'rgba(255,252,240,0.98)');
+    grad.addColorStop(0.08, 'rgba(255,240,210,0.7)');
+    grad.addColorStop(0.2,  'rgba(255,210,150,0.35)');
+    grad.addColorStop(0.4,  'rgba(255,180,100,0.12)');
+    grad.addColorStop(0.7,  'rgba(255,140,60,0.03)');
+    grad.addColorStop(1,    'rgba(255,100,30,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    return new THREE.CanvasTexture(c);
+}
+
+function createFlareStreakTexture(size = 256) {
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    const cx = size / 2, cy = size / 2;
+    // Horizontal anamorphic streak
+    const grad = ctx.createLinearGradient(0, cy, size, cy);
+    grad.addColorStop(0, 'rgba(255,220,180,0)');
+    grad.addColorStop(0.3, 'rgba(255,240,210,0.15)');
+    grad.addColorStop(0.45, 'rgba(255,250,240,0.6)');
+    grad.addColorStop(0.5, 'rgba(255,255,250,0.85)');
+    grad.addColorStop(0.55, 'rgba(255,250,240,0.6)');
+    grad.addColorStop(0.7, 'rgba(255,240,210,0.15)');
+    grad.addColorStop(1, 'rgba(255,220,180,0)');
+    // Narrow vertical falloff
+    ctx.fillStyle = grad;
+    for (let y = 0; y < size; y++) {
+        const dy = Math.abs(y - cy) / cy;
+        const falloff = Math.exp(-dy * dy * 12);
+        ctx.globalAlpha = falloff;
+        ctx.fillRect(0, y, size, 1);
+    }
+    return new THREE.CanvasTexture(c);
+}
+
+function createFlareGhostTexture(size = 128) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    const cx = size / 2;
+    // Soft ring — ghost element (bright ring, hollow center)
+    const grad = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
+    grad.addColorStop(0,   'rgba(255,240,220,0)');
+    grad.addColorStop(0.5, 'rgba(255,240,220,0.02)');
+    grad.addColorStop(0.7, 'rgba(255,230,200,0.25)');
+    grad.addColorStop(0.85,'rgba(255,220,180,0.15)');
+    grad.addColorStop(1,   'rgba(255,200,150,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    return new THREE.CanvasTexture(c);
+}
+
+const flareDiscTex = createFlareDiscTexture(256);
+const flareStreakTex = createFlareStreakTexture(256);
+const flareGhostTex = createFlareGhostTexture(128);
+
+// Flare element pool — a group of sprites
+const flareGroup = new THREE.Group();
+flareGroup.visible = false;
+flareGroup.renderOrder = 100; // always on top
+scene.add(flareGroup);
+
+// Main disc — bright central flash
+const flareDiscMat = new THREE.SpriteMaterial({
+    map: flareDiscTex, transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false,
+    color: 0xfffff0,
+});
+const flareDisc = new THREE.Sprite(flareDiscMat);
+flareDisc.scale.set(1.2, 1.2, 1);
+flareGroup.add(flareDisc);
+
+// Anamorphic streak — wide horizontal line through the source
+const flareStreakMat = new THREE.SpriteMaterial({
+    map: flareStreakTex, transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false,
+    color: 0xfff8e0,
+});
+const flareStreak = new THREE.Sprite(flareStreakMat);
+flareStreak.scale.set(4.0, 0.15, 1); // wide and narrow
+flareGroup.add(flareStreak);
+
+// Ghost elements — 4 smaller discs spread along axis from source through center
+const flareGhosts = [];
+const GHOST_POSITIONS = [-0.3, 0.5, 0.8, 1.3]; // offset along source→center axis (1.0 = center)
+const GHOST_SCALES = [0.15, 0.25, 0.12, 0.35];
+const GHOST_COLORS = [0xffeedd, 0xeeddff, 0xddeeff, 0xffddee]; // subtle color fringing
+for (let i = 0; i < 4; i++) {
+    const gMat = new THREE.SpriteMaterial({
+        map: flareGhostTex, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false,
+        color: GHOST_COLORS[i],
+    });
+    const ghost = new THREE.Sprite(gMat);
+    const s = GHOST_SCALES[i];
+    ghost.scale.set(s, s, 1);
+    flareGroup.add(ghost);
+    flareGhosts.push({ sprite: ghost, mat: gMat, axisPos: GHOST_POSITIONS[i] });
+}
+
+// Flare animation state
+let flareActive = false;
+let flareStartTime = 0;
+const FLARE_DURATION = 2.8; // seconds — sharp attack, slow ethereal fade
+const FLARE_ATTACK = 0.15;  // seconds to peak
+
+function triggerTawafFlare(sourceX, sourceY) {
+    flareActive = true;
+    flareStartTime = performance.now() / 1000;
+    flareGroup.visible = true;
+
+    // Position main elements at the source (noon tip of Kaaba)
+    flareDisc.position.set(sourceX, sourceY, 0.04);
+    flareStreak.position.set(sourceX, sourceY, 0.04);
+
+    // Position ghosts along the axis from source through scene center (0,0)
+    const dx = -sourceX, dy = -sourceY; // direction toward center
+    for (const g of flareGhosts) {
+        g.sprite.position.set(
+            sourceX + dx * g.axisPos,
+            sourceY + dy * g.axisPos,
+            0.04
+        );
+    }
+
+    // ── Compute screen-space UV for the post-processing shader flare ──
+    // Project world position → NDC → UV (0,0 = bottom-left, 1,1 = top-right)
+    const uvX = (sourceX - camera.left) / (camera.right - camera.left);
+    const uvY = (sourceY - camera.bottom) / (camera.top - camera.bottom);
+    vignettePass.uniforms.uFlarePos.value.set(uvX, uvY);
+
+    // Tint flare to current prayer palette
+    const palette = artwork ? artwork.palette : PRAYER_PALETTES.isha;
+    vignettePass.uniforms.uFlareColor.value.setHSL(
+        palette.h / 360, Math.min((palette.s + 10) / 100, 0.8), 0.95
+    );
+}
+
+function updateTawafFlare() {
+    if (!flareActive) {
+        // Ensure shader flare is off when not active
+        vignettePass.uniforms.uFlare.value = 0.0;
+        return;
+    }
+    const elapsed = (performance.now() / 1000) - flareStartTime;
+    if (elapsed > FLARE_DURATION) {
+        flareActive = false;
+        flareGroup.visible = false;
+        flareDiscMat.opacity = 0;
+        flareStreakMat.opacity = 0;
+        for (const g of flareGhosts) g.mat.opacity = 0;
+        vignettePass.uniforms.uFlare.value = 0.0;
+        return;
+    }
+
+    // Envelope: sharp attack → slow exponential decay
+    let envelope;
+    if (elapsed < FLARE_ATTACK) {
+        // Attack: cubic ease-in for a sharp flash
+        const t = elapsed / FLARE_ATTACK;
+        envelope = t * t * (3 - 2 * t); // smoothstep
+    } else {
+        // Decay: exponential falloff — ethereal fade
+        const decayT = (elapsed - FLARE_ATTACK) / (FLARE_DURATION - FLARE_ATTACK);
+        envelope = Math.exp(-decayT * 3.5) * (1 - decayT * 0.3);
+    }
+
+    // ── Drive the post-processing shader flare ──
+    // This creates the cinematic screen-space wash, streaks, ghosts, and starburst
+    vignettePass.uniforms.uFlare.value = envelope;
+
+    // Main disc: scales up slightly during flash, then shrinks
+    const discScale = 1.0 + envelope * 0.6;
+    flareDisc.scale.set(discScale, discScale, 1);
+    flareDiscMat.opacity = envelope * 0.75;
+    flareDiscMat.needsUpdate = true;
+
+    // Streak: widens during flash
+    const streakW = 3.5 + envelope * 2.5;
+    flareStreak.scale.set(streakW, 0.12 + envelope * 0.08, 1);
+    flareStreakMat.opacity = envelope * 0.45;
+    flareStreakMat.needsUpdate = true;
+
+    // Ghosts: staggered timing, lower intensity
+    for (let i = 0; i < flareGhosts.length; i++) {
+        const delay = i * 0.06; // slight stagger
+        const ghostT = Math.max(0, elapsed - delay);
+        let gEnv;
+        if (ghostT < FLARE_ATTACK) {
+            const t = ghostT / FLARE_ATTACK;
+            gEnv = t * t;
+        } else {
+            const dt = (ghostT - FLARE_ATTACK) / (FLARE_DURATION - FLARE_ATTACK);
+            gEnv = Math.exp(-dt * 4.0);
+        }
+        flareGhosts[i].mat.opacity = gEnv * 0.25;
+        flareGhosts[i].mat.needsUpdate = true;
+    }
+}
+
 // Temp color for reuse (avoids allocations)
 const _tmpColor = new THREE.Color();
 
@@ -1652,6 +1945,13 @@ function updateClockHands(now, night, blending) {
     epicycleTime += (epicycleDt / EPICYCLE_CYCLE) * TWO_PI;
     if (epicycleTime >= TWO_PI) {
         epicycleTime -= TWO_PI; // seamless loop, trail persists
+        // Tawaf circuit tracking — 7 circuits = 1 complete tawaf
+        tawafCircuitCount++;
+        if (tawafCircuitCount >= 7) {
+            tawafCircuitCount = 0;
+            // Fire lens flare at the noon-facing (topmost) tip of the Kaaba diamond
+            triggerTawafFlare(0, kaabaHalfDiag);
+        }
     }
 
     // Evaluate epicycles — Kaaba outline
@@ -1813,34 +2113,10 @@ function updateClockHands(now, night, blending) {
             hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
         } else {
-            // --- Hour / Minute: circle + orbiting dot + glow ---
-            const r = HAND_EPI_RADII[h];
-            for (let j = 0; j <= epicycleCircleSegments; j++) {
-                circle.posArr[j * 3]     = tip.x + epicycleUnitCircle[j * 3] * r;
-                circle.posArr[j * 3 + 1] = tip.y + epicycleUnitCircle[j * 3 + 1] * r;
-                circle.posArr[j * 3 + 2] = 0.01;
-            }
-            circle.geo.attributes.position.needsUpdate = true;
-            circle.mat.opacity = 0.25;
-            circle.mat.color.setHSL(baseH / 360, epiS * 0.7, epiL * 0.8);
-            circle.mat.needsUpdate = true;
-            circle.line.visible = true;
-            const a = dotAngles[h] + Math.PI / 2;
-            dot.posArr[0] = tip.x + Math.cos(a) * r;
-            dot.posArr[1] = tip.y + Math.sin(a) * r;
-            dot.posArr[2] = 0.02;
-            dot.geo.attributes.position.needsUpdate = true;
-            dot.mat.opacity = 1.0;
-            dot.mat.color.setHSL(baseH / 360, epiS, epiL);
-            dot.mat.needsUpdate = true;
-            hg.posArr[0] = tip.x;
-            hg.posArr[1] = tip.y;
-            hg.posArr[2] = 0.025;
-            hg.geo.attributes.position.needsUpdate = true;
-            hg.mat.opacity = 0.25;
-            hg.mat.size = [50, 40][h];
-            hg.mat.color.setHSL(baseH / 360, 0.12, 0.93);
-            hg.mat.blending = THREE.AdditiveBlending;
+            // --- Hour / Minute: hide circle, dot, and glow sprite ---
+            circle.line.visible = false;
+            dot.points.visible = false;
+            hg.mat.opacity = 0;
             hg.mat.needsUpdate = true;
         }
     }
@@ -1904,6 +2180,12 @@ function applyDayNight() {
     const [r6h, r6s, r6l] = rings[6];
     const edgeColor = new THREE.Color().setHSL(r6h / 360, Math.min(r6s * 1.3, 100) / 100, r6l * 0.7 / 100);
     vignettePass.uniforms.uEdgeColor.value.copy(edgeColor);
+
+    // ── Tint lens flare to prayer palette ──
+    // The flare should feel native to the current Turrell color field
+    const flareBaseColor = new THREE.Color().setHSL(pH / 360, Math.min(pS + 10, 80) / 100, 0.95);
+    flareDiscMat.color.copy(flareBaseColor);
+    flareStreakMat.color.setHSL(pH / 360, Math.min(pS + 5, 70) / 100, 0.97);
 
     // ── Trace materials (orbiter mode only) ──
     if (THEME_MODE !== 'orbiter') { /* skip trace updates in turrell mode */ }
@@ -2190,6 +2472,9 @@ function update(timestamp) {
 
     // Animate Aten Reign breathing
     atenReignMat.uniforms.uTime.value = timestamp * 0.001;
+
+    // Update tawaf lens flare animation
+    updateTawafFlare();
 
     // Render
     composer.render();
