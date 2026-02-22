@@ -29,10 +29,10 @@ const TWO_PI = Math.PI * 2;
 const STARTUP_PRESET = Object.freeze({
     night: Object.freeze({
         alphaMul: 2.0,
-        bloomStrength: 0.25,
-        bloomThreshold: 0.30,
-        bloomRadius: 0.50,
-        bg: '#030108',
+        bloomStrength: 0.15,   // gentler bloom — heavenly, not nuclear
+        bloomThreshold: 0.40,
+        bloomRadius: 0.40,
+        bg: '#1a1520',         // soft dark — not void-black
     }),
     day: Object.freeze({
         alphaMul: 4.0,
@@ -53,12 +53,12 @@ const STARTUP_PRESET = Object.freeze({
         pathGradient: 16,
     }),
     turrell: Object.freeze({
-        glowIntensity: 0.25,   // 0 = no luminance boost, 1 = nuclear
+        glowIntensity: 0.12,   // subtle luminance — Turrell light glows softly, not harshly
         blurPasses: 5,         // 1–12: more passes = more dissolved
         blurScale: 0.6,        // multiplier on pass radii (0.3 = subtle, 2.0 = mega)
-        tintStrength: 0.4,     // multiplier on prayer color tint (0 = neutral, 2.0 = saturated)
-        fadeTarget: 0.35,      // final opacity of blurred layer (0–1)
-        fadeRate: 0.0005,      // lerp speed toward fadeTarget
+        tintStrength: 0.3,     // gentler tint — let the natural palette speak
+        fadeTarget: 0.85,      // HOLD the atmospheric layer through entire prayer period
+        fadeRate: 0.003,       // faster fade-in so atmosphere is present quickly
     }),
 });
 
@@ -77,11 +77,11 @@ const RATIO_BANK = [
 ];
 
 const PRAYER_PALETTES = {
-    fajr:    { h: 230, s: 65, l: 45, name: 'Fajr',    ar: 'فجر'    },  // deep cerulean blue — predawn Turrell sky
-    dhuhr:   { h: 45,  s: 70, l: 55, name: 'Dhuhr',   ar: 'ظهر'    },  // warm amber — noon light flooding a space
-    asr:     { h: 20,  s: 65, l: 50, name: 'Asr',     ar: 'عصر'    },  // burnt orange — late afternoon Turrell warmth
-    maghrib: { h: 330, s: 60, l: 45, name: 'Maghrib', ar: 'مغرب'   },  // deep magenta-rose — Turrell sunset aperture
-    isha:    { h: 270, s: 55, l: 35, name: 'Isha',    ar: 'عشاء'    },  // deep violet — Turrell's night Skyspace
+    fajr:    { h: 210, s: 35, l: 72, name: 'Fajr',    ar: 'فجر'    },  // pale cerulean — predawn Skyspace, Aten Reign top ring
+    dhuhr:   { h: 45,  s: 30, l: 78, name: 'Dhuhr',   ar: 'ظهر'    },  // warm cream — noon light flooding through aperture
+    asr:     { h: 25,  s: 35, l: 70, name: 'Asr',     ar: 'عصر'    },  // soft peach — late afternoon Turrell warmth
+    maghrib: { h: 330, s: 30, l: 65, name: 'Maghrib', ar: 'مغرب'   },  // soft rose — sunset Skyspace
+    isha:    { h: 250, s: 25, l: 55, name: 'Isha',    ar: 'عشاء'    },  // soft lavender — night Skyspace, still luminous
 };
 
 // prettier-ignore
@@ -481,7 +481,7 @@ const radius = frustum * 1.6; // orbital radius in world units — scaled up for
 
 const scene = new THREE.Scene();
 // Initial bg — will be overridden by prayer palette tint in applyDayNight()
-scene.background = new THREE.Color('#020204');
+scene.background = new THREE.Color('#1a1520');
 
 const camera = new THREE.OrthographicCamera(
     aspect >= 1 ? -frustum * aspect : -frustum,
@@ -701,11 +701,11 @@ function renderGroupBlurred(captureGroup) {
     if (blurredLayer) blurredLayer.mesh.visible = false;
 
     // Render captureGroup to blurTargetA
-    // Day: transparent bg (no dark card). Night: opaque dark bg (Turrell glow needs substance)
+    // Day: transparent bg (no dark card). Night: soft dark bg (Turrell glow needs substance)
     const night = isNightTime();
     const prevClearAlpha = renderer.getClearAlpha();
     renderer.getClearColor(_blurPrevClearColor);
-    renderer.setClearColor(night ? 0x030108 : 0x000000, night ? 1 : 0);
+    renderer.setClearColor(night ? 0x1a1520 : 0x000000, night ? 1 : 0);
     renderer.setRenderTarget(blurTargetA);
     renderer.clear();
     renderer.render(scene, camera);
@@ -1027,6 +1027,108 @@ function createLumeTexture(size) {
     return new THREE.CanvasTexture(c);
 }
 const lumeTexture = createLumeTexture(64);
+
+// ═══════════════════════════════════════════════════════════════
+// ISLAMIC STAR GEOMETRY — procedural 12-fold rosette at center
+// Structural sacred geometry that the tawaf orbits weave through
+// ═══════════════════════════════════════════════════════════════
+
+function buildIslamicStar(foldCount, outerR, innerR, centerR) {
+    // Generates a multi-layer Islamic star pattern:
+    // 1. Outer star polygon (12-pointed)
+    // 2. Inner star polygon (rotated, interlocking)
+    // 3. Central rosette ring
+    // 4. Radial lines connecting center to vertices
+    const positions = [];
+    const step = TWO_PI / foldCount;
+
+    // Layer 1: Outer star — alternating outer/inner vertices
+    for (let i = 0; i < foldCount; i++) {
+        const a1 = step * i - Math.PI / 2;
+        const a2 = step * (i + 0.5) - Math.PI / 2;
+        const a3 = step * (i + 1) - Math.PI / 2;
+        // Outer point → inner notch → next outer point
+        positions.push(
+            Math.cos(a1) * outerR, Math.sin(a1) * outerR, 0,
+            Math.cos(a2) * innerR, Math.sin(a2) * innerR, 0,
+        );
+        positions.push(
+            Math.cos(a2) * innerR, Math.sin(a2) * innerR, 0,
+            Math.cos(a3) * outerR, Math.sin(a3) * outerR, 0,
+        );
+    }
+
+    // Layer 2: Inner star — rotated half-step, smaller
+    const innerOuterR = outerR * 0.72;
+    const innerInnerR = innerR * 0.85;
+    const halfStep = step * 0.5;
+    for (let i = 0; i < foldCount; i++) {
+        const a1 = step * i + halfStep - Math.PI / 2;
+        const a2 = step * (i + 0.5) + halfStep - Math.PI / 2;
+        const a3 = step * (i + 1) + halfStep - Math.PI / 2;
+        positions.push(
+            Math.cos(a1) * innerOuterR, Math.sin(a1) * innerOuterR, 0,
+            Math.cos(a2) * innerInnerR, Math.sin(a2) * innerInnerR, 0,
+        );
+        positions.push(
+            Math.cos(a2) * innerInnerR, Math.sin(a2) * innerInnerR, 0,
+            Math.cos(a3) * innerOuterR, Math.sin(a3) * innerOuterR, 0,
+        );
+    }
+
+    // Layer 3: Central rosette — small polygon at center
+    const roseR = centerR;
+    for (let i = 0; i < foldCount; i++) {
+        const a1 = step * i - Math.PI / 2;
+        const a2 = step * (i + 1) - Math.PI / 2;
+        positions.push(
+            Math.cos(a1) * roseR, Math.sin(a1) * roseR, 0,
+            Math.cos(a2) * roseR, Math.sin(a2) * roseR, 0,
+        );
+    }
+
+    // Layer 4: Radial spokes — center to outer star vertices
+    for (let i = 0; i < foldCount; i++) {
+        const a = step * i - Math.PI / 2;
+        positions.push(
+            Math.cos(a) * centerR, Math.sin(a) * centerR, 0,
+            Math.cos(a) * outerR, Math.sin(a) * outerR, 0,
+        );
+    }
+
+    // Layer 5: Connecting petals — inner star tips to central rosette
+    for (let i = 0; i < foldCount; i++) {
+        const a = step * i + halfStep - Math.PI / 2;
+        positions.push(
+            Math.cos(a) * centerR * 1.2, Math.sin(a) * centerR * 1.2, 0,
+            Math.cos(a) * innerOuterR, Math.sin(a) * innerOuterR, 0,
+        );
+    }
+
+    return new Float32Array(positions);
+}
+
+// Build the star at the orbital radius scale — fills the center where orbits weave
+const islamicStarGeo = new THREE.BufferGeometry();
+const islamicStarPositions = buildIslamicStar(12, radius * 0.65, radius * 0.35, radius * 0.15);
+islamicStarGeo.setAttribute('position', new THREE.BufferAttribute(islamicStarPositions, 3));
+const islamicStarMat = new THREE.LineBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.12,
+    blending: THREE.AdditiveBlending,
+    depthTest: false,
+});
+const islamicStarMesh = new THREE.LineSegments(islamicStarGeo, islamicStarMat);
+islamicStarMesh.position.z = -0.02; // behind live elements, in front of blurred layer
+liveGroup.add(islamicStarMesh);
+
+// Palette-tinted star color updated in applyDayNight
+function updateIslamicStarColor(palette, night) {
+    const col = new THREE.Color().setHSL(palette.h / 360, palette.s * 0.8 / 100, night ? palette.l * 1.2 / 100 : palette.l * 0.7 / 100);
+    islamicStarMat.color.copy(col);
+    islamicStarMat.opacity = night ? 0.15 : 0.08;
+}
 
 // --- Pre-allocate all live elements ONCE ---
 const MAX_PAIRS = 10;
@@ -1662,7 +1764,7 @@ function updateClockHands(now, night, blending) {
 // ═══════════════════════════════════════════════════════════════
 
 let forceNight = null; // null = auto, true = force night, false = force day
-function isNightTime() { return true;
+function isNightTime() {
     if (forceNight !== null) return forceNight;
     return currentVars && (currentVars.prayerPeriod === 'maghrib' || currentVars.prayerPeriod === 'isha');
 }
@@ -1671,19 +1773,21 @@ function applyDayNight() {
     const night = isNightTime();
     const preset = night ? PRESETS.night : PRESETS.day;
 
-    // Turrell-tinted background: deep, rich version of current prayer palette
-    // Even darkness has color — like a Turrell Skyspace at dusk
+    // Turrell-tinted background: luminous version of current prayer palette
+    // Turrell's Skyspaces are LIGHT — you look into radiance, not darkness
     const palette = artwork ? artwork.palette : (currentVars ? PRAYER_PALETTES[currentVars.prayerPeriod] : PRAYER_PALETTES.isha);
-    scene.background = new THREE.Color().setHSL(palette.h / 360, palette.s * 0.4 / 100, 3 / 100);
+    const bgL = night ? palette.l * 0.28 / 100 : palette.l * 0.40 / 100;
+    const bgS = night ? palette.s * 0.6 / 100 : palette.s * 0.5 / 100;
+    scene.background = new THREE.Color().setHSL(palette.h / 360, bgS, bgL);
 
-    // Bloom
+    // Bloom — gentle, not harsh
     bloomPass.strength = preset.bloomStrength;
     bloomPass.threshold = preset.bloomThreshold;
     bloomPass.radius = preset.bloomRadius;
 
-    // Turrell vignette — more pronounced at night (deeper Ganzfeld chamber feeling)
-    vignettePass.uniforms.uDarkness.value = night ? 0.7 : 0.25;
-    vignettePass.uniforms.uOffset.value = night ? 1.1 : 1.4;
+    // Turrell vignette — very gentle. Skyspaces are about boundless light, not tunnels
+    vignettePass.uniforms.uDarkness.value = night ? 0.3 : 0.12;
+    vignettePass.uniforms.uOffset.value = night ? 1.3 : 1.5;
 
     // Update trace materials
     for (const obj of traceObjects) {
@@ -1737,15 +1841,16 @@ function applyDayNight() {
         }
     }
 
-    // Blurred layer: visible at night (Turrell glow), hidden during day (no dark card)
+    // Update Islamic star geometry color for current prayer
+    updateIslamicStarColor(palette, night);
+
+    // Blurred layer: always visible — Turrell atmosphere persists through entire prayer
     if (blurredLayer) {
-        blurredLayer.mesh.visible = night;
-        if (night) {
-            blurredLayer.mesh.material.blending = THREE.AdditiveBlending;
-            blurredLayer.mesh.material.premultipliedAlpha = false;
-            blurredLayer.mesh.material.opacity = blurredLayer.opacity;
-            blurredLayer.mesh.material.needsUpdate = true;
-        }
+        blurredLayer.mesh.visible = true;
+        blurredLayer.mesh.material.blending = night ? THREE.AdditiveBlending : THREE.NormalBlending;
+        blurredLayer.mesh.material.premultipliedAlpha = !night;
+        blurredLayer.mesh.material.opacity = blurredLayer.opacity;
+        blurredLayer.mesh.material.needsUpdate = true;
     }
 
     updateBodyColors();
@@ -1983,6 +2088,8 @@ function update(timestamp) {
     traceGroup.rotation.z = TWO_PI * (_s / 60);
     // Rotate blurred previous layer at the same rate
     if (blurredLayer) blurredLayer.mesh.rotation.z = traceGroup.rotation.z;
+    // Islamic star rotates very slowly — 1 revolution per 7 minutes (tawaf pace)
+    islamicStarMesh.rotation.z = TWO_PI * (_s / 420);
 
     // Rebuild live overlay
     updateLiveElements(vars.prayerProgress, now);
