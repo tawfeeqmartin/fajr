@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v49: fix nuclear white-out on seed change — glow only on final blur pass
+// v50: Turrell Skyspace — luminous bg, soft dissolving edge, no star overlay
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -27,19 +27,22 @@ const TWO_PI = Math.PI * 2;
 // These are the locked-in startup values. GUI tweaks are ephemeral.
 // To save new defaults: update STARTUP_PRESET, then Object.assign into PRESETS on load.
 const STARTUP_PRESET = Object.freeze({
+    // Turrell Skyspace approach: ALL prayers are luminous. No dark mode.
+    // Difference between prayers is HUE, not brightness.
     night: Object.freeze({
-        alphaMul: 2.0,
-        bloomStrength: 0.15,   // gentler bloom — heavenly, not nuclear
-        bloomThreshold: 0.40,
-        bloomRadius: 0.40,
-        bg: '#1a1520',         // soft dark — not void-black
+        alphaMul: 6.0,         // high multiplier — traces must contrast against light bg
+        alphaMax: 0.28,        // cap per-segment opacity
+        bloomStrength: 0.03,   // barely perceptible — Turrell is clean light, not glow
+        bloomThreshold: 0.85,
+        bloomRadius: 0.15,
+        bg: '#eae7f0',         // (unused — bg computed from palette)
     }),
     day: Object.freeze({
-        alphaMul: 4.0,
-        alphaMax: 0.14,
-        bloomStrength: 0.06,
-        bloomThreshold: 0.6,
-        bloomRadius: 0.3,
+        alphaMul: 6.0,
+        alphaMax: 0.28,
+        bloomStrength: 0.03,
+        bloomThreshold: 0.85,
+        bloomRadius: 0.15,
         bg: '#f8f7f4',
     }),
     shared: Object.freeze({
@@ -47,18 +50,18 @@ const STARTUP_PRESET = Object.freeze({
         radiusPower: 2.0,
         midDipStrength: 0.55,
         velCap: 1.5,
-        connAlphaMul: 0.04,
+        connAlphaMul: 0.06,    // slightly higher connection opacity
         noiseSigma: 0.0003,
         hueJitter: 10,
         pathGradient: 16,
     }),
     turrell: Object.freeze({
-        glowIntensity: 0.12,   // subtle luminance — Turrell light glows softly, not harshly
-        blurPasses: 5,         // 1–12: more passes = more dissolved
-        blurScale: 0.6,        // multiplier on pass radii (0.3 = subtle, 2.0 = mega)
-        tintStrength: 0.3,     // gentler tint — let the natural palette speak
-        fadeTarget: 0.85,      // HOLD the atmospheric layer through entire prayer period
-        fadeRate: 0.003,       // faster fade-in so atmosphere is present quickly
+        glowIntensity: 0.04,   // barely there — the light IS the scene, not an effect
+        blurPasses: 6,         // 1–12: enough to dissolve traces into soft color
+        blurScale: 0.8,        // wider blur — more Ganzfeld dissolution
+        tintStrength: 0.45,    // stronger tint — want the prayer color to come through
+        fadeTarget: 0.12,      // very subtle — just a whisper of depth, not a dark cloud
+        fadeRate: 0.003,       // fade-in
     }),
 });
 
@@ -480,8 +483,8 @@ const frustum = 2; // world units from center to edge vertically
 const radius = frustum * 1.6; // orbital radius in world units — scaled up for larger drawing fill
 
 const scene = new THREE.Scene();
-// Initial bg — will be overridden by prayer palette tint in applyDayNight()
-scene.background = new THREE.Color('#1a1520');
+// Initial bg — luminous, will be palette-tinted by applyDayNight()
+scene.background = new THREE.Color('#edeae6');
 
 const camera = new THREE.OrthographicCamera(
     aspect >= 1 ? -frustum * aspect : -frustum,
@@ -701,11 +704,11 @@ function renderGroupBlurred(captureGroup) {
     if (blurredLayer) blurredLayer.mesh.visible = false;
 
     // Render captureGroup to blurTargetA
-    // Day: transparent bg (no dark card). Night: soft dark bg (Turrell glow needs substance)
+    // Transparent background — traces captured in isolation, then blurred as atmospheric wash
     const night = isNightTime();
     const prevClearAlpha = renderer.getClearAlpha();
     renderer.getClearColor(_blurPrevClearColor);
-    renderer.setClearColor(night ? 0x1a1520 : 0x000000, night ? 1 : 0);
+    renderer.setClearColor(0x000000, 0);
     renderer.setRenderTarget(blurTargetA);
     renderer.clear();
     renderer.render(scene, camera);
@@ -841,11 +844,12 @@ function buildTraceGeometry(artwork) {
         const avgR = (pair.r1 + pair.r2) / 2;
         const radiusScale = Math.pow(avgR, PRESETS.shared.radiusPower) * 4.0;
 
-        // --- Colors ---
+        // --- Colors (Turrell luminous mode) ---
+        // Traces are DARKER than the luminous bg — visible through contrast
         const preset = night ? PRESETS.night : PRESETS.day;
-        const traceL = night ? pair.l : Math.max(pair.l - 35, 8);
-        const traceS = night ? pair.s : Math.min(pair.s + 25, 100);
-        const baseAlpha = night ? pair.alpha * preset.alphaMul : Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
+        const traceL = Math.max(pair.l - 40, 20);
+        const traceS = Math.min(pair.s + 15, 80);
+        const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
         const traceAlpha = baseAlpha * depthScale * radiusScale;
 
         const color = hslToColor(pair.h, traceS, traceL);
@@ -930,7 +934,7 @@ function buildTraceGeometry(artwork) {
         const rosetteMat = new THREE.LineBasicMaterial({
             transparent: true,
             opacity: traceAlpha,
-            blending: night ? THREE.AdditiveBlending : THREE.NormalBlending,
+            blending: THREE.NormalBlending,  // always normal — traces seen through light
             vertexColors: true,
             depthTest: false,
         });
@@ -957,12 +961,12 @@ function buildTraceGeometry(artwork) {
         connectGeo.setAttribute('position', new THREE.BufferAttribute(connectPositions, 3));
         connectGeo.setDrawRange(0, 0);
 
-        const connAlpha = night ? traceAlpha * PRESETS.shared.connAlphaMul : Math.min(pair.alpha * 0.8, PRESETS.shared.connAlphaMul) * depthScale;
+        const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale;
         const connectMat = new THREE.LineBasicMaterial({
             color: color,
             transparent: true,
             opacity: connAlpha,
-            blending: night ? THREE.AdditiveBlending : THREE.NormalBlending,
+            blending: THREE.NormalBlending,
             depthTest: false,
         });
         const connectSegments = new THREE.LineSegments(connectGeo, connectMat);
@@ -1028,108 +1032,6 @@ function createLumeTexture(size) {
 }
 const lumeTexture = createLumeTexture(64);
 
-// ═══════════════════════════════════════════════════════════════
-// ISLAMIC STAR GEOMETRY — procedural 12-fold rosette at center
-// Structural sacred geometry that the tawaf orbits weave through
-// ═══════════════════════════════════════════════════════════════
-
-function buildIslamicStar(foldCount, outerR, innerR, centerR) {
-    // Generates a multi-layer Islamic star pattern:
-    // 1. Outer star polygon (12-pointed)
-    // 2. Inner star polygon (rotated, interlocking)
-    // 3. Central rosette ring
-    // 4. Radial lines connecting center to vertices
-    const positions = [];
-    const step = TWO_PI / foldCount;
-
-    // Layer 1: Outer star — alternating outer/inner vertices
-    for (let i = 0; i < foldCount; i++) {
-        const a1 = step * i - Math.PI / 2;
-        const a2 = step * (i + 0.5) - Math.PI / 2;
-        const a3 = step * (i + 1) - Math.PI / 2;
-        // Outer point → inner notch → next outer point
-        positions.push(
-            Math.cos(a1) * outerR, Math.sin(a1) * outerR, 0,
-            Math.cos(a2) * innerR, Math.sin(a2) * innerR, 0,
-        );
-        positions.push(
-            Math.cos(a2) * innerR, Math.sin(a2) * innerR, 0,
-            Math.cos(a3) * outerR, Math.sin(a3) * outerR, 0,
-        );
-    }
-
-    // Layer 2: Inner star — rotated half-step, smaller
-    const innerOuterR = outerR * 0.72;
-    const innerInnerR = innerR * 0.85;
-    const halfStep = step * 0.5;
-    for (let i = 0; i < foldCount; i++) {
-        const a1 = step * i + halfStep - Math.PI / 2;
-        const a2 = step * (i + 0.5) + halfStep - Math.PI / 2;
-        const a3 = step * (i + 1) + halfStep - Math.PI / 2;
-        positions.push(
-            Math.cos(a1) * innerOuterR, Math.sin(a1) * innerOuterR, 0,
-            Math.cos(a2) * innerInnerR, Math.sin(a2) * innerInnerR, 0,
-        );
-        positions.push(
-            Math.cos(a2) * innerInnerR, Math.sin(a2) * innerInnerR, 0,
-            Math.cos(a3) * innerOuterR, Math.sin(a3) * innerOuterR, 0,
-        );
-    }
-
-    // Layer 3: Central rosette — small polygon at center
-    const roseR = centerR;
-    for (let i = 0; i < foldCount; i++) {
-        const a1 = step * i - Math.PI / 2;
-        const a2 = step * (i + 1) - Math.PI / 2;
-        positions.push(
-            Math.cos(a1) * roseR, Math.sin(a1) * roseR, 0,
-            Math.cos(a2) * roseR, Math.sin(a2) * roseR, 0,
-        );
-    }
-
-    // Layer 4: Radial spokes — center to outer star vertices
-    for (let i = 0; i < foldCount; i++) {
-        const a = step * i - Math.PI / 2;
-        positions.push(
-            Math.cos(a) * centerR, Math.sin(a) * centerR, 0,
-            Math.cos(a) * outerR, Math.sin(a) * outerR, 0,
-        );
-    }
-
-    // Layer 5: Connecting petals — inner star tips to central rosette
-    for (let i = 0; i < foldCount; i++) {
-        const a = step * i + halfStep - Math.PI / 2;
-        positions.push(
-            Math.cos(a) * centerR * 1.2, Math.sin(a) * centerR * 1.2, 0,
-            Math.cos(a) * innerOuterR, Math.sin(a) * innerOuterR, 0,
-        );
-    }
-
-    return new Float32Array(positions);
-}
-
-// Build the star at the orbital radius scale — fills the center where orbits weave
-const islamicStarGeo = new THREE.BufferGeometry();
-const islamicStarPositions = buildIslamicStar(12, radius * 0.65, radius * 0.35, radius * 0.15);
-islamicStarGeo.setAttribute('position', new THREE.BufferAttribute(islamicStarPositions, 3));
-const islamicStarMat = new THREE.LineBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.12,
-    blending: THREE.AdditiveBlending,
-    depthTest: false,
-});
-const islamicStarMesh = new THREE.LineSegments(islamicStarGeo, islamicStarMat);
-islamicStarMesh.position.z = -0.02; // behind live elements, in front of blurred layer
-liveGroup.add(islamicStarMesh);
-
-// Palette-tinted star color updated in applyDayNight
-function updateIslamicStarColor(palette, night) {
-    const col = new THREE.Color().setHSL(palette.h / 360, palette.s * 0.8 / 100, night ? palette.l * 1.2 / 100 : palette.l * 0.7 / 100);
-    islamicStarMat.color.copy(col);
-    islamicStarMat.opacity = night ? 0.15 : 0.08;
-}
-
 // --- Pre-allocate all live elements ONCE ---
 const MAX_PAIRS = 10;
 const MAX_DOTS = MAX_PAIRS * 3; // inner + outer + midpoint per pair
@@ -1145,8 +1047,8 @@ const liveDotMat = new THREE.PointsMaterial({
     size: 5,
     map: dotTexture,
     transparent: true,
-    opacity: 0.4,
-    blending: THREE.AdditiveBlending,
+    opacity: 0.5,
+    blending: THREE.NormalBlending,
     vertexColors: true,
     depthTest: false,
     sizeAttenuation: false,
@@ -1161,10 +1063,10 @@ for (let i = 0; i < MAX_PAIRS; i++) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
     const mat = new THREE.LineBasicMaterial({
-        color: 0xffffff,
+        color: 0x444444,
         transparent: true,
-        opacity: 0.1,
-        blending: THREE.AdditiveBlending,
+        opacity: 0.12,
+        blending: THREE.NormalBlending,
         depthTest: false,
     });
     const line = new THREE.Line(geo, mat);
@@ -1185,10 +1087,10 @@ const liveHands = handDefs.map(def => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
     const mat = new THREE.LineBasicMaterial({
-        color: 0xffffff,
+        color: 0x333333,
         transparent: true,
         opacity: def.alpha,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
         depthTest: false,
     });
     const line = new THREE.Line(geo, mat);
@@ -1210,8 +1112,8 @@ const trailGeo = new THREE.BufferGeometry();
 trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPosArr, 3));
 trailGeo.setAttribute('color', new THREE.BufferAttribute(trailColorArr, 3));
 const trailMat = new THREE.LineBasicMaterial({
-    transparent: true, opacity: 0.15,
-    blending: THREE.AdditiveBlending, vertexColors: true, depthTest: false,
+    transparent: true, opacity: 0.18,
+    blending: THREE.NormalBlending, vertexColors: true, depthTest: false,
 });
 const trailLine = new THREE.LineSegments(trailGeo, trailMat);
 trailLine.visible = false;
@@ -1224,8 +1126,8 @@ function makeClockDot(size, opacity, z) {
     geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
     const mat = new THREE.PointsMaterial({
         size, map: dotTexture, transparent: true, opacity,
-        blending: THREE.AdditiveBlending, depthTest: false, sizeAttenuation: false,
-        color: 0xffffff,
+        blending: THREE.NormalBlending, depthTest: false, sizeAttenuation: false,
+        color: 0x333333,
     });
     const points = new THREE.Points(geo, mat);
     liveGroup.add(points);
@@ -1346,8 +1248,8 @@ for (let h = 0; h < 3; h++) {
         size: [55, 42, 32][h],
         map: glowTexture,
         transparent: true,
-        opacity: 0.85,
-        blending: THREE.AdditiveBlending,
+        opacity: 0.0,   // hidden — glow is invisible on luminous bg
+        blending: THREE.NormalBlending,
         depthTest: false,
         sizeAttenuation: false,
     });
@@ -1390,11 +1292,11 @@ kaabaGlowGeo.setAttribute('position', new THREE.BufferAttribute(kaabaGlowPositio
 kaabaGlowGeo.setDrawRange(0, 0);
 const kaabaGlowMat = new THREE.PointsMaterial({
     size: 1.45, sizeAttenuation: false,
-    transparent: true, opacity: 0.45,
-    blending: THREE.AdditiveBlending,
+    transparent: true, opacity: 0.0,   // hidden — glow invisible on luminous bg
+    blending: THREE.NormalBlending,
     depthTest: false,
     map: glowTexture,
-    color: 0xffffff,
+    color: 0x333333,
 });
 const kaabaGlowPoints = new THREE.Points(kaabaGlowGeo, kaabaGlowMat);
 kaabaGlowPoints.position.z = -0.005; // sit just behind the main trail
@@ -1407,8 +1309,8 @@ const tipGlowMat = new THREE.PointsMaterial({
     size: 40,
     map: glowTexture,
     transparent: true,
-    opacity: 0.9,
-    blending: THREE.AdditiveBlending,
+    opacity: 0.0,   // hidden — glow invisible on luminous bg
+    blending: THREE.NormalBlending,
     depthTest: false,
     sizeAttenuation: false,
 });
@@ -1433,7 +1335,7 @@ function updateLiveElements(progress, now) {
 
     const night = isNightTime();
     const t = progress * artwork.totalRevolutions * TWO_PI;
-    const blending = night ? THREE.AdditiveBlending : THREE.NormalBlending;
+    const blending = THREE.NormalBlending;  // always normal — luminous bg
     const pairCount = artwork.pairs.length;
 
     // --- Update orbiter dots ---
@@ -1447,8 +1349,9 @@ function updateLiveElements(progress, now) {
             my += Math.sin(a3) * pair.r3 * radius;
         }
 
-        const dotL = night ? pair.l : Math.max(pair.l - 20, 18);
-        const dotS = night ? pair.s : Math.min(pair.s + 10, 85);
+        // Dot colors: darker than bg for visibility in luminous field
+        const dotL = Math.max(pair.l - 30, 20);
+        const dotS = Math.min(pair.s + 10, 80);
         _tmpColor.setHSL(pair.h / 360, dotS / 100, dotL / 100);
 
         const base = pi * 9; // 3 dots × 3 components
@@ -1468,7 +1371,7 @@ function updateLiveElements(progress, now) {
         conn.posArr[3] = 0;  conn.posArr[4] = 0;  conn.posArr[5] = 0;
         conn.geo.attributes.position.needsUpdate = true;
         conn.mat.color.copy(_tmpColor);
-        conn.mat.opacity = night ? 0.1 : 0.08;
+        conn.mat.opacity = 0.10;
         conn.mat.blending = blending;
         conn.mat.needsUpdate = true;
         conn.line.visible = true;
@@ -1479,8 +1382,8 @@ function updateLiveElements(progress, now) {
     liveDotGeo.setDrawRange(0, pairCount * 3);
     liveDotGeo.attributes.position.needsUpdate = true;
     liveDotGeo.attributes.color.needsUpdate = true;
-    liveDotMat.size = night ? 4 : 5;
-    liveDotMat.opacity = night ? 0.35 : 0.4;
+    liveDotMat.size = 5;
+    liveDotMat.opacity = 0.5;
     liveDotMat.blending = blending;
     liveDotMat.needsUpdate = true;
 
@@ -1505,17 +1408,14 @@ function updateClockHands(now, night, blending) {
     const palette = artwork ? artwork.palette : PRAYER_PALETTES.isha;
     const baseH = palette.h;
 
-    // Lume breathing — subtle SuperLuminova pulsation (±5%)
-    const lumeBreathe = night ? 1.0 + Math.sin(Date.now() * 0.0005) * 0.05 : 1.0;
-
     // Hand configs: [angle, radius, saturation, lightness, opacity]
-    // Use palette color (same as drawing) for both day and night
-    const pS = night ? palette.s : Math.min(palette.s + 15, 100);  // boost saturation in day for contrast
-    const pL = night ? palette.l : Math.max(palette.l - 15, 15);  // darken in day for readability against #f8f7f4
+    // Hands are darker than the luminous bg — readable, elegant
+    const pS = Math.min(palette.s + 15, 85);
+    const pL = Math.max(palette.l - 30, 15);  // darkened for contrast against luminous bg
     const handConfigs = [
-        [hrAngle,  hrR,  pS, pL, night ? 0.95 : 0.85],
-        [minAngle, minR, pS, pL, night ? 0.85 : 0.75],
-        [secAngle, secR, pS, pL, night ? 0.75 : 0.65],
+        [hrAngle,  hrR,  pS, pL, 0.85],
+        [minAngle, minR, pS, pL, 0.75],
+        [secAngle, secR, pS, pL, 0.65],
     ];
 
     for (let i = 0; i < 3; i++) {
@@ -1526,8 +1426,8 @@ function updateClockHands(now, night, blending) {
         hand.posArr[4] = Math.sin(angle) * r;
         hand.geo.attributes.position.needsUpdate = true;
         hand.mat.color.setHSL(baseH / 360, sat / 100, lit / 100);
-        hand.mat.opacity = alpha * lumeBreathe;
-        hand.mat.blending = night ? THREE.AdditiveBlending : blending;
+        hand.mat.opacity = alpha;
+        hand.mat.blending = THREE.NormalBlending;
         hand.mat.needsUpdate = true;
     }
 
@@ -1547,14 +1447,13 @@ function updateClockHands(now, night, blending) {
         trailPosArr[off + 3] = Math.cos(a1) * secR; trailPosArr[off + 4] = Math.sin(a1) * secR; trailPosArr[off + 5] = 0.01;
     }
     trailGeo.attributes.position.needsUpdate = true;
-    trailMat.opacity = night ? 0.15 : 0.12;
-    trailMat.blending = blending;
+    trailMat.opacity = 0.15;
+    trailMat.blending = THREE.NormalBlending;
     trailMat.needsUpdate = true;
 
-    // --- Update clock dots (lume pips at night) ---
-    // Night: lume texture + AdditiveBlending + full opacity + big sizes = SuperLuminova glow
-    const lumeBlend = night ? THREE.AdditiveBlending : THREE.NormalBlending;
-    const activeTex = night ? lumeTexture : dotTexture;
+    // --- Update clock dots ---
+    const lumeBlend = THREE.NormalBlending;
+    const activeTex = dotTexture;
 
     // --- Epicycle hour numeral ---
     const epicycleNow = performance.now() / 1000;
@@ -1598,16 +1497,17 @@ function updateClockHands(now, night, blending) {
     tipGlowGeo.attributes.position.needsUpdate = true;
     // Pulse synced with Kaaba glow — flares with the cube
     const glowPulse = 0.75 + 0.25 * Math.sin(performance.now() * 0.003);
-    tipGlowMat.opacity = glowPulse;
-    tipGlowMat.size = night ? 50 : 35;
+    tipGlowMat.opacity = 0;  // hidden in luminous mode
+    tipGlowMat.size = 35;
     tipGlowMat.needsUpdate = true;
 
     // (tip glow trail removed)
 
     // Trail colors: prayer palette gradient from transparent (old) to bright (new)
     const epiDrawCount = Math.min(epicycleTrailCount, EPICYCLE_TRAIL_MAX);
-    const epiS = night ? palette.s / 100 : Math.min((palette.s + 20) / 100, 0.95);
-    const epiL = night ? palette.l / 100 : Math.max((palette.l - 30) / 100, 0.10);
+    // Epicycle trail: darker than bg for visibility
+    const epiS = Math.min((palette.s + 20) / 100, 0.85);
+    const epiL = Math.max((palette.l - 35) / 100, 0.12);
     _tmpColor.setHSL(baseH / 360, epiS, epiL);
     for (let i = 0; i < epiDrawCount; i++) {
         const brightness = i / epiDrawCount;
@@ -1621,8 +1521,8 @@ function updateClockHands(now, night, blending) {
     epicycleTrailGeo.attributes.color.needsUpdate = true;
     // Kaaba glow/pulse — slow breathing on the entire cube drawing
     const kaabaPulse = 0.7 + 0.3 * Math.sin(performance.now() * 0.003); // ~0.3 Hz breathe
-    epicycleTrailMat.opacity = kaabaPulse;
-    epicycleTrailMat.blending = THREE.AdditiveBlending;
+    epicycleTrailMat.opacity = kaabaPulse * 0.8;
+    epicycleTrailMat.blending = THREE.NormalBlending;
     epicycleTrailMat.needsUpdate = true;
 
     // --- Kaaba glow halo layer update ---
@@ -1634,10 +1534,9 @@ function updateClockHands(now, night, blending) {
     kaabaGlowGeo.setDrawRange(0, epiDrawCount);
     kaabaGlowGeo.attributes.position.needsUpdate = true;
     // Pulse the glow — brighter than the main trail, synced breathing
-    const glowSize = night ? 2.18 : 1.45;
-    kaabaGlowMat.size = glowSize * (0.85 + 0.15 * Math.sin(performance.now() * 0.003));
-    kaabaGlowMat.opacity = (night ? 0.55 : 0.35) * kaabaPulse;
-    kaabaGlowMat.color.setHSL(baseH / 360, 0.3, 0.95); // warm white tinted toward prayer color
+    kaabaGlowMat.size = 1.45;
+    kaabaGlowMat.opacity = 0;  // hidden in luminous mode
+    kaabaGlowMat.color.setHSL(baseH / 360, 0.3, 0.4);
     kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
@@ -1653,8 +1552,8 @@ function updateClockHands(now, night, blending) {
                 circle.posArr[j * 3 + 2] = 0.01;
             }
             circle.geo.attributes.position.needsUpdate = true;
-            circle.mat.opacity = (night ? 0.12 : 0.06) * (1 - i / visibleCircles) * kaabaPulse; // pulse with cube
-            circle.mat.color.setRGB(1, 1, 1);
+            circle.mat.opacity = 0.08 * (1 - i / visibleCircles) * kaabaPulse;
+            circle.mat.color.setHSL(baseH / 360, 0.2, 0.4);  // tinted, darker than bg
             circle.mat.blending = THREE.NormalBlending;
             circle.mat.needsUpdate = true;
             circle.line.visible = true;
@@ -1676,8 +1575,8 @@ function updateClockHands(now, night, blending) {
         }
         epicycleArmGeo.setDrawRange(0, armCount + 1);
         epicycleArmGeo.attributes.position.needsUpdate = true;
-        epicycleArmMat.opacity = (night ? 0.1 : 0.04) * kaabaPulse; // pulse with cube
-        epicycleArmMat.color.setRGB(1, 1, 1); // half-intensity white
+        epicycleArmMat.opacity = 0.06 * kaabaPulse;
+        epicycleArmMat.color.setHSL(baseH / 360, 0.2, 0.4);
         epicycleArmMat.blending = THREE.NormalBlending;
         epicycleArmMat.needsUpdate = true;
         epicycleArmLine.visible = true;
@@ -1717,9 +1616,8 @@ function updateClockHands(now, night, blending) {
             hg.posArr[1] = tip.y;
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            const hgPulse = 0.85 + 0.15 * Math.sin(performance.now() * 0.006);
-            hg.mat.opacity = hgPulse;
-            hg.mat.size = night ? 42 : 32;
+            hg.mat.opacity = 0;  // hidden in luminous mode
+            hg.mat.size = 32;
             hg.mat.needsUpdate = true;
         } else {
             // --- Hour / Minute: circle + orbiting dot + glow ---
@@ -1730,7 +1628,7 @@ function updateClockHands(now, night, blending) {
                 circle.posArr[j * 3 + 2] = 0.01;
             }
             circle.geo.attributes.position.needsUpdate = true;
-            circle.mat.opacity = night ? 0.45 : 0.25;
+            circle.mat.opacity = 0.25;
             circle.mat.color.setHSL(baseH / 360, epiS * 0.7, epiL * 0.8);
             circle.mat.needsUpdate = true;
             circle.line.visible = true;
@@ -1746,15 +1644,14 @@ function updateClockHands(now, night, blending) {
             hg.posArr[1] = dot.posArr[1];
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            const hgPulse = 0.85 + 0.1 * Math.sin(performance.now() * 0.006 + h * 2.1);
-            hg.mat.opacity = hgPulse;
-            hg.mat.size = night ? [70, 55][h] : [55, 42][h];
+            hg.mat.opacity = 0;  // hidden in luminous mode
+            hg.mat.size = [55, 42][h];
             hg.mat.needsUpdate = true;
         }
     }
 
-    centerDot.mat.opacity = night ? 0.5 : 0.25;
-    centerDot.mat.blending = night ? THREE.AdditiveBlending : blending;
+    centerDot.mat.opacity = 0.3;
+    centerDot.mat.blending = THREE.NormalBlending;
     centerDot.mat.color.setHSL(baseH / 360, pS / 100, pL / 100);
     centerDot.mat.needsUpdate = true;
 }
@@ -1770,26 +1667,34 @@ function isNightTime() {
 }
 
 function applyDayNight() {
+    // ═══════════════════════════════════════════════════════════════
+    // TURRELL SKYSPACE APPROACH: ALL prayers are luminous.
+    // No dark mode. The difference between prayers is COLOR, not brightness.
+    // You look into radiant light — like a Ganzfeld or Aten Reign.
+    // ═══════════════════════════════════════════════════════════════
     const night = isNightTime();
     const preset = night ? PRESETS.night : PRESETS.day;
 
-    // Turrell-tinted background: luminous version of current prayer palette
-    // Turrell's Skyspaces are LIGHT — you look into radiance, not darkness
     const palette = artwork ? artwork.palette : (currentVars ? PRAYER_PALETTES[currentVars.prayerPeriod] : PRAYER_PALETTES.isha);
-    const bgL = night ? palette.l * 0.28 / 100 : palette.l * 0.40 / 100;
-    const bgS = night ? palette.s * 0.6 / 100 : palette.s * 0.5 / 100;
+
+    // Background: LUMINOUS — 88-92% lightness, gently tinted with prayer color.
+    // Turrell's walls glow. The bg IS the light. Not darkness with glow on top.
+    const bgL = 0.90 - ((100 - palette.l) / 100 * 0.04); // 86-90%, dimmer prayers barely lower
+    const bgS = palette.s * 0.18 / 100;                   // very desaturated — just a whisper of hue
     scene.background = new THREE.Color().setHSL(palette.h / 360, bgS, bgL);
 
-    // Bloom — gentle, not harsh
+    // Bloom — barely perceptible. The light is the scene, not an effect.
     bloomPass.strength = preset.bloomStrength;
     bloomPass.threshold = preset.bloomThreshold;
     bloomPass.radius = preset.bloomRadius;
 
-    // Turrell vignette — very gentle. Skyspaces are about boundless light, not tunnels
-    vignettePass.uniforms.uDarkness.value = night ? 0.3 : 0.12;
-    vignettePass.uniforms.uOffset.value = night ? 1.3 : 1.5;
+    // Vignette — almost none. Turrell Skyspaces are boundless, not tunnels.
+    vignettePass.uniforms.uDarkness.value = 0.06;
+    vignettePass.uniforms.uOffset.value = 1.8;
 
-    // Update trace materials
+    // ── Trace materials: DARKER than bg, normal blending ──────────
+    // The traces are like subtle geometric patterns seen through luminous air.
+    // They must CONTRAST against the light bg — darker, slightly more saturated.
     for (const obj of traceObjects) {
         const pair = obj.pair;
         const d = pair.depth !== undefined ? pair.depth : 0.5;
@@ -1797,24 +1702,24 @@ function applyDayNight() {
         const avgR = (pair.r1 + pair.r2) / 2;
         const radiusScale = Math.pow(avgR, PRESETS.shared.radiusPower) * 4.0;
 
-        const traceL = night ? pair.l : Math.max(pair.l - 35, 8);
-        const traceS = night ? pair.s : Math.min(pair.s + 25, 100);
-        const baseAlpha = night ? pair.alpha * preset.alphaMul : Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
+        // Traces: bring lightness DOWN so they read against the luminous bg
+        const traceL = Math.max(pair.l - 40, 20);
+        const traceS = Math.min(pair.s + 15, 80);
+        const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
         const traceAlpha = baseAlpha * depthScale * radiusScale;
-        const connAlpha = night ? traceAlpha * PRESETS.shared.connAlphaMul : Math.min(pair.alpha * 0.8, PRESETS.shared.connAlphaMul) * depthScale;
-        const blending = night ? THREE.AdditiveBlending : THREE.NormalBlending;
+        const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale;
 
         obj.rosetteLine.material.opacity = traceAlpha;
-        obj.rosetteLine.material.blending = blending;
+        obj.rosetteLine.material.blending = THREE.NormalBlending;
         obj.rosetteLine.material.needsUpdate = true;
 
         obj.connectSegments.material.color = hslToColor(pair.h, traceS, traceL);
         obj.connectSegments.material.opacity = connAlpha;
-        obj.connectSegments.material.blending = blending;
+        obj.connectSegments.material.blending = THREE.NormalBlending;
         obj.connectSegments.material.needsUpdate = true;
     }
 
-    // Update historical trace layers blending (kept for compatibility — empty array)
+    // Historical trace layers (kept for compatibility — empty array)
     for (const layer of traceLayers) {
         for (let j = 0; j < layer.traceObjects.length; j++) {
             const obj = layer.traceObjects[j];
@@ -1823,32 +1728,28 @@ function applyDayNight() {
             const depthScale = 1.0 - d * PRESETS.shared.depthFactor;
             const avgR = (pair.r1 + pair.r2) / 2;
             const radiusScale = Math.pow(avgR, PRESETS.shared.radiusPower) * 4.0;
-            const baseAlpha = night ? pair.alpha * preset.alphaMul : Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
+            const baseAlpha = Math.min(pair.alpha * preset.alphaMul, preset.alphaMax);
             const traceAlpha = baseAlpha * depthScale * radiusScale;
-            const connAlpha = night ? traceAlpha * PRESETS.shared.connAlphaMul : Math.min(pair.alpha * 0.8, PRESETS.shared.connAlphaMul) * depthScale;
-            const blending = night ? THREE.AdditiveBlending : THREE.NormalBlending;
+            const connAlpha = Math.min(pair.alpha * 1.2, PRESETS.shared.connAlphaMul) * depthScale;
 
             layer.origOpacities[j].rosetteAlpha = traceAlpha;
             layer.origOpacities[j].connectAlpha = connAlpha;
 
             obj.rosetteLine.material.opacity = traceAlpha * layer.opacity;
-            obj.rosetteLine.material.blending = blending;
+            obj.rosetteLine.material.blending = THREE.NormalBlending;
             obj.rosetteLine.material.needsUpdate = true;
 
-            obj.connectSegments.material.blending = blending;
+            obj.connectSegments.material.blending = THREE.NormalBlending;
             obj.connectSegments.material.opacity = connAlpha * layer.opacity;
             obj.connectSegments.material.needsUpdate = true;
         }
     }
 
-    // Update Islamic star geometry color for current prayer
-    updateIslamicStarColor(palette, night);
-
-    // Blurred layer: always visible — Turrell atmosphere persists through entire prayer
+    // Blurred atmospheric layer — gentle color wash, not glow
     if (blurredLayer) {
         blurredLayer.mesh.visible = true;
-        blurredLayer.mesh.material.blending = night ? THREE.AdditiveBlending : THREE.NormalBlending;
-        blurredLayer.mesh.material.premultipliedAlpha = !night;
+        blurredLayer.mesh.material.blending = THREE.NormalBlending;
+        blurredLayer.mesh.material.premultipliedAlpha = true;
         blurredLayer.mesh.material.opacity = blurredLayer.opacity;
         blurredLayer.mesh.material.needsUpdate = true;
     }
@@ -1857,14 +1758,14 @@ function applyDayNight() {
 }
 
 function updateBodyColors() {
-    const night = isNightTime();
-    const textHi  = night ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.30)';
-    const textMid = night ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.22)';
-    const textLo  = night ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.18)';
-    const textXLo = night ? 'rgba(255,255,255,0.1)'  : 'rgba(0,0,0,0.12)';
-    const btnBg   = night ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
-    const btnClr  = night ? 'rgba(255,255,255,0.3)'  : 'rgba(0,0,0,0.3)';
-    const btnBrd  = night ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    // Always luminous background — text is always dark on light
+    const textHi  = 'rgba(0,0,0,0.30)';
+    const textMid = 'rgba(0,0,0,0.22)';
+    const textLo  = 'rgba(0,0,0,0.18)';
+    const textXLo = 'rgba(0,0,0,0.12)';
+    const btnBg   = 'rgba(0,0,0,0.04)';
+    const btnClr  = 'rgba(0,0,0,0.3)';
+    const btnBrd  = 'rgba(0,0,0,0.08)';
 
     if (_elPrayerName)    _elPrayerName.style.color    = textHi;
     if (_elTimeDisplay)   _elTimeDisplay.style.color   = textMid;
@@ -1967,7 +1868,7 @@ function update(timestamp) {
                 opacity: 1.0,
                 depthTest: false,
                 depthWrite: false,
-                blending: THREE.AdditiveBlending,
+                blending: THREE.NormalBlending,
             });
             const quadMesh = new THREE.Mesh(quadGeo, quadMat);
             // Position slightly behind z=0 so it renders behind live drawing
@@ -2044,7 +1945,7 @@ function update(timestamp) {
                 opacity: 0.0,  // fade in from 0 for a gentle entrance
                 depthTest: false,
                 depthWrite: false,
-                blending: THREE.AdditiveBlending,
+                blending: THREE.NormalBlending,
             });
             const quadMesh = new THREE.Mesh(quadGeo, quadMat);
             quadMesh.position.set(0, 0, -0.1);
@@ -2088,9 +1989,6 @@ function update(timestamp) {
     traceGroup.rotation.z = TWO_PI * (_s / 60);
     // Rotate blurred previous layer at the same rate
     if (blurredLayer) blurredLayer.mesh.rotation.z = traceGroup.rotation.z;
-    // Islamic star rotates very slowly — 1 revolution per 7 minutes (tawaf pace)
-    islamicStarMesh.rotation.z = TWO_PI * (_s / 420);
-
     // Rebuild live overlay
     updateLiveElements(vars.prayerProgress, now);
 
