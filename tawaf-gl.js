@@ -656,7 +656,9 @@ void main() {
     float boost = smoothstep(0.005, 0.15, lum) * uGlowIntensity;
     tinted += boost;
 
-    gl_FragColor = vec4(tinted, blurred.a);
+    // Pre-multiply RGB by alpha so transparent bg pixels stay transparent (day mode).
+    // Night mode uses opaque bg (alpha=1) so this is a no-op at night.
+    gl_FragColor = vec4(tinted * blurred.a, blurred.a);
 }
 `;
 
@@ -1728,14 +1730,15 @@ function applyDayNight() {
         }
     }
 
-    // Update blurred layer blending for day/night
+    // Blurred layer: visible at night (Turrell glow), hidden during day (no dark card)
     if (blurredLayer) {
-        // The blurred quad uses NormalBlending in day mode (shows as a soft overlay)
-        // and AdditiveBlending in night mode (glows into the scene)
-        blurredLayer.mesh.material.blending = night ? THREE.AdditiveBlending : THREE.NormalBlending;
-        blurredLayer.mesh.material.premultipliedAlpha = !night;
-        blurredLayer.mesh.material.opacity = blurredLayer.opacity;
-        blurredLayer.mesh.material.needsUpdate = true;
+        blurredLayer.mesh.visible = night;
+        if (night) {
+            blurredLayer.mesh.material.blending = THREE.AdditiveBlending;
+            blurredLayer.mesh.material.premultipliedAlpha = false;
+            blurredLayer.mesh.material.opacity = blurredLayer.opacity;
+            blurredLayer.mesh.material.needsUpdate = true;
+        }
     }
 
     updateBodyColors();
