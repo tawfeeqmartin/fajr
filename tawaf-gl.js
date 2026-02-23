@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v76: 3D glass Kaaba cube (MeshPhysicalMaterial transmission) — beams refract through real glass
+// v103: Custom FBO chromatic refraction glass — per-channel IOR dispersion, iridescent Fresnel
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -571,8 +571,12 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(W, H);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-// Higher transmission resolution — dichroic glass needs crisp refraction + dispersion
-renderer.transmissionResolutionScale = 1.5; // above default for clear prismatic effect
+// Glass FBO — ring scene rendered here for custom chromatic refraction
+const _glassFBODpr = Math.min(window.devicePixelRatio, 2);
+const _glassFBO = new THREE.WebGLRenderTarget(
+    W * _glassFBODpr, H * _glassFBODpr,
+    { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter }
+);
 if (CONTAINED) {
     CONTAINER.appendChild(renderer.domElement);
 } else {
@@ -1168,73 +1172,134 @@ const atenReignQuad = new THREE.Mesh(
     new THREE.PlaneGeometry(_atenW, _atenH),
     atenReignMat
 );
-atenReignQuad.position.set(0, 0, -0.02);  // between rings and glass cube
-atenReignQuad.renderOrder = -2;  // after ring meshes (-10 to -4), before glass (0)
+atenReignQuad.position.set(0, 0, 0.15);  // in front of glass cube
+atenReignQuad.renderOrder = 2;  // after glass cube (0), beams render on top
 scene.add(atenReignQuad);
 
 // ═══════════════════════════════════════════════════════════════
-// 3D GLASS KAABA CUBE — real MeshPhysicalMaterial with transmission
+// 3D GLASS KAABA CUBE — Custom FBO chromatic refraction
 // "the glass as if it were a pearly white star" — Quran 24:35
-// The cube refracts the Turrell rings and light beams behind it,
-// making the beams appear to originate from within the glass.
+// Uses screen-space refraction with per-channel IOR offset for
+// true prismatic dispersion. The rings behind the glass appear
+// to split into rainbow colors at the cube edges.
 // ═══════════════════════════════════════════════════════════════
 
-// ── PRODUCT PHOTOGRAPHY LIGHTING — designed for dichroic glass ──
-// Three-point setup with strong key for edge catches, fill to prevent
-// dead faces, and rim for silhouette definition. The glass cube needs
-// high-contrast lighting to show its Fresnel edges and iridescence.
-const _glassAmbient = new THREE.AmbientLight(0xffffff, 0.15);
-scene.add(_glassAmbient);
-// Key light — from above-right, moderate intensity for clear edge definition
-const _glassKey = new THREE.DirectionalLight(0xffffff, 1.8);
-_glassKey.position.set(3, 5, 4);
-scene.add(_glassKey);
-// Fill light — from below-left, lifts shadow side gently
-const _glassFill = new THREE.DirectionalLight(0xe8ecff, 0.4);
-_glassFill.position.set(-3, -2, 3);
-scene.add(_glassFill);
-// Rim light — from behind, defines silhouette
-const _glassRim = new THREE.DirectionalLight(0xffffff, 1.2);
-_glassRim.position.set(0, 3, -5);
-scene.add(_glassRim);
+// No Three.js lights needed — glass uses custom screen-space shader
 
-// Cube size — refined scale: prominent but not dominant
 const _glassCubeSide = 0.272;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
-// ── GLASS PRISM CUBE ──
-// Reference: dichroic prism cubes — perfectly clear glass, no color of its own.
-// The glass reads through sharp Fresnel edge catches + visible ring refraction.
-const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(1.0, 1.0, 1.0),       // pure white — colorless glass
-    metalness: 0,
-    roughness: 0.0,            // perfect polish — crisp edge highlights
-    transmission: 0.98,        // near-invisible body — rings show through undimmed
-    thickness: 0.8,            // proportional to 0.272 WU cube
-    ior: 1.52,                 // optical glass (BK7) — subtle but real distortion
-    transparent: true,
+
+// ── CUSTOM GLASS SHADER ──
+// Technique: render rings to FBO, sample FBO with per-channel IOR offsets
+// Inspired by drei-vanilla MeshTransmissionMaterial + Maxime Heckel's dispersion
+const GLASS_VERT = `
+    varying vec3 vWorldNormal;
+    varying vec3 vViewDir;
+    varying vec4 vProjected;
+    void main() {
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        vViewDir = normalize(cameraPosition - worldPos.xyz);
+        vec4 projected = projectionMatrix * viewMatrix * worldPos;
+        vProjected = projected;
+        gl_Position = projected;
+    }
+`;
+
+const GLASS_FRAG = `
+    uniform sampler2D uFBO;
+    uniform float uIOR;
+    uniform float uChromatic;
+    uniform float uRefractPower;
+    uniform float uFresnelPower;
+    uniform float uTime;
+    varying vec3 vWorldNormal;
+    varying vec3 vViewDir;
+    varying vec4 vProjected;
+
+    // Cosine palette iridescence — rainbow hue from view angle
+    vec3 iridescentColor(float t) {
+        vec3 a = vec3(0.5, 0.5, 0.5);
+        vec3 b = vec3(0.5, 0.5, 0.5);
+        vec3 c = vec3(1.0, 1.0, 1.0);
+        vec3 d = vec3(0.0, 0.33, 0.67);
+        return a + b * cos(6.28318 * (c * t + d));
+    }
+
+    void main() {
+        vec3 normal = normalize(vWorldNormal);
+        vec3 viewDir = normalize(vViewDir);
+
+        // Screen-space UV from projected position (camera-independent)
+        vec2 screenUV = (vProjected.xy / vProjected.w) * 0.5 + 0.5;
+
+        // Fresnel — strong edge glow defines the glass silhouette
+        float cosTheta = abs(dot(viewDir, normal));
+        float fresnel = pow(1.0 - cosTheta, uFresnelPower);
+
+        // Per-channel refraction — each channel bends at different IOR
+        // This creates visible chromatic dispersion at cube edges
+        float iorR = 1.0 / uIOR;
+        float iorG = 1.0 / (uIOR + uChromatic);
+        float iorB = 1.0 / (uIOR + uChromatic * 2.0);
+
+        vec3 refR = refract(-viewDir, normal, iorR);
+        vec3 refG = refract(-viewDir, normal, iorG);
+        vec3 refB = refract(-viewDir, normal, iorB);
+
+        // Project refracted rays to screen UV offsets
+        vec2 uvR = screenUV + refR.xy * uRefractPower;
+        vec2 uvG = screenUV + refG.xy * uRefractPower;
+        vec2 uvB = screenUV + refB.xy * uRefractPower;
+
+        // Sample the FBO (rings behind the glass)
+        float r = texture2D(uFBO, uvR).r;
+        float g = texture2D(uFBO, uvG).g;
+        float b = texture2D(uFBO, uvB).b;
+        vec3 refracted = vec3(r, g, b);
+
+        // Iridescent edge color — dichroic rainbow shift
+        float iriT = cosTheta * 0.6 + uTime * 0.015;
+        vec3 iriColor = iridescentColor(iriT);
+
+        // Edge highlight: mix white Fresnel + iridescent color
+        vec3 edgeColor = mix(vec3(1.0, 1.0, 1.0), iriColor, 0.6);
+
+        // Final: refracted rings + Fresnel edge glow with iridescence
+        vec3 color = mix(refracted, edgeColor, fresnel * 0.4);
+
+        // Subtle edge brightness lift for glass edge catches
+        color += fresnel * 0.06;
+
+        gl_FragColor = vec4(color, 1.0);
+    }
+`;
+
+const _glassCubeMat = new THREE.ShaderMaterial({
+    uniforms: {
+        uFBO:          { value: _glassFBO.texture },
+        uIOR:          { value: 1.45 },           // glass IOR — lower = more visible refraction
+        uChromatic:    { value: 0.12 },           // chromatic aberration strength
+        uRefractPower: { value: 0.3 },            // how much UV shifts per refraction
+        uFresnelPower: { value: 3.5 },            // edge glow falloff
+        uTime:         { value: 0.0 },
+    },
+    vertexShader: GLASS_VERT,
+    fragmentShader: GLASS_FRAG,
+    transparent: false,    // opaque — shows refracted scene, not transparent
+    depthTest: true,
+    depthWrite: true,
     side: THREE.DoubleSide,
-    envMap: _glassEnvMap,
-    envMapIntensity: 2.5,      // strong env reflections — primary shape definition
-    specularIntensity: 2.0,    // visible Fresnel edge catches
-    specularColor: new THREE.Color(1.0, 1.0, 1.0),
-    attenuationColor: new THREE.Color(0.95, 0.97, 1.0),  // barely-there cool tint
-    attenuationDistance: 3.0,   // long distance = very subtle coloring
-    clearcoat: 1.0,            // max clearcoat — crisp glints at edges
-    clearcoatRoughness: 0.0,
-    dispersion: 3.0,           // moderate chromatic aberration at edges
-    iridescence: 0.6,          // subtle dichroic color shift — not overwhelming
-    iridescenceIOR: 1.8,
-    iridescenceThicknessRange: [100, 400],
 });
+
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
-// 3/4 view — camera provides 18° tilt, cube adds remaining rotation
-// Combined angle reads as a natural elevated perspective (like the reference photo)
+// 3/4 view — camera provides 18° tilt, cube adds rotation
 glassCube.rotation.set(
-    THREE.MathUtils.degToRad(18),  // camera 18° + cube 18° = 36° combined tilt
-    Math.PI / 4,                    // 45° — show right face (diamond orientation)
+    THREE.MathUtils.degToRad(18),
+    Math.PI / 4,
     0
 );
-glassCube.position.set(0, 0, 0.1);  // in front of ring quad, behind overlays
+glassCube.position.set(0, 0, 0.1);
 glassCube.renderOrder = 0;
 scene.add(glassCube);
 
@@ -3003,6 +3068,31 @@ function update(timestamp) {
     // Update qibla compass beam
     updateQiblaBeam();
 
+    // ── Glass cube animation — gentle breathing rotation ──
+    // Slow oscillation reveals 3D nature through shifting Fresnel edges
+    const _rotTime = performance.now() * 0.001;
+    glassCube.rotation.y = Math.PI / 4 + Math.sin(_rotTime * 0.25) * 0.06;
+    _glassCubeMat.uniforms.uTime.value = _rotTime;
+
+    // ── Two-pass rendering for glass FBO ──
+    // Pass 1: render ring scene (without glass + beams) to FBO
+    glassCube.visible = false;
+    atenReignQuad.visible = false;
+    // Hide overlay elements during FBO capture
+    for (const hg of handGlows) hg.points.visible = false;
+    centerDot.points.visible = false;
+
+    renderer.setRenderTarget(_glassFBO);
+    renderer.clear();
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+
+    // Pass 2: restore everything and render with composer
+    glassCube.visible = true;
+    atenReignQuad.visible = true;
+    for (const hg of handGlows) hg.points.visible = true;
+    centerDot.points.visible = true;
+
     // Render
     composer.render();
 
@@ -3082,10 +3172,14 @@ function onResize() {
     blurTargetB.setSize(W, H);
     bokehMat.uniforms.uResolution.value.set(W, H);
 
+    // Resize glass FBO to match viewport
+    const _resizeDpr = Math.min(window.devicePixelRatio, 2);
+    _glassFBO.setSize(W * _resizeDpr, H * _resizeDpr);
+
     // Resize beam overlay quad to match perspective frustum
     {
-        // Quad at z=-0.02 — compute visible area at that depth from camera
-        const quadDist = camDist + 0.02;  // distance from camera to quad along view axis
+        // Quad at z=0.15 — in front of glass cube
+        const quadDist = camDist - 0.15;  // distance from camera to quad along view axis
         const halfH = quadDist * Math.tan(THREE.MathUtils.degToRad(camFOV / 2));
         const halfW = halfH * (W / H);
         const aqW = halfW * 2.4;  // 1.2x margin
