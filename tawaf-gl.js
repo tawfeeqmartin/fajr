@@ -1049,8 +1049,8 @@ const ATEN_REIGN_FRAG = `
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
-            // Cube edge in UV space — matches 0.17 WU cube side at 45° rotation
-            float cubeEdge = 0.045;
+            // Cube edge in UV space — matches 0.272 WU cube side at 45° rotation
+            float cubeEdge = 0.072;
 
             // Radial profile: zero inside cube, sharp ramp at the face
             // Creates the illusion of light emerging from the glass surface
@@ -1199,18 +1199,17 @@ _glassRim.position.set(0, 3, -5);
 scene.add(_glassRim);
 
 // Cube size — refined scale: prominent but not dominant
-const _glassCubeSide = 0.17;
+const _glassCubeSide = 0.272;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
 // ── GLASS PRISM CUBE ──
 // Reference: dichroic prism cubes — perfectly clear glass, no color of its own.
 // The glass reads through sharp Fresnel edge catches + visible ring refraction.
-// Smaller cube (0.17 WU) needs stronger specular to define edges at scale.
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(1.0, 1.0, 1.0),       // pure white — colorless glass
     metalness: 0,
     roughness: 0.0,            // perfect polish — crisp edge highlights
     transmission: 0.98,        // near-invisible body — rings show through undimmed
-    thickness: 0.5,            // thinner body = less attenuation at smaller scale
+    thickness: 0.8,            // proportional to 0.272 WU cube
     ior: 1.52,                 // optical glass (BK7) — subtle but real distortion
     transparent: true,
     side: THREE.DoubleSide,
