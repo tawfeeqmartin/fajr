@@ -105,45 +105,45 @@ const PRAYER_PALETTES = {
 // Wider hue spread per prayer for richer simultaneous contrast between bands.
 const PRAYER_RING_PALETTES = {
     fajr: [
-        [188, 65, 52],   // 1st heaven (Adam ﷺ): deep vivid teal — the rich inner ring
-        [196, 40, 68],   // 2nd heaven (Isa & Yahya ﷺ): medium cerulean
-        [206, 34, 72],   // 3rd heaven (Yusuf ﷺ): morning blue
+        [188, 70, 42],   // 1st heaven (Adam ﷺ): deep vivid teal — rich, saturated inner ring
+        [196, 45, 58],   // 2nd heaven (Isa & Yahya ﷺ): medium cerulean
+        [206, 38, 65],   // 3rd heaven (Yusuf ﷺ): morning blue
         [216, 42, 60],   // 4th heaven (Idris ﷺ): steel blue
         [226, 50, 48],   // 5th heaven (Harun ﷺ): deepening azure
         [238, 60, 36],   // 6th heaven (Musa ﷺ): twilight blue
         [250, 68, 26],   // 7th heaven (Ibrahim ﷺ): indigo — Sidrat al-Muntaha
     ],
     dhuhr: [
-        [52,  65, 52],   // 1st heaven: deep gold — rich inner ring
-        [48,  40, 68],   // 2nd heaven: warm gold
-        [42,  34, 72],   // 3rd heaven: golden amber
+        [52,  70, 42],   // 1st heaven: deep gold — rich, saturated inner ring
+        [48,  45, 58],   // 2nd heaven: warm gold
+        [42,  38, 65],   // 3rd heaven: golden amber
         [34,  42, 60],   // 4th heaven: deep amber
         [24,  50, 48],   // 5th heaven: sienna warmth
         [14,  60, 36],   // 6th heaven: burnt umber
         [4,   68, 26],   // 7th heaven: earth depth
     ],
     asr: [
-        [34,  65, 52],   // 1st heaven: deep peach — rich inner ring
-        [28,  40, 68],   // 2nd heaven: warm coral
-        [20,  34, 72],   // 3rd heaven: warm terracotta
+        [34,  70, 42],   // 1st heaven: deep peach — rich, saturated inner ring
+        [28,  45, 58],   // 2nd heaven: warm coral
+        [20,  38, 65],   // 3rd heaven: warm terracotta
         [12,  42, 60],   // 4th heaven: deep terracotta
         [4,   50, 48],   // 5th heaven: deepening rust
         [354, 60, 36],   // 6th heaven: dark rust
         [344, 68, 26],   // 7th heaven: crimson depth
     ],
     maghrib: [
-        [350, 65, 52],   // 1st heaven: deep rose — rich inner ring
-        [344, 40, 68],   // 2nd heaven: warm rose
-        [335, 34, 72],   // 3rd heaven: warm magenta
+        [350, 70, 42],   // 1st heaven: deep rose — rich, saturated inner ring
+        [344, 45, 58],   // 2nd heaven: warm rose
+        [335, 38, 65],   // 3rd heaven: warm magenta
         [326, 42, 60],   // 4th heaven: deep rose
         [316, 50, 48],   // 5th heaven: deepening plum
         [304, 60, 36],   // 6th heaven: dark plum
         [292, 68, 26],   // 7th heaven: purple depth
     ],
     isha: [
-        [280, 65, 52],   // 1st heaven: deep lavender — rich inner ring
-        [274, 40, 68],   // 2nd heaven: warm lavender
-        [266, 34, 72],   // 3rd heaven: warm violet
+        [280, 70, 42],   // 1st heaven: deep lavender — rich, saturated inner ring
+        [274, 45, 58],   // 2nd heaven: warm lavender
+        [266, 38, 65],   // 3rd heaven: warm violet
         [258, 42, 60],   // 4th heaven: violet
         [248, 50, 48],   // 5th heaven: deepening purple
         [238, 60, 36],   // 6th heaven: dark purple
@@ -547,17 +547,22 @@ const frustum = 2; // world units from center to edge vertically
 const radius = frustum * 1.6; // orbital radius in world units — scaled up for larger drawing fill
 
 const scene = new THREE.Scene();
-// No scene.background — Aten Reign quad provides the concentric ring background
+// No scene.background — ring geometry provides the concentric ring background
 scene.background = null;
+// scene.environment enables proper IBL for MeshPhysicalMaterial transmission.
+// Without this, glass transmission has no environment to refract light from,
+// making the cube look opaque/grey instead of transparent.
 
-const camera = new THREE.OrthographicCamera(
-    aspect >= 1 ? -frustum * aspect : -frustum,
-    aspect >= 1 ?  frustum * aspect :  frustum,
-    aspect >= 1 ?  frustum          :  frustum / aspect,
-    aspect >= 1 ? -frustum          : -frustum / aspect,
-    0.1, 100
-);
-camera.position.set(0, 0, 10);
+// ── Perspective Camera ──
+// Subtle depth — inner rings appear slightly larger than outer rings,
+// and the glass cube gains natural 3D presence.
+// FOV 30° from ~7.5 WU distance matches the old ortho frustum (2 WU half-height).
+const camFOV = 30;
+const camTiltDeg = 18;  // elevated angle — shows cube top face clearly, like dichroic prism photo
+const camDist = frustum / Math.tan(THREE.MathUtils.degToRad(camFOV / 2));
+const camTiltRad = THREE.MathUtils.degToRad(camTiltDeg);
+const camera = new THREE.PerspectiveCamera(camFOV, aspect, 0.1, 100);
+camera.position.set(0, Math.sin(camTiltRad) * camDist, Math.cos(camTiltRad) * camDist);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({
@@ -566,8 +571,8 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(W, H);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-// Higher transmission resolution — glass cube needs crisp refraction
-renderer.transmissionResolutionScale = 1.0; // default 0.5 makes glass look blurry
+// Higher transmission resolution — dichroic glass needs crisp refraction + dispersion
+renderer.transmissionResolutionScale = 1.5; // above default for clear prismatic effect
 if (CONTAINED) {
     CONTAINER.appendChild(renderer.domElement);
 } else {
@@ -590,12 +595,14 @@ const _envMat = new THREE.ShaderMaterial({
     fragmentShader: `varying vec3 vWorldPos;
         void main() {
             float y = vWorldPos.y * 0.5 + 0.5; // 0=bottom, 1=top
-            // Warm gradient: golden bottom → cream middle → cool blue top
-            vec3 bottom = vec3(0.95, 0.85, 0.72);
-            vec3 middle = vec3(0.98, 0.96, 0.93);
-            vec3 top = vec3(0.88, 0.92, 0.98);
-            vec3 col = mix(bottom, middle, smoothstep(0.0, 0.5, y));
-            col = mix(col, top, smoothstep(0.5, 1.0, y));
+            // Bright studio gradient — glass reads as clear when the env is mostly light.
+            // Subtle gradient provides just enough variation for edge catches.
+            // Think: softbox-lit studio with bright walls, slightly darker floor.
+            vec3 bottom = vec3(0.5, 0.52, 0.55);    // mid-grey floor — not too dark
+            vec3 middle = vec3(0.75, 0.77, 0.80);   // light grey — subtle transition
+            vec3 top = vec3(1.0, 1.0, 1.0);          // pure white — top highlights
+            vec3 col = mix(bottom, middle, smoothstep(0.0, 0.45, y));
+            col = mix(col, top, smoothstep(0.45, 1.0, y));
             gl_FragColor = vec4(col, 1.0);
         }`,
 });
@@ -603,6 +610,7 @@ _envScene.add(new THREE.Mesh(_envGeo, _envMat));
 const _pmrem = new THREE.PMREMGenerator(renderer);
 const _envRT = _pmrem.fromScene(_envScene, 0, 0.1, 100);
 const _glassEnvMap = _envRT.texture;
+scene.environment = _glassEnvMap;  // enables transmission IBL — glass can now refract ring light
 _pmrem.dispose();
 
 // Post-processing: bloom
@@ -610,9 +618,9 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(W, H),
-    0.12,  // strength — gentle bloom, preserve ring saturation
-    0.4,   // radius — tighter spread
-    0.72   // threshold — high, only beam tips and flare bloom
+    0.18,  // strength — enough bloom for beam glow without washing rings
+    0.5,   // radius — moderate spread for prismatic halo
+    0.65   // threshold — catches beam tips and glass edge catches
 );
 composer.addPass(bloomPass);
 
@@ -1033,105 +1041,92 @@ const ATEN_REIGN_FRAG = `
             color += dirBias * uQiblaAlign * uQiblaBeam * 0.09;
         }
 
-        // ── LIGHT BEAMS — radiate from the glass cube through the rings ──
-        // Beams start at center (inside the 3D glass cube) and extend outward.
-        // The glass cube refracts them via MeshPhysicalMaterial — beams visible
-        // through the glass as distorted light. Brightness builds from center
-        // outward, peaking just outside the cube, then tapering to the tips.
+        // ── PRISMATIC LIGHT BEAMS — dispersed light from the dichroic glass cube ──
+        // Like light through a real prism: beams start as tight white filaments
+        // at the cube face and fan outward with increasing chromatic separation.
+        // Near the cube all three R/G/B channels overlap (reads white/bright).
+        // At the tips the channels separate visibly into rainbow fringe.
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
-            // Chromatic dispersion — increases with distance (prism effect)
-            float dispersion = dist * 0.04;
+            // Cube edge in UV space — matches 0.50 WU cube side at 45° rotation
+            float cubeEdge = 0.13;
 
-            // Beams emerge from the cube edge and build gradually outward
-            float cubeEdge = 0.12;
-            float radialProfile = smoothstep(cubeEdge - 0.02, cubeEdge + 0.14, dist);
+            // Radial profile: zero inside cube, sharp ramp at the face
+            // Creates the illusion of light emerging from the glass surface
+            float radialProfile = smoothstep(cubeEdge * 0.5, cubeEdge + 0.03, dist);
 
-            // Fan-out: razor-thin at cube face, ~12x wider at tips (real prism dispersion)
-            float fanOut = mix(1.0, 0.06, smoothstep(cubeEdge, 0.90, dist));
+            // Chromatic dispersion — increases with distance (real prism physics)
+            // Near cube: channels overlap = white. Far: visible R/G/B separation.
+            float dispersion = dist * dist * 0.25;
 
-            // Ring band boundaries
-            float rb0 = 0.16;   float rb1 = 0.245;  float rb2 = 0.355;
-            float rb3 = 0.465;  float rb4 = 0.585;  float rb5 = 0.750;
+            // Fan-out: beams widen dramatically with distance (angular spread)
+            // At cube face: razor-thin filament. At edge: wide prismatic cone.
+            float fanT = smoothstep(cubeEdge, 1.0, dist);
+            float fanFactor = mix(1.0, 0.015, fanT * fanT);
 
-            // Band collision function: Gaussian flare at ring boundary
-            float bandW = 16.0;
+            // Soft radial taper — beams fade elegantly at their endpoints
+            float taperWidth = 0.08;
 
-            // ── Hour beam — widest, deepest dispersion, fans out most ──
+            // ── Hour beam — widest, most dispersion, warm dominance ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
-            float adH_r = adH + dispersion * 1.3;
-            float adH_b = adH - dispersion * 1.3;
-            float maskH = smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
-            float hBand = exp(-pow((dist - rb0) * bandW, 2.0))
-                        + exp(-pow((dist - rb1) * bandW, 2.0))
-                        + exp(-pow((dist - rb2) * bandW, 2.0))
-                        + exp(-pow((dist - rb3) * bandW, 2.0));
-            float hBoost = 1.0 + hBand * 0.3;
-            // Fan-out: sharp at cube → soft wide at tip
-            float hSharpCore = 400.0 * fanOut;
-            float hSharpGlow = 80.0 * fanOut;
+            float adH_r = adH + dispersion * 2.2;     // red bends least
+            float adH_b = adH - dispersion * 2.2;     // blue bends most
+            float maskH = smoothstep(uHandLens.x + taperWidth, uHandLens.x - taperWidth, dist);
+            float hSharp = 120.0 * fanFactor;
+            float hGlow  = 15.0 * fanFactor;
             vec3 beamH;
-            beamH.r = (exp(-adH_r * adH_r * hSharpCore) * 0.14 + exp(-adH_r * adH_r * hSharpGlow) * 0.04) * hBoost;
-            beamH.g = (exp(-adH   * adH   * hSharpCore * 1.15) * 0.12 + exp(-adH * adH * hSharpGlow * 1.15) * 0.03) * hBoost;
-            beamH.b = (exp(-adH_b * adH_b * hSharpCore) * 0.14 + exp(-adH_b * adH_b * hSharpGlow) * 0.04) * hBoost;
+            beamH.r = exp(-adH_r * adH_r * hSharp) * 0.65 + exp(-adH_r * adH_r * hGlow) * 0.20;
+            beamH.g = exp(-adH   * adH   * hSharp * 1.1) * 0.55 + exp(-adH * adH * hGlow * 1.1) * 0.16;
+            beamH.b = exp(-adH_b * adH_b * hSharp) * 0.65 + exp(-adH_b * adH_b * hGlow) * 0.20;
             color += beamH * maskH * radialProfile * uHandVis;
 
-            // ── Minute beam — tighter at source, fans out through rings ──
+            // ── Minute beam — medium width, moderate dispersion ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
-            float adM_r = adM + dispersion;
-            float adM_b = adM - dispersion;
-            float maskM = smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
-            float mBand = exp(-pow((dist - rb0) * bandW, 2.0))
-                        + exp(-pow((dist - rb1) * bandW, 2.0))
-                        + exp(-pow((dist - rb2) * bandW, 2.0))
-                        + exp(-pow((dist - rb3) * bandW, 2.0))
-                        + exp(-pow((dist - rb4) * bandW, 2.0));
-            float mBoost = 1.0 + mBand * 0.3;
-            float mSharpCore = 600.0 * fanOut;
-            float mSharpGlow = 120.0 * fanOut;
+            float adM_r = adM + dispersion * 1.7;
+            float adM_b = adM - dispersion * 1.7;
+            float maskM = smoothstep(uHandLens.y + taperWidth, uHandLens.y - taperWidth, dist);
+            float mSharp = 220.0 * fanFactor;
+            float mGlow  = 28.0 * fanFactor;
             vec3 beamM;
-            beamM.r = (exp(-adM_r * adM_r * mSharpCore) * 0.12 + exp(-adM_r * adM_r * mSharpGlow) * 0.03) * mBoost;
-            beamM.g = (exp(-adM   * adM   * mSharpCore * 1.12) * 0.10 + exp(-adM * adM * mSharpGlow * 1.12) * 0.025) * mBoost;
-            beamM.b = (exp(-adM_b * adM_b * mSharpCore) * 0.12 + exp(-adM_b * adM_b * mSharpGlow) * 0.03) * mBoost;
+            beamM.r = exp(-adM_r * adM_r * mSharp) * 0.50 + exp(-adM_r * adM_r * mGlow) * 0.16;
+            beamM.g = exp(-adM   * adM   * mSharp * 1.1) * 0.42 + exp(-adM * adM * mGlow * 1.1) * 0.13;
+            beamM.b = exp(-adM_b * adM_b * mSharp) * 0.50 + exp(-adM_b * adM_b * mGlow) * 0.16;
             color += beamM * maskM * radialProfile * uHandVis;
 
-            // ── Second beam — starts razor-thin, fans to visible width ──
+            // ── Second beam — thinnest, fastest, with prismatic sparkle ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
-            float adS_r = adS + dispersion * 0.8;
-            float adS_b = adS - dispersion * 0.8;
-            float maskS = smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
-            float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
-            hSparkle = hSparkle * 0.12 + 0.88;
-            float sBand = exp(-pow((dist - rb0) * bandW, 2.0))
-                        + exp(-pow((dist - rb1) * bandW, 2.0))
-                        + exp(-pow((dist - rb2) * bandW, 2.0))
-                        + exp(-pow((dist - rb3) * bandW, 2.0))
-                        + exp(-pow((dist - rb4) * bandW, 2.0))
-                        + exp(-pow((dist - rb5) * bandW, 2.0));
-            float sBoost = 1.0 + sBand * 0.25;
-            float sSharpCore = 1200.0 * fanOut;
-            float sSharpGlow = 240.0 * fanOut;
+            float adS_r = adS + dispersion * 1.3;
+            float adS_b = adS - dispersion * 1.3;
+            float maskS = smoothstep(uHandLens.z + taperWidth, uHandLens.z - taperWidth, dist);
+            // Prismatic sparkle — like light catching microfacets in the beam
+            float sparkle = sin(dist * 55.0 + uTime * 7.0) * 0.5 + 0.5;
+            sparkle = sparkle * 0.15 + 0.85;
+            float sSharp = 400.0 * fanFactor;
+            float sGlow  = 50.0 * fanFactor;
             vec3 beamS;
-            beamS.r = (exp(-adS_r * adS_r * sSharpCore) * 0.10 + exp(-adS_r * adS_r * sSharpGlow) * 0.025) * sBoost;
-            beamS.g = (exp(-adS   * adS   * sSharpCore * 1.1) * 0.08 + exp(-adS * adS * sSharpGlow * 1.1) * 0.02) * sBoost;
-            beamS.b = (exp(-adS_b * adS_b * sSharpCore) * 0.10 + exp(-adS_b * adS_b * sSharpGlow) * 0.025) * sBoost;
-            color += beamS * maskS * radialProfile * uHandVis * hSparkle;
+            beamS.r = exp(-adS_r * adS_r * sSharp) * 0.40 + exp(-adS_r * adS_r * sGlow) * 0.12;
+            beamS.g = exp(-adS   * adS   * sSharp * 1.1) * 0.34 + exp(-adS * adS * sGlow * 1.1) * 0.10;
+            beamS.b = exp(-adS_b * adS_b * sSharp) * 0.40 + exp(-adS_b * adS_b * sGlow) * 0.12;
+            color += beamS * maskS * radialProfile * uHandVis * sparkle;
 
-            // ── Ring illumination — bands brighten where beams cross them ──
-            float beamHit = exp(-adH * adH * 50.0) * maskH
-                          + exp(-adM * adM * 70.0) * maskM
-                          + exp(-adS * adS * 90.0) * maskS;
-            float ringResponse = (exp(-pow((dist - rb0) * 12.0, 2.0))
-                               +  exp(-pow((dist - rb1) * 12.0, 2.0))
-                               +  exp(-pow((dist - rb2) * 12.0, 2.0))
-                               +  exp(-pow((dist - rb3) * 12.0, 2.0))
-                               +  exp(-pow((dist - rb4) * 12.0, 2.0))
-                               +  exp(-pow((dist - rb5) * 12.0, 2.0)));
-            color += beamHit * ringResponse * 0.03 * uHandVis;
+            // ── Ring brightening at beam-ring intersections ──
+            // Each beam crossing a ring boundary creates a visible flare
+            float beamPresence = exp(-adH * adH * 25.0) * maskH
+                               + exp(-adM * adM * 35.0) * maskM
+                               + exp(-adS * adS * 50.0) * maskS;
+            float rb0 = 0.18; float rb1 = 0.27; float rb2 = 0.38;
+            float rb3 = 0.49; float rb4 = 0.60; float rb5 = 0.77;
+            float ringBright = exp(-pow((dist - rb0) * 9.0, 2.0))
+                             + exp(-pow((dist - rb1) * 9.0, 2.0))
+                             + exp(-pow((dist - rb2) * 9.0, 2.0))
+                             + exp(-pow((dist - rb3) * 9.0, 2.0))
+                             + exp(-pow((dist - rb4) * 9.0, 2.0))
+                             + exp(-pow((dist - rb5) * 9.0, 2.0));
+            color += beamPresence * ringBright * 0.10 * uHandVis;
         }
 
         // Alpha: beam brightness determines opacity (additive blending)
@@ -1164,9 +1159,11 @@ const atenReignMat = new THREE.ShaderMaterial({
 
 // Beam overlay quad — in front of rings, behind glass cube
 // This quad renders ONLY beam hands + qibla beam, additively on top of ring geometry
-const _atenAspect = W / H;
-const _atenW = frustum * (_atenAspect >= 1 ? _atenAspect : 1) * 2.4;
-const _atenH = frustum * (_atenAspect >= 1 ? 1 : 1 / _atenAspect) * 2.4;
+// Sized to fill the perspective frustum at quad depth (z=-0.02)
+const _atenQuadDist = camDist + 0.02;
+const _atenHalfH = _atenQuadDist * Math.tan(THREE.MathUtils.degToRad(camFOV / 2));
+const _atenW = _atenHalfH * (W / H) * 2.4;
+const _atenH = _atenHalfH * 2.4;
 const atenReignQuad = new THREE.Mesh(
     new THREE.PlaneGeometry(_atenW, _atenH),
     atenReignMat
@@ -1182,49 +1179,70 @@ scene.add(atenReignQuad);
 // making the beams appear to originate from within the glass.
 // ═══════════════════════════════════════════════════════════════
 
-// Scene lights — minimal! Glass should be nearly invisible except edges.
-// The point light INSIDE the cube sells it as "source of light"
-const _glassAmbient = new THREE.AmbientLight(0xffffff, 0.08);
+// ── PRODUCT PHOTOGRAPHY LIGHTING — designed for dichroic glass ──
+// Three-point setup with strong key for edge catches, fill to prevent
+// dead faces, and rim for silhouette definition. The glass cube needs
+// high-contrast lighting to show its Fresnel edges and iridescence.
+const _glassAmbient = new THREE.AmbientLight(0xffffff, 0.15);
 scene.add(_glassAmbient);
-// Single key light — catches just the top-right edge for glass read
-const _glassKey = new THREE.DirectionalLight(0xffffff, 0.3);
-_glassKey.position.set(1, 2, 4);
+// Key light — from above-right for Fresnel edge catches (not too hot — preserve transparency)
+const _glassKey = new THREE.DirectionalLight(0xffffff, 2.8);
+_glassKey.position.set(3, 6, 4);
 scene.add(_glassKey);
-// Inner point light — subtle warm core visible through frosted glass
-// Not a blast of light — just enough to give the cube a warm center
-const _innerLight = new THREE.PointLight(0xfff4e0, 0.25, 0.8, 2);
-_innerLight.position.set(0, 0, 0.1);  // at cube center
+// Fill light — from below-left, lifts shadow side
+const _glassFill = new THREE.DirectionalLight(0xe8ecff, 0.6);
+_glassFill.position.set(-3, -2, 3);
+scene.add(_glassFill);
+// Rim light — from behind, strong silhouette edge definition
+const _glassRim = new THREE.DirectionalLight(0xffffff, 2.0);
+_glassRim.position.set(0, 3, -5);
+scene.add(_glassRim);
+// Side accent — catches edges the key light misses
+const _glassSide = new THREE.DirectionalLight(0xfff8f0, 1.0);
+_glassSide.position.set(-4, 1, 1);
+scene.add(_glassSide);
+// Inner point light — prayer-tinted core glow visible through glass
+const _innerLight = new THREE.PointLight(0xfff4e0, 0.5, 1.0, 2);
+_innerLight.position.set(0, 0, 0.1);
 scene.add(_innerLight);
 
-// Cube size — matches the shader prism diamond footprint
-// Shader diamond: manhattan dist 0.095 in UV ≈ 0.19 WU half-diagonal
-// For isometric cube rotated 45°, side ≈ 0.27 WU
-const _glassCubeSide = 0.30;
+// Cube size — large enough to be the visual protagonist at center
+const _glassCubeSide = 0.50;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
+// ── DICHROIC BEAM-SPLITTER PRISM ──
+// Reference: real dichroic prism cubes — clear glass, no color of its own.
+// Color happens at internal faces where light splits. Sharp Fresnel edges
+// define the shape; strong iridescence creates the dichroic color-shift.
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(0.98, 0.98, 0.98),   // near-white — colorless glass
+    color: new THREE.Color(1.0, 1.0, 1.0),       // pure white — colorless glass
     metalness: 0,
-    roughness: 0.15,           // clearer glass — real geometry behind needs sharper refraction
-    transmission: 0.92,        // highly transmissive — see rings clearly through glass
-    thickness: 0.8,            // moderate — enough IOR distortion without washing out
-    ior: 1.52,                 // crown glass — visible refraction of the ring geometry behind
+    roughness: 0.01,           // near-perfect polish — maximum Fresnel edge definition
+    transmission: 0.95,        // very clear — rings visible through glass with slight body
+    thickness: 1.5,            // enough body for visible IOR bending of the rings behind
+    ior: 1.9,                  // high — visible refraction distortion of rings through glass
     transparent: true,
     side: THREE.DoubleSide,
-    envMap: _glassEnvMap,      // procedural gradient — Fresnel edges catch soft highlights
-    envMapIntensity: 0.35,     // environment reflections define glass edges
-    specularIntensity: 1.5,    // strong Fresnel edges — this is how glass reads
-    specularColor: new THREE.Color(1.0, 1.0, 1.0),   // neutral specular
-    attenuationColor: new THREE.Color(0.90, 0.92, 0.96),  // faint cool tint inside glass
-    attenuationDistance: 0.4,  // visible body — glass has presence
-    emissive: new THREE.Color(0.0, 0.0, 0.0),     // NO self-illumination
-    emissiveIntensity: 0.0,    // glass is transparent, not a light source
+    envMap: _glassEnvMap,
+    envMapIntensity: 1.8,      // strong — crisp white edge catches define the glass shape
+    specularIntensity: 3.0,    // bright Fresnel edges — primary shape definition
+    specularColor: new THREE.Color(1.0, 1.0, 1.0),
+    attenuationColor: new THREE.Color(0.90, 0.93, 1.0),  // cool tint visible through body
+    attenuationDistance: 2.0,   // moderate — subtle coloring through glass body
+    // ── Edge definition ──
+    clearcoat: 0.8,            // sharp edge glints on top of transmission
+    clearcoatRoughness: 0.02,
+    // ── Dichroic properties — the soul of the effect ──
+    dispersion: 5.0,           // strong chromatic aberration — visible rainbow at edges
+    iridescence: 1.0,          // full dichroic — maximum angle-dependent color shift
+    iridescenceIOR: 2.2,       // strong RGB separation
+    iridescenceThicknessRange: [100, 600],  // wide thin-film range — richer color variety
 });
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
-// Isometric 3/4 view: top vertex points up, right and top faces visible
-// Classic isometric: rotate Y by 45°, then X by atan(1/√2) ≈ 35.264°
+// 3/4 view — camera provides 18° tilt, cube adds remaining rotation
+// Combined angle reads as a natural elevated perspective (like the reference photo)
 glassCube.rotation.set(
-    Math.atan(1 / Math.SQRT2),  // ~35.264° — tilt to show top face
-    Math.PI / 4,                 // 45° — show right face
+    THREE.MathUtils.degToRad(18),  // camera 18° + cube 18° = 36° combined tilt
+    Math.PI / 4,                    // 45° — show right face (diamond orientation)
     0
 );
 glassCube.position.set(0, 0, 0.1);  // in front of ring quad, behind overlays
@@ -1320,9 +1338,9 @@ for (let i = 0; i < 7; i++) {
         },
         vertexShader: RING_VERT,
         fragmentShader: RING_FRAG,
-        transparent: true,
-        depthTest: false,
-        depthWrite: false,
+        transparent: false,       // opaque — glass transmission pass needs these
+        depthTest: true,          // depth-tested — glass cube refracts them at correct Z
+        depthWrite: true,
         side: THREE.DoubleSide,
     });
 
@@ -3038,19 +3056,8 @@ function onResize() {
     W = _isFullscreen ? canvasEl.clientWidth : (CONTAINED ? CONTAINER.clientWidth : window.innerWidth);
     H = _isFullscreen ? canvasEl.clientHeight : (CONTAINED ? CONTAINER.clientHeight : window.innerHeight);
     const aspect = W / H;
-    if (aspect >= 1) {
-        // Landscape / square — fit vertically, expand horizontally
-        camera.left   = -frustum * aspect;
-        camera.right  =  frustum * aspect;
-        camera.top    =  frustum;
-        camera.bottom = -frustum;
-    } else {
-        // Portrait (fullscreen phone) — fit horizontally, expand vertically
-        camera.left   = -frustum;
-        camera.right  =  frustum;
-        camera.top    =  frustum / aspect;
-        camera.bottom = -frustum / aspect;
-    }
+    // Perspective camera — just update aspect ratio
+    camera.aspect = aspect;
 
     // Center clock within safe area (accounts for notch + gesture bar)
     if (_isFullscreen) {
@@ -3063,12 +3070,15 @@ function onResize() {
         m.style.bottom = 'env(safe-area-inset-bottom, 0px)';
         const safeBottom = window.innerHeight - m.getBoundingClientRect().top;
         document.body.removeChild(m);
-        // Shift frustum so scene center aligns with safe area center
-        const offsetPx = (safeTop - safeBottom) / 2; // positive = shift scene down
-        const frustumH = camera.top - camera.bottom;
-        const offsetWorld = offsetPx / H * frustumH;
-        camera.top    -= offsetWorld;
-        camera.bottom -= offsetWorld;
+        // Shift camera target to compensate for safe area offset
+        const offsetPx = (safeTop - safeBottom) / 2;
+        const visH = 2 * camDist * Math.tan(THREE.MathUtils.degToRad(camFOV / 2));
+        const offsetWorld = offsetPx / H * visH;
+        camera.position.set(0, Math.sin(camTiltRad) * camDist - offsetWorld, Math.cos(camTiltRad) * camDist);
+        camera.lookAt(0, -offsetWorld, 0);
+    } else {
+        camera.position.set(0, Math.sin(camTiltRad) * camDist, Math.cos(camTiltRad) * camDist);
+        camera.lookAt(0, 0, 0);
     }
 
     camera.updateProjectionMatrix();
@@ -3085,11 +3095,14 @@ function onResize() {
     blurTargetB.setSize(W, H);
     bokehMat.uniforms.uResolution.value.set(W, H);
 
-    // Resize beam overlay quad to match new frustum
+    // Resize beam overlay quad to match perspective frustum
     {
-        const newAspect = W / H;
-        const aqW = frustum * (newAspect >= 1 ? newAspect : 1) * 2.4;
-        const aqH = frustum * (newAspect >= 1 ? 1 : 1 / newAspect) * 2.4;
+        // Quad at z=-0.02 — compute visible area at that depth from camera
+        const quadDist = camDist + 0.02;  // distance from camera to quad along view axis
+        const halfH = quadDist * Math.tan(THREE.MathUtils.degToRad(camFOV / 2));
+        const halfW = halfH * (W / H);
+        const aqW = halfW * 2.4;  // 1.2x margin
+        const aqH = halfH * 2.4;
         atenReignQuad.geometry.dispose();
         atenReignQuad.geometry = new THREE.PlaneGeometry(aqW, aqH);
     }
