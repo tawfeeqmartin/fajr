@@ -268,10 +268,10 @@ function getMoonPhase(date) {
 function isLaylatulQadr(ramadanDay) { return ramadanDay >= 21 && ramadanDay % 2 === 1; }
 function isJumuah(date) { return date.getDay() === 5; }
 
-// LA fallback times (used when window._prayerTimings is not yet populated)
+// LA fallback times (Feb/Mar 2026 — used when window._prayerTimings is not yet populated)
 const _LA_FALLBACK_TIMES = {
-    fajr: { h: 5, m: 15 }, dhuhr: { h: 12, m: 10 },
-    asr: { h: 15, m: 40 }, maghrib: { h: 18, m: 5 }, isha: { h: 19, m: 25 },
+    fajr: { h: 5, m: 22 }, dhuhr: { h: 12, m: 13 },
+    asr: { h: 15, m: 33 }, maghrib: { h: 17, m: 52 }, isha: { h: 19, m: 8 },
 };
 
 function getPrayerTimes() {
@@ -2384,9 +2384,12 @@ function update(timestamp) {
         if (manualSeedOffset > 0) modVars.dateStr = `${vars.dateStr}-v${manualSeedOffset}`;
         artwork = generateArtwork(modVars);
         if (THEME_MODE === 'orbiter') buildTraceGeometry(artwork);
+        // Always update palette on prayer change — fixes flash when API times
+        // differ from fallback times (e.g. maghrib→isha, both "night")
+        applyDayNight();
     }
 
-    // Detect day/night transition
+    // Detect day/night transition (bloom/theme presets)
     const dayNight = isNightTime() ? 'night' : 'day';
     if (dayNight !== lastDayNight) {
         if (THEME_MODE === 'orbiter' && lastDayNight !== null && artwork) {
