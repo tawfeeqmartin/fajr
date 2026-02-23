@@ -2516,6 +2516,26 @@ function onResize() {
         camera.top    =  frustum / aspect;
         camera.bottom = -frustum / aspect;
     }
+
+    // Center clock within safe area (accounts for notch + gesture bar)
+    if (_isFullscreen) {
+        const m = document.createElement('div');
+        m.style.cssText = 'position:fixed;left:0;width:0;visibility:hidden;pointer-events:none';
+        m.style.top = 'env(safe-area-inset-top, 0px)';
+        document.body.appendChild(m);
+        const safeTop = m.getBoundingClientRect().top;
+        m.style.top = 'auto';
+        m.style.bottom = 'env(safe-area-inset-bottom, 0px)';
+        const safeBottom = window.innerHeight - m.getBoundingClientRect().top;
+        document.body.removeChild(m);
+        // Shift frustum so scene center aligns with safe area center
+        const offsetPx = (safeTop - safeBottom) / 2; // positive = shift scene down
+        const frustumH = camera.top - camera.bottom;
+        const offsetWorld = offsetPx / H * frustumH;
+        camera.top    -= offsetWorld;
+        camera.bottom -= offsetWorld;
+    }
+
     camera.updateProjectionMatrix();
     renderer.setSize(W, H);
     composer.setSize(W, H);
