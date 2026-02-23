@@ -1518,7 +1518,8 @@ function fsNextDial() {
 }
 
 function fsUpdateModeIcon() {
-  document.getElementById('fsModeIcon').innerHTML = fsNight ? SUN_SVG : MOON_SVG;
+  const el = document.getElementById('fsModeIcon');
+  if(el) el.innerHTML = fsNight ? SUN_SVG : MOON_SVG;
 }
 
 // Live clock for fullscreen header
