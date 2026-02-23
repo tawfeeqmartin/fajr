@@ -1969,8 +1969,16 @@ function updateClockHands(now, night, blending) {
 
     // Trail colors: prayer palette gradient from transparent (old) to bright (new)
     const epiDrawCount = Math.min(epicycleTrailCount, EPICYCLE_TRAIL_MAX);
-    // Epicycle trail: Kaaba outline — complementary color (Turrell simultaneous contrast)
-    const compH = ((palette.h + 180) % 360) / 360;
+    // Epicycle trail: Kaaba outline — curated contrasting hue (Turrell simultaneous contrast)
+    // Hand-picked per prayer to avoid monotonous green while maintaining visual tension
+    const KAABA_CONTRAST = {
+        fajr:    35,   // warm amber against cerulean rings
+        dhuhr:   225,  // sapphire blue against golden rings
+        asr:     238,  // blue-violet against coral rings
+        maghrib: 218,  // deep blue against rose rings
+        isha:    38,   // warm gold against violet rings
+    };
+    const compH = (KAABA_CONTRAST[artwork.prayerPeriod] || ((palette.h + 180) % 360)) / 360;
     const compS = Math.min(palette.s + 10, 65) / 100;  // richer than rings — the contrast needs to read
     const compL = 0.48;  // mid-luminous — colored light, not flat pigment
     const _compColor = new THREE.Color().setHSL(compH, compS, compL);
