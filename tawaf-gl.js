@@ -1049,8 +1049,8 @@ const ATEN_REIGN_FRAG = `
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
-            // Cube edge in UV space — matches 0.50 WU cube side at 45° rotation
-            float cubeEdge = 0.13;
+            // Cube edge in UV space — matches 0.17 WU cube side at 45° rotation
+            float cubeEdge = 0.045;
 
             // Radial profile: zero inside cube, sharp ramp at the face
             // Creates the illusion of light emerging from the glass surface
@@ -1185,57 +1185,47 @@ scene.add(atenReignQuad);
 // high-contrast lighting to show its Fresnel edges and iridescence.
 const _glassAmbient = new THREE.AmbientLight(0xffffff, 0.15);
 scene.add(_glassAmbient);
-// Key light — from above-right for Fresnel edge catches (not too hot — preserve transparency)
-const _glassKey = new THREE.DirectionalLight(0xffffff, 2.8);
-_glassKey.position.set(3, 6, 4);
+// Key light — from above-right, moderate intensity for clear edge definition
+const _glassKey = new THREE.DirectionalLight(0xffffff, 1.8);
+_glassKey.position.set(3, 5, 4);
 scene.add(_glassKey);
-// Fill light — from below-left, lifts shadow side
-const _glassFill = new THREE.DirectionalLight(0xe8ecff, 0.6);
+// Fill light — from below-left, lifts shadow side gently
+const _glassFill = new THREE.DirectionalLight(0xe8ecff, 0.4);
 _glassFill.position.set(-3, -2, 3);
 scene.add(_glassFill);
-// Rim light — from behind, strong silhouette edge definition
-const _glassRim = new THREE.DirectionalLight(0xffffff, 2.0);
+// Rim light — from behind, defines silhouette
+const _glassRim = new THREE.DirectionalLight(0xffffff, 1.2);
 _glassRim.position.set(0, 3, -5);
 scene.add(_glassRim);
-// Side accent — catches edges the key light misses
-const _glassSide = new THREE.DirectionalLight(0xfff8f0, 1.0);
-_glassSide.position.set(-4, 1, 1);
-scene.add(_glassSide);
-// Inner point light — prayer-tinted core glow visible through glass
-const _innerLight = new THREE.PointLight(0xfff4e0, 0.5, 1.0, 2);
-_innerLight.position.set(0, 0, 0.1);
-scene.add(_innerLight);
 
-// Cube size — large enough to be the visual protagonist at center
-const _glassCubeSide = 0.50;
+// Cube size — refined scale: prominent but not dominant
+const _glassCubeSide = 0.17;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
-// ── DICHROIC BEAM-SPLITTER PRISM ──
-// Reference: real dichroic prism cubes — clear glass, no color of its own.
-// Color happens at internal faces where light splits. Sharp Fresnel edges
-// define the shape; strong iridescence creates the dichroic color-shift.
+// ── GLASS PRISM CUBE ──
+// Reference: dichroic prism cubes — perfectly clear glass, no color of its own.
+// The glass reads through sharp Fresnel edge catches + visible ring refraction.
+// Smaller cube (0.17 WU) needs stronger specular to define edges at scale.
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(1.0, 1.0, 1.0),       // pure white — colorless glass
     metalness: 0,
-    roughness: 0.01,           // near-perfect polish — maximum Fresnel edge definition
-    transmission: 0.95,        // very clear — rings visible through glass with slight body
-    thickness: 1.5,            // enough body for visible IOR bending of the rings behind
-    ior: 1.9,                  // high — visible refraction distortion of rings through glass
+    roughness: 0.0,            // perfect polish — crisp edge highlights
+    transmission: 0.98,        // near-invisible body — rings show through undimmed
+    thickness: 0.5,            // thinner body = less attenuation at smaller scale
+    ior: 1.52,                 // optical glass (BK7) — subtle but real distortion
     transparent: true,
     side: THREE.DoubleSide,
     envMap: _glassEnvMap,
-    envMapIntensity: 1.8,      // strong — crisp white edge catches define the glass shape
-    specularIntensity: 3.0,    // bright Fresnel edges — primary shape definition
+    envMapIntensity: 2.5,      // strong env reflections — primary shape definition
+    specularIntensity: 2.0,    // visible Fresnel edge catches
     specularColor: new THREE.Color(1.0, 1.0, 1.0),
-    attenuationColor: new THREE.Color(0.90, 0.93, 1.0),  // cool tint visible through body
-    attenuationDistance: 2.0,   // moderate — subtle coloring through glass body
-    // ── Edge definition ──
-    clearcoat: 0.8,            // sharp edge glints on top of transmission
-    clearcoatRoughness: 0.02,
-    // ── Dichroic properties — the soul of the effect ──
-    dispersion: 5.0,           // strong chromatic aberration — visible rainbow at edges
-    iridescence: 1.0,          // full dichroic — maximum angle-dependent color shift
-    iridescenceIOR: 2.2,       // strong RGB separation
-    iridescenceThicknessRange: [100, 600],  // wide thin-film range — richer color variety
+    attenuationColor: new THREE.Color(0.95, 0.97, 1.0),  // barely-there cool tint
+    attenuationDistance: 3.0,   // long distance = very subtle coloring
+    clearcoat: 1.0,            // max clearcoat — crisp glints at edges
+    clearcoatRoughness: 0.0,
+    dispersion: 3.0,           // moderate chromatic aberration at edges
+    iridescence: 0.6,          // subtle dichroic color shift — not overwhelming
+    iridescenceIOR: 1.8,
+    iridescenceThicknessRange: [100, 400],
 });
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
 // 3/4 view — camera provides 18° tilt, cube adds remaining rotation
@@ -2249,8 +2239,11 @@ function triggerTawafFlare(sourceX, sourceY) {
 
     // ── Compute screen-space UV for the post-processing shader flare ──
     // Project world position → NDC → UV (0,0 = bottom-left, 1,1 = top-right)
-    const uvX = (sourceX - camera.left) / (camera.right - camera.left);
-    const uvY = (sourceY - camera.bottom) / (camera.top - camera.bottom);
+    // Use Three.js vector projection for perspective camera compatibility
+    const _flareVec = new THREE.Vector3(sourceX, sourceY, 0);
+    _flareVec.project(camera); // world → NDC (-1 to 1)
+    const uvX = (_flareVec.x + 1) * 0.5;
+    const uvY = (_flareVec.y + 1) * 0.5;
     vignettePass.uniforms.uFlarePos.value.set(uvX, uvY);
 
     // Tint flare to current prayer palette
@@ -2578,11 +2571,6 @@ function applyDayNight() {
     }
 
     // scene.background stays null — ring meshes provide the background
-
-    // ── Inner point light — subtle warm core visible through frosted glass ──
-    // Uses r0 hue but much lower saturation/lightness — understated, not nuclear
-    _ringColor.setHSL(rings[0][0] / 360, rings[0][1] * 0.4 / 100, rings[0][2] * 0.6 / 100);
-    _innerLight.color.copy(_ringColor);
 
     // Bloom — near-zero. Turrell light is perceptually uniform. No point-source glow.
     bloomPass.strength = preset.bloomStrength;
