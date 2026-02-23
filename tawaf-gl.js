@@ -1626,45 +1626,57 @@ function handleDeviceOrientation(e) {
 
 // iOS 13+ requires user gesture for DeviceOrientation permission
 let _gyroGranted = false;
-async function requestGyroPermission() {
+
+function _enableGyro() {
+    if (_gyroGranted) return;
+    _gyroGranted = true;
+    window._gyroGranted = true;
+    window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+    // Hide prompt if visible
+    const btn = document.getElementById('gyroPrompt');
+    if (btn) { btn.style.opacity = '0'; setTimeout(() => btn.style.display = 'none', 300); }
+}
+
+function initGyroscope() {
+    if (typeof DeviceOrientationEvent === 'undefined') return;
+
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS: requestPermission() MUST be called directly inside a user gesture handler.
+        // Do NOT wrap in async or call through another function — iOS loses the gesture context.
+        const tryRequest = (e) => {
+            if (_gyroGranted) {
+                document.removeEventListener('click', tryRequest, true);
+                document.removeEventListener('touchstart', tryRequest, true);
+                return;
+            }
+            // Call DIRECTLY — no async wrapper, no intermediate function
+            DeviceOrientationEvent.requestPermission().then(state => {
+                if (state === 'granted') {
+                    _enableGyro();
+                    document.removeEventListener('click', tryRequest, true);
+                    document.removeEventListener('touchstart', tryRequest, true);
+                }
+            }).catch(() => { /* will retry on next tap */ });
+        };
+        // Use touchstart (not touchend) — more reliable gesture context on iOS
+        document.addEventListener('click', tryRequest, true);
+        document.addEventListener('touchstart', tryRequest, true);
+        // Do NOT call requestPermission() here without gesture — iOS will silently deny
+    } else {
+        // Android / desktop — no permission needed
+        _enableGyro();
+    }
+}
+// Expose for fullscreen entry
+window._requestGyroPermission = function() {
     if (_gyroGranted) return;
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-            const perm = await DeviceOrientationEvent.requestPermission();
-            if (perm === 'granted') {
-                _gyroGranted = true;
-                window.addEventListener('deviceorientation', handleDeviceOrientation, true);
-            }
-        } catch (e) { /* denied or not from gesture — will retry on next tap */ }
-    } else if (typeof DeviceOrientationEvent !== 'undefined') {
-        // Android / desktop — no permission needed
-        _gyroGranted = true;
-        window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+        DeviceOrientationEvent.requestPermission().then(state => {
+            if (state === 'granted') _enableGyro();
+        }).catch(() => {});
     }
-}
-function initGyroscope() {
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // iOS: keep retrying on every user interaction until granted
-        const tryRequest = () => {
-            if (_gyroGranted) {
-                document.removeEventListener('click', tryRequest, true);
-                document.removeEventListener('touchend', tryRequest, true);
-                return;
-            }
-            requestGyroPermission();
-        };
-        document.addEventListener('click', tryRequest, true);
-        document.addEventListener('touchend', tryRequest, true);
-        // Also try immediately in case permission was previously granted
-        requestGyroPermission();
-    } else {
-        requestGyroPermission();
-    }
-}
-// Expose so fullscreen entry can also trigger permission request
-window._requestGyroPermission = requestGyroPermission;
+};
 initGyroscope();
 
 // Flare textures — procedural generation

@@ -348,6 +348,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 <div id="clockFullscreen" class="clock-fs-overlay">
   <button id="clockFsClose" class="clock-fs-close" aria-label="Close">&times;</button>
   <div id="fsVersionTag" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + 8px);left:16px;z-index:210;font-family:var(--font);font-size:.6rem;font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.05em;pointer-events:none"></div>
+  <button id="gyroPrompt" style="display:none;position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + 32px);right:16px;z-index:215;font-family:var(--font);font-size:.65rem;font-weight:300;letter-spacing:.04em;color:rgba(232,228,220,.5);background:rgba(0,0,0,.08);border:1px solid rgba(232,228,220,.15);border-radius:20px;padding:6px 14px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s" onclick="if(window._requestGyroPermission)window._requestGyroPermission()">Enable parallax</button>
   <div id="fsHeader" class="fs-header">
     <div class="fs-datetime" id="fsDateTime"></div>
     <div class="fs-location" id="fsLocation"></div>
@@ -1628,6 +1629,13 @@ async function fsFetchPrayer() {
 function openClockFullscreen() {
   // Fullscreen tap is a user gesture — request gyro permission (iOS)
   if(window._requestGyroPermission) window._requestGyroPermission();
+  // Show gyro prompt button if not yet granted
+  const gyroBtn = document.getElementById('gyroPrompt');
+  if(gyroBtn && !window._gyroGranted) {
+    gyroBtn.style.display = 'block';
+    // Auto-hide after 8s if user ignores it
+    setTimeout(() => { if(gyroBtn) gyroBtn.style.opacity = '0'; setTimeout(() => { if(gyroBtn) gyroBtn.style.display = 'none'; }, 300); }, 8000);
+  }
 
   const overlay = document.getElementById('clockFullscreen');
   const canvas = document.querySelector('#dialHero canvas');
@@ -1788,7 +1796,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=44';
+_cs.type='module';_cs.src='tawaf-gl.js?v=45';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
