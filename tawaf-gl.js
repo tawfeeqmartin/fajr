@@ -999,13 +999,17 @@ const ATEN_REIGN_FRAG = `
         // r0 ring boundary pushed outward so it forms a VISIBLE saturated
         // band around the prism (dist 0.095–0.16) before transitioning to r1.
         // This is the Turrell key: the innermost ring is the richest color.
-        vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.16, 0.24, dist));
-        color = mix(color, r2, smoothstep(0.25, 0.35, dist));
-        color = mix(color, r3, smoothstep(0.36, 0.46, dist));
-        color = mix(color, r4, smoothstep(0.47, 0.58, dist));
-        color = mix(color, r5, smoothstep(0.59, 0.74, dist));
-        color = mix(color, r6, smoothstep(0.76, 0.96, dist));
+        // Center is dark/neutral — the 3D glass cube covers this area.
+        // r0 appears as a distinct RING BAND around the cube edge (0.10–0.20),
+        // not flooding the entire center. This gives the Turrell inner-ring read.
+        vec3 centerDark = r0 * 0.3;  // dark version of r0 — neutral but tinted
+        vec3 color = mix(centerDark, r0, smoothstep(0.06, 0.12, dist));
+        color = mix(color, r1, smoothstep(0.18, 0.26, dist));
+        color = mix(color, r2, smoothstep(0.27, 0.37, dist));
+        color = mix(color, r3, smoothstep(0.38, 0.48, dist));
+        color = mix(color, r4, smoothstep(0.49, 0.60, dist));
+        color = mix(color, r5, smoothstep(0.61, 0.76, dist));
+        color = mix(color, r6, smoothstep(0.78, 0.96, dist));
 
         // Chromatic ring splitting is handled by the 3D glass cube's IOR refraction
 
@@ -1016,9 +1020,8 @@ const ATEN_REIGN_FRAG = `
         // ── Subtle center warmth — glass cube sits in a pool of light ──
         // Slight warmth at center makes the glass feel like a light source,
         // not a dark hole. The glass transmission does the contrast work.
-        // Minimal center warmth — the glass cube provides its own presence
-        float centerWarm = 0.015 * exp(-dist * dist * 30.0);
-        color += centerWarm;
+        // No center warmth — the 3D glass cube provides its own presence
+        // Dark center gives the glass contrast to read as glass
 
         // ── Turrell luminance lift at ring boundaries ──
         // Bright seams between color bands — light bleeding between Skyspace panels.
@@ -1265,7 +1268,7 @@ scene.add(atenReignQuad);
 const _glassAmbient = new THREE.AmbientLight(0xffffff, 0.08);
 scene.add(_glassAmbient);
 // Single key light — catches just the top-right edge for glass read
-const _glassKey = new THREE.DirectionalLight(0xffffff, 0.5);
+const _glassKey = new THREE.DirectionalLight(0xffffff, 0.3);
 _glassKey.position.set(1, 2, 4);
 scene.add(_glassKey);
 // Inner point light — subtle warm core visible through frosted glass
@@ -2491,9 +2494,9 @@ function applyDayNight() {
 
     // scene.background stays null — Aten Reign quad handles everything
 
-    // ── Inner point light — tracks the innermost ring color ──
-    // The warm glow visible THROUGH the glass makes the cube feel like the light source
-    _ringColor.setHSL(rings[0][0] / 360, Math.min(rings[0][1] + 15, 80) / 100, rings[0][2] / 100);
+    // ── Inner point light — subtle warm core visible through frosted glass ──
+    // Uses r0 hue but much lower saturation/lightness — understated, not nuclear
+    _ringColor.setHSL(rings[0][0] / 360, rings[0][1] * 0.4 / 100, rings[0][2] * 0.6 / 100);
     _innerLight.color.copy(_ringColor);
 
     // Bloom — near-zero. Turrell light is perceptually uniform. No point-source glow.
