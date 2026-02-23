@@ -101,8 +101,8 @@ const PRAYER_PALETTES = {
 // Lightness descends: L:88 (luminous) → L:32 (deep heaven).
 const PRAYER_RING_PALETTES = {
     fajr: [
-        [190, 25, 88],   // 1st heaven: pale dawn sky
-        [198, 30, 80],   // 2nd heaven: soft cerulean
+        [190, 30, 83],   // 1st heaven: pale dawn sky (more visible color)
+        [198, 32, 78],   // 2nd heaven: soft cerulean
         [206, 36, 72],   // 3rd heaven: morning blue
         [214, 42, 63],   // 4th heaven: steel blue
         [222, 48, 53],   // 5th heaven: deepening azure
@@ -110,8 +110,8 @@ const PRAYER_RING_PALETTES = {
         [242, 60, 32],   // 7th heaven: indigo depth
     ],
     dhuhr: [
-        [50,  25, 88],   // 1st heaven: pale sunlight
-        [46,  30, 80],   // 2nd heaven: warm gold
+        [50,  30, 83],   // 1st heaven: pale sunlight (more visible color)
+        [46,  32, 78],   // 2nd heaven: warm gold
         [42,  36, 72],   // 3rd heaven: golden amber
         [36,  42, 63],   // 4th heaven: deep amber
         [28,  48, 53],   // 5th heaven: sienna warmth
@@ -119,8 +119,8 @@ const PRAYER_RING_PALETTES = {
         [12,  60, 32],   // 7th heaven: earth depth
     ],
     asr: [
-        [32,  25, 88],   // 1st heaven: pale peach
-        [26,  30, 80],   // 2nd heaven: soft coral
+        [32,  30, 83],   // 1st heaven: pale peach (more visible color)
+        [26,  32, 78],   // 2nd heaven: soft coral
         [20,  36, 72],   // 3rd heaven: warm terracotta
         [14,  42, 63],   // 4th heaven: deep terracotta
         [6,   48, 53],   // 5th heaven: deepening rust
@@ -128,8 +128,8 @@ const PRAYER_RING_PALETTES = {
         [350, 60, 32],   // 7th heaven: crimson depth
     ],
     maghrib: [
-        [348, 25, 88],   // 1st heaven: pale rose
-        [342, 30, 80],   // 2nd heaven: soft rose
+        [348, 30, 83],   // 1st heaven: pale rose (more visible color)
+        [342, 32, 78],   // 2nd heaven: soft rose
         [335, 36, 72],   // 3rd heaven: warm magenta
         [328, 42, 63],   // 4th heaven: deep rose
         [320, 48, 53],   // 5th heaven: deepening plum
@@ -137,14 +137,27 @@ const PRAYER_RING_PALETTES = {
         [300, 60, 32],   // 7th heaven: purple depth
     ],
     isha: [
-        [278, 25, 88],   // 1st heaven: pale lavender
-        [272, 30, 80],   // 2nd heaven: soft lavender
+        [278, 30, 83],   // 1st heaven: pale lavender (more visible color)
+        [272, 32, 78],   // 2nd heaven: soft lavender
         [266, 36, 72],   // 3rd heaven: warm violet
         [260, 42, 63],   // 4th heaven: violet
         [252, 48, 53],   // 5th heaven: deepening purple
         [244, 54, 42],   // 6th heaven: dark purple
         [236, 60, 32],   // 7th heaven: deep indigo
     ],
+};
+
+// ── TURRELL SIMULTANEOUS CONTRAST ──
+// Complementary hue for each prayer — the "missing color" that amplifies the primary.
+// In Turrell's Skyspaces, the LED surround is one color and the aperture APPEARS
+// to shift to the complement. Your retina manufactures it. We make it real.
+// Used for: Kaaba halo (sacred light source), ring 0 aperture tint, tawaf flare afterimage.
+const PRAYER_COMPLEMENTS = {
+    fajr:    { h: 30,  s: 55, l: 72 },  // cerulean (210°) → warm amber complement
+    dhuhr:   { h: 222, s: 52, l: 70 },  // golden (42°) → cool blue-violet complement
+    asr:     { h: 205, s: 54, l: 71 },  // coral (25°) → teal complement
+    maghrib: { h: 158, s: 50, l: 70 },  // rose (338°) → teal-green complement
+    isha:    { h: 82,  s: 48, l: 72 },  // violet (262°) → yellow-green complement
 };
 
 // prettier-ignore
@@ -632,14 +645,15 @@ const TurrellApertureShader = {
                 float fAspect = max(uAspect, 1.0) / max(1.0 / uAspect, 1.0);
                 flareUV.x *= fAspect;
 
-                // 1. Gentle luminance bloom — subtle brightening of the field
-                float wash = uFlare * 0.05;
+                // 1. Complementary wash — the "missing color" tints the whole field
+                // As it fades, afterimage amplifies the primary prayer color
+                float wash = uFlare * 0.14;
                 texel.rgb = mix(texel.rgb, uFlareColor, wash);
 
                 // 2. Soft radial glow from source — wide, diffuse
                 float flareDist = length(flareUV);
-                float burst = exp(-flareDist * flareDist * 8.0) * uFlare;
-                texel.rgb += uFlareColor * burst * 0.12;
+                float burst = exp(-flareDist * flareDist * 6.0) * uFlare;
+                texel.rgb += uFlareColor * burst * 0.25;
 
                 // 3. Subtle anamorphic streak — barely there horizontal
                 float streakY = exp(-flareUV.y * flareUV.y * 1200.0);
@@ -1715,10 +1729,15 @@ function triggerTawafFlare(sourceX, sourceY) {
     const uvY = (sourceY - camera.bottom) / (camera.top - camera.bottom);
     vignettePass.uniforms.uFlarePos.value.set(uvX, uvY);
 
-    // Tint flare to current prayer palette
+    // ── TURRELL AFTERIMAGE — flare tinted with COMPLEMENTARY color ──
+    // The tawaf flare briefly introduces the complement of the prayer color.
+    // As it fades, the afterimage effect makes the primary rings feel MORE saturated.
+    // Like Turrell cycling LED colors: the transition moment amplifies perception.
     const palette = artwork ? artwork.palette : PRAYER_PALETTES.isha;
+    const pName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
+    const flareComp = PRAYER_COMPLEMENTS[pName] || PRAYER_COMPLEMENTS.isha;
     vignettePass.uniforms.uFlareColor.value.setHSL(
-        palette.h / 360, Math.min((palette.s + 10) / 100, 0.8), 0.95
+        flareComp.h / 360, flareComp.s / 100, flareComp.l / 100
     );
 }
 
@@ -1861,6 +1880,7 @@ function updateClockHands(now, night, blending) {
 
     const palette = artwork ? artwork.palette : PRAYER_PALETTES.isha;
     const baseH = palette.h;
+    const currentPrayerName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
 
     // Hand configs: [angle, radius, saturation, lightness, opacity]
     // Hands: luminous — brighter than bg, high opacity for readability
@@ -1962,7 +1982,9 @@ function updateClockHands(now, night, blending) {
     tipGlowPoint.visible = true;
     tipGlowMat.opacity = glowPulse * 0.3;
     tipGlowMat.size = 30;
-    tipGlowMat.color.setHSL(baseH / 360, 0.15, 0.95);
+    // Pen tip: gentle complementary tint — the sacred drawing point carries contrast
+    const tipComp = PRAYER_COMPLEMENTS[currentPrayerName] || PRAYER_COMPLEMENTS.isha;
+    tipGlowMat.color.setHSL(tipComp.h / 360, tipComp.s * 0.6 / 100, 0.93);
     tipGlowMat.needsUpdate = true;
 
     // (tip glow trail removed)
@@ -1998,9 +2020,13 @@ function updateClockHands(now, night, blending) {
     }
     kaabaGlowGeo.setDrawRange(0, epiDrawCount);
     kaabaGlowGeo.attributes.position.needsUpdate = true;
-    kaabaGlowMat.size = 6;
-    kaabaGlowMat.opacity = kaabaPulse * 0.25;
-    kaabaGlowMat.color.setHSL(baseH / 360, 0.12, 0.92);
+    kaabaGlowMat.size = 20;  // wide complementary aura — needs to be visible against bright center
+    kaabaGlowMat.opacity = kaabaPulse * 0.55;
+    // Turrell simultaneous contrast: Kaaba halo glows in the COMPLEMENT
+    // of the prayer color — sacred light emanating from the other side of the spectrum.
+    // Your retina amplifies the primary rings by contrast with this complementary source.
+    const compData = PRAYER_COMPLEMENTS[currentPrayerName] || PRAYER_COMPLEMENTS.isha;
+    kaabaGlowMat.color.setHSL(compData.h / 360, compData.s / 100, compData.l / 100);
     kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
@@ -2139,10 +2165,31 @@ function applyDayNight() {
     const prayerName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
     const rings = PRAYER_RING_PALETTES[prayerName] || PRAYER_RING_PALETTES.isha;
 
+    // ── TURRELL SIMULTANEOUS CONTRAST — ring 0 aperture tint ──
+    // The innermost ring (the "aperture") carries a subtle complementary shift.
+    // This is the Skyspace illusion: the surround color makes the center APPEAR
+    // to tint toward the complement. We make it real — just enough to feel, not see.
+    const comp = PRAYER_COMPLEMENTS[prayerName] || PRAYER_COMPLEMENTS.isha;
+    const COMP_SHIFT = 0.30; // 30% blend toward complement — perceptible Skyspace tension
+
     const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4', 'uRing5', 'uRing6'];
     for (let i = 0; i < 7; i++) {
         const [rh, rs, rl] = rings[i];
-        _ringColor.setHSL(rh / 360, rs / 100, rl / 100);
+        if (i === 0) {
+            // Ring 0: blend hue AND saturation toward complement.
+            // Turrell's aperture APPEARS to shift color — we make it real.
+            // 30% hue shift + saturation boost = visible complementary tension.
+            const blendH = rh + (comp.h - rh) * COMP_SHIFT;
+            const blendS = rs + (comp.s - rs) * COMP_SHIFT * 0.6; // gentler S blend
+            const blendL = Math.min(rl, 83); // cap lightness so color is visible, not white
+            _ringColor.setHSL(((blendH % 360) + 360) % 360 / 360, blendS / 100, blendL / 100);
+        } else if (i === 1) {
+            // Ring 1 gets a whisper of complement too — gradient of tension
+            const blendH1 = rh + (comp.h - rh) * COMP_SHIFT * 0.3;
+            _ringColor.setHSL(((blendH1 % 360) + 360) % 360 / 360, rs / 100, rl / 100);
+        } else {
+            _ringColor.setHSL(rh / 360, rs / 100, rl / 100);
+        }
         atenReignMat.uniforms[ringUniforms[i]].value.copy(_ringColor);
     }
 
@@ -2163,11 +2210,13 @@ function applyDayNight() {
     const edgeColor = new THREE.Color().setHSL(r6h / 360, Math.min(r6s * 1.3, 100) / 100, r6l * 0.7 / 100);
     vignettePass.uniforms.uEdgeColor.value.copy(edgeColor);
 
-    // ── Tint lens flare to prayer palette ──
-    // The flare should feel native to the current Turrell color field
-    const flareBaseColor = new THREE.Color().setHSL(pH / 360, Math.min(pS + 10, 80) / 100, 0.95);
+    // ── Tint lens flare to COMPLEMENT — afterimage amplification ──
+    // World-space sprites use complementary color to match the shader flare.
+    // When the complement fades, the primary color field feels amplified.
+    const flareComp2 = PRAYER_COMPLEMENTS[prayerName] || PRAYER_COMPLEMENTS.isha;
+    const flareBaseColor = new THREE.Color().setHSL(flareComp2.h / 360, flareComp2.s / 100, 0.90);
     flareDiscMat.color.copy(flareBaseColor);
-    flareStreakMat.color.setHSL(pH / 360, Math.min(pS + 5, 70) / 100, 0.97);
+    flareStreakMat.color.setHSL(flareComp2.h / 360, Math.max(flareComp2.s - 5, 10) / 100, 0.93);
 
     // ── Trace materials (orbiter mode only) ──
     if (THEME_MODE !== 'orbiter') { /* skip trace updates in turrell mode */ }
