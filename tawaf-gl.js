@@ -1013,11 +1013,11 @@ const ATEN_REIGN_FRAG = `
         // Nur manifests through the ring colors themselves, not white wash.
         // The innermost ring carries the warmth of the lamp (misbah).
 
-        // ── Center darkening — creates contrast for the 3D glass cube ──
-        // The glass needs a slightly darker background to read as transparent.
-        // Without this, the glass sits in pale uniform color → looks opaque.
-        float centerDim = 1.0 - 0.12 * exp(-dist * dist * 30.0);
-        color *= centerDim;
+        // ── Subtle center warmth — glass cube sits in a pool of light ──
+        // Slight warmth at center makes the glass feel like a light source,
+        // not a dark hole. The glass transmission does the contrast work.
+        float centerWarm = 0.04 * exp(-dist * dist * 25.0);
+        color += centerWarm;
 
         // ── Turrell luminance lift at ring boundaries ──
         // Bright seams between color bands — light bleeding between Skyspace panels.
@@ -1107,46 +1107,46 @@ const ATEN_REIGN_FRAG = `
             color += dirBias * uQiblaAlign * uQiblaBeam * 0.09;
         }
 
-        // ── LIGHT BEAMS — emerge from the 3D glass cube at center ──
-        // Beams originate from inside the glass prism and radiate outward.
-        // The glass cube refracts them naturally via MeshPhysicalMaterial.
-        // Beam brightness peaks at the cube edge (~0.12) and tapers to the tips.
+        // ── LIGHT BEAMS — radiate from the glass cube through the rings ──
+        // Beams start at center (inside the 3D glass cube) and extend outward.
+        // The glass cube refracts them via MeshPhysicalMaterial — beams visible
+        // through the glass as distorted light. Brightness builds from center
+        // outward, peaking just outside the cube, then tapering to the tips.
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
             // Chromatic dispersion — increases with distance from center
-            float dispersion = dist * 0.02;
+            float dispersion = dist * 0.025;
 
-            // Cube edge in UV space — beams emerge brightest here
+            // Radial intensity profile: starts dim at center, peaks at cube
+            // edge (~0.12), sustains through rings, tapers at the tip.
+            // This makes beams feel like they ORIGINATE from the glass.
             float cubeEdge = 0.12;
-
-            // Subtle emergence — slight brightening at cube surface, not nuclear
-            float emergeFactor = exp(-(dist - cubeEdge) * (dist - cubeEdge) * 40.0);
+            float radialProfile = smoothstep(0.0, cubeEdge, dist);  // ramps up from center to cube edge
 
             // Ring band boundaries
             float rb0 = 0.16;   float rb1 = 0.245;  float rb2 = 0.355;
             float rb3 = 0.465;  float rb4 = 0.585;  float rb5 = 0.750;
 
             // Band collision function: Gaussian flare at ring boundary
-            float bandW = 18.0;
+            float bandW = 16.0;
 
             // ── Hour beam — widest, deepest dispersion ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
             float adH_r = adH + dispersion;
             float adH_b = adH - dispersion;
-            // Visible from center through glass to endpoint
             float maskH = smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
             float hBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
                         + exp(-pow((dist - rb3) * bandW, 2.0));
-            float hBoost = 1.0 + hBand * 0.6 + emergeFactor * 0.4;
+            float hBoost = 1.0 + hBand * 0.5;
             vec3 beamH;
-            beamH.r = (exp(-adH_r * adH_r * 400.0) * 0.28 + exp(-adH_r * adH_r * 80.0) * 0.06) * hBoost;
-            beamH.g = (exp(-adH   * adH   * 450.0) * 0.24 + exp(-adH   * adH   * 90.0) * 0.05) * hBoost;
-            beamH.b = (exp(-adH_b * adH_b * 400.0) * 0.28 + exp(-adH_b * adH_b * 80.0) * 0.06) * hBoost;
-            color += beamH * maskH * uHandVis;
+            beamH.r = (exp(-adH_r * adH_r * 300.0) * 0.50 + exp(-adH_r * adH_r * 60.0) * 0.10) * hBoost;
+            beamH.g = (exp(-adH   * adH   * 350.0) * 0.44 + exp(-adH   * adH   * 70.0) * 0.08) * hBoost;
+            beamH.b = (exp(-adH_b * adH_b * 300.0) * 0.50 + exp(-adH_b * adH_b * 60.0) * 0.10) * hBoost;
+            color += beamH * maskH * radialProfile * uHandVis;
 
             // ── Minute beam — tighter, crosses more rings ──
             float adM = hAngle - uHandAngles.y;
@@ -1159,12 +1159,12 @@ const ATEN_REIGN_FRAG = `
                         + exp(-pow((dist - rb2) * bandW, 2.0))
                         + exp(-pow((dist - rb3) * bandW, 2.0))
                         + exp(-pow((dist - rb4) * bandW, 2.0));
-            float mBoost = 1.0 + mBand * 0.5 + emergeFactor * 0.35;
+            float mBoost = 1.0 + mBand * 0.4;
             vec3 beamM;
-            beamM.r = (exp(-adM_r * adM_r * 600.0) * 0.24 + exp(-adM_r * adM_r * 130.0) * 0.05) * mBoost;
-            beamM.g = (exp(-adM   * adM   * 650.0) * 0.20 + exp(-adM   * adM   * 140.0) * 0.04) * mBoost;
-            beamM.b = (exp(-adM_b * adM_b * 600.0) * 0.24 + exp(-adM_b * adM_b * 130.0) * 0.05) * mBoost;
-            color += beamM * maskM * uHandVis;
+            beamM.r = (exp(-adM_r * adM_r * 500.0) * 0.42 + exp(-adM_r * adM_r * 100.0) * 0.08) * mBoost;
+            beamM.g = (exp(-adM   * adM   * 550.0) * 0.36 + exp(-adM   * adM   * 110.0) * 0.06) * mBoost;
+            beamM.b = (exp(-adM_b * adM_b * 500.0) * 0.42 + exp(-adM_b * adM_b * 100.0) * 0.08) * mBoost;
+            color += beamM * maskM * radialProfile * uHandVis;
 
             // ── Second beam — razor-thin, crosses all rings, sparkle ──
             float adS = hAngle - uHandAngles.z;
@@ -1173,19 +1173,19 @@ const ATEN_REIGN_FRAG = `
             float adS_b = adS - dispersion;
             float maskS = smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
             float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
-            hSparkle = hSparkle * 0.15 + 0.85;
+            hSparkle = hSparkle * 0.12 + 0.88;
             float sBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
                         + exp(-pow((dist - rb3) * bandW, 2.0))
                         + exp(-pow((dist - rb4) * bandW, 2.0))
                         + exp(-pow((dist - rb5) * bandW, 2.0));
-            float sBoost = 1.0 + sBand * 0.4 + emergeFactor * 0.3;
+            float sBoost = 1.0 + sBand * 0.35;
             vec3 beamS;
-            beamS.r = (exp(-adS_r * adS_r * 900.0) * 0.20 + exp(-adS_r * adS_r * 200.0) * 0.04) * sBoost;
-            beamS.g = (exp(-adS   * adS   * 1000.0) * 0.16 + exp(-adS   * adS   * 220.0) * 0.03) * sBoost;
-            beamS.b = (exp(-adS_b * adS_b * 900.0) * 0.20 + exp(-adS_b * adS_b * 200.0) * 0.04) * sBoost;
-            color += beamS * maskS * uHandVis * hSparkle;
+            beamS.r = (exp(-adS_r * adS_r * 800.0) * 0.35 + exp(-adS_r * adS_r * 160.0) * 0.07) * sBoost;
+            beamS.g = (exp(-adS   * adS   * 900.0) * 0.30 + exp(-adS   * adS   * 180.0) * 0.05) * sBoost;
+            beamS.b = (exp(-adS_b * adS_b * 800.0) * 0.35 + exp(-adS_b * adS_b * 160.0) * 0.07) * sBoost;
+            color += beamS * maskS * radialProfile * uHandVis * hSparkle;
 
             // ── Ring illumination — bands brighten where beams cross them ──
             float beamHit = exp(-adH * adH * 50.0) * maskH
@@ -1197,7 +1197,7 @@ const ATEN_REIGN_FRAG = `
                                +  exp(-pow((dist - rb3) * 12.0, 2.0))
                                +  exp(-pow((dist - rb4) * 12.0, 2.0))
                                +  exp(-pow((dist - rb5) * 12.0, 2.0)));
-            color += beamHit * ringResponse * 0.06 * uHandVis;
+            color += beamHit * ringResponse * 0.08 * uHandVis;
         }
 
         gl_FragColor = vec4(color, 1.0);
@@ -1261,7 +1261,7 @@ _glassKey.position.set(1, 2, 4);
 scene.add(_glassKey);
 // Inner point light — warm glow inside the cube, the "source of light"
 // This is visible THROUGH the transmission as a warm luminous core
-const _innerLight = new THREE.PointLight(0xfff0d0, 1.2, 1.0, 2);
+const _innerLight = new THREE.PointLight(0xfff0d0, 2.5, 1.5, 2);
 _innerLight.position.set(0, 0, 0.1);  // at cube center
 scene.add(_innerLight);
 
@@ -1271,22 +1271,22 @@ scene.add(_innerLight);
 const _glassCubeSide = 0.30;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(1.0, 1.0, 1.0),     // neutral — transmission shows what's behind
+    color: new THREE.Color(1.0, 0.99, 0.97),    // near-white — glass is almost colorless
     metalness: 0,
-    roughness: 0.0,            // perfect crystal — zero surface diffusion
-    transmission: 1.0,         // fully transmissive — see-through glass
-    thickness: 2.5,            // deep refraction — visible distortion of rings behind
-    ior: 2.0,                  // very high IOR — strong visible distortion + prominent edges
+    roughness: 0.03,           // near-perfect crystal — subtle surface highlights
+    transmission: 0.95,        // highly transmissive — ring colors shine through
+    thickness: 1.0,            // thin glass — minimal absorption, keeps rings visible
+    ior: 2.4,                  // very high IOR — prominent edge refraction = reads as glass
     transparent: true,
     side: THREE.DoubleSide,
     envMap: _glassEnvMap,      // procedural gradient — Fresnel edges reflect this
-    envMapIntensity: 0.15,     // subtle — glass should be mostly invisible
-    specularIntensity: 1.5,    // Fresnel at glancing angles — the edge outline
-    specularColor: new THREE.Color(1.0, 1.0, 1.0),
-    attenuationColor: new THREE.Color(0.95, 0.92, 0.85),  // warm tint through thick glass
-    attenuationDistance: 0.3,  // noticeable color shift in thick sections
-    emissive: new THREE.Color(0.0, 0.0, 0.0),  // no surface glow — inner light does this
-    emissiveIntensity: 0,
+    envMapIntensity: 0.6,      // visible reflections at glancing angles
+    specularIntensity: 2.5,    // strong Fresnel at edges — the glass outline
+    specularColor: new THREE.Color(1.0, 0.98, 0.95),   // warm specular highlights
+    attenuationColor: new THREE.Color(0.98, 0.96, 0.92),  // nearly clear — minimal darkening
+    attenuationDistance: 1.0,  // long distance = barely any color absorption
+    emissive: new THREE.Color(1.0, 0.96, 0.88),   // warm inner glow — cube IS the light source
+    emissiveIntensity: 0.5,    // strong glow — glass radiates warmth, brighter than surroundings
 });
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
 // Isometric 3/4 view: top vertex points up, right and top faces visible
