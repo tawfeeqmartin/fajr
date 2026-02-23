@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v72: Glass cube visible — beams emerge from prism edge, not inside it
+// v76: 3D glass Kaaba cube (MeshPhysicalMaterial transmission) — beams refract through real glass
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -566,6 +566,8 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(W, H);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// Higher transmission resolution — glass cube needs crisp refraction
+renderer.transmissionResolutionScale = 1.0; // default 0.5 makes glass look blurry
 if (CONTAINED) {
     CONTAINER.appendChild(renderer.domElement);
 } else {
@@ -937,39 +939,7 @@ const ATEN_REIGN_FRAG = `
         uv += parallax;
         float dist = length(uv);
 
-        // ── Glass Prism IOR — Kaaba refracts light passing through it ──
-        // The diamond is a clear glass prism. Light bends and splits
-        // chromatically as it passes through — you can SEE the refraction.
-        float dxK = abs(uv.x);
-        float dyK = abs(uv.y);
-        float prismSDF = (dxK + dyK) / 0.095; // 1.0 at Kaaba diamond edge
-        float insidePrism = 1.0 - smoothstep(0.75, 1.0, prismSDF);
-
-        // Chromatic IOR — red/green/blue channels refract differently through glass
-        // Subtle magnification — just enough to see spectral split, not blow out center
-        float iorBase = insidePrism * 0.025;    // gentle magnification
-        float iorR = iorBase * 0.85;            // red bends least
-        float iorG = iorBase * 1.00;            // green in the middle
-        float iorB = iorBase * 1.18;            // blue bends most
-        // Store separate dist values for chromatic ring sampling later
-        float distR = dist - iorR;
-        float distG = dist - iorG;
-        float distB = dist - iorB;
-        // Main dist uses green channel (middle of spectrum)
-        dist -= iorG;
-
-        // Slight angular twist near edges — faceted glass warps directionality
-        float facetWarp = insidePrism * (1.0 - insidePrism) * 0.03;
-        uv += vec2(sign(uv.x), sign(uv.y)) * facetWarp;
-
-        // ── Glass edge caustic — bright seam where light enters/exits the prism ──
-        float edgeBand = smoothstep(0.7, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.15, prismSDF));
-        float edgeCaustic = edgeBand * 0.07;  // crisp edge seam — defines glass boundary
-
-        // ── Prism core — clean dark glass, no hotspot ──
-        // The glass is quiet. The ring around it speaks.
-        float coreIntensity = 0.0;  // killed — let the r0 ring carry the warmth
-        float internalCaustic = 0.0;  // clean glass, no shimmer
+        // ── Glass is now a real 3D mesh — shader just renders rings + beams ──
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
         float b0 = sin(uTime * 0.14) * 0.015;
@@ -1006,52 +976,13 @@ const ATEN_REIGN_FRAG = `
         color = mix(color, r5, smoothstep(0.59, 0.74, dist));
         color = mix(color, r6, smoothstep(0.76, 0.96, dist));
 
-        // Chromatic split inside prism — R and B channels sample offset rings
-        if (insidePrism > 0.01) {
-            // Red channel ring sampling (bends least — sees slightly inner rings)
-            vec3 cR = r0;
-            cR = mix(cR, r1, smoothstep(0.16, 0.24, distR));
-            cR = mix(cR, r2, smoothstep(0.25, 0.35, distR));
-            cR = mix(cR, r3, smoothstep(0.36, 0.46, distR));
-            cR = mix(cR, r4, smoothstep(0.47, 0.58, distR));
-            cR = mix(cR, r5, smoothstep(0.59, 0.74, distR));
-            cR = mix(cR, r6, smoothstep(0.76, 0.96, distR));
-
-            // Blue channel ring sampling (bends most — sees slightly outer rings)
-            vec3 cB = r0;
-            cB = mix(cB, r1, smoothstep(0.16, 0.24, distB));
-            cB = mix(cB, r2, smoothstep(0.25, 0.35, distB));
-            cB = mix(cB, r3, smoothstep(0.36, 0.46, distB));
-            cB = mix(cB, r4, smoothstep(0.47, 0.58, distB));
-            cB = mix(cB, r5, smoothstep(0.59, 0.74, distB));
-            cB = mix(cB, r6, smoothstep(0.76, 0.96, distB));
-
-            // Blend: outside prism = normal, inside = chromatic split
-            color.r = mix(color.r, cR.r, insidePrism);
-            color.b = mix(color.b, cB.b, insidePrism);
-        }
+        // Chromatic ring splitting is handled by the 3D glass cube's IOR refraction
 
         // ── Ayat an-Nur (24:35) — "Light upon light" (نور على نور) ──
         // Nur manifests through the ring colors themselves, not white wash.
         // The innermost ring carries the warmth of the lamp (misbah).
 
-        // ── Glass body — distinctly dimmer than the saturated r0 ring ──
-        // The prism reads as a warm dark crystal. The rich r0 ring OUTSIDE it
-        // is the most saturated band — like Turrell's inner aperture glow.
-        float glassTint = insidePrism * 0.70;
-        // Darker glass body — enough contrast that r0 ring reads as vivid color
-        color = mix(color, color * vec3(0.55, 0.48, 0.42), glassTint);
-
-        // ── Glass edge — soft luminous boundary, not dark stroke ──
-        // Turrell transitions gently; the color shift itself defines the edge.
-        float glassEdge = smoothstep(0.80, 0.96, prismSDF) * (1.0 - smoothstep(0.96, 1.12, prismSDF));
-        color *= 1.0 - glassEdge * 0.12;
-
-        // ── Glass prism edge caustic ──
-        color += edgeCaustic * vec3(0.98, 0.96, 0.93);
-
-        // Internal caustic shimmer — barely perceptible light dancing inside the glass
-        color += internalCaustic * vec3(0.98, 0.97, 0.95) * 0.005;
+        // Glass body, edges, and caustics handled by 3D MeshPhysicalMaterial cube
 
         // ── Turrell luminance lift at ring boundaries ──
         // Bright seams between color bands — light bleeding between Skyspace panels.
@@ -1141,55 +1072,46 @@ const ATEN_REIGN_FRAG = `
             color += dirBias * uQiblaAlign * uQiblaBeam * 0.09;
         }
 
-        // ── PRISM HANDS — temporal light dispersed through sacred glass ──
-        // Each beam radiates from the prism and COLLIDES with its nearest
-        // ring band — flaring at the boundary as if the hand is the source
-        // of that ring's light. The beam IS the ring at the collision point.
+        // ── LIGHT BEAMS — refracted through the 3D glass cube at center ──
+        // Beams start from the center and radiate outward. The 3D glass cube
+        // (MeshPhysicalMaterial with transmission) refracts them naturally.
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
-            // Beams emerge FROM the prism edge outward — zero inside the glass
-            float outsidePrism = 1.0 - insidePrism;
-
-            // Chromatic dispersion — increases with distance from prism
+            // Chromatic dispersion — increases with distance from center
             float dispersion = dist * 0.015;
 
-            // Ring band boundaries (shifted to match widened r0 ring)
+            // Ring band boundaries
             float rb0 = 0.16;   float rb1 = 0.245;  float rb2 = 0.355;
             float rb3 = 0.465;  float rb4 = 0.585;  float rb5 = 0.750;
 
             // Band collision function: Gaussian flare at ring boundary
-            // bandW controls width of the flare bloom at each crossing
             float bandW = 18.0;
-
-            // Reuse prism SDF — Fresnel edge where beams exit glass
-            float fresnelEdge = smoothstep(0.55, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.4, prismSDF));
-
             // ── Hour beam — widest, deepest dispersion ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
             float adH_r = adH + dispersion;
             float adH_b = adH - dispersion;
-            // Start beyond r0 ring (0.16) so the inner color band stays saturated
-            float maskH = smoothstep(0.14, 0.20, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
+            // Beams start from the center — the 3D glass cube refracts them
+            float maskH = smoothstep(0.02, 0.06, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
             // Band collision — hour beam crosses rings 0-3, flares at each
             float hBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
                         + exp(-pow((dist - rb3) * bandW, 2.0));
-            float hBoost = 1.0 + hBand * 0.6; // beam brightens at ring crossings
+            float hBoost = 1.0 + hBand * 0.6;
             vec3 beamH;
             beamH.r = (exp(-adH_r * adH_r * 500.0) * 0.14 + exp(-adH_r * adH_r * 120.0) * 0.03) * hBoost;
             beamH.g = (exp(-adH   * adH   * 550.0) * 0.12 + exp(-adH   * adH   * 130.0) * 0.025) * hBoost;
             beamH.b = (exp(-adH_b * adH_b * 500.0) * 0.14 + exp(-adH_b * adH_b * 120.0) * 0.03) * hBoost;
-            color += beamH * maskH * uHandVis * outsidePrism;
+            color += beamH * maskH * uHandVis;
 
             // ── Minute beam — tighter, crosses more rings ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
             float adM_r = adM + dispersion * 0.8;
             float adM_b = adM - dispersion * 0.8;
-            float maskM = smoothstep(0.14, 0.20, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
+            float maskM = smoothstep(0.02, 0.06, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
             float mBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
@@ -1200,14 +1122,14 @@ const ATEN_REIGN_FRAG = `
             beamM.r = (exp(-adM_r * adM_r * 750.0) * 0.12 + exp(-adM_r * adM_r * 170.0) * 0.025) * mBoost;
             beamM.g = (exp(-adM   * adM   * 800.0) * 0.10 + exp(-adM   * adM   * 180.0) * 0.02) * mBoost;
             beamM.b = (exp(-adM_b * adM_b * 750.0) * 0.12 + exp(-adM_b * adM_b * 170.0) * 0.025) * mBoost;
-            color += beamM * maskM * uHandVis * outsidePrism;
+            color += beamM * maskM * uHandVis;
 
             // ── Second beam — razor-thin, crosses all rings, sparkle ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
             float adS_r = adS + dispersion;
             float adS_b = adS - dispersion;
-            float maskS = smoothstep(0.14, 0.20, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
+            float maskS = smoothstep(0.02, 0.06, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
             float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
             hSparkle = hSparkle * 0.2 + 0.8;
             float sBand = exp(-pow((dist - rb0) * bandW, 2.0))
@@ -1221,34 +1143,19 @@ const ATEN_REIGN_FRAG = `
             beamS.r = (exp(-adS_r * adS_r * 1200.0) * 0.10 + exp(-adS_r * adS_r * 260.0) * 0.02) * sBoost;
             beamS.g = (exp(-adS   * adS   * 1300.0) * 0.08 + exp(-adS   * adS   * 280.0) * 0.015) * sBoost;
             beamS.b = (exp(-adS_b * adS_b * 1200.0) * 0.10 + exp(-adS_b * adS_b * 260.0) * 0.02) * sBoost;
-            color += beamS * maskS * uHandVis * hSparkle * outsidePrism;
+            color += beamS * maskS * uHandVis * hSparkle;
 
-            // ── Ring illumination — each band BRIGHTENS where a beam crosses it ──
-            // This is the key aesthetic: the hand isn't just passing through the ring,
-            // it's LIGHTING IT UP. The ring glows at the beam intersection.
-            float beamHit = exp(-adH * adH * 60.0) * maskH    // hour beam width
-                          + exp(-adM * adM * 80.0) * maskM    // minute beam width
-                          + exp(-adS * adS * 100.0) * maskS;  // second beam width
-            // Apply as additive luminance at ring boundaries only
+            // ── Ring illumination — bands brighten where beams cross them ──
+            float beamHit = exp(-adH * adH * 60.0) * maskH
+                          + exp(-adM * adM * 80.0) * maskM
+                          + exp(-adS * adS * 100.0) * maskS;
             float ringResponse = (exp(-pow((dist - rb0) * 12.0, 2.0))
                                +  exp(-pow((dist - rb1) * 12.0, 2.0))
                                +  exp(-pow((dist - rb2) * 12.0, 2.0))
                                +  exp(-pow((dist - rb3) * 12.0, 2.0))
                                +  exp(-pow((dist - rb4) * 12.0, 2.0))
                                +  exp(-pow((dist - rb5) * 12.0, 2.0)));
-            color += beamHit * ringResponse * 0.03 * uHandVis * outsidePrism;
-
-            // ── Prism facet glow — crystal edge catches passing beams ──
-            float hEdge = exp(-adH * adH * 80.0) * maskH;
-            float mEdge = exp(-adM * adM * 100.0) * maskM;
-            float sEdge = exp(-adS * adS * 130.0) * maskS;
-            color += vec3(0.97, 0.95, 0.92) * fresnelEdge * (hEdge + mEdge + sEdge) * 0.05 * uHandVis;
-
-            // ── Caustic shimmer at prism exit points ──
-            float caustic = sin(hAngle * 12.0 + uTime * 1.5) * 0.5 + 0.5;
-            caustic *= caustic;
-            float atEdge = fresnelEdge * (hEdge + mEdge + sEdge);
-            color += vec3(1.0, 0.98, 0.95) * caustic * atEdge * 0.05 * uHandVis;
+            color += beamHit * ringResponse * 0.03 * uHandVis;
         }
 
         gl_FragColor = vec4(color, 1.0);
@@ -1294,6 +1201,51 @@ const atenReignQuad = new THREE.Mesh(
 atenReignQuad.position.set(0, 0, -0.5);
 atenReignQuad.renderOrder = -10;
 scene.add(atenReignQuad);
+
+// ═══════════════════════════════════════════════════════════════
+// 3D GLASS KAABA CUBE — real MeshPhysicalMaterial with transmission
+// "the glass as if it were a pearly white star" — Quran 24:35
+// The cube refracts the Turrell rings and light beams behind it,
+// making the beams appear to originate from within the glass.
+// ═══════════════════════════════════════════════════════════════
+
+// Scene lights — minimal, just enough for glass Fresnel and edge highlights
+// Heavy lighting makes the glass look solid; we want transmission to dominate
+const _glassAmbient = new THREE.AmbientLight(0xffffff, 0.15);
+scene.add(_glassAmbient);
+const _glassKey = new THREE.DirectionalLight(0xfff8f0, 0.3);
+_glassKey.position.set(0, 3, 5);  // top-front — catches top face edge
+scene.add(_glassKey);
+
+// Cube size — matches the shader prism diamond footprint
+// Shader diamond: manhattan dist 0.095 in UV ≈ 0.19 WU half-diagonal
+// For isometric cube rotated 45°, side ≈ 0.27 WU
+const _glassCubeSide = 0.32;
+const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
+const _glassCubeMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,           // neutral — transmission shows what's behind
+    metalness: 0,
+    roughness: 0.0,            // perfect crystal — no surface diffusion
+    transmission: 1.0,         // fully transmissive
+    thickness: 1.2,            // more refraction depth — visible distortion
+    ior: 1.7,                  // high IOR — more visible refraction + stronger Fresnel edges
+    transparent: true,
+    side: THREE.DoubleSide,    // see through all faces
+    envMapIntensity: 0.2,
+    specularIntensity: 1.5,    // strong Fresnel at edges — the key to looking like glass
+    specularColor: new THREE.Color(0xffffff),
+});
+const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
+// Isometric 3/4 view: top vertex points up, right and top faces visible
+// Classic isometric: rotate Y by 45°, then X by atan(1/√2) ≈ 35.264°
+glassCube.rotation.set(
+    Math.atan(1 / Math.SQRT2),  // ~35.264° — tilt to show top face
+    Math.PI / 4,                 // 45° — show right face
+    0
+);
+glassCube.position.set(0, 0, 0.1);  // in front of ring quad, behind overlays
+glassCube.renderOrder = 0;
+scene.add(glassCube);
 
 // Pre-allocated Color for ring computation
 const _ringColor = new THREE.Color();
