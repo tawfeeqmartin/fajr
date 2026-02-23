@@ -2091,14 +2091,25 @@ function updateClockHands(now, night, blending) {
     };
     const compH = (KAABA_CONTRAST[artwork.prayerPeriod] || ((palette.h + 180) % 360)) / 360;
     const compS = Math.min(palette.s + 10, 65) / 100;  // richer than rings — the contrast needs to read
-    const compL = 0.48;  // mid-luminous — colored light, not flat pigment
+    const compL = 0.48;  // Kaaba fill — mid-luminous solid
+    // Trail color: bright luminous version of each prayer's own hue (not complement)
+    // The trail should read as colored LIGHT emanating from the pen tip, not a dark smear
+    const TRAIL_HUE = {
+        fajr:    { h: 210, s: 40, l: 82 },  // pale cerulean light
+        dhuhr:   { h: 42,  s: 45, l: 80 },  // warm golden light
+        asr:     { h: 25,  s: 42, l: 78 },  // soft coral light
+        maghrib: { h: 338, s: 40, l: 76 },  // gentle rose light
+        isha:    { h: 262, s: 38, l: 78 },  // soft violet light
+    };
+    const trailPalette = TRAIL_HUE[artwork.prayerPeriod] || TRAIL_HUE.isha;
+    const _trailColor = new THREE.Color().setHSL(trailPalette.h / 360, trailPalette.s / 100, trailPalette.l / 100);
     const _compColor = new THREE.Color().setHSL(compH, compS, compL);
     for (let i = 0; i < epiDrawCount; i++) {
         const t = i / epiDrawCount;
-        const alpha = 0.3 + 0.7 * t; // fade from transparent (old) to opaque (new)
-        epicycleTrailColors[i * 4]     = _compColor.r;
-        epicycleTrailColors[i * 4 + 1] = _compColor.g;
-        epicycleTrailColors[i * 4 + 2] = _compColor.b;
+        const alpha = 0.5 + 0.5 * t; // fade from semi-visible (old) to full (new)
+        epicycleTrailColors[i * 4]     = _trailColor.r;
+        epicycleTrailColors[i * 4 + 1] = _trailColor.g;
+        epicycleTrailColors[i * 4 + 2] = _trailColor.b;
         epicycleTrailColors[i * 4 + 3] = alpha;
     }
     // Kaaba fill — solid complementary color (the sacred contrast at the heart of light)
@@ -2124,7 +2135,7 @@ function updateClockHands(now, night, blending) {
     kaabaGlowGeo.attributes.position.needsUpdate = true;
     kaabaGlowMat.size = 6;
     kaabaGlowMat.opacity = kaabaPulse * 0.25;
-    kaabaGlowMat.color.setHSL(compH, Math.min(compS + 0.05, 0.6), 0.75); // complement glow — light radiates in the opposite color
+    kaabaGlowMat.color.setHSL(trailPalette.h / 360, trailPalette.s / 100 + 0.05, 0.85); // prayer-tinted glow — light radiates in harmony with the rings
     kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
