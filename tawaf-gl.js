@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v58: Clock-synced tawaf (7 circuits = 60s, flare on minute) + hr/min glow sprites
+// v59: Sacred proportions + Ayat an-Nur + sabr transitions + tasbih dhikr + gyroscope Miraj
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -97,53 +97,57 @@ const PRAYER_PALETTES = {
 // Each prayer has 7 DISTINCT hues radiating from luminous center to immersive edge.
 // Turrell Aten Reign structure with Islamic cosmological depth.
 // [h, s, l] per ring, center (0) to edge (6).
-// Saturation climbs: S:25 (tinted light) → S:60 (immersive color).
-// Lightness descends: L:88 (luminous) → L:32 (deep heaven).
+//
+// ── Miraj depth progression ──
+// Each heaven the Prophet ﷺ ascended through had greater glory.
+// Steeper saturation climb: S:18 (near-pure divine light) → S:68 (deep immersion).
+// Steeper lightness descent: L:92 (luminous source) → L:26 (infinite depth).
+// Wider hue spread per prayer for richer simultaneous contrast between bands.
 const PRAYER_RING_PALETTES = {
     fajr: [
-        [190, 25, 88],   // 1st heaven: pale dawn sky
-        [198, 30, 80],   // 2nd heaven: soft cerulean
-        [206, 36, 72],   // 3rd heaven: morning blue
-        [214, 42, 63],   // 4th heaven: steel blue
-        [222, 48, 53],   // 5th heaven: deepening azure
-        [232, 54, 42],   // 6th heaven: twilight blue
-        [242, 60, 32],   // 7th heaven: indigo depth
+        [188, 18, 92],   // 1st heaven (Adam ﷺ): pale dawn — nearest to pure light
+        [196, 26, 82],   // 2nd heaven (Isa & Yahya ﷺ): soft cerulean
+        [206, 34, 72],   // 3rd heaven (Yusuf ﷺ): morning blue
+        [216, 42, 60],   // 4th heaven (Idris ﷺ): steel blue
+        [226, 50, 48],   // 5th heaven (Harun ﷺ): deepening azure
+        [238, 60, 36],   // 6th heaven (Musa ﷺ): twilight blue
+        [250, 68, 26],   // 7th heaven (Ibrahim ﷺ): indigo — Sidrat al-Muntaha
     ],
     dhuhr: [
-        [50,  25, 88],   // 1st heaven: pale sunlight
-        [46,  30, 80],   // 2nd heaven: warm gold
-        [42,  36, 72],   // 3rd heaven: golden amber
-        [36,  42, 63],   // 4th heaven: deep amber
-        [28,  48, 53],   // 5th heaven: sienna warmth
-        [20,  54, 42],   // 6th heaven: burnt umber
-        [12,  60, 32],   // 7th heaven: earth depth
+        [52,  18, 92],   // 1st heaven: pale sunlight
+        [48,  26, 82],   // 2nd heaven: warm gold
+        [42,  34, 72],   // 3rd heaven: golden amber
+        [34,  42, 60],   // 4th heaven: deep amber
+        [24,  50, 48],   // 5th heaven: sienna warmth
+        [14,  60, 36],   // 6th heaven: burnt umber
+        [4,   68, 26],   // 7th heaven: earth depth
     ],
     asr: [
-        [32,  25, 88],   // 1st heaven: pale peach
-        [26,  30, 80],   // 2nd heaven: soft coral
-        [20,  36, 72],   // 3rd heaven: warm terracotta
-        [14,  42, 63],   // 4th heaven: deep terracotta
-        [6,   48, 53],   // 5th heaven: deepening rust
-        [358, 54, 42],   // 6th heaven: dark rust
-        [350, 60, 32],   // 7th heaven: crimson depth
+        [34,  18, 92],   // 1st heaven: pale peach
+        [28,  26, 82],   // 2nd heaven: soft coral
+        [20,  34, 72],   // 3rd heaven: warm terracotta
+        [12,  42, 60],   // 4th heaven: deep terracotta
+        [4,   50, 48],   // 5th heaven: deepening rust
+        [354, 60, 36],   // 6th heaven: dark rust
+        [344, 68, 26],   // 7th heaven: crimson depth
     ],
     maghrib: [
-        [348, 25, 88],   // 1st heaven: pale rose
-        [342, 30, 80],   // 2nd heaven: soft rose
-        [335, 36, 72],   // 3rd heaven: warm magenta
-        [328, 42, 63],   // 4th heaven: deep rose
-        [320, 48, 53],   // 5th heaven: deepening plum
-        [310, 54, 42],   // 6th heaven: dark plum
-        [300, 60, 32],   // 7th heaven: purple depth
+        [350, 18, 92],   // 1st heaven: pale rose
+        [344, 26, 82],   // 2nd heaven: soft rose
+        [335, 34, 72],   // 3rd heaven: warm magenta
+        [326, 42, 60],   // 4th heaven: deep rose
+        [316, 50, 48],   // 5th heaven: deepening plum
+        [304, 60, 36],   // 6th heaven: dark plum
+        [292, 68, 26],   // 7th heaven: purple depth
     ],
     isha: [
-        [278, 25, 88],   // 1st heaven: pale lavender
-        [272, 30, 80],   // 2nd heaven: soft lavender
-        [266, 36, 72],   // 3rd heaven: warm violet
-        [260, 42, 63],   // 4th heaven: violet
-        [252, 48, 53],   // 5th heaven: deepening purple
-        [244, 54, 42],   // 6th heaven: dark purple
-        [236, 60, 32],   // 7th heaven: deep indigo
+        [280, 18, 92],   // 1st heaven: pale lavender
+        [274, 26, 82],   // 2nd heaven: soft lavender
+        [266, 34, 72],   // 3rd heaven: warm violet
+        [258, 42, 60],   // 4th heaven: violet
+        [248, 50, 48],   // 5th heaven: deepening purple
+        [238, 60, 36],   // 6th heaven: dark purple
+        [228, 68, 26],   // 7th heaven: deep indigo — Sidrat al-Muntaha
     ],
 };
 
@@ -909,11 +913,20 @@ const ATEN_REIGN_FRAG = `
     uniform vec3 uRing6;
     uniform float uTime;
     uniform float uAspect;
+    uniform vec2 uTilt;           // gyroscope parallax (Miraj portal depth)
+    uniform float uTasbihPulse;   // dhikr breathing pulse (0..1)
     varying vec2 vUv;
     void main() {
         vec2 uv = (vUv - 0.5) * 2.0;
         // Correct for non-square viewport — keeps rings circular
         uv *= vec2(max(uAspect, 1.0), max(1.0 / uAspect, 1.0));
+
+        // ── Miraj portal depth (gyroscope parallax) ──
+        // Outer rings shift more on tilt — looking through layers of sacred space.
+        // Quadratic scaling: the 7th heaven feels farther than the 1st.
+        float rawDist = length(uv);
+        vec2 parallax = uTilt * rawDist * rawDist * 0.18;
+        uv += parallax;
         float dist = length(uv);
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
@@ -933,33 +946,48 @@ const ATEN_REIGN_FRAG = `
         vec3 r5 = uRing5 + b5;
         vec3 r6 = uRing6 + b6;
 
-        // 7 concentric color bands — the Seven Heavens (سبع سماوات).
-        // Wider bands with soft feathered edges. Rings extend well beyond the
-        // clip area so on portrait phones the outer heavens wrap the screen vertically.
+        // ── Seven Heavens (سبع سماوات) — sacred proportion ring widths ──
+        // "He created seven heavens in layers" — Quran 67:3
+        // Ring widths follow φ^⅓ (≈1.175) growth: inner heavens intimate,
+        // outer heavens vast — divine proportion. The math is invisible
+        // but the feeling is "this is right."
         vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.04, 0.16, dist));
-        color = mix(color, r2, smoothstep(0.16, 0.30, dist));
-        color = mix(color, r3, smoothstep(0.30, 0.46, dist));
-        color = mix(color, r4, smoothstep(0.46, 0.64, dist));
-        color = mix(color, r5, smoothstep(0.64, 0.84, dist));
-        color = mix(color, r6, smoothstep(0.84, 1.10, dist));
+        color = mix(color, r1, smoothstep(0.05, 0.13, dist));   // 1st → 2nd heaven
+        color = mix(color, r2, smoothstep(0.15, 0.25, dist));   // 2nd → 3rd heaven
+        color = mix(color, r3, smoothstep(0.27, 0.39, dist));   // 3rd → 4th heaven
+        color = mix(color, r4, smoothstep(0.40, 0.55, dist));   // 4th → 5th heaven
+        color = mix(color, r5, smoothstep(0.57, 0.74, dist));   // 5th → 6th heaven
+        color = mix(color, r6, smoothstep(0.76, 0.96, dist));   // 6th → 7th heaven
 
-        // Turrell luminance lift at ring boundaries — visible bright seams
-        // between color bands, like light bleeding between adjacent Skyspace panels.
-        // Wide Gaussian peaks at each transition midpoint; intensity scales with
-        // the local lightness so inner (brighter) seams glow more.
-        float w = 12.0; // peak width (lower = wider, softer seam)
-        float edge01 = exp(-pow((dist - 0.10) * w, 2.0));
-        float edge12 = exp(-pow((dist - 0.23) * w, 2.0));
-        float edge23 = exp(-pow((dist - 0.38) * w, 2.0));
-        float edge34 = exp(-pow((dist - 0.55) * w, 2.0));
-        float edge45 = exp(-pow((dist - 0.74) * w, 2.0));
-        float edge56 = exp(-pow((dist - 0.97) * w, 2.0));
+        // ── Ayat an-Nur (24:35) — "Light upon light" (نور على نور) ──
+        // Three nested luminance layers at center:
+        //   the niche (mishkat), the lamp (misbah), the glass (zujaja)
+        //   "like a pearly white star" — stacked radiance at the sacred heart
+        float nurCore  = exp(-dist * dist * 80.0);   // the lamp — tight radiance
+        float nurGlass = exp(-dist * dist * 12.0);   // the glass — pearly star
+        float nurNiche = exp(-dist * dist * 3.5);    // the niche — broad warmth
+        float nurLight = nurCore * 0.10 + nurGlass * 0.05 + nurNiche * 0.025;
+        color += nurLight;
+
+        // ── Turrell luminance lift at ring boundaries ──
+        // Bright seams between color bands — light bleeding between Skyspace panels.
+        // Positions follow sacred proportion boundaries.
+        float w = 12.0;
+        float edge01 = exp(-pow((dist - 0.092) * w, 2.0));
+        float edge12 = exp(-pow((dist - 0.200) * w, 2.0));
+        float edge23 = exp(-pow((dist - 0.327) * w, 2.0));
+        float edge34 = exp(-pow((dist - 0.477) * w, 2.0));
+        float edge45 = exp(-pow((dist - 0.652) * w, 2.0));
+        float edge56 = exp(-pow((dist - 0.858) * w, 2.0));
         float liftMask = (edge01 + edge12 + edge23 + edge34 + edge45 + edge56);
-        // Lift relative to local luminance — brighter zones get brighter seams
         float localLum = dot(color, vec3(0.299, 0.587, 0.114));
         float lift = liftMask * (0.06 + localLum * 0.10);
         color += lift;
+
+        // ── Tasbih dhikr pulse ──
+        // 33× SubhanAllah, 33× Alhamdulillah, 34× Allahu Akbar
+        // Subtle deepening of all rings — the sacred rhythm of remembrance
+        color = mix(color, color * 0.85, uTasbihPulse * 0.25);
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -976,6 +1004,8 @@ const atenReignMat = new THREE.ShaderMaterial({
         uRing6: { value: new THREE.Color(0.60, 0.56, 0.68) },
         uTime:  { value: 0.0 },
         uAspect: { value: W / H },
+        uTilt: { value: new THREE.Vector2(0, 0) },
+        uTasbihPulse: { value: 0.0 },
     },
     vertexShader: BLUR_VERT,  // reuse the pass-through vertex shader
     fragmentShader: ATEN_REIGN_FRAG,
@@ -1574,6 +1604,49 @@ let epicycleLastRealTime = 0;
 let tawafCircuitCount = 0;   // 0–6, resets after firing
 let tawafLastWrap = false;    // edge-detect the epicycleTime wrap
 
+// ── Tasbih dhikr rhythm ──
+// 33× SubhanAllah, 33× Alhamdulillah, 34× Allahu Akbar = 100
+// Every tawaf completion (every minute) increments the counter.
+// At counts 33, 66, 100: a subtle visual pulse — ring deepening.
+let tasbihCount = 0;          // 0-99, resets after 100
+let tasbihPulseStart = 0;     // timestamp (seconds) of last dhikr pulse
+const TASBIH_PULSE_DURATION = 5.0; // seconds — slow meditative fade
+
+// ── Gyroscope parallax (Miraj portal depth) ──
+// Device tilt creates the illusion of looking through layered sacred space.
+let _deviceTiltX = 0, _deviceTiltY = 0;
+const _tiltSmooth = { x: 0, y: 0 };
+
+function handleDeviceOrientation(e) {
+    // gamma: left-right tilt (-90..90), beta: front-back tilt (-180..180)
+    // Normalize around typical phone holding angle (~45° pitch)
+    _deviceTiltX = (e.gamma || 0) / 90;
+    _deviceTiltY = ((e.beta || 45) - 45) / 90;
+}
+
+// iOS 13+ requires user gesture for DeviceOrientation permission
+function initGyroscope() {
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS: request on first user interaction
+        const requestOnce = async () => {
+            document.removeEventListener('click', requestOnce);
+            document.removeEventListener('touchend', requestOnce);
+            try {
+                const perm = await DeviceOrientationEvent.requestPermission();
+                if (perm === 'granted') {
+                    window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                }
+            } catch (e) { /* silently fail on denied */ }
+        };
+        document.addEventListener('click', requestOnce);
+        document.addEventListener('touchend', requestOnce);
+    } else if (typeof DeviceOrientationEvent !== 'undefined') {
+        window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+    }
+}
+initGyroscope();
+
 // Flare textures — procedural generation
 function createFlareDiscTexture(size = 256) {
     const c = document.createElement('canvas');
@@ -1918,11 +1991,17 @@ function updateClockHands(now, night, blending) {
     const tawafCurrentCircuit = Math.floor(tawafPhase); // which circuit (0-6)
     epicycleTime = (tawafPhase - tawafCurrentCircuit) * TWO_PI; // position within current circuit
 
-    // Detect minute boundary (tawaf completion) — fire lens flare
+    // Detect minute boundary (tawaf completion) — fire lens flare + tasbih rhythm
     if (tawafSeconds < 0.5 && tawafLastWrap) {
         // Second hand just crossed 12 — 7th circuit complete
         triggerTawafFlare(0, kaabaHalfDiag);
         tawafLastWrap = false;
+
+        // Tasbih dhikr rhythm: 33 SubhanAllah, 33 Alhamdulillah, 34 Allahu Akbar
+        tasbihCount = (tasbihCount + 1) % 100;
+        if (tasbihCount === 33 || tasbihCount === 66 || tasbihCount === 0) {
+            tasbihPulseStart = performance.now() / 1000;
+        }
     } else if (tawafSeconds > 59) {
         tawafLastWrap = true; // arm the trigger for the next crossing
     }
@@ -2327,6 +2406,68 @@ function computeVariables(now) {
     };
 }
 
+// ── Sabr (patience) — slow prayer transition ──
+// During the last 15 minutes of each prayer period, imperceptibly crossfade
+// the ring palette toward the next prayer's colors. The change is so slow
+// you can't see it happening — then suddenly you realize the world shifted.
+// This is how Turrell works. This is how prayer time works.
+const TRANSITION_MINUTES = 15;
+const _transRingColor = new THREE.Color();
+const _PRAYER_ORDER = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+function updatePrayerTransition(vars) {
+    if (!vars || !vars.period || !artwork) return;
+
+    const period = vars.period;
+    const periodDuration = period.end - period.start; // in minutes
+    const minutesRemaining = (1 - period.progress) * periodDuration;
+
+    if (minutesRemaining > TRANSITION_MINUTES || minutesRemaining <= 0) return;
+
+    // We're in the transition zone — sabr begins
+    const transitionProgress = 1 - (minutesRemaining / TRANSITION_MINUTES);
+    // Smoothstep ease-in-out — imperceptible at first, accelerates gently
+    const t = transitionProgress * transitionProgress * (3 - 2 * transitionProgress);
+
+    const currentPrayer = vars.prayerPeriod;
+    const currentIdx = _PRAYER_ORDER.indexOf(currentPrayer);
+    const nextIdx = (currentIdx + 1) % 5;
+    const nextPrayerName = _PRAYER_ORDER[nextIdx];
+
+    const currentRings = PRAYER_RING_PALETTES[currentPrayer] || PRAYER_RING_PALETTES.isha;
+    const nextRings = PRAYER_RING_PALETTES[nextPrayerName];
+
+    const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4', 'uRing5', 'uRing6'];
+    for (let i = 0; i < 7; i++) {
+        const [ch, cs, cl] = currentRings[i];
+        const [nh, ns, nl] = nextRings[i];
+        // Interpolate HSL — handle hue wrap-around
+        let dh = nh - ch;
+        if (dh > 180) dh -= 360;
+        if (dh < -180) dh += 360;
+        const blendH = ((ch + dh * t) % 360 + 360) % 360;
+        const blendS = cs + (ns - cs) * t;
+        const blendL = cl + (nl - cl) * t;
+        _transRingColor.setHSL(blendH / 360, blendS / 100, blendL / 100);
+        atenReignMat.uniforms[ringUniforms[i]].value.copy(_transRingColor);
+    }
+
+    // Also blend the page background during transition
+    if (t > 0.3) { // only start page tinting halfway through
+        const pageTintT = (t - 0.3) / 0.7; // 0..1 over the second half
+        const [pgH, pgS, pgL] = currentRings[6];
+        const [npgH, npgS, npgL] = nextRings[6];
+        let dpgH = npgH - pgH;
+        if (dpgH > 180) dpgH -= 360;
+        if (dpgH < -180) dpgH += 360;
+        const bpgH = ((pgH + dpgH * pageTintT) % 360 + 360) % 360;
+        const bpgS = pgS + (npgS - pgS) * pageTintT;
+        const bpgL = pgL + (npgL - pgL) * pageTintT;
+        const pageTint = `hsl(${bpgH}, ${Math.round(bpgS * 0.28)}%, ${Math.round(Math.min(bpgL + 48, 90))}%)`;
+        document.documentElement.style.setProperty('--bg', pageTint);
+    }
+}
+
 function update(timestamp) {
     requestAnimationFrame(update);
 
@@ -2467,6 +2608,26 @@ function update(timestamp) {
     }
     // Rebuild live overlay
     updateLiveElements(vars.prayerProgress, now);
+
+    // ── Gyroscope parallax — smooth device tilt into portal depth ──
+    _tiltSmooth.x += (_deviceTiltX - _tiltSmooth.x) * 0.06;
+    _tiltSmooth.y += (_deviceTiltY - _tiltSmooth.y) * 0.06;
+    atenReignMat.uniforms.uTilt.value.set(_tiltSmooth.x * 0.15, _tiltSmooth.y * 0.15);
+
+    // ── Tasbih dhikr pulse — subtle ring deepening ──
+    if (tasbihPulseStart > 0) {
+        const tasbihElapsed = performance.now() / 1000 - tasbihPulseStart;
+        const tasbihRaw = Math.max(0, 1 - tasbihElapsed / TASBIH_PULSE_DURATION);
+        atenReignMat.uniforms.uTasbihPulse.value = tasbihRaw * tasbihRaw; // quadratic easeout
+        if (tasbihRaw <= 0) tasbihPulseStart = 0; // done
+    } else {
+        atenReignMat.uniforms.uTasbihPulse.value = 0;
+    }
+
+    // ── Sabr (patience) — slow prayer transition crossfade ──
+    // During the last 15 minutes, imperceptibly blend toward the next prayer's palette.
+    // "Indeed, prayer has been decreed upon the believers at specified times" (4:103)
+    updatePrayerTransition(vars);
 
     // Animate Aten Reign breathing
     atenReignMat.uniforms.uTime.value = timestamp * 0.001;
