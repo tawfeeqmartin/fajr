@@ -2093,9 +2093,9 @@ function updateClockHands(now, night, blending) {
             hg.posArr[1] = tip.y;
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            hg.mat.opacity = 0.2;
-            hg.mat.size = 28;
-            hg.mat.color.setHSL(baseH / 360, 0.12, 0.93);
+            hg.mat.opacity = 0.45;
+            hg.mat.size = 36;
+            hg.mat.color.setHSL(baseH / 360, 0.30, 0.88);
             hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
         } else {
@@ -2106,11 +2106,11 @@ function updateClockHands(now, night, blending) {
             hg.posArr[1] = tip.y;
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            const glowSize = h === 0 ? 38 : 30; // hour bigger, minute smaller
-            const glowOpacity = h === 0 ? 0.15 : 0.18;
+            const glowSize = h === 0 ? 52 : 42; // hour bigger, minute smaller
+            const glowOpacity = h === 0 ? 0.40 : 0.45;
             hg.mat.opacity = glowOpacity;
             hg.mat.size = glowSize;
-            hg.mat.color.setHSL(baseH / 360, 0.15, 0.91);
+            hg.mat.color.setHSL(baseH / 360, 0.30, 0.86);
             hg.mat.blending = THREE.AdditiveBlending;
             hg.mat.needsUpdate = true;
         }
