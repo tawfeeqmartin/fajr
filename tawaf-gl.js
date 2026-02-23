@@ -1982,9 +1982,8 @@ function updateClockHands(now, night, blending) {
     tipGlowPoint.visible = true;
     tipGlowMat.opacity = glowPulse * 0.3;
     tipGlowMat.size = 30;
-    // Pen tip: gentle complementary tint — the sacred drawing point carries contrast
-    const tipComp = PRAYER_COMPLEMENTS[currentPrayerName] || PRAYER_COMPLEMENTS.isha;
-    tipGlowMat.color.setHSL(tipComp.h / 360, tipComp.s * 0.6 / 100, 0.93);
+    // Pen tip: prayer palette glow — warm sacred light at the drawing nib
+    tipGlowMat.color.setHSL(palette.h / 360, Math.min(palette.s + 5, 70) / 100, 0.93);
     tipGlowMat.needsUpdate = true;
 
     // (tip glow trail removed)
@@ -2020,13 +2019,10 @@ function updateClockHands(now, night, blending) {
     }
     kaabaGlowGeo.setDrawRange(0, epiDrawCount);
     kaabaGlowGeo.attributes.position.needsUpdate = true;
-    kaabaGlowMat.size = 20;  // wide complementary aura — needs to be visible against bright center
+    kaabaGlowMat.size = 20;
     kaabaGlowMat.opacity = kaabaPulse * 0.55;
-    // Turrell simultaneous contrast: Kaaba halo glows in the COMPLEMENT
-    // of the prayer color — sacred light emanating from the other side of the spectrum.
-    // Your retina amplifies the primary rings by contrast with this complementary source.
-    const compData = PRAYER_COMPLEMENTS[currentPrayerName] || PRAYER_COMPLEMENTS.isha;
-    kaabaGlowMat.color.setHSL(compData.h / 360, compData.s / 100, compData.l / 100);
+    // Kaaba halo: prayer palette color — warm sacred light surrounding the black form
+    kaabaGlowMat.color.setHSL(palette.h / 360, Math.min(palette.s + 10, 80) / 100, Math.min(palette.l + 15, 90) / 100);
     kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
@@ -2170,7 +2166,7 @@ function applyDayNight() {
     // This is the Skyspace illusion: the surround color makes the center APPEAR
     // to tint toward the complement. We make it real — just enough to feel, not see.
     const comp = PRAYER_COMPLEMENTS[prayerName] || PRAYER_COMPLEMENTS.isha;
-    const COMP_SHIFT = 0.30; // 30% blend toward complement — perceptible Skyspace tension
+    const COMP_SHIFT = 0.55; // 55% blend toward complement — visible Skyspace tension
 
     const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4', 'uRing5', 'uRing6'];
     for (let i = 0; i < 7; i++) {
@@ -2184,9 +2180,14 @@ function applyDayNight() {
             const blendL = Math.min(rl, 83); // cap lightness so color is visible, not white
             _ringColor.setHSL(((blendH % 360) + 360) % 360 / 360, blendS / 100, blendL / 100);
         } else if (i === 1) {
-            // Ring 1 gets a whisper of complement too — gradient of tension
-            const blendH1 = rh + (comp.h - rh) * COMP_SHIFT * 0.3;
-            _ringColor.setHSL(((blendH1 % 360) + 360) % 360 / 360, rs / 100, rl / 100);
+            // Ring 1: moderate complement tension — gradient fading outward
+            const blendH1 = rh + (comp.h - rh) * COMP_SHIFT * 0.45;
+            const blendS1 = rs + (comp.s - rs) * COMP_SHIFT * 0.3;
+            _ringColor.setHSL(((blendH1 % 360) + 360) % 360 / 360, blendS1 / 100, rl / 100);
+        } else if (i === 2) {
+            // Ring 2: whisper of complement — last trace of the aperture contrast
+            const blendH2 = rh + (comp.h - rh) * COMP_SHIFT * 0.15;
+            _ringColor.setHSL(((blendH2 % 360) + 360) % 360 / 360, rs / 100, rl / 100);
         } else {
             _ringColor.setHSL(rh / 360, rs / 100, rl / 100);
         }
