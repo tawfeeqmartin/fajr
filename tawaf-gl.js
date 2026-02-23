@@ -2659,8 +2659,27 @@ const _elSeedInfo      = document.getElementById('seed-info');
 currentVars = computeVariables(new Date());
 lastDayNight = isNightTime() ? 'night' : 'day';
 applyDayNight();
-// Reveal page now that correct prayer colors are applied — prevents flash of wrong palette
-requestAnimationFrame(() => document.body.classList.add('clock-ready'));
+// Delay reveal until API prayer times have loaded (or timeout after 800ms).
+// This prevents the double-pop where fallback times show one palette,
+// then API times arrive mid-fade and switch to another.
+function revealWhenReady() {
+    if (window._prayerTimingsReady) {
+        // API loaded — recompute with real times before revealing
+        currentVars = computeVariables(new Date());
+        applyDayNight();
+        requestAnimationFrame(() => document.body.classList.add('clock-ready'));
+    } else {
+        // Poll briefly — API usually loads within 200-500ms on refresh
+        setTimeout(revealWhenReady, 50);
+    }
+}
+// Hard deadline: reveal after 800ms even if API is slow
+setTimeout(() => {
+    if (!document.body.classList.contains('clock-ready')) {
+        requestAnimationFrame(() => document.body.classList.add('clock-ready'));
+    }
+}, 800);
+revealWhenReady();
 initGeolocation();
 initCompass();
 
