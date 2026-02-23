@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v59: Sacred proportions + Ayat an-Nur + sabr transitions + tasbih dhikr + gyroscope Miraj
+// v60: Qibla compass — inward beam + Kaaba prism refraction + 7 spectral rays
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -915,6 +915,10 @@ const ATEN_REIGN_FRAG = `
     uniform float uAspect;
     uniform vec2 uTilt;           // gyroscope parallax (Miraj portal depth)
     uniform float uTasbihPulse;   // dhikr breathing pulse (0..1)
+    uniform float uQiblaBeam;     // 0 = off, 1 = compass mode on
+    uniform float uQiblaAngle;    // beam direction in radians (0 = noon/top)
+    uniform float uQiblaAlign;    // 0 = away, 1 = facing qibla
+    uniform vec3  uQiblaColor;    // prayer-tinted beam color
     varying vec2 vUv;
     void main() {
         vec2 uv = (vUv - 0.5) * 2.0;
@@ -989,6 +993,74 @@ const ATEN_REIGN_FRAG = `
         // Subtle deepening of all rings — the sacred rhythm of remembrance
         color = mix(color, color * 0.85, uTasbihPulse * 0.25);
 
+        // ── Qibla Beam of Light + Prism (Compass Mode) ──
+        // Light travels INWARD from the edge toward the Kaaba — the sacred
+        // direction calling the worshipper. When aligned with qibla, the
+        // Kaaba refracts the beam outward into a prismatic cone:
+        // "the glass as if it were a pearly white star" — Quran 24:35
+        if (uQiblaBeam > 0.01) {
+            float angle = atan(uv.x, uv.y);
+            float aDiff = angle - uQiblaAngle;
+            aDiff = aDiff - 6.28318 * floor((aDiff + 3.14159) / 6.28318);
+
+            // ── INCOMING BEAM — travels from edge TOWARD Kaaba ──
+            // Visible ~8° arc, brightens as it converges on the sacred center.
+            float bw = 40.0;
+            float inBeam = exp(-aDiff * aDiff * bw);
+            // Radial: visible from outer edge, peaks approaching Kaaba
+            float inMask = smoothstep(1.15, 0.30, dist) * smoothstep(0.04, 0.18, dist);
+            // Convergent sparkle — light particles streaming inward
+            float sparkle = sin(dist * 35.0 - uTime * 3.5) * 0.5 + 0.5;
+            sparkle = sparkle * sparkle * 0.2 + 0.8;
+            color += uQiblaColor * inBeam * inMask * uQiblaBeam * 0.35 * sparkle;
+
+            // ── PRISM — Kaaba refracts light outward on alignment ──
+            // The incoming beam strikes the Kaaba and splits into a spectral
+            // fan on the opposite side — "the glass as if it were a pearly
+            // white star" refracting light through the 7 heavens.
+            if (uQiblaAlign > 0.25) {
+                float pStr = smoothstep(0.25, 0.85, uQiblaAlign) * uQiblaBeam;
+
+                // Prism rays emerge OPPOSITE to the incoming beam
+                float outAngle = uQiblaAngle + 3.14159;
+                float oDiff = angle - outAngle;
+                oDiff = oDiff - 6.28318 * floor((oDiff + 3.14159) / 6.28318);
+
+                // Wide fan for visible spectral separation
+                float fan = 0.18 * pStr;
+                // Outward mask — emanates from center, extends to edge
+                float outMask = smoothstep(0.06, 0.22, dist) * (1.0 - smoothstep(0.82, 1.12, dist));
+
+                // 7 spectral rays — one for each heaven, warm to cool
+                float pw = bw * 0.7;  // wider rays for visible separation
+                float r1 = exp(-(oDiff + fan * 3.0) * (oDiff + fan * 3.0) * pw) * outMask;
+                float r2 = exp(-(oDiff + fan * 2.0) * (oDiff + fan * 2.0) * pw) * outMask;
+                float r3 = exp(-(oDiff + fan * 1.0) * (oDiff + fan * 1.0) * pw) * outMask;
+                float r4 = exp(-oDiff * oDiff * pw) * outMask;
+                float r5 = exp(-(oDiff - fan * 1.0) * (oDiff - fan * 1.0) * pw) * outMask;
+                float r6 = exp(-(oDiff - fan * 2.0) * (oDiff - fan * 2.0) * pw) * outMask;
+                float r7 = exp(-(oDiff - fan * 3.0) * (oDiff - fan * 3.0) * pw) * outMask;
+
+                // Warm (deep red) → pure (prayer color) → cool (deep violet)
+                float pI = pStr * 0.20;
+                color += vec3(1.35, 0.60, 0.40) * r1 * pI;  // deep red
+                color += vec3(1.25, 0.85, 0.50) * r2 * pI;  // amber-orange
+                color += vec3(1.10, 1.05, 0.70) * r3 * pI;  // golden white
+                color += uQiblaColor * 1.3      * r4 * pI;   // prayer color
+                color += vec3(0.70, 1.00, 1.20) * r5 * pI;  // aqua
+                color += vec3(0.50, 0.80, 1.35) * r6 * pI;  // cerulean
+                color += vec3(0.45, 0.55, 1.40) * r7 * pI;  // deep violet
+
+                // Gentle center warmth — Kaaba glows softly, not nuclear
+                float coreGlow = exp(-dist * dist * 12.0) * pStr * 0.06;
+                color += uQiblaColor * coreGlow;
+            }
+
+            // ── Ring response — heavens brighten toward qibla ──
+            float dirBias = max(0.0, cos(aDiff));
+            color += dirBias * uQiblaAlign * uQiblaBeam * 0.09;
+        }
+
         gl_FragColor = vec4(color, 1.0);
     }
 `;
@@ -1006,6 +1078,10 @@ const atenReignMat = new THREE.ShaderMaterial({
         uAspect: { value: W / H },
         uTilt: { value: new THREE.Vector2(0, 0) },
         uTasbihPulse: { value: 0.0 },
+        uQiblaBeam:  { value: 0.0 },
+        uQiblaAngle: { value: 0.0 },
+        uQiblaAlign: { value: 0.0 },
+        uQiblaColor: { value: new THREE.Color(0.95, 0.92, 0.88) },
     },
     vertexShader: BLUR_VERT,  // reuse the pass-through vertex shader
     fragmentShader: ATEN_REIGN_FRAG,
@@ -1593,6 +1669,84 @@ let epicyclePaused = false;
 let epicyclePauseTimer = 0;
 let epicycleTrailCount = 0;
 let epicycleLastRealTime = 0;
+
+// ═══════════════════════════════════════════════════════════════
+// QIBLA COMPASS BEAM — lighthouse ray from Kaaba to edge of heavens
+// ═══════════════════════════════════════════════════════════════
+// In compass mode, a luminous beam emanates from the Kaaba and sweeps
+// the Turrell field as the user rotates. When aligned with qibla,
+// the beam hits the noon position and refracts into a prismatic cone.
+
+let _compassMode = false;
+let _qiblaRelAngle = 0;          // smoothed relative angle (radians)
+let _qiblaAlignVal = 0;          // smoothed alignment (0-1)
+let _qiblaFlareArmed = true;     // prevent rapid re-triggering
+let _lastHapticTime = 0;
+
+function updateQiblaBeam() {
+    if (!_compassMode) {
+        // Fade out beam smoothly
+        const u = atenReignMat.uniforms;
+        u.uQiblaBeam.value += (0 - u.uQiblaBeam.value) * 0.08;
+        if (u.uQiblaBeam.value < 0.005) u.uQiblaBeam.value = 0;
+        return;
+    }
+
+    // Need compass heading
+    if (deviceHeading === null) {
+        atenReignMat.uniforms.uQiblaBeam.value = 0;
+        return;
+    }
+
+    // Relative angle: qibla direction from phone's perspective
+    // When facing qibla: relAngle ≈ 0 → beam points to noon (top)
+    let relAngle = qiblaBearing - deviceHeading;
+    // Wrap to [-PI, PI]
+    relAngle = relAngle - TWO_PI * Math.floor((relAngle + Math.PI) / TWO_PI);
+
+    // Smooth the angle to prevent jitter
+    // Handle angle wrapping in smoothing
+    let diff = relAngle - _qiblaRelAngle;
+    if (diff > Math.PI) diff -= TWO_PI;
+    if (diff < -Math.PI) diff += TWO_PI;
+    _qiblaRelAngle += diff * 0.12;
+
+    // Alignment: 1.0 when perfectly facing qibla, 0 when perpendicular
+    const rawAlign = Math.max(0, Math.cos(_qiblaRelAngle));
+    // Sharpen to only activate prism when very close (within ~15°)
+    const sharpAlign = Math.pow(rawAlign, 6);
+    _qiblaAlignVal += (sharpAlign - _qiblaAlignVal) * 0.08;
+
+    // Drive shader uniforms
+    const u = atenReignMat.uniforms;
+    u.uQiblaBeam.value += (1.0 - u.uQiblaBeam.value) * 0.08; // fade in
+    u.uQiblaAngle.value = _qiblaRelAngle;
+    u.uQiblaAlign.value = _qiblaAlignVal;
+
+    // Tint beam to current prayer color (luminous, high lightness)
+    const palette = artwork ? artwork.palette : PRAYER_PALETTES.isha;
+    _ringColor.setHSL(palette.h / 360, Math.min(palette.s / 100, 0.5), 0.92);
+    u.uQiblaColor.value.copy(_ringColor);
+
+    // ── Qibla flare + haptic on alignment ──
+    if (_qiblaAlignVal > 0.85 && _qiblaFlareArmed) {
+        // Trigger the existing tawaf flare system from the noon tip of Kaaba
+        triggerTawafFlare(0, kaabaHalfDiag);
+        _qiblaFlareArmed = false;
+
+        // Haptic pulse — gentle confirmation vibration
+        const now = performance.now();
+        if (now - _lastHapticTime > 3000 && navigator.vibrate) {
+            navigator.vibrate(80); // short, gentle pulse
+            _lastHapticTime = now;
+        }
+    }
+
+    // Re-arm flare when user rotates away
+    if (_qiblaAlignVal < 0.3) {
+        _qiblaFlareArmed = true;
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════
 // TAWAF LENS FLARE — cinematic light event on every 7th circuit
@@ -2678,6 +2832,9 @@ function update(timestamp) {
     // Update tawaf lens flare animation
     updateTawafFlare();
 
+    // Update qibla compass beam
+    updateQiblaBeam();
+
     // Render
     composer.render();
 
@@ -2918,7 +3075,11 @@ window._clockSetFullscreen = function(on, snapNight) {
 window._clockOnResize = onResize;
 
 window._clockSetScrollSection = function(idx) { /* no-op */ };
-window._clockQiblaDemo        = function(on)  { /* no-op */ };
-window._clockLockCompass      = function(on)  { /* no-op */ };
+window._clockToggleCompass = function(on) {
+    _compassMode = !!on;
+    // Request compass permission on activation (iOS requires user gesture)
+    if (_compassMode) requestCompassPermission();
+};
+window._clockIsCompassMode = function() { return _compassMode; };
 
 update();
