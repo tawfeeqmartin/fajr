@@ -354,7 +354,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
     <div class="fs-location" id="fsLocation"></div>
     <div class="fs-prayer-bar" id="fsPrayerBar"><span id="fsPrayerTimes"></span></div>
   </div>
-  <button id="fsCompassToggle" class="fs-mode-toggle" aria-label="Find Qibla"><svg id="fsCompassIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L4 7v9l8 5 8-5V7Z M4 7l8 5 8-5 M12 12v10"/></svg></button>
+  <button id="fsCompassToggle" class="fs-mode-toggle" aria-label="Find Qibla"><svg id="fsCompassIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L22 12L12 22L2 12Z"/></svg></button>
   <div id="fsDialPicker" class="fs-dial-picker">
     <div style="display:flex;align-items:center;gap:1.2rem;justify-content:center">
       <button onclick="fsPrevDial()" aria-label="Previous" style="background:none;border:none;cursor:pointer;padding:.5rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(26,26,26,.4)" stroke-width="1"><polyline points="15,18 9,12 15,6"/></svg></button>
@@ -1758,7 +1758,10 @@ document.getElementById('clockFsClose').addEventListener('click', () => {
 });
 
 // Back button — compass-aware to prevent accidental exit during phone rotation
+let _lastCompassExitTime = 0;
 window.addEventListener('popstate', (e) => {
+  // Ignore popstate from button-driven compass toggle-off (we just popped the compass entry)
+  if(_compassPopFromBtn) { _compassPopFromBtn = false; return; }
   if(document.getElementById('clockFullscreen').classList.contains('active')) {
     if(fsCompassOn) {
       // First back while compass is active: turn off compass, stay in fullscreen
@@ -1766,7 +1769,14 @@ window.addEventListener('popstate', (e) => {
       if(window._clockToggleCompass) window._clockToggleCompass(false);
       const cIcon = document.getElementById('fsCompassIcon');
       if(cIcon) cIcon.style.opacity = '.6';
+      _lastCompassExitTime = Date.now();
       // Re-push fullscreen state so next back actually exits
+      history.pushState({clockFs:true}, '', '#clock');
+      return;
+    }
+    // Grace period after compass exit — prevents accidental double-back
+    // (rotating phone for qibla can trigger edge-swipe gestures)
+    if(Date.now() - _lastCompassExitTime < 600) {
       history.pushState({clockFs:true}, '', '#clock');
       return;
     }
@@ -1776,14 +1786,21 @@ window.addEventListener('popstate', (e) => {
 
 // Compass (qibla) toggle in fullscreen
 let fsCompassOn = false;
+let _compassPopFromBtn = false;
 document.getElementById('fsCompassToggle').addEventListener('click', () => {
   fsCompassOn = !fsCompassOn;
   if(window._clockToggleCompass) window._clockToggleCompass(fsCompassOn);
   // Visual feedback: active state on the icon
   const icon = document.getElementById('fsCompassIcon');
   if(icon) icon.style.opacity = fsCompassOn ? '1' : '.6';
-  // Push history state so back gesture exits compass first, not fullscreen
-  if(fsCompassOn) history.pushState({compass:true}, '', '#clock');
+  if(fsCompassOn) {
+    // Push history state so back gesture exits compass first, not fullscreen
+    history.pushState({compass:true}, '', '#clock');
+  } else {
+    // Pop the compass history entry so stale state doesn't exit fullscreen on next back
+    _compassPopFromBtn = true;
+    history.back();
+  }
 });
 
 // Listen button in fullscreen
@@ -1817,7 +1834,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=60';
+_cs.type='module';_cs.src='tawaf-gl.js?v=62';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

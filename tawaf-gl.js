@@ -1682,6 +1682,7 @@ let _qiblaRelAngle = 0;          // smoothed relative angle (radians)
 let _qiblaAlignVal = 0;          // smoothed alignment (0-1)
 let _qiblaFlareArmed = true;     // prevent rapid re-triggering
 let _lastHapticTime = 0;
+let _handVisibility = 1;          // lerps 0↔1 — hides clock hands in compass mode
 
 function updateQiblaBeam() {
     if (!_compassMode) {
@@ -2105,6 +2106,11 @@ function updateLiveElements(progress, now) {
 }
 
 function updateClockHands(now, night, blending) {
+    // Smooth hand visibility for compass mode transitions
+    const handTarget = _compassMode ? 0 : 1;
+    _handVisibility += (handTarget - _handVisibility) * 0.15;
+    if (_handVisibility < 0.005) _handVisibility = 0;
+
     const s = now.getSeconds() + now.getMilliseconds() / 1000;
     const m = now.getMinutes() + s / 60;
     const h = now.getHours() % 12; // snap to hour — no interpolation
@@ -2125,10 +2131,11 @@ function updateClockHands(now, night, blending) {
     // Hands: luminous — brighter than bg, high opacity for readability
     const pS = Math.max(palette.s - 10, 8);
     const pL = Math.min(palette.l + 18, 93);  // brighter than bg — hands are light within the field
+    const hv = _handVisibility;
     const handConfigs = [
-        [hrAngle,  hrR,  pS, pL, 0.85],
-        [minAngle, minR, pS, pL, 0.75],
-        [secAngle, secR, pS, pL, 0.65],
+        [hrAngle,  hrR,  pS, pL, 0.85 * hv],
+        [minAngle, minR, pS, pL, 0.75 * hv],
+        [secAngle, secR, pS, pL, 0.65 * hv],
     ];
 
     for (let i = 0; i < 3; i++) {
@@ -2369,7 +2376,7 @@ function updateClockHands(now, night, blending) {
             hg.posArr[1] = tip.y;
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
-            hg.mat.opacity = 0.45;
+            hg.mat.opacity = 0.45 * hv;
             hg.mat.size = 36;
             hg.mat.color.setHSL(baseH / 360, 0.30, 0.88);
             hg.mat.blending = THREE.AdditiveBlending;
@@ -2383,7 +2390,7 @@ function updateClockHands(now, night, blending) {
             hg.posArr[2] = 0.025;
             hg.geo.attributes.position.needsUpdate = true;
             const glowSize = h === 0 ? 52 : 42; // hour bigger, minute smaller
-            const glowOpacity = h === 0 ? 0.40 : 0.45;
+            const glowOpacity = (h === 0 ? 0.40 : 0.45) * hv;
             hg.mat.opacity = glowOpacity;
             hg.mat.size = glowSize;
             hg.mat.color.setHSL(baseH / 360, 0.30, 0.86);
@@ -2392,7 +2399,7 @@ function updateClockHands(now, night, blending) {
         }
     }
 
-    centerDot.mat.opacity = 0.3;
+    centerDot.mat.opacity = 0.3 * hv;
     centerDot.mat.blending = THREE.NormalBlending;
     centerDot.mat.color.setHSL(baseH / 360, pS / 100, pL / 100);
     centerDot.mat.needsUpdate = true;
