@@ -105,7 +105,7 @@ const PRAYER_PALETTES = {
 // Wider hue spread per prayer for richer simultaneous contrast between bands.
 const PRAYER_RING_PALETTES = {
     fajr: [
-        [188, 18, 92],   // 1st heaven (Adam ﷺ): pale dawn — nearest to pure light
+        [188, 50, 72],   // 1st heaven (Adam ﷺ): vivid dawn — the glowing inner ring
         [196, 26, 82],   // 2nd heaven (Isa & Yahya ﷺ): soft cerulean
         [206, 34, 72],   // 3rd heaven (Yusuf ﷺ): morning blue
         [216, 42, 60],   // 4th heaven (Idris ﷺ): steel blue
@@ -114,7 +114,7 @@ const PRAYER_RING_PALETTES = {
         [250, 68, 26],   // 7th heaven (Ibrahim ﷺ): indigo — Sidrat al-Muntaha
     ],
     dhuhr: [
-        [52,  18, 92],   // 1st heaven: pale sunlight
+        [52,  50, 72],   // 1st heaven: vivid sunlight — glowing inner ring
         [48,  26, 82],   // 2nd heaven: warm gold
         [42,  34, 72],   // 3rd heaven: golden amber
         [34,  42, 60],   // 4th heaven: deep amber
@@ -123,7 +123,7 @@ const PRAYER_RING_PALETTES = {
         [4,   68, 26],   // 7th heaven: earth depth
     ],
     asr: [
-        [34,  18, 92],   // 1st heaven: pale peach
+        [34,  50, 72],   // 1st heaven: vivid peach — glowing inner ring
         [28,  26, 82],   // 2nd heaven: soft coral
         [20,  34, 72],   // 3rd heaven: warm terracotta
         [12,  42, 60],   // 4th heaven: deep terracotta
@@ -132,7 +132,7 @@ const PRAYER_RING_PALETTES = {
         [344, 68, 26],   // 7th heaven: crimson depth
     ],
     maghrib: [
-        [350, 18, 92],   // 1st heaven: pale rose
+        [350, 50, 72],   // 1st heaven: vivid rose — glowing inner ring
         [344, 26, 82],   // 2nd heaven: soft rose
         [335, 34, 72],   // 3rd heaven: warm magenta
         [326, 42, 60],   // 4th heaven: deep rose
@@ -141,7 +141,7 @@ const PRAYER_RING_PALETTES = {
         [292, 68, 26],   // 7th heaven: purple depth
     ],
     isha: [
-        [280, 18, 92],   // 1st heaven: pale lavender
+        [280, 50, 72],   // 1st heaven: vivid lavender — glowing inner ring
         [274, 26, 82],   // 2nd heaven: soft lavender
         [266, 34, 72],   // 3rd heaven: warm violet
         [258, 42, 60],   // 4th heaven: violet
@@ -577,9 +577,9 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(W, H),
-    0.3,   // strength
-    0.5,   // radius
-    0.15   // threshold — catches fainter lines
+    0.12,  // strength — gentle bloom, preserve ring saturation
+    0.4,   // radius — tighter spread
+    0.72   // threshold — high, only beam tips and flare bloom
 );
 composer.addPass(bloomPass);
 
@@ -588,7 +588,7 @@ composer.addPass(bloomPass);
 const TurrellApertureShader = {
     uniforms: {
         tDiffuse:    { value: null },
-        uGlow:       { value: 0.20 },    // stronger center aperture radiance
+        uGlow:       { value: 0.0 },     // killed — dark glass core needs contrast, not glow
         uDeepen:     { value: 0.14 },    // deeper edge immersion
         uEdgeColor:  { value: new THREE.Color(0.5, 0.45, 0.55) }, // deeper prayer tint at edges
         uAspect:     { value: W / H },
@@ -966,13 +966,10 @@ const ATEN_REIGN_FRAG = `
         float edgeBand = smoothstep(0.7, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.15, prismSDF));
         float edgeCaustic = edgeBand * 0.07;  // crisp edge seam — defines glass boundary
 
-        // ── Prism core hotspot — the beam-splitting origin ──
-        // At the very center of the glass, all three beams originate.
-        // A concentrated spectral hotspot makes the refraction visible.
-        float coreIntensity = exp(-prismSDF * prismSDF * 12.0) * insidePrism;
-        // Internal caustic network — faceted light patterns inside the glass
-        float internalCaustic = sin(prismSDF * 25.0 + uTime * 0.5) * 0.5 + 0.5;
-        internalCaustic *= internalCaustic * insidePrism * 0.015;
+        // ── Prism core — clean dark glass, no hotspot ──
+        // The glass is quiet. The ring around it speaks.
+        float coreIntensity = 0.0;  // killed — let the r0 ring carry the warmth
+        float internalCaustic = 0.0;  // clean glass, no shimmer
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
         float b0 = sin(uTime * 0.14) * 0.015;
@@ -998,32 +995,35 @@ const ATEN_REIGN_FRAG = `
         // creating visible spectral splitting — the glass refracts the rings.
 
         // Green channel (main) — standard ring sampling
+        // r0 ring boundary pushed outward so it forms a VISIBLE saturated
+        // band around the prism (dist 0.095–0.16) before transitioning to r1.
+        // This is the Turrell key: the innermost ring is the richest color.
         vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.05, 0.13, dist));
-        color = mix(color, r2, smoothstep(0.15, 0.25, dist));
-        color = mix(color, r3, smoothstep(0.27, 0.39, dist));
-        color = mix(color, r4, smoothstep(0.40, 0.55, dist));
-        color = mix(color, r5, smoothstep(0.57, 0.74, dist));
+        color = mix(color, r1, smoothstep(0.16, 0.24, dist));
+        color = mix(color, r2, smoothstep(0.25, 0.35, dist));
+        color = mix(color, r3, smoothstep(0.36, 0.46, dist));
+        color = mix(color, r4, smoothstep(0.47, 0.58, dist));
+        color = mix(color, r5, smoothstep(0.59, 0.74, dist));
         color = mix(color, r6, smoothstep(0.76, 0.96, dist));
 
         // Chromatic split inside prism — R and B channels sample offset rings
         if (insidePrism > 0.01) {
             // Red channel ring sampling (bends least — sees slightly inner rings)
             vec3 cR = r0;
-            cR = mix(cR, r1, smoothstep(0.05, 0.13, distR));
-            cR = mix(cR, r2, smoothstep(0.15, 0.25, distR));
-            cR = mix(cR, r3, smoothstep(0.27, 0.39, distR));
-            cR = mix(cR, r4, smoothstep(0.40, 0.55, distR));
-            cR = mix(cR, r5, smoothstep(0.57, 0.74, distR));
+            cR = mix(cR, r1, smoothstep(0.16, 0.24, distR));
+            cR = mix(cR, r2, smoothstep(0.25, 0.35, distR));
+            cR = mix(cR, r3, smoothstep(0.36, 0.46, distR));
+            cR = mix(cR, r4, smoothstep(0.47, 0.58, distR));
+            cR = mix(cR, r5, smoothstep(0.59, 0.74, distR));
             cR = mix(cR, r6, smoothstep(0.76, 0.96, distR));
 
             // Blue channel ring sampling (bends most — sees slightly outer rings)
             vec3 cB = r0;
-            cB = mix(cB, r1, smoothstep(0.05, 0.13, distB));
-            cB = mix(cB, r2, smoothstep(0.15, 0.25, distB));
-            cB = mix(cB, r3, smoothstep(0.27, 0.39, distB));
-            cB = mix(cB, r4, smoothstep(0.40, 0.55, distB));
-            cB = mix(cB, r5, smoothstep(0.57, 0.74, distB));
+            cB = mix(cB, r1, smoothstep(0.16, 0.24, distB));
+            cB = mix(cB, r2, smoothstep(0.25, 0.35, distB));
+            cB = mix(cB, r3, smoothstep(0.36, 0.46, distB));
+            cB = mix(cB, r4, smoothstep(0.47, 0.58, distB));
+            cB = mix(cB, r5, smoothstep(0.59, 0.74, distB));
             cB = mix(cB, r6, smoothstep(0.76, 0.96, distB));
 
             // Blend: outside prism = normal, inside = chromatic split
@@ -1032,25 +1032,20 @@ const ATEN_REIGN_FRAG = `
         }
 
         // ── Ayat an-Nur (24:35) — "Light upon light" (نور على نور) ──
-        // Three nested luminance layers at center:
-        //   the niche (mishkat), the lamp (misbah), the glass (zujaja)
-        //   "like a pearly white star" — stacked radiance at the sacred heart
-        // ── Ayat an-Nur — suppressed inside prism so glass shape reads ──
-        float nurOutside = 1.0 - insidePrism;  // zero inside glass, full outside
-        float nurCore  = exp(-dist * dist * 80.0);
-        float nurGlass = exp(-dist * dist * 12.0);
-        float nurNiche = exp(-dist * dist * 3.5);
-        float nurLight = nurCore * 0.002 + nurGlass * 0.001 + nurNiche * 0.0008;
-        color += nurLight * nurOutside;
+        // Nur manifests through the ring colors themselves, not white wash.
+        // The innermost ring carries the warmth of the lamp (misbah).
 
-        // ── Glass body tint — defines the cube shape without the mesh overlay ──
-        // Heavy darkening + cool shift — diamond must be unmistakably glass
-        float glassTint = insidePrism * 0.75;
-        color = mix(color, color * vec3(0.55, 0.62, 0.82), glassTint);
+        // ── Glass body — distinctly dimmer than the saturated r0 ring ──
+        // The prism reads as a warm dark crystal. The rich r0 ring OUTSIDE it
+        // is the most saturated band — like Turrell's inner aperture glow.
+        float glassTint = insidePrism * 0.70;
+        // Darker glass body — enough contrast that r0 ring reads as vivid color
+        color = mix(color, color * vec3(0.55, 0.48, 0.42), glassTint);
 
-        // ── Glass edge stroke — crisp dark border defines the cube shape ──
+        // ── Glass edge — soft luminous boundary, not dark stroke ──
+        // Turrell transitions gently; the color shift itself defines the edge.
         float glassEdge = smoothstep(0.80, 0.96, prismSDF) * (1.0 - smoothstep(0.96, 1.12, prismSDF));
-        color *= 1.0 - glassEdge * 0.35;
+        color *= 1.0 - glassEdge * 0.12;
 
         // ── Glass prism edge caustic ──
         color += edgeCaustic * vec3(0.98, 0.96, 0.93);
@@ -1062,15 +1057,15 @@ const ATEN_REIGN_FRAG = `
         // Bright seams between color bands — light bleeding between Skyspace panels.
         // Positions follow sacred proportion boundaries.
         float w = 12.0;
-        float edge01 = exp(-pow((dist - 0.092) * w, 2.0));
-        float edge12 = exp(-pow((dist - 0.200) * w, 2.0));
-        float edge23 = exp(-pow((dist - 0.327) * w, 2.0));
-        float edge34 = exp(-pow((dist - 0.477) * w, 2.0));
-        float edge45 = exp(-pow((dist - 0.652) * w, 2.0));
-        float edge56 = exp(-pow((dist - 0.858) * w, 2.0));
-        float liftMask = (edge01 + edge12 + edge23 + edge34 + edge45 + edge56);
+        // Skip innermost boundary — let the r0 ring color speak for itself
+        float edge12 = exp(-pow((dist - 0.245) * w, 2.0));
+        float edge23 = exp(-pow((dist - 0.355) * w, 2.0));
+        float edge34 = exp(-pow((dist - 0.465) * w, 2.0));
+        float edge45 = exp(-pow((dist - 0.585) * w, 2.0));
+        float edge56 = exp(-pow((dist - 0.750) * w, 2.0));
+        float liftMask = (edge12 + edge23 + edge34 + edge45 + edge56);
         float localLum = dot(color, vec3(0.299, 0.587, 0.114));
-        float lift = liftMask * (0.06 + localLum * 0.10);
+        float lift = liftMask * (0.04 + localLum * 0.06);
         color += lift;
 
         // ── Tasbih dhikr pulse ──
@@ -1159,10 +1154,9 @@ const ATEN_REIGN_FRAG = `
             // Chromatic dispersion — increases with distance from prism
             float dispersion = dist * 0.015;
 
-            // Ring band boundaries (sacred proportion positions)
-            // Each beam will flare at the boundary nearest to its tip
-            float rb0 = 0.092;  float rb1 = 0.200;  float rb2 = 0.327;
-            float rb3 = 0.477;  float rb4 = 0.652;  float rb5 = 0.858;
+            // Ring band boundaries (shifted to match widened r0 ring)
+            float rb0 = 0.16;   float rb1 = 0.245;  float rb2 = 0.355;
+            float rb3 = 0.465;  float rb4 = 0.585;  float rb5 = 0.750;
 
             // Band collision function: Gaussian flare at ring boundary
             // bandW controls width of the flare bloom at each crossing
@@ -1176,7 +1170,8 @@ const ATEN_REIGN_FRAG = `
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
             float adH_r = adH + dispersion;
             float adH_b = adH - dispersion;
-            float maskH = smoothstep(0.06, 0.14, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
+            // Start beyond r0 ring (0.16) so the inner color band stays saturated
+            float maskH = smoothstep(0.14, 0.20, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
             // Band collision — hour beam crosses rings 0-3, flares at each
             float hBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
@@ -1194,7 +1189,7 @@ const ATEN_REIGN_FRAG = `
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
             float adM_r = adM + dispersion * 0.8;
             float adM_b = adM - dispersion * 0.8;
-            float maskM = smoothstep(0.06, 0.14, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
+            float maskM = smoothstep(0.14, 0.20, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
             float mBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
@@ -1212,7 +1207,7 @@ const ATEN_REIGN_FRAG = `
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
             float adS_r = adS + dispersion;
             float adS_b = adS - dispersion;
-            float maskS = smoothstep(0.06, 0.14, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
+            float maskS = smoothstep(0.14, 0.20, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
             float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
             hSparkle = hSparkle * 0.2 + 0.8;
             float sBand = exp(-pow((dist - rb0) * bandW, 2.0))
@@ -1262,10 +1257,10 @@ const ATEN_REIGN_FRAG = `
 
 const atenReignMat = new THREE.ShaderMaterial({
     uniforms: {
-        uRing0: { value: new THREE.Color(0.97, 0.96, 0.95) },
-        uRing1: { value: new THREE.Color(0.93, 0.92, 0.94) },
-        uRing2: { value: new THREE.Color(0.88, 0.87, 0.90) },
-        uRing3: { value: new THREE.Color(0.82, 0.80, 0.85) },
+        uRing0: { value: new THREE.Color(0.88, 0.52, 0.28) },
+        uRing1: { value: new THREE.Color(0.85, 0.70, 0.58) },
+        uRing2: { value: new THREE.Color(0.88, 0.80, 0.76) },
+        uRing3: { value: new THREE.Color(0.85, 0.80, 0.84) },
         uRing4: { value: new THREE.Color(0.75, 0.72, 0.80) },
         uRing5: { value: new THREE.Color(0.68, 0.64, 0.74) },
         uRing6: { value: new THREE.Color(0.60, 0.56, 0.68) },
@@ -2490,7 +2485,7 @@ function applyDayNight() {
     // ── VIGNETTE — amplifies the Aten Reign depth ──
     // Center glow: strong aperture radiance, the "inner light" of Quaker practice.
     // Edge: reinforces ring 4's rich prayer color — like Turrell's Skyspace surround.
-    vignettePass.uniforms.uGlow.value = 0.06;        // subtle aperture warmth at center
+    vignettePass.uniforms.uGlow.value = 0.0;          // no center glow — dark prism needs contrast
     vignettePass.uniforms.uDeepen.value = 0.15;     // edge immersion — reinforces 7th heaven depth
     // Edge color from ring 6 (7th heaven) — deepest ring, pushed even richer
     const [r6h, r6s, r6l] = rings[6];
