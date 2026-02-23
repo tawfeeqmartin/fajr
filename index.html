@@ -354,7 +354,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
     <div class="fs-location" id="fsLocation"></div>
     <div class="fs-prayer-bar" id="fsPrayerBar"><span id="fsPrayerTimes"></span></div>
   </div>
-  <button id="fsCompassToggle" class="fs-mode-toggle" aria-label="Find Qibla"><svg id="fsCompassIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L22 12L12 22L2 12Z"/></svg></button>
+  <button id="fsCompassToggle" class="fs-mode-toggle" aria-label="Find Qibla"><svg id="fsCompassIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="M12 3L20 8v8l-8 5-8-5V8z M12 3v18 M4 8l8 5 8-5"/></svg></button>
   <div id="fsDialPicker" class="fs-dial-picker">
     <div style="display:flex;align-items:center;gap:1.2rem;justify-content:center">
       <button onclick="fsPrevDial()" aria-label="Previous" style="background:none;border:none;cursor:pointer;padding:.5rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(26,26,26,.4)" stroke-width="1"><polyline points="15,18 9,12 15,6"/></svg></button>
@@ -1776,7 +1776,7 @@ window.addEventListener('popstate', (e) => {
     }
     // Grace period after compass exit — prevents accidental double-back
     // (rotating phone for qibla can trigger edge-swipe gestures)
-    if(Date.now() - _lastCompassExitTime < 600) {
+    if(Date.now() - _lastCompassExitTime < 1500) {
       history.pushState({clockFs:true}, '', '#clock');
       return;
     }
@@ -1834,7 +1834,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=62';
+_cs.type='module';_cs.src='tawaf-gl.js?v=63';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

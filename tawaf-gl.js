@@ -2086,7 +2086,7 @@ function updateLiveElements(progress, now) {
             conn.posArr[3] = 0;  conn.posArr[4] = 0;  conn.posArr[5] = 0;
             conn.geo.attributes.position.needsUpdate = true;
             conn.mat.color.copy(_tmpColor);
-            conn.mat.opacity = 0.10;
+            conn.mat.opacity = 0.10 * _handVisibility;
             conn.mat.blending = blending;
             conn.mat.needsUpdate = true;
             conn.line.visible = true;
@@ -2096,7 +2096,7 @@ function updateLiveElements(progress, now) {
         liveDotGeo.attributes.position.needsUpdate = true;
         liveDotGeo.attributes.color.needsUpdate = true;
         liveDotMat.size = 5;
-        liveDotMat.opacity = 0.5;
+        liveDotMat.opacity = 0.5 * _handVisibility;
         liveDotMat.blending = blending;
         liveDotMat.needsUpdate = true;
     }
@@ -2141,6 +2141,7 @@ function updateClockHands(now, night, blending) {
     for (let i = 0; i < 3; i++) {
         const [angle, r, sat, lit, alpha] = handConfigs[i];
         const hand = liveHands[i];
+        hand.line.visible = hv > 0;
         // Origin stays at (0, 0, 0.01) — only update tip
         hand.posArr[3] = Math.cos(angle) * r;
         hand.posArr[4] = Math.sin(angle) * r;
@@ -2167,7 +2168,7 @@ function updateClockHands(now, night, blending) {
         trailPosArr[off + 3] = Math.cos(a1) * secR; trailPosArr[off + 4] = Math.sin(a1) * secR; trailPosArr[off + 5] = 0.01;
     }
     trailGeo.attributes.position.needsUpdate = true;
-    trailMat.opacity = 0.15;
+    trailMat.opacity = 0.15 * hv;
     trailMat.blending = THREE.NormalBlending;
     trailMat.needsUpdate = true;
 
