@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v60: Qibla compass — inward beam + Kaaba prism refraction + 7 spectral rays
+// v67: Glass prism Kaaba — IOR distortion bends rings through the crystal + chromatic beam hands
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -937,6 +937,27 @@ const ATEN_REIGN_FRAG = `
         uv += parallax;
         float dist = length(uv);
 
+        // ── Glass Prism IOR — Kaaba refracts light passing through it ──
+        // The diamond (rotated square) is a dark crystal. Light bends as it
+        // passes through: rings behind the cube magnify and shift, creating
+        // the unmistakable look of looking through polished glass.
+        // IOR > 1 means light converges — inner rings appear to expand outward.
+        float dxK = abs(uv.x);
+        float dyK = abs(uv.y);
+        float prismSDF = (dxK + dyK) / 0.095; // 1.0 at Kaaba diamond edge
+        float insidePrism = 1.0 - smoothstep(0.75, 1.0, prismSDF);
+        // Magnification: rings inside the cube appear pushed outward (IOR lens effect)
+        dist -= insidePrism * 0.035;
+        // Slight angular twist near edges — faceted glass warps directionality
+        float facetWarp = insidePrism * (1.0 - insidePrism) * 0.02;
+        uv += vec2(sign(uv.x), sign(uv.y)) * facetWarp;
+
+        // ── Glass edge caustic — bright seam where light enters/exits the prism ──
+        // Real glass catches light at its edges — a thin bright line runs along
+        // the diamond perimeter where refraction is strongest.
+        float edgeBand = smoothstep(0.7, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.15, prismSDF));
+        float edgeCaustic = edgeBand * 0.08;
+
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
         float b0 = sin(uTime * 0.14) * 0.015;
         float b1 = sin(uTime * 0.11 + 0.9) * 0.018;
@@ -976,6 +997,10 @@ const ATEN_REIGN_FRAG = `
         float nurNiche = exp(-dist * dist * 3.5);    // the niche — broad warmth
         float nurLight = nurCore * 0.10 + nurGlass * 0.05 + nurNiche * 0.025;
         color += nurLight;
+
+        // ── Glass prism edge caustic ──
+        // The diamond edge catches light — a thin bright seam where refraction peaks
+        color += edgeCaustic * vec3(0.98, 0.96, 0.93);
 
         // ── Turrell luminance lift at ring boundaries ──
         // Bright seams between color bands — light bleeding between Skyspace panels.
@@ -1065,38 +1090,73 @@ const ATEN_REIGN_FRAG = `
             color += dirBias * uQiblaAlign * uQiblaBeam * 0.09;
         }
 
-        // ── CLOCK HAND BEAMS — thin focused lines of light from center ──
-        // Inspired by the qibla beam but tighter, radiating outward from the
-        // sacred center. Each hand is a filament of light — hour widest,
-        // second thinnest — with a soft halo around the core.
+        // ── PRISM HANDS — temporal light dispersed through sacred glass ──
+        // The Kaaba is a dark crystal prism. White light enters from the
+        // Turrell field and refracts into three temporal beams — hour,
+        // minute, second — each carrying chromatic dispersion as it
+        // radiates outward. Red bends least, blue most.
+        // "the glass as if it were a pearly white star" — Quran 24:35
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
-            // Hour beam — focused filament, warmest
+            // Chromatic dispersion — increases with distance from prism
+            // Near the cube: beams are nearly white. At the tips: visible rainbow fringe.
+            float dispersion = dist * 0.012;
+
+            // Reuse prism SDF from IOR section — Fresnel edge where beams exit glass
+            float fresnelEdge = smoothstep(0.55, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.4, prismSDF));
+
+            // Hour beam — widest, disperses most (slowest movement = most accumulated refraction)
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
-            float coreH = exp(-adH * adH * 600.0);
-            float haloH = exp(-adH * adH * 140.0);
-            float maskH = smoothstep(0.015, 0.04, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
-            color += uHandColor * (coreH * 0.28 + haloH * 0.07) * maskH * uHandVis;
+            float adH_r = adH + dispersion;       // red bends least (outside)
+            float adH_b = adH - dispersion;       // blue bends most (inside)
+            float maskH = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
+            vec3 beamH;
+            beamH.r = exp(-adH_r * adH_r * 500.0) * 0.30 + exp(-adH_r * adH_r * 120.0) * 0.07;
+            beamH.g = exp(-adH   * adH   * 550.0) * 0.26 + exp(-adH   * adH   * 130.0) * 0.06;
+            beamH.b = exp(-adH_b * adH_b * 500.0) * 0.30 + exp(-adH_b * adH_b * 120.0) * 0.07;
+            color += beamH * maskH * uHandVis;
 
-            // Minute beam — tighter filament
+            // Minute beam — tighter, moderate dispersion
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
-            float coreM = exp(-adM * adM * 900.0);
-            float haloM = exp(-adM * adM * 200.0);
-            float maskM = smoothstep(0.015, 0.04, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
-            color += uHandColor * (coreM * 0.24 + haloM * 0.05) * maskM * uHandVis;
+            float adM_r = adM + dispersion * 0.8;
+            float adM_b = adM - dispersion * 0.8;
+            float maskM = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
+            vec3 beamM;
+            beamM.r = exp(-adM_r * adM_r * 750.0) * 0.26 + exp(-adM_r * adM_r * 170.0) * 0.06;
+            beamM.g = exp(-adM   * adM   * 800.0) * 0.22 + exp(-adM   * adM   * 180.0) * 0.05;
+            beamM.b = exp(-adM_b * adM_b * 750.0) * 0.26 + exp(-adM_b * adM_b * 170.0) * 0.06;
+            color += beamM * maskM * uHandVis;
 
-            // Second beam — razor-thin filament with sparkle
+            // Second beam — razor-thin, sharpest dispersion
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
-            float coreS = exp(-adS * adS * 1400.0);
-            float haloS = exp(-adS * adS * 300.0);
-            float maskS = smoothstep(0.015, 0.04, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
+            float adS_r = adS + dispersion;
+            float adS_b = adS - dispersion;
+            float maskS = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
             float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
             hSparkle = hSparkle * 0.2 + 0.8;
-            color += uHandColor * (coreS * 0.20 + haloS * 0.04) * maskS * uHandVis * hSparkle;
+            vec3 beamS;
+            beamS.r = exp(-adS_r * adS_r * 1200.0) * 0.22 + exp(-adS_r * adS_r * 260.0) * 0.05;
+            beamS.g = exp(-adS   * adS   * 1300.0) * 0.18 + exp(-adS   * adS   * 280.0) * 0.04;
+            beamS.b = exp(-adS_b * adS_b * 1200.0) * 0.22 + exp(-adS_b * adS_b * 260.0) * 0.05;
+            color += beamS * maskS * uHandVis * hSparkle;
+
+            // ── Prism facet glow — crystal edge catches passing beams ──
+            // Each beam brightens the diamond edge as it exits the glass
+            float hEdge = exp(-adH * adH * 80.0) * maskH;
+            float mEdge = exp(-adM * adM * 100.0) * maskM;
+            float sEdge = exp(-adS * adS * 130.0) * maskS;
+            color += vec3(0.97, 0.95, 0.92) * fresnelEdge * (hEdge + mEdge + sEdge) * 0.10 * uHandVis;
+
+            // ── Subtle caustic shimmer at prism exit points ──
+            // Where beams cross the diamond edge, tiny sparkles of dispersed light
+            float caustic = sin(hAngle * 12.0 + uTime * 1.5) * 0.5 + 0.5;
+            caustic *= caustic;
+            float atEdge = fresnelEdge * (hEdge + mEdge + sEdge);
+            color += vec3(1.0, 0.98, 0.95) * caustic * atEdge * 0.04 * uHandVis;
         }
 
         gl_FragColor = vec4(color, 1.0);
@@ -1677,9 +1737,9 @@ kaabaFillShape.lineTo(-kaabaHalfDiag, 0);       // left
 kaabaFillShape.closePath();
 const kaabaFillGeo = new THREE.ShapeGeometry(kaabaFillShape);
 const kaabaFillMat = new THREE.MeshBasicMaterial({
-    color: 0x050505,        // near-black — the Kiswa
+    color: 0x0c0c18,        // dark crystal glass — deep with a hint of indigo
     transparent: true,
-    opacity: 0.92,
+    opacity: 0.45,           // translucent — IOR distortion visible through the prism
     depthTest: false,
     side: THREE.DoubleSide,
 });
