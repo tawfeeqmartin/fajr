@@ -354,7 +354,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
     <div class="fs-location" id="fsLocation"></div>
     <div class="fs-prayer-bar" id="fsPrayerBar"><span id="fsPrayerTimes"></span></div>
   </div>
-  <button id="fsCompassToggle" class="fs-mode-toggle" aria-label="Find Qibla"><svg id="fsCompassIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"/><polygon points="12,2 14.5,10 12,8 9.5,10" fill="currentColor" stroke="none" opacity=".9"/><polygon points="12,22 9.5,14 12,16 14.5,14" fill="currentColor" stroke="none" opacity=".35"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" opacity=".5"/></svg></button>
+  <button id="fsCompassToggle" class="fs-mode-toggle" aria-label="Find Qibla"><svg id="fsCompassIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L4 7v9l8 5 8-5V7Z M4 7l8 5 8-5 M12 12v10"/></svg></button>
   <div id="fsDialPicker" class="fs-dial-picker">
     <div style="display:flex;align-items:center;gap:1.2rem;justify-content:center">
       <button onclick="fsPrevDial()" aria-label="Previous" style="background:none;border:none;cursor:pointer;padding:.5rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(26,26,26,.4)" stroke-width="1"><polyline points="15,18 9,12 15,6"/></svg></button>
@@ -1757,9 +1757,19 @@ document.getElementById('clockFsClose').addEventListener('click', () => {
   if(location.hash === '#clock') history.back();
 });
 
-// Back button
+// Back button — compass-aware to prevent accidental exit during phone rotation
 window.addEventListener('popstate', (e) => {
   if(document.getElementById('clockFullscreen').classList.contains('active')) {
+    if(fsCompassOn) {
+      // First back while compass is active: turn off compass, stay in fullscreen
+      fsCompassOn = false;
+      if(window._clockToggleCompass) window._clockToggleCompass(false);
+      const cIcon = document.getElementById('fsCompassIcon');
+      if(cIcon) cIcon.style.opacity = '.6';
+      // Re-push fullscreen state so next back actually exits
+      history.pushState({clockFs:true}, '', '#clock');
+      return;
+    }
     closeClockFullscreen();
   }
 });
@@ -1772,6 +1782,8 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
   // Visual feedback: active state on the icon
   const icon = document.getElementById('fsCompassIcon');
   if(icon) icon.style.opacity = fsCompassOn ? '1' : '.6';
+  // Push history state so back gesture exits compass first, not fullscreen
+  if(fsCompassOn) history.pushState({compass:true}, '', '#clock');
 });
 
 // Listen button in fullscreen
