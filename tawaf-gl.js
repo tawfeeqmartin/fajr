@@ -105,8 +105,8 @@ const PRAYER_PALETTES = {
 // Wider hue spread per prayer for richer simultaneous contrast between bands.
 const PRAYER_RING_PALETTES = {
     fajr: [
-        [188, 50, 72],   // 1st heaven (Adam ﷺ): vivid dawn — the glowing inner ring
-        [196, 26, 82],   // 2nd heaven (Isa & Yahya ﷺ): soft cerulean
+        [188, 65, 52],   // 1st heaven (Adam ﷺ): deep vivid teal — the rich inner ring
+        [196, 40, 68],   // 2nd heaven (Isa & Yahya ﷺ): medium cerulean
         [206, 34, 72],   // 3rd heaven (Yusuf ﷺ): morning blue
         [216, 42, 60],   // 4th heaven (Idris ﷺ): steel blue
         [226, 50, 48],   // 5th heaven (Harun ﷺ): deepening azure
@@ -114,8 +114,8 @@ const PRAYER_RING_PALETTES = {
         [250, 68, 26],   // 7th heaven (Ibrahim ﷺ): indigo — Sidrat al-Muntaha
     ],
     dhuhr: [
-        [52,  50, 72],   // 1st heaven: vivid sunlight — glowing inner ring
-        [48,  26, 82],   // 2nd heaven: warm gold
+        [52,  65, 52],   // 1st heaven: deep gold — rich inner ring
+        [48,  40, 68],   // 2nd heaven: warm gold
         [42,  34, 72],   // 3rd heaven: golden amber
         [34,  42, 60],   // 4th heaven: deep amber
         [24,  50, 48],   // 5th heaven: sienna warmth
@@ -123,8 +123,8 @@ const PRAYER_RING_PALETTES = {
         [4,   68, 26],   // 7th heaven: earth depth
     ],
     asr: [
-        [34,  50, 72],   // 1st heaven: vivid peach — glowing inner ring
-        [28,  26, 82],   // 2nd heaven: soft coral
+        [34,  65, 52],   // 1st heaven: deep peach — rich inner ring
+        [28,  40, 68],   // 2nd heaven: warm coral
         [20,  34, 72],   // 3rd heaven: warm terracotta
         [12,  42, 60],   // 4th heaven: deep terracotta
         [4,   50, 48],   // 5th heaven: deepening rust
@@ -132,8 +132,8 @@ const PRAYER_RING_PALETTES = {
         [344, 68, 26],   // 7th heaven: crimson depth
     ],
     maghrib: [
-        [350, 50, 72],   // 1st heaven: vivid rose — glowing inner ring
-        [344, 26, 82],   // 2nd heaven: soft rose
+        [350, 65, 52],   // 1st heaven: deep rose — rich inner ring
+        [344, 40, 68],   // 2nd heaven: warm rose
         [335, 34, 72],   // 3rd heaven: warm magenta
         [326, 42, 60],   // 4th heaven: deep rose
         [316, 50, 48],   // 5th heaven: deepening plum
@@ -141,8 +141,8 @@ const PRAYER_RING_PALETTES = {
         [292, 68, 26],   // 7th heaven: purple depth
     ],
     isha: [
-        [280, 50, 72],   // 1st heaven: vivid lavender — glowing inner ring
-        [274, 26, 82],   // 2nd heaven: soft lavender
+        [280, 65, 52],   // 1st heaven: deep lavender — rich inner ring
+        [274, 40, 68],   // 2nd heaven: warm lavender
         [266, 34, 72],   // 3rd heaven: warm violet
         [258, 42, 60],   // 4th heaven: violet
         [248, 50, 48],   // 5th heaven: deepening purple
@@ -1016,7 +1016,8 @@ const ATEN_REIGN_FRAG = `
         // ── Subtle center warmth — glass cube sits in a pool of light ──
         // Slight warmth at center makes the glass feel like a light source,
         // not a dark hole. The glass transmission does the contrast work.
-        float centerWarm = 0.04 * exp(-dist * dist * 25.0);
+        // Minimal center warmth — the glass cube provides its own presence
+        float centerWarm = 0.015 * exp(-dist * dist * 30.0);
         color += centerWarm;
 
         // ── Turrell luminance lift at ring boundaries ──
@@ -1115,14 +1116,15 @@ const ATEN_REIGN_FRAG = `
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
-            // Chromatic dispersion — increases with distance from center
-            float dispersion = dist * 0.025;
+            // Chromatic dispersion — increases with distance (prism effect)
+            float dispersion = dist * 0.04;
 
-            // Radial intensity profile: starts dim at center, peaks at cube
-            // edge (~0.12), sustains through rings, tapers at the tip.
-            // This makes beams feel like they ORIGINATE from the glass.
+            // Beams emerge from the cube edge and build gradually outward
             float cubeEdge = 0.12;
-            float radialProfile = smoothstep(0.0, cubeEdge, dist);  // ramps up from center to cube edge
+            float radialProfile = smoothstep(cubeEdge - 0.02, cubeEdge + 0.14, dist);
+
+            // Fan-out: razor-thin at cube face, ~12x wider at tips (real prism dispersion)
+            float fanOut = mix(1.0, 0.06, smoothstep(cubeEdge, 0.90, dist));
 
             // Ring band boundaries
             float rb0 = 0.16;   float rb1 = 0.245;  float rb2 = 0.355;
@@ -1131,46 +1133,51 @@ const ATEN_REIGN_FRAG = `
             // Band collision function: Gaussian flare at ring boundary
             float bandW = 16.0;
 
-            // ── Hour beam — widest, deepest dispersion ──
+            // ── Hour beam — widest, deepest dispersion, fans out most ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
-            float adH_r = adH + dispersion;
-            float adH_b = adH - dispersion;
+            float adH_r = adH + dispersion * 1.3;
+            float adH_b = adH - dispersion * 1.3;
             float maskH = smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
             float hBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
                         + exp(-pow((dist - rb3) * bandW, 2.0));
-            float hBoost = 1.0 + hBand * 0.5;
+            float hBoost = 1.0 + hBand * 0.3;
+            // Fan-out: sharp at cube → soft wide at tip
+            float hSharpCore = 400.0 * fanOut;
+            float hSharpGlow = 80.0 * fanOut;
             vec3 beamH;
-            beamH.r = (exp(-adH_r * adH_r * 300.0) * 0.50 + exp(-adH_r * adH_r * 60.0) * 0.10) * hBoost;
-            beamH.g = (exp(-adH   * adH   * 350.0) * 0.44 + exp(-adH   * adH   * 70.0) * 0.08) * hBoost;
-            beamH.b = (exp(-adH_b * adH_b * 300.0) * 0.50 + exp(-adH_b * adH_b * 60.0) * 0.10) * hBoost;
+            beamH.r = (exp(-adH_r * adH_r * hSharpCore) * 0.14 + exp(-adH_r * adH_r * hSharpGlow) * 0.04) * hBoost;
+            beamH.g = (exp(-adH   * adH   * hSharpCore * 1.15) * 0.12 + exp(-adH * adH * hSharpGlow * 1.15) * 0.03) * hBoost;
+            beamH.b = (exp(-adH_b * adH_b * hSharpCore) * 0.14 + exp(-adH_b * adH_b * hSharpGlow) * 0.04) * hBoost;
             color += beamH * maskH * radialProfile * uHandVis;
 
-            // ── Minute beam — tighter, crosses more rings ──
+            // ── Minute beam — tighter at source, fans out through rings ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
-            float adM_r = adM + dispersion * 0.8;
-            float adM_b = adM - dispersion * 0.8;
+            float adM_r = adM + dispersion;
+            float adM_b = adM - dispersion;
             float maskM = smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
             float mBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
                         + exp(-pow((dist - rb3) * bandW, 2.0))
                         + exp(-pow((dist - rb4) * bandW, 2.0));
-            float mBoost = 1.0 + mBand * 0.4;
+            float mBoost = 1.0 + mBand * 0.3;
+            float mSharpCore = 600.0 * fanOut;
+            float mSharpGlow = 120.0 * fanOut;
             vec3 beamM;
-            beamM.r = (exp(-adM_r * adM_r * 500.0) * 0.42 + exp(-adM_r * adM_r * 100.0) * 0.08) * mBoost;
-            beamM.g = (exp(-adM   * adM   * 550.0) * 0.36 + exp(-adM   * adM   * 110.0) * 0.06) * mBoost;
-            beamM.b = (exp(-adM_b * adM_b * 500.0) * 0.42 + exp(-adM_b * adM_b * 100.0) * 0.08) * mBoost;
+            beamM.r = (exp(-adM_r * adM_r * mSharpCore) * 0.12 + exp(-adM_r * adM_r * mSharpGlow) * 0.03) * mBoost;
+            beamM.g = (exp(-adM   * adM   * mSharpCore * 1.12) * 0.10 + exp(-adM * adM * mSharpGlow * 1.12) * 0.025) * mBoost;
+            beamM.b = (exp(-adM_b * adM_b * mSharpCore) * 0.12 + exp(-adM_b * adM_b * mSharpGlow) * 0.03) * mBoost;
             color += beamM * maskM * radialProfile * uHandVis;
 
-            // ── Second beam — razor-thin, crosses all rings, sparkle ──
+            // ── Second beam — starts razor-thin, fans to visible width ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
-            float adS_r = adS + dispersion;
-            float adS_b = adS - dispersion;
+            float adS_r = adS + dispersion * 0.8;
+            float adS_b = adS - dispersion * 0.8;
             float maskS = smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
             float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
             hSparkle = hSparkle * 0.12 + 0.88;
@@ -1180,11 +1187,13 @@ const ATEN_REIGN_FRAG = `
                         + exp(-pow((dist - rb3) * bandW, 2.0))
                         + exp(-pow((dist - rb4) * bandW, 2.0))
                         + exp(-pow((dist - rb5) * bandW, 2.0));
-            float sBoost = 1.0 + sBand * 0.35;
+            float sBoost = 1.0 + sBand * 0.25;
+            float sSharpCore = 1200.0 * fanOut;
+            float sSharpGlow = 240.0 * fanOut;
             vec3 beamS;
-            beamS.r = (exp(-adS_r * adS_r * 800.0) * 0.35 + exp(-adS_r * adS_r * 160.0) * 0.07) * sBoost;
-            beamS.g = (exp(-adS   * adS   * 900.0) * 0.30 + exp(-adS   * adS   * 180.0) * 0.05) * sBoost;
-            beamS.b = (exp(-adS_b * adS_b * 800.0) * 0.35 + exp(-adS_b * adS_b * 160.0) * 0.07) * sBoost;
+            beamS.r = (exp(-adS_r * adS_r * sSharpCore) * 0.10 + exp(-adS_r * adS_r * sSharpGlow) * 0.025) * sBoost;
+            beamS.g = (exp(-adS   * adS   * sSharpCore * 1.1) * 0.08 + exp(-adS * adS * sSharpGlow * 1.1) * 0.02) * sBoost;
+            beamS.b = (exp(-adS_b * adS_b * sSharpCore) * 0.10 + exp(-adS_b * adS_b * sSharpGlow) * 0.025) * sBoost;
             color += beamS * maskS * radialProfile * uHandVis * hSparkle;
 
             // ── Ring illumination — bands brighten where beams cross them ──
@@ -1197,7 +1206,7 @@ const ATEN_REIGN_FRAG = `
                                +  exp(-pow((dist - rb3) * 12.0, 2.0))
                                +  exp(-pow((dist - rb4) * 12.0, 2.0))
                                +  exp(-pow((dist - rb5) * 12.0, 2.0)));
-            color += beamHit * ringResponse * 0.08 * uHandVis;
+            color += beamHit * ringResponse * 0.03 * uHandVis;
         }
 
         gl_FragColor = vec4(color, 1.0);
@@ -1259,9 +1268,9 @@ scene.add(_glassAmbient);
 const _glassKey = new THREE.DirectionalLight(0xffffff, 0.5);
 _glassKey.position.set(1, 2, 4);
 scene.add(_glassKey);
-// Inner point light — warm glow inside the cube, the "source of light"
-// This is visible THROUGH the transmission as a warm luminous core
-const _innerLight = new THREE.PointLight(0xfff0d0, 2.5, 1.5, 2);
+// Inner point light — subtle warm core visible through frosted glass
+// Not a blast of light — just enough to give the cube a warm center
+const _innerLight = new THREE.PointLight(0xfff4e0, 0.25, 0.8, 2);
 _innerLight.position.set(0, 0, 0.1);  // at cube center
 scene.add(_innerLight);
 
@@ -1271,22 +1280,22 @@ scene.add(_innerLight);
 const _glassCubeSide = 0.30;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(1.0, 0.99, 0.97),    // near-white — glass is almost colorless
+    color: new THREE.Color(0.97, 0.97, 0.97),   // near-white — colorless frosted glass
     metalness: 0,
-    roughness: 0.03,           // near-perfect crystal — subtle surface highlights
-    transmission: 0.95,        // highly transmissive — ring colors shine through
-    thickness: 1.0,            // thin glass — minimal absorption, keeps rings visible
-    ior: 2.4,                  // very high IOR — prominent edge refraction = reads as glass
+    roughness: 0.35,           // frosted glass — soft diffused look, not sharp
+    transmission: 0.85,        // transmissive but frosted — ring colors diffuse through
+    thickness: 1.2,            // thicker = more internal frosted scattering
+    ior: 1.45,                 // glass IOR — natural
     transparent: true,
     side: THREE.DoubleSide,
-    envMap: _glassEnvMap,      // procedural gradient — Fresnel edges reflect this
-    envMapIntensity: 0.6,      // visible reflections at glancing angles
-    specularIntensity: 2.5,    // strong Fresnel at edges — the glass outline
-    specularColor: new THREE.Color(1.0, 0.98, 0.95),   // warm specular highlights
-    attenuationColor: new THREE.Color(0.98, 0.96, 0.92),  // nearly clear — minimal darkening
-    attenuationDistance: 1.0,  // long distance = barely any color absorption
-    emissive: new THREE.Color(1.0, 0.96, 0.88),   // warm inner glow — cube IS the light source
-    emissiveIntensity: 0.5,    // strong glow — glass radiates warmth, brighter than surroundings
+    envMap: _glassEnvMap,      // procedural gradient — Fresnel edges catch soft highlights
+    envMapIntensity: 0.25,     // subtle environment reflections
+    specularIntensity: 1.2,    // crisp Fresnel edges define the glass shape
+    specularColor: new THREE.Color(1.0, 1.0, 1.0),   // neutral specular
+    attenuationColor: new THREE.Color(0.92, 0.93, 0.95),  // faint cool tint inside glass
+    attenuationDistance: 0.6,  // moderate absorption — glass has visible body
+    emissive: new THREE.Color(0.0, 0.0, 0.0),     // NO self-illumination
+    emissiveIntensity: 0.0,    // glass is transparent, not a light source
 });
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
 // Isometric 3/4 view: top vertex points up, right and top faces visible
