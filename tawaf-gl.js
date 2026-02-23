@@ -919,6 +919,10 @@ const ATEN_REIGN_FRAG = `
     uniform float uQiblaAngle;    // beam direction in radians (0 = noon/top)
     uniform float uQiblaAlign;    // 0 = away, 1 = facing qibla
     uniform vec3  uQiblaColor;    // prayer-tinted beam color
+    uniform vec3  uHandAngles;   // hr, min, sec angles (shader coords)
+    uniform vec3  uHandLens;     // hr, min, sec beam lengths (UV dist)
+    uniform float uHandVis;      // hand visibility (0-1)
+    uniform vec3  uHandColor;    // prayer-tinted hand color
     varying vec2 vUv;
     void main() {
         vec2 uv = (vUv - 0.5) * 2.0;
@@ -1061,6 +1065,40 @@ const ATEN_REIGN_FRAG = `
             color += dirBias * uQiblaAlign * uQiblaBeam * 0.09;
         }
 
+        // ── CLOCK HAND BEAMS — thin focused lines of light from center ──
+        // Inspired by the qibla beam but tighter, radiating outward from the
+        // sacred center. Each hand is a filament of light — hour widest,
+        // second thinnest — with a soft halo around the core.
+        if (uHandVis > 0.005) {
+            float hAngle = atan(uv.x, uv.y);
+
+            // Hour beam — focused filament, warmest
+            float adH = hAngle - uHandAngles.x;
+            adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
+            float coreH = exp(-adH * adH * 600.0);
+            float haloH = exp(-adH * adH * 140.0);
+            float maskH = smoothstep(0.015, 0.04, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
+            color += uHandColor * (coreH * 0.28 + haloH * 0.07) * maskH * uHandVis;
+
+            // Minute beam — tighter filament
+            float adM = hAngle - uHandAngles.y;
+            adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
+            float coreM = exp(-adM * adM * 900.0);
+            float haloM = exp(-adM * adM * 200.0);
+            float maskM = smoothstep(0.015, 0.04, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
+            color += uHandColor * (coreM * 0.24 + haloM * 0.05) * maskM * uHandVis;
+
+            // Second beam — razor-thin filament with sparkle
+            float adS = hAngle - uHandAngles.z;
+            adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
+            float coreS = exp(-adS * adS * 1400.0);
+            float haloS = exp(-adS * adS * 300.0);
+            float maskS = smoothstep(0.015, 0.04, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
+            float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
+            hSparkle = hSparkle * 0.2 + 0.8;
+            color += uHandColor * (coreS * 0.20 + haloS * 0.04) * maskS * uHandVis * hSparkle;
+        }
+
         gl_FragColor = vec4(color, 1.0);
     }
 `;
@@ -1082,6 +1120,10 @@ const atenReignMat = new THREE.ShaderMaterial({
         uQiblaAngle: { value: 0.0 },
         uQiblaAlign: { value: 0.0 },
         uQiblaColor: { value: new THREE.Color(0.95, 0.92, 0.88) },
+        uHandAngles: { value: new THREE.Vector3(0, 0, 0) },
+        uHandLens:   { value: new THREE.Vector3(0.383, 0.575, 0.719) },
+        uHandVis:    { value: 1.0 },
+        uHandColor:  { value: new THREE.Color(0.95, 0.93, 0.90) },
     },
     vertexShader: BLUR_VERT,  // reuse the pass-through vertex shader
     fragmentShader: ATEN_REIGN_FRAG,
@@ -2132,24 +2174,20 @@ function updateClockHands(now, night, blending) {
     const pS = Math.max(palette.s - 10, 8);
     const pL = Math.min(palette.l + 18, 93);  // brighter than bg — hands are light within the field
     const hv = _handVisibility;
-    const handConfigs = [
-        [hrAngle,  hrR,  pS, pL, 0.85 * hv],
-        [minAngle, minR, pS, pL, 0.75 * hv],
-        [secAngle, secR, pS, pL, 0.65 * hv],
-    ];
 
+    // Drive shader beam uniforms — beams of light replace line-based hands
+    const _bu = atenReignMat.uniforms;
+    _bu.uHandAngles.value.set(
+        Math.PI / 2 - hrAngle,
+        Math.PI / 2 - minAngle,
+        Math.PI / 2 - secAngle
+    );
+    _bu.uHandVis.value = hv;
+    _bu.uHandColor.value.setHSL(baseH / 360, Math.min(pS / 100, 0.4), 0.92);
+
+    // Line-based hands hidden — shader beams are the visual representation
     for (let i = 0; i < 3; i++) {
-        const [angle, r, sat, lit, alpha] = handConfigs[i];
-        const hand = liveHands[i];
-        hand.line.visible = hv > 0;
-        // Origin stays at (0, 0, 0.01) — only update tip
-        hand.posArr[3] = Math.cos(angle) * r;
-        hand.posArr[4] = Math.sin(angle) * r;
-        hand.geo.attributes.position.needsUpdate = true;
-        hand.mat.color.setHSL(baseH / 360, sat / 100, lit / 100);
-        hand.mat.opacity = alpha;
-        hand.mat.blending = THREE.NormalBlending;
-        hand.mat.needsUpdate = true;
+        liveHands[i].line.visible = false;
     }
 
     // Clock dot positions
@@ -2234,7 +2272,7 @@ function updateClockHands(now, night, blending) {
     // Pen tip glow — sacred light at the drawing nib
     tipGlowPoint.visible = true;
     tipGlowMat.opacity = glowPulse * 0.55;
-    tipGlowMat.size = 48;
+    tipGlowMat.size = 0.28 * Math.min(W, H) * renderer.getPixelRatio() / (2 * frustum);
     tipGlowMat.color.setHSL(baseH / 360, 0.35, 0.88);
     tipGlowMat.needsUpdate = true;
 
@@ -2295,7 +2333,7 @@ function updateClockHands(now, night, blending) {
     }
     kaabaGlowGeo.setDrawRange(0, epiDrawCount);
     kaabaGlowGeo.attributes.position.needsUpdate = true;
-    kaabaGlowMat.size = 6;
+    kaabaGlowMat.size = 6 * Math.min(W, H) / 375;
     kaabaGlowMat.opacity = kaabaPulse * 0.25;
     kaabaGlowMat.color.setHSL(trailPalette.h / 360, trailPalette.s / 100 + 0.05, 0.85); // prayer-tinted glow — light radiates in harmony with the rings
     kaabaGlowMat.needsUpdate = true;
@@ -2369,35 +2407,23 @@ function updateClockHands(now, night, blending) {
         const dot = handEpiDots[h];
         const hg = handGlows[h];
 
-        if (h === 2) {
-            // --- Seconds hand: glow sprite at tip, no circle ---
-            circle.line.visible = false;
-            dot.points.visible = false;
-            hg.posArr[0] = tip.x;
-            hg.posArr[1] = tip.y;
-            hg.posArr[2] = 0.025;
-            hg.geo.attributes.position.needsUpdate = true;
-            hg.mat.opacity = 0.45 * hv;
-            hg.mat.size = 36;
-            hg.mat.color.setHSL(baseH / 360, 0.30, 0.88);
-            hg.mat.blending = THREE.AdditiveBlending;
-            hg.mat.needsUpdate = true;
-        } else {
-            // --- Hour / Minute: hide circle + dot, show glow sprite at hand tip ---
-            circle.line.visible = false;
-            dot.points.visible = false;
-            hg.posArr[0] = tip.x;
-            hg.posArr[1] = tip.y;
-            hg.posArr[2] = 0.025;
-            hg.geo.attributes.position.needsUpdate = true;
-            const glowSize = h === 0 ? 52 : 42; // hour bigger, minute smaller
-            const glowOpacity = (h === 0 ? 0.40 : 0.45) * hv;
-            hg.mat.opacity = glowOpacity;
-            hg.mat.size = glowSize;
-            hg.mat.color.setHSL(baseH / 360, 0.30, 0.86);
-            hg.mat.blending = THREE.AdditiveBlending;
-            hg.mat.needsUpdate = true;
-        }
+        // Scale glow sizes to world-space proportions (DPR-aware)
+        // Buffer pixels per world unit — consistent across all screens/DPRs
+        const dpr = renderer.getPixelRatio();
+        const pxPerWU = Math.min(W, H) * dpr / (2 * frustum);
+        // Glow world-space sizes: [hour, minute, second]
+        const GLOW_WU = [0.32, 0.26, 0.22];
+        circle.line.visible = false;
+        dot.points.visible = false;
+        hg.posArr[0] = tip.x;
+        hg.posArr[1] = tip.y;
+        hg.posArr[2] = 0.025;
+        hg.geo.attributes.position.needsUpdate = true;
+        hg.mat.size = GLOW_WU[h] * pxPerWU;
+        hg.mat.opacity = (h === 2 ? 0.45 : h === 0 ? 0.40 : 0.45) * hv;
+        hg.mat.color.setHSL(baseH / 360, 0.30, h === 2 ? 0.88 : 0.86);
+        hg.mat.blending = THREE.AdditiveBlending;
+        hg.mat.needsUpdate = true;
     }
 
     centerDot.mat.opacity = 0.3 * hv;

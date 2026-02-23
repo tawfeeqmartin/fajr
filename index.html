@@ -1748,7 +1748,7 @@ function closeClockFullscreen() {
   fsCompassOn = false;
   if(window._clockToggleCompass) window._clockToggleCompass(false);
   const cIcon = document.getElementById('fsCompassIcon');
-  if(cIcon) cIcon.style.opacity = '.6';
+  if(cIcon) { cIcon.innerHTML = _cubeSVG; cIcon.style.opacity = '.6'; }
 }
 
 // Close button
@@ -1768,7 +1768,7 @@ window.addEventListener('popstate', (e) => {
       fsCompassOn = false;
       if(window._clockToggleCompass) window._clockToggleCompass(false);
       const cIcon = document.getElementById('fsCompassIcon');
-      if(cIcon) cIcon.style.opacity = '.6';
+      if(cIcon) { cIcon.innerHTML = _cubeSVG; cIcon.style.opacity = '.6'; }
       _lastCompassExitTime = Date.now();
       // Re-push fullscreen state so next back actually exits
       history.pushState({clockFs:true}, '', '#clock');
@@ -1787,12 +1787,14 @@ window.addEventListener('popstate', (e) => {
 // Compass (qibla) toggle in fullscreen
 let fsCompassOn = false;
 let _compassPopFromBtn = false;
+const _cubeSVG = '<path d="M12 3L20 8v8l-8 5-8-5V8z M12 3v18 M4 8l8 5 8-5"/>';
+const _clockSVG = '<circle cx="12" cy="12" r="9.5"/><line x1="12" y1="12" x2="12" y2="5.5"/><line x1="12" y1="12" x2="16" y2="12"/>';
 document.getElementById('fsCompassToggle').addEventListener('click', () => {
   fsCompassOn = !fsCompassOn;
   if(window._clockToggleCompass) window._clockToggleCompass(fsCompassOn);
-  // Visual feedback: active state on the icon
+  // Swap icon: cube → clock (in compass mode), clock → cube (in clock mode)
   const icon = document.getElementById('fsCompassIcon');
-  if(icon) icon.style.opacity = fsCompassOn ? '1' : '.6';
+  if(icon) { icon.innerHTML = fsCompassOn ? _clockSVG : _cubeSVG; icon.style.opacity = fsCompassOn ? '1' : '.6'; }
   if(fsCompassOn) {
     // Push history state so back gesture exits compass first, not fullscreen
     history.pushState({compass:true}, '', '#clock');
@@ -1834,7 +1836,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=63';
+_cs.type='module';_cs.src='tawaf-gl.js?v=65';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
