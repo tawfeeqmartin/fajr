@@ -2648,6 +2648,8 @@ const _elSeedInfo      = document.getElementById('seed-info');
 currentVars = computeVariables(new Date());
 lastDayNight = isNightTime() ? 'night' : 'day';
 applyDayNight();
+// Reveal page now that correct prayer colors are applied — prevents flash of wrong palette
+requestAnimationFrame(() => document.body.classList.add('clock-ready'));
 initGeolocation();
 initCompass();
 

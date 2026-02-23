@@ -147,7 +147,9 @@ body{
   font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;
   overflow-x:clip;width:100%;
   transition:color 1s ease;
+  opacity:0;
 }
+body.clock-ready{opacity:1;transition:opacity .4s ease,color 1s ease}
 body::after{display:none;
 }
 
@@ -320,7 +322,7 @@ footer a:hover{color:var(--text)}
 }
 
 /* ── Fullscreen Clock Overlay ── */
-.clock-fs-overlay{position:fixed;inset:0;z-index:200;background:#0c0c12;display:none;flex-direction:column;align-items:center;justify-content:center}
+.clock-fs-overlay{position:fixed;inset:0;z-index:200;background:var(--bg,#f8f7f4);display:none;flex-direction:column;align-items:center;justify-content:center}
 .clock-fs-overlay.active{display:flex}
 .clock-fs-overlay canvas{z-index:20}
 /* Hide landing page content instantly when loading #clock */
@@ -1782,7 +1784,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=36';
+_cs.type='module';_cs.src='tawaf-gl.js?v=37';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
