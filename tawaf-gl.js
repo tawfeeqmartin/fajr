@@ -1625,26 +1625,46 @@ function handleDeviceOrientation(e) {
 }
 
 // iOS 13+ requires user gesture for DeviceOrientation permission
-function initGyroscope() {
+let _gyroGranted = false;
+async function requestGyroPermission() {
+    if (_gyroGranted) return;
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // iOS: request on first user interaction
-        const requestOnce = async () => {
-            document.removeEventListener('click', requestOnce);
-            document.removeEventListener('touchend', requestOnce);
-            try {
-                const perm = await DeviceOrientationEvent.requestPermission();
-                if (perm === 'granted') {
-                    window.addEventListener('deviceorientation', handleDeviceOrientation, true);
-                }
-            } catch (e) { /* silently fail on denied */ }
-        };
-        document.addEventListener('click', requestOnce);
-        document.addEventListener('touchend', requestOnce);
+        try {
+            const perm = await DeviceOrientationEvent.requestPermission();
+            if (perm === 'granted') {
+                _gyroGranted = true;
+                window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+            }
+        } catch (e) { /* denied or not from gesture — will retry on next tap */ }
     } else if (typeof DeviceOrientationEvent !== 'undefined') {
+        // Android / desktop — no permission needed
+        _gyroGranted = true;
         window.addEventListener('deviceorientation', handleDeviceOrientation, true);
     }
 }
+function initGyroscope() {
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS: keep retrying on every user interaction until granted
+        const tryRequest = () => {
+            if (_gyroGranted) {
+                document.removeEventListener('click', tryRequest, true);
+                document.removeEventListener('touchend', tryRequest, true);
+                return;
+            }
+            requestGyroPermission();
+        };
+        document.addEventListener('click', tryRequest, true);
+        document.addEventListener('touchend', tryRequest, true);
+        // Also try immediately in case permission was previously granted
+        requestGyroPermission();
+    } else {
+        requestGyroPermission();
+    }
+}
+// Expose so fullscreen entry can also trigger permission request
+window._requestGyroPermission = requestGyroPermission;
 initGyroscope();
 
 // Flare textures — procedural generation

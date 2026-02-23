@@ -1626,6 +1626,9 @@ async function fsFetchPrayer() {
 }
 
 function openClockFullscreen() {
+  // Fullscreen tap is a user gesture — request gyro permission (iOS)
+  if(window._requestGyroPermission) window._requestGyroPermission();
+
   const overlay = document.getElementById('clockFullscreen');
   const canvas = document.querySelector('#dialHero canvas');
   if(!canvas) return;
@@ -1785,7 +1788,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=43';
+_cs.type='module';_cs.src='tawaf-gl.js?v=44';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
