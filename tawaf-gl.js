@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v103: Custom FBO chromatic refraction glass — per-channel IOR dispersion, iridescent Fresnel
+// v104: Glass prism cube — 3-channel chromatic aberration, white Fresnel edges, dichroic shimmer
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -1217,59 +1217,72 @@ const GLASS_FRAG = `
     varying vec3 vViewDir;
     varying vec4 vProjected;
 
-    // Cosine palette iridescence — rainbow hue from view angle
-    vec3 iridescentColor(float t) {
-        vec3 a = vec3(0.5, 0.5, 0.5);
-        vec3 b = vec3(0.5, 0.5, 0.5);
-        vec3 c = vec3(1.0, 1.0, 1.0);
-        vec3 d = vec3(0.0, 0.33, 0.67);
-        return a + b * cos(6.28318 * (c * t + d));
-    }
-
     void main() {
         vec3 normal = normalize(vWorldNormal);
         vec3 viewDir = normalize(vViewDir);
 
-        // Screen-space UV from projected position (camera-independent)
+        // Screen-space UV from projected position
         vec2 screenUV = (vProjected.xy / vProjected.w) * 0.5 + 0.5;
 
-        // Fresnel — strong edge glow defines the glass silhouette
+        // Fresnel — defines glass silhouette. Real glass: sharp bright edges.
         float cosTheta = abs(dot(viewDir, normal));
         float fresnel = pow(1.0 - cosTheta, uFresnelPower);
 
-        // Per-channel refraction — each channel bends at different IOR
-        // This creates visible chromatic dispersion at cube edges
+        // Edge detection — sharp geometric edge highlights via fwidth
+        vec3 normalDeriv = fwidth(normal);
+        float edgeFactor = smoothstep(0.15, 0.6, length(normalDeriv) * 10.0);
+
+        // ── 3-channel chromatic aberration ──
+        // Each color channel refracts at slightly different IOR:
+        // Red bends least → Green middle → Blue bends most
+        // Face centers: all 3 channels sample nearly the same UV → clear glass
+        // Edges: normals diverge → UV offsets separate → visible rainbow fringe
         float iorR = 1.0 / uIOR;
-        float iorG = 1.0 / (uIOR + uChromatic);
-        float iorB = 1.0 / (uIOR + uChromatic * 2.0);
+        float iorG = 1.0 / (uIOR + uChromatic * 0.5);
+        float iorB = 1.0 / (uIOR + uChromatic);
 
         vec3 refR = refract(-viewDir, normal, iorR);
         vec3 refG = refract(-viewDir, normal, iorG);
         vec3 refB = refract(-viewDir, normal, iorB);
 
-        // Project refracted rays to screen UV offsets
         vec2 uvR = screenUV + refR.xy * uRefractPower;
         vec2 uvG = screenUV + refG.xy * uRefractPower;
         vec2 uvB = screenUV + refB.xy * uRefractPower;
 
-        // Sample the FBO (rings behind the glass)
+        // Sample background through the glass — each channel at its own offset
         float r = texture2D(uFBO, uvR).r;
         float g = texture2D(uFBO, uvG).g;
         float b = texture2D(uFBO, uvB).b;
         vec3 refracted = vec3(r, g, b);
 
-        // Iridescent edge color — dichroic rainbow shift
-        float iriT = cosTheta * 0.6 + uTime * 0.015;
-        vec3 iriColor = iridescentColor(iriT);
+        // Slight desaturation — clear glass is neutral, not color-tinted
+        // This prevents warm backgrounds from making the glass look solid-colored
+        float luma = dot(refracted, vec3(0.299, 0.587, 0.114));
+        refracted = mix(refracted, vec3(luma), 0.3);
 
-        // Edge highlight: mix white Fresnel + iridescent color
-        vec3 edgeColor = mix(vec3(1.0, 1.0, 1.0), iriColor, 0.6);
+        // Slight darkening inside glass — creates contrast with bright ring behind
+        // Real glass absorbs a tiny amount of light; this also helps the cube
+        // read as a distinct object against the luminous inner ring
+        refracted *= 0.85;
 
-        // Final: refracted rings + Fresnel edge glow with iridescence
-        vec3 color = mix(refracted, edgeColor, fresnel * 0.4);
+        // ── Compose: transparent glass with white edge catches ──
+        vec3 color = refracted;
 
-        // Subtle edge brightness lift for glass edge catches
-        color += fresnel * 0.06;
+        // White Fresnel edge glow — sharp, like polished optical glass
+        float edgeMask = pow(fresnel, 1.2);
+        color = mix(color, vec3(1.0), edgeMask * 0.75);
+
+        // Geometric edge lines — bright white at cube edges
+        color += vec3(1.0) * edgeFactor * 0.8;
+
+        // Dichroic shimmer at grazing angles — subtle rainbow color shift
+        float rainbow = cosTheta * 3.0 + uTime * 0.15;
+        vec3 dichroic = vec3(
+            sin(rainbow) * 0.5 + 0.5,
+            sin(rainbow + 2.09) * 0.5 + 0.5,
+            sin(rainbow + 4.19) * 0.5 + 0.5
+        );
+        color += dichroic * edgeMask * edgeMask * 0.18;
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -1278,10 +1291,10 @@ const GLASS_FRAG = `
 const _glassCubeMat = new THREE.ShaderMaterial({
     uniforms: {
         uFBO:          { value: _glassFBO.texture },
-        uIOR:          { value: 1.45 },           // glass IOR — lower = more visible refraction
-        uChromatic:    { value: 0.12 },           // chromatic aberration strength
-        uRefractPower: { value: 0.3 },            // how much UV shifts per refraction
-        uFresnelPower: { value: 3.5 },            // edge glow falloff
+        uIOR:          { value: 1.35 },           // glass IOR — slightly low for stronger bending
+        uChromatic:    { value: 0.40 },           // chromatic spread — visible rainbow at edges
+        uRefractPower: { value: 0.45 },           // UV shift per refraction — visible distortion
+        uFresnelPower: { value: 2.2 },            // edge glow falloff — broad Fresnel
         uTime:         { value: 0.0 },
     },
     vertexShader: GLASS_VERT,
@@ -3070,8 +3083,10 @@ function update(timestamp) {
 
     // ── Glass cube animation — gentle breathing rotation ──
     // Slow oscillation reveals 3D nature through shifting Fresnel edges
+    // and changing refraction patterns — essential for glass readability
     const _rotTime = performance.now() * 0.001;
-    glassCube.rotation.y = Math.PI / 4 + Math.sin(_rotTime * 0.25) * 0.06;
+    glassCube.rotation.y = Math.PI / 4 + Math.sin(_rotTime * 0.2) * 0.12;
+    glassCube.rotation.x = THREE.MathUtils.degToRad(18) + Math.sin(_rotTime * 0.15) * 0.04;
     _glassCubeMat.uniforms.uTime.value = _rotTime;
 
     // ── Two-pass rendering for glass FBO ──
