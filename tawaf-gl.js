@@ -937,17 +937,9 @@ const _blurTintColor = new THREE.Color();
 // Each ring shifts hue slightly for the multi-chromatic field effect.
 
 const ATEN_REIGN_FRAG = `
-    uniform vec3 uRing0;
-    uniform vec3 uRing1;
-    uniform vec3 uRing2;
-    uniform vec3 uRing3;
-    uniform vec3 uRing4;
-    uniform vec3 uRing5;
-    uniform vec3 uRing6;
     uniform float uTime;
     uniform float uAspect;
     uniform vec2 uTilt;           // gyroscope parallax (Miraj portal depth)
-    uniform float uTasbihPulse;   // dhikr breathing pulse (0..1)
     uniform float uQiblaBeam;     // 0 = off, 1 = compass mode on
     uniform float uQiblaAngle;    // beam direction in radians (0 = noon/top)
     uniform float uQiblaAlign;    // 0 = away, 1 = facing qibla
@@ -959,89 +951,19 @@ const ATEN_REIGN_FRAG = `
     varying vec2 vUv;
     void main() {
         vec2 uv = (vUv - 0.5) * 2.0;
-        // Correct for non-square viewport — keeps rings circular
         uv *= vec2(max(uAspect, 1.0), max(1.0 / uAspect, 1.0));
 
         // ── Miraj portal depth (gyroscope parallax) ──
-        // Outer rings shift more on tilt — looking through layers of sacred space.
-        // Quadratic scaling: the 7th heaven feels farther than the 1st.
         float rawDist = length(uv);
         vec2 parallax = uTilt * rawDist * rawDist * 0.18;
         uv += parallax;
         float dist = length(uv);
 
-        // ── Glass is now a real 3D mesh — shader just renders rings + beams ──
-
-        // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
-        float b0 = sin(uTime * 0.14) * 0.015;
-        float b1 = sin(uTime * 0.11 + 0.9) * 0.018;
-        float b2 = sin(uTime * 0.09 + 1.8) * 0.020;
-        float b3 = sin(uTime * 0.07 + 2.7) * 0.022;
-        float b4 = sin(uTime * 0.06 + 3.6) * 0.025;
-        float b5 = sin(uTime * 0.04 + 4.5) * 0.028;
-        float b6 = sin(uTime * 0.03 + 5.4) * 0.030;
-
-        vec3 r0 = uRing0 + b0;
-        vec3 r1 = uRing1 + b1;
-        vec3 r2 = uRing2 + b2;
-        vec3 r3 = uRing3 + b3;
-        vec3 r4 = uRing4 + b4;
-        vec3 r5 = uRing5 + b5;
-        vec3 r6 = uRing6 + b6;
-
-        // ── Seven Heavens (سبع سماوات) — sacred proportion ring widths ──
-        // "He created seven heavens in layers" — Quran 67:3
-        // Ring widths follow φ^⅓ (≈1.175) growth.
-        // CHROMATIC SAMPLING: inside the prism, R/G/B sample at different radii
-        // creating visible spectral splitting — the glass refracts the rings.
-
-        // Green channel (main) — standard ring sampling
-        // r0 ring boundary pushed outward so it forms a VISIBLE saturated
-        // band around the prism (dist 0.095–0.16) before transitioning to r1.
-        // This is the Turrell key: the innermost ring is the richest color.
-        // Center is dark/neutral — the 3D glass cube covers this area.
-        // r0 appears as a distinct RING BAND around the cube edge (0.10–0.20),
-        // not flooding the entire center. This gives the Turrell inner-ring read.
-        vec3 centerDark = r0 * 0.3;  // dark version of r0 — neutral but tinted
-        vec3 color = mix(centerDark, r0, smoothstep(0.06, 0.12, dist));
-        color = mix(color, r1, smoothstep(0.18, 0.26, dist));
-        color = mix(color, r2, smoothstep(0.27, 0.37, dist));
-        color = mix(color, r3, smoothstep(0.38, 0.48, dist));
-        color = mix(color, r4, smoothstep(0.49, 0.60, dist));
-        color = mix(color, r5, smoothstep(0.61, 0.76, dist));
-        color = mix(color, r6, smoothstep(0.78, 0.96, dist));
-
-        // Chromatic ring splitting is handled by the 3D glass cube's IOR refraction
-
-        // ── Ayat an-Nur (24:35) — "Light upon light" (نور على نور) ──
-        // Nur manifests through the ring colors themselves, not white wash.
-        // The innermost ring carries the warmth of the lamp (misbah).
-
-        // ── Subtle center warmth — glass cube sits in a pool of light ──
-        // Slight warmth at center makes the glass feel like a light source,
-        // not a dark hole. The glass transmission does the contrast work.
-        // No center warmth — the 3D glass cube provides its own presence
-        // Dark center gives the glass contrast to read as glass
-
-        // ── Turrell luminance lift at ring boundaries ──
-        // Bright seams between color bands — light bleeding between Skyspace panels.
-        // Positions follow sacred proportion boundaries.
-        float w = 12.0;
-        // Skip innermost boundary — let the r0 ring color speak for itself
-        float edge12 = exp(-pow((dist - 0.245) * w, 2.0));
-        float edge23 = exp(-pow((dist - 0.355) * w, 2.0));
-        float edge34 = exp(-pow((dist - 0.465) * w, 2.0));
-        float edge45 = exp(-pow((dist - 0.585) * w, 2.0));
-        float edge56 = exp(-pow((dist - 0.750) * w, 2.0));
-        float liftMask = (edge12 + edge23 + edge34 + edge45 + edge56);
-        float localLum = dot(color, vec3(0.299, 0.587, 0.114));
-        float lift = liftMask * (0.04 + localLum * 0.06);
-        color += lift;
-
-        // ── Tasbih dhikr pulse ──
-        // 33× SubhanAllah, 33× Alhamdulillah, 34× Allahu Akbar
-        // Subtle deepening of all rings — the sacred rhythm of remembrance
-        color = mix(color, color * 0.85, uTasbihPulse * 0.25);
+        // ── BEAM-ONLY OVERLAY ──
+        // Rings are now real 3D geometry. This quad only renders:
+        // beam hands, qibla beam, and ring-beam interactions.
+        // Uses additive blending — beams brighten the ring geometry behind.
+        vec3 color = vec3(0.0);
 
         // ── Qibla Beam of Light + Prism (Compass Mode) ──
         // Light travels INWARD from the edge toward the Kaaba — the sacred
@@ -1212,23 +1134,17 @@ const ATEN_REIGN_FRAG = `
             color += beamHit * ringResponse * 0.03 * uHandVis;
         }
 
-        gl_FragColor = vec4(color, 1.0);
+        // Alpha: beam brightness determines opacity (additive blending)
+        float beamAlpha = dot(color, vec3(0.333));
+        gl_FragColor = vec4(color, beamAlpha);
     }
 `;
 
 const atenReignMat = new THREE.ShaderMaterial({
     uniforms: {
-        uRing0: { value: new THREE.Color(0.88, 0.52, 0.28) },
-        uRing1: { value: new THREE.Color(0.85, 0.70, 0.58) },
-        uRing2: { value: new THREE.Color(0.88, 0.80, 0.76) },
-        uRing3: { value: new THREE.Color(0.85, 0.80, 0.84) },
-        uRing4: { value: new THREE.Color(0.75, 0.72, 0.80) },
-        uRing5: { value: new THREE.Color(0.68, 0.64, 0.74) },
-        uRing6: { value: new THREE.Color(0.60, 0.56, 0.68) },
         uTime:  { value: 0.0 },
         uAspect: { value: W / H },
         uTilt: { value: new THREE.Vector2(0, 0) },
-        uTasbihPulse: { value: 0.0 },
         uQiblaBeam:  { value: 0.0 },
         uQiblaAngle: { value: 0.0 },
         uQiblaAlign: { value: 0.0 },
@@ -1240,11 +1156,14 @@ const atenReignMat = new THREE.ShaderMaterial({
     },
     vertexShader: BLUR_VERT,  // reuse the pass-through vertex shader
     fragmentShader: ATEN_REIGN_FRAG,
+    transparent: true,
     depthTest: false,
     depthWrite: false,
+    blending: THREE.AdditiveBlending,  // beams ADD light to ring geometry behind
 });
 
-// Fullscreen quad covering the camera frustum — slightly oversized for safety
+// Beam overlay quad — in front of rings, behind glass cube
+// This quad renders ONLY beam hands + qibla beam, additively on top of ring geometry
 const _atenAspect = W / H;
 const _atenW = frustum * (_atenAspect >= 1 ? _atenAspect : 1) * 2.4;
 const _atenH = frustum * (_atenAspect >= 1 ? 1 : 1 / _atenAspect) * 2.4;
@@ -1252,8 +1171,8 @@ const atenReignQuad = new THREE.Mesh(
     new THREE.PlaneGeometry(_atenW, _atenH),
     atenReignMat
 );
-atenReignQuad.position.set(0, 0, -0.5);
-atenReignQuad.renderOrder = -10;
+atenReignQuad.position.set(0, 0, -0.02);  // between rings and glass cube
+atenReignQuad.renderOrder = -2;  // after ring meshes (-10 to -4), before glass (0)
 scene.add(atenReignQuad);
 
 // ═══════════════════════════════════════════════════════════════
@@ -1283,20 +1202,20 @@ scene.add(_innerLight);
 const _glassCubeSide = 0.30;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(0.97, 0.97, 0.97),   // near-white — colorless frosted glass
+    color: new THREE.Color(0.98, 0.98, 0.98),   // near-white — colorless glass
     metalness: 0,
-    roughness: 0.35,           // frosted glass — soft diffused look, not sharp
-    transmission: 0.85,        // transmissive but frosted — ring colors diffuse through
-    thickness: 1.2,            // thicker = more internal frosted scattering
-    ior: 1.45,                 // glass IOR — natural
+    roughness: 0.15,           // clearer glass — real geometry behind needs sharper refraction
+    transmission: 0.92,        // highly transmissive — see rings clearly through glass
+    thickness: 0.8,            // moderate — enough IOR distortion without washing out
+    ior: 1.52,                 // crown glass — visible refraction of the ring geometry behind
     transparent: true,
     side: THREE.DoubleSide,
     envMap: _glassEnvMap,      // procedural gradient — Fresnel edges catch soft highlights
-    envMapIntensity: 0.25,     // subtle environment reflections
-    specularIntensity: 1.2,    // crisp Fresnel edges define the glass shape
+    envMapIntensity: 0.35,     // environment reflections define glass edges
+    specularIntensity: 1.5,    // strong Fresnel edges — this is how glass reads
     specularColor: new THREE.Color(1.0, 1.0, 1.0),   // neutral specular
-    attenuationColor: new THREE.Color(0.92, 0.93, 0.95),  // faint cool tint inside glass
-    attenuationDistance: 0.6,  // moderate absorption — glass has visible body
+    attenuationColor: new THREE.Color(0.90, 0.92, 0.96),  // faint cool tint inside glass
+    attenuationDistance: 0.4,  // visible body — glass has presence
     emissive: new THREE.Color(0.0, 0.0, 0.0),     // NO self-illumination
     emissiveIntensity: 0.0,    // glass is transparent, not a light source
 });
@@ -1312,8 +1231,138 @@ glassCube.position.set(0, 0, 0.1);  // in front of ring quad, behind overlays
 glassCube.renderOrder = 0;
 scene.add(glassCube);
 
+// ═══════════════════════════════════════════════════════════════
+// 3D RING GEOMETRY — Seven Heavens as real geometry
+// Each ring is a RingGeometry mesh at a different Z depth.
+// The glass cube's transmission pass captures these at their actual
+// positions, producing genuine depth-dependent refraction.
+// ═══════════════════════════════════════════════════════════════
+
+// Ring boundaries in UV-distance space (from shader smoothstep values).
+// Conversion: worldRadius = uvDist * frustum * 1.2 (quad covers frustum * 2.4)
+const _ringScale = frustum * 1.2;
+// Define ring boundaries: [innerUV, outerUV] for each of 7 rings
+// Rings overlap by 0.02 UV units to prevent pixel gaps at boundaries
+const _ringBounds = [
+    [0.00, 0.24],   // Ring 0 (innermost) — center, overlaps into ring 1
+    [0.20, 0.34],   // Ring 1 — overlaps both neighbors
+    [0.30, 0.45],   // Ring 2
+    [0.41, 0.56],   // Ring 3
+    [0.52, 0.70],   // Ring 4
+    [0.66, 0.89],   // Ring 5
+    [0.85, 1.30],   // Ring 6 (outermost) — extends well past viewport
+];
+
+// Z depths — staggered so inner rings are close to the cube, outer rings are far
+// Glass cube is at z=0.1; rings go behind it
+const _ringDepths = [
+    -0.05,   // Ring 0: closest to cube (0.15 WU behind glass)
+    -0.12,   // Ring 1
+    -0.20,   // Ring 2
+    -0.29,   // Ring 3
+    -0.39,   // Ring 4
+    -0.50,   // Ring 5
+    -0.62,   // Ring 6: farthest (0.72 WU behind glass)
+];
+
+// Create ring meshes with simple ShaderMaterial for smooth blending
+const _ringMeshes = [];
+const _ringMaterials = [];
+
+// Vertex shader for rings — pass radius to fragment for blending
+const RING_VERT = `
+    varying float vRadius;
+    void main() {
+        // position.xy is the ring geometry — radius = length of vertex position
+        vRadius = length(position.xy);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+`;
+
+// Fragment shader for rings — smooth color blending, fully opaque
+// No alpha gaps — each ring is fully opaque. Color transitions handled
+// by blending inner/outer colors across the ring width.
+const RING_FRAG = `
+    uniform vec3 uColorInner;
+    uniform vec3 uColorOuter;
+    uniform float uInnerRadius;
+    uniform float uOuterRadius;
+    uniform float uBlendInner;
+    uniform float uBlendOuter;
+    uniform float uBreath;        // breathing animation offset
+    varying float vRadius;
+    void main() {
+        vec3 innerC = uColorInner + uBreath;
+        vec3 outerC = uColorOuter + uBreath;
+        // Smooth blend from inner color to outer color across the ring
+        float t = smoothstep(uInnerRadius, uOuterRadius, vRadius);
+        vec3 color = mix(innerC, outerC, t);
+        // Fully opaque — no alpha gaps between rings
+        gl_FragColor = vec4(color, 1.0);
+    }
+`;
+
+for (let i = 0; i < 7; i++) {
+    const [innerUV, outerUV] = _ringBounds[i];
+    const innerR = innerUV * _ringScale;
+    const outerR = outerUV * _ringScale;
+
+    const geo = new THREE.RingGeometry(innerR, outerR, 128, 1);
+    const mat = new THREE.ShaderMaterial({
+        uniforms: {
+            uColorInner:  { value: new THREE.Color(0.5, 0.5, 0.5) },
+            uColorOuter:  { value: new THREE.Color(0.5, 0.5, 0.5) },
+            uInnerRadius: { value: innerR },
+            uOuterRadius: { value: outerR },
+            uBlendInner:  { value: (outerR - innerR) * 0.3 },
+            uBlendOuter:  { value: (outerR - innerR) * 0.3 },
+            uBreath:      { value: 0.0 },
+        },
+        vertexShader: RING_VERT,
+        fragmentShader: RING_FRAG,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+    });
+
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(0, 0, _ringDepths[i]);
+    // Outermost ring (i=6) renders first (renderOrder=-10), innermost (i=0) renders
+    // last (renderOrder=-4) so inner rings visually overlap outer at boundaries
+    mesh.renderOrder = -10 + (6 - i);
+    scene.add(mesh);
+    _ringMeshes.push(mesh);
+    _ringMaterials.push(mat);
+}
+
+// Ring boundary luminance seams — thin bright rings at the transition points
+// These are thin ring meshes that add the Turrell luminance lift at boundaries
+const _ringSeamBoundaries = [0.22, 0.32, 0.43, 0.54, 0.68, 0.87];
+const _seamMeshes = [];
+for (let i = 0; i < _ringSeamBoundaries.length; i++) {
+    const r = _ringSeamBoundaries[i] * _ringScale;
+    const width = 0.02; // thin seam
+    const geo = new THREE.RingGeometry(r - width, r + width, 128, 1);
+    const mat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(1, 1, 1),
+        transparent: true,
+        opacity: 0.06,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    // Z slightly in front of the ring behind it
+    mesh.position.set(0, 0, _ringDepths[Math.min(i + 1, 6)] + 0.01);
+    mesh.renderOrder = -3;
+    scene.add(mesh);
+    _seamMeshes.push(mesh);
+}
+
 // Pre-allocated Color for ring computation
 const _ringColor = new THREE.Color();
+const _ringColor2 = new THREE.Color();
 
 // Groups
 let traceGroup = new THREE.Group();
@@ -2485,14 +2534,32 @@ function applyDayNight() {
     const prayerName = artwork ? artwork.prayerPeriod : (currentVars ? currentVars.prayerPeriod : 'isha');
     const rings = PRAYER_RING_PALETTES[prayerName] || PRAYER_RING_PALETTES.isha;
 
-    const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4', 'uRing5', 'uRing6'];
+    // ── Update 3D ring mesh colors ──
+    // Each ring mesh gets its inner color from this ring and outer color from the next
     for (let i = 0; i < 7; i++) {
         const [rh, rs, rl] = rings[i];
         _ringColor.setHSL(rh / 360, rs / 100, rl / 100);
-        atenReignMat.uniforms[ringUniforms[i]].value.copy(_ringColor);
+        _ringMaterials[i].uniforms.uColorInner.value.copy(_ringColor);
+
+        // Outer color: blend toward the next ring, or darken for the last
+        if (i < 6) {
+            const [nh, ns, nl] = rings[i + 1];
+            _ringColor2.setHSL(nh / 360, ns / 100, nl / 100);
+            _ringMaterials[i].uniforms.uColorOuter.value.copy(_ringColor2);
+        } else {
+            // Outermost ring darkens at the edge
+            _ringColor2.setHSL(rh / 360, rs / 100, Math.max(rl - 15, 10) / 100);
+            _ringMaterials[i].uniforms.uColorOuter.value.copy(_ringColor2);
+        }
     }
 
-    // scene.background stays null — Aten Reign quad handles everything
+    // Update seam luminance colors (white-ish, tinted slightly by adjacent rings)
+    for (let i = 0; i < _seamMeshes.length; i++) {
+        const [rh] = rings[Math.min(i + 1, 6)];
+        _seamMeshes[i].material.color.setHSL(rh / 360, 0.15, 0.95);
+    }
+
+    // scene.background stays null — ring meshes provide the background
 
     // ── Inner point light — subtle warm core visible through frosted glass ──
     // Uses r0 hue but much lower saturation/lightness — understated, not nuclear
@@ -2696,7 +2763,7 @@ function updatePrayerTransition(vars) {
     const currentRings = PRAYER_RING_PALETTES[currentPrayer] || PRAYER_RING_PALETTES.isha;
     const nextRings = PRAYER_RING_PALETTES[nextPrayerName];
 
-    const ringUniforms = ['uRing0', 'uRing1', 'uRing2', 'uRing3', 'uRing4', 'uRing5', 'uRing6'];
+    // Update 3D ring mesh colors during prayer transition
     for (let i = 0; i < 7; i++) {
         const [ch, cs, cl] = currentRings[i];
         const [nh, ns, nl] = nextRings[i];
@@ -2708,7 +2775,21 @@ function updatePrayerTransition(vars) {
         const blendS = cs + (ns - cs) * t;
         const blendL = cl + (nl - cl) * t;
         _transRingColor.setHSL(blendH / 360, blendS / 100, blendL / 100);
-        atenReignMat.uniforms[ringUniforms[i]].value.copy(_transRingColor);
+        _ringMaterials[i].uniforms.uColorInner.value.copy(_transRingColor);
+
+        // Outer color: next ring in the blend
+        if (i < 6) {
+            const [cnh, cns, cnl] = currentRings[i + 1];
+            const [nnh, nns, nnl] = nextRings[i + 1];
+            let dnh = nnh - cnh;
+            if (dnh > 180) dnh -= 360;
+            if (dnh < -180) dnh += 360;
+            const blendNH = ((cnh + dnh * t) % 360 + 360) % 360;
+            const blendNS = cns + (nns - cns) * t;
+            const blendNL = cnl + (nnl - cnl) * t;
+            _transRingColor.setHSL(blendNH / 360, blendNS / 100, blendNL / 100);
+            _ringMaterials[i].uniforms.uColorOuter.value.copy(_transRingColor);
+        }
     }
 
     // Also blend the page background during transition
@@ -2874,13 +2955,13 @@ function update(timestamp) {
     atenReignMat.uniforms.uTilt.value.set(_tiltSmooth.x * 0.15, _tiltSmooth.y * 0.15);
 
     // ── Tasbih dhikr pulse — subtle ring deepening ──
+    // Applied to 3D ring mesh opacities now (rings are real geometry)
+    let _tasbihDim = 1.0;
     if (tasbihPulseStart > 0) {
         const tasbihElapsed = performance.now() / 1000 - tasbihPulseStart;
         const tasbihRaw = Math.max(0, 1 - tasbihElapsed / TASBIH_PULSE_DURATION);
-        atenReignMat.uniforms.uTasbihPulse.value = tasbihRaw * tasbihRaw; // quadratic easeout
-        if (tasbihRaw <= 0) tasbihPulseStart = 0; // done
-    } else {
-        atenReignMat.uniforms.uTasbihPulse.value = 0;
+        _tasbihDim = 1.0 - tasbihRaw * tasbihRaw * 0.25; // quadratic easeout, 25% max dimming
+        if (tasbihRaw <= 0) tasbihPulseStart = 0;
     }
 
     // ── Sabr (patience) — slow prayer transition crossfade ──
@@ -2888,8 +2969,28 @@ function update(timestamp) {
     // "Indeed, prayer has been decreed upon the believers at specified times" (4:103)
     updatePrayerTransition(vars);
 
-    // Animate Aten Reign breathing
+    // Animate beam overlay time
     atenReignMat.uniforms.uTime.value = timestamp * 0.001;
+
+    // ── Animate 3D ring breathing + parallax ──
+    const t = timestamp * 0.001;
+    const breathRates = [0.14, 0.11, 0.09, 0.07, 0.06, 0.04, 0.03];
+    const breathPhases = [0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4];
+    const breathAmps = [0.015, 0.018, 0.020, 0.022, 0.025, 0.028, 0.030];
+    for (let i = 0; i < 7; i++) {
+        _ringMaterials[i].uniforms.uBreath.value = Math.sin(t * breathRates[i] + breathPhases[i]) * breathAmps[i];
+
+        // Tasbih dim: scale ring opacity during dhikr pulse
+        _ringMeshes[i].material.opacity = _tasbihDim;
+
+        // Parallax: each ring translates based on tilt + its Z depth
+        // Deeper rings (larger |z|) shift more — true 3D parallax
+        const tiltX = atenReignMat.uniforms.uTilt.value.x;
+        const tiltY = atenReignMat.uniforms.uTilt.value.y;
+        const depthFactor = Math.abs(_ringDepths[i]) * 0.4;
+        _ringMeshes[i].position.x = tiltX * depthFactor;
+        _ringMeshes[i].position.y = tiltY * depthFactor;
+    }
 
     // Update tawaf lens flare animation
     updateTawafFlare();
@@ -2984,13 +3085,28 @@ function onResize() {
     blurTargetB.setSize(W, H);
     bokehMat.uniforms.uResolution.value.set(W, H);
 
-    // Resize Aten Reign background quad to match new frustum
+    // Resize beam overlay quad to match new frustum
     {
         const newAspect = W / H;
         const aqW = frustum * (newAspect >= 1 ? newAspect : 1) * 2.4;
         const aqH = frustum * (newAspect >= 1 ? 1 : 1 / newAspect) * 2.4;
         atenReignQuad.geometry.dispose();
         atenReignQuad.geometry = new THREE.PlaneGeometry(aqW, aqH);
+    }
+
+    // Resize 3D ring geometry to match viewport
+    // Ring geometry is in world units based on frustum — only the outermost
+    // ring needs to extend far enough to cover any aspect ratio
+    {
+        const newAspect = W / H;
+        const maxExtent = frustum * Math.max(newAspect, 1 / newAspect) * 1.5;
+        // Update ring 6 outer radius if viewport got wider
+        const outerR = Math.max(_ringBounds[6][1] * _ringScale, maxExtent);
+        if (outerR > _ringBounds[6][1] * _ringScale) {
+            const innerR = _ringBounds[6][0] * _ringScale;
+            _ringMeshes[6].geometry.dispose();
+            _ringMeshes[6].geometry = new THREE.RingGeometry(innerR, outerR, 128, 1);
+        }
     }
 
     // Resize blurred quad to match new frustum
