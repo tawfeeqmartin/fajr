@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Seven Heavens — سبع سماوات — Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #060608;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        #canvas-container { width: 100vw; height: 100vh; }
+        canvas { display: block; }
+        #title {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+            color: rgba(255,255,255,0.25); font-size: 10px; font-weight: 300;
+            letter-spacing: 4px; text-transform: uppercase; z-index: 10;
+            pointer-events: none; white-space: nowrap;
+        }
+        #time-display {
+            position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+            color: rgba(255,255,255,0.25); font-size: 13px; font-weight: 200;
+            letter-spacing: 3px; z-index: 10; pointer-events: none;
+            font-variant-numeric: tabular-nums;
+        }
+        #controls {
+            position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+            z-index: 10; display: flex; gap: 10px;
+        }
+        .ctrl-btn {
+            padding: 6px 18px; background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; cursor: pointer; font-size: 11px; font-weight: 300;
+            font-family: inherit; letter-spacing: 1px; transition: all 0.4s ease; outline: none;
+        }
+        .ctrl-btn:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
+        .ctrl-btn.active {
+            background: rgba(68,136,255,0.15); border-color: rgba(68,136,255,0.3);
+            color: rgba(68,136,255,0.8);
+        }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://esm.sh/three@0.170.0",
+            "three/addons/": "https://esm.sh/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="title">Seven Heavens · سبع سماوات</div>
+    <div id="canvas-container"></div>
+    <div id="time-display"></div>
+    <div id="controls">
+        <button class="ctrl-btn" id="btn-lume">Lume</button>
+        <button class="ctrl-btn" id="btn-speed">60×</button>
+    </div>
+    <script type="module" src="seven-heavens-clock.js"></script>
+</body>
+</html>

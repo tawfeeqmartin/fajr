@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototype",
+      "runtimeExecutable": "wsl",
+      "runtimeArgs": ["bash", "-c", "cd /home/tawfeeq/ramadan-clock-site/prototype && npx serve -l 3001 --no-clipboard"],
+      "port": 3001
+    },
+    {
+      "name": "dev",
+      "runtimeExecutable": "wsl",
+      "runtimeArgs": ["bash", "-c", "cd /home/tawfeeq/ramadan-clock-site && npx serve -l 3000 --no-clipboard"],
+      "port": 3000
+    }
+  ]
+}

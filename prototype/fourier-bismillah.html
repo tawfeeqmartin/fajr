@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fourier Bismillah — A Gift of Time</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
+    <script type="importmap">
+    {"imports":{"three":"https://esm.sh/three@0.170.0","three/addons/":"https://esm.sh/three@0.170.0/examples/jsm/","lil-gui":"https://esm.sh/lil-gui@0.19.2"}}
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #020204;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            color: rgba(255,255,255,0.5);
+        }
+        canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+        }
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10;
+            display: flex; flex-direction: column;
+            justify-content: flex-end; align-items: center;
+            padding: 28px 24px 24px;
+        }
+        #status {
+            font-size: 10px; font-weight: 300; letter-spacing: 2px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            transition: opacity 1s ease;
+        }
+        #version-tag {
+            position: fixed; top: 8px; left: 10px;
+            font-size: 9px; font-weight: 300; letter-spacing: 1px;
+            color: rgba(255,255,255,0.2); z-index: 20;
+            font-family: 'Inter', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <div id="status">Initializing...</div>
+    </div>
+    <div id="version-tag">v1 · fourier-bismillah</div>
+    <script type="module" src="fourier-bismillah.js?v=2"></script>
+</body>
+</html>

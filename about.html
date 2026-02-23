@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About — Every Orbit is a Prayer | A Gift of Time</title>
+<meta name="description" content="How a generative prayer clock draws from the Quran's vision of time, orbital motion, and tawaf. The mathematics of worship made visible.">
+<link rel="canonical" href="https://agiftoftime.app/about.html">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agiftoftime.app/about.html">
+<meta property="og:title" content="Every Orbit is a Prayer — A Gift of Time">
+<meta property="og:description" content="How a generative prayer clock draws from the Quran's vision of time, orbital motion, and tawaf.">
+<meta property="og:image" content="https://agiftoftime.app/og-image.png">
+<meta property="og:site_name" content="A Gift of Time">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Every Orbit is a Prayer — A Gift of Time">
+<meta name="twitter:description" content="How a generative prayer clock draws from the Quran's vision of time, orbital motion, and tawaf.">
+<meta name="twitter:image" content="https://agiftoftime.app/og-image.png">
+<meta name="author" content="Tawfeeq Martin">
+<meta name="theme-color" content="#f8f7f4">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Lateef&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/thin/style.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f7f4;--text:#1a1a1a;--text-muted:#6b6b6b;
+  --gold:#c8a44e;--border:#e5e3dd;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+}
+html{font-size:16px}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--text);
+  font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+
+.page{max-width:560px;margin:0 auto;padding:3rem 1.5rem 4rem}
+
+nav{
+  padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{font-weight:500;font-size:.9rem;letter-spacing:.02em;text-decoration:none;color:var(--text)}
+
+.back{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:400;color:var(--text-muted);text-decoration:none;margin-bottom:2.5rem}
+.back:hover{color:var(--text)}
+
+h1{font-weight:200;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.02em;line-height:1.2;margin-bottom:1rem}
+.subtitle{font-size:1rem;color:var(--text-muted);margin-bottom:2.5rem;font-weight:300;line-height:1.7}
+
+.verse{text-align:center;margin:2rem 0;padding:2rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.verse-ar{font-family:'Lateef',serif;font-size:1.6rem;direction:rtl;color:var(--text);margin-bottom:.75rem;line-height:1.8}
+.verse-en{font-style:italic;font-weight:300;font-size:.95rem;color:var(--text-muted);line-height:1.6;margin-bottom:.4rem}
+.verse-ref{font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+
+h2{font-weight:400;font-size:1.1rem;margin-bottom:1rem;margin-top:2.5rem}
+p{font-weight:300;font-size:.95rem;line-height:1.7;margin-bottom:1rem}
+p:last-child{margin-bottom:0}
+
+.section{margin-top:2.5rem}
+
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.75rem 2rem;border-radius:100px;
+  font-family:var(--font);font-size:.9rem;font-weight:500;
+  cursor:pointer;border:none;text-decoration:none;
+  transition:all .2s;
+}
+.btn-primary{background:var(--text);color:var(--bg)}
+.btn-primary:hover{opacity:.85}
+
+footer{
+  margin-top:4rem;padding:2rem 0;border-top:1px solid var(--border);
+  text-align:center;font-size:.8rem;color:var(--text-muted);font-weight:300;
+}
+footer a{text-decoration:none}
+footer a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <a href="./" class="nav-logo">A Gift of Time</a>
+  </div>
+  <a href="./#clock" class="btn btn-primary" style="font-size:.8rem;padding:.55rem 1.25rem">Open Clock</a>
+</nav>
+
+<div class="page">
+
+<a href="./" class="back"><i class="ph-thin ph-arrow-left"></i> Back</a>
+
+<h1>Every orbit is a prayer.</h1>
+<p class="subtitle">How a generative clock draws from the Quran's vision of time, motion, and worship.</p>
+
+<!-- ═══ TIME BELONGS TO GOD ═══ -->
+
+<div class="section">
+<h2>Time belongs to God</h2>
+
+<div class="verse">
+  <p class="verse-ar">وَالْعَصْرِ &#x6DD; إِنَّ الْإِنسَانَ لَفِي خُسْرٍ &#x6DD; إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ</p>
+  <p class="verse-en">"By time. Indeed, mankind is in loss &mdash; except for those who have believed and done righteous deeds and advised each other to truth and advised each other to patience."</p>
+  <p class="verse-ref">Surah Al-Asr 103:1&ndash;3</p>
+</div>
+
+<p>Allah swears by time itself. Of all the things in creation He could invoke, He chose the passing of hours. This clock begins there &mdash; with the conviction that time is not a neutral backdrop to life but something sacred enough for God to swear by.</p>
+
+<p>In Islam, prayer is not scheduled arbitrarily. Each salah is anchored to the sun's position in the sky &mdash; its decline past the zenith, its approach to the horizon, its disappearance below it.</p>
+
+<div class="verse">
+  <p class="verse-ar">الشَّمْسُ وَالْقَمَرُ بِحُسْبَانٍ</p>
+  <p class="verse-en">"The sun and the moon move by precise calculation."</p>
+  <p class="verse-ref">Surah Ar-Rahman 55:5</p>
+</div>
+
+<p>The Arabic word <em>husban</em> means precise reckoning &mdash; mathematical order. Prayer times are a consequence of celestial mechanics, not convention. When you pray Fajr, you are responding to the earth's rotation. When you pray Maghrib, you are marking the moment your point on the planet turns away from the sun. The clock makes this relationship visible.</p>
+</div>
+
+<!-- ═══ SWIMMING IN ORBITS ═══ -->
+
+<div class="section">
+<h2>Swimming in orbits</h2>
+
+<div class="verse">
+  <p class="verse-ar">لَا الشَّمْسُ يَنبَغِي لَهَا أَن تُدْرِكَ الْقَمَرَ وَلَا اللَّيْلُ سَابِقُ النَّهَارِ ۚ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ</p>
+  <p class="verse-en">"It is not for the sun to overtake the moon, nor does the night outstrip the day. Each one is swimming in an orbit."</p>
+  <p class="verse-ref">Surah Ya-Sin 36:40</p>
+</div>
+
+<p>The word <em>yasbahun</em> &mdash; they swim &mdash; is one of the most striking images in the Quran. Celestial bodies do not march or grind; they glide. And the word <em>falak</em> &mdash; orbit, celestial sphere &mdash; places them on paths that curve and return.</p>
+
+<p>The generative patterns in this clock are built on the same principle: <strong>orbital resonance</strong>. Pairs of circles trace paths at mathematically related speeds &mdash; ratios like 3:5, 5:8, 7:12 &mdash; the same kind of relationships that govern planetary orbits in our solar system. Where the paths cross and converge, delicate geometric rosettes emerge. No two prayer periods produce the same pattern. Each is seeded from the Hijri date, your location on earth, and the bearing toward Mecca.</p>
+</div>
+
+<!-- ═══ TAWAF — THE HUMAN ORBIT ═══ -->
+
+<div class="section">
+<h2>Tawaf &mdash; the human orbit</h2>
+
+<div class="verse">
+  <p class="verse-ar">ثُمَّ لْيَقْضُوا تَفَثَهُمْ وَلْيُوفُوا نُذُورَهُمْ وَلْيَطَّوَّفُوا بِالْبَيْتِ الْعَتِيقِ</p>
+  <p class="verse-en">"Then let them complete their rites and fulfil their vows and circumambulate the Ancient House."</p>
+  <p class="verse-ref">Surah Al-Hajj 22:29</p>
+</div>
+
+<p>In tawaf, pilgrims circle the Kaaba &mdash; the first house built for the worship of God. The Arabic root <em>ta-wa-fa</em> (ط-و-ف) carries the meaning of going around, orbiting. It is the one act of worship that is itself an orbit: human bodies tracing a circle around a sacred centre, just as celestial bodies trace circles through space.</p>
+
+<p>The clock draws directly from this. Orbiter dots circle a centre point, and the Qibla bearing &mdash; the direction from your location to Mecca &mdash; orients every pattern. The geometry is always facing the Kaaba.</p>
+</div>
+
+<!-- ═══ NIGHT WRAPS OVER DAY ═══ -->
+
+<div class="section">
+<h2>Night wraps over day</h2>
+
+<div class="verse">
+  <p class="verse-ar">يُكَوِّرُ اللَّيْلَ عَلَى النَّهَارِ وَيُكَوِّرُ النَّهَارَ عَلَى اللَّيْلِ</p>
+  <p class="verse-en">"He wraps the night over the day and wraps the day over the night."</p>
+  <p class="verse-ref">Surah Az-Zumar 39:5</p>
+</div>
+
+<p>The verb <em>yukawwiru</em> means to coil or wind, like wrapping a turban. Night does not switch on like a lamp &mdash; it winds around the earth, one edge of shadow curving over the lit surface. The image is rotational, spherical, orbital.</p>
+
+<p>The clock honours this transition. At Maghrib, as the sun sets, the background shifts from warm parchment to deep night. The lines, previously drawn in ink, begin to glow &mdash; luminous traces of light on darkness. Each of the five prayer periods carries its own colour palette: the cool blues of Fajr, the warm golds of Dhuhr, the amber of Asr, the deep magentas of Maghrib, and the violet quiet of Isha.</p>
+</div>
+
+<!-- ═══ RAMADAN & LAYLATUL QADR ═══ -->
+
+<div class="section">
+<h2>Ramadan &amp; the Night of Power</h2>
+
+<div class="verse">
+  <p class="verse-ar">إِنَّا أَنزَلْنَاهُ فِي لَيْلَةِ الْقَدْرِ &#x6DD; وَمَا أَدْرَاكَ مَا لَيْلَةُ الْقَدْرِ &#x6DD; لَيْلَةُ الْقَدْرِ خَيْرٌ مِّنْ أَلْفِ شَهْرٍ</p>
+  <p class="verse-en">"Indeed, We sent it down during the Night of Power. And what can make you know what the Night of Power is? The Night of Power is better than a thousand months."</p>
+  <p class="verse-ref">Surah Al-Qadr 97:1&ndash;3</p>
+</div>
+
+<p>During Ramadan, the clock responds. The generative algorithm adds orbital pairs, making the patterns denser and richer. As the month deepens into its final ten nights, extra layers appear on the odd nights &mdash; the nights the Prophet, peace be upon him, told us to seek Laylatul Qadr. On those nights the pattern reaches its most luminous, most intricate form &mdash; a visual echo of a night that outweighs a thousand months.</p>
+
+<div class="verse">
+  <p class="verse-ar">شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ هُدًى لِّلنَّاسِ وَبَيِّنَاتٍ مِّنَ الْهُدَىٰ وَالْفُرْقَانِ</p>
+  <p class="verse-en">"The month of Ramadan is that in which the Quran was revealed, a guidance for the people and clear proofs of guidance and the criterion."</p>
+  <p class="verse-ref">Surah Al-Baqarah 2:185</p>
+</div>
+
+<p>The month itself is defined by a celestial event: the sighting of the new moon. Ramadan begins and ends with lunar observation &mdash; connecting the most sacred month in the Islamic calendar directly to orbital mechanics, to the moon completing another circuit around the earth.</p>
+</div>
+
+<!-- ═══ SIGNS FOR THOSE WHO REFLECT ═══ -->
+
+<div class="section">
+
+<div class="verse">
+  <p class="verse-ar">إِنَّ فِي خَلْقِ السَّمَاوَاتِ وَالْأَرْضِ وَاخْتِلَافِ اللَّيْلِ وَالنَّهَارِ لَآيَاتٍ لِّأُولِي الْأَلْبَابِ</p>
+  <p class="verse-en">"Indeed, in the creation of the heavens and the earth and the alternation of the night and the day are signs for those of understanding."</p>
+  <p class="verse-ref">Surah Al-Imran 3:190</p>
+</div>
+
+<p>This clock is an attempt to make those signs visible &mdash; to turn the mathematics of prayer times into something you can see, and to let the orbital beauty that governs the cosmos echo in a small corner of your screen.</p>
+
+<p>Every pattern is unique. Every pattern is a prayer.</p>
+</div>
+
+</div>
+
+<footer>
+  <p>By <a href="https://tawfeeqmartin.com">Tawfeeq Martin</a></p>
+  <p><a href="support.html">Support</a> &middot; <a href="mailto:feedback@agiftoftime.app">Feedback</a> &middot; <a href="privacy.html">Privacy &amp; Terms</a></p>
+</footer>
+
+</body>
+</html>
