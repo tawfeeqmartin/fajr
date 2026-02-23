@@ -1543,10 +1543,10 @@ liveGroup.add(kaabaFillMesh);
 const tipGlowGeo = new THREE.BufferGeometry();
 tipGlowGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0.02]), 3));
 const tipGlowMat = new THREE.PointsMaterial({
-    size: 45,
+    size: 48,
     map: glowTexture,
     transparent: true,
-    opacity: 0.4,
+    opacity: 0.55,
     blending: THREE.AdditiveBlending,  // additive — hot point of sacred light
     depthTest: false,
     sizeAttenuation: false,
@@ -1960,9 +1960,9 @@ function updateClockHands(now, night, blending) {
     const glowPulse = 0.75 + 0.25 * Math.sin(performance.now() * 0.003);
     // Pen tip glow — sacred light at the drawing nib
     tipGlowPoint.visible = true;
-    tipGlowMat.opacity = glowPulse * 0.3;
-    tipGlowMat.size = 30;
-    tipGlowMat.color.setHSL(baseH / 360, 0.15, 0.95);
+    tipGlowMat.opacity = glowPulse * 0.55;
+    tipGlowMat.size = 48;
+    tipGlowMat.color.setHSL(baseH / 360, 0.35, 0.88);
     tipGlowMat.needsUpdate = true;
 
     // (tip glow trail removed)
