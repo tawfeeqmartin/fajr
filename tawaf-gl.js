@@ -1969,17 +1969,22 @@ function updateClockHands(now, night, blending) {
 
     // Trail colors: prayer palette gradient from transparent (old) to bright (new)
     const epiDrawCount = Math.min(epicycleTrailCount, EPICYCLE_TRAIL_MAX);
-    // Epicycle trail: Kaaba outline — black like the physical Kaaba (Kiswa)
-    const epiS = Math.max((palette.s - 25) / 100, 0.03);
-    const epiL = Math.min((palette.l + 30) / 100, 0.97);
+    // Epicycle trail: Kaaba outline — complementary color (Turrell simultaneous contrast)
+    const compH = ((palette.h + 180) % 360) / 360;
+    const compS = Math.min(palette.s + 10, 65) / 100;  // richer than rings — the contrast needs to read
+    const compL = 0.48;  // mid-luminous — colored light, not flat pigment
+    const _compColor = new THREE.Color().setHSL(compH, compS, compL);
     for (let i = 0; i < epiDrawCount; i++) {
         const t = i / epiDrawCount;
         const alpha = 0.3 + 0.7 * t; // fade from transparent (old) to opaque (new)
-        epicycleTrailColors[i * 4]     = 0.02; // near-black
-        epicycleTrailColors[i * 4 + 1] = 0.02;
-        epicycleTrailColors[i * 4 + 2] = 0.04; // hint of warmth
+        epicycleTrailColors[i * 4]     = _compColor.r;
+        epicycleTrailColors[i * 4 + 1] = _compColor.g;
+        epicycleTrailColors[i * 4 + 2] = _compColor.b;
         epicycleTrailColors[i * 4 + 3] = alpha;
     }
+    // Kaaba fill — solid complementary color (the sacred contrast at the heart of light)
+    kaabaFillMat.color.setHSL(compH, compS, compL);
+    kaabaFillMat.needsUpdate = true;
     epicycleTrailGeo.setDrawRange(0, epiDrawCount);
     epicycleTrailGeo.attributes.position.needsUpdate = true;
     epicycleTrailGeo.attributes.color.needsUpdate = true;
@@ -2000,7 +2005,7 @@ function updateClockHands(now, night, blending) {
     kaabaGlowGeo.attributes.position.needsUpdate = true;
     kaabaGlowMat.size = 6;
     kaabaGlowMat.opacity = kaabaPulse * 0.25;
-    kaabaGlowMat.color.setHSL(baseH / 360, 0.12, 0.92);
+    kaabaGlowMat.color.setHSL(compH, Math.min(compS + 0.05, 0.6), 0.75); // complement glow — light radiates in the opposite color
     kaabaGlowMat.needsUpdate = true;
 
     // Update epicycle circles
@@ -2017,7 +2022,7 @@ function updateClockHands(now, night, blending) {
             }
             circle.geo.attributes.position.needsUpdate = true;
             circle.mat.opacity = 0.08 * (1 - i / visibleCircles) * kaabaPulse;
-            circle.mat.color.setHSL(baseH / 360, 0.08, 0.15);  // near-black, matching Kaaba
+            circle.mat.color.setHSL(compH, compS * 0.5, compL * 0.6);  // complement tinted, subtle
             circle.mat.blending = THREE.NormalBlending;
             circle.mat.needsUpdate = true;
             circle.line.visible = true;
@@ -2040,7 +2045,7 @@ function updateClockHands(now, night, blending) {
         epicycleArmGeo.setDrawRange(0, armCount + 1);
         epicycleArmGeo.attributes.position.needsUpdate = true;
         epicycleArmMat.opacity = 0.06 * kaabaPulse;
-        epicycleArmMat.color.setHSL(baseH / 360, 0.08, 0.15);  // near-black arm
+        epicycleArmMat.color.setHSL(compH, compS * 0.5, compL * 0.6);  // complement tinted arm
         epicycleArmMat.blending = THREE.NormalBlending;
         epicycleArmMat.needsUpdate = true;
         epicycleArmLine.visible = true;
