@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v68: Prism core lookdev — disable epicycle draw, enhance hotspot, hand-to-band light integration
+// v72: Glass cube visible — beams emerge from prism edge, not inside it
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -946,8 +946,8 @@ const ATEN_REIGN_FRAG = `
         float insidePrism = 1.0 - smoothstep(0.75, 1.0, prismSDF);
 
         // Chromatic IOR — red/green/blue channels refract differently through glass
-        // This is the key visual: rings SPLIT into spectral color inside the prism
-        float iorBase = insidePrism * 0.055;    // stronger magnification
+        // Subtle magnification — just enough to see spectral split, not blow out center
+        float iorBase = insidePrism * 0.025;    // gentle magnification
         float iorR = iorBase * 0.85;            // red bends least
         float iorG = iorBase * 1.00;            // green in the middle
         float iorB = iorBase * 1.18;            // blue bends most
@@ -964,15 +964,15 @@ const ATEN_REIGN_FRAG = `
 
         // ── Glass edge caustic — bright seam where light enters/exits the prism ──
         float edgeBand = smoothstep(0.7, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.15, prismSDF));
-        float edgeCaustic = edgeBand * 0.12;  // brighter edge seam
+        float edgeCaustic = edgeBand * 0.07;  // crisp edge seam — defines glass boundary
 
         // ── Prism core hotspot — the beam-splitting origin ──
         // At the very center of the glass, all three beams originate.
         // A concentrated spectral hotspot makes the refraction visible.
-        float coreIntensity = exp(-prismSDF * prismSDF * 8.0) * insidePrism;
+        float coreIntensity = exp(-prismSDF * prismSDF * 12.0) * insidePrism;
         // Internal caustic network — faceted light patterns inside the glass
         float internalCaustic = sin(prismSDF * 25.0 + uTime * 0.5) * 0.5 + 0.5;
-        internalCaustic *= internalCaustic * insidePrism * 0.06;
+        internalCaustic *= internalCaustic * insidePrism * 0.015;
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
         float b0 = sin(uTime * 0.14) * 0.015;
@@ -1035,22 +1035,28 @@ const ATEN_REIGN_FRAG = `
         // Three nested luminance layers at center:
         //   the niche (mishkat), the lamp (misbah), the glass (zujaja)
         //   "like a pearly white star" — stacked radiance at the sacred heart
-        float nurCore  = exp(-dist * dist * 80.0);   // the lamp — tight radiance
-        float nurGlass = exp(-dist * dist * 12.0);   // the glass — pearly star
-        float nurNiche = exp(-dist * dist * 3.5);    // the niche — broad warmth
-        float nurLight = nurCore * 0.10 + nurGlass * 0.05 + nurNiche * 0.025;
-        color += nurLight;
+        // ── Ayat an-Nur — suppressed inside prism so glass shape reads ──
+        float nurOutside = 1.0 - insidePrism;  // zero inside glass, full outside
+        float nurCore  = exp(-dist * dist * 80.0);
+        float nurGlass = exp(-dist * dist * 12.0);
+        float nurNiche = exp(-dist * dist * 3.5);
+        float nurLight = nurCore * 0.002 + nurGlass * 0.001 + nurNiche * 0.0008;
+        color += nurLight * nurOutside;
+
+        // ── Glass body tint — defines the cube shape without the mesh overlay ──
+        // Heavy darkening + cool shift — diamond must be unmistakably glass
+        float glassTint = insidePrism * 0.75;
+        color = mix(color, color * vec3(0.55, 0.62, 0.82), glassTint);
+
+        // ── Glass edge stroke — crisp dark border defines the cube shape ──
+        float glassEdge = smoothstep(0.80, 0.96, prismSDF) * (1.0 - smoothstep(0.96, 1.12, prismSDF));
+        color *= 1.0 - glassEdge * 0.35;
 
         // ── Glass prism edge caustic ──
         color += edgeCaustic * vec3(0.98, 0.96, 0.93);
 
-        // ── Prism core spectral hotspot — visible beam-splitting origin ──
-        // A warm-to-cool spectral wash at the heart of the crystal
-        // This is where white light enters and begins to separate
-        vec3 coreSpectrum = vec3(1.05, 0.98, 0.92) * coreIntensity * 0.08;
-        color += coreSpectrum;
-        // Internal caustic shimmer — light dancing inside the glass
-        color += internalCaustic * vec3(0.98, 0.97, 0.95);
+        // Internal caustic shimmer — barely perceptible light dancing inside the glass
+        color += internalCaustic * vec3(0.98, 0.97, 0.95) * 0.005;
 
         // ── Turrell luminance lift at ring boundaries ──
         // Bright seams between color bands — light bleeding between Skyspace panels.
@@ -1147,6 +1153,9 @@ const ATEN_REIGN_FRAG = `
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
+            // Beams emerge FROM the prism edge outward — zero inside the glass
+            float outsidePrism = 1.0 - insidePrism;
+
             // Chromatic dispersion — increases with distance from prism
             float dispersion = dist * 0.015;
 
@@ -1167,7 +1176,7 @@ const ATEN_REIGN_FRAG = `
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
             float adH_r = adH + dispersion;
             float adH_b = adH - dispersion;
-            float maskH = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
+            float maskH = smoothstep(0.06, 0.14, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
             // Band collision — hour beam crosses rings 0-3, flares at each
             float hBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
@@ -1175,17 +1184,17 @@ const ATEN_REIGN_FRAG = `
                         + exp(-pow((dist - rb3) * bandW, 2.0));
             float hBoost = 1.0 + hBand * 0.6; // beam brightens at ring crossings
             vec3 beamH;
-            beamH.r = (exp(-adH_r * adH_r * 500.0) * 0.30 + exp(-adH_r * adH_r * 120.0) * 0.07) * hBoost;
-            beamH.g = (exp(-adH   * adH   * 550.0) * 0.26 + exp(-adH   * adH   * 130.0) * 0.06) * hBoost;
-            beamH.b = (exp(-adH_b * adH_b * 500.0) * 0.30 + exp(-adH_b * adH_b * 120.0) * 0.07) * hBoost;
-            color += beamH * maskH * uHandVis;
+            beamH.r = (exp(-adH_r * adH_r * 500.0) * 0.14 + exp(-adH_r * adH_r * 120.0) * 0.03) * hBoost;
+            beamH.g = (exp(-adH   * adH   * 550.0) * 0.12 + exp(-adH   * adH   * 130.0) * 0.025) * hBoost;
+            beamH.b = (exp(-adH_b * adH_b * 500.0) * 0.14 + exp(-adH_b * adH_b * 120.0) * 0.03) * hBoost;
+            color += beamH * maskH * uHandVis * outsidePrism;
 
             // ── Minute beam — tighter, crosses more rings ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
             float adM_r = adM + dispersion * 0.8;
             float adM_b = adM - dispersion * 0.8;
-            float maskM = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
+            float maskM = smoothstep(0.06, 0.14, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
             float mBand = exp(-pow((dist - rb0) * bandW, 2.0))
                         + exp(-pow((dist - rb1) * bandW, 2.0))
                         + exp(-pow((dist - rb2) * bandW, 2.0))
@@ -1193,17 +1202,17 @@ const ATEN_REIGN_FRAG = `
                         + exp(-pow((dist - rb4) * bandW, 2.0));
             float mBoost = 1.0 + mBand * 0.5;
             vec3 beamM;
-            beamM.r = (exp(-adM_r * adM_r * 750.0) * 0.26 + exp(-adM_r * adM_r * 170.0) * 0.06) * mBoost;
-            beamM.g = (exp(-adM   * adM   * 800.0) * 0.22 + exp(-adM   * adM   * 180.0) * 0.05) * mBoost;
-            beamM.b = (exp(-adM_b * adM_b * 750.0) * 0.26 + exp(-adM_b * adM_b * 170.0) * 0.06) * mBoost;
-            color += beamM * maskM * uHandVis;
+            beamM.r = (exp(-adM_r * adM_r * 750.0) * 0.12 + exp(-adM_r * adM_r * 170.0) * 0.025) * mBoost;
+            beamM.g = (exp(-adM   * adM   * 800.0) * 0.10 + exp(-adM   * adM   * 180.0) * 0.02) * mBoost;
+            beamM.b = (exp(-adM_b * adM_b * 750.0) * 0.12 + exp(-adM_b * adM_b * 170.0) * 0.025) * mBoost;
+            color += beamM * maskM * uHandVis * outsidePrism;
 
             // ── Second beam — razor-thin, crosses all rings, sparkle ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
             float adS_r = adS + dispersion;
             float adS_b = adS - dispersion;
-            float maskS = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
+            float maskS = smoothstep(0.06, 0.14, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
             float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
             hSparkle = hSparkle * 0.2 + 0.8;
             float sBand = exp(-pow((dist - rb0) * bandW, 2.0))
@@ -1214,10 +1223,10 @@ const ATEN_REIGN_FRAG = `
                         + exp(-pow((dist - rb5) * bandW, 2.0));
             float sBoost = 1.0 + sBand * 0.4;
             vec3 beamS;
-            beamS.r = (exp(-adS_r * adS_r * 1200.0) * 0.22 + exp(-adS_r * adS_r * 260.0) * 0.05) * sBoost;
-            beamS.g = (exp(-adS   * adS   * 1300.0) * 0.18 + exp(-adS   * adS   * 280.0) * 0.04) * sBoost;
-            beamS.b = (exp(-adS_b * adS_b * 1200.0) * 0.22 + exp(-adS_b * adS_b * 260.0) * 0.05) * sBoost;
-            color += beamS * maskS * uHandVis * hSparkle;
+            beamS.r = (exp(-adS_r * adS_r * 1200.0) * 0.10 + exp(-adS_r * adS_r * 260.0) * 0.02) * sBoost;
+            beamS.g = (exp(-adS   * adS   * 1300.0) * 0.08 + exp(-adS   * adS   * 280.0) * 0.015) * sBoost;
+            beamS.b = (exp(-adS_b * adS_b * 1200.0) * 0.10 + exp(-adS_b * adS_b * 260.0) * 0.02) * sBoost;
+            color += beamS * maskS * uHandVis * hSparkle * outsidePrism;
 
             // ── Ring illumination — each band BRIGHTENS where a beam crosses it ──
             // This is the key aesthetic: the hand isn't just passing through the ring,
@@ -1232,13 +1241,13 @@ const ATEN_REIGN_FRAG = `
                                +  exp(-pow((dist - rb3) * 12.0, 2.0))
                                +  exp(-pow((dist - rb4) * 12.0, 2.0))
                                +  exp(-pow((dist - rb5) * 12.0, 2.0)));
-            color += beamHit * ringResponse * 0.06 * uHandVis;
+            color += beamHit * ringResponse * 0.03 * uHandVis * outsidePrism;
 
             // ── Prism facet glow — crystal edge catches passing beams ──
             float hEdge = exp(-adH * adH * 80.0) * maskH;
             float mEdge = exp(-adM * adM * 100.0) * maskM;
             float sEdge = exp(-adS * adS * 130.0) * maskS;
-            color += vec3(0.97, 0.95, 0.92) * fresnelEdge * (hEdge + mEdge + sEdge) * 0.12 * uHandVis;
+            color += vec3(0.97, 0.95, 0.92) * fresnelEdge * (hEdge + mEdge + sEdge) * 0.05 * uHandVis;
 
             // ── Caustic shimmer at prism exit points ──
             float caustic = sin(hAngle * 12.0 + uTime * 1.5) * 0.5 + 0.5;
