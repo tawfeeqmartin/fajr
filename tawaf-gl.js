@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v67: Glass prism Kaaba — IOR distortion bends rings through the crystal + chromatic beam hands
+// v68: Prism core lookdev — disable epicycle draw, enhance hotspot, hand-to-band light integration
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -938,25 +938,41 @@ const ATEN_REIGN_FRAG = `
         float dist = length(uv);
 
         // ── Glass Prism IOR — Kaaba refracts light passing through it ──
-        // The diamond (rotated square) is a dark crystal. Light bends as it
-        // passes through: rings behind the cube magnify and shift, creating
-        // the unmistakable look of looking through polished glass.
-        // IOR > 1 means light converges — inner rings appear to expand outward.
+        // The diamond is a clear glass prism. Light bends and splits
+        // chromatically as it passes through — you can SEE the refraction.
         float dxK = abs(uv.x);
         float dyK = abs(uv.y);
         float prismSDF = (dxK + dyK) / 0.095; // 1.0 at Kaaba diamond edge
         float insidePrism = 1.0 - smoothstep(0.75, 1.0, prismSDF);
-        // Magnification: rings inside the cube appear pushed outward (IOR lens effect)
-        dist -= insidePrism * 0.035;
+
+        // Chromatic IOR — red/green/blue channels refract differently through glass
+        // This is the key visual: rings SPLIT into spectral color inside the prism
+        float iorBase = insidePrism * 0.055;    // stronger magnification
+        float iorR = iorBase * 0.85;            // red bends least
+        float iorG = iorBase * 1.00;            // green in the middle
+        float iorB = iorBase * 1.18;            // blue bends most
+        // Store separate dist values for chromatic ring sampling later
+        float distR = dist - iorR;
+        float distG = dist - iorG;
+        float distB = dist - iorB;
+        // Main dist uses green channel (middle of spectrum)
+        dist -= iorG;
+
         // Slight angular twist near edges — faceted glass warps directionality
-        float facetWarp = insidePrism * (1.0 - insidePrism) * 0.02;
+        float facetWarp = insidePrism * (1.0 - insidePrism) * 0.03;
         uv += vec2(sign(uv.x), sign(uv.y)) * facetWarp;
 
         // ── Glass edge caustic — bright seam where light enters/exits the prism ──
-        // Real glass catches light at its edges — a thin bright line runs along
-        // the diamond perimeter where refraction is strongest.
         float edgeBand = smoothstep(0.7, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.15, prismSDF));
-        float edgeCaustic = edgeBand * 0.08;
+        float edgeCaustic = edgeBand * 0.12;  // brighter edge seam
+
+        // ── Prism core hotspot — the beam-splitting origin ──
+        // At the very center of the glass, all three beams originate.
+        // A concentrated spectral hotspot makes the refraction visible.
+        float coreIntensity = exp(-prismSDF * prismSDF * 8.0) * insidePrism;
+        // Internal caustic network — faceted light patterns inside the glass
+        float internalCaustic = sin(prismSDF * 25.0 + uTime * 0.5) * 0.5 + 0.5;
+        internalCaustic *= internalCaustic * insidePrism * 0.06;
 
         // Each ring breathes at glacier pace — Turrell's shifts are IMPERCEPTIBLE.
         float b0 = sin(uTime * 0.14) * 0.015;
@@ -977,16 +993,43 @@ const ATEN_REIGN_FRAG = `
 
         // ── Seven Heavens (سبع سماوات) — sacred proportion ring widths ──
         // "He created seven heavens in layers" — Quran 67:3
-        // Ring widths follow φ^⅓ (≈1.175) growth: inner heavens intimate,
-        // outer heavens vast — divine proportion. The math is invisible
-        // but the feeling is "this is right."
+        // Ring widths follow φ^⅓ (≈1.175) growth.
+        // CHROMATIC SAMPLING: inside the prism, R/G/B sample at different radii
+        // creating visible spectral splitting — the glass refracts the rings.
+
+        // Green channel (main) — standard ring sampling
         vec3 color = r0;
-        color = mix(color, r1, smoothstep(0.05, 0.13, dist));   // 1st → 2nd heaven
-        color = mix(color, r2, smoothstep(0.15, 0.25, dist));   // 2nd → 3rd heaven
-        color = mix(color, r3, smoothstep(0.27, 0.39, dist));   // 3rd → 4th heaven
-        color = mix(color, r4, smoothstep(0.40, 0.55, dist));   // 4th → 5th heaven
-        color = mix(color, r5, smoothstep(0.57, 0.74, dist));   // 5th → 6th heaven
-        color = mix(color, r6, smoothstep(0.76, 0.96, dist));   // 6th → 7th heaven
+        color = mix(color, r1, smoothstep(0.05, 0.13, dist));
+        color = mix(color, r2, smoothstep(0.15, 0.25, dist));
+        color = mix(color, r3, smoothstep(0.27, 0.39, dist));
+        color = mix(color, r4, smoothstep(0.40, 0.55, dist));
+        color = mix(color, r5, smoothstep(0.57, 0.74, dist));
+        color = mix(color, r6, smoothstep(0.76, 0.96, dist));
+
+        // Chromatic split inside prism — R and B channels sample offset rings
+        if (insidePrism > 0.01) {
+            // Red channel ring sampling (bends least — sees slightly inner rings)
+            vec3 cR = r0;
+            cR = mix(cR, r1, smoothstep(0.05, 0.13, distR));
+            cR = mix(cR, r2, smoothstep(0.15, 0.25, distR));
+            cR = mix(cR, r3, smoothstep(0.27, 0.39, distR));
+            cR = mix(cR, r4, smoothstep(0.40, 0.55, distR));
+            cR = mix(cR, r5, smoothstep(0.57, 0.74, distR));
+            cR = mix(cR, r6, smoothstep(0.76, 0.96, distR));
+
+            // Blue channel ring sampling (bends most — sees slightly outer rings)
+            vec3 cB = r0;
+            cB = mix(cB, r1, smoothstep(0.05, 0.13, distB));
+            cB = mix(cB, r2, smoothstep(0.15, 0.25, distB));
+            cB = mix(cB, r3, smoothstep(0.27, 0.39, distB));
+            cB = mix(cB, r4, smoothstep(0.40, 0.55, distB));
+            cB = mix(cB, r5, smoothstep(0.57, 0.74, distB));
+            cB = mix(cB, r6, smoothstep(0.76, 0.96, distB));
+
+            // Blend: outside prism = normal, inside = chromatic split
+            color.r = mix(color.r, cR.r, insidePrism);
+            color.b = mix(color.b, cB.b, insidePrism);
+        }
 
         // ── Ayat an-Nur (24:35) — "Light upon light" (نور على نور) ──
         // Three nested luminance layers at center:
@@ -999,8 +1042,15 @@ const ATEN_REIGN_FRAG = `
         color += nurLight;
 
         // ── Glass prism edge caustic ──
-        // The diamond edge catches light — a thin bright seam where refraction peaks
         color += edgeCaustic * vec3(0.98, 0.96, 0.93);
+
+        // ── Prism core spectral hotspot — visible beam-splitting origin ──
+        // A warm-to-cool spectral wash at the heart of the crystal
+        // This is where white light enters and begins to separate
+        vec3 coreSpectrum = vec3(1.05, 0.98, 0.92) * coreIntensity * 0.08;
+        color += coreSpectrum;
+        // Internal caustic shimmer — light dancing inside the glass
+        color += internalCaustic * vec3(0.98, 0.97, 0.95);
 
         // ── Turrell luminance lift at ring boundaries ──
         // Bright seams between color bands — light bleeding between Skyspace panels.
@@ -1091,46 +1141,64 @@ const ATEN_REIGN_FRAG = `
         }
 
         // ── PRISM HANDS — temporal light dispersed through sacred glass ──
-        // The Kaaba is a dark crystal prism. White light enters from the
-        // Turrell field and refracts into three temporal beams — hour,
-        // minute, second — each carrying chromatic dispersion as it
-        // radiates outward. Red bends least, blue most.
-        // "the glass as if it were a pearly white star" — Quran 24:35
+        // Each beam radiates from the prism and COLLIDES with its nearest
+        // ring band — flaring at the boundary as if the hand is the source
+        // of that ring's light. The beam IS the ring at the collision point.
         if (uHandVis > 0.005) {
             float hAngle = atan(uv.x, uv.y);
 
             // Chromatic dispersion — increases with distance from prism
-            // Near the cube: beams are nearly white. At the tips: visible rainbow fringe.
-            float dispersion = dist * 0.012;
+            float dispersion = dist * 0.015;
 
-            // Reuse prism SDF from IOR section — Fresnel edge where beams exit glass
+            // Ring band boundaries (sacred proportion positions)
+            // Each beam will flare at the boundary nearest to its tip
+            float rb0 = 0.092;  float rb1 = 0.200;  float rb2 = 0.327;
+            float rb3 = 0.477;  float rb4 = 0.652;  float rb5 = 0.858;
+
+            // Band collision function: Gaussian flare at ring boundary
+            // bandW controls width of the flare bloom at each crossing
+            float bandW = 18.0;
+
+            // Reuse prism SDF — Fresnel edge where beams exit glass
             float fresnelEdge = smoothstep(0.55, 0.95, prismSDF) * (1.0 - smoothstep(0.95, 1.4, prismSDF));
 
-            // Hour beam — widest, disperses most (slowest movement = most accumulated refraction)
+            // ── Hour beam — widest, deepest dispersion ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
-            float adH_r = adH + dispersion;       // red bends least (outside)
-            float adH_b = adH - dispersion;       // blue bends most (inside)
+            float adH_r = adH + dispersion;
+            float adH_b = adH - dispersion;
             float maskH = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.x + 0.02, uHandLens.x - 0.02, dist);
+            // Band collision — hour beam crosses rings 0-3, flares at each
+            float hBand = exp(-pow((dist - rb0) * bandW, 2.0))
+                        + exp(-pow((dist - rb1) * bandW, 2.0))
+                        + exp(-pow((dist - rb2) * bandW, 2.0))
+                        + exp(-pow((dist - rb3) * bandW, 2.0));
+            float hBoost = 1.0 + hBand * 0.6; // beam brightens at ring crossings
             vec3 beamH;
-            beamH.r = exp(-adH_r * adH_r * 500.0) * 0.30 + exp(-adH_r * adH_r * 120.0) * 0.07;
-            beamH.g = exp(-adH   * adH   * 550.0) * 0.26 + exp(-adH   * adH   * 130.0) * 0.06;
-            beamH.b = exp(-adH_b * adH_b * 500.0) * 0.30 + exp(-adH_b * adH_b * 120.0) * 0.07;
+            beamH.r = (exp(-adH_r * adH_r * 500.0) * 0.30 + exp(-adH_r * adH_r * 120.0) * 0.07) * hBoost;
+            beamH.g = (exp(-adH   * adH   * 550.0) * 0.26 + exp(-adH   * adH   * 130.0) * 0.06) * hBoost;
+            beamH.b = (exp(-adH_b * adH_b * 500.0) * 0.30 + exp(-adH_b * adH_b * 120.0) * 0.07) * hBoost;
             color += beamH * maskH * uHandVis;
 
-            // Minute beam — tighter, moderate dispersion
+            // ── Minute beam — tighter, crosses more rings ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
             float adM_r = adM + dispersion * 0.8;
             float adM_b = adM - dispersion * 0.8;
             float maskM = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.y + 0.02, uHandLens.y - 0.02, dist);
+            float mBand = exp(-pow((dist - rb0) * bandW, 2.0))
+                        + exp(-pow((dist - rb1) * bandW, 2.0))
+                        + exp(-pow((dist - rb2) * bandW, 2.0))
+                        + exp(-pow((dist - rb3) * bandW, 2.0))
+                        + exp(-pow((dist - rb4) * bandW, 2.0));
+            float mBoost = 1.0 + mBand * 0.5;
             vec3 beamM;
-            beamM.r = exp(-adM_r * adM_r * 750.0) * 0.26 + exp(-adM_r * adM_r * 170.0) * 0.06;
-            beamM.g = exp(-adM   * adM   * 800.0) * 0.22 + exp(-adM   * adM   * 180.0) * 0.05;
-            beamM.b = exp(-adM_b * adM_b * 750.0) * 0.26 + exp(-adM_b * adM_b * 170.0) * 0.06;
+            beamM.r = (exp(-adM_r * adM_r * 750.0) * 0.26 + exp(-adM_r * adM_r * 170.0) * 0.06) * mBoost;
+            beamM.g = (exp(-adM   * adM   * 800.0) * 0.22 + exp(-adM   * adM   * 180.0) * 0.05) * mBoost;
+            beamM.b = (exp(-adM_b * adM_b * 750.0) * 0.26 + exp(-adM_b * adM_b * 170.0) * 0.06) * mBoost;
             color += beamM * maskM * uHandVis;
 
-            // Second beam — razor-thin, sharpest dispersion
+            // ── Second beam — razor-thin, crosses all rings, sparkle ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
             float adS_r = adS + dispersion;
@@ -1138,25 +1206,45 @@ const ATEN_REIGN_FRAG = `
             float maskS = smoothstep(0.015, 0.06, dist) * smoothstep(uHandLens.z + 0.02, uHandLens.z - 0.02, dist);
             float hSparkle = sin(dist * 45.0 + uTime * 5.0) * 0.5 + 0.5;
             hSparkle = hSparkle * 0.2 + 0.8;
+            float sBand = exp(-pow((dist - rb0) * bandW, 2.0))
+                        + exp(-pow((dist - rb1) * bandW, 2.0))
+                        + exp(-pow((dist - rb2) * bandW, 2.0))
+                        + exp(-pow((dist - rb3) * bandW, 2.0))
+                        + exp(-pow((dist - rb4) * bandW, 2.0))
+                        + exp(-pow((dist - rb5) * bandW, 2.0));
+            float sBoost = 1.0 + sBand * 0.4;
             vec3 beamS;
-            beamS.r = exp(-adS_r * adS_r * 1200.0) * 0.22 + exp(-adS_r * adS_r * 260.0) * 0.05;
-            beamS.g = exp(-adS   * adS   * 1300.0) * 0.18 + exp(-adS   * adS   * 280.0) * 0.04;
-            beamS.b = exp(-adS_b * adS_b * 1200.0) * 0.22 + exp(-adS_b * adS_b * 260.0) * 0.05;
+            beamS.r = (exp(-adS_r * adS_r * 1200.0) * 0.22 + exp(-adS_r * adS_r * 260.0) * 0.05) * sBoost;
+            beamS.g = (exp(-adS   * adS   * 1300.0) * 0.18 + exp(-adS   * adS   * 280.0) * 0.04) * sBoost;
+            beamS.b = (exp(-adS_b * adS_b * 1200.0) * 0.22 + exp(-adS_b * adS_b * 260.0) * 0.05) * sBoost;
             color += beamS * maskS * uHandVis * hSparkle;
 
+            // ── Ring illumination — each band BRIGHTENS where a beam crosses it ──
+            // This is the key aesthetic: the hand isn't just passing through the ring,
+            // it's LIGHTING IT UP. The ring glows at the beam intersection.
+            float beamHit = exp(-adH * adH * 60.0) * maskH    // hour beam width
+                          + exp(-adM * adM * 80.0) * maskM    // minute beam width
+                          + exp(-adS * adS * 100.0) * maskS;  // second beam width
+            // Apply as additive luminance at ring boundaries only
+            float ringResponse = (exp(-pow((dist - rb0) * 12.0, 2.0))
+                               +  exp(-pow((dist - rb1) * 12.0, 2.0))
+                               +  exp(-pow((dist - rb2) * 12.0, 2.0))
+                               +  exp(-pow((dist - rb3) * 12.0, 2.0))
+                               +  exp(-pow((dist - rb4) * 12.0, 2.0))
+                               +  exp(-pow((dist - rb5) * 12.0, 2.0)));
+            color += beamHit * ringResponse * 0.06 * uHandVis;
+
             // ── Prism facet glow — crystal edge catches passing beams ──
-            // Each beam brightens the diamond edge as it exits the glass
             float hEdge = exp(-adH * adH * 80.0) * maskH;
             float mEdge = exp(-adM * adM * 100.0) * maskM;
             float sEdge = exp(-adS * adS * 130.0) * maskS;
-            color += vec3(0.97, 0.95, 0.92) * fresnelEdge * (hEdge + mEdge + sEdge) * 0.10 * uHandVis;
+            color += vec3(0.97, 0.95, 0.92) * fresnelEdge * (hEdge + mEdge + sEdge) * 0.12 * uHandVis;
 
-            // ── Subtle caustic shimmer at prism exit points ──
-            // Where beams cross the diamond edge, tiny sparkles of dispersed light
+            // ── Caustic shimmer at prism exit points ──
             float caustic = sin(hAngle * 12.0 + uTime * 1.5) * 0.5 + 0.5;
             caustic *= caustic;
             float atEdge = fresnelEdge * (hEdge + mEdge + sEdge);
-            color += vec3(1.0, 0.98, 0.95) * caustic * atEdge * 0.04 * uHandVis;
+            color += vec3(1.0, 0.98, 0.95) * caustic * atEdge * 0.05 * uHandVis;
         }
 
         gl_FragColor = vec4(color, 1.0);
@@ -2298,183 +2386,37 @@ function updateClockHands(now, night, blending) {
         tawafLastWrap = true; // arm the trigger for the next crossing
     }
 
-    // Evaluate epicycles — Kaaba outline
-    const coeffs = kaabaDFT;
-    const numEpiCoeffs = Math.min(EPICYCLE_NUM_COEFFS, coeffs.length);
-    const pen = evaluateEpicycles(coeffs, -epicycleTime, numEpiCoeffs); // negative = anti-clockwise (tawaf direction)
-    const penWorldX = pen.x;
-    const penWorldY = pen.y;
+    // ── Epicycle draw DISABLED — prism cube is pure shader glass now ──
+    // Tawaf timing + flare trigger are still computed above (tawafPhase, triggerTawafFlare).
+    // All Three.js overlay geometry (trail, circles, arm, fill, glow, tip) hidden.
+    epicycleTrailLine.visible = false;
+    kaabaGlowPoints.visible = false;
+    kaabaFillMesh.visible = false;
+    tipGlowPoint.visible = false;
+    epicycleArmLine.visible = false;
+    for (let i = 0; i < EPICYCLE_CIRCLE_POOL; i++) epicycleCircles[i].line.visible = false;
 
-    // Accumulate trail (only when actively drawing)
-    if (!epicyclePaused) {
-        if (epicycleTrailCount < EPICYCLE_TRAIL_MAX) {
-            epicycleTrailPositions[epicycleTrailCount * 3]     = penWorldX;
-            epicycleTrailPositions[epicycleTrailCount * 3 + 1] = penWorldY;
-            epicycleTrailPositions[epicycleTrailCount * 3 + 2] = 0.01;
-            epicycleTrailCount++;
-        } else {
-            // Sliding window: shift old points out, add new at end
-            epicycleTrailPositions.copyWithin(0, 3, EPICYCLE_TRAIL_MAX * 3);
-            epicycleTrailPositions[(EPICYCLE_TRAIL_MAX - 1) * 3]     = penWorldX;
-            epicycleTrailPositions[(EPICYCLE_TRAIL_MAX - 1) * 3 + 1] = penWorldY;
-            epicycleTrailPositions[(EPICYCLE_TRAIL_MAX - 1) * 3 + 2] = 0.01;
-        }
-    }
-
-    // --- Update pen tip hot glow ---
-    const glowPosArr = tipGlowGeo.attributes.position.array;
-    glowPosArr[0] = penWorldX;
-    glowPosArr[1] = penWorldY;
-    glowPosArr[2] = 0.02;
-    tipGlowGeo.attributes.position.needsUpdate = true;
-    // Pulse synced with Kaaba glow — flares with the cube
-    const glowPulse = 0.75 + 0.25 * Math.sin(performance.now() * 0.003);
-    // Pen tip glow — sacred light at the drawing nib
-    tipGlowPoint.visible = true;
-    tipGlowMat.opacity = glowPulse * 0.55;
-    tipGlowMat.size = 0.28 * Math.min(W, H) * renderer.getPixelRatio() / (2 * frustum);
-    tipGlowMat.color.setHSL(baseH / 360, 0.35, 0.88);
-    tipGlowMat.needsUpdate = true;
-
-    // (tip glow trail removed)
-
-    // Trail colors: prayer palette gradient from transparent (old) to bright (new)
-    const epiDrawCount = Math.min(epicycleTrailCount, EPICYCLE_TRAIL_MAX);
-    // Epicycle trail: Kaaba outline — curated contrasting hue (Turrell simultaneous contrast)
-    // Hand-picked per prayer to avoid monotonous green while maintaining visual tension
-    const KAABA_CONTRAST = {
-        fajr:    35,   // warm amber against cerulean rings
-        dhuhr:   225,  // sapphire blue against golden rings
-        asr:     238,  // blue-violet against coral rings
-        maghrib: 218,  // deep blue against rose rings
-        isha:    38,   // warm gold against violet rings
-    };
-    const compH = (KAABA_CONTRAST[artwork.prayerPeriod] || ((palette.h + 180) % 360)) / 360;
-    const compS = Math.min(palette.s + 10, 65) / 100;  // richer than rings — the contrast needs to read
-    const compL = 0.48;  // Kaaba fill — mid-luminous solid
-    // Trail color: bright luminous version of each prayer's own hue (not complement)
-    // The trail should read as colored LIGHT emanating from the pen tip, not a dark smear
-    const TRAIL_HUE = {
-        fajr:    { h: 210, s: 40, l: 82 },  // pale cerulean light
-        dhuhr:   { h: 42,  s: 45, l: 80 },  // warm golden light
-        asr:     { h: 25,  s: 42, l: 78 },  // soft coral light
-        maghrib: { h: 338, s: 40, l: 76 },  // gentle rose light
-        isha:    { h: 262, s: 38, l: 78 },  // soft violet light
-    };
-    const trailPalette = TRAIL_HUE[artwork.prayerPeriod] || TRAIL_HUE.isha;
-    const _trailColor = new THREE.Color().setHSL(trailPalette.h / 360, trailPalette.s / 100, trailPalette.l / 100);
-    const _compColor = new THREE.Color().setHSL(compH, compS, compL);
-    for (let i = 0; i < epiDrawCount; i++) {
-        const t = i / epiDrawCount;
-        const alpha = 0.5 + 0.5 * t; // fade from semi-visible (old) to full (new)
-        epicycleTrailColors[i * 4]     = _trailColor.r;
-        epicycleTrailColors[i * 4 + 1] = _trailColor.g;
-        epicycleTrailColors[i * 4 + 2] = _trailColor.b;
-        epicycleTrailColors[i * 4 + 3] = alpha;
-    }
-    // Kaaba fill — solid complementary color (the sacred contrast at the heart of light)
-    kaabaFillMat.color.setHSL(compH, compS, compL);
-    kaabaFillMat.needsUpdate = true;
-    epicycleTrailGeo.setDrawRange(0, epiDrawCount);
-    epicycleTrailGeo.attributes.position.needsUpdate = true;
-    epicycleTrailGeo.attributes.color.needsUpdate = true;
-    // Kaaba glow/pulse — slow breathing on the entire cube drawing
-    // The Kaaba is the sacred source — it must be clearly visible as the center of radiance
-    const kaabaPulse = 0.85 + 0.15 * Math.sin(performance.now() * 0.002); // gentle breathe, always bright
-    epicycleTrailMat.opacity = kaabaPulse;
-    epicycleTrailMat.blending = THREE.NormalBlending;
-    epicycleTrailMat.needsUpdate = true;
-
-    // --- Kaaba glow halo layer — soft light outlining the sacred geometry ---
-    kaabaGlowPoints.visible = true;
-    kaabaGlowPositions.set(epicycleTrailPositions.subarray(0, epiDrawCount * 3), 0);
-    for (let i = 0; i < epiDrawCount; i++) {
-        kaabaGlowPositions[i * 3 + 2] = -0.005;
-    }
-    kaabaGlowGeo.setDrawRange(0, epiDrawCount);
-    kaabaGlowGeo.attributes.position.needsUpdate = true;
-    kaabaGlowMat.size = 6 * Math.min(W, H) / 375;
-    kaabaGlowMat.opacity = kaabaPulse * 0.25;
-    kaabaGlowMat.color.setHSL(trailPalette.h / 360, trailPalette.s / 100 + 0.05, 0.85); // prayer-tinted glow — light radiates in harmony with the rings
-    kaabaGlowMat.needsUpdate = true;
-
-    // Update epicycle circles
-    const visibleCircles = Math.min(numEpiCoeffs, EPICYCLE_CIRCLE_POOL, pen.circleCount);
-    for (let i = 0; i < EPICYCLE_CIRCLE_POOL; i++) {
-        const circle = epicycleCircles[i];
-        if (i < visibleCircles) {
-            const ec = pen.circles[i];
-            const ccx = ec.cx, ccy = ec.cy;
-            for (let j = 0; j <= epicycleCircleSegments; j++) {
-                circle.posArr[j * 3]     = ccx + epicycleUnitCircle[j * 3] * ec.r;
-                circle.posArr[j * 3 + 1] = ccy + epicycleUnitCircle[j * 3 + 1] * ec.r;
-                circle.posArr[j * 3 + 2] = 0.01;
-            }
-            circle.geo.attributes.position.needsUpdate = true;
-            circle.mat.opacity = 0.08 * (1 - i / visibleCircles) * kaabaPulse;
-            circle.mat.color.setHSL(compH, compS * 0.5, compL * 0.6);  // complement tinted, subtle
-            circle.mat.blending = THREE.NormalBlending;
-            circle.mat.needsUpdate = true;
-            circle.line.visible = true;
-        } else {
-            circle.line.visible = false;
-        }
-    }
-
-    // Update epicycle arm (radius chain)
-    if (pen.circleCount > 0) {
-        const armCount = Math.min(numEpiCoeffs, pen.circleCount);
-        epicycleArmPositions[0] = pen.circles[0].cx;
-        epicycleArmPositions[1] = pen.circles[0].cy;
-        epicycleArmPositions[2] = 0.01;
-        for (let i = 0; i < armCount; i++) {
-            epicycleArmPositions[(i + 1) * 3]     = pen.circles[i].ex;
-            epicycleArmPositions[(i + 1) * 3 + 1] = pen.circles[i].ey;
-            epicycleArmPositions[(i + 1) * 3 + 2] = 0.01;
-        }
-        epicycleArmGeo.setDrawRange(0, armCount + 1);
-        epicycleArmGeo.attributes.position.needsUpdate = true;
-        epicycleArmMat.opacity = 0.06 * kaabaPulse;
-        epicycleArmMat.color.setHSL(compH, compS * 0.5, compL * 0.6);  // complement tinted arm
-        epicycleArmMat.blending = THREE.NormalBlending;
-        epicycleArmMat.needsUpdate = true;
-        epicycleArmLine.visible = true;
-    } else {
-        epicycleArmLine.visible = false;
-    }
-
-    // Hide all hand dots — replaced by epicycle circles
+    // Hide all hand dots and epicycle circles
     hrDot.mat.opacity = 0; hrDot.mat.needsUpdate = true;
     minDot.mat.opacity = 0; minDot.mat.needsUpdate = true;
     secDot.mat.opacity = 0; secDot.mat.needsUpdate = true;
 
-    // --- Hand epicycle circles (one circle + orbiting dot per hand) ---
+    // Hand tip glows — still visible, these are the beam endpoints
     const handTips = [
         { x: hx, y: hy },  // hour
         { x: mx, y: my },  // minute
         { x: sx, y: sy },  // second
     ];
-    // Orbiting dot angles: 1 rev/hr, 1 rev/min, 1 rev/sec
-    const handNow = getVirtualTime();
-    const dotAngles = [
-        TWO_PI * (handNow.getMinutes() + handNow.getSeconds() / 60) / 60,   // hour dot: 1 rev per hour
-        TWO_PI * (handNow.getSeconds() + handNow.getMilliseconds() / 1000) / 60, // min dot: 1 rev per minute
-        TWO_PI * (handNow.getMilliseconds() / 1000),                     // sec dot: 1 rev per second
-    ];
     for (let h = 0; h < 3; h++) {
         const tip = handTips[h];
-        const circle = handEpiCircles[h];
-        const dot = handEpiDots[h];
         const hg = handGlows[h];
+        handEpiCircles[h].line.visible = false;
+        handEpiDots[h].points.visible = false;
 
         // Scale glow sizes to world-space proportions (DPR-aware)
-        // Buffer pixels per world unit — consistent across all screens/DPRs
         const dpr = renderer.getPixelRatio();
         const pxPerWU = Math.min(W, H) * dpr / (2 * frustum);
-        // Glow world-space sizes: [hour, minute, second]
         const GLOW_WU = [0.32, 0.26, 0.22];
-        circle.line.visible = false;
-        dot.points.visible = false;
         hg.posArr[0] = tip.x;
         hg.posArr[1] = tip.y;
         hg.posArr[2] = 0.025;
