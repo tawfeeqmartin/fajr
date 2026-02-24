@@ -54,8 +54,9 @@ const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
 
 // ─── SCENE ────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x7a8090);
-scene.fog = new THREE.FogExp2(0x7a8090, 0.038);
+// Turrell dusk atmosphere — warm but desaturated enough for dichroic glass to read
+scene.background = new THREE.Color(0x5a4535);
+scene.fog = new THREE.FogExp2(0x5a4535, 0.040);
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 
@@ -92,45 +93,52 @@ window.addEventListener('resize', onResize);
 // ─── FLOOR ────────────────────────────────────────────────────────────────────
 const ground = new THREE.Mesh(
   new THREE.CircleGeometry(80, 128),
-  new THREE.MeshStandardMaterial({ color: 0x767676, roughness: 0.95, metalness: 0 })
+  // Warm amber ground — Turrell glowing earth, complements cool violet/blue/green hands
+  new THREE.MeshStandardMaterial({ color: 0xc07030, roughness: 0.90, metalness: 0 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
 // ─── LIGHTING ─────────────────────────────────────────────────────────────────
-const key = new THREE.SpotLight(0xffffff, 28);
-key.position.set(-4.3, 0.55, -0.4);
+// KEY — warm white, higher position, narrow angle: sculpts top/front faces sharply
+const key = new THREE.SpotLight(0xfff8e0, 40);
+key.position.set(-4.3, 1.8, -0.4);
 key.target.position.set(0, 0.5, 0);
-key.angle = 0.07; key.penumbra = 0.20; key.decay = 1.2;
+key.angle = 0.055; key.penumbra = 0.12; key.decay = 1.2;
 key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.001;
 scene.add(key, key.target);
 
-const back = new THREE.SpotLight(0xd8e8ff, 24);
+// BACKLIGHT — warm amber: illuminates bg behind cube, giving FBO warm tones to refract
+// Also creates warm halo at cube's back silhouette — Turrell glow effect
+const back = new THREE.SpotLight(0xff8030, 22);
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
-back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
+back.angle = 0.65; back.penumbra = 0.80; back.decay = 1.1;
 scene.add(back, back.target);
 
-const rim = new THREE.SpotLight(0x6688ff, 6.0);
-rim.position.set(-1.5, 5.5, -3.0);
+// RIM — stronger cool blue: crisp edge separation against warm bg, defines silhouette
+const rim = new THREE.SpotLight(0x7788ff, 14.0);
+rim.position.set(-1.5, 6.0, -3.5);
 rim.target.position.set(0, 0.5, 0);
-rim.angle = 0.50; rim.penumbra = 0.90;
+rim.angle = 0.42; rim.penumbra = 0.85;
 scene.add(rim, rim.target);
 
-const rectFill = new THREE.RectAreaLight(0xfff5ee, 6.0, 10, 10);
-rectFill.position.set(0, 6.5, 0.5);
+// OVERHEAD FILL — warm, narrower: gentle top fill, doesn't flatten the key shadow
+const rectFill = new THREE.RectAreaLight(0xffd0a0, 3.5, 8, 8);
+rectFill.position.set(0, 7.0, 0.5);
 rectFill.lookAt(0, 0, 0.5);
 scene.add(rectFill);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+// Very low ambient — ensures shadow faces stay dark, maximum contrast ratio
+scene.add(new THREE.AmbientLight(0xffffff, 0.05));
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
     uOpacity: { value: 0.28 },
-    uColor:   { value: new THREE.Color(0xdde8f0) },
+    uColor:   { value: new THREE.Color(0xd06020) },  // Warm amber mist — Turrell ground glow
   },
   vertexShader: `
     varying vec2 vUv;
