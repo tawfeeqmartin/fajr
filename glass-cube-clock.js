@@ -300,9 +300,11 @@ function floorRay(az, c1, c2, w, len, op) {
 }
 
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
-floorRay(-101, 0x9900ff, 0xff00ff, 0.72, 3.48, 0.88);   // HOUR   (violet)
-floorRay(-114, 0x1133ff, 0x00aaff, 0.72, 5.64, 0.92);   // MINUTE (blue)
-floorRay( 216, 0x44ff88, 0x00cc44, 0.40, 9.12, 0.62);   // SECOND (green)
+// initY = 0 for all three so they share the same reference direction at midnight/noon.
+// At any time T the hands are at -(fraction)*TAU from that reference — readable clock pattern.
+floorRay(0, 0x9900ff, 0xff00ff, 0.72, 3.48, 0.88);   // HOUR   (violet)
+floorRay(0, 0x1133ff, 0x00aaff, 0.72, 5.64, 0.92);   // MINUTE (blue)
+floorRay(0, 0x44ff88, 0x00cc44, 0.40, 9.12, 0.62);   // SECOND (green)
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
 [
