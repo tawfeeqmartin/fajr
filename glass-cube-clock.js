@@ -105,7 +105,7 @@ const gobo = new THREE.SpotLight(0xffffff, 48);
 gobo.position.set(-3.5, 6.5, 3.2);
 gobo.target.position.set(0.3, 0, 0.5);  // aim slightly forward — pool extends toward camera
 gobo.angle = 0.28;        // ~16° half-angle → pool radius ≈ 2.2 units on floor
-gobo.penumbra = 0.12;     // hard edge, gobo-like
+gobo.penumbra = 0.22;     // slightly softer edge — less harsh falloff
 gobo.decay = 1.6;
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(2048, 2048);
@@ -121,8 +121,8 @@ rim.target.position.set(0, 0.6, 0);
 rim.angle = 0.32; rim.penumbra = 0.70; rim.decay = 1.2;
 scene.add(rim, rim.target);
 
-// Low ambient — floor outside the pool reads dark but not black
-scene.add(new THREE.AmbientLight(0xffffff, 0.08));
+// Lifted ambient — floor outside pool reads as dark grey, not near-black
+scene.add(new THREE.AmbientLight(0xffffff, 0.18));
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
