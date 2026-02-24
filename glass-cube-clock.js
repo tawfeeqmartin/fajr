@@ -356,39 +356,20 @@ function ptTimeToAngle(totalMinutes) {
   return (3 * Math.PI / 4) - ((totalMinutes % 720) / 720) * TAU;
 }
 
-// Prayer sectors: full fan/wedge geometry that spans the entire prayer window.
-// Uses the same mkMat hand-beam shader — UVs map identically:
-//   uv.x = 0→1 across arc (0.5 at sector midline = Gaussian peak)
-//   uv.y = 0→1 from apex to tip (same radial fade as hand beams)
-// The hour hand sweeping INTO the sector = prayer has started.
-function makeSectorGeom(radius, thetaHalf, segments) {
-  segments = segments || 48;
-  const pos = [], uvs = [];
-  pos.push(0, 0, 0); uvs.push(0.5, 0); // apex
-  for (let i = 0; i <= segments; i++) {
-    const t = -thetaHalf + (2 * thetaHalf * i / segments);
-    pos.push(Math.sin(t) * radius, Math.cos(t) * radius, 0);
-    uvs.push(i / segments, 1);
-  }
-  const idx = [];
-  for (let i = 1; i <= segments; i++) idx.push(0, i, i + 1);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs, 2));
-  geo.setIndex(idx);
-  geo.computeVertexNormals();
-  return geo;
-}
+// Prayer beams: same PlaneGeometry + mkMat as clock hands — light from the cube,
+// not geometry. Wider than hands (1.6 vs 0.4–0.72) so they read as "a window"
+// not "a precise moment." Beam points at window START so the hour hand enters
+// the beam exactly when prayer begins.
 
 const SECTOR_RADIUS      = 9.12;  // matches second-hand length
 const SECTOR_FADE_SEC    = 180.0; // fade active → 0 over 3 minutes after window ends
 const SECTOR_HORIZON_MIN = 600;   // upcoming detection horizon (~10 h)
 const UPCOMING_RAMP_MIN  = 60;    // start intensifying upcoming beam 60 min before prayer
 
-// Opacities — fan sectors cover full window area, so lower than narrow beams
-const OP_ACTIVE   = 0.22;  // active: clearly visible without dominating the cube
-const OP_UPCOMING = 0.08;  // next-up far away: subtle ambient presence
-const OP_FAJR_DIM = 0.04;  // Fajr upcoming far: always a dawn horizon whisper
+// Opacities — narrow beams, same visual language as clock hands
+const OP_ACTIVE   = 0.55;  // active prayer: clearly lit, slightly dimmer than hands
+const OP_UPCOMING = 0.16;  // next-up far away: dim glow, proximity ramp takes it to 0.55
+const OP_FAJR_DIM = 0.07;  // Fajr upcoming far: faint dawn whisper
 
 let prayerSectors = []; // [{ grp, mat, def, startMin, endMin }]
 let ptSectorsRebuilt = false;
@@ -405,15 +386,10 @@ function buildPrayerSectors() {
     const startAng = ptTimeToAngle(startMin);
     const endAng   = ptTimeToAngle(endMin);
 
-    // Clockwise angular sweep (negative direction); wrap cross-midnight windows.
-    let thetaLen = endAng - startAng;
-    if (thetaLen > 0) thetaLen -= TAU;
-    const spanAngle = Math.abs(thetaLen);
-    const midAng    = startAng + thetaLen / 2;
-
-    // Full fan sector covering the entire prayer window — hour hand sweeping
-    // into this sector IS the visual cue that prayer time has started.
-    const g = makeSectorGeom(SECTOR_RADIUS, spanAngle / 2);
+    // Beam points at window START — hour hand enters the beam when prayer begins.
+    // Width 1.6: wider than hands (0.4–0.72) so it reads as a range, not a moment.
+    const g = new THREE.PlaneGeometry(1.6, SECTOR_RADIUS, 1, 16);
+    g.translate(0, SECTOR_RADIUS / 2, 0); // apex at cube, tip at outer radius
 
     const mat = mkMat(def.color, def.color2, def.isFajr ? OP_FAJR_DIM : OP_UPCOMING);
 
@@ -421,7 +397,7 @@ function buildPrayerSectors() {
     grp.add(new THREE.Mesh(g, mat));
     grp.position.y = 0.006;        // just below clock hands (0.008)
     grp.rotation.order = 'YXZ';
-    grp.rotation.y = midAng;      // point toward prayer window center on clock
+    grp.rotation.y = startAng;    // point at window start — hand enters beam when prayer begins
     grp.rotation.x = Math.PI / 2; // lie flat on floor
     prismGroup.add(grp);
 
