@@ -597,17 +597,22 @@ const _envMat = new THREE.ShaderMaterial({
         void main() {
             vec3 n = normalize(vWorldPos);
             float y = n.y * 0.5 + 0.5;
-            // Studio backdrop: warm whites, subtle gradient
-            vec3 col = mix(vec3(0.6, 0.58, 0.62), vec3(1.2, 1.18, 1.15), smoothstep(0.0, 0.7, y));
-            // Top softbox — bright white, slightly warm
-            float topLight = smoothstep(0.75, 0.95, y);
-            col += vec3(2.0, 1.9, 1.8) * topLight;
-            // Side fill — subtle warm light from the right
-            float sideLight = max(0.0, dot(n, normalize(vec3(1.0, 0.3, 0.5))));
-            col += vec3(0.4, 0.35, 0.3) * pow(sideLight, 3.0);
-            // Rim accent — cool light from behind-left for edge catches
-            float rimLight = max(0.0, dot(n, normalize(vec3(-0.5, 0.2, -1.0))));
-            col += vec3(0.3, 0.35, 0.5) * pow(rimLight, 4.0);
+            // HIGH CONTRAST studio — dark base with hot highlights.
+            // Dichroic glass needs strong contrast to produce visible Fresnel edges.
+            // Dark base — like a product photography studio with black backdrop
+            vec3 col = mix(vec3(0.08, 0.07, 0.10), vec3(0.25, 0.23, 0.22), smoothstep(0.0, 0.6, y));
+            // Top softbox — VERY bright, concentrated. This is what catches the cube edges.
+            float topLight = smoothstep(0.70, 0.92, y);
+            col += vec3(4.0, 3.8, 3.6) * topLight;
+            // Side key — hard light from upper-right for a strong specular catch
+            float sideLight = max(0.0, dot(n, normalize(vec3(1.0, 0.5, 0.4))));
+            col += vec3(1.5, 1.4, 1.3) * pow(sideLight, 6.0);
+            // Rim accent — cool light from behind-left for back-edge definition
+            float rimLight = max(0.0, dot(n, normalize(vec3(-0.6, 0.1, -1.0))));
+            col += vec3(0.8, 1.0, 1.5) * pow(rimLight, 5.0);
+            // Bottom bounce — very subtle, prevents fully black bottom
+            float bounce = smoothstep(0.3, 0.0, y);
+            col += vec3(0.12, 0.10, 0.14) * bounce;
             gl_FragColor = vec4(col, 1.0);
         }`,
 });
@@ -616,15 +621,17 @@ const _pmrem = new THREE.PMREMGenerator(renderer);
 const _envRT = _pmrem.fromScene(_envScene, 0, 0.1, 100);
 scene.environment = _envRT.texture;
 _pmrem.dispose();
+// Higher-res transmission FBO for sharper glass refraction on retina displays
+renderer.transmissionResolutionScale = Math.min(window.devicePixelRatio, 2) * 0.75;
 
 // Post-processing: bloom
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(W, H),
-    0.20,  // strength — subtle glow, not nuclear
-    0.5,   // radius — tight spread for clean beam edges
-    0.72   // threshold — only the brightest beam/glass highlights bloom
+    0.12,  // strength — very subtle. Glass needs SHARP edges, not soft glow
+    0.4,   // radius — tight
+    0.85   // threshold — only the hottest specular catches bloom
 );
 composer.addPass(bloomPass);
 
@@ -1059,60 +1066,66 @@ const ATEN_REIGN_FRAG = `
             // Radial profile: ramps up PAST the cube face — beams emerge from glass, not inside it
             float radialProfile = smoothstep(cubeEdge * 0.6, cubeEdge + 0.12, dist);
 
-            // Chromatic dispersion — increases with distance (real prism physics)
-            // Near cube: channels overlap = white. Far: visible R/G/B separation.
-            float dispersion = dist * dist * 0.55;
+            // Chromatic dispersion — grows with distance squared (real prism physics)
+            // Near cube: channels overlap = white core. Far: separated color bands.
+            float dispersion = dist * dist * 0.45;
 
-            // Fan-out: beams widen dramatically with distance (angular spread)
-            // At cube face: razor-thin filament. At edge: wide prismatic cone.
-            float fanT = smoothstep(cubeEdge, 1.0, dist);
-            float fanFactor = mix(1.0, 0.012, fanT * fanT);
+            // Fan-out: beams widen with distance — tight at cube, broad at tips
+            // Reference shows WIDE soft beams, not laser lines
+            float fanT = smoothstep(cubeEdge, 0.8, dist);
+            float fanFactor = mix(1.0, 0.04, fanT * fanT);  // 25x fan-out ratio
 
             // Soft radial taper — beams fade elegantly at their endpoints
-            float taperWidth = 0.08;
+            float taperWidth = 0.10;
 
-            // ── Hour beam — widest, most dispersion ──
+            // Intensity: moderate — let the COLOR do the work, not brightness
+            float beamI = 0.65;
+
+            // ── Hour beam — widest, most dispersion (slow = accumulated refraction) ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
-            float adH_r = adH + dispersion * 3.5;     // red bends least
-            float adH_b = adH - dispersion * 3.5;     // blue bends most
+            float adH_r = adH + dispersion * 4.0;     // red bends least
+            float adH_g = adH + dispersion * 0.5;     // green near center
+            float adH_b = adH - dispersion * 4.0;     // blue bends most
             float maskH = smoothstep(uHandLens.x + taperWidth, uHandLens.x - taperWidth, dist);
-            float hSharp = 70.0 * fanFactor;
-            float hGlow  = 8.0 * fanFactor;
+            float hSharp = 35.0 * fanFactor;   // WIDER base — soft beam
+            float hGlow  = 5.0 * fanFactor;    // wide glow envelope
             vec3 beamH;
-            beamH.r = exp(-adH_r * adH_r * hSharp) * 1.8 + exp(-adH_r * adH_r * hGlow) * 0.55;
-            beamH.g = exp(-adH   * adH   * hSharp * 1.1) * 1.5 + exp(-adH * adH * hGlow * 1.1) * 0.45;
-            beamH.b = exp(-adH_b * adH_b * hSharp) * 1.8 + exp(-adH_b * adH_b * hGlow) * 0.55;
+            beamH.r = exp(-adH_r * adH_r * hSharp) * beamI + exp(-adH_r * adH_r * hGlow) * 0.25;
+            beamH.g = exp(-adH_g * adH_g * hSharp * 1.05) * beamI * 0.85 + exp(-adH_g * adH_g * hGlow) * 0.20;
+            beamH.b = exp(-adH_b * adH_b * hSharp) * beamI + exp(-adH_b * adH_b * hGlow) * 0.25;
             color += beamH * maskH * radialProfile * uHandVis;
 
             // ── Minute beam — medium width, moderate dispersion ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
-            float adM_r = adM + dispersion * 2.8;
-            float adM_b = adM - dispersion * 2.8;
+            float adM_r = adM + dispersion * 3.2;
+            float adM_g = adM + dispersion * 0.3;
+            float adM_b = adM - dispersion * 3.2;
             float maskM = smoothstep(uHandLens.y + taperWidth, uHandLens.y - taperWidth, dist);
-            float mSharp = 130.0 * fanFactor;
-            float mGlow  = 16.0 * fanFactor;
+            float mSharp = 55.0 * fanFactor;   // medium width
+            float mGlow  = 8.0 * fanFactor;
             vec3 beamM;
-            beamM.r = exp(-adM_r * adM_r * mSharp) * 1.5 + exp(-adM_r * adM_r * mGlow) * 0.45;
-            beamM.g = exp(-adM   * adM   * mSharp * 1.1) * 1.2 + exp(-adM * adM * mGlow * 1.1) * 0.36;
-            beamM.b = exp(-adM_b * adM_b * mSharp) * 1.5 + exp(-adM_b * adM_b * mGlow) * 0.45;
+            beamM.r = exp(-adM_r * adM_r * mSharp) * beamI * 0.9 + exp(-adM_r * adM_r * mGlow) * 0.22;
+            beamM.g = exp(-adM_g * adM_g * mSharp * 1.05) * beamI * 0.75 + exp(-adM_g * adM_g * mGlow) * 0.18;
+            beamM.b = exp(-adM_b * adM_b * mSharp) * beamI * 0.9 + exp(-adM_b * adM_b * mGlow) * 0.22;
             color += beamM * maskM * radialProfile * uHandVis;
 
             // ── Second beam — thinnest, fastest, with prismatic sparkle ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
-            float adS_r = adS + dispersion * 2.2;
-            float adS_b = adS - dispersion * 2.2;
+            float adS_r = adS + dispersion * 2.5;
+            float adS_g = adS + dispersion * 0.2;
+            float adS_b = adS - dispersion * 2.5;
             float maskS = smoothstep(uHandLens.z + taperWidth, uHandLens.z - taperWidth, dist);
             float sparkle = sin(dist * 55.0 + uTime * 7.0) * 0.5 + 0.5;
-            sparkle = sparkle * 0.12 + 0.88;
-            float sSharp = 250.0 * fanFactor;
-            float sGlow  = 30.0 * fanFactor;
+            sparkle = sparkle * 0.10 + 0.90;
+            float sSharp = 90.0 * fanFactor;   // tighter than hour/minute but still wider than before
+            float sGlow  = 14.0 * fanFactor;
             vec3 beamS;
-            beamS.r = exp(-adS_r * adS_r * sSharp) * 1.3 + exp(-adS_r * adS_r * sGlow) * 0.38;
-            beamS.g = exp(-adS   * adS   * sSharp * 1.1) * 1.05 + exp(-adS * adS * sGlow * 1.1) * 0.30;
-            beamS.b = exp(-adS_b * adS_b * sSharp) * 1.3 + exp(-adS_b * adS_b * sGlow) * 0.38;
+            beamS.r = exp(-adS_r * adS_r * sSharp) * beamI * 0.8 + exp(-adS_r * adS_r * sGlow) * 0.18;
+            beamS.g = exp(-adS_g * adS_g * sSharp * 1.05) * beamI * 0.65 + exp(-adS_g * adS_g * sGlow) * 0.15;
+            beamS.b = exp(-adS_b * adS_b * sSharp) * beamI * 0.8 + exp(-adS_b * adS_b * sGlow) * 0.18;
             color += beamS * maskS * radialProfile * uHandVis * sparkle;
 
             // ── Ring brightening at beam-ring intersections ──
@@ -1128,7 +1141,7 @@ const ATEN_REIGN_FRAG = `
                              + exp(-pow((dist - rb3) * 9.0, 2.0))
                              + exp(-pow((dist - rb4) * 9.0, 2.0))
                              + exp(-pow((dist - rb5) * 9.0, 2.0));
-            color += beamPresence * ringBright * 0.18 * uHandVis;
+            color += beamPresence * ringBright * 0.10 * uHandVis;
         }
 
         // Alpha: beam brightness determines opacity (additive blending)
@@ -1184,20 +1197,21 @@ scene.add(atenReignQuad);
 
 // ── Three.js Lights for glass definition ──
 // Glass needs real lights to create specular highlights and define its shape.
-// Key light (top-right): main specular catch — defines the cube edges
-const _keyLight = new THREE.DirectionalLight(0xffffff, 3.0);
-_keyLight.position.set(2, 5, 3);
+// Key light (top-right): main specular catch — this is what defines glass edges
+// Product photography rule: one strong key light > multiple weak fills
+const _keyLight = new THREE.DirectionalLight(0xffffff, 5.0);
+_keyLight.position.set(2, 4, 3);
 scene.add(_keyLight);
-// Fill light (left): prevents fully dark faces — subtle warmth
-const _fillLight = new THREE.DirectionalLight(0xf0e8d8, 0.8);
-_fillLight.position.set(-3, 2, 1);
+// Fill light (left): very subtle — just prevents fully black faces
+const _fillLight = new THREE.DirectionalLight(0xf8f0e8, 0.4);
+_fillLight.position.set(-3, 1, 1);
 scene.add(_fillLight);
-// Rim light (behind-below): catches back edges of glass — cool tint for separation
-const _rimLight = new THREE.DirectionalLight(0xd0d8ff, 1.5);
-_rimLight.position.set(0, -1, -4);
+// Rim light (behind-below): catches back edges — cool tint for glass separation
+const _rimLight = new THREE.DirectionalLight(0xc0d0ff, 2.5);
+_rimLight.position.set(-1, -2, -4);
 scene.add(_rimLight);
-// Ambient — prevents pure black on unlit faces
-const _ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+// Ambient — VERY low. Glass reads better with high contrast, not flat fill
+const _ambientLight = new THREE.AmbientLight(0x303030, 0.15);
 scene.add(_ambientLight);
 
 const _glassCubeSide = 0.272;
@@ -1209,29 +1223,34 @@ const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _gla
 // no custom shader needed. The scene.environment provides reflection content,
 // and the ring meshes provide refraction content (visible behind the glass).
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    // Core glass properties
-    transmission: 1.0,          // fully transmissive — you can see through it
-    thickness: 1.5,             // refraction depth — controls how much the image bends
-    roughness: 0.02,            // near-perfect polish — clear glass, not frosted
-    metalness: 0.0,             // glass is not metallic
+    // Core glass — perfectly clear, you see THROUGH it
+    transmission: 1.0,
+    thickness: 3.5,             // deeper refraction — more dramatic bending of what's behind
+    roughness: 0.0,             // flawless polish — dichroic cubes are optically perfect
+    metalness: 0.0,
 
-    // IOR + Dispersion — the prism rainbow effect
-    ior: 1.5,                   // standard glass (1.0=air, 1.5=glass, 2.42=diamond)
-    dispersion: 0.3,            // chromatic aberration — R/G/B channels refract differently
-                                // This is what creates the rainbow color split at edges
+    // IOR + Dispersion — the PRISM effect. This is the critical parameter.
+    // High dispersion = strong per-wavelength IOR shift = visible rainbow splitting
+    ior: 1.52,                  // optical glass (BK7)
+    dispersion: 5.0,            // CRANKED — heavy chromatic aberration for visible spectral split
 
-    // Iridescence — angle-dependent color shift (dichroic coating simulation)
-    iridescence: 0.6,           // strength of thin-film interference
-    iridescenceIOR: 1.5,        // iridescence film IOR
-    iridescenceThicknessRange: [100, 400],  // nm — controls which wavelengths interfere
+    // Iridescence — thin-film dichroic coating simulation
+    // Subtle — the real color comes from dispersion, not surface coating
+    iridescence: 0.25,
+    iridescenceIOR: 2.2,        // higher IOR = faster color cycling across angles
+    iridescenceThicknessRange: [200, 500],
 
-    // Reflections
-    reflectivity: 0.5,          // default glass reflectivity (Schlick F0)
-    envMapIntensity: 1.5,       // boost environment reflections for visible edge catches
+    // Reflections — sharp edge catches are essential for glass readability
+    reflectivity: 0.5,
+    envMapIntensity: 3.0,       // strong env reflections — defines the cube edges
 
-    // Absorption — very subtle warm tint as light travels through
-    attenuationColor: new THREE.Color(0xfff8f0),
-    attenuationDistance: 2.0,
+    // No absorption tint — dichroic glass is perfectly colorless
+    attenuationColor: new THREE.Color(0xffffff),
+    attenuationDistance: 10.0,  // essentially no absorption
+
+    // Clearcoat — adds a second specular layer for crisp edge highlights
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
 
     // Rendering
     transparent: true,
@@ -1240,6 +1259,151 @@ const _glassCubeMat = new THREE.MeshPhysicalMaterial({
     depthTest: true,
     depthWrite: true,
 });
+
+// ── CHROMATIC DISPERSION OVERRIDE ──────────────────────────────
+// Replace Three.js's weak built-in dispersion with 10-sample smooth spread
+// per R/G/B channel (Franky Hung / Maxime Heckel technique).
+// Each channel refracts at a different IOR → visible spectral separation
+// like a real dichroic beam-splitting prism cube.
+_glassCubeMat.onBeforeCompile = function(shader) {
+    shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <transmission_pars_fragment>',
+        /* glsl */`
+        #ifdef USE_TRANSMISSION
+
+            uniform float transmission;
+            uniform float thickness;
+            uniform float attenuationDistance;
+            uniform vec3 attenuationColor;
+
+            #ifdef USE_TRANSMISSIONMAP
+                uniform sampler2D transmissionMap;
+            #endif
+            #ifdef USE_THICKNESSMAP
+                uniform sampler2D thicknessMap;
+            #endif
+
+            uniform vec2 transmissionSamplerSize;
+            uniform sampler2D transmissionSamplerMap;
+            uniform mat4 modelMatrix;
+            uniform mat4 projectionMatrix;
+            varying vec3 vWorldPosition;
+
+            float w0( float a ) { return ( 1.0 / 6.0 ) * ( a * ( a * ( - a + 3.0 ) - 3.0 ) + 1.0 ); }
+            float w1( float a ) { return ( 1.0 / 6.0 ) * ( a * a * ( 3.0 * a - 6.0 ) + 4.0 ); }
+            float w2( float a ) { return ( 1.0 / 6.0 ) * ( a * ( a * ( - 3.0 * a + 3.0 ) + 3.0 ) + 1.0 ); }
+            float w3( float a ) { return ( 1.0 / 6.0 ) * ( a * a * a ); }
+            float g0( float a ) { return w0( a ) + w1( a ); }
+            float g1( float a ) { return w2( a ) + w3( a ); }
+            float h0( float a ) { return - 1.0 + w1( a ) / ( w0( a ) + w1( a ) ); }
+            float h1( float a ) { return 1.0 + w3( a ) / ( w2( a ) + w3( a ) ); }
+
+            vec4 bicubic( sampler2D tex, vec2 uv, vec4 texelSize, float lod ) {
+                uv = uv * texelSize.zw + 0.5;
+                vec2 iuv = floor( uv );
+                vec2 fuv = fract( uv );
+                float g0x = g0( fuv.x ); float g1x = g1( fuv.x );
+                float h0x = h0( fuv.x ); float h1x = h1( fuv.x );
+                float h0y = h0( fuv.y ); float h1y = h1( fuv.y );
+                vec2 p0 = ( vec2( iuv.x + h0x, iuv.y + h0y ) - 0.5 ) * texelSize.xy;
+                vec2 p1 = ( vec2( iuv.x + h1x, iuv.y + h0y ) - 0.5 ) * texelSize.xy;
+                vec2 p2 = ( vec2( iuv.x + h0x, iuv.y + h1y ) - 0.5 ) * texelSize.xy;
+                vec2 p3 = ( vec2( iuv.x + h1x, iuv.y + h1y ) - 0.5 ) * texelSize.xy;
+                return g0( fuv.y ) * ( g0x * textureLod( tex, p0, lod ) + g1x * textureLod( tex, p1, lod ) ) +
+                    g1( fuv.y ) * ( g0x * textureLod( tex, p2, lod ) + g1x * textureLod( tex, p3, lod ) );
+            }
+
+            vec4 textureBicubic( sampler2D sampler, vec2 uv, float lod ) {
+                vec2 fLodSize = vec2( textureSize( sampler, int( lod ) ) );
+                vec2 cLodSize = vec2( textureSize( sampler, int( lod + 1.0 ) ) );
+                vec2 fLodSizeInv = 1.0 / fLodSize;
+                vec2 cLodSizeInv = 1.0 / cLodSize;
+                vec4 fSample = bicubic( sampler, uv, vec4( fLodSizeInv, fLodSize ), floor( lod ) );
+                vec4 cSample = bicubic( sampler, uv, vec4( cLodSizeInv, cLodSize ), ceil( lod ) );
+                return mix( fSample, cSample, fract( lod ) );
+            }
+
+            vec3 getVolumeTransmissionRay( const in vec3 n, const in vec3 v, const in float thickness, const in float ior, const in mat4 modelMatrix ) {
+                vec3 refractionVector = refract( - v, normalize( n ), 1.0 / ior );
+                vec3 modelScale;
+                modelScale.x = length( vec3( modelMatrix[ 0 ].xyz ) );
+                modelScale.y = length( vec3( modelMatrix[ 1 ].xyz ) );
+                modelScale.z = length( vec3( modelMatrix[ 2 ].xyz ) );
+                return normalize( refractionVector ) * thickness * modelScale;
+            }
+
+            float applyIorToRoughness( const in float roughness, const in float ior ) {
+                return roughness * clamp( ior * 2.0 - 2.0, 0.0, 1.0 );
+            }
+
+            vec4 getTransmissionSample( const in vec2 fragCoord, const in float roughness, const in float ior ) {
+                float lod = log2( transmissionSamplerSize.x ) * applyIorToRoughness( roughness, ior );
+                return textureBicubic( transmissionSamplerMap, fragCoord.xy, lod );
+            }
+
+            vec3 volumeAttenuation( const in float transmissionDistance, const in vec3 attenuationColor, const in float attenuationDistance ) {
+                if ( isinf( attenuationDistance ) ) {
+                    return vec3( 1.0 );
+                } else {
+                    vec3 attenuationCoefficient = -log( attenuationColor ) / attenuationDistance;
+                    vec3 transmittance = exp( - attenuationCoefficient * transmissionDistance );
+                    return transmittance;
+                }
+            }
+
+            // ── 10-sample chromatic dispersion per R/G/B channel ──
+            vec4 getIBLVolumeRefraction( const in vec3 n, const in vec3 v, const in float roughness, const in vec3 diffuseColor,
+                const in vec3 specularColor, const in float specularF90, const in vec3 position, const in mat4 modelMatrix,
+                const in mat4 viewMatrix, const in mat4 projMatrix, const in float dispersion, const in float ior, const in float thickness,
+                const in vec3 attenuationColor, const in float attenuationDistance ) {
+
+                // Per-channel IOR — red bends least, blue bends most (real glass)
+                const float rIOR = 1.40;
+                const float gIOR = 1.45;
+                const float bIOR = 1.52;
+
+                vec3 txRayR = getVolumeTransmissionRay( n, v, thickness, rIOR, modelMatrix );
+                vec4 ndcPos = projMatrix * viewMatrix * vec4( position + txRayR, 1.0 );
+                vec2 refCoordsR = ndcPos.xy / ndcPos.w;
+
+                vec3 txRayG = getVolumeTransmissionRay( n, v, thickness, gIOR, modelMatrix );
+                ndcPos = projMatrix * viewMatrix * vec4( position + txRayG, 1.0 );
+                vec2 refCoordsG = ndcPos.xy / ndcPos.w;
+
+                vec3 txRayB = getVolumeTransmissionRay( n, v, thickness, bIOR, modelMatrix );
+                ndcPos = projMatrix * viewMatrix * vec4( position + txRayB, 1.0 );
+                vec2 refCoordsB = ndcPos.xy / ndcPos.w;
+
+                const int LOOP = 10;
+                const float rSpread = 0.08;
+                const float gSpread = 0.10;
+                const float bSpread = 0.12;
+
+                vec4 txLight = vec4(0.0, 0.0, 0.0, 1.0);
+
+                for ( int i = 0; i < LOOP; i++ ) {
+                    float fi = float(i) / float(LOOP);
+                    vec2 rSlide = vec2(1.0 + fi * rSpread * txRayR.xy);
+                    vec2 gSlide = vec2(1.0 + fi * gSpread * txRayG.xy);
+                    vec2 bSlide = vec2(1.0 + fi * bSpread * txRayB.xy);
+                    txLight.r += getTransmissionSample( (refCoordsR + 1.0) / 2.0 * rSlide, roughness, rIOR ).r;
+                    txLight.g += getTransmissionSample( (refCoordsG + 1.0) / 2.0 * gSlide, roughness, gIOR ).g;
+                    txLight.b += getTransmissionSample( (refCoordsB + 1.0) / 2.0 * bSlide, roughness, bIOR ).b;
+                }
+                txLight.rgb /= float(LOOP);
+
+                vec3 transmittance = diffuseColor * volumeAttenuation( length( txRayG ), attenuationColor, attenuationDistance );
+                vec3 attenuatedColor = transmittance * txLight.rgb;
+
+                vec3 F = EnvironmentBRDF( n, v, specularColor, specularF90, roughness );
+                float txFactor = ( transmittance.r + transmittance.g + transmittance.b ) / 3.0;
+                return vec4( ( 1.0 - F ) * attenuatedColor, 1.0 - ( 1.0 - txLight.a ) * txFactor );
+            }
+        #endif
+        `
+    );
+};
+_glassCubeMat.needsUpdate = true;
 
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
 // 3/4 view — camera provides 22° tilt, cube rotated 45° on Y for diamond silhouette
@@ -3021,8 +3185,8 @@ function update(timestamp) {
     // Slow oscillation reveals 3D nature through shifting Fresnel edges
     // and changing refraction patterns — essential for glass readability
     const _rotTime = performance.now() * 0.001;
-    glassCube.rotation.y = Math.PI / 4 + Math.sin(_rotTime * 0.22) * 0.22;
-    glassCube.rotation.x = THREE.MathUtils.degToRad(12) + Math.sin(_rotTime * 0.17) * 0.10;
+    glassCube.rotation.y = Math.PI / 4 + _rotTime * 0.015 + Math.sin(_rotTime * 0.22) * 0.12;
+    glassCube.rotation.x = THREE.MathUtils.degToRad(12) + Math.sin(_rotTime * 0.17) * 0.08;
 
     // MeshPhysicalMaterial handles the two-pass FBO rendering internally —
     // it automatically hides transmissive objects, renders the background,
