@@ -330,13 +330,13 @@ window._clockSetFullscreen = function(on) {
 // Active: 0.18 max opacity, upcoming: 0.08, Fajr dim: 0.05.
 
 const PRAYER_WINDOWS_DEF = [
-  { name: 'Tahajjud', startKey: 'Midnight', endKey: 'Fajr',    color: 0x7700ee, isFajr: false },
-  { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x3311cc, isFajr: true  },
-  { name: 'Dhuha',   startKey: 'Sunrise',  endKey: 'Dhuhr',    color: 0xffcc00, isFajr: false },
-  { name: 'Dhuhr',   startKey: 'Dhuhr',    endKey: 'Asr',      color: 0x00bb44, isFajr: false },
-  { name: 'Asr',     startKey: 'Asr',      endKey: 'Maghrib',  color: 0xff8800, isFajr: false },
-  { name: 'Maghrib', startKey: 'Maghrib',  endKey: 'Isha',     color: 0xff2200, isFajr: false },
-  { name: 'Isha',    startKey: 'Isha',     endKey: 'Midnight', color: 0x0055ff, isFajr: false },
+  { name: 'Tahajjud', startKey: 'Midnight', endKey: 'Fajr',    color: 0x7700ee, color2: 0xcc66ff, isFajr: false },
+  { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x3311cc, color2: 0x8866ee, isFajr: true  },
+  { name: 'Dhuha',   startKey: 'Sunrise',  endKey: 'Dhuhr',    color: 0xff9900, color2: 0xffee44, isFajr: false },
+  { name: 'Dhuhr',   startKey: 'Dhuhr',    endKey: 'Asr',      color: 0x00bb44, color2: 0x66ff99, isFajr: false },
+  { name: 'Asr',     startKey: 'Asr',      endKey: 'Maghrib',  color: 0xff8800, color2: 0xffcc44, isFajr: false },
+  { name: 'Maghrib', startKey: 'Maghrib',  endKey: 'Isha',     color: 0xff2200, color2: 0xff8866, isFajr: false },
+  { name: 'Isha',    startKey: 'Isha',     endKey: 'Midnight', color: 0x0055ff, color2: 0x44aaff, isFajr: false },
 ];
 
 const PT_FALLBACK = {
@@ -355,71 +355,20 @@ function ptTimeToAngle(totalMinutes) {
   return -((totalMinutes % 720) / 720) * TAU;
 }
 
-// Build a canonical pie-slice pointing toward +Y, UV-mapped for gradient shader.
-// u=0..1 across arc width, v=0 at apex (origin), v=1 at outer tip.
-// Group rotation.y points the wedge to the correct clock direction.
-function makeSectorGeom(radius, thetaHalf, segments) {
-  segments = segments || 48;
-  const positions = [];
-  const uvs       = [];
-
-  // Apex vertex at origin
-  positions.push(0, 0, 0);
-  uvs.push(0.5, 0);
-
-  for (let i = 0; i <= segments; i++) {
-    const t = -thetaHalf + (2 * thetaHalf * i / segments);
-    positions.push(Math.sin(t) * radius, Math.cos(t) * radius, 0);
-    uvs.push(i / segments, 1);
-  }
-
-  // Triangle fan from apex (index 0) through outer arc
-  const indices = [];
-  for (let i = 1; i <= segments; i++) {
-    indices.push(0, i, i + 1);
-  }
-
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs, 2));
-  geo.setIndex(indices);
-  geo.computeVertexNormals();
-  return geo;
-}
-
-// Vertex shader — just pass UVs through
-const PT_VERT = `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-// Fragment shader: radial + angular glow.
-// vUv.y=0 at apex (near cube), vUv.y=1 at tip (far from cube).
-// Bright at ~60% of length, transparent at base AND edges.
-// Angular fade softens wedge edges so it blends into floor naturally.
-const PT_FRAG = `
-  uniform vec3  uColor;
-  uniform float uOp;
-  varying vec2  vUv;
-  void main() {
-    float radial  = smoothstep(0.0, 0.15, vUv.y) * (1.0 - smoothstep(0.75, 1.0, vUv.y));
-    float angular = 1.0 - abs(vUv.x - 0.5) * 2.0;
-    angular = pow(max(angular, 0.0), 0.5);
-    gl_FragColor  = vec4(uColor, radial * angular * uOp);
-  }
-`;
+// Prayer beams use the same PlaneGeometry + mkMat shader as clock hands.
+// Width is proportional to the prayer window's angular span (capped at 4.5 units)
+// so short windows like Fajr/Maghrib are narrower than long windows like Dhuha/Tahajjud.
+// Beams inherit the hand gradient physics: Gaussian width falloff, smooth length fade,
+// additive blending — just at lower opacity than the clock hands.
 
 const SECTOR_RADIUS      = 9.12;  // matches second-hand length
 const SECTOR_FADE_SEC    = 180.0; // fade active → 0 over 3 minutes after window ends
 const SECTOR_HORIZON_MIN = 600;   // upcoming detection horizon (~10 h)
 
-// Target opacities — very subtle so cube remains hero
-const OP_ACTIVE   = 0.18;
-const OP_UPCOMING = 0.08;
-const OP_FAJR_DIM = 0.05; // Fajr upcoming — always dimmer, dawn horizon marker
+// Opacities — beam physics, cube still dominant hero
+const OP_ACTIVE   = 0.38;  // active window: visible beam but softer than clock hands
+const OP_UPCOMING = 0.14;  // next-up: dim ambient glow
+const OP_FAJR_DIM = 0.07;  // Fajr upcoming — always a dawn horizon whisper
 
 let prayerSectors = []; // [{ grp, mat, def, startMin, endMin }]
 let ptSectorsRebuilt = false;
@@ -436,35 +385,27 @@ function buildPrayerSectors() {
     const startAng = ptTimeToAngle(startMin);
     const endAng   = ptTimeToAngle(endMin);
 
-    // Angular span must sweep clockwise (negative direction).
+    // Clockwise angular sweep (negative direction); wrap cross-midnight windows.
     let thetaLen = endAng - startAng;
-    if (thetaLen > 0) thetaLen -= TAU; // wrap for cross-midnight windows (e.g. Tahajjud)
+    if (thetaLen > 0) thetaLen -= TAU;
+    const spanAngle = Math.abs(thetaLen);
+    const midAng    = startAng + thetaLen / 2;
 
-    const thetaHalf = Math.abs(thetaLen) / 2;
-    const midAng    = startAng + thetaLen / 2; // center direction of the canonical wedge
+    // Beam width: chord-proportional to span, capped so nothing overwhelms the cube.
+    // Short windows (Fajr ~45°) → narrow; long windows (Tahajjud ~165°) → wide.
+    const w = Math.min(SECTOR_RADIUS * spanAngle * 0.28, 4.5);
 
-    const geo = makeSectorGeom(SECTOR_RADIUS, thetaHalf);
+    const g = new THREE.PlaneGeometry(w, SECTOR_RADIUS, 1, 16);
+    g.translate(0, SECTOR_RADIUS / 2, 0); // apex at origin, tip at +Y
 
-    const mat = new THREE.ShaderMaterial({
-      uniforms: {
-        uColor: { value: new THREE.Color(def.color) },
-        uOp:    { value: def.isFajr ? OP_FAJR_DIM : OP_UPCOMING },
-      },
-      vertexShader:   PT_VERT,
-      fragmentShader: PT_FRAG,
-      transparent: true,
-      blending:    THREE.AdditiveBlending,
-      depthWrite:  false,
-      side:        THREE.DoubleSide,
-    });
+    const mat = mkMat(def.color, def.color2, def.isFajr ? OP_FAJR_DIM : OP_UPCOMING);
 
-    const mesh = new THREE.Mesh(geo, mat);
-    const grp  = new THREE.Group();
-    grp.add(mesh);
+    const grp = new THREE.Group();
+    grp.add(new THREE.Mesh(g, mat));
+    grp.position.y = 0.006;        // just below clock hands (0.008)
     grp.rotation.order = 'YXZ';
-    grp.rotation.y     = midAng;       // orient wedge toward window's midpoint on clock
-    grp.rotation.x     = Math.PI / 2; // tilt XY plane flat onto floor
-    grp.position.y     = 0.006;       // just below clock hands (0.008)
+    grp.rotation.y = midAng;      // point toward prayer window center on clock
+    grp.rotation.x = Math.PI / 2; // lie flat on floor
     prismGroup.add(grp);
 
     prayerSectors.push({ grp, mat, def, startMin, endMin });
@@ -529,7 +470,7 @@ function updatePrayerWindows(now) {
     }
 
     // Smooth lerp toward target (0.03 ≈ ~1s transition at 60fps)
-    mat.uniforms.uOp.value = THREE.MathUtils.lerp(mat.uniforms.uOp.value, targetOp, 0.03);
+    mat.uniforms.op.value = THREE.MathUtils.lerp(mat.uniforms.op.value, targetOp, 0.03);
   });
 }
 
