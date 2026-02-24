@@ -383,11 +383,13 @@ const OP_ACTIVE   = 0.55;  // active prayer: clearly lit, slightly dimmer than h
 const OP_UPCOMING = 0.16;  // next-up far away: dim glow, proximity ramp takes it to 0.55
 const OP_FAJR_DIM = 0.07;  // Fajr upcoming far: faint dawn whisper
 
-let prayerSectors = []; // [{ grp, mat, def, startMin, endMin }]
+let prayerSectors = []; // [{ grps[], mats[], def, startMin, endMin }]
 let ptSectorsRebuilt = false;
 
 function buildPrayerSectors() {
-  prayerSectors.forEach(function(ps) { prismGroup.remove(ps.grp); });
+  prayerSectors.forEach(function(ps) {
+    ps.grps.forEach(function(g) { prismGroup.remove(g); });
+  });
   prayerSectors = [];
 
   const T = window._prayerTimings || PT_FALLBACK;
@@ -398,22 +400,40 @@ function buildPrayerSectors() {
     const startAng = ptTimeToAngle(startMin);
     const endAng   = ptTimeToAngle(endMin);
 
-    // Beam points at window START — hour hand enters the beam when prayer begins.
-    // Width 1.6: wider than hands (0.4–0.72) so it reads as a range, not a moment.
-    const g = new THREE.PlaneGeometry(1.6, SECTOR_RADIUS, 1, 16);
-    g.translate(0, SECTOR_RADIUS / 2, 0); // apex at cube, tip at outer radius
+    // Clockwise angular sweep; wrap cross-midnight windows (e.g. Tahajjud)
+    let thetaLen = endAng - startAng;
+    if (thetaLen > 0) thetaLen -= TAU;
 
-    const mat = mkMatSoft(def.color, def.color2, def.isFajr ? OP_FAJR_DIM : OP_UPCOMING);
+    // Fan of narrow beams — same width/shader as clock hands, spread evenly
+    // across the full prayer window. Cube projects multiple rays like a prism
+    // spreading light. Number scales with window duration.
+    const spanMin = ((endMin - startMin) + 1440) % 1440;
+    const numRays = spanMin < 90 ? 2 : spanMin < 180 ? 3 : spanMin < 270 ? 4 : 5;
+    const initOp  = def.isFajr ? OP_FAJR_DIM : OP_UPCOMING;
 
-    const grp = new THREE.Group();
-    grp.add(new THREE.Mesh(g, mat));
-    grp.position.y = 0.006;        // just below clock hands (0.008)
-    grp.rotation.order = 'YXZ';
-    grp.rotation.y = startAng;    // point at window start — hand enters beam when prayer begins
-    grp.rotation.x = Math.PI / 2; // lie flat on floor
-    prismGroup.add(grp);
+    const grps = [], mats = [];
+    for (let i = 0; i < numRays; i++) {
+      const t   = (numRays === 1) ? 0 : i / (numRays - 1); // 0 → 1 across window
+      const ang = startAng + thetaLen * t;
 
-    prayerSectors.push({ grp, mat, def, startMin, endMin });
+      const geo = new THREE.PlaneGeometry(0.72, SECTOR_RADIUS, 1, 16);
+      geo.translate(0, SECTOR_RADIUS / 2, 0);
+
+      const mat = mkMat(def.color, def.color2, initOp);
+
+      const grp = new THREE.Group();
+      grp.add(new THREE.Mesh(geo, mat));
+      grp.position.y = 0.006;
+      grp.rotation.order = 'YXZ';
+      grp.rotation.y = ang;
+      grp.rotation.x = Math.PI / 2;
+      prismGroup.add(grp);
+
+      grps.push(grp);
+      mats.push(mat);
+    }
+
+    prayerSectors.push({ grps, mats, def, startMin, endMin });
   });
 }
 
@@ -431,7 +451,7 @@ function updatePrayerWindows(now) {
   const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
   prayerSectors.forEach(function(ps) {
-    const { mat, def, startMin, endMin } = ps;
+    const { mats, def, startMin, endMin } = ps;
     const wraps = startMin > endMin; // cross-midnight window (Tahajjud)
 
     // ── Active? ────────────────────────────────────────────────────────────────────────────
@@ -485,8 +505,10 @@ function updatePrayerWindows(now) {
       targetOp = 0.0;
     }
 
-    // Smooth lerp toward target (0.03 ≈ ~1s transition at 60fps)
-    mat.uniforms.op.value = THREE.MathUtils.lerp(mat.uniforms.op.value, targetOp, 0.03);
+    // Smooth lerp toward target for all rays in this window
+    mats.forEach(function(mat) {
+      mat.uniforms.op.value = THREE.MathUtils.lerp(mat.uniforms.op.value, targetOp, 0.03);
+    });
   });
 }
 
