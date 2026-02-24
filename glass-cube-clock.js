@@ -3,9 +3,7 @@
 // Three.js FBO dichroic shader, per-channel IOR, real-time H:M:S hands
 
 import * as THREE from 'three';
-import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
-RectAreaLightUniformsLib.init();
 
 // ─── CONTAINER DETECTION ──────────────────────────────────────────────────────
 const CONTAINER = window._clockContainer || null;
@@ -54,10 +52,8 @@ const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
 
 // ─── SCENE ────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// Near-neutral grey — gives FBO neutral content so glass shows its own dispersion colours
-// Turrell atmosphere comes from the warm/cool lighting contrast, not background saturation
-scene.background = new THREE.Color(0x7a7878);
-scene.fog = new THREE.FogExp2(0x7a7878, 0.038);
+scene.background = new THREE.Color(0x7a8090);
+scene.fog = new THREE.FogExp2(0x7a8090, 0.038);
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 
@@ -94,53 +90,46 @@ window.addEventListener('resize', onResize);
 // ─── FLOOR ────────────────────────────────────────────────────────────────────
 const ground = new THREE.Mesh(
   new THREE.CircleGeometry(80, 128),
-  // Warm-neutral taupe — just enough warmth to complement cool hands, without killing glass transparency
-  new THREE.MeshStandardMaterial({ color: 0x857870, roughness: 0.90, metalness: 0 })
+  new THREE.MeshStandardMaterial({ color: 0x767676, roughness: 0.95, metalness: 0 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// ─── LIGHTING ─────────────────────────────────────────────────────────────────
-// KEY — warm white, higher position, narrow angle: sculpts top/front faces sharply
-const key = new THREE.SpotLight(0xfff8e0, 40);
-key.position.set(-4.3, 1.8, -0.4);
-key.target.position.set(0, 0.5, 0);
-key.angle = 0.055; key.penumbra = 0.12; key.decay = 1.2;
-key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.001;
-scene.add(key, key.target);
+// ─── LIGHTING — Plan B+C: Gobo spot + faint rim ───────────────────────────────
 
-// BACKLIGHT — warm amber: illuminates bg behind cube, giving FBO warm tones to refract
-// Also creates warm halo at cube's back silhouette — Turrell glow effect
-// Warm white backlight — Turrell glow behind cube, NOT saturated orange
-const back = new THREE.SpotLight(0xffd0a0, 22);
-back.position.set(3.0, 3.0, -5.5);
-back.target.position.set(0, 0.5, 0);
-back.angle = 0.65; back.penumbra = 0.80; back.decay = 1.1;
-scene.add(back, back.target);
+// GOBO SPOT (B) — upper-front-left, angled down.
+// Hard-edged cone throws an elliptical pool across the cube and forward on the floor.
+// Pool diameter ~4 units — covers cube + surrounding floor, rest stays in ambient shadow.
+const gobo = new THREE.SpotLight(0xffffff, 48);
+gobo.position.set(-3.5, 6.5, 3.2);
+gobo.target.position.set(0.3, 0, 0.5);  // aim slightly forward — pool extends toward camera
+gobo.angle = 0.28;        // ~16° half-angle → pool radius ≈ 2.2 units on floor
+gobo.penumbra = 0.12;     // hard edge, gobo-like
+gobo.decay = 1.6;
+gobo.castShadow = true;
+gobo.shadow.mapSize.set(2048, 2048);
+gobo.shadow.bias = -0.001;
+scene.add(gobo, gobo.target);
 
-// RIM — stronger cool blue: crisp edge separation against warm bg, defines silhouette
-const rim = new THREE.SpotLight(0x7788ff, 14.0);
-rim.position.set(-1.5, 6.0, -3.5);
-rim.target.position.set(0, 0.5, 0);
-rim.angle = 0.42; rim.penumbra = 0.85;
+// RIM BACKLIGHT (C) — upper-right-behind, soft.
+// Just enough to catch the cube's back silhouette — prevents it from disappearing
+// into the shadow zone. Does NOT flood the floor.
+const rim = new THREE.SpotLight(0xd0e0ff, 7);
+rim.position.set(2.0, 5.0, -6.0);
+rim.target.position.set(0, 0.6, 0);
+rim.angle = 0.32; rim.penumbra = 0.70; rim.decay = 1.2;
 scene.add(rim, rim.target);
 
-// OVERHEAD FILL — warm, narrower: gentle top fill, doesn't flatten the key shadow
-const rectFill = new THREE.RectAreaLight(0xffd0a0, 3.5, 8, 8);
-rectFill.position.set(0, 7.0, 0.5);
-rectFill.lookAt(0, 0, 0.5);
-scene.add(rectFill);
-
-// Very low ambient — ensures shadow faces stay dark, maximum contrast ratio
-scene.add(new THREE.AmbientLight(0xffffff, 0.05));
+// Low ambient — floor outside the pool reads dark but not black
+scene.add(new THREE.AmbientLight(0xffffff, 0.08));
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
     uOpacity: { value: 0.28 },
-    uColor:   { value: new THREE.Color(0xb0a898) },  // Neutral warm mist — barely tinted
+    uColor:   { value: new THREE.Color(0xdde8f0) },
   },
   vertexShader: `
     varying vec2 vUv;
