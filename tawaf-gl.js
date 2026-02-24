@@ -1,7 +1,7 @@
 // tawaf-gl.js — Three.js Generative Tawaf Clock
 // Orbital resonance patterns with additive blending + bloom
 // Port of tawaf.js (Canvas 2D) to WebGL via Three.js
-// v106: Glass prism cube — wider chromatic dispersion, brighter beams with stronger fan-out, dichroic edge shimmer
+// v108: Dichroic prism overhaul — high IOR, wide chromatic dispersion, no face tinting, elevated camera
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -557,8 +557,8 @@ scene.background = null;
 // Subtle depth — inner rings appear slightly larger than outer rings,
 // and the glass cube gains natural 3D presence.
 // FOV 30° from ~7.5 WU distance matches the old ortho frustum (2 WU half-height).
-const camFOV = 30;
-const camTiltDeg = 18;  // elevated angle — shows cube top face clearly, like dichroic prism photo
+const camFOV = 28;
+const camTiltDeg = 22;  // elevated angle — reveals cube top face and gives rings genuine depth perspective
 const camDist = frustum / Math.tan(THREE.MathUtils.degToRad(camFOV / 2));
 const camTiltRad = THREE.MathUtils.degToRad(camTiltDeg);
 const camera = new THREE.PerspectiveCamera(camFOV, aspect, 0.1, 100);
@@ -622,9 +622,9 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(W, H),
-    0.25,  // strength — beam glow + glass edge catches
-    0.6,   // radius — moderate spread for prismatic halo
-    0.60   // threshold — catches beams and glass highlights
+    0.20,  // strength — subtle glow, not nuclear
+    0.5,   // radius — tight spread for clean beam edges
+    0.72   // threshold — only the brightest beam/glass highlights bloom
 );
 composer.addPass(bloomPass);
 
@@ -1056,65 +1056,63 @@ const ATEN_REIGN_FRAG = `
             // Cube edge in UV space — matches 0.272 WU cube side at 45° rotation
             float cubeEdge = 0.072;
 
-            // Radial profile: zero inside cube, sharp ramp at the face
-            // Creates the illusion of light emerging from the glass surface
-            float radialProfile = smoothstep(cubeEdge * 0.5, cubeEdge + 0.03, dist);
+            // Radial profile: ramps up PAST the cube face — beams emerge from glass, not inside it
+            float radialProfile = smoothstep(cubeEdge * 0.6, cubeEdge + 0.12, dist);
 
             // Chromatic dispersion — increases with distance (real prism physics)
             // Near cube: channels overlap = white. Far: visible R/G/B separation.
-            float dispersion = dist * dist * 0.40;
+            float dispersion = dist * dist * 0.55;
 
             // Fan-out: beams widen dramatically with distance (angular spread)
             // At cube face: razor-thin filament. At edge: wide prismatic cone.
             float fanT = smoothstep(cubeEdge, 1.0, dist);
-            float fanFactor = mix(1.0, 0.008, fanT * fanT);
+            float fanFactor = mix(1.0, 0.012, fanT * fanT);
 
             // Soft radial taper — beams fade elegantly at their endpoints
             float taperWidth = 0.08;
 
-            // ── Hour beam — widest, most dispersion, warm dominance ──
+            // ── Hour beam — widest, most dispersion ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
-            float adH_r = adH + dispersion * 2.8;     // red bends least
-            float adH_b = adH - dispersion * 2.8;     // blue bends most
+            float adH_r = adH + dispersion * 3.5;     // red bends least
+            float adH_b = adH - dispersion * 3.5;     // blue bends most
             float maskH = smoothstep(uHandLens.x + taperWidth, uHandLens.x - taperWidth, dist);
-            float hSharp = 90.0 * fanFactor;
-            float hGlow  = 10.0 * fanFactor;
+            float hSharp = 70.0 * fanFactor;
+            float hGlow  = 8.0 * fanFactor;
             vec3 beamH;
-            beamH.r = exp(-adH_r * adH_r * hSharp) * 1.0 + exp(-adH_r * adH_r * hGlow) * 0.35;
-            beamH.g = exp(-adH   * adH   * hSharp * 1.1) * 0.85 + exp(-adH * adH * hGlow * 1.1) * 0.28;
-            beamH.b = exp(-adH_b * adH_b * hSharp) * 1.0 + exp(-adH_b * adH_b * hGlow) * 0.35;
+            beamH.r = exp(-adH_r * adH_r * hSharp) * 1.8 + exp(-adH_r * adH_r * hGlow) * 0.55;
+            beamH.g = exp(-adH   * adH   * hSharp * 1.1) * 1.5 + exp(-adH * adH * hGlow * 1.1) * 0.45;
+            beamH.b = exp(-adH_b * adH_b * hSharp) * 1.8 + exp(-adH_b * adH_b * hGlow) * 0.55;
             color += beamH * maskH * radialProfile * uHandVis;
 
             // ── Minute beam — medium width, moderate dispersion ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
-            float adM_r = adM + dispersion * 2.2;
-            float adM_b = adM - dispersion * 2.2;
+            float adM_r = adM + dispersion * 2.8;
+            float adM_b = adM - dispersion * 2.8;
             float maskM = smoothstep(uHandLens.y + taperWidth, uHandLens.y - taperWidth, dist);
-            float mSharp = 160.0 * fanFactor;
-            float mGlow  = 20.0 * fanFactor;
+            float mSharp = 130.0 * fanFactor;
+            float mGlow  = 16.0 * fanFactor;
             vec3 beamM;
-            beamM.r = exp(-adM_r * adM_r * mSharp) * 0.80 + exp(-adM_r * adM_r * mGlow) * 0.28;
-            beamM.g = exp(-adM   * adM   * mSharp * 1.1) * 0.68 + exp(-adM * adM * mGlow * 1.1) * 0.22;
-            beamM.b = exp(-adM_b * adM_b * mSharp) * 0.80 + exp(-adM_b * adM_b * mGlow) * 0.28;
+            beamM.r = exp(-adM_r * adM_r * mSharp) * 1.5 + exp(-adM_r * adM_r * mGlow) * 0.45;
+            beamM.g = exp(-adM   * adM   * mSharp * 1.1) * 1.2 + exp(-adM * adM * mGlow * 1.1) * 0.36;
+            beamM.b = exp(-adM_b * adM_b * mSharp) * 1.5 + exp(-adM_b * adM_b * mGlow) * 0.45;
             color += beamM * maskM * radialProfile * uHandVis;
 
             // ── Second beam — thinnest, fastest, with prismatic sparkle ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
-            float adS_r = adS + dispersion * 1.8;
-            float adS_b = adS - dispersion * 1.8;
+            float adS_r = adS + dispersion * 2.2;
+            float adS_b = adS - dispersion * 2.2;
             float maskS = smoothstep(uHandLens.z + taperWidth, uHandLens.z - taperWidth, dist);
-            // Prismatic sparkle — like light catching microfacets in the beam
             float sparkle = sin(dist * 55.0 + uTime * 7.0) * 0.5 + 0.5;
-            sparkle = sparkle * 0.15 + 0.85;
-            float sSharp = 300.0 * fanFactor;
-            float sGlow  = 38.0 * fanFactor;
+            sparkle = sparkle * 0.12 + 0.88;
+            float sSharp = 250.0 * fanFactor;
+            float sGlow  = 30.0 * fanFactor;
             vec3 beamS;
-            beamS.r = exp(-adS_r * adS_r * sSharp) * 0.65 + exp(-adS_r * adS_r * sGlow) * 0.20;
-            beamS.g = exp(-adS   * adS   * sSharp * 1.1) * 0.55 + exp(-adS * adS * sGlow * 1.1) * 0.16;
-            beamS.b = exp(-adS_b * adS_b * sSharp) * 0.65 + exp(-adS_b * adS_b * sGlow) * 0.20;
+            beamS.r = exp(-adS_r * adS_r * sSharp) * 1.3 + exp(-adS_r * adS_r * sGlow) * 0.38;
+            beamS.g = exp(-adS   * adS   * sSharp * 1.1) * 1.05 + exp(-adS * adS * sGlow * 1.1) * 0.30;
+            beamS.b = exp(-adS_b * adS_b * sSharp) * 1.3 + exp(-adS_b * adS_b * sGlow) * 0.38;
             color += beamS * maskS * radialProfile * uHandVis * sparkle;
 
             // ── Ring brightening at beam-ring intersections ──
@@ -1130,7 +1128,7 @@ const ATEN_REIGN_FRAG = `
                              + exp(-pow((dist - rb3) * 9.0, 2.0))
                              + exp(-pow((dist - rb4) * 9.0, 2.0))
                              + exp(-pow((dist - rb5) * 9.0, 2.0));
-            color += beamPresence * ringBright * 0.10 * uHandVis;
+            color += beamPresence * ringBright * 0.18 * uHandVis;
         }
 
         // Alpha: beam brightness determines opacity (additive blending)
@@ -1256,79 +1254,62 @@ const GLASS_FRAG = `
         // Screen-space UV from projected position
         vec2 screenUV = (vProjected.xy / vProjected.w) * 0.5 + 0.5;
 
-        // Fresnel — thin, sharp edge catches (real optical glass)
+        // Fresnel — sharp edge catches (real optical glass)
         float cosTheta = abs(dot(viewDir, normal));
         float fresnel = pow(1.0 - cosTheta, uFresnelPower);
 
         // Edge detection — geometric edge lines via normal discontinuity
         vec3 normalDeriv = fwidth(normal);
-        float edgeFactor = smoothstep(0.2, 0.8, length(normalDeriv) * 15.0);
+        float edgeFactor = smoothstep(0.15, 0.7, length(normalDeriv) * 18.0);
 
         // ── Multi-sample spectral refraction ──
-        // 12 samples across the visible spectrum, each at a different IOR.
-        // More samples = smoother rainbow gradient through the glass.
-        const int SAMPLES = 12;
+        // 16 samples across the visible spectrum for smooth rainbow gradient.
+        // Each sample uses a slightly different IOR — red bends least, violet most.
+        const int SAMPLES = 16;
         vec3 refracted = vec3(0.0);
-        float totalWeight = 0.0;
 
         for (int i = 0; i < SAMPLES; i++) {
             float t = float(i) / float(SAMPLES - 1); // 0..1 across spectrum
             float ior = 1.0 / (uIOR + uChromatic * t);
             vec3 refDir = refract(-viewDir, normal, ior);
-            // Stronger UV offset — rings must visibly distort and split through glass
             vec2 sampleUV = screenUV + refDir.xy * uRefractPower;
+            sampleUV = clamp(sampleUV, 0.0, 1.0);
             vec3 bg = texture2D(uFBO, sampleUV).rgb;
             vec3 spectralColor = wavelengthToRGB(t);
             refracted += bg * spectralColor;
-            totalWeight += 1.0;
         }
-        refracted /= totalWeight * 0.30; // normalize — slightly brighter to compensate darkening
+        // Normalize: spectral weighting averages ~0.55 per channel across 16 samples
+        // so divide by ~9 to get roughly correct luminance
+        refracted /= 9.0;
 
-        // ── Internal reflection (fake second bounce) ──
+        // ── Internal reflection (fake second bounce — total internal reflection) ──
         vec3 reflected = reflect(-viewDir, normal);
-        vec2 reflUV = screenUV + reflected.xy * uRefractPower * 0.4;
+        vec2 reflUV = screenUV + reflected.xy * uRefractPower * 0.3;
+        reflUV = clamp(reflUV, 0.0, 1.0);
         vec3 internalRefl = texture2D(uFBO, reflUV).rgb;
-        float tirMask = smoothstep(0.4, 0.1, cosTheta);
-        refracted = mix(refracted, internalRefl * 1.3, tirMask * 0.3);
+        float tirMask = smoothstep(0.35, 0.08, cosTheta);
+        refracted = mix(refracted, internalRefl * 1.1, tirMask * 0.25);
 
-        // ── Glass body: dark crystal with bright edges ──
-        // The glass must be DARKER than surrounding rings to create contrast.
-        // Like a real dark crystal: you see faint refracted color inside,
-        // but the identity comes from bright edge catches + dichroic face tints.
+        // ── Glass body: CLEAR with visible chromatic refraction ──
+        // Real dichroic glass is colorless — ALL color comes from the chromatic
+        // aberration splitting light into its spectrum. No face tinting.
+        vec3 color = refracted * 0.95;
 
-        // Dim the body — refracted rings visible as ghostly color, not dominant
-        vec3 bodyColor = refracted * 0.50;
+        // ── White Fresnel edge catches — THE #1 glass visual cue ──
+        // Crisp but not nuclear — elegant highlights that define the glass shape
+        float edgeCatch = pow(fresnel, 4.0);
+        color += vec3(1.0, 0.99, 0.97) * edgeCatch * 1.4;
 
-        // ── Face-dependent dichroic tint — THE signature look ──
-        // Each face refracts a DIFFERENT vivid color. The different dot coefficients
-        // ensure each box face normal maps to a unique spectrum position.
-        // This creates the iconic dichroic prism look: cyan face, magenta face, gold face.
-        float faceSeed = normal.x * 1.5 + normal.y * 2.3 + normal.z * 3.7;
-        float faceAngle = faceSeed + uTime * 0.08;
-        vec3 faceColor = wavelengthToRGB(fract(faceAngle));
-        // Strong at face centers, zero at edges (edges are white Fresnel)
-        float faceMask = cosTheta * cosTheta;
-        bodyColor += faceColor * faceMask * 0.75;
-
-        // Start with dark body
-        vec3 color = bodyColor;
-
-        // ── BRIGHT white Fresnel edge catches — THE #1 glass visual cue ──
-        // These MUST be unmistakably white-bright against the dark body.
-        // This is the single most important visual that says "glass."
-        float edgeCatch = pow(fresnel, 2.5);
-        color += vec3(1.0, 0.98, 0.95) * edgeCatch * 1.8;
-
-        // Geometric edge lines — crisp white wireframe at cube edges
-        // These define the 3D shape — bright lines where faces meet
-        color += vec3(1.0, 0.98, 0.95) * edgeFactor * 1.2;
+        // Geometric edge lines — subtle wireframe at cube edges
+        color += vec3(1.0, 0.98, 0.95) * edgeFactor * 0.9;
 
         // ── Dichroic rainbow shimmer at edges ──
-        // Rainbow bands visible along Fresnel edges — like light diffracting at the surface
-        float iriAngle = cosTheta * 12.0 + uTime * 0.35;
-        vec3 dichroic = wavelengthToRGB(fract(iriAngle * 0.3 + 0.5));
-        float iriMask = fresnel * fresnel;
-        color += dichroic * iriMask * 1.0;
+        // Spectral bands at Fresnel edges — the signature dichroic look.
+        // Thin rainbow interference pattern that shifts with viewing angle.
+        float iriAngle = cosTheta * 22.0 + uTime * 0.3;
+        vec3 dichroic = wavelengthToRGB(fract(iriAngle * 0.5 + 0.3));
+        float iriMask = fresnel * fresnel * fresnel;
+        color += dichroic * iriMask * 1.2;
 
         gl_FragColor = vec4(color, 1.0);
     }
@@ -1337,10 +1318,10 @@ const GLASS_FRAG = `
 const _glassCubeMat = new THREE.ShaderMaterial({
     uniforms: {
         uFBO:          { value: _glassFBO.texture },
-        uIOR:          { value: 1.25 },           // low base IOR = more visible bending
-        uChromatic:    { value: 2.20 },           // very wide chromatic spread — visible rainbow at edges
-        uRefractPower: { value: 1.20 },           // aggressive UV shift — rings visibly warp and split
-        uFresnelPower: { value: 4.0 },            // sharp Fresnel edges — slightly wider for visibility
+        uIOR:          { value: 1.50 },           // real glass IOR — strong visible refraction
+        uChromatic:    { value: 3.2 },            // wide chromatic spread — visible rainbow dispersion
+        uRefractPower: { value: 0.90 },           // strong UV shift — rings distort clearly through glass
+        uFresnelPower: { value: 5.0 },            // crisp Fresnel edges — tight highlight falloff
         uTime:         { value: 0.0 },
     },
     vertexShader: GLASS_VERT,
@@ -1354,7 +1335,7 @@ const _glassCubeMat = new THREE.ShaderMaterial({
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
 // 3/4 view — camera provides 18° tilt, cube adds rotation
 glassCube.rotation.set(
-    THREE.MathUtils.degToRad(18),
+    THREE.MathUtils.degToRad(12),  // less X tilt — camera elevation provides the top-face view
     Math.PI / 4,
     0
 );
@@ -3131,8 +3112,8 @@ function update(timestamp) {
     // Slow oscillation reveals 3D nature through shifting Fresnel edges
     // and changing refraction patterns — essential for glass readability
     const _rotTime = performance.now() * 0.001;
-    glassCube.rotation.y = Math.PI / 4 + Math.sin(_rotTime * 0.15) * 0.18;
-    glassCube.rotation.x = THREE.MathUtils.degToRad(18) + Math.sin(_rotTime * 0.11) * 0.08;
+    glassCube.rotation.y = Math.PI / 4 + Math.sin(_rotTime * 0.22) * 0.22;
+    glassCube.rotation.x = THREE.MathUtils.degToRad(12) + Math.sin(_rotTime * 0.17) * 0.10;
     _glassCubeMat.uniforms.uTime.value = _rotTime;
 
     // ── Two-pass rendering for glass FBO ──
