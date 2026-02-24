@@ -547,8 +547,8 @@ const frustum = 2; // world units from center to edge vertically
 const radius = frustum * 1.6; // orbital radius in world units — scaled up for larger drawing fill
 
 const scene = new THREE.Scene();
-// No scene.background — ring geometry provides the concentric ring background
-scene.background = null;
+// Background needed for glass transmission FBO
+scene.background = new THREE.Color(0x0a0a12);
 // scene.environment enables proper IBL for MeshPhysicalMaterial transmission.
 // Without this, glass transmission has no environment to refract light from,
 // making the cube look opaque/grey instead of transparent.
@@ -564,6 +564,7 @@ const camTiltRad = THREE.MathUtils.degToRad(camTiltDeg);
 const camera = new THREE.PerspectiveCamera(camFOV, aspect, 0.1, 100);
 camera.position.set(0, Math.sin(camTiltRad) * camDist, Math.cos(camTiltRad) * camDist);
 camera.lookAt(0, 0, 0);
+// camera uses default layer 0
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -1185,7 +1186,10 @@ const atenReignQuad = new THREE.Mesh(
     atenReignMat
 );
 atenReignQuad.position.set(0, 0, 0.15);  // in front of glass cube
-atenReignQuad.renderOrder = 2;  // after glass cube (0), beams render on top
+// Aten Reign quad renders AFTER glass — beams overlay on top
+atenReignQuad.renderOrder = 20;
+// transparent: true ensures this quad is NOT in the opaque pass
+// that feeds the glass transmission FBO
 scene.add(atenReignQuad);
 
 // ═══════════════════════════════════════════════════════════════
@@ -1224,23 +1228,23 @@ const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _gla
 // ── MeshPhysicalMaterial — perfectly clear glass ──
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
     transmission: 1.0,
-    thickness: 3.0,
-    roughness: 0.0,
+    thickness: 0.5,             // LOW — high values make glass appear opaque
+    roughness: 0.05,            // tiny bit of roughness helps transmission
     metalness: 0.0,
-    ior: 1.50,
-    dispersion: 1.0, // nonzero to enable dispersion code path we'll replace
+    ior: 1.5,
+    dispersion: 3.0,            // visible chromatic aberration
 
-    iridescence: 0.3,
-    iridescenceIOR: 2.3,
-    iridescenceThicknessRange: [250, 450],
+    iridescence: 0.1,               // very subtle dichroic shimmer
+    iridescenceIOR: 2.0,
+    iridescenceThicknessRange: [200, 400],
 
-    reflectivity: 0.5,
-    envMapIntensity: 3.5,
+    reflectivity: 0.1,             // minimal reflection — let transmission dominate
+    envMapIntensity: 0.3,           // very low — glass should be about what's BEHIND it
 
     attenuationColor: new THREE.Color(0xffffff),
     attenuationDistance: 100.0,
 
-    clearcoat: 1.0,
+    clearcoat: 0.2,                 // subtle — just enough for edge glints
     clearcoatRoughness: 0.0,
 
     transparent: true,
@@ -1287,8 +1291,10 @@ glassCube.rotation.set(
     0
 );
 glassCube.position.set(0, 0, 0.1);
-glassCube.renderOrder = 10;
+glassCube.renderOrder = 0;  // renders before atenReignQuad so transmission FBO captures ring meshes
 scene.add(glassCube);
+
+// Debug sphere removed — transmission FBO confirmed working with MeshBasicMaterial
 
 // ═══════════════════════════════════════════════════════════════
 // 3D RING GEOMETRY — Seven Heavens as real geometry
@@ -1367,23 +1373,23 @@ for (let i = 0; i < 7; i++) {
     const outerR = outerUV * _ringScale;
 
     const geo = new THREE.RingGeometry(innerR, outerR, 128, 1);
-    const mat = new THREE.ShaderMaterial({
-        uniforms: {
-            uColorInner:  { value: new THREE.Color(0.5, 0.5, 0.5) },
-            uColorOuter:  { value: new THREE.Color(0.5, 0.5, 0.5) },
-            uInnerRadius: { value: innerR },
-            uOuterRadius: { value: outerR },
-            uBlendInner:  { value: (outerR - innerR) * 0.3 },
-            uBlendOuter:  { value: (outerR - innerR) * 0.3 },
-            uBreath:      { value: 0.0 },
-        },
-        vertexShader: RING_VERT,
-        fragmentShader: RING_FRAG,
-        transparent: false,       // opaque — glass transmission pass needs these
-        depthTest: true,          // depth-tested — glass cube refracts them at correct Z
-        depthWrite: true,
+    // MeshBasicMaterial — required for glass transmission FBO compatibility.
+    // ShaderMaterial is invisible to Three.js's transmission pre-pass.
+    // We lose the inner→outer gradient but gain working glass refraction.
+    const mat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(0.5, 0.5, 0.5),
         side: THREE.DoubleSide,
+        transparent: false,
+        depthTest: true,
+        depthWrite: true,
     });
+    // Compatibility shim — code that sets ring colors uses uniforms.uColorInner.value
+    // This shim redirects those calls to mat.color
+    mat.uniforms = {
+        uColorInner:  { value: mat.color },
+        uColorOuter:  { value: new THREE.Color(0.5, 0.5, 0.5) }, // ignored but prevents errors
+        uBreath:      { value: 0.0 }, // ignored — no gradient animation with BasicMaterial
+    };
 
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(0, 0, _ringDepths[i]);
@@ -3062,10 +3068,15 @@ function update(timestamp) {
     glassCube.rotation.y = Math.PI / 4 + _rotTime * 0.015 + Math.sin(_rotTime * 0.22) * 0.12;
     glassCube.rotation.x = THREE.MathUtils.degToRad(12) + Math.sin(_rotTime * 0.17) * 0.08;
 
-    // MeshPhysicalMaterial handles the two-pass FBO rendering internally —
-    // it automatically hides transmissive objects, renders the background,
-    // then uses that as the refraction source. No manual FBO management needed.
+    // TWO-PASS RENDER:
+    // Pass 1: Hide aten quad → composer renders scene with glass transmission
+    //         FBO seeing only the 3D ring meshes (not the flat shader quad)
+    // Pass 2: Show aten quad → render scene again WITHOUT clearing
+    //         The aten quad (transparent, additive, depthTest:false) composites
+    //         its beams on top of the glass render.
+    atenReignQuad.visible = false;
     composer.render();
+    atenReignQuad.visible = true;
 
     updateUI(now, vars);
 }

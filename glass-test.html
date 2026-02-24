@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html><head><style>body{margin:0;background:#000}</style></head>
+<body>
+<script type="importmap">{"imports":{"three":"https://esm.sh/three@0.170.0","three/addons/":"https://esm.sh/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x111122);
+
+const camera = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 2, 6);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+// Environment for glass reflections
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envScene = new THREE.Scene();
+const envGeo = new THREE.SphereGeometry(1, 64, 32);
+const envMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    vertexShader: 'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader: 'varying vec3 vP;void main(){float y=normalize(vP).y*0.5+0.5;vec3 c=mix(vec3(0.1),vec3(0.3),y);c+=vec3(3.0)*smoothstep(0.7,0.95,y);gl_FragColor=vec4(c,1.0);}',
+});
+envScene.add(new THREE.Mesh(envGeo, envMat));
+scene.environment = pmrem.fromScene(envScene, 0, 0.1, 100).texture;
+pmrem.dispose();
+
+// Colored background objects (for glass to refract)
+const colors = [0xff4444, 0x44ff44, 0x4444ff, 0xffff44, 0xff44ff];
+for (let i = 0; i < 5; i++) {
+    const ring = new THREE.Mesh(
+        new THREE.RingGeometry(0.8 + i * 0.5, 1.1 + i * 0.5, 64),
+        new THREE.MeshBasicMaterial({color: colors[i], side: THREE.DoubleSide})
+    );
+    ring.position.z = -1;
+    scene.add(ring);
+}
+
+// Lights
+const key = new THREE.DirectionalLight(0xffffff, 5);
+key.position.set(2, 4, 3);
+scene.add(key);
+scene.add(new THREE.AmbientLight(0x303030, 0.2));
+
+// GLASS CUBE — vanilla MeshPhysicalMaterial
+const glassMat = new THREE.MeshPhysicalMaterial({
+    transmission: 1.0,
+    thickness: 2.0,
+    roughness: 0.0,
+    metalness: 0.0,
+    ior: 1.5,
+    dispersion: 3.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
+    envMapIntensity: 2.0,
+    attenuationColor: new THREE.Color(0xffffff),
+    attenuationDistance: 100,
+    side: THREE.DoubleSide,
+});
+
+const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), glassMat);
+cube.rotation.set(0.2, Math.PI/4, 0);
+scene.add(cube);
+
+function animate() {
+    requestAnimationFrame(animate);
+    cube.rotation.y += 0.005;
+    renderer.render(scene, camera);
+}
+animate();
+
+console.log('Glass test loaded. Material transmission:', glassMat.transmission);
+</script>
+</body></html>
