@@ -58,8 +58,22 @@ scene.background = new THREE.Color(0x7a8090);
 scene.fog = new THREE.FogExp2(0x7a8090, 0.038);
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
-camera.position.set(0, 6.8, 8.5);
-camera.lookAt(0, 0.5, 0);
+
+// Two camera presets:
+//   LANDING    — tight telephoto crop for the circular hero (cube + proximal rays fill circle)
+//   FULLSCREEN — wide shot shows full floor scene
+const CAM_LANDING    = { pos: [0, 2.2, 2.5], fov: 50, look: [0, 0.5, 0] };
+const CAM_FULLSCREEN = { pos: [0, 6.8, 8.5], fov: 78, look: [0, 0.5, 0] };
+
+function applyCamera(preset) {
+  camera.position.set(...preset.pos);
+  camera.fov = preset.fov;
+  camera.updateProjectionMatrix();
+  camera.lookAt(...preset.look);
+}
+
+// Start in landing (contained) mode
+applyCamera(CONTAINED ? CAM_LANDING : CAM_FULLSCREEN);
 
 // ─── RESIZE ───────────────────────────────────────────────────────────────────
 function onResize() {
@@ -285,7 +299,7 @@ floorRay( 216, 0x44ff88, 0x00cc44, 0.40, 9.12, 0.62);   // SECOND (green)
 // ─── FULLSCREEN HOOK (called by openClockFullscreen in index.html) ─────────────
 window._clockSetFullscreen = function(on) {
   _isFullscreen = !!on;
-  // Trigger a resize so renderer/camera update to new dimensions
+  applyCamera(_isFullscreen ? CAM_FULLSCREEN : CAM_LANDING);
   setTimeout(onResize, 50);
 };
 
