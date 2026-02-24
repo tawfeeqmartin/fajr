@@ -1321,13 +1321,13 @@ const _ringBounds = [
 // Z depths — staggered so inner rings are close to the cube, outer rings are far
 // Glass cube is at z=0.1; rings go behind it
 const _ringDepths = [
-    -0.05,   // Ring 0: closest to cube (0.15 WU behind glass)
-    -0.12,   // Ring 1
-    -0.20,   // Ring 2
-    -0.29,   // Ring 3
-    -0.39,   // Ring 4
-    -0.50,   // Ring 5
-    -0.62,   // Ring 6: farthest (0.72 WU behind glass)
+    -0.05,   // Ring 0: behind cube (inner — visible through glass)
+    -0.10,   // Ring 1: behind cube
+    -0.15,   // Ring 2: behind cube
+     0.12,   // Ring 3: IN FRONT of cube — rings wrap around it
+     0.16,   // Ring 4: in front
+     0.20,   // Ring 5: in front
+     0.24,   // Ring 6: outermost, in front (closest to camera)
 ];
 
 // Create ring meshes with simple ShaderMaterial for smooth blending
@@ -1393,9 +1393,9 @@ for (let i = 0; i < 7; i++) {
 
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(0, 0, _ringDepths[i]);
-    // Outermost ring (i=6) renders first (renderOrder=-10), innermost (i=0) renders
-    // last (renderOrder=-4) so inner rings visually overlap outer at boundaries
-    mesh.renderOrder = -10 + (6 - i);
+    // Rings behind glass (i<3): renderOrder < 0 (captured by transmission FBO)
+    // Rings in front (i>=3): renderOrder > 0 (render after glass, frame the cube)
+    mesh.renderOrder = i < 3 ? (-10 + (2 - i)) : (5 + i);
     scene.add(mesh);
     _ringMeshes.push(mesh);
     _ringMaterials.push(mat);
