@@ -287,6 +287,18 @@ const FRAG = `
 `;
 function mkMat(c1,c2,op){ return new THREE.ShaderMaterial({ uniforms:{c1:{value:new THREE.Color(c1)},c2:{value:new THREE.Color(c2)},op:{value:op}}, vertexShader:VERT, fragmentShader:FRAG, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide }); }
 
+// Soft variant for prayer beams — wider Gaussian (2.2 vs 4.8) = diffuse zone vs sharp needle
+const FRAG_SOFT = `
+  uniform vec3 c1,c2; uniform float op; varying vec2 vUv;
+  void main(){
+    vec3 col=mix(c1,c2,pow(clamp(vUv.y,0.,1.),0.6));
+    float sx=exp(-pow((vUv.x-0.5)*2.2,2.0));
+    float sy=smoothstep(0.0,0.08,vUv.y)*smoothstep(1.0,0.36,vUv.y);
+    gl_FragColor=vec4(col,sx*sy*op);
+  }
+`;
+function mkMatSoft(c1,c2,op){ return new THREE.ShaderMaterial({ uniforms:{c1:{value:new THREE.Color(c1)},c2:{value:new THREE.Color(c2)},op:{value:op}}, vertexShader:VERT, fragmentShader:FRAG_SOFT, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide }); }
+
 function floorRay(az, c1, c2, w, len, op) {
   const g = new THREE.PlaneGeometry(w, len, 1, 16); g.translate(0, len/2, 0);
   const grp = new THREE.Group();
@@ -391,7 +403,7 @@ function buildPrayerSectors() {
     const g = new THREE.PlaneGeometry(1.6, SECTOR_RADIUS, 1, 16);
     g.translate(0, SECTOR_RADIUS / 2, 0); // apex at cube, tip at outer radius
 
-    const mat = mkMat(def.color, def.color2, def.isFajr ? OP_FAJR_DIM : OP_UPCOMING);
+    const mat = mkMatSoft(def.color, def.color2, def.isFajr ? OP_FAJR_DIM : OP_UPCOMING);
 
     const grp = new THREE.Group();
     grp.add(new THREE.Mesh(g, mat));
