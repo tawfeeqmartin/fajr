@@ -52,8 +52,9 @@ const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
 
 // ─── SCENE ────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x7a8090);
-scene.fog = new THREE.FogExp2(0x7a8090, 0.038);
+// Match page background (#f8f7f4 cream) — canvas dissolves into site, no hard edge
+scene.background = new THREE.Color(0xf8f7f4);
+scene.fog = new THREE.FogExp2(0xf8f7f4, 0.048);
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 
@@ -96,32 +97,40 @@ ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// ─── LIGHTING — Plan B+C: Gobo spot + faint rim ───────────────────────────────
+// ─── LIGHTING ─────────────────────────────────────────────────────────────────
+// Working with the FBO shader: the cube body brightness comes from what the FBO
+// captures BEHIND the glass. The backlight is the most critical fixture — it
+// illuminates the background scene the shader refracts. Without it, glass goes dark.
 
-// GOBO SPOT (B) — upper-front-left, angled down.
-// Hard-edged cone throws an elliptical pool across the cube and forward on the floor.
-// Pool diameter ~4 units — covers cube + surrounding floor, rest stays in ambient shadow.
-const gobo = new THREE.SpotLight(0xffffff, 48);
+// BACKLIGHT — from behind-right. Illuminates the scene behind the cube so the
+// FBO captures bright content → glass refracts light and looks transparent/glowing.
+const back = new THREE.SpotLight(0xd8e8ff, 22);
+back.position.set(3.0, 3.0, -5.5);
+back.target.position.set(0, 0.5, 0);
+back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
+scene.add(back, back.target);
+
+// GOBO KEY — upper-front-left, broad wash (not a tight spot).
+// Shapes the floor with a gentle gradient pool, defines front/top cube faces.
+// Wide angle + soft penumbra = falloff is gradual, not a hard disco-spot.
+const gobo = new THREE.SpotLight(0xffffff, 32);
 gobo.position.set(-3.5, 6.5, 3.2);
-gobo.target.position.set(0.3, 0, 0.5);  // aim slightly forward — pool extends toward camera
-gobo.angle = 0.28;        // ~16° half-angle → pool radius ≈ 2.2 units on floor
-gobo.penumbra = 0.22;     // slightly softer edge — less harsh falloff
-gobo.decay = 1.6;
+gobo.target.position.set(0.3, 0, 0.5);
+gobo.angle = 0.42;       // wider cone — broad wash over cube + floor
+gobo.penumbra = 0.45;    // soft falloff, blends into ambient naturally
+gobo.decay = 1.4;
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(2048, 2048);
 gobo.shadow.bias = -0.001;
 scene.add(gobo, gobo.target);
 
-// RIM BACKLIGHT (C) — upper-right-behind, soft.
-// Just enough to catch the cube's back silhouette — prevents it from disappearing
-// into the shadow zone. Does NOT flood the floor.
-const rim = new THREE.SpotLight(0xd0e0ff, 7);
-rim.position.set(2.0, 5.0, -6.0);
+// COOL RIM — catches back edges of cube, separates silhouette from bg
+const rim = new THREE.SpotLight(0x8899ff, 9);
+rim.position.set(-1.5, 5.5, -3.5);
 rim.target.position.set(0, 0.6, 0);
-rim.angle = 0.32; rim.penumbra = 0.70; rim.decay = 1.2;
+rim.angle = 0.45; rim.penumbra = 0.85;
 scene.add(rim, rim.target);
 
-// Lifted ambient — floor outside pool reads as dark grey, not near-black
 scene.add(new THREE.AmbientLight(0xffffff, 0.18));
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
