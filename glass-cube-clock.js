@@ -365,11 +365,12 @@ function ptTimeToAngle(totalMinutes) {
 const SECTOR_RADIUS      = 9.12;  // matches second-hand length
 const SECTOR_FADE_SEC    = 180.0; // fade active → 0 over 3 minutes after window ends
 const SECTOR_HORIZON_MIN = 600;   // upcoming detection horizon (~10 h)
+const UPCOMING_RAMP_MIN  = 60;    // start intensifying upcoming beam 60 min before prayer
 
 // Opacities — beam physics, cube still dominant hero
 const OP_ACTIVE   = 0.38;  // active window: visible beam but softer than clock hands
-const OP_UPCOMING = 0.14;  // next-up: dim ambient glow
-const OP_FAJR_DIM = 0.07;  // Fajr upcoming — always a dawn horizon whisper
+const OP_UPCOMING = 0.14;  // next-up far away: dim ambient glow
+const OP_FAJR_DIM = 0.07;  // Fajr upcoming far: always a dawn horizon whisper
 
 let prayerSectors = []; // [{ grp, mat, def, startMin, endMin }]
 let ptSectorsRebuilt = false;
@@ -452,19 +453,30 @@ function updatePrayerWindows(now) {
     // ── Minutes until next start (perpetual-cycle upcoming detection) ─────────────────
     const minUntilStart = (startMin - nowMin + 1440) % 1440;
 
-    // ── Compute target opacity ────────────────────────────────────────────────────────────────────────────
+    // ── Compute target opacity ─────────────────────────────────────────────────
     let targetOp;
     if (isActive) {
-      targetOp = OP_ACTIVE; // 0.18 — subtle floor ambience
+      targetOp = OP_ACTIVE;
     } else if (secSinceEnd !== null) {
-      // Fading from OP_ACTIVE → 0 over 3 minutes
+      // Fade from OP_ACTIVE → 0 over 3 minutes after window ends
       targetOp = OP_ACTIVE * Math.max(0.0, 1.0 - secSinceEnd / SECTOR_FADE_SEC);
     } else if (def.isFajr) {
-      // Always a dim horizon indicator even when not active
-      targetOp = OP_FAJR_DIM; // 0.05
+      // Fajr: always a horizon whisper, but ramps near dawn
+      if (minUntilStart <= UPCOMING_RAMP_MIN) {
+        const f = 1.0 - minUntilStart / UPCOMING_RAMP_MIN;
+        targetOp = OP_FAJR_DIM + (OP_UPCOMING - OP_FAJR_DIM) * f;
+      } else {
+        targetOp = OP_FAJR_DIM;
+      }
     } else if (minUntilStart <= SECTOR_HORIZON_MIN) {
-      // Upcoming within ~10h: show at dim upcoming opacity
-      targetOp = OP_UPCOMING; // 0.08
+      if (minUntilStart <= UPCOMING_RAMP_MIN) {
+        // Proximity ramp: 60 min out → 0.14, 30 min → 0.26, 10 min → 0.34, 0 min → 0.38
+        // Builds anticipation as the prayer approaches
+        const f = 1.0 - minUntilStart / UPCOMING_RAMP_MIN;
+        targetOp = OP_UPCOMING + (OP_ACTIVE - OP_UPCOMING) * f;
+      } else {
+        targetOp = OP_UPCOMING;
+      }
     } else {
       // Truly past, not yet cycling back — hidden
       targetOp = 0.0;
