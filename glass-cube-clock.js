@@ -322,9 +322,10 @@ window._clockSetFullscreen = function(on) {
   setTimeout(onResize, 50);
 };
 
-// ─── PRAYER WINDOW SECTORS ────────────────────────────────────────────────────
+// ─── PRAYER WINDOW SECTORS ────────────────────────────────────────────────
 // Seven glowing fan/pie-slice sectors on the floor, one per Islamic prayer window.
-// They indicate the active prayer period and which windows are upcoming.
+// Subtle atmospheric floor glow — cube remains the visual hero.
+// Active: 0.18 max opacity, upcoming: 0.08, Fajr dim: 0.05.
 
 const PRAYER_WINDOWS_DEF = [
   { name: 'Tahajjud', startKey: 'Midnight', endKey: 'Fajr',    color: 0x7700ee, isFajr: false },
@@ -352,46 +353,71 @@ function ptTimeToAngle(totalMinutes) {
   return -((totalMinutes % 720) / 720) * TAU;
 }
 
-// Build a flat pie-slice Shape in the XY plane (before rotation to floor).
-function makeSectorGeom(radius, thetaStart, thetaLength, segments) {
-  segments = segments || 72;
-  const shape = new THREE.Shape();
-  shape.moveTo(0, 0);
+// Build a canonical pie-slice pointing toward +Y, UV-mapped for gradient shader.
+// u=0..1 across arc width, v=0 at apex (origin), v=1 at outer tip.
+// Group rotation.y points the wedge to the correct clock direction.
+function makeSectorGeom(radius, thetaHalf, segments) {
+  segments = segments || 48;
+  const positions = [];
+  const uvs       = [];
+
+  // Apex vertex at origin
+  positions.push(0, 0, 0);
+  uvs.push(0.5, 0);
+
   for (let i = 0; i <= segments; i++) {
-    const th = thetaStart + (thetaLength * i) / segments;
-    shape.lineTo(Math.cos(th) * radius, Math.sin(th) * radius);
+    const t = -thetaHalf + (2 * thetaHalf * i / segments);
+    positions.push(Math.sin(t) * radius, Math.cos(t) * radius, 0);
+    uvs.push(i / segments, 1);
   }
-  shape.lineTo(0, 0);
-  return new THREE.ShapeGeometry(shape);
+
+  // Triangle fan from apex (index 0) through outer arc
+  const indices = [];
+  for (let i = 1; i <= segments; i++) {
+    indices.push(0, i, i + 1);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+  return geo;
 }
 
-// Vertex shader: pass normalised radial distance to fragment for gradient.
-const PT_VERT = [
-  'uniform float uRadius;',
-  'varying float vR;',
-  'void main(){',
-  '  vR = length(position.xy) / uRadius;',
-  '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
-  '}',
-].join('\n');
+// Vertex shader — just pass UVs through
+const PT_VERT = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
 
-// Fragment shader: radial soft glow (fade in from centre, fade out at tip).
-const PT_FRAG = [
-  'uniform vec3  uColor;',
-  'uniform float uOp;',
-  'varying float vR;',
-  'void main(){',
-  '  float fade = smoothstep(0.0, 0.14, vR) * smoothstep(1.0, 0.52, vR);',
-  '  gl_FragColor = vec4(uColor, fade * uOp);',
-  '}',
-].join('\n');
+// Fragment shader: radial + angular glow.
+// vUv.y=0 at apex (near cube), vUv.y=1 at tip (far from cube).
+// Bright at ~60% of length, transparent at base AND edges.
+// Angular fade softens wedge edges so it blends into floor naturally.
+const PT_FRAG = `
+  uniform vec3  uColor;
+  uniform float uOp;
+  varying vec2  vUv;
+  void main() {
+    float radial  = smoothstep(0.0, 0.15, vUv.y) * (1.0 - smoothstep(0.75, 1.0, vUv.y));
+    float angular = 1.0 - abs(vUv.x - 0.5) * 2.0;
+    angular = pow(max(angular, 0.0), 0.5);
+    gl_FragColor  = vec4(uColor, radial * angular * uOp);
+  }
+`;
 
-const SECTOR_RADIUS    = 9.12;  // matches second-hand length
-const SECTOR_FADE_SEC  = 180.0; // fade window from 1.0→0 over 3 minutes
-// A window is "upcoming" if its next start is within this many minutes.
-// ~10 h horizon: shows tonight's Tahajjud + tomorrow's Fajr from Isha,
-// but not mid-morning windows that are clearly tomorrow.
-const SECTOR_HORIZON_MIN = 600;
+const SECTOR_RADIUS      = 9.12;  // matches second-hand length
+const SECTOR_FADE_SEC    = 180.0; // fade active → 0 over 3 minutes after window ends
+const SECTOR_HORIZON_MIN = 600;   // upcoming detection horizon (~10 h)
+
+// Target opacities — very subtle so cube remains hero
+const OP_ACTIVE   = 0.18;
+const OP_UPCOMING = 0.08;
+const OP_FAJR_DIM = 0.05; // Fajr upcoming — always dimmer, dawn horizon marker
 
 let prayerSectors = []; // [{ grp, mat, def, startMin, endMin }]
 let ptSectorsRebuilt = false;
@@ -412,13 +438,15 @@ function buildPrayerSectors() {
     let thetaLen = endAng - startAng;
     if (thetaLen > 0) thetaLen -= TAU; // wrap for cross-midnight windows (e.g. Tahajjud)
 
-    const geo = makeSectorGeom(SECTOR_RADIUS, startAng, thetaLen);
+    const thetaHalf = Math.abs(thetaLen) / 2;
+    const midAng    = startAng + thetaLen / 2; // center direction of the canonical wedge
+
+    const geo = makeSectorGeom(SECTOR_RADIUS, thetaHalf);
 
     const mat = new THREE.ShaderMaterial({
       uniforms: {
-        uColor:  { value: new THREE.Color(def.color) },
-        uOp:     { value: def.isFajr ? 0.25 : 0.5 },
-        uRadius: { value: SECTOR_RADIUS },
+        uColor: { value: new THREE.Color(def.color) },
+        uOp:    { value: def.isFajr ? OP_FAJR_DIM : OP_UPCOMING },
       },
       vertexShader:   PT_VERT,
       fragmentShader: PT_FRAG,
@@ -432,8 +460,9 @@ function buildPrayerSectors() {
     const grp  = new THREE.Group();
     grp.add(mesh);
     grp.rotation.order = 'YXZ';
-    grp.rotation.x     = Math.PI / 2;  // tilt XY plane flat onto floor (matches hand convention)
-    grp.position.y     = 0.006;        // just below clock hands (0.008)
+    grp.rotation.y     = midAng;       // orient wedge toward window's midpoint on clock
+    grp.rotation.x     = Math.PI / 2; // tilt XY plane flat onto floor
+    grp.position.y     = 0.006;       // just below clock hands (0.008)
     prismGroup.add(grp);
 
     prayerSectors.push({ grp, mat, def, startMin, endMin });
@@ -457,7 +486,7 @@ function updatePrayerWindows(now) {
     const { mat, def, startMin, endMin } = ps;
     const wraps = startMin > endMin; // cross-midnight window (Tahajjud)
 
-    // ── Active? ──────────────────────────────────────────────────────────────
+    // ── Active? ────────────────────────────────────────────────────────────────────────────
     let isActive;
     if (wraps) {
       isActive = (nowMin >= startMin) || (nowMin < endMin);
@@ -465,38 +494,35 @@ function updatePrayerWindows(now) {
       isActive = (nowMin >= startMin) && (nowMin < endMin);
     }
 
-    // ── Seconds since window ended (for fade-out calculation) ────────────────
+    // ── Seconds since window ended (for fade-out) ──────────────────────────────────────
     let secSinceEnd = null;
     if (!isActive) {
       const endSecAbs = endMin * 60;
       let elapsed = nowSec - endSecAbs;
-      if (elapsed < 0) elapsed += 86400; // wrap midnight
-      // Only treat as "just ended" within the fade window + a small buffer
-      if (elapsed < SECTOR_FADE_SEC + 120) {
+      if (elapsed < 0) elapsed += 86400;
+      if (elapsed < SECTOR_FADE_SEC) {
         secSinceEnd = elapsed;
       }
     }
 
-    // ── Minutes until next start (perpetual-cycle upcoming detection) ─────────
-    // (startMin - nowMin + 1440) % 1440 = minutes until this window starts again
+    // ── Minutes until next start (perpetual-cycle upcoming detection) ─────────────────
     const minUntilStart = (startMin - nowMin + 1440) % 1440;
 
-    // ── Compute target opacity ────────────────────────────────────────────────
+    // ── Compute target opacity ────────────────────────────────────────────────────────────────────────────
     let targetOp;
     if (isActive) {
-      targetOp = 1.0;
+      targetOp = OP_ACTIVE; // 0.18 — subtle floor ambience
     } else if (secSinceEnd !== null) {
-      // Fading from 1.0 → 0 over SECTOR_FADE_SEC seconds
-      targetOp = Math.max(0.0, 1.0 - secSinceEnd / SECTOR_FADE_SEC);
+      // Fading from OP_ACTIVE → 0 over 3 minutes
+      targetOp = OP_ACTIVE * Math.max(0.0, 1.0 - secSinceEnd / SECTOR_FADE_SEC);
     } else if (def.isFajr) {
-      // Fajr is always a dim horizon marker when not active or fading.
-      // It marks approaching dawn without competing with Tahajjud/Isha.
-      targetOp = 0.25;
+      // Always a dim horizon indicator even when not active
+      targetOp = OP_FAJR_DIM; // 0.05
     } else if (minUntilStart <= SECTOR_HORIZON_MIN) {
-      // Window starts within the upcoming-horizon → glow at half brightness
-      targetOp = 0.5;
+      // Upcoming within ~10h: show at dim upcoming opacity
+      targetOp = OP_UPCOMING; // 0.08
     } else {
-      // Past, more than 3 min ago, and not yet "upcoming" — hidden
+      // Truly past, not yet cycling back — hidden
       targetOp = 0.0;
     }
 
