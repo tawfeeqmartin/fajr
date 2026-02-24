@@ -356,21 +356,39 @@ function ptTimeToAngle(totalMinutes) {
   return (3 * Math.PI / 4) - ((totalMinutes % 720) / 720) * TAU;
 }
 
-// Prayer beams use the same PlaneGeometry + mkMat shader as clock hands.
-// Width is proportional to the prayer window's angular span (capped at 4.5 units)
-// so short windows like Fajr/Maghrib are narrower than long windows like Dhuha/Tahajjud.
-// Beams inherit the hand gradient physics: Gaussian width falloff, smooth length fade,
-// additive blending — just at lower opacity than the clock hands.
+// Prayer sectors: full fan/wedge geometry that spans the entire prayer window.
+// Uses the same mkMat hand-beam shader — UVs map identically:
+//   uv.x = 0→1 across arc (0.5 at sector midline = Gaussian peak)
+//   uv.y = 0→1 from apex to tip (same radial fade as hand beams)
+// The hour hand sweeping INTO the sector = prayer has started.
+function makeSectorGeom(radius, thetaHalf, segments) {
+  segments = segments || 48;
+  const pos = [], uvs = [];
+  pos.push(0, 0, 0); uvs.push(0.5, 0); // apex
+  for (let i = 0; i <= segments; i++) {
+    const t = -thetaHalf + (2 * thetaHalf * i / segments);
+    pos.push(Math.sin(t) * radius, Math.cos(t) * radius, 0);
+    uvs.push(i / segments, 1);
+  }
+  const idx = [];
+  for (let i = 1; i <= segments; i++) idx.push(0, i, i + 1);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  return geo;
+}
 
 const SECTOR_RADIUS      = 9.12;  // matches second-hand length
 const SECTOR_FADE_SEC    = 180.0; // fade active → 0 over 3 minutes after window ends
 const SECTOR_HORIZON_MIN = 600;   // upcoming detection horizon (~10 h)
 const UPCOMING_RAMP_MIN  = 60;    // start intensifying upcoming beam 60 min before prayer
 
-// Opacities — beam physics, cube still dominant hero
-const OP_ACTIVE   = 0.38;  // active window: visible beam but softer than clock hands
-const OP_UPCOMING = 0.14;  // next-up far away: dim ambient glow
-const OP_FAJR_DIM = 0.07;  // Fajr upcoming far: always a dawn horizon whisper
+// Opacities — fan sectors cover full window area, so lower than narrow beams
+const OP_ACTIVE   = 0.22;  // active: clearly visible without dominating the cube
+const OP_UPCOMING = 0.08;  // next-up far away: subtle ambient presence
+const OP_FAJR_DIM = 0.04;  // Fajr upcoming far: always a dawn horizon whisper
 
 let prayerSectors = []; // [{ grp, mat, def, startMin, endMin }]
 let ptSectorsRebuilt = false;
@@ -393,12 +411,9 @@ function buildPrayerSectors() {
     const spanAngle = Math.abs(thetaLen);
     const midAng    = startAng + thetaLen / 2;
 
-    // Beam width: chord-proportional to span, capped so nothing overwhelms the cube.
-    // Short windows (Fajr ~45°) → narrow; long windows (Tahajjud ~165°) → wide.
-    const w = Math.min(SECTOR_RADIUS * spanAngle * 0.28, 4.5);
-
-    const g = new THREE.PlaneGeometry(w, SECTOR_RADIUS, 1, 16);
-    g.translate(0, SECTOR_RADIUS / 2, 0); // apex at origin, tip at +Y
+    // Full fan sector covering the entire prayer window — hour hand sweeping
+    // into this sector IS the visual cue that prayer time has started.
+    const g = makeSectorGeom(SECTOR_RADIUS, spanAngle / 2);
 
     const mat = mkMat(def.color, def.color2, def.isFajr ? OP_FAJR_DIM : OP_UPCOMING);
 
