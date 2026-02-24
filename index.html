@@ -1644,7 +1644,7 @@ function openClockFullscreen() {
 
   // Show version tag
   const vTag=document.getElementById('fsVersionTag');
-  if(vTag){const vs=document.querySelector('script[src*="tawaf-gl.js"]')||document.querySelector('script[src*="clock.js"]');const vm=vs&&vs.src.match(/v=(\d+)/);vTag.textContent='v'+(vm?vm[1]:'?');}
+  if(vTag){const vs=document.querySelector('script[src*="glass-cube-clock.js"]')||document.querySelector('script[src*="tawaf-gl.js"]')||document.querySelector('script[src*="clock.js"]');const vm=vs&&vs.src.match(/v=(\d+)/);vTag.textContent='v'+(vm?vm[1]:'?');}
 
   // Stop tour/idle — pause all landing page animations in fullscreen
   stopDialCycle();
@@ -1836,7 +1836,7 @@ function fsPlaySurah() {
 // Load 3D clock immediately
 window._clockContainer=document.getElementById('dialHero');
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='tawaf-gl.js?v=165';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=1';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
