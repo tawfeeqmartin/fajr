@@ -1195,64 +1195,53 @@ scene.add(atenReignQuad);
 // to split into rainbow colors at the cube edges.
 // ═══════════════════════════════════════════════════════════════
 
-// ── Three.js Lights for glass definition ──
-// Glass needs real lights to create specular highlights and define its shape.
-// Key light (top-right): main specular catch — this is what defines glass edges
-// Product photography rule: one strong key light > multiple weak fills
-const _keyLight = new THREE.DirectionalLight(0xffffff, 5.0);
+// ── Three.js Lights for glass definition ── (Chris lookdev v2)
+const _keyLight = new THREE.DirectionalLight(0xffffff, 6.0);
 _keyLight.position.set(2, 4, 3);
 scene.add(_keyLight);
-// Fill light (left): very subtle — just prevents fully black faces
-const _fillLight = new THREE.DirectionalLight(0xf8f0e8, 0.4);
+
+const _fillLight = new THREE.DirectionalLight(0xf8f0e8, 0.3);
 _fillLight.position.set(-3, 1, 1);
 scene.add(_fillLight);
-// Rim light (behind-below): catches back edges — cool tint for glass separation
-const _rimLight = new THREE.DirectionalLight(0xc0d0ff, 2.5);
+
+const _rimLight = new THREE.DirectionalLight(0xc0d0ff, 3.0);
 _rimLight.position.set(-1, -2, -4);
 scene.add(_rimLight);
-// Ambient — VERY low. Glass reads better with high contrast, not flat fill
-const _ambientLight = new THREE.AmbientLight(0x303030, 0.15);
+
+// Top-down accent — catches the top face edge crisply
+const _topLight = new THREE.DirectionalLight(0xffffff, 2.0);
+_topLight.position.set(0, 6, 0);
+scene.add(_topLight);
+
+const _ambientLight = new THREE.AmbientLight(0x303030, 0.1);
 scene.add(_ambientLight);
 
+// ── Glass cube geometry ──
 const _glassCubeSide = 0.272;
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
 
-// ── MeshPhysicalMaterial Glass ──
-// Real physics-based glass using Three.js r170's native transmission + dispersion.
-// This material automatically handles the FBO refraction pass internally —
-// no custom shader needed. The scene.environment provides reflection content,
-// and the ring meshes provide refraction content (visible behind the glass).
+// ── MeshPhysicalMaterial — perfectly clear glass ──
 const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    // Core glass — perfectly clear, you see THROUGH it
     transmission: 1.0,
-    thickness: 3.5,             // deeper refraction — more dramatic bending of what's behind
-    roughness: 0.0,             // flawless polish — dichroic cubes are optically perfect
+    thickness: 3.0,
+    roughness: 0.0,
     metalness: 0.0,
+    ior: 1.50,
+    dispersion: 1.0, // nonzero to enable dispersion code path we'll replace
 
-    // IOR + Dispersion — the PRISM effect. This is the critical parameter.
-    // High dispersion = strong per-wavelength IOR shift = visible rainbow splitting
-    ior: 1.52,                  // optical glass (BK7)
-    dispersion: 5.0,            // CRANKED — heavy chromatic aberration for visible spectral split
+    iridescence: 0.3,
+    iridescenceIOR: 2.3,
+    iridescenceThicknessRange: [250, 450],
 
-    // Iridescence — thin-film dichroic coating simulation
-    // Subtle — the real color comes from dispersion, not surface coating
-    iridescence: 0.25,
-    iridescenceIOR: 2.2,        // higher IOR = faster color cycling across angles
-    iridescenceThicknessRange: [200, 500],
-
-    // Reflections — sharp edge catches are essential for glass readability
     reflectivity: 0.5,
-    envMapIntensity: 3.0,       // strong env reflections — defines the cube edges
+    envMapIntensity: 3.5,
 
-    // No absorption tint — dichroic glass is perfectly colorless
     attenuationColor: new THREE.Color(0xffffff),
-    attenuationDistance: 10.0,  // essentially no absorption
+    attenuationDistance: 100.0,
 
-    // Clearcoat — adds a second specular layer for crisp edge highlights
     clearcoat: 1.0,
     clearcoatRoughness: 0.0,
 
-    // Rendering
     transparent: true,
     opacity: 1.0,
     side: THREE.DoubleSide,
@@ -1260,11 +1249,9 @@ const _glassCubeMat = new THREE.MeshPhysicalMaterial({
     depthWrite: true,
 });
 
-// ── CHROMATIC DISPERSION OVERRIDE ──────────────────────────────
-// Replace Three.js's weak built-in dispersion with 10-sample smooth spread
-// per R/G/B channel (Franky Hung / Maxime Heckel technique).
-// Each channel refracts at a different IOR → visible spectral separation
-// like a real dichroic beam-splitting prism cube.
+// ── CHROMATIC DISPERSION OVERRIDE (Chris lookdev v2) ──
+// 6-sample per-channel IOR refraction with proper NDC→UV projection.
+// BK7 glass dispersion: R 1.46-1.49, G 1.49-1.52, B 1.52-1.55
 _glassCubeMat.onBeforeCompile = function(shader) {
     shader.fragmentShader = shader.fragmentShader.replace(
         '#include <transmission_pars_fragment>',
@@ -1289,115 +1276,113 @@ _glassCubeMat.onBeforeCompile = function(shader) {
             uniform mat4 projectionMatrix;
             varying vec3 vWorldPosition;
 
-            float w0( float a ) { return ( 1.0 / 6.0 ) * ( a * ( a * ( - a + 3.0 ) - 3.0 ) + 1.0 ); }
-            float w1( float a ) { return ( 1.0 / 6.0 ) * ( a * a * ( 3.0 * a - 6.0 ) + 4.0 ); }
-            float w2( float a ) { return ( 1.0 / 6.0 ) * ( a * ( a * ( - 3.0 * a + 3.0 ) + 3.0 ) + 1.0 ); }
-            float w3( float a ) { return ( 1.0 / 6.0 ) * ( a * a * a ); }
-            float g0( float a ) { return w0( a ) + w1( a ); }
-            float g1( float a ) { return w2( a ) + w3( a ); }
-            float h0( float a ) { return - 1.0 + w1( a ) / ( w0( a ) + w1( a ) ); }
-            float h1( float a ) { return 1.0 + w3( a ) / ( w2( a ) + w3( a ) ); }
+            float w0(float a){return(1.0/6.0)*(a*(a*(-a+3.0)-3.0)+1.0);}
+            float w1(float a){return(1.0/6.0)*(a*a*(3.0*a-6.0)+4.0);}
+            float w2(float a){return(1.0/6.0)*(a*(a*(-3.0*a+3.0)+3.0)+1.0);}
+            float w3(float a){return(1.0/6.0)*(a*a*a);}
+            float g0(float a){return w0(a)+w1(a);}
+            float g1(float a){return w2(a)+w3(a);}
+            float h0(float a){return -1.0+w1(a)/(w0(a)+w1(a));}
+            float h1(float a){return 1.0+w3(a)/(w2(a)+w3(a));}
 
-            vec4 bicubic( sampler2D tex, vec2 uv, vec4 texelSize, float lod ) {
-                uv = uv * texelSize.zw + 0.5;
-                vec2 iuv = floor( uv );
-                vec2 fuv = fract( uv );
-                float g0x = g0( fuv.x ); float g1x = g1( fuv.x );
-                float h0x = h0( fuv.x ); float h1x = h1( fuv.x );
-                float h0y = h0( fuv.y ); float h1y = h1( fuv.y );
-                vec2 p0 = ( vec2( iuv.x + h0x, iuv.y + h0y ) - 0.5 ) * texelSize.xy;
-                vec2 p1 = ( vec2( iuv.x + h1x, iuv.y + h0y ) - 0.5 ) * texelSize.xy;
-                vec2 p2 = ( vec2( iuv.x + h0x, iuv.y + h1y ) - 0.5 ) * texelSize.xy;
-                vec2 p3 = ( vec2( iuv.x + h1x, iuv.y + h1y ) - 0.5 ) * texelSize.xy;
-                return g0( fuv.y ) * ( g0x * textureLod( tex, p0, lod ) + g1x * textureLod( tex, p1, lod ) ) +
-                    g1( fuv.y ) * ( g0x * textureLod( tex, p2, lod ) + g1x * textureLod( tex, p3, lod ) );
+            vec4 bicubic(sampler2D tex,vec2 uv,vec4 texelSize,float lod){
+                uv=uv*texelSize.zw+0.5;
+                vec2 iuv=floor(uv);vec2 fuv=fract(uv);
+                float g0x=g0(fuv.x);float g1x=g1(fuv.x);
+                float h0x=h0(fuv.x);float h1x=h1(fuv.x);
+                float h0y=h0(fuv.y);float h1y=h1(fuv.y);
+                vec2 p0=(vec2(iuv.x+h0x,iuv.y+h0y)-0.5)*texelSize.xy;
+                vec2 p1=(vec2(iuv.x+h1x,iuv.y+h0y)-0.5)*texelSize.xy;
+                vec2 p2=(vec2(iuv.x+h0x,iuv.y+h1y)-0.5)*texelSize.xy;
+                vec2 p3=(vec2(iuv.x+h1x,iuv.y+h1y)-0.5)*texelSize.xy;
+                return g0(fuv.y)*(g0x*textureLod(tex,p0,lod)+g1x*textureLod(tex,p1,lod))+
+                       g1(fuv.y)*(g0x*textureLod(tex,p2,lod)+g1x*textureLod(tex,p3,lod));
             }
 
-            vec4 textureBicubic( sampler2D sampler, vec2 uv, float lod ) {
-                vec2 fLodSize = vec2( textureSize( sampler, int( lod ) ) );
-                vec2 cLodSize = vec2( textureSize( sampler, int( lod + 1.0 ) ) );
-                vec2 fLodSizeInv = 1.0 / fLodSize;
-                vec2 cLodSizeInv = 1.0 / cLodSize;
-                vec4 fSample = bicubic( sampler, uv, vec4( fLodSizeInv, fLodSize ), floor( lod ) );
-                vec4 cSample = bicubic( sampler, uv, vec4( cLodSizeInv, cLodSize ), ceil( lod ) );
-                return mix( fSample, cSample, fract( lod ) );
+            vec4 textureBicubic(sampler2D sampler,vec2 uv,float lod){
+                vec2 fLodSize=vec2(textureSize(sampler,int(lod)));
+                vec2 cLodSize=vec2(textureSize(sampler,int(lod+1.0)));
+                vec4 fSample=bicubic(sampler,uv,vec4(1.0/fLodSize,fLodSize),floor(lod));
+                vec4 cSample=bicubic(sampler,uv,vec4(1.0/cLodSize,cLodSize),ceil(lod));
+                return mix(fSample,cSample,fract(lod));
             }
 
-            vec3 getVolumeTransmissionRay( const in vec3 n, const in vec3 v, const in float thickness, const in float ior, const in mat4 modelMatrix ) {
-                vec3 refractionVector = refract( - v, normalize( n ), 1.0 / ior );
+            vec3 getVolumeTransmissionRay(const in vec3 n,const in vec3 v,const in float thickness,const in float ior,const in mat4 modelMatrix){
+                vec3 refractionVector=refract(-v,normalize(n),1.0/ior);
                 vec3 modelScale;
-                modelScale.x = length( vec3( modelMatrix[ 0 ].xyz ) );
-                modelScale.y = length( vec3( modelMatrix[ 1 ].xyz ) );
-                modelScale.z = length( vec3( modelMatrix[ 2 ].xyz ) );
-                return normalize( refractionVector ) * thickness * modelScale;
+                modelScale.x=length(vec3(modelMatrix[0].xyz));
+                modelScale.y=length(vec3(modelMatrix[1].xyz));
+                modelScale.z=length(vec3(modelMatrix[2].xyz));
+                return normalize(refractionVector)*thickness*modelScale;
             }
 
-            float applyIorToRoughness( const in float roughness, const in float ior ) {
-                return roughness * clamp( ior * 2.0 - 2.0, 0.0, 1.0 );
+            float applyIorToRoughness(const in float roughness,const in float ior){
+                return roughness*clamp(ior*2.0-2.0,0.0,1.0);
             }
 
-            vec4 getTransmissionSample( const in vec2 fragCoord, const in float roughness, const in float ior ) {
-                float lod = log2( transmissionSamplerSize.x ) * applyIorToRoughness( roughness, ior );
-                return textureBicubic( transmissionSamplerMap, fragCoord.xy, lod );
+            vec4 getTransmissionSample(const in vec2 fragCoord,const in float roughness,const in float ior){
+                float lod=log2(transmissionSamplerSize.x)*applyIorToRoughness(roughness,ior);
+                return textureBicubic(transmissionSamplerMap,fragCoord.xy,lod);
             }
 
-            vec3 volumeAttenuation( const in float transmissionDistance, const in vec3 attenuationColor, const in float attenuationDistance ) {
-                if ( isinf( attenuationDistance ) ) {
-                    return vec3( 1.0 );
-                } else {
-                    vec3 attenuationCoefficient = -log( attenuationColor ) / attenuationDistance;
-                    vec3 transmittance = exp( - attenuationCoefficient * transmissionDistance );
-                    return transmittance;
+            vec3 volumeAttenuation(const in float transmissionDistance,const in vec3 attenuationColor,const in float attenuationDistance){
+                if(isinf(attenuationDistance)){return vec3(1.0);}
+                vec3 attenuationCoefficient=-log(attenuationColor)/attenuationDistance;
+                return exp(-attenuationCoefficient*transmissionDistance);
+            }
+
+            // ── 6-sample chromatic dispersion per channel (18 total) ──
+            vec4 getIBLVolumeRefraction(
+                const in vec3 n, const in vec3 v, const in float roughness,
+                const in vec3 diffuseColor, const in vec3 specularColor,
+                const in float specularF90, const in vec3 position,
+                const in mat4 modelMatrix, const in mat4 viewMatrix,
+                const in mat4 projMatrix, const in float dispersion,
+                const in float ior, const in float thickness,
+                const in vec3 attenuationColor, const in float attenuationDistance
+            ) {
+                const int SAMPLES = 6;
+                const float IOR_BASE_R = 1.46;
+                const float IOR_BASE_G = 1.49;
+                const float IOR_BASE_B = 1.52;
+                const float IOR_SPREAD = 0.03;
+
+                vec3 colorAccum = vec3(0.0);
+                float alphaAccum = 0.0;
+
+                for (int i = 0; i < SAMPLES; i++) {
+                    float fi = float(i) / float(SAMPLES - 1);
+
+                    float rIor = IOR_BASE_R + fi * IOR_SPREAD;
+                    vec3 txRayR = getVolumeTransmissionRay(n, v, thickness, rIor, modelMatrix);
+                    vec4 ndcR = projMatrix * viewMatrix * vec4(position + txRayR, 1.0);
+                    vec2 uvR = ndcR.xy / ndcR.w * 0.5 + 0.5;
+                    colorAccum.r += getTransmissionSample(uvR, roughness, rIor).r;
+
+                    float gIor = IOR_BASE_G + fi * IOR_SPREAD;
+                    vec3 txRayG = getVolumeTransmissionRay(n, v, thickness, gIor, modelMatrix);
+                    vec4 ndcG = projMatrix * viewMatrix * vec4(position + txRayG, 1.0);
+                    vec2 uvG = ndcG.xy / ndcG.w * 0.5 + 0.5;
+                    colorAccum.g += getTransmissionSample(uvG, roughness, gIor).g;
+
+                    float bIor = IOR_BASE_B + fi * IOR_SPREAD;
+                    vec3 txRayB = getVolumeTransmissionRay(n, v, thickness, bIor, modelMatrix);
+                    vec4 ndcB = projMatrix * viewMatrix * vec4(position + txRayB, 1.0);
+                    vec2 uvB = ndcB.xy / ndcB.w * 0.5 + 0.5;
+                    colorAccum.b += getTransmissionSample(uvB, roughness, bIor).b;
+                    alphaAccum += getTransmissionSample(uvB, roughness, bIor).a;
                 }
-            }
 
-            // ── 10-sample chromatic dispersion per R/G/B channel ──
-            vec4 getIBLVolumeRefraction( const in vec3 n, const in vec3 v, const in float roughness, const in vec3 diffuseColor,
-                const in vec3 specularColor, const in float specularF90, const in vec3 position, const in mat4 modelMatrix,
-                const in mat4 viewMatrix, const in mat4 projMatrix, const in float dispersion, const in float ior, const in float thickness,
-                const in vec3 attenuationColor, const in float attenuationDistance ) {
+                colorAccum /= float(SAMPLES);
+                alphaAccum /= float(SAMPLES);
 
-                // Per-channel IOR — red bends least, blue bends most (real glass)
-                const float rIOR = 1.40;
-                const float gIOR = 1.45;
-                const float bIOR = 1.52;
+                vec3 txRayMid = getVolumeTransmissionRay(n, v, thickness, ior, modelMatrix);
+                vec3 transmittance = diffuseColor * volumeAttenuation(length(txRayMid), attenuationColor, attenuationDistance);
+                vec3 attenuatedColor = transmittance * colorAccum;
 
-                vec3 txRayR = getVolumeTransmissionRay( n, v, thickness, rIOR, modelMatrix );
-                vec4 ndcPos = projMatrix * viewMatrix * vec4( position + txRayR, 1.0 );
-                vec2 refCoordsR = ndcPos.xy / ndcPos.w;
-
-                vec3 txRayG = getVolumeTransmissionRay( n, v, thickness, gIOR, modelMatrix );
-                ndcPos = projMatrix * viewMatrix * vec4( position + txRayG, 1.0 );
-                vec2 refCoordsG = ndcPos.xy / ndcPos.w;
-
-                vec3 txRayB = getVolumeTransmissionRay( n, v, thickness, bIOR, modelMatrix );
-                ndcPos = projMatrix * viewMatrix * vec4( position + txRayB, 1.0 );
-                vec2 refCoordsB = ndcPos.xy / ndcPos.w;
-
-                const int LOOP = 10;
-                const float rSpread = 0.08;
-                const float gSpread = 0.10;
-                const float bSpread = 0.12;
-
-                vec4 txLight = vec4(0.0, 0.0, 0.0, 1.0);
-
-                for ( int i = 0; i < LOOP; i++ ) {
-                    float fi = float(i) / float(LOOP);
-                    vec2 rSlide = vec2(1.0 + fi * rSpread * txRayR.xy);
-                    vec2 gSlide = vec2(1.0 + fi * gSpread * txRayG.xy);
-                    vec2 bSlide = vec2(1.0 + fi * bSpread * txRayB.xy);
-                    txLight.r += getTransmissionSample( (refCoordsR + 1.0) / 2.0 * rSlide, roughness, rIOR ).r;
-                    txLight.g += getTransmissionSample( (refCoordsG + 1.0) / 2.0 * gSlide, roughness, gIOR ).g;
-                    txLight.b += getTransmissionSample( (refCoordsB + 1.0) / 2.0 * bSlide, roughness, bIOR ).b;
-                }
-                txLight.rgb /= float(LOOP);
-
-                vec3 transmittance = diffuseColor * volumeAttenuation( length( txRayG ), attenuationColor, attenuationDistance );
-                vec3 attenuatedColor = transmittance * txLight.rgb;
-
-                vec3 F = EnvironmentBRDF( n, v, specularColor, specularF90, roughness );
-                float txFactor = ( transmittance.r + transmittance.g + transmittance.b ) / 3.0;
-                return vec4( ( 1.0 - F ) * attenuatedColor, 1.0 - ( 1.0 - txLight.a ) * txFactor );
+                vec3 F = EnvironmentBRDF(n, v, specularColor, specularF90, roughness);
+                float txFactor = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
+                return vec4((1.0 - F) * attenuatedColor, 1.0 - (1.0 - alphaAccum) * txFactor);
             }
         #endif
         `
@@ -1405,15 +1390,40 @@ _glassCubeMat.onBeforeCompile = function(shader) {
 };
 _glassCubeMat.needsUpdate = true;
 
+// ── Diagonal internal beam-splitter plane ──
+// Real dichroic cubes have an internal diagonal coating that splits light.
+const _diagonalGeo = new THREE.PlaneGeometry(_glassCubeSide * 0.95, _glassCubeSide * 1.34);
+const _diagonalMat = new THREE.MeshPhysicalMaterial({
+    transmission: 0.92,
+    thickness: 0.1,
+    roughness: 0.0,
+    metalness: 0.0,
+    ior: 1.8,
+    iridescence: 1.0,
+    iridescenceIOR: 2.8,
+    iridescenceThicknessRange: [300, 600],
+    color: new THREE.Color(0xffffff),
+    transparent: true,
+    opacity: 0.15,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    envMapIntensity: 2.0,
+});
+
+const _diagonalPlane = new THREE.Mesh(_diagonalGeo, _diagonalMat);
+_diagonalPlane.rotation.set(0, Math.PI / 4, 0);
+_diagonalPlane.renderOrder = 9;
+
+// ── Assemble the glass cube ──
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
-// 3/4 view — camera provides 22° tilt, cube rotated 45° on Y for diamond silhouette
+glassCube.add(_diagonalPlane);
 glassCube.rotation.set(
     THREE.MathUtils.degToRad(12),
     Math.PI / 4,
     0
 );
 glassCube.position.set(0, 0, 0.1);
-glassCube.renderOrder = 10;  // render after ring meshes so transmission pass captures them
+glassCube.renderOrder = 10;
 scene.add(glassCube);
 
 // ═══════════════════════════════════════════════════════════════
