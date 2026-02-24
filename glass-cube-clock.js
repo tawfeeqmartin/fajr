@@ -368,27 +368,92 @@ function ptTimeToAngle(totalMinutes) {
   return (3 * Math.PI / 4) - ((totalMinutes % 720) / 720) * TAU;
 }
 
-// Prayer beams: same PlaneGeometry + mkMat as clock hands — light from the cube,
-// not geometry. Wider than hands (1.6 vs 0.4–0.72) so they read as "a window"
-// not "a precise moment." Beam points at window START so the hour hand enters
-// the beam exactly when prayer begins.
+// Prayer windows: triangle-fan sector geometry, but the shader defines the light —
+// NOT the geometry. Bright at cube apex, fills entire angular window, radiates
+// outward and fades. Soft angular edges. The sector is invisible; only the
+// spread of light from the source is perceived.
+//
+// u=0→1 across arc, v=0 at apex, v=1 at tip (same UV layout as mkMat).
+const FRAG_WINDOW = `
+  uniform vec3  c1, c2;
+  uniform float op;
+  varying vec2  vUv;
+  void main() {
+    // Radial: bright at cube source, spreads and fades outward (light physics)
+    float r = vUv.y;
+    float radial = smoothstep(0.0, 0.06, r) * (1.0 - smoothstep(0.3, 1.0, r));
+
+    // Angular: fills the full window, soft fade only at the edges
+    float edge = smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x);
+
+    vec3 col = mix(c1, c2, pow(clamp(r, 0.0, 1.0), 0.5));
+    gl_FragColor = vec4(col, radial * edge * op);
+  }
+`;
+function mkMatWindow(c1, c2, op) {
+  return new THREE.ShaderMaterial({
+    uniforms: { c1:{value:new THREE.Color(c1)}, c2:{value:new THREE.Color(c2)}, op:{value:op} },
+    vertexShader: VERT, fragmentShader: FRAG_WINDOW,
+    transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide
+  });
+}
+
+// Triangle fan from cube apex to outer arc, UV-mapped for FRAG_WINDOW.
+function makeSectorGeom(radius, thetaHalf, segments) {
+  segments = segments || 48;
+  const pos = [], uvs = [];
+  pos.push(0, 0, 0); uvs.push(0.5, 0);
+  for (let i = 0; i <= segments; i++) {
+    const t = -thetaHalf + (2 * thetaHalf * i / segments);
+    pos.push(Math.sin(t) * radius, Math.cos(t) * radius, 0);
+    uvs.push(i / segments, 1);
+  }
+  const idx = [];
+  for (let i = 1; i <= segments; i++) idx.push(0, i, i + 1);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  return geo;
+}
 
 const SECTOR_RADIUS      = 9.12;  // matches second-hand length
 const SECTOR_FADE_SEC    = 180.0; // fade active → 0 over 3 minutes after window ends
 const SECTOR_HORIZON_MIN = 600;   // upcoming detection horizon (~10 h)
 const UPCOMING_RAMP_MIN  = 60;    // start intensifying upcoming beam 60 min before prayer
 
-// Opacities — narrow beams, same visual language as clock hands
-const OP_ACTIVE   = 0.55;  // active prayer: clearly lit, slightly dimmer than hands
-const OP_UPCOMING = 0.16;  // next-up far away: dim glow, proximity ramp takes it to 0.55
-const OP_FAJR_DIM = 0.07;  // Fajr upcoming far: faint dawn whisper
+// Boundary beam opacities (same visual language as clock hands)
+const OP_ACTIVE   = 0.55;  // active: clearly lit boundary markers
+const OP_UPCOMING = 0.16;  // next-up far: dim, proximity ramp takes it to 0.55
+const OP_FAJR_DIM = 0.07;  // Fajr far: faint dawn whisper
+// Atmospheric fill is a fixed fraction of the boundary beam opacity
+const FILL_RATIO  = 0.20;  // fill opacity = beam opacity × 0.20
 
-let prayerSectors = []; // [{ grps[], mats[], def, startMin, endMin }]
+// Each prayer window: two crisp boundary beams (start + end, same as hands)
+// + one very dim atmospheric sector fill between them.
+// [{ fillGrp, fillMat, beamGrps[], beamMats[], def, startMin, endMin }]
+let prayerSectors = [];
 let ptSectorsRebuilt = false;
+
+function addBeam(ang, color, color2, initOp) {
+  const geo = new THREE.PlaneGeometry(0.72, SECTOR_RADIUS, 1, 16);
+  geo.translate(0, SECTOR_RADIUS / 2, 0);
+  const mat = mkMat(color, color2, initOp);
+  const grp = new THREE.Group();
+  grp.add(new THREE.Mesh(geo, mat));
+  grp.position.y = 0.008;
+  grp.rotation.order = 'YXZ';
+  grp.rotation.y = ang;
+  grp.rotation.x = Math.PI / 2;
+  prismGroup.add(grp);
+  return { grp, mat };
+}
 
 function buildPrayerSectors() {
   prayerSectors.forEach(function(ps) {
-    ps.grps.forEach(function(g) { prismGroup.remove(g); });
+    prismGroup.remove(ps.fillGrp);
+    ps.beamGrps.forEach(function(g) { prismGroup.remove(g); });
   });
   prayerSectors = [];
 
@@ -400,40 +465,34 @@ function buildPrayerSectors() {
     const startAng = ptTimeToAngle(startMin);
     const endAng   = ptTimeToAngle(endMin);
 
-    // Clockwise angular sweep; wrap cross-midnight windows (e.g. Tahajjud)
     let thetaLen = endAng - startAng;
     if (thetaLen > 0) thetaLen -= TAU;
+    const spanAngle = Math.abs(thetaLen);
+    const midAng    = startAng + thetaLen / 2;
+    const initBeamOp = def.isFajr ? OP_FAJR_DIM : OP_UPCOMING;
+    const initFillOp = initBeamOp * FILL_RATIO;
 
-    // Fan of narrow beams — same width/shader as clock hands, spread evenly
-    // across the full prayer window. Cube projects multiple rays like a prism
-    // spreading light. Number scales with window duration.
-    const spanMin = ((endMin - startMin) + 1440) % 1440;
-    const numRays = spanMin < 90 ? 2 : spanMin < 180 ? 3 : spanMin < 270 ? 4 : 5;
-    const initOp  = def.isFajr ? OP_FAJR_DIM : OP_UPCOMING;
+    // ── Atmospheric fill (very dim sector — just enough warmth to hint the zone)
+    const fillGeo = makeSectorGeom(SECTOR_RADIUS, spanAngle / 2);
+    const fillMat = mkMatWindow(def.color, def.color2, initFillOp);
+    const fillGrp = new THREE.Group();
+    fillGrp.add(new THREE.Mesh(fillGeo, fillMat));
+    fillGrp.position.y = 0.005;
+    fillGrp.rotation.order = 'YXZ';
+    fillGrp.rotation.y = midAng;
+    fillGrp.rotation.x = Math.PI / 2;
+    prismGroup.add(fillGrp);
 
-    const grps = [], mats = [];
-    for (let i = 0; i < numRays; i++) {
-      const t   = (numRays === 1) ? 0 : i / (numRays - 1); // 0 → 1 across window
-      const ang = startAng + thetaLen * t;
+    // ── Crisp boundary beams at window start and end (same shader as hands)
+    const startBeam = addBeam(startAng, def.color, def.color2, initBeamOp);
+    const endBeam   = addBeam(endAng,   def.color, def.color2, initBeamOp);
 
-      const geo = new THREE.PlaneGeometry(0.72, SECTOR_RADIUS, 1, 16);
-      geo.translate(0, SECTOR_RADIUS / 2, 0);
-
-      const mat = mkMat(def.color, def.color2, initOp);
-
-      const grp = new THREE.Group();
-      grp.add(new THREE.Mesh(geo, mat));
-      grp.position.y = 0.006;
-      grp.rotation.order = 'YXZ';
-      grp.rotation.y = ang;
-      grp.rotation.x = Math.PI / 2;
-      prismGroup.add(grp);
-
-      grps.push(grp);
-      mats.push(mat);
-    }
-
-    prayerSectors.push({ grps, mats, def, startMin, endMin });
+    prayerSectors.push({
+      fillGrp, fillMat,
+      beamGrps: [startBeam.grp, endBeam.grp],
+      beamMats: [startBeam.mat, endBeam.mat],
+      def, startMin, endMin,
+    });
   });
 }
 
@@ -451,7 +510,7 @@ function updatePrayerWindows(now) {
   const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
   prayerSectors.forEach(function(ps) {
-    const { mats, def, startMin, endMin } = ps;
+    const { fillMat, beamMats, def, startMin, endMin } = ps;
     const wraps = startMin > endMin; // cross-midnight window (Tahajjud)
 
     // ── Active? ────────────────────────────────────────────────────────────────────────────
@@ -505,10 +564,13 @@ function updatePrayerWindows(now) {
       targetOp = 0.0;
     }
 
-    // Smooth lerp toward target for all rays in this window
-    mats.forEach(function(mat) {
-      mat.uniforms.op.value = THREE.MathUtils.lerp(mat.uniforms.op.value, targetOp, 0.03);
+    // Boundary beams lerp to target; fill tracks at FILL_RATIO of beam opacity
+    beamMats.forEach(function(m) {
+      m.uniforms.op.value = THREE.MathUtils.lerp(m.uniforms.op.value, targetOp, 0.03);
     });
+    fillMat.uniforms.op.value = THREE.MathUtils.lerp(
+      fillMat.uniforms.op.value, targetOp * FILL_RATIO, 0.03
+    );
   });
 }
 
