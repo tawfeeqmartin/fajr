@@ -1068,7 +1068,8 @@ const ATEN_REIGN_FRAG = `
 
             // Chromatic dispersion — grows with distance squared (real prism physics)
             // Near cube: channels overlap = white core. Far: separated color bands.
-            float dispersion = dist * dist * 0.45;
+            // Reduced from 0.45 — was causing beams to visually curl at edges
+            float dispersion = dist * dist * 0.15;
 
             // Fan-out: beams widen with distance — tight at cube, broad at tips
             // Reference shows WIDE soft beams, not laser lines
@@ -1084,9 +1085,9 @@ const ATEN_REIGN_FRAG = `
             // ── Hour beam — widest, most dispersion (slow = accumulated refraction) ──
             float adH = hAngle - uHandAngles.x;
             adH -= 6.28318 * floor((adH + 3.14159) / 6.28318);
-            float adH_r = adH + dispersion * 4.0;     // red bends least
-            float adH_g = adH + dispersion * 0.5;     // green near center
-            float adH_b = adH - dispersion * 4.0;     // blue bends most
+            float adH_r = adH + dispersion * 2.0;     // red bends least
+            float adH_g = adH + dispersion * 0.3;     // green near center
+            float adH_b = adH - dispersion * 2.0;     // blue bends most
             float maskH = smoothstep(uHandLens.x + taperWidth, uHandLens.x - taperWidth, dist);
             float hSharp = 35.0 * fanFactor;   // WIDER base — soft beam
             float hGlow  = 5.0 * fanFactor;    // wide glow envelope
@@ -1099,9 +1100,9 @@ const ATEN_REIGN_FRAG = `
             // ── Minute beam — medium width, moderate dispersion ──
             float adM = hAngle - uHandAngles.y;
             adM -= 6.28318 * floor((adM + 3.14159) / 6.28318);
-            float adM_r = adM + dispersion * 3.2;
-            float adM_g = adM + dispersion * 0.3;
-            float adM_b = adM - dispersion * 3.2;
+            float adM_r = adM + dispersion * 1.6;
+            float adM_g = adM + dispersion * 0.2;
+            float adM_b = adM - dispersion * 1.6;
             float maskM = smoothstep(uHandLens.y + taperWidth, uHandLens.y - taperWidth, dist);
             float mSharp = 55.0 * fanFactor;   // medium width
             float mGlow  = 8.0 * fanFactor;
@@ -1114,9 +1115,9 @@ const ATEN_REIGN_FRAG = `
             // ── Second beam — thinnest, fastest, with prismatic sparkle ──
             float adS = hAngle - uHandAngles.z;
             adS -= 6.28318 * floor((adS + 3.14159) / 6.28318);
-            float adS_r = adS + dispersion * 2.5;
-            float adS_g = adS + dispersion * 0.2;
-            float adS_b = adS - dispersion * 2.5;
+            float adS_r = adS + dispersion * 1.2;
+            float adS_g = adS + dispersion * 0.15;
+            float adS_b = adS - dispersion * 1.2;
             float maskS = smoothstep(uHandLens.z + taperWidth, uHandLens.z - taperWidth, dist);
             float sparkle = sin(dist * 55.0 + uTime * 7.0) * 0.5 + 0.5;
             sparkle = sparkle * 0.10 + 0.90;
@@ -1249,146 +1250,8 @@ const _glassCubeMat = new THREE.MeshPhysicalMaterial({
     depthWrite: true,
 });
 
-// ── CHROMATIC DISPERSION OVERRIDE (Chris lookdev v2) ──
-// 6-sample per-channel IOR refraction with proper NDC→UV projection.
-// BK7 glass dispersion: R 1.46-1.49, G 1.49-1.52, B 1.52-1.55
-_glassCubeMat.onBeforeCompile = function(shader) {
-    shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <transmission_pars_fragment>',
-        /* glsl */`
-        #ifdef USE_TRANSMISSION
-
-            uniform float transmission;
-            uniform float thickness;
-            uniform float attenuationDistance;
-            uniform vec3 attenuationColor;
-
-            #ifdef USE_TRANSMISSIONMAP
-                uniform sampler2D transmissionMap;
-            #endif
-            #ifdef USE_THICKNESSMAP
-                uniform sampler2D thicknessMap;
-            #endif
-
-            uniform vec2 transmissionSamplerSize;
-            uniform sampler2D transmissionSamplerMap;
-            uniform mat4 modelMatrix;
-            uniform mat4 projectionMatrix;
-            varying vec3 vWorldPosition;
-
-            float w0(float a){return(1.0/6.0)*(a*(a*(-a+3.0)-3.0)+1.0);}
-            float w1(float a){return(1.0/6.0)*(a*a*(3.0*a-6.0)+4.0);}
-            float w2(float a){return(1.0/6.0)*(a*(a*(-3.0*a+3.0)+3.0)+1.0);}
-            float w3(float a){return(1.0/6.0)*(a*a*a);}
-            float g0(float a){return w0(a)+w1(a);}
-            float g1(float a){return w2(a)+w3(a);}
-            float h0(float a){return -1.0+w1(a)/(w0(a)+w1(a));}
-            float h1(float a){return 1.0+w3(a)/(w2(a)+w3(a));}
-
-            vec4 bicubic(sampler2D tex,vec2 uv,vec4 texelSize,float lod){
-                uv=uv*texelSize.zw+0.5;
-                vec2 iuv=floor(uv);vec2 fuv=fract(uv);
-                float g0x=g0(fuv.x);float g1x=g1(fuv.x);
-                float h0x=h0(fuv.x);float h1x=h1(fuv.x);
-                float h0y=h0(fuv.y);float h1y=h1(fuv.y);
-                vec2 p0=(vec2(iuv.x+h0x,iuv.y+h0y)-0.5)*texelSize.xy;
-                vec2 p1=(vec2(iuv.x+h1x,iuv.y+h0y)-0.5)*texelSize.xy;
-                vec2 p2=(vec2(iuv.x+h0x,iuv.y+h1y)-0.5)*texelSize.xy;
-                vec2 p3=(vec2(iuv.x+h1x,iuv.y+h1y)-0.5)*texelSize.xy;
-                return g0(fuv.y)*(g0x*textureLod(tex,p0,lod)+g1x*textureLod(tex,p1,lod))+
-                       g1(fuv.y)*(g0x*textureLod(tex,p2,lod)+g1x*textureLod(tex,p3,lod));
-            }
-
-            vec4 textureBicubic(sampler2D sampler,vec2 uv,float lod){
-                vec2 fLodSize=vec2(textureSize(sampler,int(lod)));
-                vec2 cLodSize=vec2(textureSize(sampler,int(lod+1.0)));
-                vec4 fSample=bicubic(sampler,uv,vec4(1.0/fLodSize,fLodSize),floor(lod));
-                vec4 cSample=bicubic(sampler,uv,vec4(1.0/cLodSize,cLodSize),ceil(lod));
-                return mix(fSample,cSample,fract(lod));
-            }
-
-            vec3 getVolumeTransmissionRay(const in vec3 n,const in vec3 v,const in float thickness,const in float ior,const in mat4 modelMatrix){
-                vec3 refractionVector=refract(-v,normalize(n),1.0/ior);
-                vec3 modelScale;
-                modelScale.x=length(vec3(modelMatrix[0].xyz));
-                modelScale.y=length(vec3(modelMatrix[1].xyz));
-                modelScale.z=length(vec3(modelMatrix[2].xyz));
-                return normalize(refractionVector)*thickness*modelScale;
-            }
-
-            float applyIorToRoughness(const in float roughness,const in float ior){
-                return roughness*clamp(ior*2.0-2.0,0.0,1.0);
-            }
-
-            vec4 getTransmissionSample(const in vec2 fragCoord,const in float roughness,const in float ior){
-                float lod=log2(transmissionSamplerSize.x)*applyIorToRoughness(roughness,ior);
-                return textureBicubic(transmissionSamplerMap,fragCoord.xy,lod);
-            }
-
-            vec3 volumeAttenuation(const in float transmissionDistance,const in vec3 attenuationColor,const in float attenuationDistance){
-                if(isinf(attenuationDistance)){return vec3(1.0);}
-                vec3 attenuationCoefficient=-log(attenuationColor)/attenuationDistance;
-                return exp(-attenuationCoefficient*transmissionDistance);
-            }
-
-            // ── 6-sample chromatic dispersion per channel (18 total) ──
-            vec4 getIBLVolumeRefraction(
-                const in vec3 n, const in vec3 v, const in float roughness,
-                const in vec3 diffuseColor, const in vec3 specularColor,
-                const in float specularF90, const in vec3 position,
-                const in mat4 modelMatrix, const in mat4 viewMatrix,
-                const in mat4 projMatrix, const in float dispersion,
-                const in float ior, const in float thickness,
-                const in vec3 attenuationColor, const in float attenuationDistance
-            ) {
-                const int SAMPLES = 6;
-                const float IOR_BASE_R = 1.46;
-                const float IOR_BASE_G = 1.49;
-                const float IOR_BASE_B = 1.52;
-                const float IOR_SPREAD = 0.03;
-
-                vec3 colorAccum = vec3(0.0);
-                float alphaAccum = 0.0;
-
-                for (int i = 0; i < SAMPLES; i++) {
-                    float fi = float(i) / float(SAMPLES - 1);
-
-                    float rIor = IOR_BASE_R + fi * IOR_SPREAD;
-                    vec3 txRayR = getVolumeTransmissionRay(n, v, thickness, rIor, modelMatrix);
-                    vec4 ndcR = projMatrix * viewMatrix * vec4(position + txRayR, 1.0);
-                    vec2 uvR = ndcR.xy / ndcR.w * 0.5 + 0.5;
-                    colorAccum.r += getTransmissionSample(uvR, roughness, rIor).r;
-
-                    float gIor = IOR_BASE_G + fi * IOR_SPREAD;
-                    vec3 txRayG = getVolumeTransmissionRay(n, v, thickness, gIor, modelMatrix);
-                    vec4 ndcG = projMatrix * viewMatrix * vec4(position + txRayG, 1.0);
-                    vec2 uvG = ndcG.xy / ndcG.w * 0.5 + 0.5;
-                    colorAccum.g += getTransmissionSample(uvG, roughness, gIor).g;
-
-                    float bIor = IOR_BASE_B + fi * IOR_SPREAD;
-                    vec3 txRayB = getVolumeTransmissionRay(n, v, thickness, bIor, modelMatrix);
-                    vec4 ndcB = projMatrix * viewMatrix * vec4(position + txRayB, 1.0);
-                    vec2 uvB = ndcB.xy / ndcB.w * 0.5 + 0.5;
-                    colorAccum.b += getTransmissionSample(uvB, roughness, bIor).b;
-                    alphaAccum += getTransmissionSample(uvB, roughness, bIor).a;
-                }
-
-                colorAccum /= float(SAMPLES);
-                alphaAccum /= float(SAMPLES);
-
-                vec3 txRayMid = getVolumeTransmissionRay(n, v, thickness, ior, modelMatrix);
-                vec3 transmittance = diffuseColor * volumeAttenuation(length(txRayMid), attenuationColor, attenuationDistance);
-                vec3 attenuatedColor = transmittance * colorAccum;
-
-                vec3 F = EnvironmentBRDF(n, v, specularColor, specularF90, roughness);
-                float txFactor = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
-                return vec4((1.0 - F) * attenuatedColor, 1.0 - (1.0 - alphaAccum) * txFactor);
-            }
-        #endif
-        `
-    );
-};
-// needsUpdate removed — onBeforeCompile fires automatically on first render
+// onBeforeCompile REMOVED — using Three.js r170 native dispersion
+// If this vanilla glass works, we layer chromatic override back on top
 
 // ── Diagonal internal beam-splitter plane ──
 // Real dichroic cubes have an internal diagonal coating that splits light.
