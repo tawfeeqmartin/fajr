@@ -155,7 +155,7 @@ body::after{display:none;
 
 /* ── Sticky clock ── */
 .clock-sticky{
-  position:sticky;top:0;z-index:50;
+  position:sticky;top:0;z-index:50;background:#0d0d12!important;
   display:flex;align-items:center;justify-content:center;
   height:calc(var(--clock-size) + 4.5rem);
   padding:4rem 0 .5rem;
@@ -182,6 +182,8 @@ nav{
   transition:background .3s,box-shadow .3s;
 }
 nav.scrolled{background:var(--bg);opacity:.97;backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--border)}
+/* Nav text is light when floating over dark hero */
+nav:not(.scrolled) .nav-logo,nav:not(.scrolled) #navNext{color:rgba(232,228,220,.75);transition:color .4s}
 .nav-logo{font-weight:500;font-size:.9rem;letter-spacing:.02em}
 
 /* ── Buttons ── */
@@ -226,6 +228,8 @@ a{color:inherit;text-decoration:none}
 }
 /* Ensure section content paints above any positioned ancestors */
 .scroll-section>*{position:relative;z-index:2;}
+/* Gradient bridge: dark hero → cream content */
+#sec-hook{background:linear-gradient(to bottom,#0d0d12 0%,#f8f7f4 22%);}
 /* grain removed — dark-only mode, clock renders its own background */
 #dialHero canvas{position:relative;z-index:2}
 .section-header{

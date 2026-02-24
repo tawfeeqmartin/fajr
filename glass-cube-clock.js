@@ -52,9 +52,9 @@ const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
 
 // ─── SCENE ────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// Match page background (#f8f7f4 cream) — canvas dissolves into site, no hard edge
-scene.background = new THREE.Color(0xf8f7f4);
-scene.fog = new THREE.FogExp2(0xf8f7f4, 0.048);
+// Dark scene — glass refraction and dichroic dispersion pop against near-black
+scene.background = new THREE.Color(0x0d0d12);
+scene.fog = new THREE.FogExp2(0x0d0d12, 0.048);
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 
@@ -91,7 +91,7 @@ window.addEventListener('resize', onResize);
 // ─── FLOOR ────────────────────────────────────────────────────────────────────
 const ground = new THREE.Mesh(
   new THREE.CircleGeometry(80, 128),
-  new THREE.MeshStandardMaterial({ color: 0x767676, roughness: 0.95, metalness: 0 })
+  new THREE.MeshStandardMaterial({ color: 0x18182a, roughness: 0.88, metalness: 0 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
@@ -104,7 +104,7 @@ scene.add(ground);
 
 // BACKLIGHT — from behind-right. Illuminates the scene behind the cube so the
 // FBO captures bright content → glass refracts light and looks transparent/glowing.
-const back = new THREE.SpotLight(0xd8e8ff, 22);
+const back = new THREE.SpotLight(0xd8e8ff, 38);
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
@@ -131,14 +131,22 @@ rim.target.position.set(0, 0.6, 0);
 rim.angle = 0.45; rim.penumbra = 0.85;
 scene.add(rim, rim.target);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.18));
+// CUBE SUN — bright point directly behind the cube.
+// The FBO shader samples the scene behind the glass — without a bright source
+// there, the refracted RGB is dark and no rainbow is visible. This gives it
+// bright content to bend, producing visible chromatic dispersion.
+const cubeSun = new THREE.PointLight(0xe8f2ff, 120, 14);
+cubeSun.position.set(0, 1.0, -2.0);
+scene.add(cubeSun);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.08));
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
-    uOpacity: { value: 0.28 },
-    uColor:   { value: new THREE.Color(0xdde8f0) },
+    uOpacity: { value: 0.18 },
+    uColor:   { value: new THREE.Color(0x4466cc) },
   },
   vertexShader: `
     varying vec2 vUv;
