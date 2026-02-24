@@ -62,7 +62,7 @@ const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 // Two camera presets:
 //   LANDING    — tight telephoto crop for the circular hero (cube + proximal rays fill circle)
 //   FULLSCREEN — wide shot shows full floor scene
-const CAM_LANDING    = { pos: [0, 3.1, 3.85], fov: 50, look: [0, 0.5, 0] };
+const CAM_LANDING    = { pos: [0, 3.4, 4.3], fov: 50, look: [0, 0.5, 0] };
 const CAM_FULLSCREEN = { pos: [0, 6.8, 8.5], fov: 78, look: [0, 0.5, 0] };
 
 function applyCamera(preset) {
@@ -91,7 +91,7 @@ window.addEventListener('resize', onResize);
 
 // ─── FLOOR ────────────────────────────────────────────────────────────────────
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(500, 500),
+  new THREE.CircleGeometry(80, 128),
   new THREE.MeshStandardMaterial({ color: 0x767676, roughness: 0.95, metalness: 0 })
 );
 ground.rotation.x = -Math.PI / 2;
