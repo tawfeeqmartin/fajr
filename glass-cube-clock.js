@@ -54,16 +54,17 @@ const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
 
 // ─── SCENE ────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// Turrell dusk atmosphere — warm but desaturated enough for dichroic glass to read
-scene.background = new THREE.Color(0x5a4535);
-scene.fog = new THREE.FogExp2(0x5a4535, 0.040);
+// Near-neutral grey — gives FBO neutral content so glass shows its own dispersion colours
+// Turrell atmosphere comes from the warm/cool lighting contrast, not background saturation
+scene.background = new THREE.Color(0x7a7878);
+scene.fog = new THREE.FogExp2(0x7a7878, 0.038);
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 
 // Two camera presets:
 //   LANDING    — tight telephoto crop for the circular hero (cube + proximal rays fill circle)
 //   FULLSCREEN — wide shot shows full floor scene
-const CAM_LANDING    = { pos: [0, 3.4, 4.3], fov: 50, look: [0, 0.5, 0] };
+const CAM_LANDING    = { pos: [0, 4.1, 5.4], fov: 50, look: [0, 0.5, 0] };
 const CAM_FULLSCREEN = { pos: [0, 6.8, 8.5], fov: 78, look: [0, 0.5, 0] };
 
 function applyCamera(preset) {
@@ -93,8 +94,8 @@ window.addEventListener('resize', onResize);
 // ─── FLOOR ────────────────────────────────────────────────────────────────────
 const ground = new THREE.Mesh(
   new THREE.CircleGeometry(80, 128),
-  // Warm amber ground — Turrell glowing earth, complements cool violet/blue/green hands
-  new THREE.MeshStandardMaterial({ color: 0xc07030, roughness: 0.90, metalness: 0 })
+  // Warm-neutral taupe — just enough warmth to complement cool hands, without killing glass transparency
+  new THREE.MeshStandardMaterial({ color: 0x857870, roughness: 0.90, metalness: 0 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
@@ -111,7 +112,8 @@ scene.add(key, key.target);
 
 // BACKLIGHT — warm amber: illuminates bg behind cube, giving FBO warm tones to refract
 // Also creates warm halo at cube's back silhouette — Turrell glow effect
-const back = new THREE.SpotLight(0xff8030, 22);
+// Warm white backlight — Turrell glow behind cube, NOT saturated orange
+const back = new THREE.SpotLight(0xffd0a0, 22);
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
 back.angle = 0.65; back.penumbra = 0.80; back.decay = 1.1;
@@ -138,7 +140,7 @@ const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
     uOpacity: { value: 0.28 },
-    uColor:   { value: new THREE.Color(0xd06020) },  // Warm amber mist — Turrell ground glow
+    uColor:   { value: new THREE.Color(0xb0a898) },  // Neutral warm mist — barely tinted
   },
   vertexShader: `
     varying vec2 vUv;
