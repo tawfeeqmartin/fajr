@@ -1388,7 +1388,7 @@ _glassCubeMat.onBeforeCompile = function(shader) {
         `
     );
 };
-_glassCubeMat.needsUpdate = true;
+// needsUpdate removed — onBeforeCompile fires automatically on first render
 
 // ── Diagonal internal beam-splitter plane ──
 // Real dichroic cubes have an internal diagonal coating that splits light.
@@ -1416,7 +1416,8 @@ _diagonalPlane.renderOrder = 9;
 
 // ── Assemble the glass cube ──
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
-glassCube.add(_diagonalPlane);
+// Diagonal plane temporarily disabled for debugging glass transmission
+// glassCube.add(_diagonalPlane);
 glassCube.rotation.set(
     THREE.MathUtils.degToRad(12),
     Math.PI / 4,
