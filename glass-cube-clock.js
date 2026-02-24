@@ -62,9 +62,9 @@ const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 //   LANDING    — tight telephoto crop for the circular hero (cube + proximal rays fill circle)
 //   FULLSCREEN — wide shot shows full floor scene
 // FOV 35° on both — telephoto/rectilinear, minimal perspective distortion.
-// Cube edges and right angles look geometrically correct (no wide-angle warp).
-// Distance compensates for tighter angle so framing stays similar.
-const CAM_LANDING    = { pos: [0, 5.5, 9.0],  fov: 35, look: [0, 0.5, 0] };
+// Elevation angle matched: both cameras sit ~33° above cube so top face reads properly.
+// Landing was too low (29°) making cube look flat — raised y to match fullscreen proportion.
+const CAM_LANDING    = { pos: [0, 7.5, 10.5], fov: 35, look: [0, 0.5, 0] };
 const CAM_FULLSCREEN = { pos: [0, 10.5, 16.0], fov: 35, look: [0, 0.5, 0] };
 
 function applyCamera(preset) {
