@@ -300,11 +300,11 @@ function floorRay(az, c1, c2, w, len, op) {
 }
 
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
-// initY = 0 for all three so they share the same reference direction at midnight/noon.
-// At any time T the hands are at -(fraction)*TAU from that reference — readable clock pattern.
-floorRay(0, 0x9900ff, 0xff00ff, 0.72, 3.48, 0.88);   // HOUR   (violet)
-floorRay(0, 0x1133ff, 0x00aaff, 0.72, 5.64, 0.92);   // MINUTE (blue)
-floorRay(0, 0x44ff88, 0x00cc44, 0.40, 9.12, 0.62);   // SECOND (green)
+// initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
+// at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
+floorRay(135, 0x9900ff, 0xff00ff, 0.72, 3.48, 0.88);   // HOUR   (violet)
+floorRay(135, 0x1133ff, 0x00aaff, 0.72, 5.64, 0.92);   // MINUTE (blue)
+floorRay(135, 0x44ff88, 0x00cc44, 0.40, 9.12, 0.62);   // SECOND (green)
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
 [
@@ -349,10 +349,11 @@ function ptParseMin(str) {
   return p[0] * 60 + p[1];
 }
 
-// Map minutes-since-midnight on the 12h clock to a shape angle.
-// The 12h clock wraps every 720 min; formula matches the clock-hand convention.
+// Map minutes-since-midnight on the 12h clock to a beam angle.
+// Mirrors the hand formula: initY(135°) - fraction*TAU, so prayer beams
+// land at exactly the right clock-face position alongside the hands.
 function ptTimeToAngle(totalMinutes) {
-  return -((totalMinutes % 720) / 720) * TAU;
+  return (3 * Math.PI / 4) - ((totalMinutes % 720) / 720) * TAU;
 }
 
 // Prayer beams use the same PlaneGeometry + mkMat shader as clock hands.
