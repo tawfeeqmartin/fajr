@@ -356,6 +356,12 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-header .fs-datetime{font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em}
 .fs-header .fs-location{display:none}
 .fs-prayer-bar{font-size:clamp(.55rem,1.1vmin,1.1rem);font-weight:300;letter-spacing:.1em;margin-top:clamp(4px,0.8vmin,12px);opacity:.55}
+.iftar-gold{color:#ffd966!important}
+.fs-iftar-countdown{text-align:center;margin-top:clamp(8px,1.5vmin,20px);display:none;z-index:205;position:relative}
+.fs-iftar-countdown.active{display:block}
+.fs-iftar-label{font-family:var(--font);font-size:clamp(.55rem,1.1vmin,1rem);font-weight:300;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,217,102,.5)}
+.fs-iftar-time{font-family:var(--font);font-size:clamp(2rem,6vmin,5rem);font-weight:200;letter-spacing:.04em;color:#ffd966;line-height:1}
+.fs-iftar-time .iftar-sec{opacity:.45}
 .fs-mode-toggle{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(8px,1.5vmin,24px));right:clamp(12px,2vmin,32px);z-index:210;cursor:pointer;background:none;border:none;padding:clamp(6px,1vmin,16px);color:rgba(232,228,220,.6);transition:opacity .5s ease}
 .fs-mode-toggle svg{width:clamp(18px,3vmin,40px);height:clamp(18px,3vmin,40px);stroke-width:1;fill:none;stroke:currentColor}
 /* Dial picker — hidden for single-clock mode, kept for future multi-dial */
@@ -376,6 +382,10 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
     <div class="fs-datetime" id="fsDateTime"></div>
     <div class="fs-location" id="fsLocation"></div>
     <div class="fs-prayer-bar" id="fsPrayerBar"><span id="fsPrayerTimes"></span></div>
+  </div>
+  <div class="fs-iftar-countdown" id="fsIftarCountdown">
+    <div class="fs-iftar-label">until iftar</div>
+    <div class="fs-iftar-time" id="fsIftarTime"></div>
   </div>
   <button id="fsCompassToggle" class="fs-mode-toggle" aria-label="Find Qibla"><svg id="fsCompassIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="M12 3L20 8v8l-8 5-8-5V8z M12 3v18 M4 8l8 5 8-5"/></svg></button>
   <div id="fsDialPicker" class="fs-dial-picker">
@@ -1299,12 +1309,37 @@ function updateNavClock(){
     let nextP='',nextS=0;
     t5.forEach(p=>{const ps=toSec(t[p]);if(!nextP&&ps>nowS){nextP=p;nextS=ps;}});
     if(!nextP){nextP='Fajr';nextS=toSec(t['Fajr'])+86400;} // wrap to tomorrow's Fajr
-    let diff=nextS-nowS;
-    const h=Math.floor(diff/3600);diff%=3600;
-    const m=Math.floor(diff/60);
-    const s=diff%60;
-    const label=h>0?h+'h '+m+'m '+s+'s':m>0?m+'m '+s+'s':s+'s';
-    elNext.textContent=nextP+' in '+label;
+    // Iftar mode: between sunrise and maghrib, show "Iftar in ..."
+    const sunriseS=t.Sunrise?toSec(t.Sunrise):toSec(t.Fajr);
+    const maghribS=toSec(t.Maghrib);
+    const isFasting=nowS>=sunriseS&&nowS<maghribS;
+    let diff,label;
+    if(isFasting){
+      diff=maghribS-nowS;
+      const h=Math.floor(diff/3600);diff%=3600;const m=Math.floor(diff/60);const s=diff%60;
+      label=h>0?h+'h '+m+'m '+s+'s':m>0?m+'m '+s+'s':s+'s';
+      elNext.textContent='Iftar in '+label;
+      elNext.classList.add('iftar-gold');
+    }else{
+      diff=nextS-nowS;
+      const h=Math.floor(diff/3600);diff%=3600;const m=Math.floor(diff/60);const s=diff%60;
+      label=h>0?h+'h '+m+'m '+s+'s':m>0?m+'m '+s+'s':s+'s';
+      elNext.textContent=nextP+' in '+label;
+      elNext.classList.remove('iftar-gold');
+    }
+    // Fullscreen iftar countdown
+    const fsIftar=document.getElementById('fsIftarCountdown');
+    const fsIftarTime=document.getElementById('fsIftarTime');
+    if(fsIftar&&fsIftarTime){
+      if(isFasting){
+        let d2=maghribS-nowS;
+        const hh=Math.floor(d2/3600);d2%=3600;const mm=Math.floor(d2/60);const ss=d2%60;
+        fsIftarTime.innerHTML=hh+':'+(mm<10?'0':'')+mm+':<span class="iftar-sec">'+(ss<10?'0':'')+ss+'</span>';
+        fsIftar.classList.add('active');
+      }else{
+        fsIftar.classList.remove('active');
+      }
+    }
   }
   // All prayer times
   const elTimes=document.getElementById('navTimes');
