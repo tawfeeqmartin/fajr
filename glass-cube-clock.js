@@ -454,7 +454,7 @@ function makeSectorGeom(radius, thetaHalf, segments) {
 }
 
 const SECTOR_RADIUS = 9.12;  // matches second-hand length
-const OP_ACTIVE = 1.0;
+const OP_ACTIVE = 1.3;
 
 
 let prayerSectors = [];
@@ -646,7 +646,7 @@ function updatePrayerWindows(now) {
 
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
-  const nextTarget = nextIdx >= 0 ? Math.max(_opA - _opS, 0.0) : 0.0;
+  const nextTarget = nextIdx >= 0 ? (_devActive ? _opA : Math.max(_opA - _opS, 0.0)) : 0.0;
   nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, _lerpRate);
 
   if (nextIdx >= 0) {
@@ -661,7 +661,7 @@ function updatePrayerWindows(now) {
 
   // ── Third prayer disc (prayer after next) ──
   const tu = _thirdDiscMat.uniforms;
-  const thirdTarget = thirdIdx >= 0 ? Math.max(_opA - _opS * 2, 0.0) : 0.0;
+  const thirdTarget = thirdIdx >= 0 ? (_devActive ? _opA : Math.max(_opA - _opS * 2, 0.0)) : 0.0;
   tu.uIntensity.value = THREE.MathUtils.lerp(tu.uIntensity.value, thirdTarget, _lerpRate);
 
   if (thirdIdx >= 0) {
