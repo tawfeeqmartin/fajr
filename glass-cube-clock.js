@@ -792,6 +792,10 @@ function _devBuildPanel() {
       <label style="color:#888">Active: </label><input type="range" id="_devOpActive" min="0" max="30" value="${OP_ACTIVE*10}" style="width:120px"><span id="_devOpActiveV" style="color:#fff;margin-left:4px">${OP_ACTIVE}</span><br>
       <label style="color:#888">Step: </label><input type="range" id="_devOpStep" min="0" max="10" value="${OP_STEP*10}" style="width:120px"><span id="_devOpStepV" style="color:#fff;margin-left:4px">${OP_STEP}</span>
     </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">
+      <div style="color:#fff;font-size:12px;margin-bottom:6px">Layout</div>
+      <label style="color:#888">Spacer: </label><input type="range" id="_devSpacer" min="20" max="100" value="100" style="width:120px"><span id="_devSpacerV" style="color:#fff;margin-left:4px">100vh</span>
+    </div>
   `;
   document.body.appendChild(panel);
 
@@ -823,6 +827,11 @@ function _devBuildPanel() {
   document.getElementById('_devOpStep').addEventListener('input', function(e) {
     window._OP_STEP_OVERRIDE = parseFloat(e.target.value) / 10;
     document.getElementById('_devOpStepV').textContent = window._OP_STEP_OVERRIDE.toFixed(1);
+  });
+  document.getElementById('_devSpacer').addEventListener('input', function(e) {
+    var v = e.target.value;
+    document.documentElement.style.setProperty('--spacer-h', v + 'vh');
+    document.getElementById('_devSpacerV').textContent = v + 'vh';
   });
 
   // Add custom window button
