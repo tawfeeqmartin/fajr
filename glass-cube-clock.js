@@ -20,14 +20,12 @@ function calcDpr(w, h) {
 }
 
 var _canvasEl = null; // set after renderer created
-var _stableW = window.innerWidth;
-var _stableH = Math.max(window.innerHeight, screen.height); // use full screen height to cover Safari chrome hidden state
+var _lockedAspect = window.innerWidth / window.innerHeight; // lock camera aspect at load
 function getSize() {
   if (CONTAINED) {
     return { w: CONTAINER.clientWidth || 400, h: CONTAINER.clientHeight || 400 };
   }
-  // Locked dimensions — aspect ratio never shifts between states
-  return { w: _stableW, h: _stableH };
+  return { w: window.innerWidth, h: window.innerHeight };
 }
 
 let { w: W, h: H } = getSize();
@@ -45,9 +43,7 @@ if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
   const c = renderer.domElement;
-  // Canvas pinned to stable dimensions — body bg matches scene so no visible gap
-  c.style.cssText = 'position:fixed;left:0;top:0;z-index:0;width:'+_stableW+'px;height:'+_stableH+'px;';
-  document.body.style.backgroundColor = '#0d0d12';
+  c.style.cssText = 'position:fixed;inset:0;z-index:0;width:100%;height:100%;';
   document.body.appendChild(c);
   _canvasEl = c;
 }
@@ -87,17 +83,16 @@ applyCamera(CONTAINED ? CAM_LANDING : CAM_FULLSCREEN);
 
 // ─── RESIZE ───────────────────────────────────────────────────────────────────
 function onResize() {
-  // Only update stable dimensions on real orientation change (not scrollbar/chrome shifts)
-  var newW = window.innerWidth, newH = window.innerHeight;
-  if (!CONTAINED && (Math.abs(newW - _stableW) > 50 || Math.abs(newH - _stableH) > 100)) {
-    _stableW = newW; _stableH = newH;
-    if (_canvasEl) { _canvasEl.style.width = _stableW + 'px'; _canvasEl.style.height = _stableH + 'px'; }
-  }
+  var prevAspect = _lockedAspect;
   ({ w: W, h: H } = getSize());
+  // Update locked aspect only on real orientation change
+  if (!CONTAINED && Math.abs((W/H) - _lockedAspect) > 0.15) {
+    _lockedAspect = W / H;
+  }
   dpr = calcDpr(W, H);
   renderer.setPixelRatio(dpr);
   renderer.setSize(W, H, false);
-  camera.aspect = W / H;
+  camera.aspect = _lockedAspect; // locked — scene never shifts
   camera.updateProjectionMatrix();
   fboRT.setSize(W * dpr, H * dpr);
   cubeMat.uniforms.uRes.value.set(W * dpr, H * dpr);
