@@ -763,12 +763,16 @@ function _devBuildPanel() {
   if (document.getElementById('_devPanel')) return;
   const panel = document.createElement('div');
   panel.id = '_devPanel';
-  panel.style.cssText = 'position:fixed;top:8px;right:8px;z-index:99999;background:rgba(0,0,0,0.88);color:#ccc;font:11px/1.5 monospace;padding:12px;border-radius:8px;max-height:90vh;overflow-y:auto;min-width:260px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1)';
+  panel.style.cssText = 'position:fixed;top:8px;left:8px;z-index:99999;background:rgba(0,0,0,0.88);color:#ccc;font:10px/1.4 monospace;padding:10px;border-radius:8px;max-height:90vh;overflow-y:auto;width:220px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1)';
 
   // Time override
   const timeNow = new Date();
   panel.innerHTML = `
-    <div style="color:#fff;font-size:13px;margin-bottom:8px;font-weight:600">🕐 Prayer Dev Panel</div>
+    <div style="color:#fff;font-size:13px;margin-bottom:8px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
+      <span>🕐 Dev Panel</span>
+      <button id="_devMinimize" style="background:none;border:none;color:#888;font:bold 14px monospace;cursor:pointer;padding:0 4px">−</button>
+    </div>
+    <div id="_devBody">
     <div style="margin-bottom:8px">
       <label style="color:#888">Time Override</label><br>
       <input type="range" id="_devTimeSlider" min="0" max="1439" value="${timeNow.getHours()*60+timeNow.getMinutes()}" style="width:200px">
@@ -796,8 +800,21 @@ function _devBuildPanel() {
       <div style="color:#fff;font-size:12px;margin-bottom:6px">Layout</div>
       <label style="color:#888">Spacer: </label><input type="range" id="_devSpacer" min="20" max="100" value="100" style="width:120px"><span id="_devSpacerV" style="color:#fff;margin-left:4px">100vh</span>
     </div>
+    </div>
   `;
   document.body.appendChild(panel);
+
+  // Minimize toggle
+  document.getElementById('_devMinimize').addEventListener('click', function() {
+    var body = document.getElementById('_devBody');
+    if (body.style.display === 'none') {
+      body.style.display = '';
+      this.textContent = '−';
+    } else {
+      body.style.display = 'none';
+      this.textContent = '+';
+    }
+  });
 
   // Slider events
   const slider = document.getElementById('_devTimeSlider');
