@@ -1591,6 +1591,12 @@ function _setPrayerLocation(lat, lon, locationName) {
   // Store for glass-cube-clock beams
   window._prayerTimings = t;
   window._prayerTimingsReady = true;
+  // Pre-compute Qibla bearing from this location
+  if (adhanQiblaAngle === null) {
+    var rLat = lat * Math.PI / 180, rLng = lon * Math.PI / 180;
+    var mLat = 21.4225 * Math.PI / 180, mLng = 39.8262 * Math.PI / 180;
+    adhanQiblaAngle = Math.atan2(Math.sin(mLng - rLng), Math.cos(rLat) * Math.tan(mLat) - Math.sin(rLat) * Math.cos(mLng - rLng));
+  }
   _displayPrayerTimes(t, null);
   if(locationName) fsSetLocation(locationName);
   _prayerLocationResolved = true;
@@ -1844,23 +1850,33 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
   const icon = document.getElementById('fsCompassIcon');
   if(icon) { icon.innerHTML = fsCompassOn ? _clockSVG : _cubeSVG; icon.style.opacity = fsCompassOn ? '1' : '.6'; }
   if(fsCompassOn) {
-    // Request compass permission + compute Qibla
-    (async()=>{
-      if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){
-        try{await DeviceOrientationEvent.requestPermission();}catch(e){}
-      }
-      if(!adhanQiblaAngle) await adhanGetQibla();
-      // Start feeding heading to clock
-      if(!window._compassInterval){
-        window._compassInterval=setInterval(()=>{
-          if(window._clockUpdateCompass && adhanQiblaAngle!==null){
+    // Request gyro permission DIRECTLY in click handler (iOS requires user gesture)
+    var _compassStarted = false;
+    function _startCompassFeed() {
+      if (_compassStarted) return;
+      _compassStarted = true;
+      window.addEventListener('deviceorientation', adhanCompassHandler);
+      if (!window._compassInterval) {
+        window._compassInterval = setInterval(function() {
+          if (window._clockUpdateCompass && adhanQiblaAngle !== null) {
             window._clockUpdateCompass(adhanDeviceHeading, adhanQiblaAngle);
           }
-        },50);
+        }, 50);
       }
-      // Ensure compass listener is active
-      window.addEventListener('deviceorientation',adhanCompassHandler);
-    })();
+    }
+    if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
+      DeviceOrientationEvent.requestPermission().then(function(state) {
+        if (state === 'granted') _startCompassFeed();
+      }).catch(function(){});
+    } else {
+      _startCompassFeed();
+    }
+    // Compute Qibla if not already available (use existing prayer location if possible)
+    if (!adhanQiblaAngle) {
+      adhanGetQibla().then(function(){ _startCompassFeed(); });
+    } else {
+      _startCompassFeed();
+    }
     // Push history state so back gesture exits compass first, not fullscreen
     history.pushState({compass:true}, '', '#clock');
   } else {
