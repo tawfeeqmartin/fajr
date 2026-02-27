@@ -51,6 +51,7 @@ if (CONTAINED) {
 // FBO render target
 const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
   minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat,
+  samples: 4,
 });
 
 // ─── SCENE ────────────────────────────────────────────────────────────────────
