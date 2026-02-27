@@ -628,9 +628,11 @@ function updatePrayerWindows(now) {
   // ── Active prayer disc (full intensity) ──
   const _opA = window._OP_ACTIVE_OVERRIDE != null ? window._OP_ACTIVE_OVERRIDE : OP_ACTIVE;
   const _opS = window._OP_STEP_OVERRIDE != null ? window._OP_STEP_OVERRIDE : OP_STEP;
+  const _lerpRate = _devSnapIntensity ? 1.0 : 0.03;
+  if (_devSnapIntensity) _devSnapIntensity = false;
   const u = _prayerDiscMat.uniforms;
   const activeTarget = activeIdx >= 0 ? _opA : 0.0;
-  u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, activeTarget, 0.03);
+  u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, activeTarget, _lerpRate);
 
   if (activeIdx >= 0) {
     const ps = allSectors[activeIdx];
@@ -645,7 +647,7 @@ function updatePrayerWindows(now) {
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
   const nextTarget = nextIdx >= 0 ? Math.max(_opA - _opS, 0.0) : 0.0;
-  nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, 0.03);
+  nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, _lerpRate);
 
   if (nextIdx >= 0) {
     const ps = allSectors[nextIdx];
@@ -660,7 +662,7 @@ function updatePrayerWindows(now) {
   // ── Third prayer disc (prayer after next) ──
   const tu = _thirdDiscMat.uniforms;
   const thirdTarget = thirdIdx >= 0 ? Math.max(_opA - _opS * 2, 0.0) : 0.0;
-  tu.uIntensity.value = THREE.MathUtils.lerp(tu.uIntensity.value, thirdTarget, 0.03);
+  tu.uIntensity.value = THREE.MathUtils.lerp(tu.uIntensity.value, thirdTarget, _lerpRate);
 
   if (thirdIdx >= 0) {
     const ps = allSectors[thirdIdx];
@@ -836,6 +838,7 @@ function _fmtMin(m) {
   return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ampm;
 }
 
+var _devSnapIntensity = false;
 function _devJumpToTime(min) {
   const slider = document.getElementById('_devTimeSlider');
   const label = document.getElementById('_devTimeLabel');
@@ -844,6 +847,7 @@ function _devJumpToTime(min) {
   if (label) { label.textContent = _fmtMin(min); }
   if (liveChk) { liveChk.checked = false; }
   _devTimeOverride = { h: Math.floor(min/60), m: min%60 };
+  _devSnapIntensity = true; // snap discs instantly on next frame
 }
 
 function _devRefreshWindowList() {
