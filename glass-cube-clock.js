@@ -456,13 +456,15 @@ var _compassDevMode = /[?&]compass/.test(location.search); // ?compass = dev loo
 window._clockToggleCompass = function(on) {
   _compassMode = !!on;
   if (_compassMode) {
-    // Hide hour + minute hands
+    // Hide hour + minute hands, lock second hand to 12 o'clock
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
-    _compassAligned = false;
-    _qiblaBeams.forEach(function(b){ b.visible = false; b.children[0].material.uniforms.op.value = 0; });
-    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.children[0].material.uniforms.op.value = 0; }
-    if(_qiblaCoreGlow){ _qiblaCoreGlow.visible = false; _qiblaCoreGlow.children[0].material.uniforms.op.value = 0; }
+    clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
+    clockRays[2].mesh.rotation.y = clockRays[2].initY; // lock to 12
+    // Force aligned so beams show immediately (dev/lookdev)
+    _compassAligned = true;
+    _compassQibla = _compassQibla || 0.4;
+    _compassHeading = _compassQibla; // perfect alignment
   } else {
     // Restore clock hands
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
