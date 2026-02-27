@@ -426,6 +426,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 </div>
 
 <!-- 1. THE HOOK -->
+<!-- 1. INTRODUCING -->
 <section class="scroll-section" id="sec-hook">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Introducing</p>
@@ -435,29 +436,13 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   </div>
 </section>
 
-<!-- 2. QIBLA -->
-<section class="scroll-section" id="sec-qibla">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">Direction</p>
-    <h2 class="section-title">Always facing Qibla.</h2></div>
-    <p class="section-body">The subdial compass finds the direction of al-Masjid al-Haram. Turn your phone, and it turns with you.</p>
-    <div class="verse">
-      <p class="verse-ar">فَوَلِّ وَجْهَكَ شَطْرَ ٱلْمَسْجِدِ ٱلْحَرَامِ</p>
-      <p class="verse-en">"So turn your face toward al-Masjid al-Haram."</p>
-      <p class="verse-ref">Al-Baqarah 2:144</p>
-      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/151.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
-    </div>
-  </div>
-</section>
-
-<!-- 3. PRAYER TIMES -->
+<!-- 2. PRAYER TIMES -->
 <section class="scroll-section" id="sec-prayer">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Prayer Times</p>
     <h2 class="section-title" style="margin-bottom:0">Come to prayer.</h2>
     <p style="font-size:.75rem;font-weight:300;letter-spacing:.1em;color:var(--text-muted);opacity:.45;margin-bottom:0">Hayya 'ala as-salah</p></div>
-    <p class="section-body">Automatic prayer times for your location. From Fajr to Isha, never miss a moment.</p>
-    <div id="pcTimes" style="display:inline-block;font-size:.65rem;font-weight:600;letter-spacing:.08em;color:var(--gold);margin-top:1.25rem;padding:.6rem 1.25rem;background:rgba(200,164,78,.08);border:1px solid rgba(200,164,78,.15);border-radius:100px"></div>
+    <p class="section-body">Accurate times calculated for your location. From Fajr to Isha, every prayer accounted for — with a live countdown to the next.</p>
     <div class="verse">
       <p class="verse-ar">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًا مَّوْقُوتًا</p>
       <p class="verse-en">"Indeed, prayer has been decreed upon the believers at specified times."</p>
@@ -467,12 +452,13 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   </div>
 </section>
 
-<!-- 4. ELEVEN DIALS -->
+<!-- 3. CLOCK -->
 <section class="scroll-section" id="sec-dials">
   <div class="reveal">
-    <div class="section-header"><p class="section-label">Dial Themes</p>
-    <h2 class="section-title">Eleven stars, eleven dials.</h2></div>
-    <p class="section-body">Each dial is named for a Surah of the Holy Quran — chosen to inspire reflection on mercy, creation, and time.</p>
+    <div class="section-header"><p class="section-label">The Clock</p>
+    <h2 class="section-title">Seven heavens, seven zones.</h2></div>
+    <p class="section-body">A glass prism refracts light into seven prayer zones on the clock face — one for each salah from Tahajjud to Isha. As the day moves, the active zone glows and the light shifts. Inspired by the seven heavens described in the Quran.</p>
+    <p class="section-body" style="margin-top:.75rem;opacity:.6">Real-time 3D rendering. Dichroic refraction. No two moments look the same.</p>
     <div style="margin-top:1.5rem;display:flex;align-items:center;gap:1.5rem">
       <button onclick="dialPrev()" aria-label="Previous" style="background:none;border:none;cursor:pointer;padding:.5rem"><i class="ph-thin ph-caret-left" style="font-size:1.5rem;color:var(--text);opacity:.3"></i></button>
       <div style="text-align:center;min-width:200px">
@@ -483,18 +469,15 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
     </div>
     <button id="dialListen" onclick="playDialSurah()" class="btn btn-outline" style="font-size:.8rem;padding:.5rem 1rem;gap:.4rem;margin-top:1rem"><i class="ph-thin ph-play"></i> Listen to this Surah</button>
     <div class="verse" style="margin-top:2.5rem">
-      <p class="verse-ar">إِذْ قَالَ يُوسُفُ لِأَبِيهِ يَـٰٓأَبَتِ إِنِّىٓ رَأَيْتُ أَحَدَ عَشَرَ كَوْكَبًا وَٱلشَّمْسَ وَٱلْقَمَرَ رَأَيْتُهُمْ لِى سَـٰجِدِينَ</p>
-      <p class="verse-en">"When Joseph said to his father, 'O my father, indeed I have seen eleven stars and the sun and the moon; I saw them prostrating to me.'"</p>
-      <p class="verse-ref">Yusuf 12:4</p>
-      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/1378.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
+      <p class="verse-ar">أَلَمْ تَرَوْا۟ كَيْفَ خَلَقَ ٱللَّهُ سَبْعَ سَمَـٰوَٰتٍ طِبَاقًا</p>
+      <p class="verse-en">"Do you not see how Allah created seven heavens, one above the other?"</p>
+      <p class="verse-ref">Nuh 71:15</p>
+      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/5765.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
     </div>
   </div>
 </section>
 
-<!-- 5. NIGHT MODE -->
-<!-- Night Mode section removed — whole site is dark/integrated with clock -->
-
-<!-- 6. ADHAN -->
+<!-- 4. ADHAN -->
 <section class="scroll-section" id="sec-adhan">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Adhan</p>
@@ -505,7 +488,22 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   </div>
 </section>
 
-<!-- 7. INSTALL -->
+<!-- 5. QIBLA -->
+<section class="scroll-section" id="sec-qibla">
+  <div class="reveal">
+    <div class="section-header"><p class="section-label">Direction</p>
+    <h2 class="section-title">Always facing Qibla.</h2></div>
+    <p class="section-body">A live compass finds al-Masjid al-Haram. Turn your phone, and the needle turns with you — when it locks on, the prism casts a spectral beam toward Mecca.</p>
+    <div class="verse">
+      <p class="verse-ar">فَوَلِّ وَجْهَكَ شَطْرَ ٱلْمَسْجِدِ ٱلْحَرَامِ</p>
+      <p class="verse-en">"So turn your face toward al-Masjid al-Haram."</p>
+      <p class="verse-ref">Al-Baqarah 2:144</p>
+      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/151.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. INSTALL -->
 <section class="scroll-section" id="sec-install">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Install</p>
@@ -1207,10 +1205,10 @@ function setupScrollObservers(){
   // Track intersection ratios — only the most-visible section wins
   const sectionStates={
     'sec-hook':    ()=>{ if(window._clockSwitchDial&&DIALS[dialIdx]!=='slate'){dialIdx=6;updateDial();} setNightMode(false); },
-    'sec-qibla':   ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(true); },
     'sec-prayer':  ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(false); },
     'sec-dials':   ()=>{ setNightMode(false); startDialCycle(); },
     'sec-adhan':   ()=>{ stopDialCycle(); },
+    'sec-qibla':   ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(true); },
     'sec-install': ()=>{ setNightMode(false); },
   };
   const ratios={};
