@@ -1292,6 +1292,9 @@ window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scr
   }, 100);
 })();
 
+// Set _isRamadan early so countdowns use it from the first tick
+try{const _h=getHijriDate();if(_h)window._isRamadan=/ramadan/i.test(_h.month);}catch(e){}
+
 // ── Nav bar live clock + next prayer ──
 let _navClockTimer=null;
 function startNavClock(){
