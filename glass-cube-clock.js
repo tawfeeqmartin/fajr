@@ -45,7 +45,7 @@ if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
   const c = renderer.domElement;
-  c.style.cssText = 'position:fixed;inset:0;z-index:0;width:100%;height:100%;';
+  c.style.cssText = 'position:fixed;left:0;top:0;z-index:0;width:'+_stableW+'px;height:'+_stableH+'px;';
   document.body.appendChild(c);
   _canvasEl = c;
 }
@@ -89,6 +89,7 @@ function onResize() {
   var newW = window.innerWidth, newH = window.innerHeight;
   if (!CONTAINED && (Math.abs(newW - _stableW) > 50 || Math.abs(newH - _stableH) > 100)) {
     _stableW = newW; _stableH = newH;
+    if (_canvasEl) { _canvasEl.style.width = _stableW + 'px'; _canvasEl.style.height = _stableH + 'px'; }
   }
   ({ w: W, h: H } = getSize());
   dpr = calcDpr(W, H);
