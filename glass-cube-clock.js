@@ -593,6 +593,10 @@ const clock = new THREE.Clock();
 
 prismGroup.rotation.y = Math.PI / 4;
 
+let _themeFrameCount = 0;
+const _themeBuf = new Uint8Array(4);
+const _themeMeta = document.querySelector('meta[name="theme-color"]');
+
 (function loop() {
   requestAnimationFrame(loop);
   const t = clock.getElapsedTime();
@@ -636,6 +640,15 @@ prismGroup.rotation.y = Math.PI / 4;
   cubeMat.uniforms.uScene.value = fboRT.texture;
 
   renderer.render(scene, camera);
+
+  // Sample top-left pixel and sync theme-color meta tag (Dynamic Island match)
+  if (++_themeFrameCount >= 60) {
+    _themeFrameCount = 0;
+    const gl = renderer.getContext();
+    gl.readPixels(0, gl.drawingBufferHeight - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, _themeBuf);
+    const hex = '#' + ((1<<24) + (_themeBuf[0]<<16) + (_themeBuf[1]<<8) + _themeBuf[2]).toString(16).slice(1);
+    if (_themeMeta) _themeMeta.setAttribute('content', hex);
+  }
 })();
 
 // Signal site that clock is ready
