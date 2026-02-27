@@ -353,6 +353,8 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 /* Fullscreen chrome — scales with viewport via clamp() */
 .clock-fs-close{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(8px,1.5vmin,24px));left:clamp(12px,2vmin,32px);z-index:210;background:none;border:none;color:rgba(232,228,220,.6);font-size:clamp(1.2rem,2.5vmin,2.4rem);cursor:pointer;padding:clamp(6px,1vmin,16px);transition:opacity .5s ease}
 .fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint,.fs-chrome-hidden #fsVersionTag{opacity:0!important;pointer-events:none}
+/* Compass mode: strip ALL chrome except the mode toggle button */
+.compass-active .clock-fs-close,.compass-active .fs-header,.compass-active .fs-dial-picker,.compass-active #fsTapHint,.compass-active #fsVersionTag,.compass-active .fs-iftar-countdown{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
 .fs-header .fs-datetime{font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em}
 .fs-header .fs-location{display:none}
@@ -1824,6 +1826,8 @@ function closeClockFullscreen() {
   // Reset compass mode
   fsCompassOn = false;
   if(window._clockToggleCompass) window._clockToggleCompass(false);
+  const fcEl = document.getElementById('clockFullscreen');
+  if(fcEl) fcEl.classList.remove('compass-active');
   const cIcon = document.getElementById('fsCompassIcon');
   if(cIcon) { cIcon.innerHTML = _cubeSVG; cIcon.style.opacity = '.6'; }
 }
@@ -1844,6 +1848,8 @@ window.addEventListener('popstate', (e) => {
       // First back while compass is active: turn off compass, stay in fullscreen
       fsCompassOn = false;
       if(window._clockToggleCompass) window._clockToggleCompass(false);
+      const fcPop = document.getElementById('clockFullscreen');
+      if(fcPop) fcPop.classList.remove('compass-active');
       const cIcon = document.getElementById('fsCompassIcon');
       if(cIcon) { cIcon.innerHTML = _cubeSVG; cIcon.style.opacity = '.6'; }
       _lastCompassExitTime = Date.now();
@@ -1869,6 +1875,9 @@ const _clockSVG = '<circle cx="12" cy="12" r="9.5"/><line x1="12" y1="12" x2="12
 document.getElementById('fsCompassToggle').addEventListener('click', () => {
   fsCompassOn = !fsCompassOn;
   if(window._clockToggleCompass) window._clockToggleCompass(fsCompassOn);
+  // Strip all chrome in compass mode — pure cube + needle + beam
+  const fsClock = document.getElementById('clockFullscreen');
+  if(fsClock) fsClock.classList.toggle('compass-active', fsCompassOn);
   // Swap icon: cube → clock (in compass mode), clock → cube (in clock mode)
   const icon = document.getElementById('fsCompassIcon');
   if(icon) { icon.innerHTML = fsCompassOn ? _clockSVG : _cubeSVG; icon.style.opacity = fsCompassOn ? '1' : '.6'; }
