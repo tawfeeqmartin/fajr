@@ -504,16 +504,7 @@ window._clockToggleCompass = function(on) {
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
     clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
-    clockRays[2].mesh.rotation.y = clockRays[2].initY; // lock to 12
-    // Force aligned so beams show immediately (dev/lookdev)
-    _compassAligned = true;
-    _compassLocked = true; // prevent gyro from overwriting
-    _compassQibla = _compassQibla || 0.4;
-    _compassHeading = _compassQibla; // perfect alignment
-    // Slam disc beams to full opacity instantly
-    if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.55; }
-    if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.22; }
-    if(_qiblaEntryDisc){ _qiblaEntryDisc.visible = true; _qiblaEntryDisc.material.uniforms.op.value = 0.18; }
+    _compassAligned = false;
     if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0.5; }
     // Hide prayer window discs
     _prayerDisc.visible = false; _nextDisc.visible = false; _thirdDisc.visible = false;
