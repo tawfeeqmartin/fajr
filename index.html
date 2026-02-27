@@ -195,11 +195,9 @@ nav.scrolled{background:transparent;opacity:.97;backdrop-filter:none;box-shadow:
 nav:not(.scrolled){background:transparent}
 nav #navNext{transition:color .4s}
 .nav-logo{display:none}
-#navNext .nav-label{font-size:clamp(.5rem,1.2vw,.65rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,217,102,.45);line-height:1}
-#navNext .nav-time{font-size:clamp(1rem,3vw,1.3rem);font-weight:600;letter-spacing:.02em;color:#ffd966;line-height:1.1;font-variant-numeric:tabular-nums}
+#navNext .nav-label{font-size:clamp(.5rem,1.2vw,.65rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,228,220,.4);line-height:1}
+#navNext .nav-time{font-size:clamp(1rem,3vw,1.3rem);font-weight:600;letter-spacing:.02em;color:rgba(232,228,220,.75);line-height:1.1;font-variant-numeric:tabular-nums}
 #navNext .nav-time .nav-sec{opacity:.4;font-weight:400}
-#navNext.nav-prayer .nav-label{color:rgba(232,228,220,.4)}
-#navNext.nav-prayer .nav-time{color:rgba(232,228,220,.75)}
 
 /* ── Buttons ── */
 .btn{
@@ -1338,7 +1336,7 @@ function updateNavClock(){
     const nh=Math.floor(navDiff/3600);const nrm=navDiff%3600;const nm=Math.floor(nrm/60);const ns=nrm%60;
     const timeStr=nh+':'+(nm<10?'0':'')+nm+':<span class="nav-sec">'+(ns<10?'0':'')+ns+'</span>';
     elNext.innerHTML='<div class="nav-label">'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
-    elNext.classList.toggle('nav-prayer',!isIftar);
+
     // Fullscreen countdown (iftar during Ramadan fasting, otherwise next prayer)
     const fsIftar=document.getElementById('fsIftarCountdown');
     const fsIftarTime=document.getElementById('fsIftarTime');
