@@ -548,6 +548,22 @@ _prayerDisc.position.y = 0.02;
 _prayerDisc.visible = false;
 prismGroup.add(_prayerDisc);
 
+// ── Second disc for "next upcoming" prayer (dimmer) ──
+const _nextDiscMat = _prayerDiscMat.clone();
+_nextDiscMat.uniforms = {
+  uStartAngle: { value: 0.0 },
+  uEndAngle:   { value: 0.0 },
+  uColor1:     { value: new THREE.Color(0xff0000) },
+  uColor2:     { value: new THREE.Color(0x00ff00) },
+  uIntensity:  { value: 0.0 },
+  uOuterRadius:{ value: SECTOR_RADIUS },
+};
+const _nextDisc = new THREE.Mesh(_prayerDiscGeo, _nextDiscMat);
+_nextDisc.rotation.x = -Math.PI / 2;
+_nextDisc.position.y = 0.015;
+_nextDisc.visible = false;
+prismGroup.add(_nextDisc);
+
 // ── Diagnostic start/end markers for active prayer window ──
 function _mkMarkerBeam(color) {
   const geo = new THREE.PlaneGeometry(0.18, SECTOR_RADIUS, 1, 16);
@@ -565,41 +581,50 @@ function _mkMarkerBeam(color) {
 const _markerStart = _mkMarkerBeam(0xff4444); // red = start
 const _markerEnd   = _mkMarkerBeam(0x44ff44); // green = end
 
+const OP_NEXT = 0.35; // upcoming prayer — present but subdued
+
 function updatePrayerWindows(now) {
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
     buildPrayerSectors();
     ptSectorsRebuilt = true;
   }
-  if (!prayerSectors.length) { _prayerDisc.visible = false; return; }
+  if (!prayerSectors.length) {
+    _prayerDisc.visible = false; _nextDisc.visible = false;
+    _markerStart.visible = false; _markerEnd.visible = false;
+    return;
+  }
 
   const nowMin = now.getHours() * 60 + now.getMinutes();
 
-  let showIdx = -1;
+  // Find active prayer (the one we're inside) and next upcoming
+  let activeIdx = -1;
+  let nextIdx = -1;
   let bestDist = 99999;
+
   prayerSectors.forEach(function(ps, i) {
     const { startMin, endMin } = ps;
     const wraps = startMin > endMin;
-    let isActive = wraps
+    const isActive = wraps
       ? (nowMin >= startMin) || (nowMin < endMin)
       : (nowMin >= startMin) && (nowMin < endMin);
-    if (isActive) { showIdx = i; bestDist = -1; return; }
-    if (bestDist < 0) return;
+    if (isActive) { activeIdx = i; return; }
     const dist = (startMin - nowMin + 1440) % 1440;
-    if (dist < bestDist) { bestDist = dist; showIdx = i; }
+    if (dist < bestDist) { bestDist = dist; nextIdx = i; }
   });
 
+  // ── Active prayer disc (full intensity) ──
   const u = _prayerDiscMat.uniforms;
-  const targetIntensity = showIdx >= 0 ? OP_ACTIVE : 0.0;
-  u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, targetIntensity, 0.03);
+  const activeTarget = activeIdx >= 0 ? OP_ACTIVE : 0.0;
+  u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, activeTarget, 0.03);
 
-  if (showIdx >= 0) {
-    const ps = prayerSectors[showIdx];
+  if (activeIdx >= 0) {
+    const ps = prayerSectors[activeIdx];
     u.uStartAngle.value = ps.startAng;
     u.uEndAngle.value = ps.endAng;
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     _prayerDisc.visible = true;
-    // Diagnostic markers
+    // Diagnostic markers on active window
     _markerStart.rotation.y = ps.startAng;
     _markerEnd.rotation.y = ps.endAng;
     _markerStart.visible = true;
@@ -609,6 +634,21 @@ function updatePrayerWindows(now) {
     _markerEnd.visible = false;
   }
   if (u.uIntensity.value < 0.001) _prayerDisc.visible = false;
+
+  // ── Next upcoming prayer disc (dim — anticipation) ──
+  const nu = _nextDiscMat.uniforms;
+  const nextTarget = nextIdx >= 0 ? OP_NEXT : 0.0;
+  nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, 0.03);
+
+  if (nextIdx >= 0) {
+    const ps = prayerSectors[nextIdx];
+    nu.uStartAngle.value = ps.startAng;
+    nu.uEndAngle.value = ps.endAng;
+    nu.uColor1.value.set(ps.def.color);
+    nu.uColor2.value.set(ps.def.color2);
+    _nextDisc.visible = true;
+  }
+  if (nu.uIntensity.value < 0.001) _nextDisc.visible = false;
 }
 
 // buildPrayerSectors called on first updatePrayerWindows when real data ready
