@@ -431,16 +431,8 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   <div class="reveal">
     <div class="section-header"><p class="section-label">Introducing</p>
     <h1 class="section-title" style="font-size:clamp(2.5rem,7vw,5rem);letter-spacing:-.03em">A Gift of Time.</h1></div>
-    <p class="section-body">A clock that tells time the way the Quran tells time — by the prayer.</p>
-  </div>
-</section>
-
-<!-- 2. PRAYER TIMES -->
-<section class="scroll-section" id="sec-prayer">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">Prayer Times</p>
-    <h2 class="section-title">The visible spectrum meets the call to prayer.</h2></div>
-    <div class="verse">
+    <p class="section-body">The day already has a rhythm. Five prayers give it shape. This clock makes it visible — light, sound, and direction, all turning toward the same point.</p>
+    <div class="verse" style="margin-top:2.5rem">
       <p class="verse-ar">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًا مَّوْقُوتًا</p>
       <p class="verse-en">"Indeed, prayer has been decreed upon the believers at specified times."</p>
       <p class="verse-ref">An-Nisa 4:103</p>
@@ -449,12 +441,12 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   </div>
 </section>
 
-<!-- 3. KA'BAH -->
+<!-- 2. THE CLOCK -->
 <section class="scroll-section" id="sec-dials">
   <div class="reveal">
-    <div class="section-header"><p class="section-label">Ka'bah</p>
+    <div class="section-header"><p class="section-label">The Clock</p>
     <h2 class="section-title">At the center sits the cube.</h2></div>
-    <p class="section-body">The source, the axis, the point everything circles back to. Dichroic refraction, rendered in real time. Every moment unique.</p>
+    <p class="section-body">Light enters whole and leaves in color — each refraction a prayer window, shifting as the day turns. The hands orbit it. The light follows the sun. No two moments cast the same spectrum.</p>
     <div class="verse" style="margin-top:2.5rem">
       <p class="verse-ar">وَطَهِّرْ بَيْتِىَ لِلطَّآئِفِينَ وَٱلْقَآئِمِينَ وَٱلرُّكَّعِ ٱلسُّجُودِ</p>
       <p class="verse-en">"Purify My House for those who circle it, and those who stand in prayer, and those who bow and prostrate."</p>
@@ -464,23 +456,14 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   </div>
 </section>
 
-<!-- 4. CALL TO PRAYER -->
-<section class="scroll-section" id="sec-adhan">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">Call to Prayer</p>
-    <h2 class="section-title">Listen closely.</h2></div>
-    <p class="section-body">If you listen closely — with headphones — you can hear the call to prayer from the direction of Mecca.</p>
-    <button id="adhanBtn" onclick="playAdhan(this)" class="btn btn-outline adhan-btn"><i class="ph-thin ph-play"></i> Play Spatial Adhan</button>
-  </div>
-</section>
-
-<!-- 5. DIRECTION -->
+<!-- 3. TOWARD MECCA -->
 <section class="scroll-section" id="sec-qibla">
   <div class="reveal">
-    <div class="section-header"><p class="section-label">Direction</p>
+    <div class="section-header"><p class="section-label">Toward Mecca</p>
     <h2 class="section-title">Of all the directions you could face, one was chosen for you.</h2></div>
-    <p class="section-body">The compass finds it. The light follows.</p>
-    <div class="verse">
+    <p class="section-body">The compass finds it. The light follows. Put on headphones — the call to prayer arrives from that same direction.</p>
+    <button id="adhanBtn" onclick="playAdhan(this)" class="btn btn-outline adhan-btn" style="margin-top:1.25rem"><i class="ph-thin ph-play"></i> Play Spatial Adhan</button>
+    <div class="verse" style="margin-top:2.5rem">
       <p class="verse-ar">فَوَلِّ وَجْهَكَ شَطْرَ ٱلْمَسْجِدِ ٱلْحَرَامِ</p>
       <p class="verse-en">"So turn your face toward al-Masjid al-Haram."</p>
       <p class="verse-ref">Al-Baqarah 2:144</p>
@@ -489,7 +472,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   </div>
 </section>
 
-<!-- 6. INSTALL -->
+<!-- 4. INSTALL -->
 <section class="scroll-section" id="sec-install">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Install</p>
@@ -1193,11 +1176,9 @@ function setupScrollObservers(){
   // Track intersection ratios — only the most-visible section wins
   const sectionStates={
     'sec-hook':    ()=>{ if(window._clockSwitchDial&&DIALS[dialIdx]!=='slate'){dialIdx=6;updateDial();} setNightMode(false); },
-    'sec-prayer':  ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(false); },
-    'sec-dials':   ()=>{ setNightMode(false); startDialCycle(); },
-    'sec-adhan':   ()=>{ stopDialCycle(); },
+    'sec-dials':   ()=>{ setNightMode(false); },
     'sec-qibla':   ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(true); },
-    'sec-install': ()=>{ setNightMode(false); },
+    'sec-install': ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(false); },
   };
   const ratios={};
   let _lastActive='';
