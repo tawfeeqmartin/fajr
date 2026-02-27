@@ -375,6 +375,54 @@ window._clockSetFullscreen = function(on) {
   setTimeout(onResize, 50);
 };
 
+// ─── QIBLA COMPASS MODE ───────────────────────────────────────────────────
+var _compassMode = false;
+var _compassHeading = 0;      // device heading in radians
+var _compassQibla = null;     // qibla bearing in radians
+var _compassAligned = false;  // true when 12 o'clock ≈ Qibla
+var _qiblaBeam = null;        // light beam toward 6 o'clock
+
+// Create the Qibla beam (hidden by default) — bright white/gold, from cube center toward 6 o'clock
+(function() {
+  const len = 9.12;
+  const g = new THREE.PlaneGeometry(0.8, len, 1, 16); g.translate(0, len/2, 0);
+  const grp = new THREE.Group();
+  grp.add(new THREE.Mesh(g, mkMat(0xffd700, 0xffffff, 0.0)));
+  grp.position.y = 0.03;
+  grp.rotation.order = 'YXZ';
+  // Point toward 6 o'clock (opposite of 12 o'clock / initY 135°)
+  grp.rotation.y = THREE.MathUtils.degToRad(135 - 180);
+  grp.rotation.x = Math.PI / 2;
+  grp.visible = false;
+  prismGroup.add(grp);
+  _qiblaBeam = grp;
+})();
+
+window._clockToggleCompass = function(on) {
+  _compassMode = !!on;
+  if (_compassMode) {
+    // Hide hour + minute hands
+    clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
+    clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
+    _compassAligned = false;
+    _qiblaBeam.visible = false;
+    _qiblaBeam.children[0].material.uniforms.op.value = 0;
+  } else {
+    // Restore clock hands
+    clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
+    clockRays[1].mesh.children[0].material.uniforms.op.value = 0.92;
+    clockRays[2].mesh.children[0].material.uniforms.op.value = 0.62;
+    _qiblaBeam.visible = false;
+    _compassAligned = false;
+  }
+};
+
+// Called from index.html compass handler to feed heading + qibla
+window._clockUpdateCompass = function(heading, qibla) {
+  _compassHeading = heading;
+  _compassQibla = qibla;
+};
+
 // ─── PRAYER WINDOW SECTORS ────────────────────────────────────────────────
 // Seven glowing fan/pie-slice sectors on the floor, one per Islamic prayer window.
 // Subtle atmospheric floor glow — cube remains the visual hero.
@@ -702,9 +750,39 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   const m = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
 
-  clockRays[0].mesh.rotation.y = clockRays[0].initY - (h / 12) * TAU;   // hour
-  clockRays[1].mesh.rotation.y = clockRays[1].initY - (m / 60) * TAU;   // minute
-  clockRays[2].mesh.rotation.y = clockRays[2].initY - (s / 60) * TAU;   // second
+  if (_compassMode && _compassQibla !== null) {
+    // Compass mode: second hand = needle pointing toward Qibla
+    // qiblaRelative = angle from phone's north to Qibla (how far CW from 12 o'clock)
+    var qiblaRel = _compassQibla - _compassHeading;
+    // Map to clock: initY offset compensates for prismGroup rotation
+    clockRays[2].mesh.rotation.y = clockRays[2].initY - qiblaRel;
+    clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
+
+    // Check alignment: 12 o'clock pointing at Qibla = qiblaRel near 0
+    var alignDelta = Math.abs(((qiblaRel % TAU) + TAU) % TAU);
+    if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
+    var wasAligned = _compassAligned;
+    _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
+
+    // Qibla beam: show when aligned, pointing toward 6 o'clock (opposite of Qibla)
+    if (_compassAligned) {
+      _qiblaBeam.visible = true;
+      var beamOp = _qiblaBeam.children[0].material.uniforms.op.value;
+      _qiblaBeam.children[0].material.uniforms.op.value = Math.min(beamOp + 0.08, 1.0);
+    } else {
+      var beamOp2 = _qiblaBeam.children[0].material.uniforms.op.value;
+      if (beamOp2 > 0.01) {
+        _qiblaBeam.children[0].material.uniforms.op.value = beamOp2 * 0.92;
+      } else {
+        _qiblaBeam.visible = false;
+      }
+    }
+  } else {
+    // Normal clock mode
+    clockRays[0].mesh.rotation.y = clockRays[0].initY - (h / 12) * TAU;   // hour
+    clockRays[1].mesh.rotation.y = clockRays[1].initY - (m / 60) * TAU;   // minute
+    clockRays[2].mesh.rotation.y = clockRays[2].initY - (s / 60) * TAU;   // second
+  }
 
   // Specular highlight orbits cube at second-hand speed
   const secAngle = (s / 60) * TAU;

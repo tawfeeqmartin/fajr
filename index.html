@@ -1844,9 +1844,28 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
   const icon = document.getElementById('fsCompassIcon');
   if(icon) { icon.innerHTML = fsCompassOn ? _clockSVG : _cubeSVG; icon.style.opacity = fsCompassOn ? '1' : '.6'; }
   if(fsCompassOn) {
+    // Request compass permission + compute Qibla
+    (async()=>{
+      if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){
+        try{await DeviceOrientationEvent.requestPermission();}catch(e){}
+      }
+      if(!adhanQiblaAngle) await adhanGetQibla();
+      // Start feeding heading to clock
+      if(!window._compassInterval){
+        window._compassInterval=setInterval(()=>{
+          if(window._clockUpdateCompass && adhanQiblaAngle!==null){
+            window._clockUpdateCompass(adhanDeviceHeading, adhanQiblaAngle);
+          }
+        },50);
+      }
+      // Ensure compass listener is active
+      window.addEventListener('deviceorientation',adhanCompassHandler);
+    })();
     // Push history state so back gesture exits compass first, not fullscreen
     history.pushState({compass:true}, '', '#clock');
   } else {
+    // Stop feeding compass data
+    if(window._compassInterval){clearInterval(window._compassInterval);window._compassInterval=null;}
     // Pop the compass history entry so stale state doesn't exit fullscreen on next back
     _compassPopFromBtn = true;
     history.back();
