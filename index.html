@@ -890,6 +890,37 @@ function adhanCompassHandler(e){
   adhanDeviceHeading=h*Math.PI/180;
 }
 
+// ── Compass Init (tawaf-gl pattern) ──
+// Called at page load: on non-iOS, registers listeners immediately.
+// On iOS, stores handler — waits for requestPermission in user gesture.
+function _initCompass() {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS: just store handler, don't add listener yet (needs user gesture)
+  } else if (typeof DeviceOrientationEvent !== 'undefined') {
+    // Android / desktop: register both listeners immediately
+    window.addEventListener('deviceorientationabsolute', adhanCompassHandler, true);
+    window.addEventListener('deviceorientation', adhanCompassHandler, true);
+  }
+}
+function _requestCompassPermission() {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(function(state) {
+      if (state === 'granted') {
+        window.addEventListener('deviceorientation', adhanCompassHandler, true);
+      }
+    }).catch(function(){});
+  }
+}
+// Init compass at page load
+_initCompass();
+// First click anywhere grants iOS permission (like tawaf-gl)
+document.addEventListener('click', function _iosCompass() {
+  _requestCompassPermission();
+  document.removeEventListener('click', _iosCompass);
+}, { once: true });
+
 // ── Position tracking ──
 function adhanPosition(){
   if(adhanAudio&&!adhanAudio.paused) return adhanAudio.currentTime;
@@ -1852,20 +1883,8 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
   const icon = document.getElementById('fsCompassIcon');
   if(icon) { icon.innerHTML = fsCompassOn ? _clockSVG : _cubeSVG; icon.style.opacity = fsCompassOn ? '1' : '.6'; }
   if(fsCompassOn) {
-    // Compass init — matches proven tawaf-gl pattern
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-      // iOS: request in user gesture, then add listener
-      DeviceOrientationEvent.requestPermission().then(function(state) {
-        if (state === 'granted') {
-          window.addEventListener('deviceorientation', adhanCompassHandler, true);
-        }
-      }).catch(function(){});
-    } else {
-      // Android / desktop: add both listeners immediately
-      window.addEventListener('deviceorientationabsolute', adhanCompassHandler, true);
-      window.addEventListener('deviceorientation', adhanCompassHandler, true);
-    }
+    // Request compass permission (iOS) — same pattern as tawaf-gl
+    _requestCompassPermission();
     // Compute Qibla if not already available
     if (!adhanQiblaAngle) adhanGetQibla();
     // Push history state so back gesture exits compass first, not fullscreen
