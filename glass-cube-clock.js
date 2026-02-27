@@ -490,7 +490,7 @@ function buildPrayerSectors() {
 // ── Polar disc prayer beam (single CircleGeometry + fragment shader) ──
 const _prayerDiscGeo = new THREE.CircleGeometry(SECTOR_RADIUS * 1.3, 64);
 const _prayerDiscMat = new THREE.ShaderMaterial({
-  transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
+  transparent: true, depthWrite: false, side: THREE.DoubleSide,
   uniforms: {
     uStartAngle: { value: 0.0 },
     uEndAngle:   { value: 0.0 },
@@ -545,7 +545,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
 
 const _prayerDisc = new THREE.Mesh(_prayerDiscGeo, _prayerDiscMat);
 _prayerDisc.rotation.x = -Math.PI / 2;
-_prayerDisc.position.y = 0.03;
+_prayerDisc.position.y = 0.02;
 _prayerDisc.visible = false;
 prismGroup.add(_prayerDisc);
 
@@ -561,7 +561,7 @@ _nextDiscMat.uniforms = {
 };
 const _nextDisc = new THREE.Mesh(_prayerDiscGeo, _nextDiscMat);
 _nextDisc.rotation.x = -Math.PI / 2;
-_nextDisc.position.y = 0.025;
+_nextDisc.position.y = 0.015;
 _nextDisc.visible = false;
 prismGroup.add(_nextDisc);
 
@@ -577,7 +577,7 @@ _thirdDiscMat.uniforms = {
 };
 const _thirdDisc = new THREE.Mesh(_prayerDiscGeo, _thirdDiscMat);
 _thirdDisc.rotation.x = -Math.PI / 2;
-_thirdDisc.position.y = 0.02;
+_thirdDisc.position.y = 0.012;
 _thirdDisc.visible = false;
 prismGroup.add(_thirdDisc);
 
