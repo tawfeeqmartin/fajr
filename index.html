@@ -1871,12 +1871,18 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
     // Request permission on iOS (must be in click handler for user gesture)
     if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
       DeviceOrientationEvent.requestPermission().then(function(state) {
-        if (state === 'granted') _startCompassFeed();
-      }).catch(function(e){ console.warn('compass permission denied', e); });
+        console.log('[compass] permission:', state);
+        _startCompassFeed(); // start regardless — 'granted' means events will fire
+      }).catch(function(e){
+        console.warn('[compass] permission error', e);
+        _startCompassFeed(); // try anyway — might already be granted
+      });
     } else {
       // Android / desktop — no permission needed
       _startCompassFeed();
     }
+    // Always register listener immediately too (in case permission was already granted)
+    _startCompassFeed();
     // Compute Qibla if not already available
     if (!adhanQiblaAngle) adhanGetQibla();
     // Push history state so back gesture exits compass first, not fullscreen

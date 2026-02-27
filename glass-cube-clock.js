@@ -750,32 +750,37 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   const m = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
 
-  if (_compassMode && _compassQibla !== null) {
-    // Compass mode: second hand = needle pointing toward Qibla
-    // qiblaRelative = angle from phone's north to Qibla (how far CW from 12 o'clock)
-    var qiblaRel = _compassQibla - _compassHeading;
-    // Map to clock: initY offset compensates for prismGroup rotation
-    clockRays[2].mesh.rotation.y = clockRays[2].initY - qiblaRel;
-    clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
+  if (_compassMode) {
+    // COMPASS MODE — clock hands NEVER tick
+    if (_compassQibla !== null) {
+      // Compass data available: needle points toward Qibla
+      var qiblaRel = _compassQibla - _compassHeading;
+      clockRays[2].mesh.rotation.y = clockRays[2].initY - qiblaRel;
+      clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
 
-    // Check alignment: 12 o'clock pointing at Qibla = qiblaRel near 0
-    var alignDelta = Math.abs(((qiblaRel % TAU) + TAU) % TAU);
-    if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
-    var wasAligned = _compassAligned;
-    _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
+      // Check alignment: 12 o'clock pointing at Qibla = qiblaRel near 0
+      var alignDelta = Math.abs(((qiblaRel % TAU) + TAU) % TAU);
+      if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
+      _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
 
-    // Qibla beam: show when aligned, pointing toward 6 o'clock (opposite of Qibla)
-    if (_compassAligned) {
-      _qiblaBeam.visible = true;
-      var beamOp = _qiblaBeam.children[0].material.uniforms.op.value;
-      _qiblaBeam.children[0].material.uniforms.op.value = Math.min(beamOp + 0.08, 1.0);
-    } else {
-      var beamOp2 = _qiblaBeam.children[0].material.uniforms.op.value;
-      if (beamOp2 > 0.01) {
-        _qiblaBeam.children[0].material.uniforms.op.value = beamOp2 * 0.92;
+      // Qibla beam: show when aligned, pointing toward 6 o'clock
+      if (_compassAligned) {
+        _qiblaBeam.visible = true;
+        var beamOp = _qiblaBeam.children[0].material.uniforms.op.value;
+        _qiblaBeam.children[0].material.uniforms.op.value = Math.min(beamOp + 0.08, 1.0);
       } else {
-        _qiblaBeam.visible = false;
+        var beamOp2 = _qiblaBeam.children[0].material.uniforms.op.value;
+        if (beamOp2 > 0.01) {
+          _qiblaBeam.children[0].material.uniforms.op.value = beamOp2 * 0.92;
+        } else {
+          _qiblaBeam.visible = false;
+        }
       }
+    } else {
+      // Waiting for compass data: slow searching sweep
+      var searchAngle = t * 1.5; // slow rotation
+      clockRays[2].mesh.rotation.y = clockRays[2].initY - searchAngle;
+      clockRays[2].mesh.children[0].material.uniforms.op.value = 0.5;
     }
   } else {
     // Normal clock mode
