@@ -239,6 +239,7 @@ const dichroicFrag = `
   uniform vec3      uSpecLightPos;
   uniform vec3      uCamWorldPos;
   uniform float     uSpecIntensity;
+  uniform float     uInternalGlow;
 
   varying vec3 vViewNormal;
   varying vec3 vViewDir;
@@ -290,6 +291,11 @@ const dichroicFrag = `
     float spec = pow(max(dot(Nw, Hw), 0.0), 24.0);
     col += vec3(1.0, 0.95, 0.9) * uSpecIntensity * spec * (0.4 + 0.6 * fresnelW);
 
+    // Internal glow: warm emissive light trapped inside, brighter at edges (fresnel)
+    float glowFresnel = pow(1.0 - cosT, 2.5);
+    vec3 glowCol = mix(vec3(1.0, 0.88, 0.55), vec3(1.0, 0.65, 0.2), glowFresnel);
+    col += glowCol * uInternalGlow * (0.2 + 0.8 * glowFresnel);
+
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -309,6 +315,7 @@ const cubeMat = new THREE.ShaderMaterial({
     uSpecLightPos: { value: new THREE.Vector3(0, 3.5, -3) },
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 1.875 },
+    uInternalGlow:  { value: 0 },
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
@@ -512,6 +519,77 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
   }
 })();
 
+// ─── ENTRY BEAM STRIP (3D plane entering the cube) ────────────────────────────
+var _qiblaEntryBeam = null;
+var _qiblaExitCaustic = null;
+
+(function() {
+  // Entry beam: thin vertical PlaneGeometry strip, warm white, additive
+  var entryGeo = new THREE.PlaneGeometry(0.06, 2.4);
+  var entryMat = new THREE.ShaderMaterial({
+    uniforms: { op: { value: 0 }, time: { value: 0 } },
+    vertexShader: VERT,
+    fragmentShader: `
+      uniform float op, time;
+      varying vec2 vUv;
+      void main() {
+        float cx = exp(-pow((vUv.x - 0.5) * 6.0, 2.0));
+        float cy = smoothstep(0.0, 0.15, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
+        float flicker = 0.92 + 0.08 * sin(time * 2.0 + vUv.y * 8.0);
+        vec3 col = mix(vec3(1.0, 0.95, 0.85), vec3(1.0, 0.82, 0.5), vUv.y);
+        gl_FragColor = vec4(col * flicker, cx * cy * op);
+      }
+    `,
+    transparent: true, blending: THREE.AdditiveBlending,
+    depthWrite: false, side: THREE.DoubleSide
+  });
+  _qiblaEntryBeam = new THREE.Mesh(entryGeo, entryMat);
+  // Position: beam enters from 12 o'clock direction toward cube center
+  // In prismGroup local space (rotated PI/4), entry from +Z toward cube
+  _qiblaEntryBeam.position.set(0, CUBE_Y, 1.8);
+  _qiblaEntryBeam.visible = false;
+  prismGroup.add(_qiblaEntryBeam);
+
+  // Exit face caustic hotspot: small plane on opposite face, spectral gradient
+  var exitGeo = new THREE.PlaneGeometry(0.35, 0.35);
+  var exitMat = new THREE.ShaderMaterial({
+    uniforms: { op: { value: 0 }, time: { value: 0 } },
+    vertexShader: VERT,
+    fragmentShader: `
+      uniform float op, time;
+      varying vec2 vUv;
+      void main() {
+        vec2 p = vUv * 2.0 - 1.0;
+        float r = length(p);
+        float disc = smoothstep(1.0, 0.3, r);
+        // Spectral band across the hotspot
+        float t2 = vUv.x;
+        vec3 col;
+        if (t2 < 0.2) {
+          col = mix(vec3(0.3, 0.0, 1.0), vec3(0.1, 0.5, 1.0), t2 / 0.2);
+        } else if (t2 < 0.4) {
+          col = mix(vec3(0.1, 0.5, 1.0), vec3(0.2, 1.0, 0.4), (t2-0.2) / 0.2);
+        } else if (t2 < 0.6) {
+          col = mix(vec3(0.2, 1.0, 0.4), vec3(1.0, 0.8, 0.0), (t2-0.4) / 0.2);
+        } else if (t2 < 0.8) {
+          col = mix(vec3(1.0, 0.8, 0.0), vec3(1.0, 0.5, 0.0), (t2-0.6) / 0.2);
+        } else {
+          col = mix(vec3(1.0, 0.5, 0.0), vec3(1.0, 0.15, 0.1), (t2-0.8) / 0.2);
+        }
+        float shimmer = 0.9 + 0.1 * sin(time * 1.5 + p.x * 12.0);
+        gl_FragColor = vec4(col * shimmer * 1.5, disc * op);
+      }
+    `,
+    transparent: true, blending: THREE.AdditiveBlending,
+    depthWrite: false, side: THREE.DoubleSide
+  });
+  _qiblaExitCaustic = new THREE.Mesh(exitGeo, exitMat);
+  // Position on the exit face (-Z side of cube, opposite entry)
+  _qiblaExitCaustic.position.set(0, CUBE_Y, -0.62);
+  _qiblaExitCaustic.visible = false;
+  prismGroup.add(_qiblaExitCaustic);
+})();
+
 window._clockToggleCompass = function(on) {
   _compassMode = !!on;
   if (_compassMode) {
@@ -531,6 +609,9 @@ window._clockToggleCompass = function(on) {
     [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
       if(d){ d.visible = false; d.material.uniforms.op.value = 0; }
     });
+    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.material.uniforms.op.value = 0; }
+    if(_qiblaExitCaustic){ _qiblaExitCaustic.visible = false; _qiblaExitCaustic.material.uniforms.op.value = 0; }
+    cubeMat.uniforms.uInternalGlow.value = 0;
     if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
     // Restore prayer window discs
     _prayerDisc.visible = true; _nextDisc.visible = true; _thirdDisc.visible = true;
@@ -917,12 +998,28 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
           var bop = _qiblaBloomDisc.material.uniforms.op.value;
           _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.02, 0.22 * breathe);
         }
-        // Entry beam
+        // Entry beam disc
         if(_qiblaEntryDisc){
           _qiblaEntryDisc.visible = true;
           var eop = _qiblaEntryDisc.material.uniforms.op.value;
           _qiblaEntryDisc.material.uniforms.op.value = Math.min(eop + 0.04, 0.18 * breathe);
         }
+        // 3D Entry beam strip
+        if(_qiblaEntryBeam){
+          _qiblaEntryBeam.visible = true;
+          _qiblaEntryBeam.material.uniforms.time.value = t;
+          var ebop = _qiblaEntryBeam.material.uniforms.op.value;
+          _qiblaEntryBeam.material.uniforms.op.value = Math.min(ebop + 0.05, 0.35 * breathe);
+        }
+        // Exit face caustic hotspot
+        if(_qiblaExitCaustic){
+          _qiblaExitCaustic.visible = true;
+          _qiblaExitCaustic.material.uniforms.time.value = t;
+          var ecop = _qiblaExitCaustic.material.uniforms.op.value;
+          _qiblaExitCaustic.material.uniforms.op.value = Math.min(ecop + 0.04, 0.5 * breathe);
+        }
+        // Internal glow on cube
+        cubeMat.uniforms.uInternalGlow.value = Math.min(cubeMat.uniforms.uInternalGlow.value + 0.03, 0.6 * breathe);
       } else if (!_compassDevMode) {
         // Fade out shadow + caustic
         if(window._qiblaCausticLight && window._qiblaCausticLight.intensity > 0.01){ window._qiblaCausticLight.intensity *= 0.9; } else if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
@@ -933,6 +1030,15 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
           if(dop > 0.005){ d.material.uniforms.op.value = dop * 0.88; }
           else { d.visible = false; d.material.uniforms.op.value = 0; }
         });
+        // Fade out entry beam, exit caustic, internal glow
+        [_qiblaEntryBeam, _qiblaExitCaustic].forEach(function(d){
+          if(!d) return;
+          var dop = d.material.uniforms.op.value;
+          if(dop > 0.005){ d.material.uniforms.op.value = dop * 0.88; }
+          else { d.visible = false; d.material.uniforms.op.value = 0; }
+        });
+        if(cubeMat.uniforms.uInternalGlow.value > 0.005){ cubeMat.uniforms.uInternalGlow.value *= 0.9; }
+        else { cubeMat.uniforms.uInternalGlow.value = 0; }
       }
     } else {
       // Waiting for compass data: slow searching sweep
