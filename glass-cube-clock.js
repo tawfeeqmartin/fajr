@@ -380,62 +380,94 @@ var _compassMode = false;
 var _compassHeading = 0;      // device heading in radians
 var _compassQibla = null;     // qibla bearing in radians
 var _compassAligned = false;  // true when 12 o'clock ≈ Qibla
-var _qiblaBeams = [];        // prismatic refraction beams toward 6 o'clock
-var _qiblaEntryBeam = null;  // incident beam (12 o'clock side)
-var _qiblaCoreGlow = null;   // convergence zone glow
+var _qiblaFanDisc = null;    // polar spectral fan disc
+var _qiblaEntryDisc = null;  // polar entry beam disc
+var _qiblaBloomDisc = null;  // wider dim bloom underlayer
 var _compassDevMode = /[?&]compass/.test(location.search); // ?compass = dev lookdev mode
 var _compassLocked = false;  // true = dev lock, skip gyro sync
 
-// Create prismatic refraction beam — single beam splits through cube into 5-band spectrum
-(function() {
-  const baseAngle = THREE.MathUtils.degToRad(135 - 180); // 6 o'clock direction
-  const entryAngle = baseAngle + Math.PI; // 12 o'clock (opposite)
-
-  // Layer 1: Entry beam (narrow white light entering cube)
-  var eg = new THREE.PlaneGeometry(1.6, 3.0, 1, 16); eg.translate(0, 3.0/2, 0);
-  _qiblaEntryBeam = new THREE.Group();
-  _qiblaEntryBeam.add(new THREE.Mesh(eg, mkMatSoft(0xfffaf0, 0xffd966, 0.0)));
-  _qiblaEntryBeam.position.y = 0.015;
-  _qiblaEntryBeam.rotation.order = 'YXZ';
-  _qiblaEntryBeam.rotation.y = entryAngle;
-  _qiblaEntryBeam.rotation.x = Math.PI / 2;
-  _qiblaEntryBeam.visible = false;
-  prismGroup.add(_qiblaEntryBeam);
-
-  // Layer 2: Core glow (wider refraction bloom at cube base)
-  var cg = new THREE.PlaneGeometry(3.0, 3.5, 1, 16); cg.translate(0, 3.5/2, 0);
-  _qiblaCoreGlow = new THREE.Group();
-  _qiblaCoreGlow.add(new THREE.Mesh(cg, mkMatSoft(0xfffdf5, 0x332200, 0.0)));
-  _qiblaCoreGlow.position.y = 0.018;
-  _qiblaCoreGlow.rotation.order = 'YXZ';
-  _qiblaCoreGlow.rotation.y = baseAngle;
-  _qiblaCoreGlow.rotation.x = Math.PI / 2;
-  _qiblaCoreGlow.visible = false;
-  prismGroup.add(_qiblaCoreGlow);
-
-  // Layer 3: 5-band spectral fan — wide angular spread so colors visibly separate
-  const SPECTRAL = [
-    { c1: 0xff4422, c2: 0x331100, w: 1.2, len: 10.0, deg: -14, op: 0.22, phase: 0.0 },   // Red
-    { c1: 0xff8800, c2: 0x332200, w: 0.8, len:  9.5, deg:  -8, op: 0.14, phase: 1.3 },   // Orange
-    { c1: 0x44ff66, c2: 0x003311, w: 1.0, len: 10.0, deg:   0, op: 0.18, phase: 2.6 },   // Green
-    { c1: 0x22ccff, c2: 0x002233, w: 0.8, len:  9.5, deg:   7, op: 0.14, phase: 3.9 },   // Cyan
-    { c1: 0x4444ff, c2: 0x110033, w: 1.2, len: 10.0, deg:  15, op: 0.24, phase: 5.2 },   // Blue/Violet
-  ];
-
-  for (var i = 0; i < SPECTRAL.length; i++) {
-    var s = SPECTRAL[i];
-    var sg = new THREE.PlaneGeometry(s.w, s.len, 1, 16); sg.translate(0, s.len/2, 0);
-    var grp = new THREE.Group();
-    grp.add(new THREE.Mesh(sg, mkMatSoft(s.c1, s.c2, 0.0)));
-    grp.position.y = 0.02 + i * 0.003;
-    grp.rotation.order = 'YXZ';
-    grp.rotation.y = baseAngle + THREE.MathUtils.degToRad(s.deg);
-    grp.rotation.x = Math.PI / 2;
-    grp.visible = false;
-    grp.userData = { baseY: baseAngle + THREE.MathUtils.degToRad(s.deg), phase: s.phase, targetOp: s.op };
-    prismGroup.add(grp);
-    _qiblaBeams.push(grp);
+// ─── POLAR PRISM SHADERS ──────────────────────────────────────────────────
+const FRAG_PRISM_FAN = `
+  uniform float op, fanCenter, fanWidth, time;
+  varying vec2 vUv;
+  void main() {
+    vec2 p = vUv * 2.0 - 1.0;
+    float r = length(p);
+    float theta = atan(p.y, p.x);
+    // Radial: fade in from center (cube zone), Gaussian fade out
+    float radial = smoothstep(0.02, 0.10, r) * exp(-r * r * 3.0);
+    // Angular fan mask
+    float ad = mod(theta - fanCenter + 3.14159, 6.28318) - 3.14159;
+    float fanPos = ad / fanWidth;
+    float fanMask = smoothstep(1.0, 0.55, abs(fanPos));
+    // Spectral color: map position through rainbow
+    float t2 = fanPos * 0.5 + 0.5; // 0..1
+    vec3 col;
+    if (t2 < 0.2) {
+      col = mix(vec3(0.3, 0.0, 1.0), vec3(0.1, 0.5, 1.0), t2 / 0.2);
+    } else if (t2 < 0.4) {
+      col = mix(vec3(0.1, 0.5, 1.0), vec3(0.2, 1.0, 0.4), (t2-0.2) / 0.2);
+    } else if (t2 < 0.6) {
+      col = mix(vec3(0.2, 1.0, 0.4), vec3(1.0, 0.8, 0.0), (t2-0.4) / 0.2);
+    } else if (t2 < 0.8) {
+      col = mix(vec3(1.0, 0.8, 0.0), vec3(1.0, 0.5, 0.0), (t2-0.6) / 0.2);
+    } else {
+      col = mix(vec3(1.0, 0.5, 0.0), vec3(1.0, 0.15, 0.1), (t2-0.8) / 0.2);
+    }
+    // Caustic shimmer
+    float shimmer = 0.9 + 0.1 * sin(r * 40.0 + time * 0.5 + theta * 3.0);
+    float bandIntensity = 1.0 - 0.3 * pow(abs(fanPos), 2.0);
+    gl_FragColor = vec4(col * shimmer, radial * fanMask * bandIntensity * op);
   }
+`;
+const FRAG_ENTRY_BEAM = `
+  uniform float op, fanCenter, fanWidth;
+  varying vec2 vUv;
+  void main() {
+    vec2 p = vUv * 2.0 - 1.0;
+    float r = length(p);
+    float theta = atan(p.y, p.x);
+    float radial = smoothstep(0.02, 0.12, r) * exp(-r * r * 5.0);
+    float ad = mod(theta - fanCenter + 3.14159, 6.28318) - 3.14159;
+    float fanMask = smoothstep(1.0, 0.4, abs(ad / fanWidth));
+    vec3 col = mix(vec3(1.0, 0.98, 0.94), vec3(1.0, 0.85, 0.4), r);
+    gl_FragColor = vec4(col, radial * fanMask * op);
+  }
+`;
+
+function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
+  var mat = new THREE.ShaderMaterial({
+    uniforms: { op:{value:opVal}, fanCenter:{value:fanCenter}, fanWidth:{value:fanWidth}, time:{value:0} },
+    vertexShader: VERT, fragmentShader: fragShader,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+  });
+  var mesh = new THREE.Mesh(new THREE.CircleGeometry(radius, 128), mat);
+  mesh.rotation.x = -Math.PI / 2; // lay flat on XZ plane
+  mesh.position.y = 0.01;
+  mesh.visible = false;
+  prismGroup.add(mesh);
+  return mesh;
+}
+
+// Create polar disc beams — replaces card-based PlaneGeometry approach
+(function() {
+  // Fan points toward 6 o'clock in UV space
+  // CircleGeometry on XZ plane: UV atan gives angle where +X = right
+  // We orient via the mesh lying flat + prismGroup's existing 45° Y rotation
+  // 6 o'clock = -Z in prismGroup local = PI rotation in UV atan
+  // But disc is rotated -PI/2 on X to lie flat, so UV +Y maps to -Z
+  // fanCenter = PI/2 points "down" in world (toward 6 o'clock from above)
+  var fanAngle = Math.PI / 2; // +Y in UV = 6 o'clock when disc is on XZ
+  var entryAngle = -Math.PI / 2; // opposite = 12 o'clock
+
+  // Layer 1: Spectral fan disc (main rainbow effect)
+  _qiblaFanDisc = mkPrismDisc(12, FRAG_PRISM_FAN, fanAngle, 0.35, 0.0);
+
+  // Layer 2: Bloom underlayer (wider, dimmer halo)
+  _qiblaBloomDisc = mkPrismDisc(14, FRAG_PRISM_FAN, fanAngle, 0.55, 0.0);
+
+  // Layer 3: Entry beam (narrow white beam from 12 o'clock)
+  _qiblaEntryDisc = mkPrismDisc(4, FRAG_ENTRY_BEAM, entryAngle, 0.07, 0.0);
 
   // Dev mode: auto-enable compass in aligned state for lookdev
   if (_compassDevMode) {
@@ -444,11 +476,9 @@ var _compassLocked = false;  // true = dev lock, skip gyro sync
       _compassAligned = true;
       _compassQibla = 0.4;
       _compassHeading = 0.4;
-      // Hide hour + minute, lock second hand
       clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
       clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
       clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
-      // Force second hand to Qibla-aligned position
       clockRays[2].mesh.rotation.y = clockRays[2].initY;
     }, 500);
   }
@@ -467,18 +497,18 @@ window._clockToggleCompass = function(on) {
     _compassLocked = true; // prevent gyro from overwriting
     _compassQibla = _compassQibla || 0.4;
     _compassHeading = _compassQibla; // perfect alignment
-    // Slam beams to full opacity instantly
-    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = true; _qiblaEntryBeam.children[0].material.uniforms.op.value = 0.25; }
-    if(_qiblaCoreGlow){ _qiblaCoreGlow.visible = true; _qiblaCoreGlow.children[0].material.uniforms.op.value = 0.15; }
-    _qiblaBeams.forEach(function(b){ b.visible = true; b.children[0].material.uniforms.op.value = b.userData.targetOp; });
+    // Slam disc beams to full opacity instantly
+    if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.22; }
+    if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.08; }
+    if(_qiblaEntryDisc){ _qiblaEntryDisc.visible = true; _qiblaEntryDisc.material.uniforms.op.value = 0.18; }
   } else {
     // Restore clock hands
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0.92;
     clockRays[2].mesh.children[0].material.uniforms.op.value = 0.62;
-    _qiblaBeams.forEach(function(b){ b.visible = false; b.children[0].material.uniforms.op.value = 0; });
-    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.children[0].material.uniforms.op.value = 0; }
-    if(_qiblaCoreGlow){ _qiblaCoreGlow.visible = false; _qiblaCoreGlow.children[0].material.uniforms.op.value = 0; }
+    [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
+      if(d){ d.visible = false; d.material.uniforms.op.value = 0; }
+    });
     _compassAligned = false;
     _compassLocked = false;
   }
@@ -839,42 +869,38 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
       _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
 
-      // Prismatic refraction: entry beam + core glow + 5-band spectral fan
+      // Prismatic refraction: polar disc shaders
       var breathe = 0.88 + 0.12 * Math.sin(t * 1.0);
+      // Update time uniform for caustic shimmer
+      if(_qiblaFanDisc) _qiblaFanDisc.material.uniforms.time.value = t;
+      if(_qiblaBloomDisc) _qiblaBloomDisc.material.uniforms.time.value = t;
+
       if (_compassAligned) {
-        // Entry beam fades in
-        if(_qiblaEntryBeam){
-          _qiblaEntryBeam.visible = true;
-          var eop = _qiblaEntryBeam.children[0].material.uniforms.op.value;
-          _qiblaEntryBeam.children[0].material.uniforms.op.value = Math.min(eop + 0.04, 0.25 * breathe);
+        // Fan disc fades in
+        if(_qiblaFanDisc){
+          _qiblaFanDisc.visible = true;
+          var fop = _qiblaFanDisc.material.uniforms.op.value;
+          _qiblaFanDisc.material.uniforms.op.value = Math.min(fop + 0.04, 0.22 * breathe);
         }
-        // Core glow fades in
-        if(_qiblaCoreGlow){
-          _qiblaCoreGlow.visible = true;
-          var cop = _qiblaCoreGlow.children[0].material.uniforms.op.value;
-          _qiblaCoreGlow.children[0].material.uniforms.op.value = Math.min(cop + 0.03, 0.15 * breathe);
+        // Bloom underlayer
+        if(_qiblaBloomDisc){
+          _qiblaBloomDisc.visible = true;
+          var bop = _qiblaBloomDisc.material.uniforms.op.value;
+          _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.02, 0.08 * breathe);
         }
-        // Spectral channels fade in with caustic wobble
-        _qiblaBeams.forEach(function(b) {
-          b.visible = true;
-          var bop = b.children[0].material.uniforms.op.value;
-          var tgt = b.userData.targetOp * breathe;
-          b.children[0].material.uniforms.op.value = Math.min(bop + 0.04, tgt);
-          // Caustic wobble: ±1.5° sinusoidal on Y axis
-          b.rotation.y = b.userData.baseY + THREE.MathUtils.degToRad(1.5) * Math.sin(t * 0.6 + b.userData.phase);
-        });
+        // Entry beam
+        if(_qiblaEntryDisc){
+          _qiblaEntryDisc.visible = true;
+          var eop = _qiblaEntryDisc.material.uniforms.op.value;
+          _qiblaEntryDisc.material.uniforms.op.value = Math.min(eop + 0.04, 0.18 * breathe);
+        }
       } else if (!_compassDevMode) {
-        // Fade out all beam layers (skip fade-out in dev mode)
-        [_qiblaEntryBeam, _qiblaCoreGlow].forEach(function(el){
-          if(!el) return;
-          var eop2 = el.children[0].material.uniforms.op.value;
-          if(eop2 > 0.005){ el.children[0].material.uniforms.op.value = eop2 * 0.88; }
-          else { el.visible = false; el.children[0].material.uniforms.op.value = 0; }
-        });
-        _qiblaBeams.forEach(function(b) {
-          var bop2 = b.children[0].material.uniforms.op.value;
-          if(bop2 > 0.005){ b.children[0].material.uniforms.op.value = bop2 * 0.88; }
-          else { b.visible = false; b.children[0].material.uniforms.op.value = 0; }
+        // Fade out all disc layers
+        [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
+          if(!d) return;
+          var dop = d.material.uniforms.op.value;
+          if(dop > 0.005){ d.material.uniforms.op.value = dop * 0.88; }
+          else { d.visible = false; d.material.uniforms.op.value = 0; }
         });
       }
     } else {
