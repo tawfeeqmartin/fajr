@@ -6,6 +6,7 @@ import * as THREE from 'three';
 
 
 // ─── CONTAINER DETECTION ──────────────────────────────────────────────────────
+const _isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
 const CONTAINER = window._clockContainer || null;
 const CONTAINED = !!CONTAINER;
 let _isFullscreen = false;
@@ -42,7 +43,9 @@ renderer.setSize(W, H);
 if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
-  document.body.appendChild(renderer.domElement);
+  const c = renderer.domElement;
+  c.style.cssText = 'position:fixed;inset:0;z-index:0;width:100%;height:100%;';
+  document.body.appendChild(c);
 }
 
 // FBO render target
@@ -64,8 +67,8 @@ const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 // FOV 35° on both — telephoto/rectilinear, minimal perspective distortion.
 // Elevation angle matched: both cameras sit ~33° above cube so top face reads properly.
 // Landing was too low (29°) making cube look flat — raised y to match fullscreen proportion.
-const CAM_LANDING    = { pos: [0, 7.5, 10.5], fov: 35, look: [0, 0.5, 0] };
-const CAM_FULLSCREEN = { pos: [0, 10.5, 16.0], fov: 35, look: [0, 0.5, 0] };
+const CAM_LANDING    = { pos: [0, 9.0, 16.0], fov: 35, look: [0, 0.5, 0] };
+const CAM_FULLSCREEN = { pos: [0, 9.0, 16.0], fov: 35, look: [0, 0.5, 0] };
 
 function applyCamera(preset) {
   camera.position.set(...preset.pos);
@@ -107,7 +110,7 @@ scene.add(ground);
 
 // BACKLIGHT — from behind-right. Illuminates the scene behind the cube so the
 // FBO captures bright content → glass refracts light and looks transparent/glowing.
-const back = new THREE.SpotLight(0xd8e8ff, 38);
+const back = new THREE.SpotLight(0x4040a0, 10);
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
@@ -116,19 +119,19 @@ scene.add(back, back.target);
 // GOBO KEY — upper-front-left, broad wash (not a tight spot).
 // Shapes the floor with a gentle gradient pool, defines front/top cube faces.
 // Wide angle + soft penumbra = falloff is gradual, not a hard disco-spot.
-const gobo = new THREE.SpotLight(0xffffff, 32);
+const gobo = new THREE.SpotLight(0xff00ff, 72);
 gobo.position.set(-3.5, 6.5, 3.2);
 gobo.target.position.set(0.3, 0, 0.5);
 gobo.angle = 0.42;       // wider cone — broad wash over cube + floor
 gobo.penumbra = 0.45;    // soft falloff, blends into ambient naturally
 gobo.decay = 1.4;
 gobo.castShadow = true;
-gobo.shadow.mapSize.set(2048, 2048);
+gobo.shadow.mapSize.set(_isMobile ? 512 : 1024, _isMobile ? 512 : 1024);
 gobo.shadow.bias = -0.001;
 scene.add(gobo, gobo.target);
 
 // COOL RIM — catches back edges of cube, separates silhouette from bg
-const rim = new THREE.SpotLight(0x8899ff, 9);
+const rim = new THREE.SpotLight(0x8060c0, 11);
 rim.position.set(-1.5, 5.5, -3.5);
 rim.target.position.set(0, 0.6, 0);
 rim.angle = 0.45; rim.penumbra = 0.85;
@@ -138,11 +141,18 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 120, 14);
+const cubeSun = new THREE.PointLight(0xe8f2ff, 105, 14);
 cubeSun.position.set(0, 1.0, -2.0);
 scene.add(cubeSun);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.08));
+scene.add(new THREE.AmbientLight(0xffffff, 0.58));
+
+// 12 o'clock spotlight — catches top edge during tawaf rotation
+const tawafSpot = new THREE.SpotLight(0xffffff, 12);
+tawafSpot.position.set(0, 3.5, -3);
+tawafSpot.target.position.set(0, 0.5, 0);
+tawafSpot.angle = 0.4; tawafSpot.penumbra = 0.9;
+scene.add(tawafSpot, tawafSpot.target);
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
@@ -183,8 +193,13 @@ const dichroicVert = `
   varying vec3 vViewNormal;
   varying vec3 vViewDir;
   varying vec3 vLocalPos;
+  varying vec3 vWorldPos;
+  varying vec3 vWorldNormal;
   void main() {
     vLocalPos = position;
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vWorldPos = worldPos.xyz;
+    vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
     vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
     vViewNormal = normalize(normalMatrix * normal);
     vViewDir = normalize(-mvPos.xyz);
@@ -201,10 +216,15 @@ const dichroicFrag = `
   uniform float     uFresnel;
   uniform float     uTime;
   uniform float     uAspect;
+  uniform vec3      uSpecLightPos;
+  uniform vec3      uCamWorldPos;
+  uniform float     uSpecIntensity;
 
   varying vec3 vViewNormal;
   varying vec3 vViewDir;
   varying vec3 vLocalPos;
+  varying vec3 vWorldPos;
+  varying vec3 vWorldNormal;
 
   vec3 thinFilm(float cosT, float t) {
     float p = 6.28318 * 2.5 * cosT + t * 0.35;
@@ -241,6 +261,15 @@ const dichroicFrag = `
     col += irid * diagF * fresnel * 0.75;
     col += fresnel * 0.55;
 
+    // ── Animated specular edge highlight ──
+    vec3 Nw = normalize(vWorldNormal);
+    vec3 Vw = normalize(uCamWorldPos - vWorldPos);
+    vec3 Lw = normalize(uSpecLightPos - vWorldPos);
+    vec3 Hw = normalize(Lw + Vw);
+    float fresnelW = pow(1.0 - max(dot(Nw, Vw), 0.0), 4.0);
+    float spec = pow(max(dot(Nw, Hw), 0.0), 24.0);
+    col += vec3(1.0, 0.95, 0.9) * uSpecIntensity * spec * (0.4 + 0.6 * fresnelW);
+
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -257,16 +286,21 @@ const cubeMat = new THREE.ShaderMaterial({
     uFresnel: { value: 2.0 },
     uTime:    { value: 0 },
     uAspect:  { value: W / H },
+    uSpecLightPos: { value: new THREE.Vector3(0, 3.5, -3) },
+    uCamWorldPos:  { value: new THREE.Vector3() },
+    uSpecIntensity: { value: 1.875 },
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
   side: THREE.FrontSide,
 });
 
+const cubeGroup = new THREE.Group();
 const cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), cubeMat);
 cubeMesh.position.y = CUBE_Y;
 cubeMesh.castShadow = true;
-prismGroup.add(cubeMesh);
+cubeGroup.add(cubeMesh);
+prismGroup.add(cubeGroup);
 prismGroup.rotation.y = Math.PI / 4;
 
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
@@ -314,8 +348,8 @@ function floorRay(az, c1, c2, w, len, op) {
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
-floorRay(135, 0x9900ff, 0xff00ff, 0.72, 3.48, 0.88);   // HOUR   (violet)
-floorRay(135, 0x1133ff, 0x00aaff, 0.72, 5.64, 0.92);   // MINUTE (blue)
+floorRay(135, 0x9900ff, 0xff00ff, 0.40, 3.48, 0.88);   // HOUR   (violet)
+floorRay(135, 0x1133ff, 0x00aaff, 0.40, 5.64, 0.92);   // MINUTE (blue)
 floorRay(135, 0x44ff88, 0x00cc44, 0.40, 9.12, 0.62);   // SECOND (green)
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
@@ -418,26 +452,15 @@ function makeSectorGeom(radius, thetaHalf, segments) {
   return geo;
 }
 
-const SECTOR_RADIUS      = 9.12;  // matches second-hand length
-const SECTOR_FADE_SEC    = 180.0; // fade active → 0 over 3 minutes after window ends
-const SECTOR_HORIZON_MIN = 600;   // upcoming detection horizon (~10 h)
-const UPCOMING_RAMP_MIN  = 60;    // start intensifying upcoming beam 60 min before prayer
+const SECTOR_RADIUS = 9.12;  // matches second-hand length
+const OP_ACTIVE = 1.2;
 
-// Boundary beam opacities (same visual language as clock hands)
-const OP_ACTIVE   = 0.55;  // active: clearly lit boundary markers
-const OP_UPCOMING = 0.16;  // next-up far: dim, proximity ramp takes it to 0.55
-const OP_FAJR_DIM = 0.07;  // Fajr far: faint dawn whisper
-// Atmospheric fill is a fixed fraction of the boundary beam opacity
-const FILL_RATIO  = 0.20;  // fill opacity = beam opacity × 0.20
-
-// Each prayer window: two crisp boundary beams (start + end, same as hands)
-// + one very dim atmospheric sector fill between them.
-// [{ fillGrp, fillMat, beamGrps[], beamMats[], def, startMin, endMin }]
 let prayerSectors = [];
 let ptSectorsRebuilt = false;
 
-function addBeam(ang, color, color2, initOp) {
-  const geo = new THREE.PlaneGeometry(0.72, SECTOR_RADIUS, 1, 16);
+function addBeam(ang, color, color2, initOp, width) {
+  const w = width || 0.72;
+  const geo = new THREE.PlaneGeometry(w, SECTOR_RADIUS, 1, 16);
   geo.translate(0, SECTOR_RADIUS / 2, 0);
   const mat = mkMat(color, color2, initOp);
   const grp = new THREE.Group();
@@ -451,128 +474,118 @@ function addBeam(ang, color, color2, initOp) {
 }
 
 function buildPrayerSectors() {
-  prayerSectors.forEach(function(ps) {
-    prismGroup.remove(ps.fillGrp);
-    ps.beamGrps.forEach(function(g) { prismGroup.remove(g); });
-  });
   prayerSectors = [];
-
   const T = window._prayerTimings || PT_FALLBACK;
-
   PRAYER_WINDOWS_DEF.forEach(function(def) {
     const startMin = ptParseMin(T[def.startKey]);
     const endMin   = ptParseMin(T[def.endKey]);
     const startAng = ptTimeToAngle(startMin);
     const endAng   = ptTimeToAngle(endMin);
-
-    let thetaLen = endAng - startAng;
-    if (thetaLen > 0) thetaLen -= TAU;
-    const spanAngle = Math.abs(thetaLen);
-    const midAng    = startAng + thetaLen / 2;
-    const initBeamOp = def.isFajr ? OP_FAJR_DIM : OP_UPCOMING;
-    const initFillOp = initBeamOp * FILL_RATIO;
-
-    // ── Atmospheric fill (very dim sector — just enough warmth to hint the zone)
-    const fillGeo = makeSectorGeom(SECTOR_RADIUS, spanAngle / 2);
-    const fillMat = mkMatWindow(def.color, def.color2, initFillOp);
-    const fillGrp = new THREE.Group();
-    fillGrp.add(new THREE.Mesh(fillGeo, fillMat));
-    fillGrp.position.y = 0.005;
-    fillGrp.rotation.order = 'YXZ';
-    fillGrp.rotation.y = midAng;
-    fillGrp.rotation.x = Math.PI / 2;
-    prismGroup.add(fillGrp);
-
-    // ── Crisp boundary beams at window start and end (same shader as hands)
-    const startBeam = addBeam(startAng, def.color, def.color2, initBeamOp);
-    const endBeam   = addBeam(endAng,   def.color, def.color2, initBeamOp);
-
-    prayerSectors.push({
-      fillGrp, fillMat,
-      beamGrps: [startBeam.grp, endBeam.grp],
-      beamMats: [startBeam.mat, endBeam.mat],
-      def, startMin, endMin,
-    });
+    prayerSectors.push({ def, startMin, endMin, startAng, endAng });
   });
 }
 
-buildPrayerSectors(); // initial build with fallback times
+// ── Polar disc prayer beam (single CircleGeometry + fragment shader) ──
+const _prayerDiscGeo = new THREE.CircleGeometry(SECTOR_RADIUS * 1.3, 64);
+const _prayerDiscMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, side: THREE.DoubleSide,
+  uniforms: {
+    uStartAngle: { value: 0.0 },
+    uEndAngle:   { value: 0.0 },
+    uColor1:     { value: new THREE.Color(0xff0000) },
+    uColor2:     { value: new THREE.Color(0x00ff00) },
+    uIntensity:  { value: 0.0 },
+    uOuterRadius:{ value: SECTOR_RADIUS },
+  },
+  vertexShader: `
+    varying vec2 vPos;
+    void main() {
+      vPos = position.xy;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    #define PI  3.14159265
+    #define TAU 6.28318530
+    uniform float uStartAngle, uEndAngle;
+    uniform vec3  uColor1, uColor2;
+    uniform float uIntensity, uOuterRadius;
+    varying vec2  vPos;
+    void main() {
+      float r = length(vPos);
+      float radial = exp(-r / uOuterRadius * 2.8);
+
+      float angle = atan(vPos.x, -vPos.y);
+
+      // Handle wrapping windows (e.g. Tahajjud crossing 12 o'clock)
+      float span = uStartAngle - uEndAngle;
+      if (span < 0.0) span += TAU;
+      float mid = uStartAngle - span * 0.5;
+      float hSpan = span * 0.5;
+
+      // Signed angular distance with wrapping
+      float d = angle - mid;
+      d = d - TAU * floor((d + PI) / TAU);
+      float normDist = abs(d) / max(hSpan, 0.001);
+      // Flat-top — stays bright to 90% of window, sharper rolloff at edges
+      float angular = exp(-pow(max(normDist - 0.90, 0.0) * 12.0, 2.0));
+
+      // Dichroic color shift across fan
+      float colorT = clamp(0.5 + d / max(hSpan * 2.0, 0.001), 0.0, 1.0);
+      vec3 col = mix(uColor1, uColor2, colorT);
+
+      float alpha = radial * angular * uIntensity;
+      if (alpha < 0.002) discard;
+      gl_FragColor = vec4(col * alpha, alpha);
+    }
+  `
+});
+
+const _prayerDisc = new THREE.Mesh(_prayerDiscGeo, _prayerDiscMat);
+_prayerDisc.rotation.x = -Math.PI / 2;
+_prayerDisc.position.y = 0.02;
+_prayerDisc.visible = false;
+prismGroup.add(_prayerDisc);
 
 function updatePrayerWindows(now) {
-  // Rebuild once when real prayer data arrives
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
     buildPrayerSectors();
     ptSectorsRebuilt = true;
   }
-  if (!prayerSectors.length) return;
+  if (!prayerSectors.length) { _prayerDisc.visible = false; return; }
 
   const nowMin = now.getHours() * 60 + now.getMinutes();
-  const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
-  prayerSectors.forEach(function(ps) {
-    const { fillMat, beamMats, def, startMin, endMin } = ps;
-    const wraps = startMin > endMin; // cross-midnight window (Tahajjud)
-
-    // ── Active? ────────────────────────────────────────────────────────────────────────────
-    let isActive;
-    if (wraps) {
-      isActive = (nowMin >= startMin) || (nowMin < endMin);
-    } else {
-      isActive = (nowMin >= startMin) && (nowMin < endMin);
-    }
-
-    // ── Seconds since window ended (for fade-out) ──────────────────────────────────────
-    let secSinceEnd = null;
-    if (!isActive) {
-      const endSecAbs = endMin * 60;
-      let elapsed = nowSec - endSecAbs;
-      if (elapsed < 0) elapsed += 86400;
-      if (elapsed < SECTOR_FADE_SEC) {
-        secSinceEnd = elapsed;
-      }
-    }
-
-    // ── Minutes until next start (perpetual-cycle upcoming detection) ─────────────────
-    const minUntilStart = (startMin - nowMin + 1440) % 1440;
-
-    // ── Compute target opacity ─────────────────────────────────────────────────
-    let targetOp;
-    if (isActive) {
-      targetOp = OP_ACTIVE;
-    } else if (secSinceEnd !== null) {
-      // Fade from OP_ACTIVE → 0 over 3 minutes after window ends
-      targetOp = OP_ACTIVE * Math.max(0.0, 1.0 - secSinceEnd / SECTOR_FADE_SEC);
-    } else if (def.isFajr) {
-      // Fajr: always a horizon whisper, but ramps near dawn
-      if (minUntilStart <= UPCOMING_RAMP_MIN) {
-        const f = 1.0 - minUntilStart / UPCOMING_RAMP_MIN;
-        targetOp = OP_FAJR_DIM + (OP_UPCOMING - OP_FAJR_DIM) * f;
-      } else {
-        targetOp = OP_FAJR_DIM;
-      }
-    } else if (minUntilStart <= SECTOR_HORIZON_MIN) {
-      if (minUntilStart <= UPCOMING_RAMP_MIN) {
-        // Proximity ramp: 60 min out → 0.14, 30 min → 0.26, 10 min → 0.34, 0 min → 0.38
-        // Builds anticipation as the prayer approaches
-        const f = 1.0 - minUntilStart / UPCOMING_RAMP_MIN;
-        targetOp = OP_UPCOMING + (OP_ACTIVE - OP_UPCOMING) * f;
-      } else {
-        targetOp = OP_UPCOMING;
-      }
-    } else {
-      // Truly past, not yet cycling back — hidden
-      targetOp = 0.0;
-    }
-
-    // Boundary beams lerp to target; fill tracks at FILL_RATIO of beam opacity
-    beamMats.forEach(function(m) {
-      m.uniforms.op.value = THREE.MathUtils.lerp(m.uniforms.op.value, targetOp, 0.03);
-    });
-    fillMat.uniforms.op.value = THREE.MathUtils.lerp(
-      fillMat.uniforms.op.value, targetOp * FILL_RATIO, 0.03
-    );
+  let showIdx = -1;
+  let bestDist = 99999;
+  prayerSectors.forEach(function(ps, i) {
+    const { startMin, endMin } = ps;
+    const wraps = startMin > endMin;
+    let isActive = wraps
+      ? (nowMin >= startMin) || (nowMin < endMin)
+      : (nowMin >= startMin) && (nowMin < endMin);
+    if (isActive) { showIdx = i; bestDist = -1; return; }
+    if (bestDist < 0) return;
+    const dist = (startMin - nowMin + 1440) % 1440;
+    if (dist < bestDist) { bestDist = dist; showIdx = i; }
   });
+
+  const u = _prayerDiscMat.uniforms;
+  const targetIntensity = showIdx >= 0 ? OP_ACTIVE : 0.0;
+  u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, targetIntensity, 0.03);
+
+  if (showIdx >= 0) {
+    const ps = prayerSectors[showIdx];
+    u.uStartAngle.value = ps.startAng;
+    u.uEndAngle.value = ps.endAng;
+    u.uColor1.value.set(ps.def.color);
+    u.uColor2.value.set(ps.def.color2);
+    _prayerDisc.visible = true;
+  }
+  if (u.uIntensity.value < 0.001) _prayerDisc.visible = false;
 }
+
+// buildPrayerSectors called on first updatePrayerWindows when real data ready
 
 // ─── ANIMATE ──────────────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
@@ -594,6 +607,21 @@ prismGroup.rotation.y = Math.PI / 4;
   clockRays[0].mesh.rotation.y = clockRays[0].initY - (h / 12) * TAU;   // hour
   clockRays[1].mesh.rotation.y = clockRays[1].initY - (m / 60) * TAU;   // minute
   clockRays[2].mesh.rotation.y = clockRays[2].initY - (s / 60) * TAU;   // second
+
+  // Specular highlight orbits cube at second-hand speed
+  const secAngle = (s / 60) * TAU;
+  const specRadius = 3.0;
+  cubeMat.uniforms.uSpecLightPos.value.set(
+    Math.sin(secAngle) * specRadius,
+    3.5,
+    -Math.cos(secAngle) * specRadius
+  );
+  cubeMat.uniforms.uCamWorldPos.value.copy(camera.position);
+
+  // Tawaf spot orbits at second-hand speed
+  const tawafAngle = (s / 60) * TAU;
+  tawafSpot.position.x = Math.sin(tawafAngle) * 3;
+  tawafSpot.position.z = -Math.cos(tawafAngle) * 3;
 
   // Update prayer window sector opacities
   updatePrayerWindows(now);

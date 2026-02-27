@@ -28,6 +28,7 @@ self.addEventListener('activate', e => {
 
 // Fetch: network-first, fallback to cache
 self.addEventListener('fetch', e => {
+  if(e.request.url.startsWith('chrome-extension://')) return;
   e.respondWith(
     fetch(e.request).then(r => {
       const clone = r.clone();

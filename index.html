@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>A Gift of Time — Prayer Times, Islamic Prayer Clock, Qibla Compass & Spatial Adhan</title>
@@ -29,7 +30,8 @@
 
 <!-- Additional SEO -->
 <meta name="author" content="Tawfeeq Martin">
-<meta name="theme-color" content="#f8f7f4">
+<meta name="theme-color" content="#24273b">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="A Gift of Time">
 <meta name="application-name" content="A Gift of Time">
 <link rel="apple-touch-icon" href="https://agiftoftime.app/apple-touch-icon.png">
@@ -126,6 +128,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/thin/style.css">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css">
+<script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <script type="importmap">
 {"imports":{"three":"https://esm.sh/three@0.170.0","three/addons/":"https://esm.sh/three@0.170.0/examples/jsm/"}}
 </script>
@@ -136,14 +139,14 @@ if(location.hash==='#clock'){document.documentElement.classList.add('clock-direc
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f8f7f4;--bg-alt:#f0efe9;--text:#1a1a1a;--text-muted:#6b6b6b;
-  --gold:#c8a44e;--border:#e5e3dd;
+  --bg:#24273b;--bg-alt:#1e2130;--text:rgba(232,228,220,.9);--text-muted:rgba(232,228,220,.5);
+  --gold:#d4af5a;--border:rgba(232,228,220,.1);
   --font:'Inter',system-ui,-apple-system,sans-serif;
   --clock-size:min(864px,95vw);
 }
 html{font-size:16px}
 body{
-  font-family:var(--font);background:var(--bg);color:var(--text);
+  font-family:var(--font);background:#0d0d12;color:var(--text);
   font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;
   overflow-x:clip;width:100%;
   transition:color 1s ease;
@@ -154,20 +157,29 @@ body::after{display:none;
 }
 
 /* ── Sticky clock ── */
+/* Clock is a fixed full-viewport background (z-index:0).
+   clock-sticky is a transparent spacer — 100vh so clock shows through. */
 .clock-sticky{
-  position:sticky;top:0;z-index:50;background:#0d0d12!important;
+  position:relative;z-index:1;
   display:flex;align-items:center;justify-content:center;
-  height:calc(var(--clock-size) + 4.5rem);
-  padding:4rem 0 .5rem;
-  background:var(--bg);
+  height:100vh;
+  background:transparent;
+  pointer-events:none; /* click through to clock canvas */
 }
 #dialHero{
-  position:relative;
-  width:var(--clock-size);height:var(--clock-size);
-  overflow:visible;
-  background:transparent;
-  flex-shrink:0;
-  /* mask removed — no edge fade on clock */
+  display:none;
+}
+.landing-prayer-bar{
+  position:fixed;top:clamp(64px,14vmin,96px);left:0;right:0;
+  text-align:center;z-index:99;pointer-events:none;
+  font-family:var(--font);font-size:clamp(.6rem,1.2vmin,1.1rem);
+  font-weight:300;letter-spacing:.1em;color:rgba(232,228,220,.55);
+  padding:.35em 1rem;
+  transition:opacity .4s ease;
+}
+.landing-hijri{
+  font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em;
+  color:rgba(232,228,220,.65);margin-bottom:clamp(4px,0.8vmin,12px);
 }
 
 /* ── Nav ── */
@@ -176,9 +188,10 @@ nav{
   padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
   transition:background .3s,box-shadow .3s;
 }
-nav.scrolled{background:var(--bg);opacity:.97;backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--border)}
-/* Nav text is light when floating over dark hero */
-nav:not(.scrolled) .nav-logo,nav:not(.scrolled) #navNext{color:rgba(232,228,220,.75);transition:color .4s}
+nav.scrolled{background:transparent;opacity:.97;backdrop-filter:none;box-shadow:none}
+/* Nav always on dark — light text */
+nav:not(.scrolled){background:transparent}
+nav .nav-logo,nav #navNext{color:rgba(232,228,220,.75);transition:color .4s}
 .nav-logo{font-weight:500;font-size:.9rem;letter-spacing:.02em}
 
 /* ── Buttons ── */
@@ -188,23 +201,23 @@ nav:not(.scrolled) .nav-logo,nav:not(.scrolled) #navNext{color:rgba(232,228,220,
   font-family:var(--font);font-size:.875rem;font-weight:500;
   cursor:pointer;border:none;transition:all .2s;
 }
-.btn-primary{background:var(--text);color:var(--bg)}
+.btn-primary{background:rgba(232,228,220,.85);color:#0d0d12}
 .btn-primary:hover{opacity:.85}
 .btn-outline{
-  background:transparent;border:1px solid var(--border);color:var(--text);
+  background:transparent;border:1px solid rgba(232,228,220,.15);color:rgba(232,228,220,.7);
   transition:color .5s ease,background-color .5s ease,border-color .5s ease;
 }
-.btn-outline:hover{border-color:var(--text)}
+.btn-outline:hover{border-color:rgba(232,228,220,.4)}
 .support-heart{display:inline-block;color:#e74c4c;font-size:1.1em;animation:heartpulse .833s ease-in-out infinite}
 @keyframes heartpulse{0%,100%{transform:scale(1)}15%{transform:scale(1.325)}30%{transform:scale(1)}45%{transform:scale(1.195)}60%{transform:scale(1)}}
 .sticky-cta{
   position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
   z-index:900;display:flex;align-items:center;gap:.6rem;
-  background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid rgba(0,0,0,.08);border-radius:2rem;
+  background:rgba(20,20,30,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(232,228,220,.1);border-radius:2rem;
   padding:.6rem 1.25rem;font-size:.8rem;font-weight:400;letter-spacing:.02em;
-  color:rgba(0,0,0,.75);text-decoration:none;
-  box-shadow:0 4px 24px rgba(0,0,0,.3);
+  color:rgba(232,228,220,.75);text-decoration:none;
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
   transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease;
   opacity:0;pointer-events:none;
 }
@@ -220,13 +233,15 @@ a{color:inherit;text-decoration:none}
   text-align:center;
   padding:0 2rem 6rem;
   position:relative;overflow:hidden;
+  background:transparent;
+  z-index:1;
+  transition:opacity .4s ease;
 }
 /* Ensure section content paints above any positioned ancestors */
 .scroll-section>*{position:relative;z-index:2;}
-/* Gradient bridge: dark hero → cream content */
-#sec-hook{background:linear-gradient(to bottom,#0d0d12 0%,#f8f7f4 22%);}
-/* grain removed — dark-only mode, clock renders its own background */
-#dialHero canvas{position:relative;z-index:2}
+/* All sections transparent — clock visible everywhere */
+#sec-hook{background:transparent;}
+#dialHero canvas{display:none} /* canvas is now fixed in body, not in dialHero */
 .section-header{
   padding:.75rem 0 .5rem;
 }
@@ -289,14 +304,15 @@ a{color:inherit;text-decoration:none}
 .step p{font-weight:300;font-size:.875rem;color:var(--text-muted);line-height:1.5;transition:color 1s ease}
 
 /* ── Scroll Snap ── */
-html{scroll-snap-type:y mandatory;scroll-padding-top:calc(var(--clock-size) + 5rem)}
+html{scroll-snap-type:y proximity;scroll-padding-top:calc(var(--clock-size) + 5rem)}
 .scroll-section{scroll-snap-align:start}
 
 /* ── Footer ── */
 footer{
   scroll-snap-align:end;
-  padding:3rem 2rem;text-align:center;border-top:1px solid var(--border);
+  padding:3rem 2rem;text-align:center;border-top:1px solid rgba(232,228,220,.08);
   transition:border-color 1s ease;
+  background:transparent;z-index:1;position:relative;
 }
 footer p{font-weight:300;font-size:.85rem;color:var(--text-muted);transition:color 1s ease}
 footer a{transition:color .2s}
@@ -323,21 +339,23 @@ footer a:hover{color:var(--text)}
 }
 
 /* ── Fullscreen Clock Overlay ── */
-.clock-fs-overlay{position:fixed;inset:0;z-index:200;background:var(--bg,#f8f7f4);display:none;flex-direction:column;align-items:center;justify-content:center}
+/* Fullscreen overlay — transparent so fixed canvas shows through, just hosts chrome UI */
+.clock-fs-overlay{position:fixed;inset:0;z-index:200;background:transparent;display:none;flex-direction:column;align-items:center;justify-content:center}
 .clock-fs-overlay.active{display:flex}
-.clock-fs-overlay canvas{z-index:20}
 /* Hide landing page content instantly when loading #clock */
 html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,.clock-direct footer{display:none!important}
-.clock-fs-overlay canvas{width:100vw!important;height:100vh!important;position:absolute;top:0;left:0;transform:none}
-.clock-fs-close{position:fixed;top:calc(env(safe-area-inset-top,12px) + 12px);left:16px;z-index:210;background:none;border:none;color:rgba(232,228,220,.6);font-size:1.5rem;cursor:pointer;padding:8px;transition:opacity .5s ease}
+/* canvas no longer lives inside overlay — it's fixed in body */
+/* Fullscreen chrome — scales with viewport via clamp() */
+.clock-fs-close{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(8px,1.5vmin,24px));left:clamp(12px,2vmin,32px);z-index:210;background:none;border:none;color:rgba(232,228,220,.6);font-size:clamp(1.2rem,2.5vmin,2.4rem);cursor:pointer;padding:clamp(6px,1vmin,16px);transition:opacity .5s ease}
 .fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker{opacity:0;pointer-events:none}
-.fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + 88px);left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
-.fs-header .fs-datetime{font-size:.7rem;font-weight:300;letter-spacing:.06em}
+.fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
+.fs-header .fs-datetime{font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em}
 .fs-header .fs-location{display:none}
-.fs-prayer-bar{font-size:.6rem;font-weight:300;letter-spacing:.1em;margin-top:6px;opacity:.55}
-.fs-mode-toggle{position:fixed;top:calc(env(safe-area-inset-top,12px) + 12px);right:16px;z-index:210;cursor:pointer;background:none;border:none;padding:8px;color:rgba(232,228,220,.6);transition:opacity .5s ease}
-.fs-mode-toggle svg{width:20px;height:20px;stroke-width:1;fill:none;stroke:currentColor}
-.fs-dial-picker{position:fixed;bottom:calc(env(safe-area-inset-bottom,12px) + 48px);left:0;right:0;text-align:center;font-family:var(--font);z-index:210;pointer-events:auto;color:rgba(232,228,220,.7);transition:opacity .5s ease}
+.fs-prayer-bar{font-size:clamp(.55rem,1.1vmin,1.1rem);font-weight:300;letter-spacing:.1em;margin-top:clamp(4px,0.8vmin,12px);opacity:.55}
+.fs-mode-toggle{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(8px,1.5vmin,24px));right:clamp(12px,2vmin,32px);z-index:210;cursor:pointer;background:none;border:none;padding:clamp(6px,1vmin,16px);color:rgba(232,228,220,.6);transition:opacity .5s ease}
+.fs-mode-toggle svg{width:clamp(18px,3vmin,40px);height:clamp(18px,3vmin,40px);stroke-width:1;fill:none;stroke:currentColor}
+/* Dial picker — hidden for single-clock mode, kept for future multi-dial */
+.fs-dial-picker{display:none}
 .fs-dial-bar{display:flex;justify-content:center;gap:7px}
 .fs-dial-bar .dial-dot{width:6px;height:6px;border-radius:50%;border:1.5px solid rgba(232,228,220,.25);cursor:pointer;transition:all .3s;background:none;padding:0}
 .fs-dial-bar .dial-dot.active{border-color:rgba(232,228,220,.7);background:rgba(232,228,220,.4)}
@@ -348,7 +366,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 <!-- Fullscreen Clock Overlay -->
 <div id="clockFullscreen" class="clock-fs-overlay">
   <button id="clockFsClose" class="clock-fs-close" aria-label="Close">&times;</button>
-  <div id="fsVersionTag" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + 8px);left:16px;z-index:210;font-family:var(--font);font-size:.6rem;font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.05em;pointer-events:none"></div>
+  <div id="fsVersionTag" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(6px,1vmin,16px));left:clamp(12px,2vmin,32px);z-index:210;font-family:var(--font);font-size:clamp(.5rem,1vmin,.9rem);font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.05em;pointer-events:none"></div>
   <button id="gyroPrompt" style="display:none;position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + 32px);right:16px;z-index:215;font-family:var(--font);font-size:.65rem;font-weight:300;letter-spacing:.04em;color:rgba(232,228,220,.5);background:rgba(0,0,0,.08);border:1px solid rgba(232,228,220,.15);border-radius:20px;padding:6px 14px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s" onclick="if(window._requestGyroPermission)window._requestGyroPermission()">Enable parallax</button>
   <div id="fsHeader" class="fs-header">
     <div class="fs-datetime" id="fsDateTime"></div>
@@ -381,6 +399,10 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 <!-- Sticky Clock -->
 <div class="clock-sticky">
   <div id="dialHero"></div>
+  <div class="landing-prayer-bar" id="landingPrayerBar">
+    <div class="landing-hijri" id="landingHijri"></div>
+    <div id="landingPrayerTimes"></div>
+  </div>
 </div>
 
 <!-- 1. THE HOOK -->
@@ -450,19 +472,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 </section>
 
 <!-- 5. NIGHT MODE -->
-<section class="scroll-section" id="sec-night">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">Night Mode</p>
-    <h2 class="section-title">The lume reveals itself.</h2></div>
-    <p class="section-body">As darkness falls, SuperLuminova indices glow to life. Each dial has its own lume colour — a quiet constellation on your wrist.</p>
-    <div class="verse">
-      <p class="verse-ar">وَجَعَلَ ٱلظُّلُمَـٰتِ وَٱلنُّورَ</p>
-      <p class="verse-en">"And He made darknesses and light."</p>
-      <p class="verse-ref">Al-An'am 6:1</p>
-      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/728.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
-    </div>
-  </div>
-</section>
+<!-- Night Mode section removed — whole site is dark/integrated with clock -->
 
 <!-- 6. ADHAN -->
 <section class="scroll-section" id="sec-adhan">
@@ -809,34 +819,8 @@ function playDialSurah(){
 // ══════════════════════════════════════════
 // NIGHT MODE
 // ══════════════════════════════════════════
-function setNightMode(on){
-  if(pageNight===on)return;
-  pageNight=on;
-  const r=document.documentElement;
-  if(on){
-    r.style.setProperty('--bg','#0c0c12');
-    r.style.setProperty('--bg-alt','#111114');
-    r.style.setProperty('--text','#e8e4dc');
-    r.style.setProperty('--text-muted','#8a8a8a');
-    r.style.setProperty('--border','rgba(255,255,255,.08)');
-  }else{
-    r.style.setProperty('--bg','#f8f7f4');
-    r.style.setProperty('--bg-alt','#f0efe9');
-    r.style.setProperty('--text','#1a1a1a');
-    r.style.setProperty('--text-muted','#6b6b6b');
-    r.style.setProperty('--border','#e5e3dd');
-  }
-  document.querySelector('.clock-sticky').style.background='';
-  const pc=document.getElementById('prayerCard');
-  if(pc){pc.style.background=on?'#141418':'#fff';pc.style.borderColor=on?'rgba(255,255,255,.08)':'var(--border)';}
-  if(window._clockSetNight) window._clockSetNight(on);
-  updateLumeHalo();
-  // Hide all fullscreen chrome when night mode starts
-  const fsClock=document.getElementById('clockFullscreen');
-  if(fsClock){
-    fsClock.classList.add('fs-chrome-hidden');
-  }
-}
+// Night mode removed — site is always dark. No-op for compatibility.
+function setNightMode(on){ pageNight=true; }
 // Tap to toggle chrome visibility in fullscreen (click = tap without drag)
 document.addEventListener('click',function(e){
   const fsClock=document.getElementById('clockFullscreen');
@@ -1173,8 +1157,7 @@ function setupScrollObservers(){
     'sec-qibla':   ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(true); },
     'sec-prayer':  ()=>{ setNightMode(false); if(window._clockQiblaDemo) window._clockQiblaDemo(false); },
     'sec-dials':   ()=>{ setNightMode(false); startDialCycle(); },
-    'sec-night':   ()=>{ setNightMode(true); stopDialCycle(); },
-    'sec-adhan':   ()=>{ setNightMode(true); stopDialCycle(); },
+    'sec-adhan':   ()=>{ stopDialCycle(); },
     'sec-install': ()=>{ setNightMode(false); },
   };
   const ratios={};
@@ -1203,7 +1186,7 @@ function setupScrollObservers(){
     const active = _lastActive || 'sec-hook';
     if(sectionStates[active]) sectionStates[active]();
     // Snap clock blend instantly — no lerp on fullscreen exit
-    const nightSections = ['sec-night','sec-adhan'];
+    const nightSections = ['sec-adhan'];
     const wantNight = nightSections.includes(active);
     window._fsLastNight = wantNight;
     if(window._clockSetNight) window._clockSetNight(wantNight, true);
@@ -1240,36 +1223,24 @@ window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scr
 // PRAYER TIMES
 // ══════════════════════════════════════════
 (async()=>{
-  let city='Los Angeles',country='US',apiUrl;
-  try{
-    const pos=await new Promise((r,j)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(r,j,{maximumAge:300000,timeout:3000}):j());
-    const lat=pos.coords.latitude,lon=pos.coords.longitude;
-    apiUrl=`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`;
-    try{const geoR=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-    const geo=await geoR.json();
-    city=geo.address?.city||geo.address?.town||geo.address?.village||city;
-    country=geo.address?.country_code?.toUpperCase()||country;}catch(e){}
-  }catch(e){
-    try{const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
-    city=tz.split('/').pop().replace(/_/g,' ');}catch(e2){}
-    apiUrl=`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=US&method=2`;
-  }
-  try{
-    const r=await fetch(apiUrl);const j=await r.json();if(j.code!==200)return;
-    const t=j.data.timings,d=j.data.date;
+  // Prayer location vars removed — adhan-js handles computation now
+  // Prayer times now computed by adhan-js in fsFetchPrayer().
+  // Wait for _prayerTimings to be set, then populate prayer card + start nav clock.
+  const _waitPT = setInterval(()=>{
+    if(!window._prayerTimings) return;
+    clearInterval(_waitPT);
+    const t=window._prayerTimings;
     const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
     const now=new Date();const nowM=now.getHours()*60+now.getMinutes();
     const toMin=s=>{const[h,m]=s.split(':').map(Number);return h*60+m;};
     let nextP='';t5.forEach(p=>{if(!nextP&&toMin(t[p])>nowM)nextP=p;});
-    document.getElementById('pcTimes').innerHTML=t5.map(p=>{
+    const pcEl=document.getElementById('pcTimes');
+    if(pcEl) pcEl.innerHTML=t5.map(p=>{
       const hi=p===nextP;
       return`<span style="${hi?'font-weight:700;color:#c0392b':''}">` +p+' '+t[p]+'</span>';
     }).join(' · ');
-    // Store for nav bar live clock
-    window._prayerTimings=t;
-    window._prayerTimingsReady=true;
     startNavClock();
-  }catch(e){window._prayerTimingsReady=true;}
+  }, 100);
 })();
 
 // ── Nav bar live clock + next prayer ──
@@ -1451,7 +1422,7 @@ addSwipe(document.getElementById('clockFullscreen'));
 // Auto-open fullscreen if URL has #clock
 if(location.hash === '#clock') {
   const _waitClock = setInterval(()=>{
-    if(window._clockSetFullscreen && document.querySelector('#dialHero canvas') && typeof openClockFullscreen === 'function') {
+    if(window._clockSetFullscreen && document.querySelector('body > canvas') && typeof openClockFullscreen === 'function') {
       clearInterval(_waitClock);
       setTimeout(()=>openClockFullscreen(), 200);
     }
@@ -1552,7 +1523,7 @@ function fsStartClock() {
   // Set Hijri date instantly — no API wait
   const h = getHijriDate();
   if(h) {
-    document.getElementById('fsDateTime').textContent = `${h.day} ${h.month} ${h.year} AH  ·  ${h.monthAr}`;
+    document.getElementById('fsDateTime').innerHTML = `<span style="color:#e0e0e0">${h.day} ${h.month} ${h.year} AH  ·  ${h.monthAr}</span>`;
   } else {
     fsUpdateDateTime(); // Gregorian fallback
   }
@@ -1561,72 +1532,140 @@ function fsStopClock() {
   if(_fsClockTimer) { clearInterval(_fsClockTimer); _fsClockTimer = null; }
 }
 
-function fsSetPrayerTimes(t, hijri) {
-  const _fpt5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
-  const _fnow=new Date(),_fnowM=_fnow.getHours()*60+_fnow.getMinutes();
-  const _ftoM=s=>{const[h,m]=(s||'').split(':').map(Number);return h*60+m;};
-  let _fnextP='';_fpt5.forEach(p=>{if(!_fnextP&&_ftoM(t[p])>_fnowM)_fnextP=p;});
-  document.getElementById('fsPrayerTimes').innerHTML=_fpt5.map(p=>`<span style="${p===_fnextP?'color:#c0392b;font-weight:600':''}">${p} ${t[p]}</span>`).join(' · ');
-  // Top header: Hijri date replaces Gregorian date/time
-  if(hijri) {
-    document.getElementById('fsDateTime').textContent = `${hijri.day} ${hijri.month.en} ${hijri.year} AH  ·  ${hijri.month.ar}`;
-  }
-  // Gregorian date removed from fullscreen
+// ── Prayer times via adhan-js (local calculation, zero network latency) ──
+function _computePrayerTimes(lat, lon) {
+  const coords = new adhan.Coordinates(lat, lon);
+  const params = adhan.CalculationMethod.NorthAmerica();
+  const date = new Date();
+  const pt = new adhan.PrayerTimes(coords, date, params);
+  const sunnah = new adhan.SunnahTimes(pt);
+  const fmt = d => {
+    const h = d.getHours(), m = d.getMinutes();
+    return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+  };
+  return {
+    Fajr: fmt(pt.fajr), Sunrise: fmt(pt.sunrise), Dhuhr: fmt(pt.dhuhr),
+    Asr: fmt(pt.asr), Maghrib: fmt(pt.maghrib), Isha: fmt(pt.isha),
+    Sunset: fmt(pt.sunset), Midnight: fmt(sunnah.middleOfTheNight),
+    Sunrise: fmt(pt.sunrise), Qiyam: fmt(sunnah.lastThirdOfTheNight),
+  };
 }
+
+function _displayPrayerTimes(t, hijri) {
+  const names = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam'];
+  const now = new Date(), nowM = now.getHours()*60+now.getMinutes();
+  const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
+  let nextP = ''; names.forEach(p => { if(!nextP && toM(t[p]) > nowM) nextP = p; });
+  const grey = ['Sunrise','Qiyam'];
+  const html = names.map(p => {
+    let style = 'color:#e0e0e0';
+    if (p === nextP) style = 'color:#c0392b;font-weight:600';
+    else if (grey.includes(p)) style = 'color:#666';
+    return `<span style="${style}">${p} ${t[p]}</span>`;
+  }).join(' · ');
+  // Fullscreen prayer bar
+  const fsEl = document.getElementById('fsPrayerTimes'); if(fsEl) fsEl.innerHTML = html;
+  // Landing prayer bar
+  const lpt = document.getElementById('landingPrayerTimes'); if(lpt) lpt.innerHTML = html;
+  // Hijri date
+  if(hijri) {
+    const hijriStr = `<span style="color:#e0e0e0">${hijri.day} ${hijri.month.en} ${hijri.year} AH  ·  ${hijri.month.ar}</span>`;
+    const fsdt = document.getElementById('fsDateTime'); if(fsdt) fsdt.innerHTML = hijriStr;
+    const lh = document.getElementById('landingHijri'); if(lh) lh.innerHTML = hijriStr;
+  }
+}
+
 function fsSetLocation(text) {
   const el = document.getElementById('fsLocation');
   if(el && text) el.textContent = text;
 }
-async function fsFetchPrayer() {
-  let resolved = false;
 
-  async function fromCoords(lat, lon, locationName) {
-    try {
-      const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`);
-      const j = await res.json();
-      if(j.code===200 && !resolved) {
-        resolved = true;
-        fsSetPrayerTimes(j.data.timings, j.data.date && j.data.date.hijri);
-        if(locationName) fsSetLocation(locationName);
-        else {
-          const tz = j.data.meta && j.data.meta.timezone;
-          if(tz) fsSetLocation(tz.split('/').pop().replace(/_/g,' '));
-        }
+let _prayerLocationResolved = false;
+function _setPrayerLocation(lat, lon, locationName) {
+  // Compute times instantly via adhan-js
+  const t = _computePrayerTimes(lat, lon);
+  // Store for glass-cube-clock beams
+  window._prayerTimings = t;
+  window._prayerTimingsReady = true;
+  _displayPrayerTimes(t, null);
+  if(locationName) fsSetLocation(locationName);
+  _prayerLocationResolved = true;
+
+  // Fetch Hijri date from AlAdhan (lightweight, non-blocking)
+  fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`)
+    .then(r=>r.json()).then(j=>{
+      if(j.code===200 && j.data.date && j.data.date.hijri) {
+        _displayPrayerTimes(t, j.data.date.hijri);
       }
-      // Upgrade location with reverse geocode (non-blocking)
-      fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
-        .then(r=>r.json()).then(g=>{
-          const city = g.city || g.locality || '';
-          const region = g.principalSubdivisionCode ? g.principalSubdivisionCode.split('-').pop() : '';
-          if(city) fsSetLocation(region ? `${city}, ${region}` : city);
-        }).catch(()=>{});
-    } catch(e) {}
-  }
+    }).catch(()=>{});
 
-  // Race: GPS vs IP geolocation — first to resolve wins
-  // GPS path
+  // Reverse geocode for nice location name
+  fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
+    .then(r=>r.json()).then(g=>{
+      const city = g.city || g.locality || '';
+      const region = g.principalSubdivisionCode ? g.principalSubdivisionCode.split('-').pop() : '';
+      if(city) fsSetLocation(region ? `${city}, ${region}` : city);
+    }).catch(()=>{});
+}
+
+// Alias for fullscreen code that calls fsSetPrayerTimes
+function fsSetPrayerTimes(t, hijri) { _displayPrayerTimes(t, hijri); }
+
+async function fsFetchPrayer() {
+  // GPS — most accurate (fires in parallel, resolves async)
   if(navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      pos => fromCoords(pos.coords.latitude, pos.coords.longitude),
-      ()=>{}, {maximumAge:600000, timeout:5000}
+      pos => {
+        if(!_prayerLocationResolved) _setPrayerLocation(pos.coords.latitude, pos.coords.longitude);
+      },
+      ()=>{}, {maximumAge:600000, timeout:8000}
     );
   }
 
-  // IP path (starts immediately, doesn't wait for GPS)
-  try {
-    const ipRes = await fetch('https://ipapi.co/json/', {signal: AbortSignal.timeout(4000)});
-    const ip = await ipRes.json();
-    if(ip.latitude && ip.longitude) {
-      const loc = ip.city ? (ip.region_code ? `${ip.city}, ${ip.region_code}` : ip.city) : '';
-      await fromCoords(ip.latitude, ip.longitude, loc);
+  // IP geolocation — try multiple services in parallel for speed
+  const ipServices = [
+    { url: 'https://ipapi.co/json/', extract: d => d.latitude && d.longitude ? {lat:d.latitude, lon:d.longitude, loc: d.city?(d.region_code?`${d.city}, ${d.region_code}`:d.city):''} : null },
+    { url: 'https://api.ipbase.com/v1/json/', extract: d => d.latitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city||''} : null },
+    { url: 'https://get.geojs.io/v1/ip/geo.json', extract: d => d.latitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city||''} : null },
+  ];
+  const racePromises = ipServices.map(async svc => {
+    try {
+      const r = await fetch(svc.url, {signal: AbortSignal.timeout(4000)});
+      const d = await r.json();
+      return svc.extract(d);
+    } catch(e) { return null; }
+  });
+  // Use first successful result
+  for (const p of racePromises) {
+    const result = await p;
+    if(result && !_prayerLocationResolved) {
+      _setPrayerLocation(result.lat, result.lon, result.loc);
+      break;
     }
-  } catch(e) {}
-
-  // Last resort: hardcoded LA if nothing worked after 6s
-  setTimeout(() => {
-    if(!resolved) fromCoords(34.05, -118.25, 'Los Angeles, CA');
-  }, 6000);
+  }
 }
+// Fetch prayer times on page load
+fsFetchPrayer();
+
+// Fade sections: only visible in bottom third of viewport.
+// Cube occupies center — text must be invisible before reaching it.
+{const _fadeScroll=()=>{
+  const vh=window.innerHeight;
+  const fadeOut=vh*0.55; // above this = invisible (cube zone)
+  const fadeIn=vh*0.7;   // below this = fully visible
+  document.querySelectorAll('.scroll-section').forEach(s=>{
+    const r=s.getBoundingClientRect();
+    const top=r.top;
+    let op;
+    if(top >= fadeIn) { op=1; }
+    else if(top <= fadeOut) { op=0; }
+    else { op=(top-fadeOut)/(fadeIn-fadeOut); }
+    s.style.opacity=String(op);
+    s.style.pointerEvents=op<0.1?'none':'auto';
+  });
+};
+window.addEventListener('scroll',_fadeScroll,{passive:true});
+_fadeScroll();}
 
 function openClockFullscreen() {
   // Fullscreen tap is a user gesture — request gyro permission (iOS)
@@ -1640,8 +1679,6 @@ function openClockFullscreen() {
   }
 
   const overlay = document.getElementById('clockFullscreen');
-  const canvas = document.querySelector('#dialHero canvas');
-  if(!canvas) return;
 
   // Show version tag
   const vTag=document.getElementById('fsVersionTag');
@@ -1653,13 +1690,19 @@ function openClockFullscreen() {
   // Reset to default dial (slate) for consistent look
   if(window.switchDial) window.switchDial(6);
 
-  // Match page background — Turrell mode is luminous, not dark
-  overlay.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f8f7f4';
+  // Transparent — clock canvas is already fixed in body behind everything
+  overlay.style.background = 'transparent';
 
-  // Move canvas into fullscreen overlay
-  overlay.appendChild(canvas);
+  // No canvas move needed — it's always a fixed background layer.
+  // Hide page content so canvas (z:0) shows through overlay (z:200).
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
+  document.querySelector('.clock-sticky').style.display = 'none';
+  const _lb=document.getElementById('landingPrayerBar');if(_lb)_lb.style.display='none';
+  document.querySelectorAll('.scroll-section').forEach(s => s.style.display = 'none');
+  document.querySelector('footer')?.style && (document.querySelector('footer').style.display = 'none');
+  const stickyC = document.querySelector('.sticky-cta');
+  if (stickyC) stickyC.style.display = 'none';
   // Hide nav in fullscreen
   const navEl = document.querySelector('nav');
   navEl.style.display = 'none';
@@ -1704,18 +1747,16 @@ function openClockFullscreen() {
 
 function closeClockFullscreen() {
   const overlay = document.getElementById('clockFullscreen');
-  const canvas = overlay.querySelector('canvas');
-  if(!canvas) return;
 
-  // Move canvas back — clear fullscreen inline styles so #dialHero sizing takes over
-  canvas.style.width = '';
-  canvas.style.height = '';
-  canvas.style.position = '';
-  canvas.style.top = '';
-  canvas.style.left = '';
-  document.getElementById('dialHero').appendChild(canvas);
+  // Restore page content
   overlay.classList.remove('active');
   document.body.style.overflow = '';
+  document.querySelector('.clock-sticky').style.display = '';
+  const _lb2=document.getElementById('landingPrayerBar');if(_lb2)_lb2.style.display='';
+  document.querySelectorAll('.scroll-section').forEach(s => s.style.display = '');
+  document.querySelector('footer')?.style && (document.querySelector('footer').style.display = '');
+  const stickyC = document.querySelector('.sticky-cta');
+  if (stickyC) stickyC.style.display = '';
   const navEl = document.querySelector('nav');
   navEl.style.display = '';
   navEl.style.background = '';
@@ -1835,7 +1876,8 @@ function fsPlaySurah() {
 }
 
 // Load 3D clock immediately
-window._clockContainer=document.getElementById('dialHero');
+// Clock is now a full-viewport background — no container needed
+// window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
 _cs.type='module';_cs.src='glass-cube-clock.js?v=5';
 document.head.appendChild(_cs);
@@ -1844,7 +1886,7 @@ document.head.appendChild(_cs);
 // SCROLL → CLOCK INDICATOR (scroll-position based, not IntersectionObserver)
 // ══════════════════════════════════════════
 setTimeout(()=>{
-  const secIds=['sec-hook','sec-qibla','sec-prayer','sec-dials','sec-night','sec-adhan','sec-install'];
+  const secIds=['sec-hook','sec-qibla','sec-prayer','sec-dials','sec-adhan','sec-install'];
   const secEls=secIds.map(id=>document.getElementById(id)).filter(Boolean);
   // Offset = sticky clock height (clock-size + 5.5rem ≈ top of content area)
   let lastIdx=-1;
@@ -1879,7 +1921,7 @@ setTimeout(setupScrollObservers,500);
     { id:'sec-qibla',   dwell:9000, scrollReveal:3000 },
     { id:'sec-prayer',  dwell:10000, scrollReveal:3500 },
     { id:'sec-dials',   dwell:30000 }, // 11 dials × 2.5s + buffer
-    { id:'sec-night',   dwell:7000 },
+
     { id:'sec-adhan',   dwell:8000 },  // linger, no auto-play
     { id:'sec-install', dwell:6000 },
   ];
@@ -1897,7 +1939,7 @@ setTimeout(setupScrollObservers,500);
     // Request fullscreen on mobile for immersive demo
     try{
       const el=document.documentElement;
-      if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+      if(el.requestFullscreen && navigator.userActivation?.isActive) el.requestFullscreen().catch(()=>{});
       else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
     }catch(e){}
     advanceTour();
@@ -1952,9 +1994,7 @@ setTimeout(setupScrollObservers,500);
     // Trigger section-specific actions
     if(sec.id==='sec-dials') startDialCycle();
     else stopDialCycle();
-    if(sec.id==='sec-night') setNightMode(true);
-    else if(sec.id==='sec-adhan') setNightMode(true);
-    else setNightMode(false);
+    // Night mode removed — always dark
     // Qibla compass demo — only on direction section
     if(sec.id==='sec-qibla'&&window._clockQiblaDemo) window._clockQiblaDemo(true);
     else if(window._clockQiblaDemo) window._clockQiblaDemo(false);
