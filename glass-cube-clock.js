@@ -97,8 +97,8 @@ window.addEventListener('resize', onResize);
 
 // ─── FLOOR ────────────────────────────────────────────────────────────────────
 const ground = new THREE.Mesh(
-  new THREE.CircleGeometry(80, 128),
-  new THREE.MeshStandardMaterial({ color: 0x18182a, roughness: 0.88, metalness: 0 })
+  new THREE.CircleGeometry(40, 64),
+  new THREE.MeshStandardMaterial({ color: 0x18182a, roughness: 0.88, metalness: 0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
