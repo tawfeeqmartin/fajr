@@ -833,6 +833,8 @@ let adhanHrtfStartCtxTime=0, adhanHrtfStartOffset=0;
 let adhanHrtfStartWall=0;
 let adhanDeviceHeading=0, adhanQiblaAngle=null, adhanCurrentPan=0;
 let adhanHasCompass=false, adhanCompassEventCount=0;
+let _compassAccurate=true, _lastCompassDataTime=0;
+let _compassTimeoutEl=null, _compassTimeoutTimer=null;
 let _preUnlockedAudio=null;
 let _adhanBtn=null; // stash button ref for ended/visibility handlers
 
@@ -865,12 +867,30 @@ async function adhanGetQibla(){
 }
 function adhanCompassHandler(e){
   let h = null;
-  if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
-  else if (e.alpha !== null && e.alpha !== undefined) h = (360 - e.alpha) % 360;
+  // iOS: use webkitCompassHeading (absolute). Reject -1 (uncalibrated).
+  if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) {
+    // Check accuracy — -1 means unreliable/uncalibrated
+    if (typeof e.webkitCompassAccuracy === 'number' && e.webkitCompassAccuracy === -1) {
+      // Unreliable — still use it but flag
+      _compassAccurate = false;
+    } else {
+      _compassAccurate = true;
+    }
+    h = e.webkitCompassHeading;
+  } else if (e.alpha !== null && e.alpha !== undefined) {
+    // Android: alpha is absolute in most browsers
+    h = (360 - e.alpha) % 360;
+    _compassAccurate = true;
+  }
   if(h==null)return;
   adhanHasCompass=true;
   adhanCompassEventCount++;
   adhanDeviceHeading=h*Math.PI/180;
+  _lastCompassDataTime = Date.now();
+  // Clear any "no compass" message
+  if (_compassTimeoutEl && _compassTimeoutEl.style.opacity !== '0') {
+    _compassTimeoutEl.style.opacity = '0';
+  }
 }
 
 // ── Compass Init (tawaf-gl pattern) ──
@@ -896,6 +916,29 @@ function _requestCompassPermission() {
     }).catch(function(){});
   }
 }
+// Compass timeout — detect when no data arrives
+function _startCompassTimeout() {
+  _clearCompassTimeout();
+  const startCount = adhanCompassEventCount;
+  _compassTimeoutTimer = setTimeout(function() {
+    // If no new compass events arrived in 3s, show help
+    if (adhanCompassEventCount === startCount && fsCompassOn) {
+      if (!_compassTimeoutEl) {
+        _compassTimeoutEl = document.createElement('div');
+        _compassTimeoutEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(30px,8vmin,80px));left:0;right:0;text-align:center;z-index:220;font-family:var(--font);font-size:clamp(.75rem,1.8vmin,1rem);font-weight:300;color:rgba(232,228,220,.5);padding:0 2rem;transition:opacity .5s ease;pointer-events:none';
+        document.getElementById('clockFullscreen').appendChild(_compassTimeoutEl);
+      }
+      _compassTimeoutEl.textContent = 'Move your phone in a figure-8 to calibrate the compass';
+      _compassTimeoutEl.style.opacity = '1';
+      // Retry check — if data arrives later, handler clears the message
+    }
+  }, 3000);
+}
+function _clearCompassTimeout() {
+  if (_compassTimeoutTimer) { clearTimeout(_compassTimeoutTimer); _compassTimeoutTimer = null; }
+  if (_compassTimeoutEl) _compassTimeoutEl.style.opacity = '0';
+}
+
 // Init compass at page load
 _initCompass();
 // First click anywhere grants iOS permission (like tawaf-gl)
@@ -1828,6 +1871,7 @@ function closeClockFullscreen() {
   if(window._clockToggleCompass) window._clockToggleCompass(false);
   const fcEl = document.getElementById('clockFullscreen');
   if(fcEl) fcEl.classList.remove('compass-active');
+  _clearCompassTimeout();
   const cIcon = document.getElementById('fsCompassIcon');
   if(cIcon) { cIcon.innerHTML = _cubeSVG; cIcon.style.opacity = '.6'; }
 }
@@ -1850,6 +1894,7 @@ window.addEventListener('popstate', (e) => {
       if(window._clockToggleCompass) window._clockToggleCompass(false);
       const fcPop = document.getElementById('clockFullscreen');
       if(fcPop) fcPop.classList.remove('compass-active');
+      _clearCompassTimeout();
       const cIcon = document.getElementById('fsCompassIcon');
       if(cIcon) { cIcon.innerHTML = _cubeSVG; cIcon.style.opacity = '.6'; }
       _lastCompassExitTime = Date.now();
@@ -1888,11 +1933,15 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
     if (!adhanQiblaAngle) adhanGetQibla();
     // Push history state so back gesture exits compass first, not fullscreen
     history.pushState({compass:true}, '', '#clock');
+    // Start compass timeout detection
+    _startCompassTimeout();
   } else {
     // Compass data keeps flowing via adhan handler — clock just stops reading it
     // Pop the compass history entry so stale state doesn't exit fullscreen on next back
     _compassPopFromBtn = true;
     history.back();
+    // Clear timeout UI
+    _clearCompassTimeout();
   }
 });
 
