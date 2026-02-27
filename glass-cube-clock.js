@@ -471,18 +471,6 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
   // Layer 3: Entry beam (narrow white beam from 12 o'clock)
   _qiblaEntryDisc = mkPrismDisc(4, FRAG_ENTRY_BEAM, entryAngle, 0.07, 0.0);
 
-  // Layer 4: Dark shadow disc under cube — "light came FROM here"
-  var _shadowDisc = new THREE.Mesh(
-    new THREE.CircleGeometry(1.2, 32),
-    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.0, transparent: true, depthWrite: false })
-  );
-  _shadowDisc.rotation.x = -Math.PI / 2;
-  _shadowDisc.position.y = 0.005;
-  _shadowDisc.renderOrder = -1;
-  _shadowDisc.visible = false;
-  prismGroup.add(_shadowDisc);
-  window._qiblaShadowDisc = _shadowDisc;
-
   // Layer 5: Caustic PointLight under cube — makes cube edges glow with fan colors
   var _causticLight = new THREE.PointLight(0xff8844, 0.0, 8);
   _causticLight.position.set(0, -0.3, 0);
@@ -523,10 +511,9 @@ window._clockToggleCompass = function(on) {
     _compassQibla = _compassQibla || 0.4;
     _compassHeading = _compassQibla; // perfect alignment
     // Slam disc beams to full opacity instantly
-    if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.22; }
-    if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.08; }
+    if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.40; }
+    if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.15; }
     if(_qiblaEntryDisc){ _qiblaEntryDisc.visible = true; _qiblaEntryDisc.material.uniforms.op.value = 0.18; }
-    if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = true; window._qiblaShadowDisc.material.opacity = 0.15; }
     if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0.5; }
     // Hide prayer window discs
     _prayerDisc.visible = false; _nextDisc.visible = false; _thirdDisc.visible = false;
@@ -538,7 +525,6 @@ window._clockToggleCompass = function(on) {
     [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
       if(d){ d.visible = false; d.material.uniforms.op.value = 0; }
     });
-    if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = false; window._qiblaShadowDisc.material.opacity = 0; }
     if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
     // Restore prayer window discs
     _prayerDisc.visible = true; _nextDisc.visible = true; _thirdDisc.visible = true;
@@ -910,7 +896,6 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
       if (_compassAligned) {
         // Shadow disc + caustic light
-        if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = true; window._qiblaShadowDisc.material.opacity = Math.min(window._qiblaShadowDisc.material.opacity + 0.02, 0.15); }
         if(window._qiblaCausticLight){
           window._qiblaCausticLight.intensity = Math.min(window._qiblaCausticLight.intensity + 0.03, 0.5 * breathe);
         }
@@ -918,13 +903,13 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         if(_qiblaFanDisc){
           _qiblaFanDisc.visible = true;
           var fop = _qiblaFanDisc.material.uniforms.op.value;
-          _qiblaFanDisc.material.uniforms.op.value = Math.min(fop + 0.04, 0.22 * breathe);
+          _qiblaFanDisc.material.uniforms.op.value = Math.min(fop + 0.04, 0.40 * breathe);
         }
         // Bloom underlayer
         if(_qiblaBloomDisc){
           _qiblaBloomDisc.visible = true;
           var bop = _qiblaBloomDisc.material.uniforms.op.value;
-          _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.02, 0.08 * breathe);
+          _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.02, 0.15 * breathe);
         }
         // Entry beam
         if(_qiblaEntryDisc){
@@ -934,7 +919,6 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         }
       } else if (!_compassDevMode) {
         // Fade out shadow + caustic
-        if(window._qiblaShadowDisc && window._qiblaShadowDisc.material.opacity > 0.005){ window._qiblaShadowDisc.material.opacity *= 0.9; } else if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = false; }
         if(window._qiblaCausticLight && window._qiblaCausticLight.intensity > 0.01){ window._qiblaCausticLight.intensity *= 0.9; } else if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
         // Fade out all disc layers
         [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
