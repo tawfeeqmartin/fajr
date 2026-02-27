@@ -20,6 +20,7 @@ function calcDpr(w, h) {
 }
 
 var _canvasEl = null; // set after renderer created
+var _stableH = window.innerHeight; // capture initial height before Safari chrome hides
 function getSize() {
   if (_isFullscreen) {
     return { w: window.innerWidth, h: window.innerHeight };
@@ -27,9 +28,8 @@ function getSize() {
   if (CONTAINED) {
     return { w: CONTAINER.clientWidth || 400, h: CONTAINER.clientHeight || 400 };
   }
-  // Use canvas clientHeight (locked to 100svh via CSS) for stable size on mobile
-  var h = (_canvasEl && _canvasEl.clientHeight) ? _canvasEl.clientHeight : window.innerHeight;
-  return { w: window.innerWidth, h: h };
+  // Lock renderer to initial height so 3D scene doesn't rescale when Safari chrome hides
+  return { w: window.innerWidth, h: _stableH || window.innerHeight };
 }
 
 let { w: W, h: H } = getSize();
@@ -47,7 +47,7 @@ if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
   const c = renderer.domElement;
-  c.style.cssText = 'position:fixed;top:0;left:0;z-index:0;width:100%;height:100vh;height:100svh;';
+  c.style.cssText = 'position:fixed;inset:0;z-index:0;width:100%;height:100%;';
   document.body.appendChild(c);
   _canvasEl = c;
 }
