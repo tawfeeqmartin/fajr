@@ -351,7 +351,7 @@ function floorRay(az, c1, c2, w, len, op) {
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
 floorRay(135, 0x9900ff, 0xff00ff, 0.40, 3.48, 0.88);   // HOUR   (violet)
 floorRay(135, 0x1133ff, 0x00aaff, 0.40, 5.64, 0.92);   // MINUTE (blue)
-floorRay(135, 0x44ff88, 0x00cc44, 0.40, 9.12, 0.62);   // SECOND (green)
+floorRay(135, 0xffffff, 0xcccccc, 0.40, 9.12, 0.62);   // SECOND (white)
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
 [
