@@ -193,9 +193,13 @@ nav{
 nav.scrolled{background:transparent;opacity:.97;backdrop-filter:none;box-shadow:none}
 /* Nav always on dark — light text */
 nav:not(.scrolled){background:transparent}
-nav #navNext{color:rgba(232,228,220,.75);transition:color .4s}
+nav #navNext{transition:color .4s}
 .nav-logo{display:none}
-#navNext{font-size:clamp(1rem,3vw,1.3rem)!important;font-weight:700!important;letter-spacing:.05em!important}
+#navNext .nav-label{font-size:clamp(.5rem,1.2vw,.65rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,217,102,.45);line-height:1}
+#navNext .nav-time{font-size:clamp(1rem,3vw,1.3rem);font-weight:600;letter-spacing:.02em;color:#ffd966;line-height:1.1;font-variant-numeric:tabular-nums}
+#navNext .nav-time .nav-sec{opacity:.4;font-weight:400}
+#navNext.nav-prayer .nav-label{color:rgba(232,228,220,.4)}
+#navNext.nav-prayer .nav-time{color:rgba(232,228,220,.75)}
 
 /* ── Buttons ── */
 .btn{
@@ -409,7 +413,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 <nav>
   <div>
     <div class="nav-logo">A Gift of Time</div>
-    <div id="navNext" style="font-size:.6rem;font-weight:500;letter-spacing:.06em;color:var(--text);margin-top:1px"></div>
+    <div id="navNext"></div>
   </div>
   <a href="#" class="btn btn-primary" style="font-size:.8rem;padding:.55rem 1.25rem" onclick="openClockFullscreen();return false;">Open Clock</a>
 </nav>
@@ -1325,19 +1329,16 @@ function updateNavClock(){
     const maghribS=toSec(t.Maghrib);
     const isFasting=nowS>=fajrS&&nowS<maghribS;
     let diff,label;
+    let navLabel,navDiff,isIftar=false;
     if(isFasting&&window._isRamadan){
-      diff=maghribS-nowS;
-      const h=Math.floor(diff/3600);diff%=3600;const m=Math.floor(diff/60);const s=diff%60;
-      label=h>0?h+'h '+m+'m '+s+'s':m>0?m+'m '+s+'s':s+'s';
-      elNext.textContent='Iftar in '+label;
-      elNext.classList.add('iftar-gold');
+      navLabel='until iftar';navDiff=maghribS-nowS;isIftar=true;
     }else{
-      diff=nextS-nowS;
-      const h=Math.floor(diff/3600);diff%=3600;const m=Math.floor(diff/60);const s=diff%60;
-      label=h>0?h+'h '+m+'m '+s+'s':m>0?m+'m '+s+'s':s+'s';
-      elNext.textContent=nextP+' in '+label;
-      elNext.classList.remove('iftar-gold');
+      navLabel='until '+nextP;navDiff=nextS-nowS;
     }
+    const nh=Math.floor(navDiff/3600);const nrm=navDiff%3600;const nm=Math.floor(nrm/60);const ns=nrm%60;
+    const timeStr=nh+':'+(nm<10?'0':'')+nm+':<span class="nav-sec">'+(ns<10?'0':'')+ns+'</span>';
+    elNext.innerHTML='<div class="nav-label">'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
+    elNext.classList.toggle('nav-prayer',!isIftar);
     // Fullscreen countdown (iftar during Ramadan fasting, otherwise next prayer)
     const fsIftar=document.getElementById('fsIftarCountdown');
     const fsIftarTime=document.getElementById('fsIftarTime');
