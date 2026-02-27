@@ -67,8 +67,8 @@ const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 // FOV 35° on both — telephoto/rectilinear, minimal perspective distortion.
 // Elevation angle matched: both cameras sit ~33° above cube so top face reads properly.
 // Landing was too low (29°) making cube look flat — raised y to match fullscreen proportion.
-const CAM_LANDING    = { pos: [0, 10.5, 16.0], fov: 35, look: [0, 0.5, 0] };
-const CAM_FULLSCREEN = { pos: [0, 10.5, 16.0], fov: 35, look: [0, 0.5, 0] };
+const CAM_LANDING    = { pos: [0.2, 9.7, 15.0], fov: 35, look: [0, -0.8, 1.0] };
+const CAM_FULLSCREEN = { pos: [0.2, 9.7, 15.0], fov: 35, look: [0, -0.8, 1.0] };
 
 function applyCamera(preset) {
   camera.position.set(...preset.pos);
