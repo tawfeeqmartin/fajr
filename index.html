@@ -352,7 +352,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 /* canvas no longer lives inside overlay — it's fixed in body */
 /* Fullscreen chrome — scales with viewport via clamp() */
 .clock-fs-close{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(8px,1.5vmin,24px));left:clamp(12px,2vmin,32px);z-index:210;background:none;border:none;color:rgba(232,228,220,.6);font-size:clamp(1.2rem,2.5vmin,2.4rem);cursor:pointer;padding:clamp(6px,1vmin,16px);transition:opacity .5s ease}
-.fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker{opacity:0;pointer-events:none}
+.fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint{opacity:0;pointer-events:none}
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
 .fs-header .fs-datetime{font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em}
 .fs-header .fs-location{display:none}
@@ -1293,7 +1293,11 @@ window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scr
 })();
 
 // Set _isRamadan early so countdowns use it from the first tick
-try{const _h=getHijriDate();if(_h)window._isRamadan=/ramadan/i.test(_h.month);}catch(e){}
+try{
+  const _hFmt=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{month:'long'});
+  const _hMonth=_hFmt.formatToParts(new Date()).find(p=>p.type==='month')?.value||'';
+  window._isRamadan=/ramadan/i.test(_hMonth);
+}catch(e){}
 
 // ── Nav bar live clock + next prayer ──
 let _navClockTimer=null;
