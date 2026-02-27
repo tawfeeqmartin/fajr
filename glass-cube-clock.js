@@ -580,22 +580,7 @@ _thirdDisc.position.y = 0.012;
 _thirdDisc.visible = false;
 prismGroup.add(_thirdDisc);
 
-// ── Diagnostic start/end markers for active prayer window ──
-function _mkMarkerBeam(color) {
-  const geo = new THREE.PlaneGeometry(0.18, SECTOR_RADIUS, 1, 16);
-  geo.translate(0, SECTOR_RADIUS / 2, 0);
-  const mat = mkMat(color, color, 0.9);
-  const grp = new THREE.Group();
-  grp.add(new THREE.Mesh(geo, mat));
-  grp.position.y = 0.01;
-  grp.rotation.order = 'YXZ';
-  grp.rotation.x = Math.PI / 2;
-  grp.visible = false;
-  prismGroup.add(grp);
-  return grp;
-}
-const _markerStart = _mkMarkerBeam(0xff4444); // red = start
-const _markerEnd   = _mkMarkerBeam(0x44ff44); // green = end
+
 
 const OP_NEXT = 1.0; // upcoming prayers — slightly dimmer than active
 
@@ -606,7 +591,7 @@ function updatePrayerWindows(now) {
   }
   if (!prayerSectors.length) {
     _prayerDisc.visible = false; _nextDisc.visible = false;
-    _markerStart.visible = false; _markerEnd.visible = false;
+
     return;
   }
 
@@ -647,21 +632,6 @@ function updatePrayerWindows(now) {
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     _prayerDisc.visible = true;
-    // Diagnostic markers on THIRD (Fajr) window
-    if (thirdIdx >= 0) {
-      const tps = prayerSectors[thirdIdx];
-      _markerStart.rotation.y = tps.startAng;
-      _markerEnd.rotation.y = tps.endAng;
-    } else if (nextIdx >= 0) {
-      const nps = prayerSectors[nextIdx];
-      _markerStart.rotation.y = nps.startAng;
-      _markerEnd.rotation.y = nps.endAng;
-    }
-    _markerStart.visible = true;
-    _markerEnd.visible = true;
-  } else {
-    _markerStart.visible = false;
-    _markerEnd.visible = false;
   }
   if (u.uIntensity.value < 0.001) _prayerDisc.visible = false;
 
