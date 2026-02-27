@@ -501,6 +501,8 @@ window._clockToggleCompass = function(on) {
     if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.22; }
     if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.08; }
     if(_qiblaEntryDisc){ _qiblaEntryDisc.visible = true; _qiblaEntryDisc.material.uniforms.op.value = 0.18; }
+    // Hide prayer window discs
+    _prayerDisc.visible = false; _nextDisc.visible = false; _thirdDisc.visible = false;
   } else {
     // Restore clock hands
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
@@ -509,6 +511,8 @@ window._clockToggleCompass = function(on) {
     [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
       if(d){ d.visible = false; d.material.uniforms.op.value = 0; }
     });
+    // Restore prayer window discs
+    _prayerDisc.visible = true; _nextDisc.visible = true; _thirdDisc.visible = true;
     _compassAligned = false;
     _compassLocked = false;
   }
