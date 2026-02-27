@@ -333,9 +333,8 @@ const FRAG_SOFT = `
 `;
 function mkMatSoft(c1,c2,op){ return new THREE.ShaderMaterial({ uniforms:{c1:{value:new THREE.Color(c1)},c2:{value:new THREE.Color(c2)},op:{value:op}}, vertexShader:VERT, fragmentShader:FRAG_SOFT, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide }); }
 
-const GAP = 0.8; // hands start outside cube edge
 function floorRay(az, c1, c2, w, len, op) {
-  const g = new THREE.PlaneGeometry(w, len, 1, 16); g.translate(0, len/2 + GAP, 0);
+  const g = new THREE.PlaneGeometry(w, len, 1, 16); g.translate(0, len/2, 0);
   const grp = new THREE.Group();
   grp.add(new THREE.Mesh(g, mkMat(c1, c2, op)));
   grp.position.y = 0.008;
