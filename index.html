@@ -192,7 +192,9 @@ nav.scrolled{background:transparent;opacity:.97;backdrop-filter:none;box-shadow:
 /* Nav always on dark — light text */
 nav:not(.scrolled){background:transparent}
 nav .nav-logo,nav #navNext{color:rgba(232,228,220,.75);transition:color .4s}
-.nav-logo{font-weight:500;font-size:.9rem;letter-spacing:.02em}
+.nav-logo{font-weight:500;font-size:.9rem;letter-spacing:.02em;transition:opacity .3s}
+.nav-logo.landing-hidden{opacity:0;width:0;overflow:hidden;padding:0;margin:0}
+#navNext.landing-hero{font-size:clamp(.85rem,2.5vw,1.1rem)!important;font-weight:600!important;letter-spacing:.04em!important;flex:1;text-align:center}
 
 /* ── Buttons ── */
 .btn{
@@ -1264,7 +1266,16 @@ const revealObs=new IntersectionObserver((entries)=>{
 // NAV SCROLL
 // ══════════════════════════════════════════
 const nav=document.querySelector('nav');
-window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>40)},{passive:true});
+const navLogo=document.querySelector('.nav-logo');
+const navNext=document.getElementById('navNext');
+function updateNavLanding(){
+  const isLanding=window.scrollY<=40;
+  nav.classList.toggle('scrolled',!isLanding);
+  if(navLogo)navLogo.classList.toggle('landing-hidden',isLanding);
+  if(navNext)navNext.classList.toggle('landing-hero',isLanding);
+}
+updateNavLanding();
+window.addEventListener('scroll',updateNavLanding,{passive:true});
 
 // ══════════════════════════════════════════
 // PRAYER TIMES
