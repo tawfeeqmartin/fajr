@@ -593,7 +593,7 @@ const clock = new THREE.Clock();
 
 prismGroup.rotation.y = Math.PI / 4;
 
-let _themeFrameCount = 0;
+let _themeFrameCount = 3599; // triggers on first frame
 const _themeBuf = new Uint8Array(4);
 const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
@@ -641,8 +641,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
   renderer.render(scene, camera);
 
-  // Sample top-left pixel and sync theme-color meta tag (Dynamic Island match)
-  if (++_themeFrameCount >= 60) {
+  // Sample top-left pixel and sync theme-color meta tag (~once per minute)
+  if (++_themeFrameCount >= 3600) {
     _themeFrameCount = 0;
     const gl = renderer.getContext();
     gl.readPixels(0, gl.drawingBufferHeight - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, _themeBuf);
