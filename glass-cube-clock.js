@@ -548,6 +548,23 @@ _prayerDisc.position.y = 0.02;
 _prayerDisc.visible = false;
 prismGroup.add(_prayerDisc);
 
+// ── Diagnostic start/end markers for active prayer window ──
+function _mkMarkerBeam(color) {
+  const geo = new THREE.PlaneGeometry(0.18, SECTOR_RADIUS, 1, 16);
+  geo.translate(0, SECTOR_RADIUS / 2, 0);
+  const mat = mkMat(color, color, 0.9);
+  const grp = new THREE.Group();
+  grp.add(new THREE.Mesh(geo, mat));
+  grp.position.y = 0.01;
+  grp.rotation.order = 'YXZ';
+  grp.rotation.x = Math.PI / 2;
+  grp.visible = false;
+  prismGroup.add(grp);
+  return grp;
+}
+const _markerStart = _mkMarkerBeam(0xff4444); // red = start
+const _markerEnd   = _mkMarkerBeam(0x44ff44); // green = end
+
 function updatePrayerWindows(now) {
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
     buildPrayerSectors();
@@ -582,6 +599,14 @@ function updatePrayerWindows(now) {
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     _prayerDisc.visible = true;
+    // Diagnostic markers
+    _markerStart.rotation.y = ps.startAng;
+    _markerEnd.rotation.y = ps.endAng;
+    _markerStart.visible = true;
+    _markerEnd.visible = true;
+  } else {
+    _markerStart.visible = false;
+    _markerEnd.visible = false;
   }
   if (u.uIntensity.value < 0.001) _prayerDisc.visible = false;
 }
