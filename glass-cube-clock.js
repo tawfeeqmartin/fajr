@@ -598,6 +598,9 @@ window._clockToggleCompass = function(on) {
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
     clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
     _compassAligned = false;
+    // Ensure 3D beam/caustic are fully reset on entry — no residual hairline
+    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.material.uniforms.op.value = 0; }
+    if(_qiblaExitCaustic){ _qiblaExitCaustic.visible = false; _qiblaExitCaustic.material.uniforms.op.value = 0; }
     if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0.5; }
     // Hide prayer window discs
     _prayerDisc.visible = false; _nextDisc.visible = false; _thirdDisc.visible = false;
@@ -1030,11 +1033,16 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
           if(dop > 0.005){ d.material.uniforms.op.value = dop * 0.88; }
           else { d.visible = false; d.material.uniforms.op.value = 0; }
         });
-        // Fade out entry beam, exit caustic, internal glow
+        // Fade out entry beam and exit caustic — fast decay with high cutoff threshold.
+        // These are thin 3D planes that appear as a 1px hairline at low opacity (the
+        // plane is nearly edge-on to the camera due to prismGroup PI/4 rotation).
+        // Sensor noise causes the alignment flag to flicker, building a persistent
+        // low-opacity state if we use a slow fade (0.88×) to a tiny threshold (0.005).
+        // Fix: fast decay (0.7×) + high threshold (0.05) → gone in ~3 frames, no hairline.
         [_qiblaEntryBeam, _qiblaExitCaustic].forEach(function(d){
           if(!d) return;
           var dop = d.material.uniforms.op.value;
-          if(dop > 0.005){ d.material.uniforms.op.value = dop * 0.88; }
+          if(dop > 0.05){ d.material.uniforms.op.value = dop * 0.7; }
           else { d.visible = false; d.material.uniforms.op.value = 0; }
         });
         if(cubeMat.uniforms.uInternalGlow.value > 0.005){ cubeMat.uniforms.uInternalGlow.value *= 0.9; }
