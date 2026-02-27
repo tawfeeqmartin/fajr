@@ -3,6 +3,7 @@
 // Three.js FBO dichroic shader, per-channel IOR, real-time H:M:S hands
 
 import * as THREE from 'three';
+import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js';
 
 
 // ─── CONTAINER DETECTION ──────────────────────────────────────────────────────
@@ -173,6 +174,41 @@ tawafSpot.position.set(0, 3.5, -3);
 tawafSpot.target.position.set(0, 0.5, 0);
 tawafSpot.angle = 0.4; tawafSpot.penumbra = 0.9;
 scene.add(tawafSpot, tawafSpot.target);
+
+// ─── LENS FLARE — front base corner of cube ──────────────────────────────────
+// Procedural textures: warm gold core + subtle dichroic ring
+function _makeFlareGlow(size) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  g.addColorStop(0,    'rgba(255, 220, 140, 1.0)');
+  g.addColorStop(0.15, 'rgba(255, 200, 100, 0.6)');
+  g.addColorStop(0.4,  'rgba(255, 180, 80, 0.15)');
+  g.addColorStop(1,    'rgba(255, 160, 60, 0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+  return new THREE.CanvasTexture(c);
+}
+function _makeFlareRing(size) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d'); const cx = size/2;
+  const g = ctx.createRadialGradient(cx, cx, size*0.28, cx, cx, size*0.48);
+  g.addColorStop(0,   'rgba(100, 180, 255, 0)');
+  g.addColorStop(0.3, 'rgba(100, 180, 255, 0.08)');
+  g.addColorStop(0.5, 'rgba(255, 210, 130, 0.12)');
+  g.addColorStop(0.7, 'rgba(180, 120, 255, 0.06)');
+  g.addColorStop(1,   'rgba(140, 100, 220, 0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+  return new THREE.CanvasTexture(c);
+}
+const _cubeFlare = new Lensflare();
+const _flareCoreEl = new LensflareElement(_makeFlareGlow(128), 60, 0);
+const _flareHaloEl = new LensflareElement(_makeFlareRing(128), 200, 0);
+_cubeFlare.addElement(_flareCoreEl);
+_cubeFlare.addElement(_flareHaloEl);
+// Front bottom corner: unit cube at CUBE_Y=0.60, rotated PI/4
+// Corner (0.5, -0.5, 0.5) rotated PI/4 → (0, -0.5, 0.707) → world (0, 0.10, 0.707)
+_cubeFlare.position.set(0, 0.10, 0.707);
+scene.add(_cubeFlare);
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
@@ -872,6 +908,9 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   const t = clock.getElapsedTime();
   cubeMat.uniforms.uTime.value = t;
   fogLayerMat.uniforms.uTime.value = t;
+  // Lens flare gentle pulse
+  _flareCoreEl.size = 60 * (1 + 0.12 * Math.sin(t * 1.2));
+  _flareHaloEl.size = 200 * (1 + 0.06 * Math.sin(t * 0.8 + 1.0));
 
   // Sync hands to real clock time
   const now = new Date();
