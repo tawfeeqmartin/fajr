@@ -1311,12 +1311,12 @@ function updateNavClock(){
     let nextP='',nextS=0;
     t5.forEach(p=>{const ps=toSec(t[p]);if(!nextP&&ps>nowS){nextP=p;nextS=ps;}});
     if(!nextP){nextP='Fajr';nextS=toSec(t['Fajr'])+86400;} // wrap to tomorrow's Fajr
-    // Iftar mode: between sunrise and maghrib, show "Iftar in ..."
+    // Iftar mode: during Ramadan between fajr and maghrib, show "Iftar in ..."
     const fajrS=toSec(t.Fajr);
     const maghribS=toSec(t.Maghrib);
     const isFasting=nowS>=fajrS&&nowS<maghribS;
     let diff,label;
-    if(isFasting){
+    if(isFasting&&window._isRamadan){
       diff=maghribS-nowS;
       const h=Math.floor(diff/3600);diff%=3600;const m=Math.floor(diff/60);const s=diff%60;
       label=h>0?h+'h '+m+'m '+s+'s':m>0?m+'m '+s+'s':s+'s';
@@ -1329,17 +1329,23 @@ function updateNavClock(){
       elNext.textContent=nextP+' in '+label;
       elNext.classList.remove('iftar-gold');
     }
-    // Fullscreen iftar countdown
+    // Fullscreen countdown (iftar during Ramadan fasting, otherwise next prayer)
     const fsIftar=document.getElementById('fsIftarCountdown');
     const fsIftarTime=document.getElementById('fsIftarTime');
+    const fsIftarLabel=fsIftar&&fsIftar.querySelector('.fs-iftar-label');
     if(fsIftar&&fsIftarTime){
-      if(isFasting){
+      if(isFasting&&window._isRamadan){
         let d2=maghribS-nowS;
         const hh=Math.floor(d2/3600);d2%=3600;const mm=Math.floor(d2/60);const ss=d2%60;
         fsIftarTime.innerHTML=hh+':'+(mm<10?'0':'')+mm+':<span class="iftar-sec">'+(ss<10?'0':'')+ss+'</span>';
+        if(fsIftarLabel)fsIftarLabel.textContent='until iftar';
         fsIftar.classList.add('active');
       }else{
-        fsIftar.classList.remove('active');
+        let d2=nextS-nowS;
+        const hh=Math.floor(d2/3600);d2%=3600;const mm=Math.floor(d2/60);const ss=d2%60;
+        fsIftarTime.innerHTML=hh+':'+(mm<10?'0':'')+mm+':<span class="iftar-sec">'+(ss<10?'0':'')+ss+'</span>';
+        if(fsIftarLabel)fsIftarLabel.textContent='until '+nextP;
+        fsIftar.classList.add('active');
       }
     }
   }
@@ -1597,6 +1603,7 @@ function fsStartClock() {
   // Set Hijri date instantly — no API wait
   const h = getHijriDate();
   if(h) {
+    window._isRamadan = /ramadan/i.test(h.month);
     document.getElementById('fsDateTime').innerHTML = `<span style="color:#e0e0e0">${h.day} ${h.month} ${h.year} AH  ·  ${h.monthAr}</span>`;
   } else {
     fsUpdateDateTime(); // Gregorian fallback
@@ -1643,6 +1650,7 @@ function _displayPrayerTimes(t, hijri) {
   const lpt = document.getElementById('landingPrayerTimes'); if(lpt) lpt.innerHTML = html;
   // Hijri date
   if(hijri) {
+    window._isRamadan = /ramadan/i.test(hijri.month.en);
     const hijriStr = `<span style="color:#e0e0e0">${hijri.day} ${hijri.month.en} ${hijri.year} AH  ·  ${hijri.month.ar}</span>`;
     const fsdt = document.getElementById('fsDateTime'); if(fsdt) fsdt.innerHTML = hijriStr;
     const lh = document.getElementById('landingHijri'); if(lh) lh.innerHTML = hijriStr;
