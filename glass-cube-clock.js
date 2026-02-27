@@ -124,7 +124,7 @@ scene.add(back, back.target);
 // GOBO KEY — upper-front-left, broad wash (not a tight spot).
 // Shapes the floor with a gentle gradient pool, defines front/top cube faces.
 // Wide angle + soft penumbra = falloff is gradual, not a hard disco-spot.
-const gobo = new THREE.SpotLight(0xff00ff, 72);
+const gobo = new THREE.SpotLight(0xffffff, 72);
 gobo.position.set(-3.5, 6.5, 3.2);
 gobo.target.position.set(0.3, 0, 0.5);
 gobo.angle = 0.42;       // wider cone — broad wash over cube + floor
@@ -511,8 +511,8 @@ window._clockToggleCompass = function(on) {
     _compassQibla = _compassQibla || 0.4;
     _compassHeading = _compassQibla; // perfect alignment
     // Slam disc beams to full opacity instantly
-    if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.40; }
-    if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.15; }
+    if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.55; }
+    if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.22; }
     if(_qiblaEntryDisc){ _qiblaEntryDisc.visible = true; _qiblaEntryDisc.material.uniforms.op.value = 0.18; }
     if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0.5; }
     // Hide prayer window discs
@@ -903,13 +903,13 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         if(_qiblaFanDisc){
           _qiblaFanDisc.visible = true;
           var fop = _qiblaFanDisc.material.uniforms.op.value;
-          _qiblaFanDisc.material.uniforms.op.value = Math.min(fop + 0.04, 0.40 * breathe);
+          _qiblaFanDisc.material.uniforms.op.value = Math.min(fop + 0.04, 0.55 * breathe);
         }
         // Bloom underlayer
         if(_qiblaBloomDisc){
           _qiblaBloomDisc.visible = true;
           var bop = _qiblaBloomDisc.material.uniforms.op.value;
-          _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.02, 0.15 * breathe);
+          _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.02, 0.22 * breathe);
         }
         // Entry beam
         if(_qiblaEntryDisc){
