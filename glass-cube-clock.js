@@ -529,7 +529,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
       d = d - TAU * floor((d + PI) / TAU);
       float normDist = abs(d) / max(hSpan, 0.001);
       // Flat-top — stays bright to 90% of window, sharper rolloff at edges
-      float angular = exp(-pow(max(normDist - 0.90, 0.0) * 12.0, 2.0));
+      float angular = exp(-pow(max(normDist - 0.95, 0.0) * 12.0, 2.0));
 
       // Dichroic color shift across fan
       float colorT = clamp(0.5 + d / max(hSpan * 2.0, 0.001), 0.0, 1.0);
