@@ -45,7 +45,8 @@ if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
   const c = renderer.domElement;
-  c.style.cssText = 'position:fixed;left:0;top:0;z-index:0;width:'+_stableW+'px;height:'+_stableH+'px;';
+  // Canvas CSS covers full screen height (not just viewport) — no grey gap when Safari chrome hides
+  c.style.cssText = 'position:fixed;left:0;top:0;z-index:0;width:'+_stableW+'px;height:100dvh;';
   document.body.appendChild(c);
   _canvasEl = c;
 }
