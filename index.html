@@ -1651,8 +1651,8 @@ fsFetchPrayer();
 // Cube occupies center — text must be invisible before reaching it.
 {const _fadeScroll=()=>{
   const vh=window.innerHeight;
-  const fadeOut=vh*0.55; // above this = invisible (cube zone)
-  const fadeIn=vh*0.7;   // below this = fully visible
+  const fadeOut=vh*0.25; // above this = invisible (cube zone)
+  const fadeIn=vh*0.45;  // below this = fully visible
   document.querySelectorAll('.scroll-section').forEach(s=>{
     const r=s.getBoundingClientRect();
     const top=r.top;
