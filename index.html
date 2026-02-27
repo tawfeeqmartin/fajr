@@ -1648,15 +1648,17 @@ async function fsFetchPrayer() {
 // Fetch prayer times on page load
 fsFetchPrayer();
 
-// Fade sections: only visible in bottom third of viewport.
-// Cube occupies center — text must be invisible before reaching it.
-{const _fadeScroll=()=>{
+// Fade sections as they scroll UP past the cube.
+// Only fade once user has scrolled (not at initial position).
+{let _hasScrolled=false;
+const _fadeScroll=()=>{
+  if(!_hasScrolled && window.scrollY > 10) _hasScrolled=true;
+  if(!_hasScrolled){ document.querySelectorAll('.scroll-section').forEach(s=>{s.style.opacity='1';s.style.pointerEvents='auto';}); return; }
   const vh=window.innerHeight;
-  const fadeOut=vh*0.25; // above this = invisible (cube zone)
-  const fadeIn=vh*0.45;  // below this = fully visible
+  const fadeOut=vh*0.15;
+  const fadeIn=vh*0.35;
   document.querySelectorAll('.scroll-section').forEach(s=>{
-    const r=s.getBoundingClientRect();
-    const top=r.top;
+    const top=s.getBoundingClientRect().top;
     let op;
     if(top >= fadeIn) { op=1; }
     else if(top <= fadeOut) { op=0; }
