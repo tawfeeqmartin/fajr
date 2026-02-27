@@ -380,36 +380,55 @@ var _compassMode = false;
 var _compassHeading = 0;      // device heading in radians
 var _compassQibla = null;     // qibla bearing in radians
 var _compassAligned = false;  // true when 12 o'clock ≈ Qibla
-var _qiblaBeams = [];        // 7 prayer-colored prism beams toward 6 o'clock
+var _qiblaBeams = [];        // prismatic refraction beams toward 6 o'clock
+var _qiblaEntryBeam = null;  // incident beam (12 o'clock side)
+var _qiblaCoreGlow = null;   // convergence zone glow
 
-// Create 7 prism beams — light splits through cube into prayer colors
+// Create prismatic refraction beam — single beam splits through cube into RGB spectrum
 (function() {
-  const PRISM_COLORS = [
-    { c1: 0x7700ee, c2: 0xcc66ff },  // Tahajjud — violet
-    { c1: 0x3311cc, c2: 0x8866ee },  // Fajr — deep blue
-    { c1: 0x0066ff, c2: 0x55ccff },  // Isha — blue
-    { c1: 0x00cc44, c2: 0x88ffaa },  // Dhuhr — green
-    { c1: 0xffbb00, c2: 0xffff44 },  // Dhuha — yellow
-    { c1: 0xff8800, c2: 0xffdd66 },  // Asr — orange
-    { c1: 0xff3300, c2: 0xff9988 },  // Maghrib — red
-  ];
-  const baseAngle = THREE.MathUtils.degToRad(135 - 180); // 6 o'clock
-  const spread = 0.6; // total fan spread in radians (~34°)
-  const count = PRISM_COLORS.length;
+  const baseAngle = THREE.MathUtils.degToRad(135 - 180); // 6 o'clock direction
+  const entryAngle = baseAngle + Math.PI; // 12 o'clock (opposite)
 
-  for (var i = 0; i < count; i++) {
-    var len = 7.5 + Math.random() * 2.5; // vary lengths slightly
-    var w = 0.35;
-    var g = new THREE.PlaneGeometry(w, len, 1, 16); g.translate(0, len/2, 0);
+  // Layer 1: Entry beam (incident light from 12 o'clock into cube)
+  var eg = new THREE.PlaneGeometry(2.0, 3.0, 1, 16); eg.translate(0, 3.0/2, 0);
+  _qiblaEntryBeam = new THREE.Group();
+  _qiblaEntryBeam.add(new THREE.Mesh(eg, mkMatSoft(0xfff8e7, 0xffd966, 0.0)));
+  _qiblaEntryBeam.position.y = 0.015;
+  _qiblaEntryBeam.rotation.order = 'YXZ';
+  _qiblaEntryBeam.rotation.y = entryAngle;
+  _qiblaEntryBeam.rotation.x = Math.PI / 2;
+  _qiblaEntryBeam.visible = false;
+  prismGroup.add(_qiblaEntryBeam);
+
+  // Layer 2: Core glow (convergence zone — white-hot center near cube)
+  var cg = new THREE.PlaneGeometry(2.4, 4.0, 1, 16); cg.translate(0, 4.0/2, 0);
+  _qiblaCoreGlow = new THREE.Group();
+  _qiblaCoreGlow.add(new THREE.Mesh(cg, mkMatSoft(0xfffdf5, 0x332200, 0.0)));
+  _qiblaCoreGlow.position.y = 0.018;
+  _qiblaCoreGlow.rotation.order = 'YXZ';
+  _qiblaCoreGlow.rotation.y = baseAngle;
+  _qiblaCoreGlow.rotation.x = Math.PI / 2;
+  _qiblaCoreGlow.visible = false;
+  prismGroup.add(_qiblaCoreGlow);
+
+  // Layer 3: Spectral fan — 3 diverging RGB channels
+  const SPECTRAL = [
+    { c1: 0xff6b4a, c2: 0xffb347, w: 2.0, deg: -2.8, op: 0.13, phase: 0.0 },    // Red (least refraction)
+    { c1: 0x7aff8b, c2: 0xe0ffd6, w: 1.8, deg:  0.0, op: 0.10, phase: 2.1 },    // Green (center)
+    { c1: 0x4a9eff, c2: 0xc7b8ff, w: 1.6, deg:  3.2, op: 0.14, phase: 4.2 },    // Blue (most refraction)
+  ];
+
+  for (var i = 0; i < SPECTRAL.length; i++) {
+    var s = SPECTRAL[i];
+    var sg = new THREE.PlaneGeometry(s.w, 9.12, 1, 16); sg.translate(0, 9.12/2, 0);
     var grp = new THREE.Group();
-    grp.add(new THREE.Mesh(g, mkMat(PRISM_COLORS[i].c1, PRISM_COLORS[i].c2, 0.0)));
-    grp.position.y = 0.02 + i * 0.003; // slight Y stagger
+    grp.add(new THREE.Mesh(sg, mkMatSoft(s.c1, s.c2, 0.0)));
+    grp.position.y = 0.02 + i * 0.003;
     grp.rotation.order = 'YXZ';
-    // Fan out from center: evenly spread around the 6 o'clock direction
-    var offset = (i / (count - 1) - 0.5) * spread;
-    grp.rotation.y = baseAngle + offset;
+    grp.rotation.y = baseAngle + THREE.MathUtils.degToRad(s.deg);
     grp.rotation.x = Math.PI / 2;
     grp.visible = false;
+    grp.userData = { baseY: baseAngle + THREE.MathUtils.degToRad(s.deg), phase: s.phase, targetOp: s.op };
     prismGroup.add(grp);
     _qiblaBeams.push(grp);
   }
@@ -423,12 +442,16 @@ window._clockToggleCompass = function(on) {
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
     _compassAligned = false;
     _qiblaBeams.forEach(function(b){ b.visible = false; b.children[0].material.uniforms.op.value = 0; });
+    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.children[0].material.uniforms.op.value = 0; }
+    if(_qiblaCoreGlow){ _qiblaCoreGlow.visible = false; _qiblaCoreGlow.children[0].material.uniforms.op.value = 0; }
   } else {
     // Restore clock hands
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0.92;
     clockRays[2].mesh.children[0].material.uniforms.op.value = 0.62;
     _qiblaBeams.forEach(function(b){ b.visible = false; b.children[0].material.uniforms.op.value = 0; });
+    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.children[0].material.uniforms.op.value = 0; }
+    if(_qiblaCoreGlow){ _qiblaCoreGlow.visible = false; _qiblaCoreGlow.children[0].material.uniforms.op.value = 0; }
     _compassAligned = false;
   }
 };
@@ -787,21 +810,44 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
       _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
 
-      // Prism beams: split through cube when aligned with Qibla
-      _qiblaBeams.forEach(function(b, i) {
-        if (_compassAligned) {
-          b.visible = true;
-          var op = b.children[0].material.uniforms.op.value;
-          b.children[0].material.uniforms.op.value = Math.min(op + 0.06, 1.0);
-        } else {
-          var op2 = b.children[0].material.uniforms.op.value;
-          if (op2 > 0.01) {
-            b.children[0].material.uniforms.op.value = op2 * 0.9;
-          } else {
-            b.visible = false;
-          }
+      // Prismatic refraction: entry beam + core glow + spectral fan
+      var breathe = 0.85 + 0.15 * Math.sin(t * 1.2);
+      if (_compassAligned) {
+        // Entry beam fades in
+        if(_qiblaEntryBeam){
+          _qiblaEntryBeam.visible = true;
+          var eop = _qiblaEntryBeam.children[0].material.uniforms.op.value;
+          _qiblaEntryBeam.children[0].material.uniforms.op.value = Math.min(eop + 0.04, 0.18 * breathe);
         }
-      });
+        // Core glow fades in
+        if(_qiblaCoreGlow){
+          _qiblaCoreGlow.visible = true;
+          var cop = _qiblaCoreGlow.children[0].material.uniforms.op.value;
+          _qiblaCoreGlow.children[0].material.uniforms.op.value = Math.min(cop + 0.03, 0.12 * breathe);
+        }
+        // Spectral channels fade in with caustic wobble
+        _qiblaBeams.forEach(function(b) {
+          b.visible = true;
+          var bop = b.children[0].material.uniforms.op.value;
+          var tgt = b.userData.targetOp * breathe;
+          b.children[0].material.uniforms.op.value = Math.min(bop + 0.04, tgt);
+          // Caustic wobble: ±0.3° sinusoidal on Y axis
+          b.rotation.y = b.userData.baseY + THREE.MathUtils.degToRad(0.3) * Math.sin(t * 0.8 + b.userData.phase);
+        });
+      } else {
+        // Fade out all beam layers
+        [_qiblaEntryBeam, _qiblaCoreGlow].forEach(function(el){
+          if(!el) return;
+          var eop2 = el.children[0].material.uniforms.op.value;
+          if(eop2 > 0.005){ el.children[0].material.uniforms.op.value = eop2 * 0.88; }
+          else { el.visible = false; el.children[0].material.uniforms.op.value = 0; }
+        });
+        _qiblaBeams.forEach(function(b) {
+          var bop2 = b.children[0].material.uniforms.op.value;
+          if(bop2 > 0.005){ b.children[0].material.uniforms.op.value = bop2 * 0.88; }
+          else { b.visible = false; b.children[0].material.uniforms.op.value = 0; }
+        });
+      }
     } else {
       // Waiting for compass data: slow searching sweep
       var searchAngle = t * 1.5; // slow rotation
