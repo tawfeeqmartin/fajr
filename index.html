@@ -1850,47 +1850,14 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
   const icon = document.getElementById('fsCompassIcon');
   if(icon) { icon.innerHTML = fsCompassOn ? _clockSVG : _cubeSVG; icon.style.opacity = fsCompassOn ? '1' : '.6'; }
   if(fsCompassOn) {
-    // Start compass feed — register listener + interval
-    function _startCompassFeed() {
-      // Dedicated compass handler that also feeds the clock
-      if (!window._compassFeedHandler) {
-        window._compassFeedHandler = function(e) {
-          // webkitCompassHeading = true north on iOS, alpha = magnetic on Android
-          var h = (typeof e.webkitCompassHeading === 'number') ? e.webkitCompassHeading : e.alpha;
-          if (h == null) return;
-          adhanHasCompass = true;
-          adhanDeviceHeading = h * Math.PI / 180;
-          // Feed directly to clock (no interval delay)
-          if (window._clockUpdateCompass && adhanQiblaAngle !== null) {
-            window._clockUpdateCompass(adhanDeviceHeading, adhanQiblaAngle);
-          }
-        };
-      }
-      window.addEventListener('deviceorientation', window._compassFeedHandler, true);
-    }
-    // Request permission on iOS (must be in click handler for user gesture)
-    if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
-      DeviceOrientationEvent.requestPermission().then(function(state) {
-        console.log('[compass] permission:', state);
-        _startCompassFeed(); // start regardless — 'granted' means events will fire
-      }).catch(function(e){
-        console.warn('[compass] permission error', e);
-        _startCompassFeed(); // try anyway — might already be granted
-      });
-    } else {
-      // Android / desktop — no permission needed
-      _startCompassFeed();
-    }
-    // Always register listener immediately too (in case permission was already granted)
-    _startCompassFeed();
+    // Ensure deviceorientation listener is active (reuse adhan's handler)
+    window.addEventListener('deviceorientation', adhanCompassHandler);
     // Compute Qibla if not already available
     if (!adhanQiblaAngle) adhanGetQibla();
     // Push history state so back gesture exits compass first, not fullscreen
     history.pushState({compass:true}, '', '#clock');
   } else {
-    // Stop feeding compass data
-    if(window._compassFeedHandler){window.removeEventListener('deviceorientation',window._compassFeedHandler,true);}
-    if(window._compassInterval){clearInterval(window._compassInterval);window._compassInterval=null;}
+    // Compass data keeps flowing via adhan handler — clock just stops reading it
     // Pop the compass history entry so stale state doesn't exit fullscreen on next back
     _compassPopFromBtn = true;
     history.back();

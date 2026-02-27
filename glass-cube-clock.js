@@ -417,11 +417,17 @@ window._clockToggleCompass = function(on) {
   }
 };
 
-// Called from index.html compass handler to feed heading + qibla
+// Read compass data directly from adhan globals (already updated by deviceorientation handler)
 window._clockUpdateCompass = function(heading, qibla) {
   _compassHeading = heading;
   _compassQibla = qibla;
 };
+
+// Auto-read from adhan globals each frame (no separate feed needed)
+function _syncCompassFromAdhan() {
+  if (typeof adhanDeviceHeading !== 'undefined') _compassHeading = adhanDeviceHeading;
+  if (typeof adhanQiblaAngle !== 'undefined' && adhanQiblaAngle !== null) _compassQibla = adhanQiblaAngle;
+}
 
 // ─── PRAYER WINDOW SECTORS ────────────────────────────────────────────────
 // Seven glowing fan/pie-slice sectors on the floor, one per Islamic prayer window.
@@ -751,6 +757,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
 
   if (_compassMode) {
+    // Pull latest compass data from adhan globals
+    _syncCompassFromAdhan();
     // COMPASS MODE — clock hands NEVER tick
     if (_compassQibla !== null) {
       // Compass data available: needle points toward Qibla
