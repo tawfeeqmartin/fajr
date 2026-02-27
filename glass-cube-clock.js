@@ -22,13 +22,10 @@ function calcDpr(w, h) {
 var _canvasEl = null; // set after renderer created
 var _stableH = window.innerHeight; // capture initial height before Safari chrome hides
 function getSize() {
-  if (_isFullscreen) {
-    return { w: window.innerWidth, h: window.innerHeight };
-  }
   if (CONTAINED) {
     return { w: CONTAINER.clientWidth || 400, h: CONTAINER.clientHeight || 400 };
   }
-  // Lock renderer to initial height so 3D scene doesn't rescale when Safari chrome hides
+  // Always use _stableH so aspect never shifts between landing/fullscreen/scroll
   return { w: window.innerWidth, h: _stableH || window.innerHeight };
 }
 
