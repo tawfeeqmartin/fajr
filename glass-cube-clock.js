@@ -465,6 +465,10 @@ window._clockToggleCompass = function(on) {
     _compassAligned = true;
     _compassQibla = _compassQibla || 0.4;
     _compassHeading = _compassQibla; // perfect alignment
+    // Slam beams to full opacity instantly
+    if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = true; _qiblaEntryBeam.children[0].material.uniforms.op.value = 0.25; }
+    if(_qiblaCoreGlow){ _qiblaCoreGlow.visible = true; _qiblaCoreGlow.children[0].material.uniforms.op.value = 0.15; }
+    _qiblaBeams.forEach(function(b){ b.visible = true; b.children[0].material.uniforms.op.value = b.userData.targetOp; });
   } else {
     // Restore clock hands
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
