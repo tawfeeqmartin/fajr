@@ -1310,9 +1310,9 @@ function updateNavClock(){
     t5.forEach(p=>{const ps=toSec(t[p]);if(!nextP&&ps>nowS){nextP=p;nextS=ps;}});
     if(!nextP){nextP='Fajr';nextS=toSec(t['Fajr'])+86400;} // wrap to tomorrow's Fajr
     // Iftar mode: between sunrise and maghrib, show "Iftar in ..."
-    const sunriseS=t.Sunrise?toSec(t.Sunrise):toSec(t.Fajr);
+    const fajrS=toSec(t.Fajr);
     const maghribS=toSec(t.Maghrib);
-    const isFasting=nowS>=sunriseS&&nowS<maghribS;
+    const isFasting=nowS>=fajrS&&nowS<maghribS;
     let diff,label;
     if(isFasting){
       diff=maghribS-nowS;
@@ -1964,7 +1964,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=28';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=29';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
