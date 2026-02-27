@@ -383,16 +383,17 @@ var _compassAligned = false;  // true when 12 o'clock ≈ Qibla
 var _qiblaBeams = [];        // prismatic refraction beams toward 6 o'clock
 var _qiblaEntryBeam = null;  // incident beam (12 o'clock side)
 var _qiblaCoreGlow = null;   // convergence zone glow
+var _compassDevMode = /[?&]compass/.test(location.search); // ?compass = dev lookdev mode
 
-// Create prismatic refraction beam — single beam splits through cube into RGB spectrum
+// Create prismatic refraction beam — single beam splits through cube into 5-band spectrum
 (function() {
   const baseAngle = THREE.MathUtils.degToRad(135 - 180); // 6 o'clock direction
   const entryAngle = baseAngle + Math.PI; // 12 o'clock (opposite)
 
-  // Layer 1: Entry beam (incident light from 12 o'clock into cube)
-  var eg = new THREE.PlaneGeometry(2.0, 3.0, 1, 16); eg.translate(0, 3.0/2, 0);
+  // Layer 1: Entry beam (narrow white light entering cube)
+  var eg = new THREE.PlaneGeometry(1.6, 3.0, 1, 16); eg.translate(0, 3.0/2, 0);
   _qiblaEntryBeam = new THREE.Group();
-  _qiblaEntryBeam.add(new THREE.Mesh(eg, mkMatSoft(0xfff8e7, 0xffd966, 0.0)));
+  _qiblaEntryBeam.add(new THREE.Mesh(eg, mkMatSoft(0xfffaf0, 0xffd966, 0.0)));
   _qiblaEntryBeam.position.y = 0.015;
   _qiblaEntryBeam.rotation.order = 'YXZ';
   _qiblaEntryBeam.rotation.y = entryAngle;
@@ -400,8 +401,8 @@ var _qiblaCoreGlow = null;   // convergence zone glow
   _qiblaEntryBeam.visible = false;
   prismGroup.add(_qiblaEntryBeam);
 
-  // Layer 2: Core glow (convergence zone — white-hot center near cube)
-  var cg = new THREE.PlaneGeometry(2.4, 4.0, 1, 16); cg.translate(0, 4.0/2, 0);
+  // Layer 2: Core glow (wider refraction bloom at cube base)
+  var cg = new THREE.PlaneGeometry(3.0, 3.5, 1, 16); cg.translate(0, 3.5/2, 0);
   _qiblaCoreGlow = new THREE.Group();
   _qiblaCoreGlow.add(new THREE.Mesh(cg, mkMatSoft(0xfffdf5, 0x332200, 0.0)));
   _qiblaCoreGlow.position.y = 0.018;
@@ -411,16 +412,18 @@ var _qiblaCoreGlow = null;   // convergence zone glow
   _qiblaCoreGlow.visible = false;
   prismGroup.add(_qiblaCoreGlow);
 
-  // Layer 3: Spectral fan — 3 diverging RGB channels
+  // Layer 3: 5-band spectral fan — wide angular spread so colors visibly separate
   const SPECTRAL = [
-    { c1: 0xff6b4a, c2: 0xffb347, w: 2.0, deg: -2.8, op: 0.13, phase: 0.0 },    // Red (least refraction)
-    { c1: 0x7aff8b, c2: 0xe0ffd6, w: 1.8, deg:  0.0, op: 0.10, phase: 2.1 },    // Green (center)
-    { c1: 0x4a9eff, c2: 0xc7b8ff, w: 1.6, deg:  3.2, op: 0.14, phase: 4.2 },    // Blue (most refraction)
+    { c1: 0xff4422, c2: 0x331100, w: 1.2, len: 10.0, deg: -14, op: 0.22, phase: 0.0 },   // Red
+    { c1: 0xff8800, c2: 0x332200, w: 0.8, len:  9.5, deg:  -8, op: 0.14, phase: 1.3 },   // Orange
+    { c1: 0x44ff66, c2: 0x003311, w: 1.0, len: 10.0, deg:   0, op: 0.18, phase: 2.6 },   // Green
+    { c1: 0x22ccff, c2: 0x002233, w: 0.8, len:  9.5, deg:   7, op: 0.14, phase: 3.9 },   // Cyan
+    { c1: 0x4444ff, c2: 0x110033, w: 1.2, len: 10.0, deg:  15, op: 0.24, phase: 5.2 },   // Blue/Violet
   ];
 
   for (var i = 0; i < SPECTRAL.length; i++) {
     var s = SPECTRAL[i];
-    var sg = new THREE.PlaneGeometry(s.w, 9.12, 1, 16); sg.translate(0, 9.12/2, 0);
+    var sg = new THREE.PlaneGeometry(s.w, s.len, 1, 16); sg.translate(0, s.len/2, 0);
     var grp = new THREE.Group();
     grp.add(new THREE.Mesh(sg, mkMatSoft(s.c1, s.c2, 0.0)));
     grp.position.y = 0.02 + i * 0.003;
@@ -431,6 +434,22 @@ var _qiblaCoreGlow = null;   // convergence zone glow
     grp.userData = { baseY: baseAngle + THREE.MathUtils.degToRad(s.deg), phase: s.phase, targetOp: s.op };
     prismGroup.add(grp);
     _qiblaBeams.push(grp);
+  }
+
+  // Dev mode: auto-enable compass in aligned state for lookdev
+  if (_compassDevMode) {
+    setTimeout(function() {
+      _compassMode = true;
+      _compassAligned = true;
+      _compassQibla = 0.4;
+      _compassHeading = 0.4;
+      // Hide hour + minute, lock second hand
+      clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
+      clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
+      clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
+      // Force second hand to Qibla-aligned position
+      clockRays[2].mesh.rotation.y = clockRays[2].initY;
+    }, 500);
   }
 })();
 
@@ -810,20 +829,20 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
       _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
 
-      // Prismatic refraction: entry beam + core glow + spectral fan
-      var breathe = 0.85 + 0.15 * Math.sin(t * 1.2);
+      // Prismatic refraction: entry beam + core glow + 5-band spectral fan
+      var breathe = 0.88 + 0.12 * Math.sin(t * 1.0);
       if (_compassAligned) {
         // Entry beam fades in
         if(_qiblaEntryBeam){
           _qiblaEntryBeam.visible = true;
           var eop = _qiblaEntryBeam.children[0].material.uniforms.op.value;
-          _qiblaEntryBeam.children[0].material.uniforms.op.value = Math.min(eop + 0.04, 0.18 * breathe);
+          _qiblaEntryBeam.children[0].material.uniforms.op.value = Math.min(eop + 0.04, 0.25 * breathe);
         }
         // Core glow fades in
         if(_qiblaCoreGlow){
           _qiblaCoreGlow.visible = true;
           var cop = _qiblaCoreGlow.children[0].material.uniforms.op.value;
-          _qiblaCoreGlow.children[0].material.uniforms.op.value = Math.min(cop + 0.03, 0.12 * breathe);
+          _qiblaCoreGlow.children[0].material.uniforms.op.value = Math.min(cop + 0.03, 0.15 * breathe);
         }
         // Spectral channels fade in with caustic wobble
         _qiblaBeams.forEach(function(b) {
@@ -831,11 +850,11 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
           var bop = b.children[0].material.uniforms.op.value;
           var tgt = b.userData.targetOp * breathe;
           b.children[0].material.uniforms.op.value = Math.min(bop + 0.04, tgt);
-          // Caustic wobble: ±0.3° sinusoidal on Y axis
-          b.rotation.y = b.userData.baseY + THREE.MathUtils.degToRad(0.3) * Math.sin(t * 0.8 + b.userData.phase);
+          // Caustic wobble: ±1.5° sinusoidal on Y axis
+          b.rotation.y = b.userData.baseY + THREE.MathUtils.degToRad(1.5) * Math.sin(t * 0.6 + b.userData.phase);
         });
-      } else {
-        // Fade out all beam layers
+      } else if (!_compassDevMode) {
+        // Fade out all beam layers (skip fade-out in dev mode)
         [_qiblaEntryBeam, _qiblaCoreGlow].forEach(function(el){
           if(!el) return;
           var eop2 = el.children[0].material.uniforms.op.value;
