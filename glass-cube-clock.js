@@ -1014,8 +1014,8 @@ function _devToggle() {
     _devBuildPanel();
     document.getElementById('_devPanel').style.display = '';
     _devUpdateBoundaries();
-    // Raise canvas z-index for interaction
-    renderer.domElement.style.zIndex = '10';
+    // Keep canvas behind content — dev panel has its own z-index
+    renderer.domElement.style.zIndex = '0';
   } else {
     if (p) p.style.display = 'none';
     _devBoundaryBeams.forEach(function(b) { prismGroup.remove(b); });
