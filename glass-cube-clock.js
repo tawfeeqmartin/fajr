@@ -20,12 +20,19 @@ function calcDpr(w, h) {
 }
 
 var _canvasEl = null; // set after renderer created
-var _lockedAspect = window.innerWidth / window.innerHeight; // lock camera aspect at load
+// Measure lvh (Large Viewport Height) — max viewport, never changes during scroll
+var _lvhEl = document.createElement('div');
+_lvhEl.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+document.body.appendChild(_lvhEl);
+var _stableW = window.innerWidth;
+var _stableH = _lvhEl.offsetHeight || window.innerHeight;
+document.body.removeChild(_lvhEl);
+
 function getSize() {
   if (CONTAINED) {
     return { w: CONTAINER.clientWidth || 400, h: CONTAINER.clientHeight || 400 };
   }
-  return { w: window.innerWidth, h: window.innerHeight };
+  return { w: _stableW, h: _stableH };
 }
 
 let { w: W, h: H } = getSize();
@@ -43,7 +50,7 @@ if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
   const c = renderer.domElement;
-  c.style.cssText = 'position:fixed;inset:0;z-index:0;width:100%;height:100%;';
+  c.style.cssText = 'position:fixed;top:0;left:0;z-index:0;width:100vw;height:100lvh;';
   document.body.appendChild(c);
   _canvasEl = c;
 }
@@ -83,22 +90,29 @@ applyCamera(CONTAINED ? CAM_LANDING : CAM_FULLSCREEN);
 
 // ─── RESIZE ───────────────────────────────────────────────────────────────────
 function onResize() {
-  var prevAspect = _lockedAspect;
   ({ w: W, h: H } = getSize());
-  // Update locked aspect only on real orientation change
-  if (!CONTAINED && Math.abs((W/H) - _lockedAspect) > 0.15) {
-    _lockedAspect = W / H;
-  }
   dpr = calcDpr(W, H);
   renderer.setPixelRatio(dpr);
   renderer.setSize(W, H, false);
-  camera.aspect = _lockedAspect; // locked — scene never shifts
+  camera.aspect = W / H;
   camera.updateProjectionMatrix();
   fboRT.setSize(W * dpr, H * dpr);
   cubeMat.uniforms.uRes.value.set(W * dpr, H * dpr);
   cubeMat.uniforms.uAspect.value = W / H;
 }
-window.addEventListener('resize', onResize);
+// Only resize on orientation change — NOT on scroll/chrome show/hide
+window.addEventListener('orientationchange', function() {
+  setTimeout(function() {
+    _stableW = window.innerWidth;
+    // Re-measure lvh
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+    document.body.appendChild(el);
+    _stableH = el.offsetHeight || window.innerHeight;
+    document.body.removeChild(el);
+    onResize();
+  }, 200);
+});
 
 // ─── FLOOR ────────────────────────────────────────────────────────────────────
 const ground = new THREE.Mesh(
