@@ -590,7 +590,11 @@ function updatePrayerWindows(now) {
     buildPrayerSectors();
     ptSectorsRebuilt = true;
   }
-  if (!prayerSectors.length) {
+  // Merge real + custom debug windows
+  const allSectors = _devActive && _devCustomSectors && _devCustomSectors.length
+    ? prayerSectors.concat(_devCustomSectors) : prayerSectors;
+
+  if (!allSectors.length) {
     _prayerDisc.visible = false; _nextDisc.visible = false;
 
     return;
@@ -605,7 +609,7 @@ function updatePrayerWindows(now) {
   let bestDist = 99999;
   let secondBest = 99999;
 
-  prayerSectors.forEach(function(ps, i) {
+  allSectors.forEach(function(ps, i) {
     const { startMin, endMin } = ps;
     const wraps = startMin > endMin;
     const isActive = wraps
@@ -622,12 +626,14 @@ function updatePrayerWindows(now) {
   });
 
   // ── Active prayer disc (full intensity) ──
+  const _opA = window._OP_ACTIVE_OVERRIDE != null ? window._OP_ACTIVE_OVERRIDE : OP_ACTIVE;
+  const _opS = window._OP_STEP_OVERRIDE != null ? window._OP_STEP_OVERRIDE : OP_STEP;
   const u = _prayerDiscMat.uniforms;
-  const activeTarget = activeIdx >= 0 ? OP_ACTIVE : 0.0;
+  const activeTarget = activeIdx >= 0 ? _opA : 0.0;
   u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, activeTarget, 0.03);
 
   if (activeIdx >= 0) {
-    const ps = prayerSectors[activeIdx];
+    const ps = allSectors[activeIdx];
     u.uStartAngle.value = ps.startAng;
     u.uEndAngle.value = ps.endAng;
     u.uColor1.value.set(ps.def.color);
@@ -638,11 +644,11 @@ function updatePrayerWindows(now) {
 
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
-  const nextTarget = nextIdx >= 0 ? Math.max(OP_ACTIVE - OP_STEP, 0.0) : 0.0;
+  const nextTarget = nextIdx >= 0 ? Math.max(_opA - _opS, 0.0) : 0.0;
   nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, 0.03);
 
   if (nextIdx >= 0) {
-    const ps = prayerSectors[nextIdx];
+    const ps = allSectors[nextIdx];
     nu.uStartAngle.value = ps.startAng;
     nu.uEndAngle.value = ps.endAng;
     nu.uColor1.value.set(ps.def.color);
@@ -653,11 +659,11 @@ function updatePrayerWindows(now) {
 
   // ── Third prayer disc (prayer after next) ──
   const tu = _thirdDiscMat.uniforms;
-  const thirdTarget = thirdIdx >= 0 ? Math.max(OP_ACTIVE - OP_STEP * 2, 0.0) : 0.0;
+  const thirdTarget = thirdIdx >= 0 ? Math.max(_opA - _opS * 2, 0.0) : 0.0;
   tu.uIntensity.value = THREE.MathUtils.lerp(tu.uIntensity.value, thirdTarget, 0.03);
 
   if (thirdIdx >= 0) {
-    const ps = prayerSectors[thirdIdx];
+    const ps = allSectors[thirdIdx];
     tu.uStartAngle.value = ps.startAng;
     tu.uEndAngle.value = ps.endAng;
     tu.uColor1.value.set(ps.def.color);
@@ -710,7 +716,15 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   tawafSpot.position.z = -Math.cos(tawafAngle) * 3;
 
   // Update prayer window sector opacities
-  updatePrayerWindows(now);
+  const prayerNow = (typeof _getDevNow === 'function' && _devActive) ? _getDevNow() : now;
+  updatePrayerWindows(prayerNow);
+
+  // Update dev time slider readout if live
+  if (_devActive && !_devTimeOverride) {
+    const sl = document.getElementById('_devTimeSlider');
+    const lb = document.getElementById('_devTimeLabel');
+    if (sl) { const v = now.getHours()*60+now.getMinutes(); sl.value = v; if (lb) lb.textContent = _fmtMin(v); }
+  }
 
   // FBO pass
   cubeMesh.visible = false;
@@ -734,3 +748,225 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
 // Signal site that clock is ready
 document.body.classList.add('clock-ready');
+
+// ─── DEV PANEL ────────────────────────────────────────────────────────────────
+// Activate with ?dev in URL or press D key
+let _devActive = false;
+let _devTimeOverride = null; // null = real time, else { h, m }
+let _devCustomWindows = []; // [{name, startH, startM, endH, endM, color}]
+let _devShowBoundaries = true;
+const _devBoundaryBeams = [];
+
+function _devBuildPanel() {
+  if (document.getElementById('_devPanel')) return;
+  const panel = document.createElement('div');
+  panel.id = '_devPanel';
+  panel.style.cssText = 'position:fixed;top:8px;right:8px;z-index:99999;background:rgba(0,0,0,0.88);color:#ccc;font:11px/1.5 monospace;padding:12px;border-radius:8px;max-height:90vh;overflow-y:auto;min-width:260px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1)';
+
+  // Time override
+  const timeNow = new Date();
+  panel.innerHTML = `
+    <div style="color:#fff;font-size:13px;margin-bottom:8px;font-weight:600">🕐 Prayer Dev Panel</div>
+    <div style="margin-bottom:8px">
+      <label style="color:#888">Time Override</label><br>
+      <input type="range" id="_devTimeSlider" min="0" max="1439" value="${timeNow.getHours()*60+timeNow.getMinutes()}" style="width:200px">
+      <span id="_devTimeLabel" style="color:#fff;margin-left:6px">${_fmtMin(timeNow.getHours()*60+timeNow.getMinutes())}</span>
+      <br><label><input type="checkbox" id="_devTimeLive" checked> Live time</label>
+    </div>
+    <div style="margin-bottom:8px">
+      <label><input type="checkbox" id="_devBoundaries" checked> Show boundaries</label>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:4px">
+      <div style="color:#fff;font-size:12px;margin-bottom:6px">Active Prayer Windows</div>
+      <div id="_devWindowList"></div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">
+      <div style="color:#fff;font-size:12px;margin-bottom:6px">Custom Debug Windows</div>
+      <div id="_devCustomList"></div>
+      <button id="_devAddWindow" style="margin-top:4px;font:11px monospace;background:#333;color:#ccc;border:1px solid #555;border-radius:4px;padding:3px 10px;cursor:pointer">+ Add window</button>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">
+      <div style="color:#fff;font-size:12px;margin-bottom:6px">Intensity</div>
+      <label style="color:#888">Active: </label><input type="range" id="_devOpActive" min="0" max="30" value="${OP_ACTIVE*10}" style="width:120px"><span id="_devOpActiveV" style="color:#fff;margin-left:4px">${OP_ACTIVE}</span><br>
+      <label style="color:#888">Step: </label><input type="range" id="_devOpStep" min="0" max="10" value="${OP_STEP*10}" style="width:120px"><span id="_devOpStepV" style="color:#fff;margin-left:4px">${OP_STEP}</span>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  // Slider events
+  const slider = document.getElementById('_devTimeSlider');
+  const label = document.getElementById('_devTimeLabel');
+  const liveChk = document.getElementById('_devTimeLive');
+  slider.addEventListener('input', function() {
+    liveChk.checked = false;
+    const min = parseInt(slider.value);
+    label.textContent = _fmtMin(min);
+    _devTimeOverride = { h: Math.floor(min/60), m: min%60 };
+  });
+  liveChk.addEventListener('change', function() {
+    if (liveChk.checked) _devTimeOverride = null;
+  });
+
+  // Boundaries toggle
+  document.getElementById('_devBoundaries').addEventListener('change', function(e) {
+    _devShowBoundaries = e.target.checked;
+    _devUpdateBoundaries();
+  });
+
+  // Intensity sliders
+  document.getElementById('_devOpActive').addEventListener('input', function(e) {
+    window._OP_ACTIVE_OVERRIDE = parseFloat(e.target.value) / 10;
+    document.getElementById('_devOpActiveV').textContent = window._OP_ACTIVE_OVERRIDE.toFixed(1);
+  });
+  document.getElementById('_devOpStep').addEventListener('input', function(e) {
+    window._OP_STEP_OVERRIDE = parseFloat(e.target.value) / 10;
+    document.getElementById('_devOpStepV').textContent = window._OP_STEP_OVERRIDE.toFixed(1);
+  });
+
+  // Add custom window button
+  document.getElementById('_devAddWindow').addEventListener('click', _devAddCustomWindow);
+
+  _devRefreshWindowList();
+}
+
+function _fmtMin(m) {
+  const h = Math.floor(m / 60), mm = m % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ampm;
+}
+
+function _devRefreshWindowList() {
+  const el = document.getElementById('_devWindowList');
+  if (!el) return;
+  const T = window._prayerTimings || PT_FALLBACK;
+  el.innerHTML = PRAYER_WINDOWS_DEF.map(function(d) {
+    return '<div style="padding:1px 0;color:#aaa"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#' + d.color.toString(16).padStart(6,'0') + ';margin-right:4px"></span>' + d.name + ': ' + (T[d.startKey]||'?') + ' → ' + (T[d.endKey]||'?') + '</div>';
+  }).join('');
+}
+
+let _devCustomIdCounter = 0;
+function _devAddCustomWindow() {
+  const id = ++_devCustomIdCounter;
+  const colors = ['#ff0000','#00ff00','#0088ff','#ff8800','#ff00ff','#00ffcc','#ffff00'];
+  const color = colors[_devCustomWindows.length % colors.length];
+  const win = { id, name: 'Debug ' + id, startH: 12, startM: 0, endH: 14, endM: 0, color: color };
+  _devCustomWindows.push(win);
+  _devRenderCustomList();
+  _devApplyCustomWindows();
+}
+
+function _devRemoveCustomWindow(id) {
+  _devCustomWindows = _devCustomWindows.filter(function(w) { return w.id !== id; });
+  _devRenderCustomList();
+  _devApplyCustomWindows();
+}
+
+function _devRenderCustomList() {
+  const el = document.getElementById('_devCustomList');
+  if (!el) return;
+  el.innerHTML = _devCustomWindows.map(function(w) {
+    return '<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)" data-id="' + w.id + '">' +
+      '<input type="color" value="' + w.color + '" data-field="color" style="width:20px;height:16px;border:none;padding:0;vertical-align:middle;cursor:pointer"> ' +
+      '<input type="text" value="' + w.name + '" data-field="name" style="width:50px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px 3px"> ' +
+      '<input type="number" value="' + w.startH + '" data-field="startH" min="0" max="23" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px">:' +
+      '<input type="number" value="' + w.startM + '" data-field="startM" min="0" max="59" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px"> → ' +
+      '<input type="number" value="' + w.endH + '" data-field="endH" min="0" max="23" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px">:' +
+      '<input type="number" value="' + w.endM + '" data-field="endM" min="0" max="59" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px"> ' +
+      '<button data-remove="' + w.id + '" style="background:#600;color:#faa;border:1px solid #844;border-radius:2px;font:10px monospace;padding:0 5px;cursor:pointer">✕</button>' +
+      '</div>';
+  }).join('');
+
+  // Wire events
+  el.querySelectorAll('[data-remove]').forEach(function(btn) {
+    btn.addEventListener('click', function() { _devRemoveCustomWindow(parseInt(btn.dataset.remove)); });
+  });
+  el.querySelectorAll('[data-field]').forEach(function(inp) {
+    inp.addEventListener('change', function() {
+      const row = inp.closest('[data-id]');
+      const id = parseInt(row.dataset.id);
+      const w = _devCustomWindows.find(function(x) { return x.id === id; });
+      if (!w) return;
+      const f = inp.dataset.field;
+      if (f === 'color' || f === 'name') w[f] = inp.value;
+      else w[f] = parseInt(inp.value) || 0;
+      _devApplyCustomWindows();
+    });
+  });
+}
+
+// Boundary debug lines (thin beams at start/end of each visible window)
+function _devUpdateBoundaries() {
+  // Clear existing
+  _devBoundaryBeams.forEach(function(b) { prismGroup.remove(b); });
+  _devBoundaryBeams.length = 0;
+  if (!_devShowBoundaries || !_devActive) return;
+
+  const allSectors = prayerSectors.concat(_devCustomSectors || []);
+  allSectors.forEach(function(ps) {
+    [ps.startAng, ps.endAng].forEach(function(ang) {
+      const geo = new THREE.PlaneGeometry(0.08, SECTOR_RADIUS, 1, 1);
+      geo.translate(0, SECTOR_RADIUS / 2, 0);
+      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false });
+      const m = new THREE.Mesh(geo, mat);
+      const grp = new THREE.Group();
+      grp.add(m);
+      grp.position.y = 0.04;
+      grp.rotation.order = 'YXZ';
+      grp.rotation.y = ang;
+      grp.rotation.x = Math.PI / 2;
+      prismGroup.add(grp);
+      _devBoundaryBeams.push(grp);
+    });
+  });
+}
+
+let _devCustomSectors = [];
+function _devApplyCustomWindows() {
+  _devCustomSectors = _devCustomWindows.map(function(w) {
+    const startMin = w.startH * 60 + w.startM;
+    const endMin = w.endH * 60 + w.endM;
+    return {
+      def: { name: w.name, color: parseInt(w.color.replace('#',''), 16), color2: parseInt(w.color.replace('#',''), 16) },
+      startMin: startMin,
+      endMin: endMin,
+      startAng: ptTimeToAngle(startMin),
+      endAng: ptTimeToAngle(endMin),
+      isCustom: true
+    };
+  });
+  _devUpdateBoundaries();
+}
+
+// Override getDevNow for time simulation
+function _getDevNow() {
+  if (_devTimeOverride) {
+    const d = new Date();
+    d.setHours(_devTimeOverride.h, _devTimeOverride.m, 0, 0);
+    return d;
+  }
+  return new Date();
+}
+
+// Toggle dev mode
+function _devToggle() {
+  _devActive = !_devActive;
+  const p = document.getElementById('_devPanel');
+  if (_devActive) {
+    _devBuildPanel();
+    document.getElementById('_devPanel').style.display = '';
+    _devUpdateBoundaries();
+    // Raise canvas z-index for interaction
+    renderer.domElement.style.zIndex = '10';
+  } else {
+    if (p) p.style.display = 'none';
+    _devBoundaryBeams.forEach(function(b) { prismGroup.remove(b); });
+    _devBoundaryBeams.length = 0;
+    renderer.domElement.style.zIndex = '';
+    _devTimeOverride = null;
+  }
+}
+
+// Activate with ?dev or D key
+if (location.search.includes('dev')) { _devActive = true; setTimeout(_devBuildPanel, 100); setTimeout(_devUpdateBoundaries, 200); }
+document.addEventListener('keydown', function(e) { if (e.key === 'D' || e.key === 'd') _devToggle(); });
