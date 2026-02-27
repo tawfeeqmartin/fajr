@@ -352,7 +352,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 /* canvas no longer lives inside overlay — it's fixed in body */
 /* Fullscreen chrome — scales with viewport via clamp() */
 .clock-fs-close{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(8px,1.5vmin,24px));left:clamp(12px,2vmin,32px);z-index:210;background:none;border:none;color:rgba(232,228,220,.6);font-size:clamp(1.2rem,2.5vmin,2.4rem);cursor:pointer;padding:clamp(6px,1vmin,16px);transition:opacity .5s ease}
-.fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none}
+.fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint,.fs-chrome-hidden #fsVersionTag{opacity:0!important;pointer-events:none}
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
 .fs-header .fs-datetime{font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em}
 .fs-header .fs-location{display:none}
@@ -378,7 +378,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 <!-- Fullscreen Clock Overlay -->
 <div id="clockFullscreen" class="clock-fs-overlay">
   <button id="clockFsClose" class="clock-fs-close" aria-label="Close">&times;</button>
-  <div id="fsVersionTag" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(6px,1vmin,16px));left:clamp(12px,2vmin,32px);z-index:210;font-family:var(--font);font-size:clamp(.5rem,1vmin,.9rem);font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.05em;pointer-events:none"></div>
+  <div id="fsVersionTag" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(6px,1vmin,16px));left:clamp(12px,2vmin,32px);z-index:210;font-family:var(--font);font-size:clamp(.5rem,1vmin,.9rem);font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.05em;pointer-events:none;transition:opacity .5s ease"></div>
 
   <div id="fsHeader" class="fs-header">
     <div class="fs-datetime" id="fsDateTime"></div>
