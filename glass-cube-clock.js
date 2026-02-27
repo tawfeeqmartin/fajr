@@ -581,7 +581,7 @@ function _mkMarkerBeam(color) {
 const _markerStart = _mkMarkerBeam(0xff4444); // red = start
 const _markerEnd   = _mkMarkerBeam(0x44ff44); // green = end
 
-const OP_NEXT = 0.35; // upcoming prayer — present but subdued
+const OP_NEXT = 1.3; // upcoming prayer — same intensity as active
 
 function updatePrayerWindows(now) {
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
