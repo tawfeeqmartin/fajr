@@ -380,22 +380,39 @@ var _compassMode = false;
 var _compassHeading = 0;      // device heading in radians
 var _compassQibla = null;     // qibla bearing in radians
 var _compassAligned = false;  // true when 12 o'clock ≈ Qibla
-var _qiblaBeam = null;        // light beam toward 6 o'clock
+var _qiblaBeams = [];        // 7 prayer-colored prism beams toward 6 o'clock
 
-// Create the Qibla beam (hidden by default) — bright white/gold, from cube center toward 6 o'clock
+// Create 7 prism beams — light splits through cube into prayer colors
 (function() {
-  const len = 9.12;
-  const g = new THREE.PlaneGeometry(0.8, len, 1, 16); g.translate(0, len/2, 0);
-  const grp = new THREE.Group();
-  grp.add(new THREE.Mesh(g, mkMat(0xffd700, 0xffffff, 0.0)));
-  grp.position.y = 0.03;
-  grp.rotation.order = 'YXZ';
-  // Point toward 6 o'clock (opposite of 12 o'clock / initY 135°)
-  grp.rotation.y = THREE.MathUtils.degToRad(135 - 180);
-  grp.rotation.x = Math.PI / 2;
-  grp.visible = false;
-  prismGroup.add(grp);
-  _qiblaBeam = grp;
+  const PRISM_COLORS = [
+    { c1: 0x7700ee, c2: 0xcc66ff },  // Tahajjud — violet
+    { c1: 0x3311cc, c2: 0x8866ee },  // Fajr — deep blue
+    { c1: 0x0066ff, c2: 0x55ccff },  // Isha — blue
+    { c1: 0x00cc44, c2: 0x88ffaa },  // Dhuhr — green
+    { c1: 0xffbb00, c2: 0xffff44 },  // Dhuha — yellow
+    { c1: 0xff8800, c2: 0xffdd66 },  // Asr — orange
+    { c1: 0xff3300, c2: 0xff9988 },  // Maghrib — red
+  ];
+  const baseAngle = THREE.MathUtils.degToRad(135 - 180); // 6 o'clock
+  const spread = 0.6; // total fan spread in radians (~34°)
+  const count = PRISM_COLORS.length;
+
+  for (var i = 0; i < count; i++) {
+    var len = 7.5 + Math.random() * 2.5; // vary lengths slightly
+    var w = 0.35;
+    var g = new THREE.PlaneGeometry(w, len, 1, 16); g.translate(0, len/2, 0);
+    var grp = new THREE.Group();
+    grp.add(new THREE.Mesh(g, mkMat(PRISM_COLORS[i].c1, PRISM_COLORS[i].c2, 0.0)));
+    grp.position.y = 0.02 + i * 0.003; // slight Y stagger
+    grp.rotation.order = 'YXZ';
+    // Fan out from center: evenly spread around the 6 o'clock direction
+    var offset = (i / (count - 1) - 0.5) * spread;
+    grp.rotation.y = baseAngle + offset;
+    grp.rotation.x = Math.PI / 2;
+    grp.visible = false;
+    prismGroup.add(grp);
+    _qiblaBeams.push(grp);
+  }
 })();
 
 window._clockToggleCompass = function(on) {
@@ -405,14 +422,13 @@ window._clockToggleCompass = function(on) {
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0;
     _compassAligned = false;
-    _qiblaBeam.visible = false;
-    _qiblaBeam.children[0].material.uniforms.op.value = 0;
+    _qiblaBeams.forEach(function(b){ b.visible = false; b.children[0].material.uniforms.op.value = 0; });
   } else {
     // Restore clock hands
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
     clockRays[1].mesh.children[0].material.uniforms.op.value = 0.92;
     clockRays[2].mesh.children[0].material.uniforms.op.value = 0.62;
-    _qiblaBeam.visible = false;
+    _qiblaBeams.forEach(function(b){ b.visible = false; b.children[0].material.uniforms.op.value = 0; });
     _compassAligned = false;
   }
 };
@@ -771,19 +787,21 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
       _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
 
-      // Qibla beam: show when aligned, pointing toward 6 o'clock
-      if (_compassAligned) {
-        _qiblaBeam.visible = true;
-        var beamOp = _qiblaBeam.children[0].material.uniforms.op.value;
-        _qiblaBeam.children[0].material.uniforms.op.value = Math.min(beamOp + 0.08, 1.0);
-      } else {
-        var beamOp2 = _qiblaBeam.children[0].material.uniforms.op.value;
-        if (beamOp2 > 0.01) {
-          _qiblaBeam.children[0].material.uniforms.op.value = beamOp2 * 0.92;
+      // Prism beams: split through cube when aligned with Qibla
+      _qiblaBeams.forEach(function(b, i) {
+        if (_compassAligned) {
+          b.visible = true;
+          var op = b.children[0].material.uniforms.op.value;
+          b.children[0].material.uniforms.op.value = Math.min(op + 0.06, 1.0);
         } else {
-          _qiblaBeam.visible = false;
+          var op2 = b.children[0].material.uniforms.op.value;
+          if (op2 > 0.01) {
+            b.children[0].material.uniforms.op.value = op2 * 0.9;
+          } else {
+            b.visible = false;
+          }
         }
-      }
+      });
     } else {
       // Waiting for compass data: slow searching sweep
       var searchAngle = t * 1.5; // slow rotation
