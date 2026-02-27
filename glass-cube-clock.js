@@ -583,7 +583,7 @@ prismGroup.add(_thirdDisc);
 
 
 
-const OP_NEXT = 1.0; // upcoming prayers — slightly dimmer than active
+const OP_STEP = 0.4; // intensity drop per consecutive prayer
 
 function updatePrayerWindows(now) {
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
@@ -638,7 +638,7 @@ function updatePrayerWindows(now) {
 
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
-  const nextTarget = nextIdx >= 0 ? OP_NEXT : 0.0;
+  const nextTarget = nextIdx >= 0 ? Math.max(OP_ACTIVE - OP_STEP, 0.0) : 0.0;
   nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, 0.03);
 
   if (nextIdx >= 0) {
@@ -653,7 +653,7 @@ function updatePrayerWindows(now) {
 
   // ── Third prayer disc (prayer after next) ──
   const tu = _thirdDiscMat.uniforms;
-  const thirdTarget = thirdIdx >= 0 ? OP_NEXT : 0.0;
+  const thirdTarget = thirdIdx >= 0 ? Math.max(OP_ACTIVE - OP_STEP * 2, 0.0) : 0.0;
   tu.uIntensity.value = THREE.MathUtils.lerp(tu.uIntensity.value, thirdTarget, 0.03);
 
   if (thirdIdx >= 0) {
