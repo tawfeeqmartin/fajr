@@ -778,6 +778,7 @@ function playVerse(btn,url){
 // ══════════════════════════════════════════
 function buildDots(){
   const c=document.getElementById('dialDots');
+  if(!c)return;
   c.innerHTML=DIALS.map((_,i)=>`<button class="dial-dot${i===dialIdx?' active':''}" onclick="switchDial(${i})" style="background:${DIAL_COLORS[DIALS[i]]}" aria-label="${DIAL_NAMES[DIALS[i]]}"></button>`).join('');
 }
 function switchDial(i){
@@ -786,12 +787,12 @@ function switchDial(i){
 }
 function updateDial(){
   const d=DIALS[dialIdx];
-  document.getElementById('dialLabel').textContent=DIAL_NAMES[d];
+  const dlEl=document.getElementById('dialLabel');if(dlEl)dlEl.textContent=DIAL_NAMES[d];
   document.querySelectorAll('.dial-dot').forEach((dot,i)=>{
     dot.classList.toggle('active',i===dialIdx);
   });
   if(dialAudio&&!dialAudio.paused){dialAudio.pause();dialPlaying=false;}
-  document.getElementById('dialListen').innerHTML='<i class="ph-thin ph-play"></i> Listen to this Surah';
+  const dlBtn=document.getElementById('dialListen');if(dlBtn)dlBtn.innerHTML='<i class="ph-thin ph-play"></i> Listen to this Surah';
   if(window._clockSwitchDial) window._clockSwitchDial(d);
   updateLumeHalo();
   // Sync fullscreen UI if active
