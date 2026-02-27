@@ -455,7 +455,7 @@ function makeSectorGeom(radius, thetaHalf, segments) {
 
 const SECTOR_RADIUS = 9.12;  // matches second-hand length
 const OP_ACTIVE = 1.3;
-const SECTOR_OVERSCAN = 0.04; // radians — slight overlap so adjacent window tapers blend
+
 
 let prayerSectors = [];
 let ptSectorsRebuilt = false;
@@ -628,8 +628,8 @@ function updatePrayerWindows(now) {
 
   if (activeIdx >= 0) {
     const ps = prayerSectors[activeIdx];
-    u.uStartAngle.value = ps.startAng + SECTOR_OVERSCAN;
-    u.uEndAngle.value = ps.endAng - SECTOR_OVERSCAN;
+    u.uStartAngle.value = ps.startAng;
+    u.uEndAngle.value = ps.endAng;
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     _prayerDisc.visible = true;
@@ -643,8 +643,8 @@ function updatePrayerWindows(now) {
 
   if (nextIdx >= 0) {
     const ps = prayerSectors[nextIdx];
-    nu.uStartAngle.value = ps.startAng + SECTOR_OVERSCAN;
-    nu.uEndAngle.value = ps.endAng - SECTOR_OVERSCAN;
+    nu.uStartAngle.value = ps.startAng;
+    nu.uEndAngle.value = ps.endAng;
     nu.uColor1.value.set(ps.def.color);
     nu.uColor2.value.set(ps.def.color2);
     _nextDisc.visible = true;
@@ -658,8 +658,8 @@ function updatePrayerWindows(now) {
 
   if (thirdIdx >= 0) {
     const ps = prayerSectors[thirdIdx];
-    tu.uStartAngle.value = ps.startAng + SECTOR_OVERSCAN;
-    tu.uEndAngle.value = ps.endAng - SECTOR_OVERSCAN;
+    tu.uStartAngle.value = ps.startAng;
+    tu.uEndAngle.value = ps.endAng;
     tu.uColor1.value.set(ps.def.color);
     tu.uColor2.value.set(ps.def.color2);
     _thirdDisc.visible = true;
