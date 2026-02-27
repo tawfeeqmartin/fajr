@@ -384,6 +384,7 @@ var _qiblaBeams = [];        // prismatic refraction beams toward 6 o'clock
 var _qiblaEntryBeam = null;  // incident beam (12 o'clock side)
 var _qiblaCoreGlow = null;   // convergence zone glow
 var _compassDevMode = /[?&]compass/.test(location.search); // ?compass = dev lookdev mode
+var _compassLocked = false;  // true = dev lock, skip gyro sync
 
 // Create prismatic refraction beam — single beam splits through cube into 5-band spectrum
 (function() {
@@ -463,6 +464,7 @@ window._clockToggleCompass = function(on) {
     clockRays[2].mesh.rotation.y = clockRays[2].initY; // lock to 12
     // Force aligned so beams show immediately (dev/lookdev)
     _compassAligned = true;
+    _compassLocked = true; // prevent gyro from overwriting
     _compassQibla = _compassQibla || 0.4;
     _compassHeading = _compassQibla; // perfect alignment
     // Slam beams to full opacity instantly
@@ -478,6 +480,7 @@ window._clockToggleCompass = function(on) {
     if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.children[0].material.uniforms.op.value = 0; }
     if(_qiblaCoreGlow){ _qiblaCoreGlow.visible = false; _qiblaCoreGlow.children[0].material.uniforms.op.value = 0; }
     _compassAligned = false;
+    _compassLocked = false;
   }
 };
 
@@ -489,6 +492,7 @@ window._clockUpdateCompass = function(heading, qibla) {
 
 // Auto-read from adhan globals each frame (no separate feed needed)
 function _syncCompassFromAdhan() {
+  if (_compassLocked) return; // dev lock — skip gyro overwrite
   if (typeof adhanDeviceHeading !== 'undefined') _compassHeading = adhanDeviceHeading;
   if (typeof adhanQiblaAngle !== 'undefined' && adhanQiblaAngle !== null) _compassQibla = adhanQiblaAngle;
 }
