@@ -396,6 +396,8 @@ const FRAG_PRISM_FAN = `
     float theta = atan(p.y, p.x);
     // Radial: fade in from center (cube zone), Gaussian fade out
     float radial = smoothstep(0.02, 0.10, r) * exp(-r * r * 3.0);
+    // Radial intensity: brighter near cube, fading outward (sells "cast by cube")
+    float cubeIntensity = 0.3 + 0.7 * smoothstep(0.35, 0.06, r);
     // Angular fan mask
     float ad = mod(theta - fanCenter + 3.14159, 6.28318) - 3.14159;
     float fanPos = ad / fanWidth;
@@ -417,7 +419,7 @@ const FRAG_PRISM_FAN = `
     // Caustic shimmer
     float shimmer = 0.9 + 0.1 * sin(r * 40.0 + time * 0.5 + theta * 3.0);
     float bandIntensity = 1.0 - 0.3 * pow(abs(fanPos), 2.0);
-    gl_FragColor = vec4(col * shimmer, radial * fanMask * bandIntensity * op);
+    gl_FragColor = vec4(col * shimmer, radial * fanMask * bandIntensity * cubeIntensity * op);
   }
 `;
 const FRAG_ENTRY_BEAM = `
@@ -469,6 +471,29 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
   // Layer 3: Entry beam (narrow white beam from 12 o'clock)
   _qiblaEntryDisc = mkPrismDisc(4, FRAG_ENTRY_BEAM, entryAngle, 0.07, 0.0);
 
+  // Layer 4: Dark shadow disc under cube — "light came FROM here"
+  var _shadowDisc = new THREE.Mesh(
+    new THREE.CircleGeometry(1.2, 32),
+    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.0, transparent: true, depthWrite: false })
+  );
+  _shadowDisc.rotation.x = -Math.PI / 2;
+  _shadowDisc.position.y = 0.005;
+  _shadowDisc.renderOrder = -1;
+  _shadowDisc.visible = false;
+  prismGroup.add(_shadowDisc);
+  window._qiblaShadowDisc = _shadowDisc;
+
+  // Layer 5: Caustic PointLight under cube — makes cube edges glow with fan colors
+  var _causticLight = new THREE.PointLight(0xff8844, 0.0, 8);
+  _causticLight.position.set(0, -0.3, 0);
+  prismGroup.add(_causticLight);
+  window._qiblaCausticLight = _causticLight;
+
+  // Set render order: fan after cube
+  if(_qiblaFanDisc) _qiblaFanDisc.renderOrder = 1;
+  if(_qiblaBloomDisc) _qiblaBloomDisc.renderOrder = 1;
+  if(_qiblaEntryDisc) _qiblaEntryDisc.renderOrder = 1;
+
   // Dev mode: auto-enable compass in aligned state for lookdev
   if (_compassDevMode) {
     setTimeout(function() {
@@ -501,6 +526,8 @@ window._clockToggleCompass = function(on) {
     if(_qiblaFanDisc){ _qiblaFanDisc.visible = true; _qiblaFanDisc.material.uniforms.op.value = 0.22; }
     if(_qiblaBloomDisc){ _qiblaBloomDisc.visible = true; _qiblaBloomDisc.material.uniforms.op.value = 0.08; }
     if(_qiblaEntryDisc){ _qiblaEntryDisc.visible = true; _qiblaEntryDisc.material.uniforms.op.value = 0.18; }
+    if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = true; window._qiblaShadowDisc.material.opacity = 0.15; }
+    if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0.5; }
     // Hide prayer window discs
     _prayerDisc.visible = false; _nextDisc.visible = false; _thirdDisc.visible = false;
   } else {
@@ -511,6 +538,8 @@ window._clockToggleCompass = function(on) {
     [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
       if(d){ d.visible = false; d.material.uniforms.op.value = 0; }
     });
+    if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = false; window._qiblaShadowDisc.material.opacity = 0; }
+    if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
     // Restore prayer window discs
     _prayerDisc.visible = true; _nextDisc.visible = true; _thirdDisc.visible = true;
     _compassAligned = false;
@@ -880,6 +909,11 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       if(_qiblaBloomDisc) _qiblaBloomDisc.material.uniforms.time.value = t;
 
       if (_compassAligned) {
+        // Shadow disc + caustic light
+        if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = true; window._qiblaShadowDisc.material.opacity = Math.min(window._qiblaShadowDisc.material.opacity + 0.02, 0.15); }
+        if(window._qiblaCausticLight){
+          window._qiblaCausticLight.intensity = Math.min(window._qiblaCausticLight.intensity + 0.03, 0.5 * breathe);
+        }
         // Fan disc fades in
         if(_qiblaFanDisc){
           _qiblaFanDisc.visible = true;
@@ -899,6 +933,9 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
           _qiblaEntryDisc.material.uniforms.op.value = Math.min(eop + 0.04, 0.18 * breathe);
         }
       } else if (!_compassDevMode) {
+        // Fade out shadow + caustic
+        if(window._qiblaShadowDisc && window._qiblaShadowDisc.material.opacity > 0.005){ window._qiblaShadowDisc.material.opacity *= 0.9; } else if(window._qiblaShadowDisc){ window._qiblaShadowDisc.visible = false; }
+        if(window._qiblaCausticLight && window._qiblaCausticLight.intensity > 0.01){ window._qiblaCausticLight.intensity *= 0.9; } else if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
         // Fade out all disc layers
         [_qiblaFanDisc, _qiblaBloomDisc, _qiblaEntryDisc].forEach(function(d){
           if(!d) return;
