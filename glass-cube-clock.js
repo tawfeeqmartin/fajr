@@ -836,13 +836,41 @@ function _fmtMin(m) {
   return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ampm;
 }
 
+function _devJumpToTime(min) {
+  const slider = document.getElementById('_devTimeSlider');
+  const label = document.getElementById('_devTimeLabel');
+  const liveChk = document.getElementById('_devTimeLive');
+  if (slider) { slider.value = min; }
+  if (label) { label.textContent = _fmtMin(min); }
+  if (liveChk) { liveChk.checked = false; }
+  _devTimeOverride = { h: Math.floor(min/60), m: min%60 };
+}
+
 function _devRefreshWindowList() {
   const el = document.getElementById('_devWindowList');
   if (!el) return;
   const T = window._prayerTimings || PT_FALLBACK;
-  el.innerHTML = PRAYER_WINDOWS_DEF.map(function(d) {
-    return '<div style="padding:1px 0;color:#aaa"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#' + d.color.toString(16).padStart(6,'0') + ';margin-right:4px"></span>' + d.name + ': ' + (T[d.startKey]||'?') + ' → ' + (T[d.endKey]||'?') + '</div>';
+  el.innerHTML = PRAYER_WINDOWS_DEF.map(function(d, i) {
+    const startMin = ptParseMin(T[d.startKey] || '0:00');
+    const endMin = ptParseMin(T[d.endKey] || '0:00');
+    const midMin = d.startKey === 'Midnight' ? (startMin + Math.floor(((endMin - startMin + 1440) % 1440) / 2)) % 1440 : startMin + 5;
+    return '<div style="padding:2px 0;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px" data-min="' + midMin + '">' +
+      '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#' + d.color.toString(16).padStart(6,'0') + '"></span>' +
+      '<span style="flex:1">' + d.name + ': ' + (T[d.startKey]||'?') + ' → ' + (T[d.endKey]||'?') + '</span>' +
+      '<button data-start="' + startMin + '" style="font:9px monospace;background:#333;color:#8f8;border:1px solid #555;border-radius:3px;padding:1px 5px;cursor:pointer">▶ Start</button>' +
+      '<button data-mid="' + midMin + '" style="font:9px monospace;background:#333;color:#ff8;border:1px solid #555;border-radius:3px;padding:1px 5px;cursor:pointer">● Mid</button>' +
+      '<button data-end="' + Math.max(endMin - 2, 0) + '" style="font:9px monospace;background:#333;color:#f88;border:1px solid #555;border-radius:3px;padding:1px 5px;cursor:pointer">■ End</button>' +
+      '</div>';
   }).join('');
+  el.querySelectorAll('[data-start]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); _devJumpToTime(parseInt(btn.dataset.start)); });
+  });
+  el.querySelectorAll('[data-mid]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); _devJumpToTime(parseInt(btn.dataset.mid)); });
+  });
+  el.querySelectorAll('[data-end]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); _devJumpToTime(parseInt(btn.dataset.end)); });
+  });
 }
 
 var _devCustomIdCounter = 0;
