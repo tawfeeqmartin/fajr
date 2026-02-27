@@ -867,21 +867,8 @@ async function adhanGetQibla(){
 }
 function adhanCompassHandler(e){
   let h = null;
-  // iOS: use webkitCompassHeading (absolute). Reject -1 (uncalibrated).
-  if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) {
-    // Check accuracy — -1 means unreliable/uncalibrated
-    if (typeof e.webkitCompassAccuracy === 'number' && e.webkitCompassAccuracy === -1) {
-      // Unreliable — still use it but flag
-      _compassAccurate = false;
-    } else {
-      _compassAccurate = true;
-    }
-    h = e.webkitCompassHeading;
-  } else if (e.alpha !== null && e.alpha !== undefined) {
-    // Android: alpha is absolute in most browsers
-    h = (360 - e.alpha) % 360;
-    _compassAccurate = true;
-  }
+  if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
+  else if (e.alpha !== null && e.alpha !== undefined) h = (360 - e.alpha) % 360;
   if(h==null)return;
   adhanHasCompass=true;
   adhanCompassEventCount++;
