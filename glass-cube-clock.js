@@ -751,11 +751,11 @@ document.body.classList.add('clock-ready');
 
 // ─── DEV PANEL ────────────────────────────────────────────────────────────────
 // Activate with ?dev in URL or press D key
-let _devActive = false;
-let _devTimeOverride = null; // null = real time, else { h, m }
-let _devCustomWindows = []; // [{name, startH, startM, endH, endM, color}]
-let _devShowBoundaries = true;
-const _devBoundaryBeams = [];
+var _devActive = false;
+var _devTimeOverride = null; // null = real time, else { h, m }
+var _devCustomWindows = []; // [{name, startH, startM, endH, endM, color}]
+var _devShowBoundaries = true;
+var _devBoundaryBeams = [];
 
 function _devBuildPanel() {
   if (document.getElementById('_devPanel')) return;
@@ -845,7 +845,7 @@ function _devRefreshWindowList() {
   }).join('');
 }
 
-let _devCustomIdCounter = 0;
+var _devCustomIdCounter = 0;
 function _devAddCustomWindow() {
   const id = ++_devCustomIdCounter;
   const colors = ['#ff0000','#00ff00','#0088ff','#ff8800','#ff00ff','#00ffcc','#ffff00'];
@@ -921,7 +921,7 @@ function _devUpdateBoundaries() {
   });
 }
 
-let _devCustomSectors = [];
+var _devCustomSectors = [];
 function _devApplyCustomWindows() {
   _devCustomSectors = _devCustomWindows.map(function(w) {
     const startMin = w.startH * 60 + w.startM;
