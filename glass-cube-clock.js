@@ -41,7 +41,7 @@ renderer.toneMappingExposure = 1.2;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
-renderer.setSize(W, H);
+renderer.setSize(W, H, false);
 
 if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
@@ -90,7 +90,7 @@ function onResize() {
   ({ w: W, h: H } = getSize());
   dpr = calcDpr(W, H);
   renderer.setPixelRatio(dpr);
-  renderer.setSize(W, H);
+  renderer.setSize(W, H, false);
   camera.aspect = W / H;
   camera.updateProjectionMatrix();
   fboRT.setSize(W * dpr, H * dpr);
