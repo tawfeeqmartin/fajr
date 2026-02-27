@@ -20,13 +20,14 @@ function calcDpr(w, h) {
 }
 
 var _canvasEl = null; // set after renderer created
-var _stableH = window.innerHeight; // capture initial height before Safari chrome hides
+var _stableW = window.innerWidth;  // lock width — scrollbar changes cause aspect shift
+var _stableH = window.innerHeight; // lock height — Safari chrome changes cause aspect shift
 function getSize() {
   if (CONTAINED) {
     return { w: CONTAINER.clientWidth || 400, h: CONTAINER.clientHeight || 400 };
   }
-  // Always use _stableH so aspect never shifts between landing/fullscreen/scroll
-  return { w: window.innerWidth, h: _stableH || window.innerHeight };
+  // Locked dimensions — aspect ratio never shifts between states
+  return { w: _stableW, h: _stableH };
 }
 
 let { w: W, h: H } = getSize();
@@ -84,6 +85,11 @@ applyCamera(CONTAINED ? CAM_LANDING : CAM_FULLSCREEN);
 
 // ─── RESIZE ───────────────────────────────────────────────────────────────────
 function onResize() {
+  // Only update stable dimensions on real orientation change (not scrollbar/chrome shifts)
+  var newW = window.innerWidth, newH = window.innerHeight;
+  if (!CONTAINED && (Math.abs(newW - _stableW) > 50 || Math.abs(newH - _stableH) > 100)) {
+    _stableW = newW; _stableH = newH;
+  }
   ({ w: W, h: H } = getSize());
   dpr = calcDpr(W, H);
   renderer.setPixelRatio(dpr);
