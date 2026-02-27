@@ -134,7 +134,7 @@
 </script>
 <script>
 // Instant dark screen if opening in clock mode — prevents landing page flash
-if(location.hash==='#clock'){document.documentElement.classList.add('clock-direct');document.documentElement.style.cssText='background:var(--bg,#f8f7f4);overflow:hidden';}
+if(location.hash==='#clock'){document.documentElement.classList.add('clock-direct');document.documentElement.style.cssText='background:var(--bg,#0d0d12);overflow:hidden';}
 </script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1782,7 +1782,7 @@ function closeClockFullscreen() {
   fsStopClock();
 
   // Restore landing page theme-color + show content
-  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content='#f8f7f4';
+  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content='#0d0d12';
   document.documentElement.classList.remove('clock-direct');
   document.documentElement.style.cssText='';
 
