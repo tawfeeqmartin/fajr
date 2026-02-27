@@ -457,8 +457,8 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
   // 6 o'clock = -Z in prismGroup local = PI rotation in UV atan
   // But disc is rotated -PI/2 on X to lie flat, so UV +Y maps to -Z
   // fanCenter = PI/2 points "down" in world (toward 6 o'clock from above)
-  var fanAngle = Math.PI / 2; // +Y in UV = 6 o'clock when disc is on XZ
-  var entryAngle = -Math.PI / 2; // opposite = 12 o'clock
+  var fanAngle = Math.PI / 2 - Math.PI / 4; // rotated -45°
+  var entryAngle = fanAngle + Math.PI; // opposite = entry beam
 
   // Layer 1: Spectral fan disc (main rainbow effect)
   _qiblaFanDisc = mkPrismDisc(12, FRAG_PRISM_FAN, fanAngle, 0.35, 0.0);
