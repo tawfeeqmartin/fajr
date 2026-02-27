@@ -800,9 +800,9 @@ function updatePrayerWindows(now) {
     u.uEndAngle.value = ps.endAng;
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
-    _prayerDisc.visible = true;
+    if (!_compassMode) _prayerDisc.visible = true;
   }
-  if (u.uIntensity.value < 0.001) _prayerDisc.visible = false;
+  if (u.uIntensity.value < 0.001 || _compassMode) _prayerDisc.visible = false;
 
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
@@ -815,9 +815,9 @@ function updatePrayerWindows(now) {
     nu.uEndAngle.value = ps.endAng;
     nu.uColor1.value.set(ps.def.color);
     nu.uColor2.value.set(ps.def.color2);
-    _nextDisc.visible = true;
+    if (!_compassMode) _nextDisc.visible = true;
   }
-  if (nu.uIntensity.value < 0.001) _nextDisc.visible = false;
+  if (nu.uIntensity.value < 0.001 || _compassMode) _nextDisc.visible = false;
 
   // ── Third prayer disc (prayer after next) ──
   const tu = _thirdDiscMat.uniforms;
@@ -830,9 +830,9 @@ function updatePrayerWindows(now) {
     tu.uEndAngle.value = ps.endAng;
     tu.uColor1.value.set(ps.def.color);
     tu.uColor2.value.set(ps.def.color2);
-    _thirdDisc.visible = true;
+    if (!_compassMode) _thirdDisc.visible = true;
   }
-  if (tu.uIntensity.value < 0.001) _thirdDisc.visible = false;
+  if (tu.uIntensity.value < 0.001 || _compassMode) _thirdDisc.visible = false;
 }
 
 // buildPrayerSectors called on first updatePrayerWindows when real data ready
