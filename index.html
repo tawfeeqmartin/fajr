@@ -358,11 +358,12 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-header .fs-location{display:none}
 .fs-prayer-bar{font-size:clamp(.55rem,1.1vmin,1.1rem);font-weight:300;letter-spacing:.1em;margin-top:clamp(4px,0.8vmin,12px);opacity:.55}
 .iftar-gold{color:#ffd966!important}
-.fs-iftar-countdown{text-align:center;margin-top:clamp(8px,1.5vmin,20px);display:none;z-index:205;position:relative}
+.fs-iftar-countdown{text-align:center;display:none;z-index:205;position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(40px,10vmin,100px));left:0;right:0;transition:opacity .5s ease}
 .fs-iftar-countdown.active{display:block}
-.fs-iftar-label{font-family:var(--font);font-size:clamp(.55rem,1.1vmin,1rem);font-weight:300;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,217,102,.5)}
-.fs-iftar-time{font-family:var(--font);font-size:clamp(2rem,6vmin,5rem);font-weight:200;letter-spacing:.04em;color:#ffd966;line-height:1}
-.fs-iftar-time .iftar-sec{opacity:.45}
+.fs-chrome-hidden .fs-iftar-countdown{opacity:0;pointer-events:none}
+.fs-iftar-label{font-family:var(--font);font-size:clamp(.6rem,1.3vmin,1.1rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,217,102,.45)}
+.fs-iftar-time{font-family:var(--font);font-size:clamp(2.5rem,8vmin,6rem);font-weight:600;letter-spacing:.02em;color:#ffd966;line-height:1}
+.fs-iftar-time .iftar-sec{opacity:.4;font-weight:400}
 .fs-mode-toggle{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(8px,1.5vmin,24px));right:clamp(12px,2vmin,32px);z-index:210;cursor:pointer;background:none;border:none;padding:clamp(6px,1vmin,16px);color:rgba(232,228,220,.6);transition:opacity .5s ease}
 .fs-mode-toggle svg{width:clamp(18px,3vmin,40px);height:clamp(18px,3vmin,40px);stroke-width:1;fill:none;stroke:currentColor}
 /* Dial picker — hidden for single-clock mode, kept for future multi-dial */
