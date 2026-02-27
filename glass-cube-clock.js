@@ -647,14 +647,15 @@ function updatePrayerWindows(now) {
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     _prayerDisc.visible = true;
-    // Diagnostic markers on NEXT (upcoming) window
-    if (nextIdx >= 0) {
+    // Diagnostic markers on THIRD (Fajr) window
+    if (thirdIdx >= 0) {
+      const tps = prayerSectors[thirdIdx];
+      _markerStart.rotation.y = tps.startAng;
+      _markerEnd.rotation.y = tps.endAng;
+    } else if (nextIdx >= 0) {
       const nps = prayerSectors[nextIdx];
       _markerStart.rotation.y = nps.startAng;
       _markerEnd.rotation.y = nps.endAng;
-    } else {
-      _markerStart.rotation.y = ps.startAng;
-      _markerEnd.rotation.y = ps.endAng;
     }
     _markerStart.visible = true;
     _markerEnd.visible = true;
