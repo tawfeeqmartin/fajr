@@ -19,6 +19,7 @@ function calcDpr(w, h) {
   return Math.min(rawDpr, maxPhysical / longest, 2);
 }
 
+var _canvasEl = null; // set after renderer created
 function getSize() {
   if (_isFullscreen) {
     return { w: window.innerWidth, h: window.innerHeight };
@@ -26,7 +27,9 @@ function getSize() {
   if (CONTAINED) {
     return { w: CONTAINER.clientWidth || 400, h: CONTAINER.clientHeight || 400 };
   }
-  return { w: window.innerWidth, h: window.innerHeight };
+  // Use canvas clientHeight (locked to 100svh via CSS) for stable size on mobile
+  var h = (_canvasEl && _canvasEl.clientHeight) ? _canvasEl.clientHeight : window.innerHeight;
+  return { w: window.innerWidth, h: h };
 }
 
 let { w: W, h: H } = getSize();
@@ -44,8 +47,9 @@ if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
   const c = renderer.domElement;
-  c.style.cssText = 'position:fixed;inset:0;z-index:0;width:100%;height:100%;';
+  c.style.cssText = 'position:fixed;top:0;left:0;z-index:0;width:100%;height:100vh;height:100svh;';
   document.body.appendChild(c);
+  _canvasEl = c;
 }
 
 // FBO render target
