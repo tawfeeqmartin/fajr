@@ -20,8 +20,8 @@ function calcDpr(w, h) {
 }
 
 var _canvasEl = null; // set after renderer created
-var _stableW = window.innerWidth;  // lock width — scrollbar changes cause aspect shift
-var _stableH = window.innerHeight; // lock height — Safari chrome changes cause aspect shift
+var _stableW = window.innerWidth;
+var _stableH = Math.max(window.innerHeight, screen.height); // use full screen height to cover Safari chrome hidden state
 function getSize() {
   if (CONTAINED) {
     return { w: CONTAINER.clientWidth || 400, h: CONTAINER.clientHeight || 400 };
