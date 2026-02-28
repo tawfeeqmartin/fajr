@@ -1886,9 +1886,9 @@ function openClockFullscreen() {
   document.querySelector('footer')?.style && (document.querySelector('footer').style.display = 'none');
   const stickyC = document.querySelector('.sticky-cta');
   if (stickyC) stickyC.style.display = 'none';
-  // Hide nav in fullscreen
+  // Hide nav in fullscreen (if exists)
   const navEl = document.querySelector('nav');
-  navEl.style.display = 'none';
+  if(navEl) navEl.style.display = 'none';
 
   // Tell clock engine to go fullscreen — double resize to handle layout timing
   if(window._clockSetFullscreen) window._clockSetFullscreen(true);
@@ -1942,9 +1942,7 @@ function closeClockFullscreen() {
   const stickyC = document.querySelector('.sticky-cta');
   if (stickyC) stickyC.style.display = '';
   const navEl = document.querySelector('nav');
-  navEl.style.display = '';
-  navEl.style.background = '';
-  navEl.style.zIndex = '';
+  if(navEl) { navEl.style.display = ''; navEl.style.background = ''; navEl.style.zIndex = ''; }
 
   // Snap clock + page back to the mode the current section expects
   if(window._fsRestoreSection) window._fsRestoreSection();
