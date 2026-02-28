@@ -184,13 +184,16 @@ body::after{display:none;
   font-family:var(--font);font-size:.875rem;font-weight:500;
   cursor:pointer;border:none;transition:all .2s;
 }
-.btn-primary{background:rgba(232,228,220,.85);color:#0d0d12}
+.btn-primary{background:rgba(120,160,255,.15);border:1px solid rgba(120,160,255,.2);color:rgba(120,160,255,.9);border-radius:100px;font-weight:400;letter-spacing:.03em;transition:all .25s ease}
+.btn-primary:hover,.btn-primary:active{background:rgba(120,160,255,.25)}
 .btn-primary:hover{opacity:.85}
 .btn-outline{
-  background:transparent;border:1px solid rgba(232,228,220,.15);color:rgba(232,228,220,.7);
-  transition:color .5s ease,background-color .5s ease,border-color .5s ease;
+  background:rgba(232,228,220,.04);border:1px solid rgba(232,228,220,.08);
+  border-radius:100px;color:rgba(232,228,220,.55);
+  font-size:.8rem;font-weight:300;letter-spacing:.03em;
+  transition:all .25s ease;
 }
-.btn-outline:hover{border-color:rgba(232,228,220,.4)}
+.btn-outline:hover,.btn-outline:active{background:rgba(232,228,220,.08);border-color:rgba(232,228,220,.12);color:rgba(232,228,220,.75)}
 .support-heart{display:inline-block;color:#e74c4c;font-size:1.1em;animation:heartpulse .833s ease-in-out infinite}
 @keyframes heartpulse{0%,100%{transform:scale(1)}15%{transform:scale(1.325)}30%{transform:scale(1)}45%{transform:scale(1.195)}60%{transform:scale(1)}}
 .sticky-cta{
@@ -353,53 +356,54 @@ a{color:inherit;text-decoration:none}
 }
 /* Frosted glass behind tile content — matches compass onboarding blur */
 .scroll-section .reveal{
-  background:rgba(13,13,18,.45);
-  backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);
-  border:1px solid rgba(232,228,220,.04);
-  padding:2rem 1.5rem;border-radius:1rem;
+  background:rgba(13,13,18,.4);
+  backdrop-filter:blur(16px) saturate(130%);-webkit-backdrop-filter:blur(16px) saturate(130%);
+  border:1px solid rgba(232,228,220,.06);
+  padding:clamp(1.5rem,4vmin,2.5rem) clamp(1.25rem,3vmin,2rem);
+  border-radius:1.25rem;
+  max-width:420px;
 }
 /* Ensure section content paints above any positioned ancestors */
 .scroll-section>*{position:relative;z-index:2;}
 #dialHero canvas{display:none} /* canvas is now fixed in body, not in dialHero */
 .section-header{
-  padding:.5rem 0 .25rem;
+  padding:.5rem 0 .5rem;
 }
 .section-label{
-  font-weight:500;font-size:.7rem;letter-spacing:.15em;
-  text-transform:uppercase;color:var(--gold);margin-bottom:.25rem;
+  font-weight:400;font-size:.65rem;letter-spacing:.2em;
+  text-transform:uppercase;color:rgba(120,160,255,.7);margin-bottom:.5rem;
 }
 .section-title{
-  font-weight:600;font-size:clamp(2rem,5vw,3.5rem);
-  line-height:1.15;letter-spacing:-.02em;margin-bottom:0;
-  transition:color 1s ease;
+  font-weight:300;font-size:clamp(1.8rem,5vw,3rem);
+  line-height:1.2;letter-spacing:-.01em;margin-bottom:.15rem;
+  color:rgba(232,228,220,.92);
 }
 .section-body{
-  font-weight:200;font-size:1.05rem;line-height:1.7;
-  color:var(--text-muted);max-width:480px;margin:0 auto;
-  transition:color 1s ease;
+  font-weight:200;font-size:.95rem;line-height:1.75;
+  color:rgba(232,228,220,.55);max-width:440px;margin:.5rem auto 0;
 }
 
 /* ── Quran verse block ── */
-.verse{text-align:center;margin-top:1.25rem;max-width:560px}
+.verse{text-align:center;margin-top:1.5rem;max-width:520px;
+  padding:1.25rem;border-radius:.75rem;
+  background:rgba(232,228,220,.03);border:1px solid rgba(232,228,220,.05);
+}
 .verse-ar{
   font-family:'Lateef','Traditional Arabic',serif;
-  font-size:clamp(1.2rem,3vw,1.8rem);line-height:1.8;
-  direction:rtl;color:var(--text);margin-bottom:.6rem;
-  transition:color 1s ease;
+  font-size:clamp(1.1rem,2.8vw,1.6rem);line-height:1.9;
+  direction:rtl;color:rgba(232,228,220,.85);margin-bottom:.5rem;
 }
 .verse-en{
-  font-size:.9rem;font-weight:300;color:var(--text-muted);
-  font-style:italic;line-height:1.6;margin-bottom:.35rem;
-  transition:color 1s ease;
+  font-size:.85rem;font-weight:300;color:rgba(232,228,220,.45);
+  font-style:italic;line-height:1.6;margin-bottom:.3rem;
 }
 .verse-ref{
-  font-size:.75rem;font-weight:500;letter-spacing:.08em;
-  color:var(--text-muted);margin-bottom:.6rem;
-  transition:color 1s ease;
+  font-size:.7rem;font-weight:400;letter-spacing:.1em;
+  color:rgba(232,228,220,.3);margin-bottom:.6rem;
 }
 
 /* ── Reveal animation ── */
-.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
 .reveal.visible{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 
@@ -415,12 +419,16 @@ a{color:inherit;text-decoration:none}
 .dial-dot.active{opacity:.7;transform:scale(1.3)}
 
 /* ── Install steps ── */
-.steps{display:flex;gap:1.5rem;margin-top:1.5rem;justify-content:center;flex-wrap:wrap;max-width:100%}
-.step{text-align:center;min-width:0;width:200px;flex-shrink:1}
-.step-icon{font-size:1.5rem;color:var(--text-muted);margin-bottom:.4rem;transition:color 1s ease}
-.step-num{font-weight:500;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem}
-.step h3{font-weight:400;font-size:1rem;margin-bottom:.4rem;transition:color 1s ease}
-.step p{font-weight:300;font-size:.875rem;color:var(--text-muted);line-height:1.5;transition:color 1s ease}
+.steps{display:flex;flex-direction:column;gap:.75rem;margin-top:1.25rem;max-width:100%}
+.step{
+  display:flex;align-items:flex-start;gap:.75rem;text-align:left;
+  padding:.75rem;border-radius:.75rem;
+  background:rgba(232,228,220,.03);border:1px solid rgba(232,228,220,.05);
+}
+.step-icon{font-size:1.1rem;color:rgba(120,160,255,.6);flex-shrink:0;margin-top:.1rem}
+.step-num{font-weight:400;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(120,160,255,.5);margin-bottom:.15rem}
+.step h3{font-weight:400;font-size:.9rem;margin-bottom:.15rem;color:rgba(232,228,220,.8)}
+.step p{font-weight:300;font-size:.8rem;color:rgba(232,228,220,.4);line-height:1.5}
 
 /* ── Scroll — no snap (natural scroll over fixed canvas) ── */
 
@@ -551,7 +559,7 @@ body.chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none;transition
 <section class="scroll-section" id="sec-hook">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Introducing</p>
-    <h1 class="section-title" style="font-size:clamp(2.5rem,7vw,5rem);letter-spacing:-.03em">A Gift of Time.</h1></div>
+    <h1 class="section-title" style="font-size:clamp(2.2rem,6vw,3.8rem);font-weight:200;letter-spacing:-.02em">A Gift of Time.</h1></div>
     <p class="section-body">The day already has a rhythm. Five prayers give it shape. This clock makes it visible — light, sound, and direction, all turning toward the same point.</p>
     <div class="verse" style="margin-top:1.25rem">
       <p class="verse-ar">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًا مَّوْقُوتًا</p>
@@ -619,7 +627,7 @@ body.chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none;transition
         <p>Opens full-screen, like a native app.</p>
       </div>
     </div>
-    <a href="#" class="btn btn-primary" style="margin-top:1.5rem" onclick="openClockFullscreen();return false;">Open Clock</a>
+    <button class="btn btn-outline" style="margin-top:1.25rem" onclick="switchMode('clock')"><i class="ph-thin ph-clock"></i> Open Clock</button>
   </div>
 </section>
 
