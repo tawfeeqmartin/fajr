@@ -244,11 +244,19 @@ body::after{display:none;
   width:100%;max-width:480px;max-height:85vh;
   background:rgba(22,22,30,.95);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
   border-radius:16px 16px 0 0;
-  padding:0 1.25rem 2rem;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:0;display:flex;flex-direction:column;
   transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
 }
 .loc-picker.open .loc-picker-sheet{transform:translateY(0)}
+.loc-picker-sticky{
+  flex-shrink:0;padding:0 1.25rem;
+  background:rgba(22,22,30,.98);border-radius:16px 16px 0 0;
+  position:sticky;top:0;z-index:1;
+}
+.loc-picker-scroll{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:0 1.25rem 2rem;
+}
 .loc-picker-header{display:flex;align-items:center;justify-content:center;padding:1rem 0 .75rem;position:relative}
 .loc-picker-handle{width:36px;height:4px;border-radius:2px;background:rgba(232,228,220,.2);position:absolute;top:8px;left:50%;transform:translateX(-50%)}
 .loc-picker-title{font-family:var(--font);font-size:1rem;font-weight:500;color:rgba(232,228,220,.8);letter-spacing:.02em}
@@ -2478,23 +2486,27 @@ setTimeout(setupScrollObservers,500);
 <!-- Location Picker -->
 <div id="locationPicker" class="loc-picker">
   <div class="loc-picker-sheet">
-    <div class="loc-picker-header">
-      <div class="loc-picker-handle"></div>
-      <span class="loc-picker-title">Location</span>
-      <button class="loc-picker-done" onclick="closeLocationPicker()">Done</button>
+    <div class="loc-picker-sticky">
+      <div class="loc-picker-header">
+        <div class="loc-picker-handle"></div>
+        <span class="loc-picker-title">Location</span>
+        <button class="loc-picker-done" onclick="closeLocationPicker()">Done</button>
+      </div>
+      <div class="loc-picker-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,220,.4)" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="locSearchInput" type="text" placeholder="Search city or country..." autocomplete="off">
+      </div>
+      <button class="loc-gps-btn" onclick="locUseGPS()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Use Current Location</span>
+        <span class="loc-gps-tag">GPS</span>
+      </button>
     </div>
-    <div class="loc-picker-search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,220,.4)" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input id="locSearchInput" type="text" placeholder="Search city or country..." autocomplete="off">
+    <div class="loc-picker-scroll">
+      <div class="loc-section-label">POPULAR CITIES</div>
+      <div class="loc-city-list" id="locCityList"></div>
+      <div class="loc-preview" id="locPreview"></div>
     </div>
-    <button class="loc-gps-btn" onclick="locUseGPS()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
-      <span>Use Current Location</span>
-      <span class="loc-gps-tag">GPS</span>
-    </button>
-    <div class="loc-section-label">POPULAR CITIES</div>
-    <div class="loc-city-list" id="locCityList"></div>
-    <div class="loc-preview" id="locPreview"></div>
   </div>
 </div>
 
