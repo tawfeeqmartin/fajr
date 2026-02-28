@@ -752,7 +752,7 @@ function makeSectorGeom(radius, thetaHalf, segments) {
 }
 
 const SECTOR_RADIUS = 9.12;  // matches second-hand length
-const OP_ACTIVE = 0.7;
+const OP_ACTIVE = 0.75;
 
 
 let prayerSectors = [];
