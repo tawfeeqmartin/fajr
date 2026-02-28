@@ -290,6 +290,7 @@ body::after{display:none;
 }
 .loc-city-item:active,.loc-city-item.selected{color:rgba(232,228,220,.95);font-weight:500}
 .loc-city-item.selected{background:rgba(120,160,255,.08);border-radius:8px;border-color:transparent}
+.loc-city-sub{font-size:.7rem;font-weight:400;letter-spacing:.06em;color:rgba(120,160,255,.6);margin-bottom:2px}
 .loc-picker-footer{
   flex-shrink:0;padding:1rem 1.25rem 1.5rem;
   background:rgba(22,22,30,.98);border-top:1px solid rgba(232,228,220,.06);
@@ -1817,21 +1818,24 @@ function fsSetLocation(text) {
 let _prayerLocationResolved = false;
 // ── Location Picker ──
 const LOC_CITIES = [
-  { name: 'Makkah, Saudi Arabia',    lat: 21.4225, lon: 39.8262 },
-  { name: 'Madinah, Saudi Arabia',   lat: 24.4672, lon: 39.6024 },
-  { name: 'Dubai, UAE',              lat: 25.2048, lon: 55.2708 },
-  { name: 'Istanbul, Turkey',        lat: 41.0082, lon: 28.9784 },
-  { name: 'Cairo, Egypt',            lat: 30.0444, lon: 31.2357 },
-  { name: 'Riyadh, Saudi Arabia',    lat: 24.7136, lon: 46.6753 },
-  { name: 'Jakarta, Indonesia',      lat: -6.2088, lon: 106.8456 },
-  { name: 'Kuala Lumpur, Malaysia',   lat: 3.1390, lon: 101.6869 },
-  { name: 'Karachi, Pakistan',       lat: 24.8607, lon: 67.0011 },
-  { name: 'Dhaka, Bangladesh',       lat: 23.8103, lon: 90.4125 },
-  { name: 'London, UK',              lat: 51.5074, lon: -0.1278 },
-  { name: 'Paris, France',           lat: 48.8566, lon: 2.3522 },
-  { name: 'New York, USA',           lat: 40.7128, lon: -74.0060 },
-  { name: 'Los Angeles, USA',        lat: 34.0522, lon: -118.2437 },
-  { name: 'Toronto, Canada',         lat: 43.6532, lon: -79.3832 },
+  // The Three Sacred Mosques
+  { name: 'Makkah, Saudi Arabia',    sub: 'Masjid al-Haram',      lat: 21.4225, lon: 39.8262 },
+  { name: 'Madinah, Saudi Arabia',   sub: 'Al-Masjid an-Nabawi',  lat: 24.4672, lon: 39.6024 },
+  { name: 'Jerusalem, Palestine',    sub: 'Al-Aqsa Mosque',       lat: 31.7781, lon: 35.2354 },
+  // Major Muslim cities
+  { name: 'Istanbul, Turkey',        sub: null, lat: 41.0082, lon: 28.9784 },
+  { name: 'Cairo, Egypt',            sub: null, lat: 30.0444, lon: 31.2357 },
+  { name: 'Dubai, UAE',              sub: null, lat: 25.2048, lon: 55.2708 },
+  { name: 'Riyadh, Saudi Arabia',    sub: null, lat: 24.7136, lon: 46.6753 },
+  { name: 'Jakarta, Indonesia',      sub: null, lat: -6.2088, lon: 106.8456 },
+  { name: 'Kuala Lumpur, Malaysia',   sub: null, lat: 3.1390, lon: 101.6869 },
+  { name: 'Karachi, Pakistan',       sub: null, lat: 24.8607, lon: 67.0011 },
+  { name: 'Dhaka, Bangladesh',       sub: null, lat: 23.8103, lon: 90.4125 },
+  { name: 'London, UK',              sub: null, lat: 51.5074, lon: -0.1278 },
+  { name: 'Paris, France',           sub: null, lat: 48.8566, lon: 2.3522 },
+  { name: 'New York, USA',           sub: null, lat: 40.7128, lon: -74.0060 },
+  { name: 'Los Angeles, USA',        sub: null, lat: 34.0522, lon: -118.2437 },
+  { name: 'Toronto, Canada',         sub: null, lat: 43.6532, lon: -79.3832 },
 ];
 
 let _locSelectedCity = null;
@@ -1845,7 +1849,11 @@ function _buildCityList(filter) {
   cities.forEach(c => {
     const div = document.createElement('div');
     div.className = 'loc-city-item' + (_locSelectedCity && _locSelectedCity.name === c.name ? ' selected' : '');
-    div.textContent = c.name;
+    if (c.sub) {
+      div.innerHTML = '<div class="loc-city-sub">' + c.sub + '</div>' + c.name;
+    } else {
+      div.textContent = c.name;
+    }
     div.onclick = () => _selectCity(c);
     list.appendChild(div);
   });
