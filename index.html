@@ -232,6 +232,68 @@ body::after{display:none;
 
 /* header-prayer-bar removed — prayer times in global .fs-header now */
 
+/* ── Location Picker ── */
+.loc-picker{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+}
+.loc-picker.open{opacity:1;pointer-events:auto}
+.loc-picker-sheet{
+  width:100%;max-width:480px;max-height:85vh;
+  background:rgba(22,22,30,.95);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-radius:16px 16px 0 0;
+  padding:0 1.25rem 2rem;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.loc-picker.open .loc-picker-sheet{transform:translateY(0)}
+.loc-picker-header{display:flex;align-items:center;justify-content:center;padding:1rem 0 .75rem;position:relative}
+.loc-picker-handle{width:36px;height:4px;border-radius:2px;background:rgba(232,228,220,.2);position:absolute;top:8px;left:50%;transform:translateX(-50%)}
+.loc-picker-title{font-family:var(--font);font-size:1rem;font-weight:500;color:rgba(232,228,220,.8);letter-spacing:.02em}
+.loc-picker-done{position:absolute;right:0;background:none;border:none;font-family:var(--font);font-size:.9rem;font-weight:500;color:rgba(120,160,255,.9);cursor:pointer;padding:.25rem}
+.loc-picker-search{
+  display:flex;align-items:center;gap:.6rem;
+  background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.08);
+  border-radius:10px;padding:.6rem .8rem;margin-bottom:.75rem;
+}
+.loc-picker-search input{
+  flex:1;background:none;border:none;outline:none;
+  font-family:var(--font);font-size:.85rem;font-weight:300;color:rgba(232,228,220,.8);
+  letter-spacing:.02em;
+}
+.loc-picker-search input::placeholder{color:rgba(232,228,220,.3)}
+.loc-gps-btn{
+  display:flex;align-items:center;gap:.6rem;width:100%;
+  background:rgba(120,160,255,.08);border:1px solid rgba(120,160,255,.15);
+  border-radius:10px;padding:.7rem .8rem;cursor:pointer;
+  font-family:var(--font);font-size:.85rem;font-weight:400;color:rgba(120,160,255,.9);
+  margin-bottom:1rem;transition:background .2s;
+}
+.loc-gps-btn:active{background:rgba(120,160,255,.15)}
+.loc-gps-tag{margin-left:auto;font-size:.7rem;font-weight:500;letter-spacing:.08em;opacity:.5}
+.loc-section-label{font-size:.65rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:rgba(232,228,220,.3);margin-bottom:.5rem}
+.loc-city-list{display:flex;flex-direction:column;align-items:center;gap:0}
+.loc-city-item{
+  width:100%;text-align:center;padding:.7rem 0;
+  font-family:var(--font);font-size:.95rem;font-weight:300;color:rgba(232,228,220,.5);
+  cursor:pointer;border-bottom:1px solid rgba(232,228,220,.04);transition:color .2s,opacity .2s;
+}
+.loc-city-item:active,.loc-city-item.selected{color:rgba(232,228,220,.95);font-weight:500}
+.loc-city-item.selected{background:rgba(120,160,255,.08);border-radius:8px;border-color:transparent}
+.loc-preview{
+  margin-top:1.25rem;text-align:center;
+  font-family:var(--font);font-size:.65rem;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.3);
+}
+.loc-preview-times{
+  display:flex;justify-content:space-around;margin-top:.5rem;
+  font-size:.8rem;font-weight:400;letter-spacing:.02em;color:rgba(232,228,220,.6);
+}
+.loc-preview-times div{text-align:center}
+.loc-preview-times .lp-label{font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:2px}
+
 /* ── Mode states ── */
 body.mode-clock .scroll-section,
 body.mode-clock footer{display:none!important}
@@ -412,7 +474,7 @@ body.chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none;transition
 <body>
 
 <!-- Global Header (shared across all modes) -->
-<div id="fsCityBlock" class="fs-city-block">
+<div id="fsCityBlock" class="fs-city-block" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto">
   <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
   <span id="fsCityName" class="nav-city-name">—</span>
 </div>
@@ -1743,6 +1805,103 @@ function fsSetLocation(text) {
 }
 
 let _prayerLocationResolved = false;
+// ── Location Picker ──
+const LOC_CITIES = [
+  { name: 'Dubai, UAE',              lat: 25.2048, lon: 55.2708 },
+  { name: 'Istanbul, Turkey',        lat: 41.0082, lon: 28.9784 },
+  { name: 'London, UK',              lat: 51.5074, lon: -0.1278 },
+  { name: 'Los Angeles, USA',        lat: 34.0522, lon: -118.2437 },
+  { name: 'Makkah, Saudi Arabia',    lat: 21.4225, lon: 39.8262 },
+  { name: 'Madinah, Saudi Arabia',   lat: 24.4672, lon: 39.6024 },
+  { name: 'Cairo, Egypt',            lat: 30.0444, lon: 31.2357 },
+  { name: 'Jakarta, Indonesia',      lat: -6.2088, lon: 106.8456 },
+  { name: 'Kuala Lumpur, Malaysia',   lat: 3.1390, lon: 101.6869 },
+  { name: 'New York, USA',           lat: 40.7128, lon: -74.0060 },
+  { name: 'Toronto, Canada',         lat: 43.6532, lon: -79.3832 },
+  { name: 'Paris, France',           lat: 48.8566, lon: 2.3522 },
+  { name: 'Riyadh, Saudi Arabia',    lat: 24.7136, lon: 46.6753 },
+  { name: 'Karachi, Pakistan',       lat: 24.8607, lon: 67.0011 },
+  { name: 'Dhaka, Bangladesh',       lat: 23.8103, lon: 90.4125 },
+];
+
+let _locSelectedCity = null;
+
+function _buildCityList(filter) {
+  const list = document.getElementById('locCityList');
+  if (!list) return;
+  const q = (filter || '').toLowerCase();
+  const cities = q ? LOC_CITIES.filter(c => c.name.toLowerCase().includes(q)) : LOC_CITIES;
+  list.innerHTML = '';
+  cities.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'loc-city-item' + (_locSelectedCity && _locSelectedCity.name === c.name ? ' selected' : '');
+    div.textContent = c.name;
+    div.onclick = () => _selectCity(c);
+    list.appendChild(div);
+  });
+}
+
+function _selectCity(city) {
+  _locSelectedCity = city;
+  _buildCityList(document.getElementById('locSearchInput')?.value);
+  // Compute preview prayer times
+  const t = _computePrayerTimes(city.lat, city.lon);
+  const preview = document.getElementById('locPreview');
+  if (preview && t) {
+    const short = city.name.split(',')[0].trim();
+    preview.innerHTML =
+      '<div>PRAYER TIMES FOR ' + short.toUpperCase() + '</div>' +
+      '<div class="loc-preview-times">' +
+      ['Fajr','Dhuhr','Asr','Maghrib','Isha'].map(p =>
+        '<div><div class="lp-label">' + p + '</div>' + (t[p]||'').split(' ')[0] + '</div>'
+      ).join('') + '</div>';
+  }
+}
+
+function openLocationPicker() {
+  const picker = document.getElementById('locationPicker');
+  if (!picker) return;
+  _buildCityList();
+  picker.classList.add('open');
+  // Auto-select current city if known
+  const curName = document.getElementById('fsCityName')?.textContent;
+  if (curName && curName !== '—') {
+    const match = LOC_CITIES.find(c => c.name.toLowerCase().startsWith(curName.toLowerCase()));
+    if (match) _selectCity(match);
+  }
+}
+
+function closeLocationPicker() {
+  const picker = document.getElementById('locationPicker');
+  if (!picker) return;
+  picker.classList.remove('open');
+  // Apply selected city
+  if (_locSelectedCity) {
+    adhanQiblaAngle = null; // reset so it recomputes for new location
+    _setPrayerLocation(_locSelectedCity.lat, _locSelectedCity.lon, _locSelectedCity.name);
+  }
+}
+
+function locUseGPS() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    _setPrayerLocation(pos.coords.latitude, pos.coords.longitude);
+    closeLocationPicker();
+  }, () => {}, { maximumAge: 0, timeout: 10000 });
+}
+
+// Search filtering
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('locSearchInput');
+  if (inp) inp.addEventListener('input', () => _buildCityList(inp.value));
+});
+
+// Close on backdrop tap
+document.addEventListener('click', function(e) {
+  const picker = document.getElementById('locationPicker');
+  if (picker && picker.classList.contains('open') && e.target === picker) closeLocationPicker();
+});
+
 function _setPrayerLocation(lat, lon, locationName) {
   // Compute times instantly via adhan-js
   const t = _computePrayerTimes(lat, lon);
@@ -2315,6 +2474,29 @@ setTimeout(setupScrollObservers,500);
   <span>Keep this free</span>
   <span class="cta-count"></span>
 </a>
+
+<!-- Location Picker -->
+<div id="locationPicker" class="loc-picker">
+  <div class="loc-picker-sheet">
+    <div class="loc-picker-header">
+      <div class="loc-picker-handle"></div>
+      <span class="loc-picker-title">Location</span>
+      <button class="loc-picker-done" onclick="closeLocationPicker()">Done</button>
+    </div>
+    <div class="loc-picker-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,220,.4)" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input id="locSearchInput" type="text" placeholder="Search city or country..." autocomplete="off">
+    </div>
+    <button class="loc-gps-btn" onclick="locUseGPS()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Use Current Location</span>
+      <span class="loc-gps-tag">GPS</span>
+    </button>
+    <div class="loc-section-label">POPULAR CITIES</div>
+    <div class="loc-city-list" id="locCityList"></div>
+    <div class="loc-preview" id="locPreview"></div>
+  </div>
+</div>
 
 <!-- Mode Pill -->
 <div class="mode-pill" id="modePill">
