@@ -2469,12 +2469,9 @@ setTimeout(setupScrollObservers,500);
 // ══════════════════════════════════════════
 (function(){
   const TOUR_SECTIONS = [
-    { id:'sec-hook',    dwell:5000 },
-    { id:'sec-qibla',   dwell:9000, scrollReveal:3000 },
-    { id:'sec-prayer',  dwell:10000, scrollReveal:3500 },
-    { id:'sec-dials',   dwell:30000 }, // 11 dials × 2.5s + buffer
-
-    { id:'sec-adhan',   dwell:8000 },  // linger, no auto-play
+    { id:'sec-hook',    dwell:6000 },
+    { id:'sec-dials',   dwell:8000 },
+    { id:'sec-qibla',   dwell:8000 },
     { id:'sec-install', dwell:6000 },
   ];
 
@@ -2529,7 +2526,7 @@ setTimeout(setupScrollObservers,500);
     if(tourIdx >= TOUR_SECTIONS.length){
       tourIdx=0;
       tourScrolling=true;
-      window.scrollTo({top:0,behavior:'smooth'});
+      const _sc=document.getElementById('infoScroller');if(_sc)_sc.scrollTo({top:0,behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'});
       setTimeout(()=>{tourScrolling=false;},1500);
       tourTimer=setTimeout(()=>advanceTour(), 2000);
       return;
