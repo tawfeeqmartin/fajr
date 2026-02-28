@@ -1886,27 +1886,15 @@ function switchMode(mode) {
   
   // Mode-specific logic
   if(mode === 'clock') {
-    // Exit compass if was in compass mode
-    if(prev === 'compass' && window._compassMode) {
-      document.getElementById('fsCompassToggle')?.click();
-    }
-    // Close fullscreen overlay chrome but keep canvas
+    if(prev === 'compass' && fsCompassOn) _toggleCompassMode(false);
     closeClockFullscreen();
     openClockFullscreen();
     window.scrollTo(0, 0);
   } else if(mode === 'compass') {
     openClockFullscreen();
-    // Trigger compass if not already active
-    if(!window._compassMode) {
-      setTimeout(() => {
-        document.getElementById('fsCompassToggle')?.click();
-      }, 100);
-    }
+    if(!fsCompassOn) setTimeout(() => _toggleCompassMode(true), 100);
   } else if(mode === 'info') {
-    // Exit compass if active
-    if(prev === 'compass' && window._compassMode) {
-      document.getElementById('fsCompassToggle')?.click();
-    }
+    if(prev === 'compass' && fsCompassOn) _toggleCompassMode(false);
     closeClockFullscreen();
     window.scrollTo(0, 0);
   }
@@ -2041,8 +2029,9 @@ function closeClockFullscreen() {
   if(cIcon) { cIcon.innerHTML = _cubeSVG; cIcon.style.opacity = '.6'; }
 }
 
-// Close button
-document.getElementById('clockFsClose').addEventListener('click', () => {
+// Close button (removed from UI, kept as fallback)
+const _fsCloseBtn = document.getElementById('clockFsClose');
+if(_fsCloseBtn) _fsCloseBtn.addEventListener('click', () => {
   closeClockFullscreen();
   if(location.hash === '#clock') history.back();
 });
@@ -2082,8 +2071,8 @@ let fsCompassOn = false;
 let _compassPopFromBtn = false;
 const _cubeSVG = '<path d="M12 3L20 8v8l-8 5-8-5V8z M12 3v18 M4 8l8 5 8-5"/>';
 const _clockSVG = '<circle cx="12" cy="12" r="9.5"/><line x1="12" y1="12" x2="12" y2="5.5"/><line x1="12" y1="12" x2="16" y2="12"/>';
-document.getElementById('fsCompassToggle').addEventListener('click', () => {
-  fsCompassOn = !fsCompassOn;
+function _toggleCompassMode(forceState) {
+  fsCompassOn = typeof forceState === 'boolean' ? forceState : !fsCompassOn;
   if(window._clockToggleCompass) window._clockToggleCompass(fsCompassOn);
   // Strip all chrome in compass mode — pure cube + needle + beam
   const fsClock = document.getElementById('clockFullscreen');
@@ -2136,7 +2125,9 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
     if(window._compassDbgEl) window._compassDbgEl.style.display = 'none';
     if(window._compassCalibEl) window._compassCalibEl.style.opacity = '0';
   }
-});
+}
+const _fsCompassBtn = document.getElementById('fsCompassToggle');
+if(_fsCompassBtn) _fsCompassBtn.addEventListener('click', () => _toggleCompassMode());
 
 // Listen button in fullscreen
 const FS_PLAY_SVG='<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:-1px;margin-right:4px"><polygon points="5,3 19,12 5,21"/></svg>';
