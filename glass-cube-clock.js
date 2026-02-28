@@ -548,9 +548,11 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaEntryBeam = new THREE.Mesh(entryGeo, entryMat);
-  _qiblaEntryBeam.position.set(0, CUBE_Y, 1.8);
+  // World space position (was (0, CUBE_Y, 1.8) in prismGroup rotated PI/4)
+  _qiblaEntryBeam.position.set(-1.273, CUBE_Y, 1.273);
   _qiblaEntryBeam.visible = false;
-  prismGroup.add(_qiblaEntryBeam);
+  // Add to SCENE not prismGroup — avoids PI/4 rotation making plane edge-on
+  scene.add(_qiblaEntryBeam);
 
   // Exit face caustic hotspot: small plane on opposite face, spectral gradient
   var exitGeo = new THREE.PlaneGeometry(0.35, 0.35);
@@ -588,10 +590,12 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaExitCaustic = new THREE.Mesh(exitGeo, exitMat);
-  // Position on the exit face (-Z side of cube, opposite entry)
-  _qiblaExitCaustic.position.set(0, CUBE_Y, -0.62);
+  // Position in world space — rotated to face camera (no prismGroup PI/4 rotation)
+  // Original prismGroup position: (0, CUBE_Y, -0.62) rotated PI/4 around Y
+  // In world space: x = 0*cos(PI/4) - (-0.62)*sin(PI/4) ≈ 0.438, z = 0*sin(PI/4) + (-0.62)*cos(PI/4) ≈ -0.438
+  _qiblaExitCaustic.position.set(0.438, CUBE_Y, -0.438);
   _qiblaExitCaustic.visible = false;
-  prismGroup.add(_qiblaExitCaustic);
+  scene.add(_qiblaExitCaustic);
 })();
 
 window._clockToggleCompass = function(on) {
