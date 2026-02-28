@@ -509,6 +509,7 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
     setTimeout(function() {
       _compassMode = true;
       _compassAligned = true;
+      _compassLocked = true; // prevent _syncCompassFromAdhan from overwriting
       _compassQibla = 0.4;
       _compassHeading = 0.4;
       clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
