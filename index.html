@@ -305,6 +305,25 @@ body::after{display:none;
 .loc-preview-times div{text-align:center}
 .loc-preview-times .lp-label{font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:2px}
 
+/* ── Compass Onboarding ── */
+.compass-onboard{
+  position:fixed;inset:0;z-index:970;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .6s ease;
+}
+.compass-onboard-content{text-align:center;color:rgba(232,228,220,.8);font-family:var(--font)}
+.compass-onboard-icon{width:80px;height:80px;color:rgba(232,228,220,.5);margin-bottom:1.25rem}
+.compass-onboard-rotate,.compass-onboard-rotate2{
+  animation:compassSway 2s ease-in-out infinite;transform-origin:32px 32px;
+}
+.compass-onboard-arrow,.compass-onboard-arrow2{
+  animation:compassSway 2s ease-in-out infinite;transform-origin:32px 32px;
+}
+@keyframes compassSway{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
+.compass-onboard-text{font-size:1.1rem;font-weight:400;letter-spacing:.02em;margin-bottom:.4rem}
+.compass-onboard-sub{font-size:.8rem;font-weight:300;color:rgba(232,228,220,.4);letter-spacing:.02em}
+
 /* ── Mode states ── */
 body.mode-clock .scroll-section,
 body.mode-clock footer{display:none!important}
@@ -2199,6 +2218,43 @@ let fsCompassOn = false;
 let _compassPopFromBtn = false;
 const _cubeSVG = '<path d="M12 3L20 8v8l-8 5-8-5V8z M12 3v18 M4 8l8 5 8-5"/>';
 const _clockSVG = '<circle cx="12" cy="12" r="9.5"/><line x1="12" y1="12" x2="12" y2="5.5"/><line x1="12" y1="12" x2="16" y2="12"/>';
+// ── Compass Onboarding Overlay ──
+var _compassOnboardEl = null;
+var _compassOnboardTimer = null;
+function _showCompassOnboarding() {
+  if (!_compassOnboardEl) {
+    _compassOnboardEl = document.createElement('div');
+    _compassOnboardEl.className = 'compass-onboard';
+    _compassOnboardEl.innerHTML =
+      '<div class="compass-onboard-content">' +
+        '<svg class="compass-onboard-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2">' +
+          '<rect x="16" y="8" width="32" height="48" rx="4"/>' +
+          '<circle cx="32" cy="32" r="2"/>' +
+          '<path d="M32 20v-6M32 50v-6" stroke-dasharray="2 2" opacity=".4"/>' +
+          '<path class="compass-onboard-rotate" d="M48 16c4 4 6 10 6 16s-2 12-6 16" opacity=".6"/>' +
+          '<path class="compass-onboard-rotate2" d="M16 48c-4-4-6-10-6-16s2-12 6-16" opacity=".6"/>' +
+          '<path class="compass-onboard-arrow" d="M54 16l2-4 4 2" opacity=".6"/>' +
+          '<path class="compass-onboard-arrow2" d="M10 48l-2 4-4-2" opacity=".6"/>' +
+        '</svg>' +
+        '<div class="compass-onboard-text">Move your phone to find Qibla</div>' +
+        '<div class="compass-onboard-sub">Point toward Makkah — the cube will light up</div>' +
+      '</div>';
+    _compassOnboardEl.onclick = _hideCompassOnboarding;
+    document.body.appendChild(_compassOnboardEl);
+  }
+  _compassOnboardEl.style.opacity = '1';
+  _compassOnboardEl.style.pointerEvents = 'auto';
+  clearTimeout(_compassOnboardTimer);
+  _compassOnboardTimer = setTimeout(_hideCompassOnboarding, 5000);
+}
+function _hideCompassOnboarding() {
+  if (_compassOnboardEl) {
+    _compassOnboardEl.style.opacity = '0';
+    _compassOnboardEl.style.pointerEvents = 'none';
+  }
+  clearTimeout(_compassOnboardTimer);
+}
+
 function _toggleCompassMode(forceState) {
   fsCompassOn = typeof forceState === 'boolean' ? forceState : !fsCompassOn;
   if(window._clockToggleCompass) window._clockToggleCompass(fsCompassOn);
@@ -2209,6 +2265,8 @@ function _toggleCompassMode(forceState) {
   const icon = document.getElementById('fsCompassIcon');
   if(icon) { icon.innerHTML = fsCompassOn ? _clockSVG : _cubeSVG; icon.style.opacity = fsCompassOn ? '1' : '.6'; }
   if(fsCompassOn) {
+    // Show compass onboarding overlay
+    _showCompassOnboarding();
     // Request compass permission (iOS) — same pattern as tawaf-gl
     _requestCompassPermission();
     // Compute Qibla if not already available
@@ -2252,6 +2310,7 @@ function _toggleCompassMode(forceState) {
     _clearCompassTimeout();
     if(window._compassDbgEl) window._compassDbgEl.style.display = 'none';
     if(window._compassCalibEl) window._compassCalibEl.style.opacity = '0';
+    _hideCompassOnboarding();
   }
 }
 const _fsCompassBtn = document.getElementById('fsCompassToggle');
