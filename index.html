@@ -355,8 +355,15 @@ body.mode-info .clock-sticky{display:none}
 body.mode-info .fs-city-block,body.mode-info .fs-countdown,body.mode-info .fs-header{opacity:0!important;pointer-events:none}
 body.mode-info .scroll-section,
 body.mode-info footer{display:block}
-body.mode-info{scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-body.mode-info::-webkit-scrollbar{display:none}
+body.mode-info{overflow:hidden}
+#infoScroller{
+  display:none;position:fixed;inset:0;z-index:5;
+  overflow-y:scroll;scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;overscroll-behavior:contain;
+}
+#infoScroller::-webkit-scrollbar{display:none}
+body.mode-info #infoScroller{display:block}
 a{color:inherit;text-decoration:none}
 
 /* ── Sections ── */
@@ -371,18 +378,15 @@ a{color:inherit;text-decoration:none}
   scroll-snap-align:start;
 }
 /* Info mode: fullscreen frosted slides — exact page height for snap-flip */
-body.mode-info .scroll-section{
-  height:100svh;min-height:0;max-height:100svh;
-  overflow-y:auto;overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
+#infoScroller .scroll-section{
+  height:100svh;min-height:100svh;
+  scroll-snap-align:start;scroll-snap-stop:always;
   justify-content:flex-start;
   padding-top:calc(env(safe-area-inset-top,0px) + clamp(48px,8vmin,72px));
   padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px);
   background:rgba(13,13,18,.55);
   backdrop-filter:blur(20px) saturate(130%);-webkit-backdrop-filter:blur(20px) saturate(130%);
 }
-body.mode-info .scroll-section::-webkit-scrollbar{display:none}
 body.mode-info .scroll-section .reveal{
   background:none;backdrop-filter:none;-webkit-backdrop-filter:none;
   border:none;max-width:420px;
@@ -587,7 +591,8 @@ body.chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none;transition
 
 </div>
 
-<!-- 1. THE HOOK -->
+<!-- Info scroller — dedicated snap container for iOS Safari -->
+<div id="infoScroller">
 <!-- 1. INTRODUCING -->
 <section class="scroll-section" id="sec-hook">
   <div class="reveal">
@@ -669,6 +674,7 @@ body.chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none;transition
   <p style="margin-bottom:.5rem">By <a href="https://tawfeeqmartin.com" target="_blank" rel="noopener">Tawfeeq Martin</a></p>
   <p><a href="support.html">Support</a><span class="footer-sep">·</span><a href="mailto:feedback@agiftoftime.app">Feedback</a><span class="footer-sep">·</span><a href="privacy.html">Privacy & Terms</a></p>
 </footer>
+</div><!-- /infoScroller -->
 
 <script>
 // ══════════════════════════════════════════
@@ -2063,12 +2069,13 @@ fsFetchPrayer();
 
 /* ── Info Dot Nav ── */
 const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-install'];
+const _infoScroller = document.getElementById('infoScroller');
 function _infoGoTo(idx) {
   const el = document.getElementById(_infoSections[idx]);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
+  if (el && _infoScroller) _infoScroller.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
 }
 function _infoUpdateDots() {
-  if (_currentMode !== 'info') return;
+  if (_currentMode !== 'info' || !_infoScroller) return;
   const dots = document.querySelectorAll('.info-dot');
   const vh = window.innerHeight;
   let activeIdx = 0;
@@ -2081,7 +2088,7 @@ function _infoUpdateDots() {
   });
   dots.forEach((d, i) => d.classList.toggle('active', i === activeIdx));
 }
-window.addEventListener('scroll', _infoUpdateDots, { passive: true });
+if (_infoScroller) _infoScroller.addEventListener('scroll', _infoUpdateDots, { passive: true });
 
 /* ── Mode Switching ── */
 var _currentMode = 'clock'; // default: clock mode
