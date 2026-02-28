@@ -907,13 +907,19 @@ document.addEventListener('visibilitychange',()=>{
 // ══════════════════════════════════════════
 // VERSE AUDIO HELPER (short ayah clips — spatial but no handoff needed)
 // ══════════════════════════════════════════
+var _activeVerseBtn=null;
 function playVerse(btn,url){
+  // Stop any other playing verse first
+  if(_activeVerseBtn&&_activeVerseBtn!==btn&&_activeVerseBtn._a&&!_activeVerseBtn._a.paused){
+    _activeVerseBtn._a.pause();_activeVerseBtn._a.currentTime=0;
+    _activeVerseBtn.innerHTML='<i class="ph-thin ph-play"></i> Listen';
+  }
   if(!btn._a){
     btn._a=new Audio(url);
-    btn._a.onended=()=>{btn.innerHTML='<i class="ph-thin ph-play"></i> Listen'};
+    btn._a.onended=()=>{btn.innerHTML='<i class="ph-thin ph-play"></i> Listen';_activeVerseBtn=null};
   }
-  if(btn._a.paused){btn._a.play();btn.innerHTML='<i class="ph-thin ph-pause"></i> Playing'}
-  else{btn._a.pause();btn.innerHTML='<i class="ph-thin ph-play"></i> Listen'}
+  if(btn._a.paused){btn._a.play();btn.innerHTML='<i class="ph-thin ph-pause"></i> Playing';_activeVerseBtn=btn}
+  else{btn._a.pause();btn.innerHTML='<i class="ph-thin ph-play"></i> Listen';_activeVerseBtn=null}
 }
 
 // ══════════════════════════════════════════
