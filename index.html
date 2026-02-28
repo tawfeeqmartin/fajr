@@ -2145,22 +2145,29 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(tickPill);
     const g = window._handGlow;
     if(!g) return;
-    // Hand colors: hour=magenta(0x9900ff/0xff00ff), minute=blue(0x1133ff/0x00aaff), second=white
-    const hr = g.h * 0.35; // magenta intensity
-    const mr = g.m * 0.25; // blue intensity  
-    const sr = g.s * 0.18; // white shimmer
-    const r = Math.round(153 * hr + 17 * mr + 255 * sr);
-    const gn = Math.round(0 * hr + 51 * mr + 255 * sr);
-    const b = Math.round(255 * hr + 255 * mr + 255 * sr);
-    const total = hr + mr + sr;
+    // Hand colors: hour=magenta, minute=blue, second=white
+    const hr = g.h * 0.35, mr = g.m * 0.25, sr = g.s * 0.18;
+    // Prayer beam contribution
+    var pr=0,pgn=0,pb=0,pi=0;
+    if(g.p > 0.01 && g.pc1){
+      pi = g.p * 0.45;
+      // Extract RGB from hex color
+      var c1 = g.pc1;
+      pr = ((c1>>16)&255); pgn = ((c1>>8)&255); pb = (c1&255);
+    }
+    const r = Math.round(153*hr + 17*mr + 255*sr + pr*pi);
+    const gn = Math.round(0*hr + 51*mr + 255*sr + pgn*pi);
+    const b = Math.round(255*hr + 255*mr + 255*sr + pb*pi);
+    const total = hr + mr + sr + pi;
     if(total < 0.01){
       pill.style.borderColor = 'rgba(232,228,220,.08)';
       pill.style.boxShadow = '0 8px 32px rgba(0,0,0,.5)';
       return;
     }
-    const a = Math.min(total * 0.4, 0.35);
-    pill.style.borderColor = 'rgba('+r+','+gn+','+b+','+a.toFixed(3)+')';
-    pill.style.boxShadow = '0 8px 32px rgba(0,0,0,.5), 0 0 '+(12+total*20).toFixed(0)+'px rgba('+r+','+gn+','+b+','+(a*0.5).toFixed(3)+')';
+    const mr2 = Math.min(r,255), mg = Math.min(gn,255), mb = Math.min(b,255);
+    const a = Math.min(total * 0.4, 0.4);
+    pill.style.borderColor = 'rgba('+mr2+','+mg+','+mb+','+a.toFixed(3)+')';
+    pill.style.boxShadow = '0 8px 32px rgba(0,0,0,.5), 0 0 '+(12+total*20).toFixed(0)+'px rgba('+mr2+','+mg+','+mb+','+(a*0.5).toFixed(3)+')';
   }
   requestAnimationFrame(tickPill);
 })();
@@ -2466,7 +2473,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=31';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=32';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

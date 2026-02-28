@@ -1098,7 +1098,25 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     // 6 o'clock = fraction 0.5 on the dial. Proximity = cos-based falloff.
     const hFrac = (h / 12) % 1, mFrac = (m / 60) % 1, sFrac = (s / 60) % 1;
     const sixDist = (f) => Math.max(0, Math.cos((f - 0.5) * TAU)); // 1 at 6, 0 at 12
-    window._handGlow = { h: sixDist(hFrac), m: sixDist(mFrac), s: sixDist(sFrac) };
+    // Prayer beam at 6 o'clock check: does the active beam span the 6 o'clock angle?
+    // 6 o'clock on the dial = time 360 min (6:00). Convert to angle:
+    const sixAngle = ptTimeToAngle(360); // angle at 6 o'clock
+    let prayerAtSix = 0, prayerC1 = 0, prayerC2 = 0;
+    if (activeIdx >= 0) {
+      const ps = allSectors[activeIdx];
+      // Normalize angles to check if sixAngle falls within [endAng, startAng] (CCW winding)
+      let sa = ps.startAng, ea = ps.endAng, sa6 = sixAngle;
+      // Unwrap for comparison
+      while (ea > sa) ea -= TAU;
+      while (sa6 > sa) sa6 -= TAU;
+      while (sa6 < ea) sa6 += TAU;
+      if (sa6 <= sa && sa6 >= ea) {
+        prayerAtSix = u.uIntensity.value; // use current faded-in intensity
+        prayerC1 = ps.def.color;
+        prayerC2 = ps.def.color2;
+      }
+    }
+    window._handGlow = { h: sixDist(hFrac), m: sixDist(mFrac), s: sixDist(sFrac), p: prayerAtSix, pc1: prayerC1, pc2: prayerC2 };
 
     // Hour hand adaptive color + intensity (lerp ~2s at 60fps)
     const hMat = clockRays[0].mesh.children[0].material;
