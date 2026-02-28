@@ -981,12 +981,16 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       // Compass data available: needle points toward Qibla
       var qiblaRel = _compassQibla - _compassHeading;
       clockRays[2].mesh.rotation.y = clockRays[2].initY - qiblaRel;
-      clockRays[2].mesh.children[0].material.uniforms.op.value = 0.95;
+      // Needle opacity: fade with calibration confidence
+      var calibrated = !!window._compassCalibrated;
+      var needleTarget = calibrated ? 0.95 : 0.25;
+      var needleCur = clockRays[2].mesh.children[0].material.uniforms.op.value;
+      clockRays[2].mesh.children[0].material.uniforms.op.value = needleCur + (needleTarget - needleCur) * 0.08;
 
       // Check alignment: 12 o'clock pointing at Qibla = qiblaRel near 0
       var alignDelta = Math.abs(((qiblaRel % TAU) + TAU) % TAU);
       if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
-      _compassAligned = alignDelta < 0.15; // ~8.5° tolerance
+      _compassAligned = calibrated && alignDelta < 0.15; // ~8.5° tolerance, only when calibrated
 
       // Prismatic refraction: polar disc shaders
       var breathe = 0.88 + 0.12 * Math.sin(t * 1.0);

@@ -823,6 +823,7 @@ let adhanHrtfStartCtxTime=0, adhanHrtfStartOffset=0;
 let adhanHrtfStartWall=0;
 let adhanDeviceHeading=0, adhanQiblaAngle=null, adhanCurrentPan=0;
 let adhanHasCompass=false, adhanCompassEventCount=0, _compassJumpCount=0;
+let _compassAccuracy=-1, _compassCalibrated=false, _compassHeadingBuf=[];
 let _compassAccurate=true, _lastCompassDataTime=0;
 let _compassTimeoutEl=null, _compassTimeoutTimer=null;
 let _preUnlockedAudio=null;
@@ -876,13 +877,52 @@ function adhanCompassHandler(e){
   }
   adhanHasCompass=true;
   adhanCompassEventCount++;
-  adhanDeviceHeading=h*Math.PI/180;
+
+  // Track accuracy from iOS webkitCompassAccuracy
+  const acc = (typeof e.webkitCompassAccuracy === 'number') ? e.webkitCompassAccuracy : -1;
+  _compassAccuracy = acc;
+  const ACCURACY_THRESHOLD = 25; // degrees
+  _compassCalibrated = (acc > 0 && acc <= ACCURACY_THRESHOLD);
+  window._compassCalibrated = _compassCalibrated;
+
+  // Circular moving average (5 samples) to smooth jitter
+  _compassHeadingBuf.push(h);
+  if(_compassHeadingBuf.length > 5) _compassHeadingBuf.shift();
+  // Circular mean: average sin/cos to handle 0/360 wrap
+  let sinSum=0, cosSum=0;
+  for(let i=0;i<_compassHeadingBuf.length;i++){
+    const rad=_compassHeadingBuf[i]*Math.PI/180;
+    sinSum+=Math.sin(rad); cosSum+=Math.cos(rad);
+  }
+  const smoothed=((Math.atan2(sinSum,cosSum)*180/Math.PI)+360)%360;
+
+  adhanDeviceHeading=smoothed*Math.PI/180;
   _lastCompassDataTime = Date.now();
+
+  // Tilt check: phone too vertical degrades magnetometer accuracy
+  const beta = e.beta || 0;
+  const tooVertical = Math.abs(beta) > 75;
+
+  // Update calibration UI
+  if(window._compassCalibEl){
+    if(_compassCalibrated && !tooVertical){
+      if(window._compassCalibEl.style.opacity!=='0') window._compassCalibEl.style.opacity='0';
+    } else {
+      // Show appropriate message
+      const inner = window._compassCalibEl.querySelector('span');
+      if(inner){
+        if(tooVertical && _compassCalibrated) inner.textContent = 'Tilt phone slightly for better accuracy';
+        else if(!_compassCalibrated) inner.textContent = 'Calibrating compass…';
+      }
+      window._compassCalibEl.style.opacity='1';
+    }
+  }
+
   // Debug overlay (temporary)
   if(window._compassDbgEl){
     const qd = adhanQiblaAngle !== null ? (adhanQiblaAngle*180/Math.PI).toFixed(1) : 'null';
     const rel = adhanQiblaAngle !== null ? ((adhanQiblaAngle - adhanDeviceHeading)*180/Math.PI).toFixed(1) : '?';
-    window._compassDbgEl.textContent = 'H:'+h.toFixed(0)+'° Q:'+qd+'° R:'+rel+'° src:'+(typeof e.webkitCompassHeading==='number'?'wk':'alpha')+(_compassJumpCount?' J:'+_compassJumpCount:'');
+    window._compassDbgEl.textContent = 'H:'+smoothed.toFixed(0)+'° Q:'+qd+'° R:'+rel+'° A:'+acc.toFixed(0)+'° src:'+(typeof e.webkitCompassHeading==='number'?'wk':'alpha')+(_compassJumpCount?' J:'+_compassJumpCount:'')+(_compassCalibrated?' ✓':' ⏳');
   }
   // Clear any "no compass" message
   if (_compassTimeoutEl && _compassTimeoutEl.style.opacity !== '0') {
@@ -925,7 +965,7 @@ function _startCompassTimeout() {
         _compassTimeoutEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(30px,8vmin,80px));left:0;right:0;text-align:center;z-index:220;font-family:var(--font);font-size:clamp(.75rem,1.8vmin,1rem);font-weight:300;color:rgba(232,228,220,.5);padding:0 2rem;transition:opacity .5s ease;pointer-events:none';
         document.getElementById('clockFullscreen').appendChild(_compassTimeoutEl);
       }
-      _compassTimeoutEl.textContent = 'Move your phone in a figure-8 to calibrate the compass';
+      _compassTimeoutEl.textContent = 'No compass signal — check Settings → Privacy → Location Services → Compass';
       _compassTimeoutEl.style.opacity = '1';
       // Retry check — if data arrives later, handler clears the message
     }
@@ -1931,6 +1971,25 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
       document.body.appendChild(window._compassDbgEl);
     }
     window._compassDbgEl.style.display = 'block';
+    // Calibration overlay — shown until accuracy is acceptable
+    if(!window._compassCalibEl){
+      window._compassCalibEl = document.createElement('div');
+      window._compassCalibEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(50px,12vmin,100px));left:0;right:0;text-align:center;z-index:220;pointer-events:none;transition:opacity .6s ease';
+      window._compassCalibEl.innerHTML =
+        '<div style="display:inline-flex;align-items:center;gap:0.6rem;background:rgba(20,20,28,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:0.65rem 1.2rem;border-radius:100px;border:1px solid rgba(255,255,255,.08)">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,220,.6)" stroke-width="1.2" stroke-linecap="round">' +
+            '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/>' +
+            '<path d="M2 12h4M18 12h4M12 2v4M12 18v4" stroke-dasharray="2 2"/>' +
+            '<animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="3s" repeatCount="indefinite"/>' +
+          '</svg>' +
+          '<span style="font-family:var(--font);font-size:clamp(.75rem,1.8vmin,1rem);font-weight:300;color:rgba(232,228,220,.6);letter-spacing:0.03em">Calibrating compass…</span>' +
+        '</div>';
+      document.getElementById('clockFullscreen').appendChild(window._compassCalibEl);
+    }
+    // Show calibration if not already calibrated
+    window._compassCalibEl.style.opacity = _compassCalibrated ? '0' : '1';
+    // Reset heading buffer for fresh start
+    _compassHeadingBuf = [];
   } else {
     // Compass data keeps flowing via adhan handler — clock just stops reading it
     // Pop the compass history entry so stale state doesn't exit fullscreen on next back
@@ -1939,6 +1998,7 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
     // Clear timeout UI
     _clearCompassTimeout();
     if(window._compassDbgEl) window._compassDbgEl.style.display = 'none';
+    if(window._compassCalibEl) window._compassCalibEl.style.opacity = '0';
   }
 });
 
