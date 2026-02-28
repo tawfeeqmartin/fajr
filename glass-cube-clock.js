@@ -548,11 +548,9 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaEntryBeam = new THREE.Mesh(entryGeo, entryMat);
-  // Centered above cube, slightly behind it (away from camera)
-  _qiblaEntryBeam.position.set(0, CUBE_Y + 1.8, -0.2);
+  _qiblaEntryBeam.position.set(0, CUBE_Y, 1.8);
   _qiblaEntryBeam.visible = false;
-  // Add to SCENE not prismGroup — avoids PI/4 rotation making plane edge-on
-  scene.add(_qiblaEntryBeam);
+  prismGroup.add(_qiblaEntryBeam);
 
   // Exit face caustic hotspot: small plane on opposite face, spectral gradient
   var exitGeo = new THREE.PlaneGeometry(0.35, 0.35);
@@ -590,11 +588,10 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaExitCaustic = new THREE.Mesh(exitGeo, exitMat);
-  // Floor hotspot just past the cube's far face (negative Z, away from camera)
-  _qiblaExitCaustic.position.set(0, 0.01, -0.8);
-  _qiblaExitCaustic.rotation.x = -Math.PI / 2;
+  // Position on the exit face (-Z side of cube, opposite entry)
+  _qiblaExitCaustic.position.set(0, CUBE_Y, -0.62);
   _qiblaExitCaustic.visible = false;
-  scene.add(_qiblaExitCaustic);
+  prismGroup.add(_qiblaExitCaustic);
 })();
 
 window._clockToggleCompass = function(on) {
@@ -1017,6 +1014,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         // 3D Entry beam strip
         if(_qiblaEntryBeam){
           _qiblaEntryBeam.visible = true;
+          // Billboard: counter-rotate prismGroup's PI/4 so plane faces camera
+          _qiblaEntryBeam.rotation.y = -Math.PI / 4;
           _qiblaEntryBeam.material.uniforms.time.value = t;
           var ebop = _qiblaEntryBeam.material.uniforms.op.value;
           _qiblaEntryBeam.material.uniforms.op.value = Math.min(ebop + 0.05, 0.35 * breathe);
@@ -1024,6 +1023,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         // Exit face caustic hotspot
         if(_qiblaExitCaustic){
           _qiblaExitCaustic.visible = true;
+          // Billboard: counter-rotate prismGroup's PI/4 so plane faces camera
+          _qiblaExitCaustic.rotation.y = -Math.PI / 4;
           _qiblaExitCaustic.material.uniforms.time.value = t;
           var ecop = _qiblaExitCaustic.material.uniforms.op.value;
           _qiblaExitCaustic.material.uniforms.op.value = Math.min(ecop + 0.04, 0.5 * breathe);
