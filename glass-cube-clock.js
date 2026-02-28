@@ -548,7 +548,8 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaEntryBeam = new THREE.Mesh(entryGeo, entryMat);
-  _qiblaEntryBeam.position.set(0, CUBE_Y, 1.8);
+  _qiblaEntryBeam.rotation.x = -Math.PI / 2; // horizontal — floor-level, always face-on to downward camera
+  _qiblaEntryBeam.position.set(0, 0.01, 1.8);
   _qiblaEntryBeam.visible = false;
   prismGroup.add(_qiblaEntryBeam);
 
@@ -588,8 +589,9 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaExitCaustic = new THREE.Mesh(exitGeo, exitMat);
-  // Position on the exit face (-Z side of cube, opposite entry)
-  _qiblaExitCaustic.position.set(0, CUBE_Y, -0.62);
+  _qiblaExitCaustic.rotation.x = -Math.PI / 2; // horizontal — floor-level, always face-on to downward camera
+  // Position past the exit face (-Z side of cube, opposite entry)
+  _qiblaExitCaustic.position.set(0, 0.01, -0.62);
   _qiblaExitCaustic.visible = false;
   prismGroup.add(_qiblaExitCaustic);
 })();
@@ -1011,20 +1013,16 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
           var eop = _qiblaEntryDisc.material.uniforms.op.value;
           _qiblaEntryDisc.material.uniforms.op.value = Math.min(eop + 0.04, 0.18 * breathe);
         }
-        // 3D Entry beam strip
+        // 3D Entry beam strip (horizontal floor plane, no billboard needed)
         if(_qiblaEntryBeam){
           _qiblaEntryBeam.visible = true;
-          // Billboard: counter-rotate prismGroup's PI/4 so plane faces camera
-          _qiblaEntryBeam.rotation.y = -Math.PI / 4;
           _qiblaEntryBeam.material.uniforms.time.value = t;
           var ebop = _qiblaEntryBeam.material.uniforms.op.value;
           _qiblaEntryBeam.material.uniforms.op.value = Math.min(ebop + 0.05, 0.35 * breathe);
         }
-        // Exit face caustic hotspot
+        // Exit face caustic hotspot (horizontal floor plane, no billboard needed)
         if(_qiblaExitCaustic){
           _qiblaExitCaustic.visible = true;
-          // Billboard: counter-rotate prismGroup's PI/4 so plane faces camera
-          _qiblaExitCaustic.rotation.y = -Math.PI / 4;
           _qiblaExitCaustic.material.uniforms.time.value = t;
           var ecop = _qiblaExitCaustic.material.uniforms.op.value;
           _qiblaExitCaustic.material.uniforms.op.value = Math.min(ecop + 0.04, 0.5 * breathe);
@@ -1041,12 +1039,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
           if(dop > 0.005){ d.material.uniforms.op.value = dop * 0.88; }
           else { d.visible = false; d.material.uniforms.op.value = 0; }
         });
-        // Fade out entry beam and exit caustic — fast decay with high cutoff threshold.
-        // These are thin 3D planes that appear as a 1px hairline at low opacity (the
-        // plane is nearly edge-on to the camera due to prismGroup PI/4 rotation).
-        // Sensor noise causes the alignment flag to flicker, building a persistent
-        // low-opacity state if we use a slow fade (0.88×) to a tiny threshold (0.005).
-        // Fix: fast decay (0.7×) + high threshold (0.05) → gone in ~3 frames, no hairline.
+        // Fade out entry beam and exit caustic — fast decay to prevent flicker residue.
         [_qiblaEntryBeam, _qiblaExitCaustic].forEach(function(d){
           if(!d) return;
           var dop = d.material.uniforms.op.value;
