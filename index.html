@@ -290,8 +290,10 @@ body::after{display:none;
 }
 .loc-city-item:active,.loc-city-item.selected{color:rgba(232,228,220,.95);font-weight:500}
 .loc-city-item.selected{background:rgba(120,160,255,.08);border-radius:8px;border-color:transparent}
-.loc-preview{
-  margin-top:1.25rem;text-align:center;
+.loc-picker-footer{
+  flex-shrink:0;padding:1rem 1.25rem 1.5rem;
+  background:rgba(22,22,30,.98);border-top:1px solid rgba(232,228,220,.06);
+  text-align:center;
   font-family:var(--font);font-size:.65rem;font-weight:500;
   letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.3);
 }
@@ -2505,8 +2507,8 @@ setTimeout(setupScrollObservers,500);
     <div class="loc-picker-scroll">
       <div class="loc-section-label">POPULAR CITIES</div>
       <div class="loc-city-list" id="locCityList"></div>
-      <div class="loc-preview" id="locPreview"></div>
     </div>
+    <div class="loc-picker-footer" id="locPreview"></div>
   </div>
 </div>
 
