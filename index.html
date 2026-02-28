@@ -951,12 +951,13 @@ function adhanCompassHandler(e){
   const beta = e.beta || 0;
   const tooVertical = Math.abs(beta) > 75;
 
-  // Update calibration UI
+  // Update calibration UI — only in compass mode
   if(window._compassCalibEl){
-    if(_compassCalibrated && !tooVertical){
+    if(!window._compassMode){
+      window._compassCalibEl.style.opacity='0';
+    } else if(_compassCalibrated && !tooVertical){
       if(window._compassCalibEl.style.opacity!=='0') window._compassCalibEl.style.opacity='0';
     } else {
-      // Show appropriate message
       const inner = window._compassCalibEl.querySelector('span');
       if(inner){
         if(tooVertical && _compassCalibrated) inner.textContent = 'Tilt phone slightly for better accuracy';
@@ -2082,7 +2083,7 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
     // Calibration overlay — shown until accuracy is acceptable
     if(!window._compassCalibEl){
       window._compassCalibEl = document.createElement('div');
-      window._compassCalibEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(50px,12vmin,100px));left:0;right:0;text-align:center;z-index:220;pointer-events:none;transition:opacity .6s ease';
+      window._compassCalibEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(80px,16vmin,120px));left:0;right:0;text-align:center;z-index:960;pointer-events:none;transition:opacity .6s ease';
       window._compassCalibEl.innerHTML =
         '<div style="display:inline-flex;align-items:center;gap:0.6rem;background:rgba(20,20,28,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:0.65rem 1.2rem;border-radius:100px;border:1px solid rgba(255,255,255,.08)">' +
           '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,220,.6)" stroke-width="1.2" stroke-linecap="round">' +
