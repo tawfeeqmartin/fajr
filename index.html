@@ -171,15 +171,7 @@ body::after{display:none;
 #dialHero{
   display:none;
 }
-.landing-prayer-bar{
-  position:fixed;top:clamp(64px,14vmin,96px);left:0;right:0;
-  text-align:center;z-index:99;pointer-events:none;
-  font-family:var(--font);font-size:clamp(.6rem,1.2vmin,1.1rem);
-  font-weight:300;letter-spacing:.1em;color:rgba(232,228,220,.55);
-  padding:.35em 1rem;
-  transition:opacity .4s ease;
-}
-/* landing-hijri removed — now in nav center */
+/* landing-prayer-bar removed — replaced by .header-prayer-bar */
 
 /* ── Nav ── */
 nav{
@@ -267,8 +259,9 @@ nav:not(.scrolled){background:transparent}
   left:0;right:0;z-index:99;
   text-align:center;pointer-events:none;
   font-family:var(--font);font-size:clamp(.55rem,1.1vmin,.95rem);
-  font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.4);
-  padding:.3em 1rem .5em;
+  font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.4);
+  padding:.2em .75rem .4em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   border-bottom:1px solid rgba(232,228,220,.06);
   transition:opacity .4s ease;
 }
