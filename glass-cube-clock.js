@@ -548,8 +548,8 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaEntryBeam = new THREE.Mesh(entryGeo, entryMat);
-  // World space position (was (0, CUBE_Y, 1.8) in prismGroup rotated PI/4)
-  _qiblaEntryBeam.position.set(-1.273, CUBE_Y, 1.273);
+  // Centered above cube, slightly behind it (away from camera)
+  _qiblaEntryBeam.position.set(0, CUBE_Y + 1.8, -0.2);
   _qiblaEntryBeam.visible = false;
   // Add to SCENE not prismGroup — avoids PI/4 rotation making plane edge-on
   scene.add(_qiblaEntryBeam);
@@ -590,10 +590,9 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaExitCaustic = new THREE.Mesh(exitGeo, exitMat);
-  // Position in world space — rotated to face camera (no prismGroup PI/4 rotation)
-  // Original prismGroup position: (0, CUBE_Y, -0.62) rotated PI/4 around Y
-  // In world space: x = 0*cos(PI/4) - (-0.62)*sin(PI/4) ≈ 0.438, z = 0*sin(PI/4) + (-0.62)*cos(PI/4) ≈ -0.438
-  _qiblaExitCaustic.position.set(0.438, CUBE_Y, -0.438);
+  // Floor hotspot just past the cube's far face (negative Z, away from camera)
+  _qiblaExitCaustic.position.set(0, 0.01, -0.8);
+  _qiblaExitCaustic.rotation.x = -Math.PI / 2;
   _qiblaExitCaustic.visible = false;
   scene.add(_qiblaExitCaustic);
 })();
