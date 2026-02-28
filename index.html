@@ -867,6 +867,12 @@ function adhanCompassHandler(e){
   adhanCompassEventCount++;
   adhanDeviceHeading=h*Math.PI/180;
   _lastCompassDataTime = Date.now();
+  // Debug overlay (temporary)
+  if(window._compassDbgEl){
+    const qd = adhanQiblaAngle !== null ? (adhanQiblaAngle*180/Math.PI).toFixed(1) : 'null';
+    const rel = adhanQiblaAngle !== null ? ((adhanQiblaAngle - adhanDeviceHeading)*180/Math.PI).toFixed(1) : '?';
+    window._compassDbgEl.textContent = 'H:'+h.toFixed(0)+'° Q:'+qd+'° R:'+rel+'° src:'+(typeof e.webkitCompassHeading==='number'?'wk':'alpha');
+  }
   // Clear any "no compass" message
   if (_compassTimeoutEl && _compassTimeoutEl.style.opacity !== '0') {
     _compassTimeoutEl.style.opacity = '0';
@@ -1897,6 +1903,13 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
     history.pushState({compass:true}, '', '#clock');
     // Start compass timeout detection
     _startCompassTimeout();
+    // Debug overlay (temporary)
+    if(!window._compassDbgEl){
+      window._compassDbgEl = document.createElement('div');
+      window._compassDbgEl.style.cssText = 'position:fixed;top:env(safe-area-inset-top,8px);left:8px;z-index:999;font:11px/1.3 monospace;color:rgba(255,255,0,.7);pointer-events:none;text-shadow:0 1px 2px #000';
+      document.body.appendChild(window._compassDbgEl);
+    }
+    window._compassDbgEl.style.display = 'block';
   } else {
     // Compass data keeps flowing via adhan handler — clock just stops reading it
     // Pop the compass history entry so stale state doesn't exit fullscreen on next back
@@ -1904,6 +1917,7 @@ document.getElementById('fsCompassToggle').addEventListener('click', () => {
     history.back();
     // Clear timeout UI
     _clearCompassTimeout();
+    if(window._compassDbgEl) window._compassDbgEl.style.display = 'none';
   }
 });
 
