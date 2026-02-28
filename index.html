@@ -233,6 +233,58 @@ nav:not(.scrolled){background:transparent}
 .sticky-cta.visible{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
 .sticky-cta .cta-heart{color:#e74c4c;font-size:1rem;display:inline-block;animation:heartpulse .833s ease-in-out infinite}
 .sticky-cta .cta-count{font-size:.65rem;font-weight:300;opacity:.5;margin-left:-.2rem}
+
+/* ── Mode Pill ── */
+.mode-pill{
+  position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px));
+  left:50%;transform:translateX(-50%);z-index:950;
+  display:flex;align-items:center;justify-content:center;gap:0;
+  width:232px;height:56px;
+  background:rgba(18,18,22,0.75);
+  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(232,228,220,.08);border-radius:999px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.mode-pill-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:none;border:none;cursor:pointer;padding:0;
+  min-height:44px;min-width:44px;
+  color:rgba(232,228,220,.35);transition:color .3s ease,opacity .3s ease;
+}
+.mode-pill-btn svg{width:22px;height:22px;transition:filter .3s ease}
+.mode-pill-btn .mode-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:rgba(232,228,220,.9);
+  opacity:0;transition:opacity .3s ease;
+}
+.mode-pill-btn.active{color:rgba(232,228,220,.9)}
+.mode-pill-btn.active svg{filter:drop-shadow(0 0 6px rgba(232,228,220,.3))}
+.mode-pill-btn.active .mode-dot{opacity:1}
+
+/* ── Header prayer bar (under nav) ── */
+.header-prayer-bar{
+  position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(48px,8vmin,64px));
+  left:0;right:0;z-index:99;
+  text-align:center;pointer-events:none;
+  font-family:var(--font);font-size:clamp(.55rem,1.1vmin,.95rem);
+  font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.4);
+  padding:.3em 1rem .5em;
+  border-bottom:1px solid rgba(232,228,220,.06);
+  transition:opacity .4s ease;
+}
+
+/* ── Mode states ── */
+body.mode-clock .scroll-section,
+body.mode-clock footer{display:none!important}
+body.mode-clock .clock-sticky{height:100svh}
+
+body.mode-compass .scroll-section,
+body.mode-compass footer,
+body.mode-compass .clock-sticky{display:none!important}
+
+body.mode-info .clock-sticky{height:46svh}
+body.mode-info .scroll-section,
+body.mode-info footer{display:block}
 a{color:inherit;text-decoration:none}
 
 /* ── Sections ── */
@@ -411,14 +463,12 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   <div id="navHijri" class="nav-hijri"></div>
   <div id="navNext" class="nav-next"></div>
 </nav>
+<div class="header-prayer-bar" id="headerPrayerBar"></div>
 
 <!-- Sticky Clock -->
 <div class="clock-sticky">
   <div id="dialHero"></div>
-  <div class="landing-prayer-bar" id="landingPrayerBar">
 
-    <div id="landingPrayerTimes"></div>
-  </div>
 </div>
 
 <!-- 1. THE HOOK -->
@@ -1698,6 +1748,7 @@ function _displayPrayerTimes(t, hijri) {
   const fsEl = document.getElementById('fsPrayerTimes'); if(fsEl) fsEl.innerHTML = html;
   // Landing prayer bar
   const lpt = document.getElementById('landingPrayerTimes'); if(lpt) lpt.innerHTML = html;
+  const hpb = document.getElementById('headerPrayerBar'); if(hpb) hpb.innerHTML = html;
   // Hijri date
   if(hijri) {
     window._isRamadan = /rama[dḍ]/i.test(hijri.month.en);
@@ -1796,6 +1847,55 @@ fsFetchPrayer();
 // Sections have solid backgrounds now — no fade needed.
 // They naturally scroll over the fixed canvas.
 
+/* ── Mode Switching ── */
+var _currentMode = 'info'; // default: info mode (shows sections)
+function switchMode(mode) {
+  if(mode === _currentMode) return;
+  const prev = _currentMode;
+  _currentMode = mode;
+  
+  // Update body class
+  document.body.classList.remove('mode-clock','mode-compass','mode-info');
+  document.body.classList.add('mode-' + mode);
+  
+  // Update pill buttons
+  document.querySelectorAll('.mode-pill-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  
+  // Mode-specific logic
+  if(mode === 'clock') {
+    // Exit compass if was in compass mode
+    if(prev === 'compass' && window._compassMode) {
+      document.getElementById('fsCompassToggle')?.click();
+    }
+    // Close fullscreen overlay chrome but keep canvas
+    closeClockFullscreen();
+    openClockFullscreen();
+    window.scrollTo(0, 0);
+  } else if(mode === 'compass') {
+    openClockFullscreen();
+    // Trigger compass if not already active
+    if(!window._compassMode) {
+      setTimeout(() => {
+        document.getElementById('fsCompassToggle')?.click();
+      }, 100);
+    }
+  } else if(mode === 'info') {
+    // Exit compass if active
+    if(prev === 'compass' && window._compassMode) {
+      document.getElementById('fsCompassToggle')?.click();
+    }
+    closeClockFullscreen();
+    window.scrollTo(0, 0);
+  }
+}
+
+// Initialize mode on load
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('mode-info');
+});
+
 function openClockFullscreen() {
   // Fullscreen tap is a user gesture — request gyro permission (iOS)
   if(window._requestGyroPermission) window._requestGyroPermission();
@@ -1821,6 +1921,7 @@ function openClockFullscreen() {
   document.body.style.overflow = 'hidden';
   document.querySelector('.clock-sticky').style.display = 'none';
   const _lb=document.getElementById('landingPrayerBar');if(_lb)_lb.style.display='none';
+  const _hpb=document.getElementById('headerPrayerBar');if(_hpb)_hpb.style.opacity='0';
   document.querySelectorAll('.scroll-section').forEach(s => s.style.display = 'none');
   document.querySelector('footer')?.style && (document.querySelector('footer').style.display = 'none');
   const stickyC = document.querySelector('.sticky-cta');
@@ -1875,6 +1976,7 @@ function closeClockFullscreen() {
   document.body.style.overflow = '';
   document.querySelector('.clock-sticky').style.display = '';
   const _lb2=document.getElementById('landingPrayerBar');if(_lb2)_lb2.style.display='';
+  const _hpb2=document.getElementById('headerPrayerBar');if(_hpb2)_hpb2.style.opacity='';
   document.querySelectorAll('.scroll-section').forEach(s => s.style.display = '');
   document.querySelector('footer')?.style && (document.querySelector('footer').style.display = '');
   const stickyC = document.querySelector('.sticky-cta');
@@ -2250,5 +2352,21 @@ setTimeout(setupScrollObservers,500);
   <span>Keep this free</span>
   <span class="cta-count"></span>
 </a>
+
+<!-- Mode Pill -->
+<div class="mode-pill" id="modePill">
+  <button class="mode-pill-btn active" data-mode="clock" aria-label="Clock" onclick="switchMode('clock')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/></svg>
+    <span class="mode-dot"></span>
+  </button>
+  <button class="mode-pill-btn" data-mode="compass" aria-label="Compass" onclick="switchMode('compass')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2L20 12L12 22L4 12Z"/></svg>
+    <span class="mode-dot"></span>
+  </button>
+  <button class="mode-pill-btn" data-mode="info" aria-label="Info" onclick="switchMode('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 4L22 20H2Z"/></svg>
+    <span class="mode-dot"></span>
+  </button>
+</div>
 </body>
 </html>
