@@ -661,6 +661,29 @@ const PRAYER_WINDOWS_DEF = [
   { name: 'Isha',    startKey: 'Isha',     endKey: 'Midnight', color: 0x0055ff, color2: 0x44aaff, isFajr: false },
 ];
 
+// ── Hour hand contrast colors per prayer (complementary hue + boosted intensity) ──
+// When hour hand is inside a prayer beam, it shifts to this color at higher opacity.
+// Default (no active prayer): violet 0x9900ff / 0xff00ff at 0.88
+const HOUR_DEFAULT_C1 = new THREE.Color(0x9900ff);
+const HOUR_DEFAULT_C2 = new THREE.Color(0xff00ff);
+const HOUR_DEFAULT_OP = 0.88;
+const HOUR_ACTIVE_OP  = 1.6;  // ~1.8x boost when inside a beam
+
+const HOUR_CONTRAST = {
+  Tahajjud: { c1: new THREE.Color(0xffcc44), c2: new THREE.Color(0xffee88) }, // gold vs purple
+  Fajr:     { c1: new THREE.Color(0xff9933), c2: new THREE.Color(0xffcc66) }, // warm amber vs indigo
+  Dhuha:    { c1: new THREE.Color(0x6622cc), c2: new THREE.Color(0x9944ff) }, // deep violet vs gold
+  Dhuhr:    { c1: new THREE.Color(0xff2266), c2: new THREE.Color(0xff6699) }, // magenta/pink vs green
+  Asr:      { c1: new THREE.Color(0x00ccff), c2: new THREE.Color(0x66eeff) }, // cyan vs amber
+  Maghrib:  { c1: new THREE.Color(0x00ffcc), c2: new THREE.Color(0x88ffee) }, // bright cyan vs red
+  Isha:     { c1: new THREE.Color(0xffaa22), c2: new THREE.Color(0xffdd66) }, // warm gold vs blue
+};
+
+// Lerp targets (smoothed in animation loop)
+let _hourTargetC1 = HOUR_DEFAULT_C1.clone();
+let _hourTargetC2 = HOUR_DEFAULT_C2.clone();
+let _hourTargetOp = HOUR_DEFAULT_OP;
+
 const PT_FALLBACK = {
   Fajr: '05:30', Sunrise: '07:00', Dhuhr: '12:15',
   Asr: '15:30', Maghrib: '18:00', Isha: '19:30', Midnight: '23:45',
@@ -916,6 +939,18 @@ function updatePrayerWindows(now) {
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     if (!_compassMode) _prayerDisc.visible = true;
+    // Hour hand contrast: shift to complementary color + boost
+    const contrast = HOUR_CONTRAST[ps.def.name];
+    if (contrast) {
+      _hourTargetC1.copy(contrast.c1);
+      _hourTargetC2.copy(contrast.c2);
+      _hourTargetOp = HOUR_ACTIVE_OP;
+    }
+  } else {
+    // No active prayer — revert to default
+    _hourTargetC1.copy(HOUR_DEFAULT_C1);
+    _hourTargetC2.copy(HOUR_DEFAULT_C2);
+    _hourTargetOp = HOUR_DEFAULT_OP;
   }
   if (u.uIntensity.value < 0.001 || _compassMode) _prayerDisc.visible = false;
 
@@ -1068,6 +1103,13 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     clockRays[0].mesh.rotation.y = clockRays[0].initY - (h / 12) * TAU;   // hour
     clockRays[1].mesh.rotation.y = clockRays[1].initY - (m / 60) * TAU;   // minute
     clockRays[2].mesh.rotation.y = clockRays[2].initY - (s / 60) * TAU;   // second
+
+    // Hour hand adaptive color + intensity (lerp ~2s at 60fps)
+    const hMat = clockRays[0].mesh.children[0].material;
+    const lRate = 0.025;
+    hMat.uniforms.c1.value.lerp(_hourTargetC1, lRate);
+    hMat.uniforms.c2.value.lerp(_hourTargetC2, lRate);
+    hMat.uniforms.op.value += (_hourTargetOp - hMat.uniforms.op.value) * lRate;
   }
 
   // Specular highlight orbits cube at second-hand speed
