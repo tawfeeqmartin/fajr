@@ -667,7 +667,7 @@ const PRAYER_WINDOWS_DEF = [
 const HOUR_DEFAULT_C1 = new THREE.Color(0x9900ff);
 const HOUR_DEFAULT_C2 = new THREE.Color(0xff00ff);
 const HOUR_DEFAULT_OP = 0.88;
-const HOUR_ACTIVE_OP  = 1.6;  // ~1.8x boost when inside a beam
+const HOUR_ACTIVE_OP  = 2.2;  // ~2.5x boost when inside a beam
 
 const HOUR_CONTRAST = {
   Tahajjud: { c1: new THREE.Color(0xffcc44), c2: new THREE.Color(0xffee88) }, // gold vs purple
@@ -1110,6 +1110,13 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     hMat.uniforms.c1.value.lerp(_hourTargetC1, lRate);
     hMat.uniforms.c2.value.lerp(_hourTargetC2, lRate);
     hMat.uniforms.op.value += (_hourTargetOp - hMat.uniforms.op.value) * lRate;
+
+    // Second hand: reduce base opacity to minimize additive pop at prayer beam edges
+    // The white hand + colored beam = blown-out overlap → sudden contrast on exit.
+    // Lower base opacity reduces the delta.
+    const sMat = clockRays[2].mesh.children[0].material;
+    const secBase = _prayerDisc.visible ? 0.40 : 0.62;
+    sMat.uniforms.op.value += (secBase - sMat.uniforms.op.value) * 0.03;
   }
 
   // Specular highlight orbits cube at second-hand speed
