@@ -226,9 +226,9 @@ body::after{display:none;
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
   background:none;border:none;cursor:pointer;padding:0;
   min-height:44px;min-width:44px;
-  color:rgba(232,228,220,.35);transition:color .3s ease,opacity .3s ease;
+  color:rgba(232,228,220,.35);transition:none;
 }
-.mode-pill-btn svg{width:22px;height:22px;transition:filter .3s ease}
+.mode-pill-btn svg{width:22px;height:22px;transition:none}
 .mode-pill-btn .mode-dot{display:none}
 .mode-pill-btn.active{color:rgba(232,228,220,.9)}
 .mode-pill-btn.active svg{filter:drop-shadow(0 0 6px rgba(232,228,220,.3))}
@@ -352,7 +352,7 @@ body.mode-compass footer,
 body.mode-compass .clock-sticky{display:none!important}
 
 body.mode-info .clock-sticky{display:none}
-body.mode-info .fs-city-block,body.mode-info .fs-countdown,body.mode-info .fs-header{opacity:0!important;pointer-events:none}
+body.mode-info .fs-city-block,body.mode-info .fs-countdown,body.mode-info .fs-header{opacity:0!important;pointer-events:none;transition:none}
 body.mode-info .scroll-section,
 body.mode-info footer{display:block}
 body.mode-info{overflow:hidden}
@@ -390,6 +390,7 @@ a{color:inherit;text-decoration:none}
 body.mode-info .scroll-section .reveal{
   background:none;backdrop-filter:none;-webkit-backdrop-filter:none;
   border:none;max-width:420px;
+  opacity:1!important;transform:none!important;transition:none!important;
 }
 /* Frosted glass behind tile content — matches compass onboarding blur */
 .scroll-section .reveal{
@@ -2120,7 +2121,7 @@ function switchMode(mode) {
     window.scrollTo(0, 0);
   } else if(mode === 'compass') {
     openClockFullscreen();
-    if(!fsCompassOn) setTimeout(() => _toggleCompassMode(true), 100);
+    if(!fsCompassOn) _toggleCompassMode(true);
   } else if(mode === 'info') {
     if(prev === 'compass' && fsCompassOn) _toggleCompassMode(false);
     closeClockFullscreen();
