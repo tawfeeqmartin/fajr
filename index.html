@@ -260,6 +260,7 @@ body::after{display:none;
 .loc-picker-header{display:flex;align-items:center;justify-content:center;padding:1rem 0 .75rem;position:relative}
 .loc-picker-handle{width:36px;height:4px;border-radius:2px;background:rgba(232,228,220,.2);position:absolute;top:8px;left:50%;transform:translateX(-50%)}
 .loc-picker-title{font-family:var(--font);font-size:1rem;font-weight:500;color:rgba(232,228,220,.8);letter-spacing:.02em}
+.loc-picker-close{position:absolute;left:0;background:none;border:none;font-size:1.4rem;font-weight:300;color:rgba(232,228,220,.5);cursor:pointer;padding:.25rem .5rem;line-height:1}
 .loc-picker-done{position:absolute;right:0;background:none;border:none;font-family:var(--font);font-size:.9rem;font-weight:500;color:rgba(120,160,255,.9);cursor:pointer;padding:.25rem}
 .loc-picker-search{
   display:flex;align-items:center;gap:.6rem;
@@ -2560,6 +2561,7 @@ setTimeout(setupScrollObservers,500);
     <div class="loc-picker-sticky">
       <div class="loc-picker-header">
         <div class="loc-picker-handle"></div>
+        <button class="loc-picker-close" onclick="closeLocationPicker()" aria-label="Close">&times;</button>
         <span class="loc-picker-title">Location</span>
         <button class="loc-picker-done" onclick="closeLocationPicker()">Done</button>
       </div>
