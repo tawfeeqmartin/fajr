@@ -1363,7 +1363,7 @@ document.addEventListener('touchstart',requestNotifPermission,{once:true});
 document.addEventListener('click',requestNotifPermission,{once:true});
 
 // ── Auto-adhan at prayer times ──
-let _lastAdhanFired='';
+let _lastAdhanFired=sessionStorage.getItem('_lastAdhanFired')||'';
 let _adhanCheckTimer=null;
 // ── Prayer time tap-to-play banner (iOS fallback) ──
 function _showAdhanBanner(prayer){
@@ -1383,6 +1383,12 @@ function _showAdhanBanner(prayer){
   b.innerHTML='<i class="ph-thin ph-speaker-simple-high" style="font-size:1.1rem"></i> '+prayer+' — tap to hear the Adhan';
   b.style.opacity='1';b.style.pointerEvents='auto';b.style.transform='translateX(-50%) translateY(0)';
   b.onclick=function(){
+    // If adhan is already playing (auto-play succeeded), just dismiss banner
+    if(adhanPlaying){
+      _hideAdhanBanner();
+      return;
+    }
+    // Otherwise start it (iOS auto-play failed, user gesture needed)
     const btn=document.getElementById('adhanBtn');
     if(btn) playAdhan(btn);
     _hideAdhanBanner();
@@ -1417,11 +1423,18 @@ function checkPrayerAdhan(){
     const diff=nowMin-pMin;
     if(diff>=0 && diff<=1 && _lastAdhanFired!==p+raw){
       _lastAdhanFired=p+raw;
+      try{sessionStorage.setItem('_lastAdhanFired',_lastAdhanFired);}catch(e){}
       console.log('[adhan] ⏰ Auto-triggering for '+p+' at '+raw+' (now='+now.toLocaleTimeString()+')');
       
       // ALWAYS show the tap banner first — guaranteed visible even if audio fails
       _showAdhanBanner(p);
       
+      // Stop any existing adhan before starting new
+      if(adhanPlaying){
+        if(adhanBufSrc){try{adhanBufSrc.stop();}catch(e){}adhanBufSrc=null;}
+        if(adhanAudio){adhanAudio.pause();adhanAudio=null;}
+        adhanPlaying=false;
+      }
       // Try to auto-play audio (may fail on iOS without gesture)
       try{
         const audio=new Audio('https://cookmom.github.io/ramadan-clock/audio/adhan-mishari.mp3');
