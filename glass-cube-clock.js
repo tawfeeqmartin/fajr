@@ -548,9 +548,11 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaEntryBeam = new THREE.Mesh(entryGeo, entryMat);
-  _qiblaEntryBeam.rotation.x = -Math.PI / 2; // horizontal — floor-level, face-on to downward camera
-  // Scene root: 12 o'clock = -Z world direction. Beam strip from cube toward -Z.
-  _qiblaEntryBeam.position.set(0, 0.01, -1.8);
+  // Lay flat on floor, beam extends along -Z (toward 12 o'clock from cube)
+  _qiblaEntryBeam.rotation.order = 'YXZ';
+  _qiblaEntryBeam.rotation.y = Math.PI; // flip so beam extends toward -Z
+  _qiblaEntryBeam.rotation.x = Math.PI / 2;
+  _qiblaEntryBeam.position.set(0, 0.01, 0);
   _qiblaEntryBeam.visible = false;
   scene.add(_qiblaEntryBeam);
 
@@ -590,9 +592,9 @@ var _qiblaExitCaustic = null;
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaExitCaustic = new THREE.Mesh(exitGeo, exitMat);
-  _qiblaExitCaustic.rotation.x = -Math.PI / 2; // horizontal — floor-level, face-on to downward camera
-  // Scene root: exit caustic on +Z side (toward camera), opposite entry
-  _qiblaExitCaustic.position.set(0, 0.01, 0.62);
+  _qiblaExitCaustic.rotation.x = -Math.PI / 2; // flat on floor
+  // Scene root: exit caustic on +Z side (toward camera, past cube's near face)
+  _qiblaExitCaustic.position.set(0, 0.01, 1.0);
   _qiblaExitCaustic.visible = false;
   scene.add(_qiblaExitCaustic);
 })();
