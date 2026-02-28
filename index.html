@@ -352,6 +352,7 @@ body.mode-compass footer,
 body.mode-compass .clock-sticky{display:none!important}
 
 body.mode-info .clock-sticky{display:none}
+body.mode-info .fs-city-block,body.mode-info .fs-countdown,body.mode-info .fs-header{opacity:0!important;pointer-events:none}
 body.mode-info .scroll-section,
 body.mode-info footer{display:block}
 body.mode-info{scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -372,7 +373,8 @@ a{color:inherit;text-decoration:none}
 /* Info mode: fullscreen frosted slides */
 body.mode-info .scroll-section{
   min-height:100svh;
-  padding-top:calc(env(safe-area-inset-top,0px) + 100px);
+  justify-content:flex-start;
+  padding-top:calc(env(safe-area-inset-top,0px) + clamp(48px,8vmin,72px));
   padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px);
   background:rgba(13,13,18,.55);
   backdrop-filter:blur(20px) saturate(130%);-webkit-backdrop-filter:blur(20px) saturate(130%);
