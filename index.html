@@ -1342,10 +1342,8 @@ const revealObs=new IntersectionObserver((entries)=>{
 },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
 
 // ══════════════════════════════════════════
-// NAV SCROLL
+// NAV SCROLL (nav removed — global header is always fixed)
 // ══════════════════════════════════════════
-const nav=document.querySelector('nav');
-window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>40)},{passive:true});
 
 // ══════════════════════════════════════════
 // PRAYER TIMES
