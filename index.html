@@ -654,11 +654,8 @@ async function playSurahSpatial(btn,src,label){
   surahCurrentSrc=src;
   btn.innerHTML='<i class="ph-thin ph-circle-notch"></i> Loading...';
 
-  // Request compass (reuses adhan's handler — already registered if adhan played)
-  if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){
-    try{await DeviceOrientationEvent.requestPermission();}catch(e){}
-  }
-  window.addEventListener('deviceorientation',adhanCompassHandler);
+  // Request compass (reuses adhan's handler — already registered via _initCompass)
+  _requestCompassPermission();
   if(!adhanQiblaAngle) await adhanGetQibla();
 
   // Clean slate
@@ -825,7 +822,7 @@ let adhanDecodedBuf=null, adhanPannerInterval=null;
 let adhanHrtfStartCtxTime=0, adhanHrtfStartOffset=0;
 let adhanHrtfStartWall=0;
 let adhanDeviceHeading=0, adhanQiblaAngle=null, adhanCurrentPan=0;
-let adhanHasCompass=false, adhanCompassEventCount=0;
+let adhanHasCompass=false, adhanCompassEventCount=0, _compassJumpCount=0;
 let _compassAccurate=true, _lastCompassDataTime=0;
 let _compassTimeoutEl=null, _compassTimeoutTimer=null;
 let _preUnlockedAudio=null;
@@ -863,6 +860,20 @@ function adhanCompassHandler(e){
   if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
   else if (e.alpha !== null && e.alpha !== undefined) h = (360 - e.alpha) % 360;
   if(h==null)return;
+  // Jump filter: reject sudden 180° flips (iOS compass drift after audio/motion)
+  if(adhanCompassEventCount > 10) {
+    const prevDeg = adhanDeviceHeading * 180 / Math.PI;
+    let delta = Math.abs(h - prevDeg);
+    if(delta > 180) delta = 360 - delta;
+    if(delta > 150) {
+      // Likely a 180° flip — reject this reading, wait for stable data
+      _compassJumpCount = (_compassJumpCount || 0) + 1;
+      if(_compassJumpCount < 5) return; // reject up to 5 consecutive flipped readings
+      // If 5+ readings are consistently flipped, accept the new heading (genuine turn)
+    } else {
+      _compassJumpCount = 0;
+    }
+  }
   adhanHasCompass=true;
   adhanCompassEventCount++;
   adhanDeviceHeading=h*Math.PI/180;
@@ -871,7 +882,7 @@ function adhanCompassHandler(e){
   if(window._compassDbgEl){
     const qd = adhanQiblaAngle !== null ? (adhanQiblaAngle*180/Math.PI).toFixed(1) : 'null';
     const rel = adhanQiblaAngle !== null ? ((adhanQiblaAngle - adhanDeviceHeading)*180/Math.PI).toFixed(1) : '?';
-    window._compassDbgEl.textContent = 'H:'+h.toFixed(0)+'° Q:'+qd+'° R:'+rel+'° src:'+(typeof e.webkitCompassHeading==='number'?'wk':'alpha');
+    window._compassDbgEl.textContent = 'H:'+h.toFixed(0)+'° Q:'+qd+'° R:'+rel+'° src:'+(typeof e.webkitCompassHeading==='number'?'wk':'alpha')+(_compassJumpCount?' J:'+_compassJumpCount:'');
   }
   // Clear any "no compass" message
   if (_compassTimeoutEl && _compassTimeoutEl.style.opacity !== '0') {
@@ -1061,11 +1072,8 @@ async function playAdhan(btn){
 
   btn.innerHTML='<i class="ph-thin ph-circle-notch"></i> Loading...';
 
-  // Request compass permission (iOS)
-  if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){
-    try{await DeviceOrientationEvent.requestPermission();}catch(e){}
-  }
-  window.addEventListener('deviceorientation',adhanCompassHandler);
+  // Request compass permission (iOS) — reuses _initCompass listener, no duplicate
+  _requestCompassPermission();
   await adhanGetQibla();
 
   // Always use HRTF path for background/foreground handoff
