@@ -939,18 +939,8 @@ function updatePrayerWindows(now) {
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     if (!_compassMode) _prayerDisc.visible = true;
-    // Hour hand contrast: shift to complementary color + boost
-    const contrast = HOUR_CONTRAST[ps.def.name];
-    if (contrast) {
-      _hourTargetC1.copy(contrast.c1);
-      _hourTargetC2.copy(contrast.c2);
-      _hourTargetOp = HOUR_ACTIVE_OP;
-    }
   } else {
-    // No active prayer — revert to default
-    _hourTargetC1.copy(HOUR_DEFAULT_C1);
-    _hourTargetC2.copy(HOUR_DEFAULT_C2);
-    _hourTargetOp = HOUR_DEFAULT_OP;
+    // no-op
   }
   if (u.uIntensity.value < 0.001 || _compassMode) _prayerDisc.visible = false;
 
@@ -1107,9 +1097,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     // Hour hand adaptive color + intensity (lerp ~2s at 60fps)
     const hMat = clockRays[0].mesh.children[0].material;
     const lRate = 0.025;
-    hMat.uniforms.c1.value.lerp(_hourTargetC1, lRate);
-    hMat.uniforms.c2.value.lerp(_hourTargetC2, lRate);
-    hMat.uniforms.op.value += (_hourTargetOp - hMat.uniforms.op.value) * lRate;
+    // Hour hand stays magenta — no adaptive contrast
 
     // Second hand: reduce base opacity to minimize additive pop at prayer beam edges
     // The white hand + colored beam = blown-out overlap → sudden contrast on exit.
