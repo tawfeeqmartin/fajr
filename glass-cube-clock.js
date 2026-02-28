@@ -534,8 +534,8 @@ var _qiblaExitCaustic = null;
       uniform float op, time;
       varying vec2 vUv;
       void main() {
-        // Tight center falloff — beam shape painted by shader, not geometry
-        float cx = exp(-pow((vUv.x - 0.5) * 16.0, 2.0));
+        // Soft center falloff — beam shape painted by shader, reads as light
+        float cx = exp(-pow((vUv.x - 0.5) * 10.0, 2.0));
         float cy = smoothstep(0.0, 0.15, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
         float a = cx * cy * op;
         if (a < 0.005) discard;
