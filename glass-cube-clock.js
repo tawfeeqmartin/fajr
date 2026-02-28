@@ -524,8 +524,9 @@ var _qiblaEntryBeam = null;
 var _qiblaExitCaustic = null;
 
 (function() {
-  // Entry beam: thin vertical PlaneGeometry strip, warm white, additive
-  var entryGeo = new THREE.PlaneGeometry(0.06, 2.4);
+  // Entry beam: wide plane with shader-painted beam (no edge-on artifact)
+  // Uses 1.2 x 2.4 plane — shader narrows it to a soft beam shape
+  var entryGeo = new THREE.PlaneGeometry(1.2, 2.4);
   var entryMat = new THREE.ShaderMaterial({
     uniforms: { op: { value: 0 }, time: { value: 0 } },
     vertexShader: VERT,
@@ -533,19 +534,20 @@ var _qiblaExitCaustic = null;
       uniform float op, time;
       varying vec2 vUv;
       void main() {
-        float cx = exp(-pow((vUv.x - 0.5) * 6.0, 2.0));
+        // Tight center falloff — beam shape painted by shader, not geometry
+        float cx = exp(-pow((vUv.x - 0.5) * 16.0, 2.0));
         float cy = smoothstep(0.0, 0.15, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
+        float a = cx * cy * op;
+        if (a < 0.005) discard;
         float flicker = 0.92 + 0.08 * sin(time * 2.0 + vUv.y * 8.0);
         vec3 col = mix(vec3(1.0, 0.95, 0.85), vec3(1.0, 0.82, 0.5), vUv.y);
-        gl_FragColor = vec4(col * flicker, cx * cy * op);
+        gl_FragColor = vec4(col * flicker, a);
       }
     `,
     transparent: true, blending: THREE.AdditiveBlending,
     depthWrite: false, side: THREE.DoubleSide
   });
   _qiblaEntryBeam = new THREE.Mesh(entryGeo, entryMat);
-  // Position: beam enters from 12 o'clock direction toward cube center
-  // In prismGroup local space (rotated PI/4), entry from +Z toward cube
   _qiblaEntryBeam.position.set(0, CUBE_Y, 1.8);
   _qiblaEntryBeam.visible = false;
   prismGroup.add(_qiblaEntryBeam);
