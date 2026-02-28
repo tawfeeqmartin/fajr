@@ -2137,6 +2137,34 @@ document.addEventListener('DOMContentLoaded', () => {
   if(typeof openClockFullscreen === 'function') openClockFullscreen();
 });
 
+// ── Nav pill dichroic glow — hands bleed light onto frosted glass ──
+(function(){
+  const pill = document.getElementById('modePill');
+  if(!pill) return;
+  function tickPill(){
+    requestAnimationFrame(tickPill);
+    const g = window._handGlow;
+    if(!g) return;
+    // Hand colors: hour=magenta(0x9900ff/0xff00ff), minute=blue(0x1133ff/0x00aaff), second=white
+    const hr = g.h * 0.35; // magenta intensity
+    const mr = g.m * 0.25; // blue intensity  
+    const sr = g.s * 0.18; // white shimmer
+    const r = Math.round(153 * hr + 17 * mr + 255 * sr);
+    const gn = Math.round(0 * hr + 51 * mr + 255 * sr);
+    const b = Math.round(255 * hr + 255 * mr + 255 * sr);
+    const total = hr + mr + sr;
+    if(total < 0.01){
+      pill.style.borderColor = 'rgba(232,228,220,.08)';
+      pill.style.boxShadow = '0 8px 32px rgba(0,0,0,.5)';
+      return;
+    }
+    const a = Math.min(total * 0.4, 0.35);
+    pill.style.borderColor = 'rgba('+r+','+gn+','+b+','+a.toFixed(3)+')';
+    pill.style.boxShadow = '0 8px 32px rgba(0,0,0,.5), 0 0 '+(12+total*20).toFixed(0)+'px rgba('+r+','+gn+','+b+','+(a*0.5).toFixed(3)+')';
+  }
+  requestAnimationFrame(tickPill);
+})();
+
 function openClockFullscreen() {
   // Fullscreen tap is a user gesture — request gyro permission (iOS)
   if(window._requestGyroPermission) window._requestGyroPermission();

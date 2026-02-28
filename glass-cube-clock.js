@@ -1094,6 +1094,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     clockRays[1].mesh.rotation.y = clockRays[1].initY - (m / 60) * TAU;   // minute
     clockRays[2].mesh.rotation.y = clockRays[2].initY - (s / 60) * TAU;   // second
 
+    // Expose hand proximity to 6 o'clock (bottom) for nav pill dichroic effect
+    // 6 o'clock = fraction 0.5 on the dial. Proximity = cos-based falloff.
+    const hFrac = (h / 12) % 1, mFrac = (m / 60) % 1, sFrac = (s / 60) % 1;
+    const sixDist = (f) => Math.max(0, Math.cos((f - 0.5) * TAU)); // 1 at 6, 0 at 12
+    window._handGlow = { h: sixDist(hFrac), m: sixDist(mFrac), s: sixDist(sFrac) };
+
     // Hour hand adaptive color + intensity (lerp ~2s at 60fps)
     const hMat = clockRays[0].mesh.children[0].material;
     const lRate = 0.025;
