@@ -578,8 +578,10 @@ var _qiblaExitCaustic = null;
         } else {
           col = mix(vec3(1.0, 0.5, 0.0), vec3(1.0, 0.15, 0.1), (t2-0.8) / 0.2);
         }
+        float a = disc * op;
+        if (a < 0.01) discard;
         float shimmer = 0.9 + 0.1 * sin(time * 1.5 + p.x * 12.0);
-        gl_FragColor = vec4(col * shimmer * 1.5, disc * op);
+        gl_FragColor = vec4(col * shimmer * 1.5, a);
       }
     `,
     transparent: true, blending: THREE.AdditiveBlending,
