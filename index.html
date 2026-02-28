@@ -394,7 +394,13 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-countdown .nav-time .nav-sec{opacity:.4;font-weight:400}
 /* Hide in compass mode */
 /* Header stays visible in all modes including compass */
-.fs-chrome-hidden .fs-city-block,.fs-chrome-hidden .fs-countdown{opacity:0!important;pointer-events:none}
+/* Tap-to-hide: all UI hidden in clock/compass */
+body.chrome-hidden .fs-city-block,
+body.chrome-hidden .fs-countdown,
+body.chrome-hidden .fs-header,
+body.chrome-hidden .mode-pill,
+body.chrome-hidden #fsVersionTag,
+body.chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 .fs-mode-toggle{display:none}
 /* Dial picker — hidden for single-clock mode, kept for future multi-dial */
 .fs-dial-picker{display:none}
@@ -826,10 +832,10 @@ function playDialSurah(){
 function setNightMode(on){ pageNight=true; }
 // Tap to toggle chrome visibility in fullscreen (click = tap without drag)
 document.addEventListener('click',function(e){
-  const fsClock=document.getElementById('clockFullscreen');
-  if(!fsClock||!fsClock.classList.contains('active'))return;
-  if(e.target.closest('button,a,.fs-dial-bar,.fs-dial-picker'))return;
-  fsClock.classList.toggle('fs-chrome-hidden');
+  // Only toggle chrome in clock or compass modes
+  if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
+  if(e.target.closest('button,a,.fs-dial-bar,.fs-dial-picker,.mode-pill'))return;
+  document.body.classList.toggle('chrome-hidden');
 });
 
 // ══════════════════════════════════════════
@@ -1840,6 +1846,7 @@ function switchMode(mode) {
   } else if(mode === 'info') {
     if(prev === 'compass' && fsCompassOn) _toggleCompassMode(false);
     closeClockFullscreen();
+    document.body.classList.remove('chrome-hidden');
     window.scrollTo(0, 0);
   }
 }
