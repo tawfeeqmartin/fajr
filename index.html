@@ -374,7 +374,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .clock-fs-close{display:none}
 .fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint,.fs-chrome-hidden #fsVersionTag{opacity:0!important;pointer-events:none}
 /* Compass mode: strip chrome except close button + mode toggle */
-.compass-active .fs-header,.compass-active .fs-dial-picker,.compass-active #fsTapHint,.compass-active #fsVersionTag{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
+.compass-active .fs-dial-picker,.compass-active #fsTapHint,.compass-active #fsVersionTag{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
 .fs-header .fs-datetime{font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em}
 .fs-header .fs-location{display:none}
@@ -398,8 +398,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-countdown .nav-time{font-size:clamp(1rem,3vw,1.3rem);font-weight:600;letter-spacing:.02em;color:rgba(232,228,220,.75);line-height:1.1;font-variant-numeric:tabular-nums}
 .fs-countdown .nav-time .nav-sec{opacity:.4;font-weight:400}
 /* Hide in compass mode */
-body.mode-compass .fs-city-block,body.mode-compass .fs-countdown,body.mode-compass .fs-header{opacity:0!important;pointer-events:none}
-.compass-active .fs-city-block,.compass-active .fs-countdown{opacity:0!important;pointer-events:none}
+/* Header stays visible in all modes including compass */
 .fs-chrome-hidden .fs-city-block,.fs-chrome-hidden .fs-countdown{opacity:0!important;pointer-events:none}
 .fs-mode-toggle{display:none}
 /* Dial picker — hidden for single-clock mode, kept for future multi-dial */
