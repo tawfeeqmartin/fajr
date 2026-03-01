@@ -311,6 +311,17 @@ function _makeMashrabiyaTexture() {
   // Composite blurred on top — depth crossfade complete
   ctx.drawImage(fadeCanvas, 0, 0);
 
+  // --- 4. Lateral edge fade: blur and fade the left/right sides ---
+  ctx.globalCompositeOperation = 'destination-in';
+  const sideGrad = ctx.createLinearGradient(0, 0, W, 0);
+  sideGrad.addColorStop(0, 'rgba(255,255,255,0)');
+  sideGrad.addColorStop(0.18, 'rgba(255,255,255,1)');
+  sideGrad.addColorStop(0.82, 'rgba(255,255,255,1)');
+  sideGrad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = sideGrad;
+  ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-over';
+
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = THREE.ClampToEdgeWrapping;  // horizontal: single tile
