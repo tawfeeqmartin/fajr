@@ -496,7 +496,7 @@ scene.add(godRayMesh);
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 20),  // v65: 1:2 aspect matches 1024×2048 mashrabiya panel
+  new THREE.PlaneGeometry(3.5, 7),  // v66: ~2x cube width, 1:2 aspect
   new THREE.MeshBasicMaterial({
     map: _mashrabiyaTex,
     color: new THREE.Color(0xff7020),
@@ -508,13 +508,13 @@ const archBloomMesh = new THREE.Mesh(
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archBloomMesh.position.set(-3.5, 0.019, 0);
+archBloomMesh.position.set(-1, 0.019, 1.2);
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
 // BASE STAMP — primary mashrabiya silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(8.5, 17),  // v65: 1:2 aspect matches 1024×2048 mashrabiya panel
+  new THREE.PlaneGeometry(3, 6),  // v66: ~2x cube width, 1:2 aspect
   new THREE.MeshBasicMaterial({
     map: _mashrabiyaTex,
     color: new THREE.Color(0xffd090),  // v60: golden hour warmth
@@ -526,7 +526,7 @@ const archFloorMesh = new THREE.Mesh(
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archFloorMesh.position.set(-3.5, 0.022, 0);
+archFloorMesh.position.set(-1, 0.022, 1.2);
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
