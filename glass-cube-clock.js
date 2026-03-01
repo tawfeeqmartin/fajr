@@ -176,7 +176,7 @@ function _makeArchTexture() {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
-  tex.rotation = -Math.PI * 0.35; // v15: rotate texture so arch tip projects toward upper-right (+X, -Z) on floor
+  tex.rotation = Math.PI * 0.75; // v17: 135° — arch tip projects toward upper-right (+X, -Z) from left-side gobo
   return tex;
 }
 
@@ -377,8 +377,8 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.04, // v12: 0.07→0.04 — less atmospheric wash so base stamp edge definition reads; halo not shape
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.12, 0); // v15: -22° — tip toward (+X, -Z) upper-right corner
-archBloomMesh.position.set(3, 0.019, -3); // v16: shift so pointed tip reaches ~(5, -5) upper-right corner
+archBloomMesh.rotation.set(-Math.PI / 2, Math.PI * 0.25, 0); // v17: 45° — long axis from lower-left to upper-right
+archBloomMesh.position.set(-0.5, 0.019, -1); // v17: centered on gobo target — light actually lands here
 archBloomMesh.renderOrder = 1; // below base stamp
 scene.add(archBloomMesh);
 
@@ -394,8 +394,8 @@ const archFloorMesh = new THREE.Mesh(
     opacity: 0.26,  // v10: 0.20→0.26 — compensates gobo 60→48 pull; arch floor pool reads at same warmth. Additive carries the shape now.
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.12, 0); // v15: matches bloom — tip toward upper-right
-archFloorMesh.position.set(3, 0.022, -3); // v16: matches bloom — tip at ~(5, -5) upper-right corner
+archFloorMesh.rotation.set(-Math.PI / 2, Math.PI * 0.25, 0); // v17: matches bloom — 45° diagonal upper-right
+archFloorMesh.position.set(-0.5, 0.022, -1); // v17: matches bloom — centered on gobo target
 archFloorMesh.renderOrder = 2; // above fog layers and bloom
 scene.add(archFloorMesh);
 
