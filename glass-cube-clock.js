@@ -163,12 +163,17 @@ function _makeArchTexture() {
   ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
   ctx.lineTo(cx + archW, baseY);
   ctx.closePath();
-  // v65: heavy blur — no hard edges, reads as diffused projected light
-  ctx.filter = 'blur(18px)';
+  // v67: extreme blur — no visible edges, pure diffused glow
+  ctx.filter = 'blur(40px)';
   ctx.fillStyle = '#e8e0d8';
   ctx.fill();
   ctx.filter = 'none';
-  // no edge stroke — blur carries the shape
+  // second pass: re-blur the entire canvas for ultra-soft falloff
+  const imgData = ctx.getImageData(0, 0, sz, sz);
+  ctx.putImageData(imgData, 0, 0);
+  ctx.filter = 'blur(24px)';
+  ctx.drawImage(c, 0, 0);
+  ctx.filter = 'none';
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
