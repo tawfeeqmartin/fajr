@@ -164,14 +164,16 @@ function _makeArchTexture() {
   ctx.fill();
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.center.set(0.5, 0.5);
+  tex.rotation = Math.PI * 0.75; // orient arch peak toward upper-right floor from camera POV
   return tex;
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xfff4d6, 45);
-gobo.position.set(-0.5, 16, 3.0);
-gobo.target.position.set(0, 0, 0);
-gobo.angle = 0.22;
+const gobo = new THREE.SpotLight(0xfff4d6, 20);
+gobo.position.set(-2.0, 16, 5.0);   // further from cube axis — shaft crosses diagonally, floor gets the pattern
+gobo.target.position.set(1.5, 0, -1.0); // upper-right floor from camera POV (+X, -Z)
+gobo.angle = 0.32;   // wider so arch legs read clearly on floor beyond cube
 gobo.penumbra = 0.0;
 gobo.decay = 1.5;
 gobo.castShadow = true;
