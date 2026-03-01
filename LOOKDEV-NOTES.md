@@ -170,6 +170,23 @@ Per artist description:
 
 **Key lesson:** Any light touching the dark frame zone (outside the arch, inside the cone) destroys the silhouette. Light purity in the cone footprint is non-negotiable. Audit ALL lights' reach into the gobo cone footprint — not just the gobo itself.
 
+### v6: Fix Light Leak + Force Arch Visible (current — client feedback v41)
+
+**CLIENT FEEDBACK (Tawfeeq, Feb 28 2026, agiftoftime.app):**
+- "I see a big light leak line artifact left of the cube"
+- "I still don't see the top of the arch and shape of arch on my phone"
+
+**ROOT CAUSE — Light Leak:**
+`godRayMesh` — a 0.55 × 13m vertical `PlaneGeometry` at (-0.6, 7.2, 3.1), rotation.y = PI×0.10 — was reading as a hard bright diagonal streak on mobile. Camera at (0.2, 9.7, 15) sees the plane nearly edge-on; its 13m height + warm white additive shader at opacity 0.14 produced a very visible glowing line to the upper-left of the cube. The "air-mass" volumetric concept doesn't translate to a billboard plane at this angle.
+- **Fix:** `godRayMesh.visible = false`. The shaft volume is now carried by the boosted gobo and arch floor stamp.
+
+**ROOT CAUSE — Arch Invisible:**
+PBR irradiance math: gobo (intensity 40, decay 1.5) at distance 16.6m delivers only `40 / 16.6^1.5 ≈ 0.59` — multiplied by cos(18°) × floor albedo 0x18182a (≈0.071) = **~0.04 diffuse contribution**. This is entirely buried under the additive spectral clock hand rays (AdditiveBlending, opacity 0.88–0.92). After AgX tonemapping, the arch pool was invisible.
+- **Fix A:** Gobo intensity 40→80, decay 1.5→1.0 → irradiance at floor now `80/16.6 × 0.953 ≈ 4.6`, floor contribution ≈ 0.33 — clearly above noise.
+- **Fix B:** Arch floor stamp — `MeshBasicMaterial` plane (9×9m) with arch texture, AdditiveBlending, opacity 0.45, warm gold (0xffe080). Bypasses PBR shading entirely: arch interior (white in texture) adds warm gold directly; black exterior contributes 0 (no pollution of dark frame). UV orientation verified: canvas flipY + rotation.x=-PI/2 → legs (canvas bottom) toward camera, tip (canvas top) away behind cube. Sacred arch read guaranteed on any phone.
+
+**Key lesson:** SpotLight.map gobo PBR irradiance on a very dark floor (albedo 0x071) cannot compete with AdditiveBlending floor effects unless intensity is extreme. Belt-and-suspenders: keep the gobo for realistic PBR shadow + light, but always back it with an additive stamp at the same target position.
+
 ### v4: Arch Silhouette Fix
 - **PRIMARY FIX:** archW reduced from `sz * 0.46` to `sz * 0.28` (56% canvas fill)
   - Old: arch nearly fills entire cone → edge reads as hard diagonal cone cutoff
@@ -191,7 +208,9 @@ Per artist description:
 | cubeSun at intensity 105 | FBO captures scene behind glass; without bright source there, dispersion is invisible |
 | FBO / RenderTarget for glass | No real-time raytracing; FBO + per-channel IOR offset produces convincing dispersion |
 | Warm gobo + cold counter | Deakins warm/cold split — depth without extra geometry |
-| godRay plane additive | Air-mass for shaft; additive so it never darkens the scene, only adds luminosity |
+| godRay plane additive | ~~Air-mass for shaft~~ RETIRED v6 — plane reads as hard diagonal streak when camera sees it edge-on |
+| Arch floor stamp (additive) | Belt-and-suspenders behind SpotLight.map gobo: MeshBasicMaterial + AdditiveBlending bypasses PBR irradiance math. Dark floor albedo (0x18182a) is too absorptive for gobo PBR alone to compete with additive spectral hands |
+| godRayMesh billboard | Don't use vertical PlaneGeometry for volumetric shafts — edge-on = artifact. Use horizontal layers or true billboarding instead |
 | Penumbra 0.05 on gobo | Crisp arch edge on floor; penumbra would soften the silhouette |
 
 ---

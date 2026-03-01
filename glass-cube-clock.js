@@ -170,12 +170,12 @@ function _makeArchTexture() {
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xfff4d6, 40);
+const gobo = new THREE.SpotLight(0xfff4d6, 80); // v6: 40→80 — 8× irradiance at floor (decay 1.5→1.0 kills falloff)
 gobo.position.set(-2.0, 16, 5.0);
 gobo.target.position.set(0.5, 0, 1.5); // foreground floor — arch fills the dead lower frame zone
 gobo.angle = 0.32;   // slightly wider — dark frame (44% of texture) projects around arch, silhouette readable
 gobo.penumbra = 0.05; // hair of softness at cone boundary, arch edge stays crisp
-gobo.decay = 1.5;
+gobo.decay = 1.0; // v6: 1.5→1.0 — less falloff over 16m throw, arch pool hits floor hard enough to read
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
 gobo.shadow.bias = -0.001;
@@ -332,7 +332,36 @@ const godRayMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 13), godRayMat);
 // Along beam midpoint: lerp((-2,16,5), (0.5,0,1.5), 0.55) ≈ (-0.6, 7.2, 3.1)
 godRayMesh.position.set(-0.6, 7.2, 3.1);
 godRayMesh.rotation.y = Math.PI * 0.10; // slight tilt toward camera, follows beam oblique
+// v6: DISABLED — this vertical plane reads as a hard diagonal "light leak" streak to the left of
+// the cube on mobile (camera sees it nearly edge-on; 13m tall × 0.55m wide at y≈7 = bright line).
+// The shaft air-mass concept is now carried by the arch floor stamp + boosted gobo instead.
+godRayMesh.visible = false;
 scene.add(godRayMesh);
+
+// ARCH FLOOR STAMP — additive overlay guarantees pointed arch reads on mobile.
+// SpotLight.map gobo irradiance on dark floor (albedo 0x18182a) is PBR-dim vs AdditiveBlending rays.
+// This stamp uses the same arch texture laid flat: additive blend, black areas contribute 0,
+// white arch interior adds warm amber directly. UV orientation with rotation.x=-PI/2 + canvas flipY:
+//   canvas bottom (legs, y≈0.99*sz) → UV V≈0 → world +Z (toward camera) ✓
+//   canvas top   (tip,  y≈0.04*sz) → UV V≈1 → world -Z (away, behind cube) ✓
+// Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
+const _archStampTex = _makeArchTexture();
+const archFloorMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(9, 9),
+  new THREE.MeshBasicMaterial({
+    map: _archStampTex,
+    color: new THREE.Color(0xffe080), // warm gold — contrasts against blue/violet spectral hands
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    opacity: 0.45,
+  })
+);
+archFloorMesh.rotation.x = -Math.PI / 2;
+archFloorMesh.position.set(0.5, 0.022, 1.5); // matches gobo target — arch sits on foreground floor
+archFloorMesh.renderOrder = 2; // above fog layers (y=0.017–0.018)
+scene.add(archFloorMesh);
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
