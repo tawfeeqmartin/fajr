@@ -180,6 +180,38 @@ function _makeArchTexture() {
   return tex;
 }
 
+// v21: edge-only arch outline — stroke with no fill, reads as silhouette boundary
+function _makeArchOutlineTexture() {
+  const sz = 1024;
+  const c = document.createElement('canvas');
+  c.width = sz; c.height = sz;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, sz, sz);
+  const cx = sz / 2;
+  const archW = sz * 0.202;
+  const baseY = sz * 0.62;
+  const springY = sz * 0.42;
+  const peakY = sz * 0.04;
+  ctx.beginPath();
+  ctx.moveTo(cx - archW, baseY);
+  ctx.lineTo(cx - archW, springY);
+  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
+  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
+  ctx.lineTo(cx + archW, baseY);
+  ctx.closePath();
+  // stroke only — no fill
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.center.set(0.5, 0.5);
+  tex.rotation = 0;
+  return tex;
+}
+
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
 const gobo = new THREE.SpotLight(0xffc870, 15); // v19: fill-only warmth from left, stamps are primary
 gobo.position.set(-6, 16, 3);
@@ -388,15 +420,35 @@ const archFloorMesh = new THREE.Mesh(
     map: _archStampTex,
     color: new THREE.Color(0xffaa40),
     transparent: true,
+    blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.45,  // v20: boosted from 0.26 — arch needs contrast to read against dark floor
+    opacity: 0.15,  // v21: low fill warmth — outline stamp carries silhouette
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.3); // v20: flip diagonal — tip toward upper-right
 archFloorMesh.position.set(3, 0.022, -3); // v20: shifted right & back so tip reaches upper-right corner
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
+
+// OUTLINE STAMP — v21: edge-only arch for silhouette definition
+const _archOutlineTex = _makeArchOutlineTexture();
+const archOutlineMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(10, 25),
+  new THREE.MeshBasicMaterial({
+    map: _archOutlineTex,
+    color: new THREE.Color(0xffcc66),
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    opacity: 0.35,
+  })
+);
+archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.3);
+archOutlineMesh.position.set(3, 0.024, -3);
+archOutlineMesh.renderOrder = 3;
+scene.add(archOutlineMesh);
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
