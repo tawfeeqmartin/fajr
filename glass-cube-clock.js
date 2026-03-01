@@ -142,7 +142,7 @@ scene.add(back, back.target);
 
 // Procedural Islamic arch gobo texture
 function _makeArchTexture() {
-  const sz = 512;
+  const sz = 1024; // v12: 512→1024 — double resolution, arch edges survive projection + bilinear filtering
   const c = document.createElement('canvas');
   c.width = sz; c.height = sz;
   const ctx = c.getContext('2d');
@@ -153,15 +153,26 @@ function _makeArchTexture() {
   const baseY = sz * 0.62;   // v9: legs clipped at 62% — bottom 38% of canvas is dark so arch feet never appear in frame
   const springY = sz * 0.42;
   const peakY = sz * 0.04;
+  // v12: sharper lancet/ogee — walls stay vertical longer, tip converges tighter.
+  // CP1 at wall-x with springY*0.55 (was 0.5) keeps sides straighter before the curve.
+  // CP2 at archW*0.06 (was 0.12) pulls tip control points closer to center → sharper point.
   ctx.beginPath();
   ctx.moveTo(cx - archW, baseY);
   ctx.lineTo(cx - archW, springY);
-  ctx.bezierCurveTo(cx - archW, springY * 0.5, cx - archW * 0.12, peakY + sz * 0.1, cx, peakY);
-  ctx.bezierCurveTo(cx + archW * 0.12, peakY + sz * 0.1, cx + archW, springY * 0.5, cx + archW, springY);
+  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
+  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
   ctx.lineTo(cx + archW, baseY);
   ctx.closePath();
-  ctx.fillStyle = '#fff';
+  // v12: fill slightly below pure white — creates contrast headroom for the edge stroke
+  ctx.fillStyle = '#e8e0d8';
   ctx.fill();
+  // v12: bright edge stroke — window frame light diffraction. 4px at 1024 = thin crisp
+  // boundary that survives additive blending + projection softening. The eye locks onto
+  // this bright contour and reads "pointed arch" instead of amorphous warm zone.
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
@@ -174,7 +185,7 @@ const gobo = new THREE.SpotLight(0xffc870, 48); // v10: 60→48 — less energy 
 gobo.position.set(6, 16, 3);            // v11: mirrored +X — light from right side, arch tip lands top-right of viewport
 gobo.target.position.set(0.5, 0, -1.0); // v11: mirrored X — arch lands on right side of mid-ground
 gobo.angle = 0.40;   // v11: 0.35→0.40 — wider cone for longer floor projection; base pushed off lower-left edge
-gobo.penumbra = 0.05; // hair of softness at cone boundary, arch edge stays crisp
+gobo.penumbra = 0.02; // v12: 0.05→0.02 — softness lives in the texture now, cone boundary razor-sharp
 gobo.decay = 1.0; // v6: 1.5→1.0 — less falloff over 16m throw, arch pool hits floor hard enough to read
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
@@ -363,7 +374,7 @@ const archBloomMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.07, // very dim — halo only, not structural shape
+    opacity: 0.04, // v12: 0.07→0.04 — less atmospheric wash so base stamp edge definition reads; halo not shape
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.22, 0); // v11: mirrored rotation — arch tip points back-right (top-right of viewport), legs exit lower-left

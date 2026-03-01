@@ -1,4 +1,4 @@
-# NEXT BRIEF — Chris lookdev handoff (v11)
+# NEXT BRIEF — Chris lookdev handoff (v12)
 
 ## What the scene looks like now
 - Oblique arch gobo from far right (+6, 16, 3) at -40° floor rotation
@@ -10,23 +10,37 @@
 - Three spectral clock hands (H/M/S) on floor, prayer window sectors active
 - Two-layer arch floor stamp (base + bloom), additive blending, warm amber
 - Dark scene (0x0d0d12), AgX tonemapping, sacred pool aesthetic
+- **Arch silhouette now reads as a crisp pointed lancet** — 1024px texture,
+  sharper ogee beziers, bright edge stroke, tighter gobo penumbra
 
-## What changed in v11
-1. **Arch mirrored to right side** — gobo position (-6,16,3) → (+6,16,3),
-   target (-0.5,0,-1) → (+0.5,0,-1). Arch tip now lands in top-right corner
-   of the viewport instead of upper-left. Client direction: "tip visible in
-   the TOP-RIGHT corner."
-2. **Longer projection** — base stamp 7×7 → 7×10, bloom stamp 9×9 → 9×13.
-   Stamps stretched in the tip-to-base axis so the base of the window light
-   exits the lower-left edge of the viewport. Gobo cone 0.35 → 0.40 to widen
-   the floor throw. Stamp centers shifted from Z=-1.0 to Z=-0.5 (toward
-   camera) so the base extends further off-screen.
-3. **15% narrower window** — arch texture width `archW` from `sz*0.28` to
-   `sz*0.238`. Shape is taller/narrower, more lancet-like.
-4. **Stamp rotations mirrored** — rotation.y from +0.22π to -0.22π on both
-   bloom and base stamps. Matches the gobo mirror so additive overlays align.
+## What changed in v12
+1. **Arch texture resolution doubled** — 512→1024. More pixels at the arch
+   boundary survive bilinear filtering and gobo projection softening. Edges
+   that were 1-2px of anti-aliased gradient are now 2-4px — enough to read
+   at distance.
+2. **Sharper lancet bezier geometry** — ogee control points tightened. CP1
+   `springY*0.5→0.55` keeps walls vertical longer before the curve starts.
+   CP2 `archW*0.12→0.06` pulls the near-tip control point to half the offset
+   from center, creating a true pointed/lancet convergence instead of a dome.
+3. **Edge glow stroke** — arch path now has a 4px #ffffff stroke over an
+   #e8e0d8 fill. The bright contour mimics light diffracting at the window
+   frame edge. Gives the eye a defined boundary to lock onto — the shape
+   reads as "pointed arch" instead of amorphous warm zone. The fill at ~91%
+   white creates contrast headroom so the stroke pops.
+4. **Gobo penumbra tightened** — 0.05→0.02. Softness now lives in the texture
+   content (fill/stroke luminance gradient), not the cone boundary. The
+   projected pool has a sharper falloff at the outer edge.
+5. **Bloom stamp pulled back** — opacity 0.07→0.04. The atmospheric halo was
+   washing over the base stamp's edge definition. At 0.04 it still reads as
+   warm corona but no longer softens the arch silhouette.
 
 ## What needs attention next
+- **Edge stroke thickness tuning**: 4px at 1024 = thin. If the edge still
+  reads soft on mobile (430px wide viewport), try 6px. If too crispy/CG,
+  drop to 3px or soften strokeStyle to #f0e8e0.
+- **Fill luminance balance**: #e8e0d8 fill vs #ffffff stroke. If the arch
+  interior looks muddy/grey through AgX tonemapping, raise fill toward #f0ece4.
+  If too uniform (stroke doesn't pop), lower toward #ddd8d0.
 - **Gobo/stamp registration**: the gobo irradiance pool and the additive stamps
   should overlap convincingly. If the gobo pool drifts from the stamp at the
   new angle, nudge `gobo.target` X/Z to align.
@@ -37,7 +51,8 @@
   now that gobo enters from the opposite side — different angle of incidence.
 - **Specular orbit**: `uSpecIntensity` at 2.8 with orbiting spec light can
   still flash the top face. Consider gating spec by `Nw.y` scrim if it flares.
-- **Mobile check**: no new shader cost; only geometry and position changes.
+- **Mobile check**: texture doubled to 1024 but still single-channel gobo —
+  no new shader cost, slight GPU memory increase (1MB→4MB).
 
 ## Client notes to carry forward
 - Tawfeeq wants arch tip in TOP-RIGHT corner — preserve the mirrored layout
