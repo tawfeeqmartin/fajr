@@ -2139,10 +2139,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── Nav pill dichroic glow — hands bleed light onto frosted glass ──
 (function(){
-  const pill = document.getElementById('modePill');
-  if(!pill) return;
+  let pill = null;
   function tickPill(){
     requestAnimationFrame(tickPill);
+    if(!pill) { pill = document.getElementById('modePill'); if(!pill) return; }
     const g = window._handGlow;
     if(!g) return;
     // Hand colors: hour=magenta, minute=blue, second=white
