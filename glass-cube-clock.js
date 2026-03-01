@@ -432,6 +432,67 @@ scene.add(archFloorMesh);
 
 // v65: outline stamp REMOVED — blur on fill texture carries the shape, no hard edges
 
+// ─── VOLUMETRIC LIGHT SHAFT ──────────────────────────────────────────────────
+// v66: visible beam through air — PlaneGeometry aligned from gobo source toward floor.
+// Custom ShaderMaterial: vertical falloff (bright at floor, fades toward source) +
+// horizontal Gaussian (bright center, soft edges) + subtle animated noise for dust.
+const _shaftMat = new THREE.ShaderMaterial({
+  transparent: true,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  side: THREE.DoubleSide,
+  uniforms: {
+    time: { value: 0 },
+    color: { value: new THREE.Color(0xffc870) },
+    op: { value: 0.07 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform float time;
+    uniform vec3 color;
+    uniform float op;
+    varying vec2 vUv;
+    // simple hash noise
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1,0)), f.x),
+                 mix(hash(i + vec2(0,1)), hash(i + vec2(1,1)), f.x), f.y);
+    }
+    void main() {
+      // horizontal: Gaussian bell (bright center, soft edges)
+      float hx = exp(-pow((vUv.x - 0.5) * 3.2, 2.0));
+      // vertical: brighter toward bottom (floor), fades toward top (source)
+      float vy = pow(1.0 - vUv.y, 1.5);
+      // dust motes — slow drift
+      float dust = noise(vUv * 8.0 + vec2(time * 0.15, time * 0.08));
+      dust = 0.7 + 0.3 * dust;
+      float a = hx * vy * dust * op;
+      gl_FragColor = vec4(color, a);
+    }
+  `
+});
+
+// Plane oriented to match the gobo→floor diagonal
+const shaftGeo = new THREE.PlaneGeometry(5, 16);
+const shaftMesh = new THREE.Mesh(shaftGeo, _shaftMat);
+// Position: midpoint between gobo (-6,16,3) and floor target (~-1.5,0,-0.5)
+shaftMesh.position.set(-3.8, 8, 1.2);
+// Rotate to align with beam angle — tilt back and diagonal
+shaftMesh.rotation.set(-0.15, -Math.PI * 0.2, 0.08);
+shaftMesh.renderOrder = 0;
+scene.add(shaftMesh);
+
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
 scene.add(prismGroup);
@@ -1231,6 +1292,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   fogLayerMat.uniforms.uTime.value = t;
   warmFogMat.uniforms.uTime.value = t;
   godRayMat.uniforms.uTime.value = t;
+  _shaftMat.uniforms.time.value = t;
 
   // Sync hands to real clock time
   const now = new Date();
