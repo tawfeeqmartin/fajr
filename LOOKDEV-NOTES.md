@@ -187,7 +187,38 @@ PBR irradiance math: gobo (intensity 40, decay 1.5) at distance 16.6m delivers o
 
 **Key lesson:** SpotLight.map gobo PBR irradiance on a very dark floor (albedo 0x071) cannot compete with AdditiveBlending floor effects unless intensity is extreme. Belt-and-suspenders: keep the gobo for realistic PBR shadow + light, but always back it with an additive stamp at the same target position.
 
-### v7: Tame the Floor Blob (current)
+### v8: Two-Layer Arch + Cube Glow (current)
+
+**V7 render diagnosis:**
+- Arch stamp shape reads correctly (v4/v6 progress intact) — silhouette is there.
+- **Problem A: arch interior reads grey-warm, not amber.** Stamp at opacity 0.14, color 0xffaa40 on a dark floor delivers ~(0.14, 0.093, 0.035) additive. PBR gobo adds ~0.20 irradiance. Combined arch interior is dim and desaturated — not "sacred pool," more "painted mark."
+- **Problem B: decal look.** Hard arch edge with low overall luminosity reads as a printed sticker, not projected light. Projected light has a luminous interior with atmospheric glow around it (Nasir al-Mulk: light scatters in the air around the pool).
+- **Problem C: cube cold and disconnected.** `uInternalGlow` at 0.14 is too subtle. The cube's Fresnel edges don't warm — cube reads cold/blue, visually severed from the warm arch below.
+
+**Fix A — Two-layer arch stamp:**
+- `archBloomMesh`: PlaneGeometry 9×9, same arch texture, color `0xff7020` deep orange-amber, opacity 0.07, renderOrder 1. This creates a wider, dimmer version of the same arch shape — atmospheric halo that bleeds beyond the hard stamp edge.
+- `archFloorMesh` (base stamp): 5×5 → **7×7**, opacity 0.14 → **0.20**. With saturated amber color, stacking gobo (0xffc870) + stamp (0xffaa40) stays warm not grey (both are saturated amber, not near-white — confirmed v7 lesson).
+- AdditiveBlending: black areas of BOTH layers contribute 0 → dark frame not contaminated by bloom.
+
+**Fix B — Gobo intensity: 50 → 60:**
+Floor irradiance now `60/16.6 × cos18° × albedo0.071 ≈ 0.24`. More PBR arch on the floor; dark frame shadow deepens proportionally (the arch silhouette contrast ratio holds).
+
+**Fix C — `uInternalGlow`: 0.14 → 0.24:**
+Cube shader: `glowCol = mix(amber, deepOrange, glowFresnel) × 0.24 × (0.2 + 0.8×glowFresnel^2.5)`. At grazing angles (where dichroic reads strongest), warm amber visibly catches the cube edges. Cube is now lit by the same warm shaft system as the arch — visual coherence restored.
+
+**Expected result:**
+- Sacred pool: warm amber interior with outer atmospheric corona, reads as glowing not stamped
+- Cube: warm amber Fresnel edges, dichroic iridescence on lit faces — tied to the arch
+- Deakins split: cube left-warm/right-cold contrast sharpens (more gobo hits cube left face)
+- Dark floor: flanks and mid-frame remain deep indigo — Tadao Ando principle holds
+
+**Two-layer arch math:**
+arch interior total contribution: gobo PBR ~0.24 + base stamp (0.20×0xffaa40) + bloom (0.07×0xff7020) ≈ warm amber at tonemapped luminance ~0.55 — visibly glowing, not blown.
+bloom "halo" region (between 7m and 9m footprints): bloom only at 0.07 = very soft ambient warmth around arch base = atmospheric scatter in Nasir al-Mulk sense.
+
+---
+
+### v7: Tame the Floor Blob
 
 **ROOT CAUSE — v6 overcook:** Two simultaneous contributions to the arch interior (PBR gobo at intensity 80 + additive stamp at opacity 0.45) stacked enough luminosity to saturate AgX tonemapping. The "warm gold" (0xffe080) + near-white gobo (0xfff4d6) averaged to a desaturated neutral grey — the arch interior read as a grey-white blob, not warm amber. The sacred darkness was gone. The dark frame was invisible because the whole floor zone was high-key.
 
@@ -236,7 +267,8 @@ PBR irradiance math: gobo (intensity 40, decay 1.5) at distance 16.6m delivers o
 | Arch floor stamp (additive) | Belt-and-suspenders behind SpotLight.map gobo: MeshBasicMaterial + AdditiveBlending bypasses PBR irradiance math. Dark floor albedo (0x18182a) is too absorptive for gobo PBR alone to compete with additive spectral hands |
 | godRayMesh billboard | Don't use vertical PlaneGeometry for volumetric shafts — edge-on = artifact. Use horizontal layers or true billboarding instead |
 | Stamp + gobo colour saturation | Near-white gobo + pale gold stamp = grey blob under AgX. Use saturated colours: gobo `0xffc870` candlelight + stamp `0xffaa40` deep amber. Same principle as Nasir al-Mulk glass — saturation must survive the optical mix |
-| Stamp opacity ceiling ~0.15 | Above ~0.20 the additive stamp stacks with PBR gobo to overwhelm AgX → neutral grey floor. Keep stamp as accent; gobo does the structural arch work |
+| Stamp opacity ceiling ~0.15 (near-white) | When gobo+stamp are BOTH near-white, above 0.15 → grey blob. With SATURATED amber on both, 0.20 base + 0.07 bloom is safe — the combined colour stays warm not neutral. Saturation is the unlock. |
+| Two-layer arch (base + bloom) | Base stamp (7×7, 0.20) = hard arch silhouette. Bloom (9×9, 0.07) = atmospheric halo beyond edges. Same arch texture for both; additive black = 0 so dark frame stays dark. Nasir al-Mulk principle: light scatters around the pool. |
 | Penumbra 0.05 on gobo | Crisp arch edge on floor; penumbra would soften the silhouette |
 
 ---

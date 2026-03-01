@@ -170,7 +170,7 @@ function _makeArchTexture() {
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xffc870, 50); // v7: 80→50 — less flood; candlelight amber (was near-white 0xfff4d6) pulls Deakins warm/cold apart
+const gobo = new THREE.SpotLight(0xffc870, 60); // v8: 50→60 — more floor irradiance; candlelight amber saturated enough to survive AgX as warm, not grey
 gobo.position.set(-2.0, 16, 5.0);
 gobo.target.position.set(0.5, 0, 1.5); // foreground floor — arch fills the dead lower frame zone
 gobo.angle = 0.32;   // slightly wider — dark frame (44% of texture) projects around arch, silhouette readable
@@ -345,9 +345,34 @@ scene.add(godRayMesh);
 //   canvas bottom (legs, y≈0.99*sz) → UV V≈0 → world +Z (toward camera) ✓
 //   canvas top   (tip,  y≈0.04*sz) → UV V≈1 → world -Z (away, behind cube) ✓
 // Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
+//
+// v8: TWO-LAYER arch — base stamp (7×7, 0.20) + bloom (9×9, 0.07).
+// Base = hard arch silhouette with enough opacity to read warm not grey.
+// Bloom = same arch shape, wider + dimmer, creates atmospheric halo around pool
+// (Nasir al-Mulk stained glass: light scatters into the air around the pool).
+// AdditiveBlending: black areas of texture contribute 0 in both layers — dark frame uncontaminated.
 const _archStampTex = _makeArchTexture();
+
+// BLOOM UNDERLAYER — wider, dimmer, same arch shape; atmospheric warmth corona
+const archBloomMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(9, 9),
+  new THREE.MeshBasicMaterial({
+    map: _archStampTex,
+    color: new THREE.Color(0xff7020), // deep orange-amber; wider spread reads as warm atmospheric halo
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    opacity: 0.07, // very dim — halo only, not structural shape
+  })
+);
+archBloomMesh.rotation.x = -Math.PI / 2;
+archBloomMesh.position.set(0.5, 0.019, 1.5); // same target, just below base stamp
+archBloomMesh.renderOrder = 1; // below base stamp
+scene.add(archBloomMesh);
+
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(5, 5),
+  new THREE.PlaneGeometry(7, 7),
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40), // v7: deeper amber (was 0xffe080 pale gold — desaturated to grey under AgX). Saturated amber survives tonemapping as warm vs neutral.
@@ -355,12 +380,12 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.14,  // v7: 0.45→0.14 — stamp was blowing out the entire floor. Accent only; PBR gobo carries the shape.
+    opacity: 0.20,  // v8: 0.14→0.20 — with saturated amber color, stacking with gobo (0xffc870) stays warm not grey. Sacred pool needs to glow.
   })
 );
 archFloorMesh.rotation.x = -Math.PI / 2;
 archFloorMesh.position.set(0.5, 0.022, 1.5); // matches gobo target — arch sits on foreground floor
-archFloorMesh.renderOrder = 2; // above fog layers (y=0.017–0.018)
+archFloorMesh.renderOrder = 2; // above fog layers and bloom
 scene.add(archFloorMesh);
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
@@ -475,7 +500,7 @@ const cubeMat = new THREE.ShaderMaterial({
     uSpecLightPos: { value: new THREE.Vector3(0, 3.5, -3) },
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 2.8 },
-    uInternalGlow:  { value: 0.14 }, // trapped sacred warmth — glows at Fresnel edges
+    uInternalGlow:  { value: 0.24 }, // v8: 0.14→0.24 — cube Fresnel edges glow warm amber, ties cube visually to arch below. glowFresnel ^ 2.5 concentrates warmth at edge grazes where dichroic reads.
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
