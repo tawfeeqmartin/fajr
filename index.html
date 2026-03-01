@@ -217,10 +217,10 @@ body::after{display:none;
   left:50%;transform:translateX(-50%);z-index:950;
   display:flex;align-items:center;justify-content:center;gap:0;
   width:232px;height:56px;
-  background:rgba(18,18,22,0.75);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border:1px solid rgba(232,228,220,.08);border-radius:999px;
-  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  background:rgba(18,18,22,0.35);
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(232,228,220,.1);border-radius:999px;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
 }
 .mode-pill-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
@@ -2137,40 +2137,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if(typeof openClockFullscreen === 'function') openClockFullscreen();
 });
 
-// ── Nav pill dichroic glow — hands bleed light onto frosted glass ──
-(function(){
-  let pill = null;
-  function tickPill(){
-    requestAnimationFrame(tickPill);
-    if(!pill) { pill = document.getElementById('modePill'); if(!pill) return; }
-    const g = window._handGlow;
-    if(!g) return;
-    // Hand colors: hour=magenta, minute=blue, second=white
-    const hr = g.h * 0.6, mr = g.m * 0.45, sr = g.s * 0.35;
-    // Prayer beam contribution
-    var pr=0,pgn=0,pb=0,pi=0;
-    if(g.p > 0.01 && g.pc1){
-      pi = g.p * 0.7;
-      var c1 = g.pc1;
-      pr = ((c1>>16)&255); pgn = ((c1>>8)&255); pb = (c1&255);
-    }
-    const r = Math.min(255, Math.round(153*hr + 17*mr + 255*sr + pr*pi));
-    const gn = Math.min(255, Math.round(0*hr + 51*mr + 255*sr + pgn*pi));
-    const b = Math.min(255, Math.round(255*hr + 255*mr + 255*sr + pb*pi));
-    const total = hr + mr + sr + pi;
-    if(total < 0.01){
-      pill.style.borderColor = 'rgba(232,228,220,.08)';
-      pill.style.boxShadow = '0 8px 32px rgba(0,0,0,.5)';
-      pill.style.background = 'rgba(18,18,22,0.75)';
-      return;
-    }
-    const a = Math.min(total * 0.6, 0.55);
-    pill.style.borderColor = 'rgba('+r+','+gn+','+b+','+a.toFixed(3)+')';
-    pill.style.boxShadow = '0 8px 32px rgba(0,0,0,.5), 0 0 '+(16+total*28).toFixed(0)+'px rgba('+r+','+gn+','+b+','+(a*0.6).toFixed(3)+')';
-    pill.style.background = 'rgba('+Math.round(r*0.15)+','+Math.round(gn*0.15)+','+Math.round(b*0.15)+','+(0.75+total*0.08).toFixed(3)+')';
-  }
-  requestAnimationFrame(tickPill);
-})();
+// ── Nav pill dichroic glow — DISABLED, keeping code for future use ──
+// (function(){ ... tickPill ... })();
 
 function openClockFullscreen() {
   // Fullscreen tap is a user gesture — request gyro permission (iOS)
