@@ -391,13 +391,13 @@ scene.add(godRayMesh);
 //
 // v20: stamps are PRIMARY arch shape. Gobo is fill only.
 // PlaneGeometry +Y = arch tip direction. rotation.x = -PI/2 lays flat on floor.
-// rotation.z = -PI*0.3 flips diagonal so tip points upper-right (+X, -Z on screen).
+// rotation.z = -PI*0.25 flips diagonal so tip points upper-right (+X, -Z on screen).
 // Using map (not alphaMap) with transparent:true preserves edge stroke detail.
 const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(12, 30),  // wide bloom halo
+  new THREE.PlaneGeometry(18, 45),  // wide bloom halo (1.5x scaled)
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xff7020),
@@ -408,14 +408,14 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.04,
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.3); // v20: flip diagonal — tip toward upper-right
-archBloomMesh.position.set(3, 0.019, -3); // v20: shifted right & back so tip reaches upper-right corner
+archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.25); // v20: flip diagonal — tip toward upper-right
+archBloomMesh.position.set(4, 0.019, -4); // v20: shifted right & back so tip reaches upper-right corner
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
 // BASE STAMP — primary arch silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 25),  // narrow lancet — 10 wide, 25 long
+  new THREE.PlaneGeometry(15, 37.5),  // narrow lancet — 15 wide, 37.5 long (1.5x)
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40),
@@ -426,15 +426,15 @@ const archFloorMesh = new THREE.Mesh(
     opacity: 0.15,  // v21: low fill warmth — outline stamp carries silhouette
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.3); // v20: flip diagonal — tip toward upper-right
-archFloorMesh.position.set(3, 0.022, -3); // v20: shifted right & back so tip reaches upper-right corner
+archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.25); // v20: flip diagonal — tip toward upper-right
+archFloorMesh.position.set(4, 0.022, -4); // v20: shifted right & back so tip reaches upper-right corner
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
 // OUTLINE STAMP — v21: edge-only arch for silhouette definition
 const _archOutlineTex = _makeArchOutlineTexture();
 const archOutlineMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 25),
+  new THREE.PlaneGeometry(15, 37.5),
   new THREE.MeshBasicMaterial({
     map: _archOutlineTex,
     color: new THREE.Color(0xffcc66),
@@ -445,8 +445,8 @@ const archOutlineMesh = new THREE.Mesh(
     opacity: 0.35,
   })
 );
-archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.3);
-archOutlineMesh.position.set(3, 0.024, -3);
+archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.25);
+archOutlineMesh.position.set(4, 0.024, -4);
 archOutlineMesh.renderOrder = 3;
 scene.add(archOutlineMesh);
 
