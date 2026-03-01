@@ -268,7 +268,7 @@ function _makeMashrabiyaTexture() {
   }
 
   // --- 1. Draw CRISP lattice (slight AA softness) ---
-  ctx.filter = 'blur(3px)';
+  ctx.filter = 'blur(5px)';
   drawLattice(ctx);
   ctx.filter = 'none';
 
@@ -280,7 +280,7 @@ function _makeMashrabiyaTexture() {
   const bCtx = blurCanvas.getContext('2d');
   bCtx.fillStyle = '#ffffff';
   bCtx.fillRect(0, 0, W, H);
-  bCtx.filter = 'blur(28px)';
+  bCtx.filter = 'blur(36px)';
   drawLattice(bCtx);
   bCtx.filter = 'none';
 
@@ -511,7 +511,7 @@ const archBloomMesh = new THREE.Mesh(
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archBloomMesh.position.set(-1, 0.019, 1.0);
+archBloomMesh.position.set(-1, 0.019, -2.0);
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
@@ -525,11 +525,11 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.14,
+    opacity: 0.09,
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archFloorMesh.position.set(-1, 0.022, 1.0);
+archFloorMesh.position.set(-1, 0.022, -2.0);
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
