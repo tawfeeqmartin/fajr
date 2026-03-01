@@ -164,21 +164,55 @@ function _makeMashrabiyaTexture() {
   const cellY = S / ROWS;
   const R = 130;
 
-  ctx.filter = 'blur(2px)';
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 3;
-
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      const cx = (col + 0.5) * cellX;
-      const cy = (row + 0.5) * cellY;
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.stroke();
+  function drawCircles(context) {
+    context.strokeStyle = '#ffffff';
+    context.lineWidth = 3;
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const cx = (col + 0.5) * cellX;
+        const cy = (row + 0.5) * cellY;
+        context.beginPath();
+        context.arc(cx, cy, R, 0, Math.PI * 2);
+        context.stroke();
+      }
     }
   }
 
+  // --- 1. Draw CRISP circles (slight AA blur) ---
+  ctx.filter = 'blur(2px)';
+  drawCircles(ctx);
   ctx.filter = 'none';
+
+  // --- Gradient blur: crisp near (bottom), soft far (top) — depth-of-field ---
+
+  // --- 2. Draw BLURRED circles on temp canvas ---
+  const blurCanvas = document.createElement('canvas');
+  blurCanvas.width = S; blurCanvas.height = S;
+  const bCtx = blurCanvas.getContext('2d');
+  bCtx.filter = 'blur(7px)';
+  drawCircles(bCtx);
+  bCtx.filter = 'none';
+
+  // --- 3. Mask blurred canvas: opaque at top, transparent at bottom ---
+  bCtx.globalCompositeOperation = 'destination-in';
+  const depthGrad = bCtx.createLinearGradient(0, 0, 0, S);
+  depthGrad.addColorStop(0, 'rgba(255,255,255,1)');   // top: keep blurred
+  depthGrad.addColorStop(1, 'rgba(255,255,255,0)');   // bottom: discard
+  bCtx.fillStyle = depthGrad;
+  bCtx.fillRect(0, 0, S, S);
+  bCtx.globalCompositeOperation = 'source-over';
+
+  // --- 4. Erase crisp where blur takes over ---
+  ctx.globalCompositeOperation = 'destination-out';
+  const eraseGrad = ctx.createLinearGradient(0, 0, 0, S);
+  eraseGrad.addColorStop(0, 'rgba(0,0,0,1)');         // top: erase crisp
+  eraseGrad.addColorStop(1, 'rgba(0,0,0,0)');         // bottom: keep crisp
+  ctx.fillStyle = eraseGrad;
+  ctx.fillRect(0, 0, S, S);
+  ctx.globalCompositeOperation = 'source-over';
+
+  // --- 5. Composite blurred on top — depth crossfade ---
+  ctx.drawImage(blurCanvas, 0, 0);
 
   // Radial vignette — fade edges to transparent
   const grad = ctx.createRadialGradient(S/2, S/2, S * 0.15, S/2, S/2, S * 0.52);
