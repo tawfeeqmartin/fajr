@@ -40,7 +40,7 @@ let dpr = calcDpr(W, H);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.toneMapping = THREE.AgXToneMapping;
-renderer.toneMappingExposure = 0.95; // v57: 1.25→0.95 — darken outside arch, dramatic contrast with bright interior
+renderer.toneMappingExposure = 0.88; // Chris: darker stage, sacred contrast
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
@@ -268,7 +268,7 @@ function _makeMashrabiyaTexture() {
   }
 
   // --- 1. Draw CRISP lattice (slight AA softness) ---
-  ctx.filter = 'blur(1px)';
+  ctx.filter = 'blur(0.5px)'; // Chris: near end ultra-crisp
   drawLattice(ctx);
   ctx.filter = 'none';
 
@@ -280,7 +280,7 @@ function _makeMashrabiyaTexture() {
   const bCtx = blurCanvas.getContext('2d');
   bCtx.fillStyle = '#ffffff';
   bCtx.fillRect(0, 0, W, H);
-  bCtx.filter = 'blur(8px)';
+  bCtx.filter = 'blur(14px)'; // Chris: far end much softer — oblique diffusion
   drawLattice(bCtx);
   bCtx.filter = 'none';
 
@@ -291,8 +291,9 @@ function _makeMashrabiyaTexture() {
   fCtx.drawImage(blurCanvas, 0, 0);
   fCtx.globalCompositeOperation = 'destination-in';
   const depthGrad = fCtx.createLinearGradient(0, 0, 0, H);
-  depthGrad.addColorStop(0, 'rgba(255,255,255,1)');   // top: keep blurred
-  depthGrad.addColorStop(1, 'rgba(255,255,255,0)');   // bottom: discard blurred
+  depthGrad.addColorStop(0, 'rgba(255,255,255,1)');   // top: fully blurred
+  depthGrad.addColorStop(0.7, 'rgba(255,255,255,0.3)'); // Chris: blur still present at 70%
+  depthGrad.addColorStop(1, 'rgba(255,255,255,0)');   // bottom: fully crisp
   fCtx.fillStyle = depthGrad;
   fCtx.fillRect(0, 0, W, H);
   fCtx.globalCompositeOperation = 'source-over';
@@ -300,8 +301,9 @@ function _makeMashrabiyaTexture() {
   // Erase crisp where blur takes over
   ctx.globalCompositeOperation = 'destination-out';
   const eraseGrad = ctx.createLinearGradient(0, 0, 0, H);
-  eraseGrad.addColorStop(0, 'rgba(0,0,0,1)');         // top: erase crisp
-  eraseGrad.addColorStop(1, 'rgba(0,0,0,0)');         // bottom: keep crisp
+  eraseGrad.addColorStop(0, 'rgba(0,0,0,1)');         // top: fully erase crisp
+  eraseGrad.addColorStop(0.6, 'rgba(0,0,0,0.15)');    // Chris: start keeping crisp earlier
+  eraseGrad.addColorStop(1, 'rgba(0,0,0,0)');         // bottom: fully crisp
   ctx.fillStyle = eraseGrad;
   ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = 'source-over';
@@ -311,21 +313,22 @@ function _makeMashrabiyaTexture() {
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.wrapS = THREE.ClampToEdgeWrapping;
-  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.wrapS = THREE.ClampToEdgeWrapping;  // horizontal: single tile
+  tex.wrapT = THREE.RepeatWrapping; // Chris: tile vertically along long axis
   tex.minFilter = THREE.LinearMipmapLinearFilter;
   tex.magFilter = THREE.LinearFilter;
+  tex.repeat.set(1, 4); // Chris: 4 rosette repeats along tiled stamp length
   return tex;
 }
 const _mashrabiyaTex = _makeMashrabiyaTexture();
 const _mashrabiyaGobo = _makeMashrabiyaTexture();
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffc870, 10); // v62: 8→10 — stronger gobo for readable star pattern
+const gobo = new THREE.SpotLight(0xffd898, 12); // Chris: warmer amber, stronger sacred shaft
 gobo.position.set(-6, 16, 3);
 gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
-gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
-gobo.penumbra = 0.6;  // v19: soft edge — fill, not hero
+gobo.angle = 0.55;    // Chris: wider cone for tiled pattern coverage
+gobo.penumbra = 0.7;  // Chris: softer penumbra, more ethereal
 gobo.decay = 1.0;
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
@@ -496,37 +499,37 @@ scene.add(godRayMesh);
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(3.5, 7),  // v66: ~2x cube width, 1:2 aspect
+  new THREE.PlaneGeometry(3.5, 28),  // Chris: 4x taller for tiled rosette coverage
   new THREE.MeshBasicMaterial({
     map: _mashrabiyaTex,
-    color: new THREE.Color(0xff7020),
+    color: new THREE.Color(0xffaa50), // Chris: warmer bloom — amber not orange
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.10,  // v58: bloom halo through lattice openings
+    opacity: 0.08,  // Chris: subtler bloom, more atmospheric
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archBloomMesh.position.set(-1, 0.019, 1.2);
+archBloomMesh.position.set(-1, 0.019, 2.0); // Chris: shifted down-screen under bottom half of cube
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
 // BASE STAMP — primary mashrabiya silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(3, 6),  // v66: ~2x cube width, 1:2 aspect
+  new THREE.PlaneGeometry(3, 24),  // Chris: 4x taller for tiled rosette coverage
   new THREE.MeshBasicMaterial({
     map: _mashrabiyaTex,
-    color: new THREE.Color(0xffd090),  // v60: golden hour warmth
+    color: new THREE.Color(0xffe0a8),  // Chris: pale gold, like late afternoon through mashrabiya stone
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.45,  // v62: stronger presence — pattern reads clearly
+    opacity: 0.40,  // Chris: slightly softer base, let bloom breathe
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archFloorMesh.position.set(-1, 0.022, 1.2);
+archFloorMesh.position.set(-1, 0.022, 2.0); // Chris: shifted down-screen under bottom half of cube
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
