@@ -181,10 +181,10 @@ function _makeArchTexture() {
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xffc870, 48); // v10: 60→48 — less energy through cube top face; floor arch compensated by stamp opacity boost
+const gobo = new THREE.SpotLight(0xffc870, 32); // v14: 48→32 — wider cone spreads energy over huge area, pull intensity to avoid blowout
 gobo.position.set(-6, 16, 3);            // v13: light from LEFT — SpotLight.map "up" projects toward +X, so arch tip lands top-RIGHT of viewport
 gobo.target.position.set(-0.5, 0, -1.0); // v13: beam toward left-center floor; arch sweeps from lower-left (base) to upper-right (tip)
-gobo.angle = 0.40;   // v11: 0.35→0.40 — wider cone for longer floor projection; base pushed off lower-left edge
+gobo.angle = 0.60;   // v14: 0.40→0.60 — massive cone, arch pool spans entire viewport diagonal
 gobo.penumbra = 0.02; // v12: 0.05→0.02 — softness lives in the texture now, cone boundary razor-sharp
 gobo.decay = 1.0; // v6: 1.5→1.0 — less falloff over 16m throw, arch pool hits floor hard enough to read
 gobo.castShadow = true;
@@ -366,7 +366,7 @@ const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, same arch shape; atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(9, 13),  // v11: 9×9→9×13 — stretched in projection direction, base exits viewport
+  new THREE.PlaneGeometry(18, 24),  // v14: 9×13→18×24 — massive bloom spans full viewport diagonal
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xff7020), // deep orange-amber; wider spread reads as warm atmospheric halo
@@ -377,13 +377,13 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.04, // v12: 0.07→0.04 — less atmospheric wash so base stamp edge definition reads; halo not shape
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.28, 0); // v13: ~50° from -Z toward +X — aligns with gobo beam direction (from -6,16,3 toward -0.5,0,-1 ≈ 54°)
-archBloomMesh.position.set(-0.5, 0.019, -1.0); // v13: stamp center under gobo target — tip extends to upper-right, base exits lower-left
+archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.35, 0); // v14: ~63° steeper diagonal — arch spans bottom-left to upper-right corner
+archBloomMesh.position.set(0, 0.019, -0.5); // v14: centered on viewport — arch frames entire scene
 archBloomMesh.renderOrder = 1; // below base stamp
 scene.add(archBloomMesh);
 
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(7, 10),  // v11: 7×7→7×10 — longer projection, base pushed off viewport
+  new THREE.PlaneGeometry(14, 18),  // v14: 7×10→14×18 — massive arch stamp frames entire scene
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40), // v7: deeper amber (was 0xffe080 pale gold — desaturated to grey under AgX). Saturated amber survives tonemapping as warm vs neutral.
@@ -394,8 +394,8 @@ const archFloorMesh = new THREE.Mesh(
     opacity: 0.26,  // v10: 0.20→0.26 — compensates gobo 60→48 pull; arch floor pool reads at same warmth. Additive carries the shape now.
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.28, 0); // v13: matches bloom — ~50° aligns with gobo beam
-archFloorMesh.position.set(-0.5, 0.022, -1.0); // v13: matches bloom center — tip upper-right, base exits lower-left
+archFloorMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.35, 0); // v14: matches bloom — steeper diagonal bottom-left to upper-right
+archFloorMesh.position.set(0, 0.022, -0.5); // v14: centered — matches bloom, arch frames entire scene
 archFloorMesh.renderOrder = 2; // above fog layers and bloom
 scene.add(archFloorMesh);
 
