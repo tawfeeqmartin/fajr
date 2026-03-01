@@ -268,7 +268,7 @@ function _makeMashrabiyaTexture() {
   }
 
   // --- 1. Draw CRISP lattice (slight AA softness) ---
-  ctx.filter = 'blur(1.5px)'; // Chris: near end ultra-crisp
+  ctx.filter = 'blur(3px)';
   drawLattice(ctx);
   ctx.filter = 'none';
 
@@ -280,7 +280,7 @@ function _makeMashrabiyaTexture() {
   const bCtx = blurCanvas.getContext('2d');
   bCtx.fillStyle = '#ffffff';
   bCtx.fillRect(0, 0, W, H);
-  bCtx.filter = 'blur(20px)'; // Chris: far end much softer — oblique diffusion
+  bCtx.filter = 'blur(28px)';
   drawLattice(bCtx);
   bCtx.filter = 'none';
 
@@ -511,7 +511,7 @@ const archBloomMesh = new THREE.Mesh(
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archBloomMesh.position.set(-1, 0.019, 2.0); // Chris: shifted down-screen under bottom half of cube
+archBloomMesh.position.set(-1, 0.019, 1.0);
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
@@ -525,11 +525,11 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.22,  // Chris: subtle like faint light through stone
+    opacity: 0.14,
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archFloorMesh.position.set(-1, 0.022, 2.0); // Chris: shifted down-screen under bottom half of cube
+archFloorMesh.position.set(-1, 0.022, 1.0);
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
