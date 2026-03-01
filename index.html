@@ -513,7 +513,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .clock-fs-close{display:none}
 .fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint,.fs-chrome-hidden #fsVersionTag{opacity:0!important;pointer-events:none}
 /* Compass mode: strip chrome except close button + mode toggle */
-.compass-active .fs-dial-picker,.compass-active #fsTapHint,.compass-active #fsVersionTag{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
+.compass-active .fs-dial-picker,.compass-active #fsTapHint{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
 .fs-header .fs-datetime{font-size:clamp(.65rem,1.4vmin,1.4rem);font-weight:300;letter-spacing:.06em}
 .fs-header .fs-location{display:none}
@@ -543,7 +543,7 @@ body.chrome-hidden .fs-city-block,
 body.chrome-hidden .fs-countdown,
 body.chrome-hidden .fs-header,
 body.chrome-hidden .mode-pill,
-body.chrome-hidden #fsVersionTag,
+/* body.chrome-hidden #fsVersionTag — kept visible during dev */
 body.chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 .fs-mode-toggle{display:none}
 /* Dial picker — hidden for single-clock mode, kept for future multi-dial */
