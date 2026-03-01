@@ -156,73 +156,28 @@ function _makeMashrabiyaTexture() {
   // Clear to fully transparent
   ctx.clearRect(0, 0, S, S);
 
-  // --- Stars-only approach ---
-  // Only the star openings as soft glowing shapes — no connecting lines.
-  // Light coming through holes in a screen: you see the openings (bright),
-  // not the lattice (dark/invisible).
-
-  // Draw onto temp canvas, then blur heavily for soft pools of light
-  const tmp = document.createElement('canvas');
-  tmp.width = S; tmp.height = S;
-  const tc = tmp.getContext('2d');
-  tc.clearRect(0, 0, S, S);
-
-  // {8/3} star polygon — 8 points alternating outer/inner radius, filled white
-  function drawStar(cx, cy, outerR) {
-    const innerR = outerR * 0.38;
-    tc.beginPath();
-    for (let i = 0; i < 16; i++) {
-      const angle = (i / 16) * Math.PI * 2 - Math.PI / 2;
-      const r = (i % 2 === 0) ? outerR : innerR;
-      const x = cx + Math.cos(angle) * r;
-      const y = cy + Math.sin(angle) * r;
-      if (i === 0) tc.moveTo(x, y); else tc.lineTo(x, y);
-    }
-    tc.closePath();
-    tc.fill();
-  }
-
-  // 2 columns × 4 rows grid of stars
-  const COLS = 2;
-  const ROWS = 4;
+  // Classical Islamic construction: overlapping circles whose intersections
+  // naturally create star-and-petal (vesica piscis) patterns — no polygons needed.
+  const COLS = 3;
+  const ROWS = 5;
   const cellX = S / COLS;
   const cellY = S / ROWS;
-  const starR = 150;
+  const R = 130;
 
-  tc.fillStyle = '#ffffff';
+  ctx.filter = 'blur(2px)';
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
 
-  // Collect star centers for connecting lines
-  const centers = [];
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       const cx = (col + 0.5) * cellX;
       const cy = (row + 0.5) * cellY;
-      centers.push({x: cx, y: cy});
-      drawStar(cx, cy, starR);
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.stroke();
     }
   }
 
-  // Thin connecting lines between adjacent star centers — geometric structure
-  tc.strokeStyle = 'rgba(255,255,255,0.3)';
-  tc.lineWidth = 1;
-  for (let i = 0; i < centers.length; i++) {
-    for (let j = i + 1; j < centers.length; j++) {
-      const dx = centers[i].x - centers[j].x;
-      const dy = centers[i].y - centers[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      // Connect only adjacent stars (within ~1.2 cell diagonals)
-      if (dist < Math.max(cellX, cellY) * 1.2) {
-        tc.beginPath();
-        tc.moveTo(centers[i].x, centers[i].y);
-        tc.lineTo(centers[j].x, centers[j].y);
-        tc.stroke();
-      }
-    }
-  }
-
-  // Moderate blur — crisp enough for stars, soft enough for light
-  ctx.filter = 'blur(3px)';
-  ctx.drawImage(tmp, 0, 0);
   ctx.filter = 'none';
 
   // Radial vignette — fade edges to transparent
@@ -243,7 +198,6 @@ function _makeMashrabiyaTexture() {
   tex.magFilter = THREE.LinearFilter;
   return tex;
 }
-
 const _mashrabiyaTex = _makeMashrabiyaTexture();
 const _mashrabiyaGobo = _makeMashrabiyaTexture();
 
