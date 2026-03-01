@@ -511,7 +511,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 /* canvas no longer lives inside overlay — it's fixed in body */
 /* Fullscreen chrome — scales with viewport via clamp() */
 .clock-fs-close{display:none}
-.fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint,.fs-chrome-hidden #fsVersionTag{opacity:0!important;pointer-events:none}
+.fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none}
 /* Compass mode: strip chrome except close button + mode toggle */
 .compass-active .fs-dial-picker,.compass-active #fsTapHint{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .5s ease}
