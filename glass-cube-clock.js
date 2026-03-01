@@ -176,23 +176,23 @@ function _makeArchTexture() {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
-  tex.rotation = -Math.PI * 0.25; // v18: flip arch tip to right side (PI*0.75 - PI)
+  tex.rotation = 0; // v19: no texture rotation — plane mesh orientation handles diagonal
   return tex;
 }
 
-// SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xffc870, 32); // v14: 48→32 — wider cone spreads energy over huge area, pull intensity to avoid blowout
-gobo.position.set(-6, 16, 3);            // v13: light from LEFT — SpotLight.map "up" projects toward +X, so arch tip lands top-RIGHT of viewport
-gobo.target.position.set(-0.5, 0, -1.0); // v13: beam toward left-center floor; arch sweeps from lower-left (base) to upper-right (tip)
-gobo.angle = 0.25;   // v16: 0.60→0.25 — narrow lancet beam, not floodlight
-gobo.penumbra = 0.02; // v12: 0.05→0.02 — softness lives in the texture now, cone boundary razor-sharp
-gobo.decay = 1.0; // v6: 1.5→1.0 — less falloff over 16m throw, arch pool hits floor hard enough to read
+// SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
+const gobo = new THREE.SpotLight(0xffc870, 15); // v19: fill-only warmth from left, stamps are primary
+gobo.position.set(-6, 16, 3);
+gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
+gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
+gobo.penumbra = 0.6;  // v19: soft edge — fill, not hero
+gobo.decay = 1.0;
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
 gobo.shadow.bias = -0.001;
 gobo.shadow.camera.near = 1;
 gobo.shadow.camera.far = 25;
-gobo.map = _makeArchTexture();
+gobo.map = null;       // v19: no gobo texture — stamps handle arch shape
 scene.add(gobo, gobo.target);
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
@@ -357,46 +357,45 @@ scene.add(godRayMesh);
 //   canvas top   (tip,  y≈0.04*sz) → UV V≈1 → world -Z (away, behind cube) ✓
 // Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
 //
-// v8: TWO-LAYER arch — base stamp (7×7, 0.20) + bloom (9×9, 0.07).
-// Base = hard arch silhouette with enough opacity to read warm not grey.
-// Bloom = same arch shape, wider + dimmer, creates atmospheric halo around pool
-// (Nasir al-Mulk stained glass: light scatters into the air around the pool).
-// AdditiveBlending: black areas of texture contribute 0 in both layers — dark frame uncontaminated.
+// v19: FRESH APPROACH — stamps are the PRIMARY arch shape. Gobo is fill only.
+// PlaneGeometry +Y = arch tip direction. rotation.x = -PI/2 lays flat on floor.
+// rotation.z = PI*0.3 (~54°) swings tip toward +X,-Z = upper-right on screen.
 const _archStampTex = _makeArchTexture();
 
-// BLOOM UNDERLAYER — wider, dimmer, same arch shape; atmospheric warmth corona
+// BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 28),  // v16: 18×24→10×28 — narrow elongated lancet bloom
+  new THREE.PlaneGeometry(12, 30),  // v19: wide bloom halo
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
-    color: new THREE.Color(0xff7020), // deep orange-amber; wider spread reads as warm atmospheric halo
+    color: new THREE.Color(0xff7020),
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.04, // v12: 0.07→0.04 — less atmospheric wash so base stamp edge definition reads; halo not shape
+    opacity: 0.04,
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, Math.PI * 0.25, 0); // v17: 45° — long axis from lower-left to upper-right
-archBloomMesh.position.set(-0.5, 0.019, -1); // v17: centered on gobo target — light actually lands here
-archBloomMesh.renderOrder = 1; // below base stamp
+archBloomMesh.rotation.set(-Math.PI / 2, 0, Math.PI * 0.3); // v19: flat on floor, ~54° diagonal bottom-left→upper-right
+archBloomMesh.position.set(2, 0.019, -2); // v19: centered so dome lands upper-right, base exits bottom-left
+archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
+// BASE STAMP — primary arch silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(8, 22),  // v16: 14×18→8×22 — narrow elongated lancet stamp
+  new THREE.PlaneGeometry(10, 25),  // v19: narrow lancet — 10 wide, 25 long
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
-    color: new THREE.Color(0xffaa40), // v7: deeper amber (was 0xffe080 pale gold — desaturated to grey under AgX). Saturated amber survives tonemapping as warm vs neutral.
+    color: new THREE.Color(0xffaa40),
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.26,  // v10: 0.20→0.26 — compensates gobo 60→48 pull; arch floor pool reads at same warmth. Additive carries the shape now.
+    opacity: 0.26,
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, Math.PI * 0.25, 0); // v17: matches bloom — 45° diagonal upper-right
-archFloorMesh.position.set(-0.5, 0.022, -1); // v17: matches bloom — centered on gobo target
-archFloorMesh.renderOrder = 2; // above fog layers and bloom
+archFloorMesh.rotation.set(-Math.PI / 2, 0, Math.PI * 0.3); // v19: same diagonal as bloom
+archFloorMesh.position.set(2, 0.022, -2); // v19: same center as bloom
+archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
