@@ -268,7 +268,7 @@ function _makeMashrabiyaTexture() {
   }
 
   // --- 1. Draw CRISP lattice (slight AA softness) ---
-  ctx.filter = 'blur(0.5px)'; // Chris: near end ultra-crisp
+  ctx.filter = 'blur(1.5px)'; // Chris: near end ultra-crisp
   drawLattice(ctx);
   ctx.filter = 'none';
 
@@ -280,7 +280,7 @@ function _makeMashrabiyaTexture() {
   const bCtx = blurCanvas.getContext('2d');
   bCtx.fillStyle = '#ffffff';
   bCtx.fillRect(0, 0, W, H);
-  bCtx.filter = 'blur(14px)'; // Chris: far end much softer — oblique diffusion
+  bCtx.filter = 'blur(20px)'; // Chris: far end much softer — oblique diffusion
   drawLattice(bCtx);
   bCtx.filter = 'none';
 
@@ -324,7 +324,7 @@ const _mashrabiyaTex = _makeMashrabiyaTexture();
 const _mashrabiyaGobo = _makeMashrabiyaTexture();
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffd898, 12); // Chris: warmer amber, stronger sacred shaft
+const gobo = new THREE.SpotLight(0xffd898, 6); // Chris: warmer amber, stronger sacred shaft
 gobo.position.set(-6, 16, 3);
 gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
 gobo.angle = 0.55;    // Chris: wider cone for tiled pattern coverage
@@ -507,7 +507,7 @@ const archBloomMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.08,  // Chris: subtler bloom, more atmospheric
+    opacity: 0.04,  // Chris: whisper-level bloom
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
@@ -525,7 +525,7 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.40,  // Chris: slightly softer base, let bloom breathe
+    opacity: 0.22,  // Chris: subtle like faint light through stone
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
