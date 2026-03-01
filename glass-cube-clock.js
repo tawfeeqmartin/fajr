@@ -213,7 +213,7 @@ function _makeArchOutlineTexture() {
 }
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffc870, 15); // v19: fill-only warmth from left, stamps are primary
+const gobo = new THREE.SpotLight(0xffc870, 0); // v27: killed — was casting visible trapezoid artifact above cube
 gobo.position.set(-6, 16, 3);
 gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
 gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
@@ -423,7 +423,7 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.15,  // v21: low fill warmth — outline stamp carries silhouette
+    opacity: 0.25,  // v27: boosted fill for contrast on dark floor
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
@@ -442,7 +442,7 @@ const archOutlineMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.35,
+    opacity: 0.55,  // v27: boosted outline for contrast on dark floor
   })
 );
 archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
