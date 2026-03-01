@@ -170,7 +170,7 @@ function _makeArchTexture() {
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xffc870, 60); // v8: 50→60 — more floor irradiance; candlelight amber saturated enough to survive AgX as warm, not grey
+const gobo = new THREE.SpotLight(0xffc870, 48); // v10: 60→48 — less energy through cube top face; floor arch compensated by stamp opacity boost
 gobo.position.set(-6, 16, 3);          // v9: swung far left — oblique shaft angle, light enters from side like real arch opening
 gobo.target.position.set(-0.5, 0, -1.0); // v9: behind cube — arch lands in mid-ground, legs clip behind cube base
 gobo.angle = 0.35;   // v9: 0.32→0.35 — slightly wider to cover oblique floor footprint from extreme lateral angle
@@ -243,7 +243,7 @@ scene.add(cubeSun);
 scene.add(new THREE.AmbientLight(0xffffff, 0.16)); // pulled way down — shadow has to mean something
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
-const tawafSpot = new THREE.SpotLight(0xffffff, 12);
+const tawafSpot = new THREE.SpotLight(0xffffff, 8); // v10: 12→8 — orbiting overhead was spiking cube top face during passes
 tawafSpot.position.set(0, 3.5, -3);
 tawafSpot.target.position.set(0, 0.5, 0);
 tawafSpot.angle = 0.4; tawafSpot.penumbra = 0.9;
@@ -380,7 +380,7 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.20,  // v8: 0.14→0.20 — with saturated amber color, stacking with gobo (0xffc870) stays warm not grey. Sacred pool needs to glow.
+    opacity: 0.26,  // v10: 0.20→0.26 — compensates gobo 60→48 pull; arch floor pool reads at same warmth. Additive carries the shape now.
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, Math.PI * 0.22, 0); // v9: matches bloom — same oblique 40° rotation, arch reads as perspective-foreshortened opening
@@ -480,6 +480,10 @@ const dichroicFrag = `
     float glowFresnel = pow(1.0 - cosT, 2.5);
     vec3 glowCol = mix(vec3(1.0, 0.88, 0.55), vec3(1.0, 0.65, 0.2), glowFresnel);
     col += glowCol * uInternalGlow * (0.2 + 0.8 * glowFresnel);
+
+    // Top-face scrim — digital barn door: tames gobo blowout on upward-facing glass
+    // Only the top face (Nw.y→1) is darkened; sides and bottom untouched.
+    col *= 1.0 - 0.55 * smoothstep(0.4, 0.92, Nw.y);
 
     gl_FragColor = vec4(col, 1.0);
   }
