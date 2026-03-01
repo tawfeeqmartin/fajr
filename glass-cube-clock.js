@@ -216,7 +216,7 @@ gobo.shadow.bias = -0.001;
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
-  tex.rotation = Math.PI * 0.75; // rotate so arch peak casts toward top-right
+  tex.rotation = Math.PI * 1.5; // arch peak projects toward top-right from upper-left light
   gobo.map = tex;
 })();
 
