@@ -170,7 +170,7 @@ function _makeArchTexture() {
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xfff4d6, 80); // v6: 40→80 — 8× irradiance at floor (decay 1.5→1.0 kills falloff)
+const gobo = new THREE.SpotLight(0xffc870, 50); // v7: 80→50 — less flood; candlelight amber (was near-white 0xfff4d6) pulls Deakins warm/cold apart
 gobo.position.set(-2.0, 16, 5.0);
 gobo.target.position.set(0.5, 0, 1.5); // foreground floor — arch fills the dead lower frame zone
 gobo.angle = 0.32;   // slightly wider — dark frame (44% of texture) projects around arch, silhouette readable
@@ -347,15 +347,15 @@ scene.add(godRayMesh);
 // Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
 const _archStampTex = _makeArchTexture();
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(9, 9),
+  new THREE.PlaneGeometry(5, 5),
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
-    color: new THREE.Color(0xffe080), // warm gold — contrasts against blue/violet spectral hands
+    color: new THREE.Color(0xffaa40), // v7: deeper amber (was 0xffe080 pale gold — desaturated to grey under AgX). Saturated amber survives tonemapping as warm vs neutral.
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.45,
+    opacity: 0.14,  // v7: 0.45→0.14 — stamp was blowing out the entire floor. Accent only; PBR gobo carries the shape.
   })
 );
 archFloorMesh.rotation.x = -Math.PI / 2;

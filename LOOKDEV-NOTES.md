@@ -187,6 +187,30 @@ PBR irradiance math: gobo (intensity 40, decay 1.5) at distance 16.6m delivers o
 
 **Key lesson:** SpotLight.map gobo PBR irradiance on a very dark floor (albedo 0x071) cannot compete with AdditiveBlending floor effects unless intensity is extreme. Belt-and-suspenders: keep the gobo for realistic PBR shadow + light, but always back it with an additive stamp at the same target position.
 
+### v7: Tame the Floor Blob (current)
+
+**ROOT CAUSE — v6 overcook:** Two simultaneous contributions to the arch interior (PBR gobo at intensity 80 + additive stamp at opacity 0.45) stacked enough luminosity to saturate AgX tonemapping. The "warm gold" (0xffe080) + near-white gobo (0xfff4d6) averaged to a desaturated neutral grey — the arch interior read as a grey-white blob, not warm amber. The sacred darkness was gone. The dark frame was invisible because the whole floor zone was high-key.
+
+**Fix A — Gobo intensity and colour:**
+- Intensity: 80 → 50 (floor irradiance: ~50/16.6 × cos18° × albedo0.071 ≈ 0.20 — still above ambient noise floor, arch interior illuminated)
+- Colour: `0xfff4d6` (near-white) → `0xffc870` (candlelight amber). Near-white was washing both arch interior and cube top towards neutral grey. Saturated amber pulls Deakins warm/cold split apart: gobo → warm amber left, coldCounter → deep blue right. Contrast reads as cinematic even on mobile OLED.
+
+**Fix B — Arch stamp scale and opacity:**
+- PlaneGeometry: `9×9` → `5×5` (arch interior now ~2.8m wide × 4.75m tall — human-scale, not landscape-scale)
+- Opacity: `0.45` → `0.14` — stamp is accent only. PBR gobo does the structural work; stamp guarantees arch warms through additive hand rays.
+- Colour: `0xffe080` (pale desaturated gold) → `0xffaa40` (deeper saturated amber). Survives AgX tonemapping as *warm* rather than grey-neutral.
+
+**Expected result:**
+- Sacred darkness restored (v5 mood)
+- Arch interior: warm amber pool, ~2.8m wide, stamped on foreground floor
+- Dark frame: dark indigo flanks either side of arch (≥22% margin = ≥1.1m of true shadow)
+- Cube top: candlelight amber from gobo, cold blue counter from coldCounter — Deakins split visible on glass faces
+- Prayer beams: unchanged, pop against restored dark floor
+
+**Key lesson (gobo colour matters):** A near-white gobo (0xfff4d6) plus a pale gold additive stamp (0xffe080) compounds into neutral grey under AgX. Use SATURATED warm colours in both so the combined result reads as warm amber not grey. This is the same principle as Nasir al-Mulk's glass — the colour only reads if it's saturated enough to survive the optical mix.
+
+---
+
 ### v4: Arch Silhouette Fix
 - **PRIMARY FIX:** archW reduced from `sz * 0.46` to `sz * 0.28` (56% canvas fill)
   - Old: arch nearly fills entire cone → edge reads as hard diagonal cone cutoff
@@ -211,6 +235,8 @@ PBR irradiance math: gobo (intensity 40, decay 1.5) at distance 16.6m delivers o
 | godRay plane additive | ~~Air-mass for shaft~~ RETIRED v6 — plane reads as hard diagonal streak when camera sees it edge-on |
 | Arch floor stamp (additive) | Belt-and-suspenders behind SpotLight.map gobo: MeshBasicMaterial + AdditiveBlending bypasses PBR irradiance math. Dark floor albedo (0x18182a) is too absorptive for gobo PBR alone to compete with additive spectral hands |
 | godRayMesh billboard | Don't use vertical PlaneGeometry for volumetric shafts — edge-on = artifact. Use horizontal layers or true billboarding instead |
+| Stamp + gobo colour saturation | Near-white gobo + pale gold stamp = grey blob under AgX. Use saturated colours: gobo `0xffc870` candlelight + stamp `0xffaa40` deep amber. Same principle as Nasir al-Mulk glass — saturation must survive the optical mix |
+| Stamp opacity ceiling ~0.15 | Above ~0.20 the additive stamp stacks with PBR gobo to overwhelm AgX → neutral grey floor. Keep stamp as accent; gobo does the structural arch work |
 | Penumbra 0.05 on gobo | Crisp arch edge on floor; penumbra would soften the silhouette |
 
 ---
@@ -219,7 +245,7 @@ PBR irradiance math: gobo (intensity 40, decay 1.5) at distance 16.6m delivers o
 
 1. **Arch tip sharpness** — current bezier produces gently curved ogee. Consider steeper control points for more dramatic pointed arch silhouette (like Mamluk horse-shoe arch).
 2. **Floor reflectivity** — floor material is roughness 0.88. A slight specular (metalness 0.05, roughness 0.65) could add wet-stone shimmer without killing the sacred mood.
-3. **Gobo colour warmth** — currently `0xfff4d6` (very slight warm). Consider `0xffc870` for more candlelight amber if the arch needs to read warmer against the cold counter.
+3. ~~**Gobo colour warmth**~~ — RESOLVED v7. Gobo colour set to `0xffc870` candlelight amber. Near-white was graying out the floor; saturated amber read confirmed.
 4. **Gobo intensity pulse** — subtle breath animation on `gobo.intensity` (± 2 around 30) to simulate candle/lantern flicker. Don't do it with `uOpacity` (that's fog); do it directly on the SpotLight.
 5. **Prayer beam / arch interaction** — arch should recede when prayer beams activate. Future: `gobo.intensity` lerps down during prayer window.
 6. **Arch rotation per prayer** — each prayer could project a different arch rotation, symbolically "turning" toward the prayer direction.
