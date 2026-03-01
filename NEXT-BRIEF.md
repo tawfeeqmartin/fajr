@@ -1,9 +1,10 @@
-# NEXT BRIEF — Chris lookdev handoff (v56)
+# NEXT BRIEF — Chris lookdev handoff (v57)
 
 ## What the scene looks like now
 - Oblique arch gobo from far LEFT (-6, 16, 3) — light source off-screen bottom-left
 - Arch tip visible in TOP-RIGHT corner of viewport, base exits lower-left
-- Gobo intensity 0 (killed) — stamps are sole arch shape carriers
+- HYBRID approach: stamps carry primary shape + gobo at intensity 6 for real light
+- Gobo has arch texture on .map — casts subtle real light/shadow through scene
 - Floor stamps aligned at ~36° (-PI*0.2) diagonal, position (-3.5, y, 0)
 - Stamps 10% wider than v55: base 12.1×28, bloom 15.4×34, outline 12.1×28
 - Window shape narrower than v10 (archW 0.202)
@@ -11,43 +12,48 @@
 - Cube top face tamed by shader scrim (55% attenuation)
 - Three spectral clock hands (H/M/S) on floor, prayer window sectors active
 - Three-layer arch floor stamp (bloom + base + outline), additive blending
-- Dark scene (0x0d0d12), AgX tonemapping @ 1.25 exposure, sacred pool aesthetic
-- Arch silhouette reads as crisp pointed lancet — 1024px texture, 5px edge stroke
-- Outline opacity 0.55, fill 0.25, bloom 0.06
+- Dark scene (0x0d0d12), AgX tonemapping @ 0.95 exposure, deep dramatic mood
+- Outline softened: 14px stroke + 6px canvas blur at 0.30 opacity — diffused light edge
+- Fill opacity 0.30, bloom 0.08, outline 0.30
 - Warm foreground fog at 0.09 opacity prevents dead lower frame
+- Ambient crushed: hemisphere 0.18, ambient 0.07, ghostFill 0.5 — deep darkness outside arch
 
-## What changed in v56
-1. **Arch pulled left** — stamp X position -3→-3.5 (all three layers).
-   Tip pulled further into frame per client direction.
-2. **Arch 10% wider** — base 11→12.1, bloom 14→15.4, outline 11→12.1.
-   Wider lancet reads with more presence on the 430×932 viewport.
-3. **Bloom opacity boosted** — 0.04→0.06. Was barely visible, now provides
-   a real atmospheric corona that sells the arch as projected light rather
-   than a graphic overlay.
-4. **Fill texture edge stroke thickened** — 4px→5px at 1024. Survives
-   bilinear filtering on mobile without going soft. Outline texture
-   remains at 6px (already correct).
-5. **toneMappingExposure lifted** — 1.2→1.25. Opens midtones so the arch
-   warmth and prayer beams read with more presence while preserving the
-   dark sacred mood. Subtle but the whole scene breathes better.
-6. **Warm foreground fog boosted** — opacity 0.07→0.09. Lower frame area
-   had dead black — now carries enough amber warmth to feel alive.
+## What changed in v57
+1. **Outline softened** — stroke widened 6→14px + canvas blur(6px) applied.
+   Opacity dropped 0.55→0.30. No longer reads as painted line — soft
+   diffused-light boundary like real projected light through a stone opening.
+2. **Exposure dropped** — 1.25→0.95. Outside the arch is now deep dark.
+   Arch interior reads bright by contrast. Dramatic chiaroscuro.
+3. **Ambient crushed** — HemisphereLight 0.4→0.18, AmbientLight 0.16→0.07,
+   ghostFill 1.2→0.5. Floor outside the arch sinks into near-black.
+   Only the arch zone and cube carry visible light.
+4. **Hybrid gobo enabled** — SpotLight intensity 0→6 with arch texture on
+   .map. Real light passes through the arch shape, casting subtle caustics
+   on the cube and actual light/shadow interaction on the floor. Stamps
+   remain the primary visual shape, gobo adds physical light behavior.
+5. **Base stamp boosted** — fill opacity 0.25→0.30. Compensates for lower
+   exposure so arch interior stays bright and warm.
+6. **Bloom corona boosted** — 0.06→0.08. Atmospheric halo holds up at the
+   lower exposure, sells the arch as projected light not flat overlay.
 
 ## What needs attention next
-- **Tip in frame**: verify arch tip is fully inside the viewport at 430×932.
-  If still clipped, nudge X further left or adjust rotation.z magnitude.
-- **Width proportion**: 10% wider arch may push base/legs into lower-left
-  corner. Verify no legs peek in. If visible, increase stamp h or shift
-  position.z.
-- **Bloom halo**: at 0.06 the corona is subtle. If it feels too strong on
-  bright monitors, pull back to 0.05. If still too faint, try 0.07.
-- **Exposure headroom**: 1.25 is safe for AgX but monitor the cube top face
-  and specular orbit — if they flare, dial back to 1.22.
-- **Fill luminance balance**: #e8e0d8 fill vs #ffffff stroke at 5px.
-  If muddy, raise fill toward #f0ece4. If stroke doesn't pop, try 6px.
-- **Specular orbit**: `uSpecIntensity` at 2.8 with orbiting spec light can
-  still flash the top face. Top-face scrim at 55% handles most cases but
-  watch for flare at the exposure bump.
+- **Gobo artifact check**: at intensity 6 the gobo is subtle, but verify no
+  trapezoid artifact appears above the cube (the old v27 problem). If visible,
+  drop to 4. If invisible and you want more interaction, try 8.
+- **Outline softness**: 14px + blur(6px) at 0.30 might be too soft on retina
+  displays. If the arch edge disappears, try blur(4px) or opacity 0.35.
+  If still too crisp, try blur(8px).
+- **Exposure balance**: 0.95 is aggressive. Cube glass refraction might look
+  dark — if so, bump to 1.0. Watch the cube top face at this exposure
+  (scrim is at 55%, should be fine).
+- **Floor darkness**: ambient at 0.07 + hemisphere at 0.18 is very dark.
+  If the scene feels like a void, nudge ambient to 0.10. If the darkness
+  reads as sacred, keep it.
+- **Bloom halo**: at 0.08 the corona is noticeable. If too strong on bright
+  monitors, pull to 0.06. If the arch needs more glow presence, try 0.10.
+- **Gobo + stamp alignment**: gobo light and stamp positions should overlap.
+  If they diverge (gobo aim at (0,0,-2) vs stamps at (-3.5,y,0)), the hybrid
+  might read as two separate light sources. Check at 430×932 viewport.
 
 ## Client notes to carry forward
 - Tawfeeq wants arch to feel like it projects from off-screen BOTTOM-LEFT
@@ -56,4 +62,7 @@
 - Base of window light must NOT be in frame — keep projection long enough
 - Window shape should be narrower than v10 — preserve 0.202 archW
 - Arch projection should feel like real architectural light, not a flat stamp
+- Client: 'blur the lines to soften edges' — done in v57 (blur+widen+reduce opacity)
+- Client: 'lower exposure outside arch for drama' — done in v57 (exposure+ambient crush)
+- Client: 'hybrid stamps + low gobo for real light' — done in v57 (gobo intensity 6)
 - index.html is off limits

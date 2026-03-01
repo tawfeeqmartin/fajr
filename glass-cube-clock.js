@@ -40,7 +40,7 @@ let dpr = calcDpr(W, H);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.toneMapping = THREE.AgXToneMapping;
-renderer.toneMappingExposure = 1.25; // v56: 1.2→1.25 — open midtones, arch warmth breathes
+renderer.toneMappingExposure = 0.95; // v57: 1.25→0.95 — darken outside arch, dramatic contrast with bright interior
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
@@ -201,10 +201,13 @@ function _makeArchOutlineTexture() {
   ctx.lineTo(cx + archW, baseY);
   ctx.closePath();
   // stroke only — no fill
-  ctx.lineWidth = 6;
+  // v57: blur the outline — softens painted-edge read into diffused light boundary
+  ctx.filter = 'blur(6px)';
+  ctx.lineWidth = 14;  // v57: 6→14px — wider stroke + blur = soft atmospheric edge, not crisp paint
   ctx.strokeStyle = '#ffffff';
   ctx.lineJoin = 'round';
   ctx.stroke();
+  ctx.filter = 'none';
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
@@ -213,7 +216,7 @@ function _makeArchOutlineTexture() {
 }
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffc870, 0); // v27: killed — was casting visible trapezoid artifact above cube
+const gobo = new THREE.SpotLight(0xffc870, 6); // v57: 0→6 — hybrid: low gobo for real light interaction, stamps carry shape
 gobo.position.set(-6, 16, 3);
 gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
 gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
@@ -224,7 +227,7 @@ gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
 gobo.shadow.bias = -0.001;
 gobo.shadow.camera.near = 1;
 gobo.shadow.camera.far = 25;
-gobo.map = null;       // v19: no gobo texture — stamps handle arch shape
+gobo.map = _makeArchTexture(); // v57: re-enable gobo texture — real light/shadow interaction through arch shape
 scene.add(gobo, gobo.target);
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
@@ -258,14 +261,14 @@ violetRim.castShadow = false;
 scene.add(violetRim, violetRim.target);
 
 // GHOST FILL — floor separation from pure black
-const ghostFill = new THREE.PointLight(0x0c0520, 1.2);
+const ghostFill = new THREE.PointLight(0x0c0520, 0.5); // v57: 1.2→0.5 — less floor fill, darker surround
 ghostFill.position.set(0, 3, 0);
 ghostFill.decay = 2;
 ghostFill.distance = 15;
 scene.add(ghostFill);
 
 // PRAYER AMBIENT — hemisphere for colored shadow fill
-const prayerAmbient = new THREE.HemisphereLight(0x1a0830, 0x0a1520, 0.4);
+const prayerAmbient = new THREE.HemisphereLight(0x1a0830, 0x0a1520, 0.18); // v57: 0.4→0.18 — crush ambient so arch interior reads bright by contrast
 scene.add(prayerAmbient);
 
 // COOL RIM — catches back edges of cube, separates silhouette from bg
@@ -283,7 +286,7 @@ const cubeSun = new THREE.PointLight(0xe8f2ff, 105, 14);
 cubeSun.position.set(0, 1.0, -2.0);
 scene.add(cubeSun);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.16)); // pulled way down — shadow has to mean something
+scene.add(new THREE.AmbientLight(0xffffff, 0.07)); // v57: 0.16→0.07 — deeper darkness outside arch, shadow is absolute
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
 const tawafSpot = new THREE.SpotLight(0xffffff, 8); // v10: 12→8 — orbiting overhead was spiking cube top face during passes
@@ -405,7 +408,7 @@ const archBloomMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.06,  // v56: 0.04→0.06 — bloom earns its layer, real atmospheric corona
+    opacity: 0.08,  // v57: 0.06→0.08 — bloom corona compensates lower exposure, arch reads as projected light
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
@@ -423,7 +426,7 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.25,  // v27: boosted fill for contrast on dark floor
+    opacity: 0.30,  // v57: 0.25→0.30 — compensate lower exposure, arch interior stays bright
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
@@ -442,7 +445,7 @@ const archOutlineMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.55,  // v27: boosted outline for contrast on dark floor
+    opacity: 0.30,  // v57: 0.55→0.30 — wider blurred stroke + lower opacity = diffused light edge, not painted line
   })
 );
 archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
