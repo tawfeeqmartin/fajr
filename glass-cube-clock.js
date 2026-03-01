@@ -149,7 +149,7 @@ function _makeArchTexture() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, sz, sz);
   const cx = sz / 2;
-  const archW = sz * 0.28;   // 56% fill — arch surrounded by 22% dark margin each side; full shape (tip + both legs) projects within cone, silhouette reads as pointed arch
+  const archW = sz * 0.238;  // v11: 0.28→0.238 — 15% narrower window shape per client direction
   const baseY = sz * 0.62;   // v9: legs clipped at 62% — bottom 38% of canvas is dark so arch feet never appear in frame
   const springY = sz * 0.42;
   const peakY = sz * 0.04;
@@ -171,9 +171,9 @@ function _makeArchTexture() {
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
 const gobo = new THREE.SpotLight(0xffc870, 48); // v10: 60→48 — less energy through cube top face; floor arch compensated by stamp opacity boost
-gobo.position.set(-6, 16, 3);          // v9: swung far left — oblique shaft angle, light enters from side like real arch opening
-gobo.target.position.set(-0.5, 0, -1.0); // v9: behind cube — arch lands in mid-ground, legs clip behind cube base
-gobo.angle = 0.35;   // v9: 0.32→0.35 — slightly wider to cover oblique floor footprint from extreme lateral angle
+gobo.position.set(6, 16, 3);            // v11: mirrored +X — light from right side, arch tip lands top-right of viewport
+gobo.target.position.set(0.5, 0, -1.0); // v11: mirrored X — arch lands on right side of mid-ground
+gobo.angle = 0.40;   // v11: 0.35→0.40 — wider cone for longer floor projection; base pushed off lower-left edge
 gobo.penumbra = 0.05; // hair of softness at cone boundary, arch edge stays crisp
 gobo.decay = 1.0; // v6: 1.5→1.0 — less falloff over 16m throw, arch pool hits floor hard enough to read
 gobo.castShadow = true;
@@ -355,7 +355,7 @@ const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, same arch shape; atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(9, 9),
+  new THREE.PlaneGeometry(9, 13),  // v11: 9×9→9×13 — stretched in projection direction, base exits viewport
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xff7020), // deep orange-amber; wider spread reads as warm atmospheric halo
@@ -366,13 +366,13 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.07, // very dim — halo only, not structural shape
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, Math.PI * 0.22, 0); // v9: rotation.y=0.22π (~40°) — arch angled obliquely on floor; tip points back-left, legs exit right-front (cropped by baseY clip)
-archBloomMesh.position.set(-0.5, 0.019, -1.0); // v9: behind cube — arch legs land at cube base, hidden; arch body opens back-left
+archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.22, 0); // v11: mirrored rotation — arch tip points back-right (top-right of viewport), legs exit lower-left
+archBloomMesh.position.set(0.5, 0.019, -0.5); // v11: mirrored X + shifted +Z — stamp center toward camera so base extends off lower-left edge
 archBloomMesh.renderOrder = 1; // below base stamp
 scene.add(archBloomMesh);
 
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(7, 7),
+  new THREE.PlaneGeometry(7, 10),  // v11: 7×7→7×10 — longer projection, base pushed off viewport
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40), // v7: deeper amber (was 0xffe080 pale gold — desaturated to grey under AgX). Saturated amber survives tonemapping as warm vs neutral.
@@ -383,8 +383,8 @@ const archFloorMesh = new THREE.Mesh(
     opacity: 0.26,  // v10: 0.20→0.26 — compensates gobo 60→48 pull; arch floor pool reads at same warmth. Additive carries the shape now.
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, Math.PI * 0.22, 0); // v9: matches bloom — same oblique 40° rotation, arch reads as perspective-foreshortened opening
-archFloorMesh.position.set(-0.5, 0.022, -1.0); // v9: matches bloom + gobo target
+archFloorMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.22, 0); // v11: mirrored — matches bloom, tip toward top-right
+archFloorMesh.position.set(0.5, 0.022, -0.5); // v11: matches bloom center — base extends off lower-left
 archFloorMesh.renderOrder = 2; // above fog layers and bloom
 scene.add(archFloorMesh);
 
