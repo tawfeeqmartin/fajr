@@ -156,123 +156,53 @@ function _makeMashrabiyaTexture() {
   // Clear to fully transparent
   ctx.clearRect(0, 0, S, S);
 
-  // --- 8-fold rosette construction ---
-  // The classic Islamic 8-fold pattern: overlapping squares rotated 45° form
-  // an 8-pointed star (octagram). The negative space creates crosses and smaller
-  // stars. We tile this across the canvas.
-  //
-  // Construction: from a circle of radius R, inscribe two squares at 0° and 45°.
-  // Their intersections define the 8-pointed star vertices. The pattern tiles
-  // on a square grid where cell = 2R.
+  // --- Stars-only approach ---
+  // Only the star openings as soft glowing shapes — no connecting lines.
+  // Light coming through holes in a screen: you see the openings (bright),
+  // not the lattice (dark/invisible).
 
-  const COLS = 3;   // v60: fewer, larger rosettes — legible on phone
-  const cell = S / COLS;
-  const R = cell * 0.42; // rosette radius — slight breathing room
-
-  // Soft white stroke for the openings (light passing through the screen)
-  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-  ctx.lineWidth = 2.0;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  // We'll draw onto a temp canvas, then blur for soft edges
+  // Draw onto temp canvas, then blur heavily for soft pools of light
   const tmp = document.createElement('canvas');
   tmp.width = S; tmp.height = S;
   const tc = tmp.getContext('2d');
   tc.clearRect(0, 0, S, S);
-  tc.strokeStyle = 'rgba(255,255,255,0.9)';
-  tc.lineWidth = 2.0;
-  tc.lineCap = 'round';
-  tc.lineJoin = 'round';
 
-  // Draw an 8-pointed star (octagram) at center (cx, cy) with radius r.
-  // Formed by two overlapping squares rotated 22.5° apart — connecting
-  // alternating vertices of a regular octagon gives the classic khatam shape.
-  function drawOctagram(cx, cy, r) {
-    const pts = [];
-    // 16 points: alternating outer (star tips) and inner (star notches)
-    // Inner radius from octagram geometry: r * cos(π/8) / cos(π/8) — for
-    // a proper octagram {8/2}, inner vertices sit at r * cos(π/4) ≈ 0.4142r
-    // from center along the bisecting angles.
-    const innerR = r * 0.42;
+  // {8/3} star polygon — 8 points alternating outer/inner radius, filled white
+  function drawStar(cx, cy, outerR) {
+    const innerR = outerR * 0.38;
+    tc.beginPath();
     for (let i = 0; i < 16; i++) {
       const angle = (i / 16) * Math.PI * 2 - Math.PI / 2;
-      const rad = (i % 2 === 0) ? r : innerR;
-      pts.push({ x: cx + Math.cos(angle) * rad, y: cy + Math.sin(angle) * rad });
-    }
-    tc.beginPath();
-    tc.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) {
-      tc.lineTo(pts[i].x, pts[i].y);
+      const r = (i % 2 === 0) ? outerR : innerR;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (i === 0) tc.moveTo(x, y); else tc.lineTo(x, y);
     }
     tc.closePath();
-    tc.stroke();
+    tc.fill();
   }
 
-  // Draw connecting cross-pattern lines between adjacent rosettes.
-  // In Islamic geometric patterns, the interstice between stars forms
-  // elongated hexagons and cross shapes — these are the "openings"
-  // that light passes through.
-  function drawInterstitial(cx, cy, r) {
-    // Small inner octagon — the hub of each rosette
-    const innerR = r * 0.28;
-    const hubPts = [];
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-      hubPts.push({ x: cx + Math.cos(angle) * innerR, y: cy + Math.sin(angle) * innerR });
-    }
-    tc.beginPath();
-    tc.moveTo(hubPts[0].x, hubPts[0].y);
-    for (let i = 1; i < hubPts.length; i++) tc.lineTo(hubPts[i].x, hubPts[i].y);
-    tc.closePath();
-    tc.stroke();
-  }
+  // 2 columns × 4 rows grid of stars
+  const COLS = 2;
+  const ROWS = 4;
+  const cellX = S / COLS;
+  const cellY = S / ROWS;
+  const starR = 120;
 
-  // Draw secondary construction lines — the extended kite shapes
-  // between star tips, forming the characteristic Islamic cross motif.
-  function drawKites(cx, cy, r, cell) {
-    const tipR = r;
-    const midR = r * 0.7;
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-      const nextAngle = ((i + 1) / 8) * Math.PI * 2 - Math.PI / 2;
-      const midAngle = ((i + 0.5) / 8) * Math.PI * 2 - Math.PI / 2;
+  tc.fillStyle = 'rgba(255,255,255,0.9)';
 
-      // Kite: tip → mid-edge → next-tip (the petal shapes between stars)
-      tc.beginPath();
-      tc.moveTo(cx + Math.cos(angle) * tipR, cy + Math.sin(angle) * tipR);
-      tc.lineTo(cx + Math.cos(midAngle) * midR, cy + Math.sin(midAngle) * midR);
-      tc.lineTo(cx + Math.cos(nextAngle) * tipR, cy + Math.sin(nextAngle) * tipR);
-      tc.stroke();
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      drawStar((col + 0.5) * cellX, (row + 0.5) * cellY, starR);
     }
   }
 
-  // v60: Primary rosettes only — no secondary rosettes or construction circles
-  // Fewer, larger stars with simple connecting kites for clean, legible pattern
-  for (let row = -1; row <= COLS + 1; row++) {
-    for (let col = -1; col <= COLS + 1; col++) {
-      const cx = (col + 0.5) * cell;
-      const cy = (row + 0.5) * cell;
-
-      // Primary octagram star + connecting kite lines only
-      drawOctagram(cx, cy, R);
-      drawKites(cx, cy, R, cell);
-    }
-  }
-
-  // Composite the temp canvas onto main with slight blur for soft edges
-  // (light through a stone screen has diffused edges, not pixel-sharp lines)
-  ctx.filter = 'blur(4px)';
+  // Heavy blur — soft pools of light, not crisp geometry
+  ctx.filter = 'blur(8px)';
   ctx.drawImage(tmp, 0, 0);
   ctx.filter = 'none';
 
-  // Second pass: overlay a crisper version at lower opacity for definition
-  ctx.globalAlpha = 0.4;
-  ctx.drawImage(tmp, 0, 0);
-  ctx.globalAlpha = 1.0;
-
-  // Radial vignette — fade edges to transparent so the pattern doesn't
-  // have hard rectangular borders (light through a screen falls off at edges)
+  // Radial vignette — fade edges to transparent
   const grad = ctx.createRadialGradient(S/2, S/2, S * 0.15, S/2, S/2, S * 0.52);
   grad.addColorStop(0, 'rgba(0,0,0,0)');
   grad.addColorStop(0.7, 'rgba(0,0,0,0)');
