@@ -165,7 +165,7 @@ function _makeMashrabiyaTexture() {
   // Their intersections define the 8-pointed star vertices. The pattern tiles
   // on a square grid where cell = 2R.
 
-  const COLS = 5;   // number of rosette centers across
+  const COLS = 3;   // v60: fewer, larger rosettes — legible on phone
   const cell = S / COLS;
   const R = cell * 0.42; // rosette radius — slight breathing room
 
@@ -247,45 +247,22 @@ function _makeMashrabiyaTexture() {
     }
   }
 
-  // Tile the pattern: rosettes at grid centers + half-offsets for seamless repeat
-  // Extend beyond canvas bounds so edge rosettes complete properly
+  // v60: Primary rosettes only — no secondary rosettes or construction circles
+  // Fewer, larger stars with simple connecting kites for clean, legible pattern
   for (let row = -1; row <= COLS + 1; row++) {
     for (let col = -1; col <= COLS + 1; col++) {
       const cx = (col + 0.5) * cell;
       const cy = (row + 0.5) * cell;
 
-      // Primary rosette
+      // Primary octagram star + connecting kite lines only
       drawOctagram(cx, cy, R);
-      drawInterstitial(cx, cy, R);
       drawKites(cx, cy, R, cell);
-
-      // Half-offset rosettes (brick pattern) — smaller rosettes in the gaps
-      // These create the secondary star pattern between primary rosettes
-      const hx = cx + cell * 0.5;
-      const hy = cy + cell * 0.5;
-      const smallR = R * 0.52;
-      drawOctagram(hx, hy, smallR);
-      drawInterstitial(hx, hy, smallR);
-    }
-  }
-
-  // Add very fine construction circles at each rosette center (barely visible)
-  // This echoes the circle-grid construction method of classical Islamic geometry
-  tc.strokeStyle = 'rgba(255,255,255,0.2)';
-  tc.lineWidth = 0.8;
-  for (let row = -1; row <= COLS + 1; row++) {
-    for (let col = -1; col <= COLS + 1; col++) {
-      const cx = (col + 0.5) * cell;
-      const cy = (row + 0.5) * cell;
-      tc.beginPath();
-      tc.arc(cx, cy, R * 0.18, 0, Math.PI * 2);
-      tc.stroke();
     }
   }
 
   // Composite the temp canvas onto main with slight blur for soft edges
   // (light through a stone screen has diffused edges, not pixel-sharp lines)
-  ctx.filter = 'blur(1.5px)';
+  ctx.filter = 'blur(4px)';
   ctx.drawImage(tmp, 0, 0);
   ctx.filter = 'none';
 
@@ -515,12 +492,12 @@ const archFloorMesh = new THREE.Mesh(
   new THREE.PlaneGeometry(8.5, 30),  // v58: tall narrow mashrabiya panel — star motifs read clearly
   new THREE.MeshBasicMaterial({
     map: _mashrabiyaTex,
-    color: new THREE.Color(0xffe0a0),  // v58: warm white-gold — light filtering through sacred screen
+    color: new THREE.Color(0xffd090),  // v60: golden hour warmth
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.35,  // v58: primary lattice brightness — geometric pattern reads on dark floor
+    opacity: 0.40,  // v60: pools of warm light — pattern reads clearly
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
