@@ -149,7 +149,7 @@ function _makeArchTexture() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, sz, sz);
   const cx = sz / 2;
-  const archW = sz * 0.238;  // v11: 0.28→0.238 — 15% narrower window shape per client direction
+  const archW = sz * 0.202;  // v16: 0.238→0.202 — 15% narrower lancet slit
   const baseY = sz * 0.62;   // v9: legs clipped at 62% — bottom 38% of canvas is dark so arch feet never appear in frame
   const springY = sz * 0.42;
   const peakY = sz * 0.04;
@@ -184,7 +184,7 @@ function _makeArchTexture() {
 const gobo = new THREE.SpotLight(0xffc870, 32); // v14: 48→32 — wider cone spreads energy over huge area, pull intensity to avoid blowout
 gobo.position.set(-6, 16, 3);            // v13: light from LEFT — SpotLight.map "up" projects toward +X, so arch tip lands top-RIGHT of viewport
 gobo.target.position.set(-0.5, 0, -1.0); // v13: beam toward left-center floor; arch sweeps from lower-left (base) to upper-right (tip)
-gobo.angle = 0.60;   // v14: 0.40→0.60 — massive cone, arch pool spans entire viewport diagonal
+gobo.angle = 0.25;   // v16: 0.60→0.25 — narrow lancet beam, not floodlight
 gobo.penumbra = 0.02; // v12: 0.05→0.02 — softness lives in the texture now, cone boundary razor-sharp
 gobo.decay = 1.0; // v6: 1.5→1.0 — less falloff over 16m throw, arch pool hits floor hard enough to read
 gobo.castShadow = true;
@@ -366,7 +366,7 @@ const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, same arch shape; atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(18, 24),  // v14: 9×13→18×24 — massive bloom spans full viewport diagonal
+  new THREE.PlaneGeometry(10, 28),  // v16: 18×24→10×28 — narrow elongated lancet bloom
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xff7020), // deep orange-amber; wider spread reads as warm atmospheric halo
@@ -378,12 +378,12 @@ const archBloomMesh = new THREE.Mesh(
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.12, 0); // v15: -22° — tip toward (+X, -Z) upper-right corner
-archBloomMesh.position.set(2, 0.019, -2); // v15: center offset so tip lands at ~(4, -4) upper-right
+archBloomMesh.position.set(3, 0.019, -3); // v16: shift so pointed tip reaches ~(5, -5) upper-right corner
 archBloomMesh.renderOrder = 1; // below base stamp
 scene.add(archBloomMesh);
 
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(14, 18),  // v14: 7×10→14×18 — massive arch stamp frames entire scene
+  new THREE.PlaneGeometry(8, 22),  // v16: 14×18→8×22 — narrow elongated lancet stamp
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40), // v7: deeper amber (was 0xffe080 pale gold — desaturated to grey under AgX). Saturated amber survives tonemapping as warm vs neutral.
@@ -395,7 +395,7 @@ const archFloorMesh = new THREE.Mesh(
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.12, 0); // v15: matches bloom — tip toward upper-right
-archFloorMesh.position.set(2, 0.022, -2); // v15: matches bloom — tip at ~(4, -4) upper-right corner
+archFloorMesh.position.set(3, 0.022, -3); // v16: matches bloom — tip at ~(5, -5) upper-right corner
 archFloorMesh.renderOrder = 2; // above fog layers and bloom
 scene.add(archFloorMesh);
 
