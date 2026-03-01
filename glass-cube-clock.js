@@ -397,7 +397,7 @@ const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(18, 45),  // wide bloom halo (1.5x scaled)
+  new THREE.PlaneGeometry(14, 34),  // v31: scaled down 25% to fit viewport
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xff7020),
@@ -409,13 +409,13 @@ const archBloomMesh = new THREE.Mesh(
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archBloomMesh.position.set(-1.0, 0.019, -2); // v30: pull dome down into frame
+archBloomMesh.position.set(-1.0, 0.019, -3); // v31: push back for viewport fit
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
 // BASE STAMP — primary arch silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(15, 37.5),  // narrow lancet — 15 wide, 37.5 long (1.5x)
+  new THREE.PlaneGeometry(11, 28),  // v31: scaled down 25% to fit viewport
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40),
@@ -427,14 +427,14 @@ const archFloorMesh = new THREE.Mesh(
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archFloorMesh.position.set(-1.0, 0.022, -2); // v30: pull dome down into frame
+archFloorMesh.position.set(-1.0, 0.022, -3); // v31: push back for viewport fit
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
 // OUTLINE STAMP — v21: edge-only arch for silhouette definition
 const _archOutlineTex = _makeArchOutlineTexture();
 const archOutlineMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(15, 37.5),
+  new THREE.PlaneGeometry(11, 28),  // v31: scaled down 25%
   new THREE.MeshBasicMaterial({
     map: _archOutlineTex,
     color: new THREE.Color(0xffcc66),
@@ -446,7 +446,7 @@ const archOutlineMesh = new THREE.Mesh(
   })
 );
 archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archOutlineMesh.position.set(-1.0, 0.024, -2); // v30: pull dome down into frame
+archOutlineMesh.position.set(-1.0, 0.024, -3); // v31: push back for viewport fit
 archOutlineMesh.renderOrder = 3;
 scene.add(archOutlineMesh);
 
