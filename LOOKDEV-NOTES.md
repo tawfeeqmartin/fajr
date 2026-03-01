@@ -158,7 +158,19 @@ Per artist description:
 - PROBLEM: pointed tip not visible
 - ROOT CAUSE: 92% fill means arch edge ≈ cone boundary; no dark frame projects → no arch silhouette
 
-### v4: Arch Silhouette Fix (current)
+### v5: Clear the Arch Floor (current — acfc491)
+**ROOT CAUSE IDENTIFIED:** floor caustic PointLights at z=0.9–1.5 (red i5.2 / orange i4.8) were flooding the gobo cone footprint with saturated warm light. The dark frame of the arch (the 22% margin each side) was being filled by these lights — no arch silhouette could project against that noise. The floor read as a red/crimson blob, not an arch.
+
+- **Floor caustics — primary fix:** warm group (red/orange/yellow) repositioned to z=–0.3–0.2 directly under cube base, distance capped at 1.0–1.2u. They now create a warm pool under the cube (physically correct: prism casts colour at its base) without reaching the arch projection zone.
+- **tawafSpot.distance = 4.5:** white intensity-12 spot was spilling through the cube (no castShadow) onto the arch floor at ~5.7u. Capped at 4.5u.
+- **Gobo intensity 30→40:** stronger punch through residual floor contributions.
+- **warmFogMesh:** opacity 0.17→0.07, z 3.8→7.0 — moved completely past the arch zone.
+- **godRay:** width 0.26→0.55, opacity 0.09→0.14 — more air-mass presence.
+- Expected: pointed arch silhouette on floor, warm-white interior, dark frame flanking.
+
+**Key lesson:** Any light touching the dark frame zone (outside the arch, inside the cone) destroys the silhouette. Light purity in the cone footprint is non-negotiable. Audit ALL lights' reach into the gobo cone footprint — not just the gobo itself.
+
+### v4: Arch Silhouette Fix
 - **PRIMARY FIX:** archW reduced from `sz * 0.46` to `sz * 0.28` (56% canvas fill)
   - Old: arch nearly fills entire cone → edge reads as hard diagonal cone cutoff
   - New: arch surrounded by ~22% dark margin each side → arch silhouette projects clearly
