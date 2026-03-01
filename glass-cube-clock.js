@@ -176,7 +176,7 @@ function _makeArchTexture() {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
-  tex.rotation = Math.PI * 0.75; // v17: 135° — arch tip projects toward upper-right (+X, -Z) from left-side gobo
+  tex.rotation = -Math.PI * 0.25; // v18: flip arch tip to right side (PI*0.75 - PI)
   return tex;
 }
 
