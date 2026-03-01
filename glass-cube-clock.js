@@ -357,14 +357,15 @@ scene.add(godRayMesh);
 //   canvas top   (tip,  y≈0.04*sz) → UV V≈1 → world -Z (away, behind cube) ✓
 // Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
 //
-// v19: FRESH APPROACH — stamps are the PRIMARY arch shape. Gobo is fill only.
+// v20: stamps are PRIMARY arch shape. Gobo is fill only.
 // PlaneGeometry +Y = arch tip direction. rotation.x = -PI/2 lays flat on floor.
-// rotation.z = PI*0.3 (~54°) swings tip toward +X,-Z = upper-right on screen.
+// rotation.z = -PI*0.3 flips diagonal so tip points upper-right (+X, -Z on screen).
+// Using map (not alphaMap) with transparent:true preserves edge stroke detail.
 const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(12, 30),  // v19: wide bloom halo
+  new THREE.PlaneGeometry(12, 30),  // wide bloom halo
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xff7020),
@@ -375,26 +376,25 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.04,
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, 0, Math.PI * 0.3); // v19: flat on floor, ~54° diagonal bottom-left→upper-right
-archBloomMesh.position.set(2, 0.019, -2); // v19: centered so dome lands upper-right, base exits bottom-left
+archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.3); // v20: flip diagonal — tip toward upper-right
+archBloomMesh.position.set(3, 0.019, -3); // v20: shifted right & back so tip reaches upper-right corner
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
 // BASE STAMP — primary arch silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 25),  // v19: narrow lancet — 10 wide, 25 long
+  new THREE.PlaneGeometry(10, 25),  // narrow lancet — 10 wide, 25 long
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40),
     transparent: true,
-    blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.26,
+    opacity: 0.45,  // v20: boosted from 0.26 — arch needs contrast to read against dark floor
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, 0, Math.PI * 0.3); // v19: same diagonal as bloom
-archFloorMesh.position.set(2, 0.022, -2); // v19: same center as bloom
+archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.3); // v20: flip diagonal — tip toward upper-right
+archFloorMesh.position.set(3, 0.022, -3); // v20: shifted right & back so tip reaches upper-right corner
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
