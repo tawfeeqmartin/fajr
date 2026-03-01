@@ -140,83 +140,27 @@ scene.add(back, back.target);
 // One dominant sacred shaft. Darkness as co-designer. Floor is the canvas.
 // Inspired by: Nasir al-Mulk, Tadao Ando, Lubezki, Deakins.
 
-// Procedural Islamic arch gobo texture
-function _makeArchTexture() {
-  const sz = 1024; // v12: 512→1024 — double resolution, arch edges survive projection + bilinear filtering
-  const c = document.createElement('canvas');
-  c.width = sz; c.height = sz;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, sz, sz);
-  const cx = sz / 2;
-  const archW = sz * 0.202;  // v16: 0.238→0.202 — 15% narrower lancet slit
-  const baseY = sz * 0.62;   // v9: legs clipped at 62% — bottom 38% of canvas is dark so arch feet never appear in frame
-  const springY = sz * 0.42;
-  const peakY = sz * 0.04;
-  // v12: sharper lancet/ogee — walls stay vertical longer, tip converges tighter.
-  // CP1 at wall-x with springY*0.55 (was 0.5) keeps sides straighter before the curve.
-  // CP2 at archW*0.06 (was 0.12) pulls tip control points closer to center → sharper point.
-  ctx.beginPath();
-  ctx.moveTo(cx - archW, baseY);
-  ctx.lineTo(cx - archW, springY);
-  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
-  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
-  ctx.lineTo(cx + archW, baseY);
-  ctx.closePath();
-  // v12: fill slightly below pure white — creates contrast headroom for the edge stroke
-  ctx.fillStyle = '#e8e0d8';
-  ctx.fill();
-  // v12: bright edge stroke — window frame light diffraction. 4px at 1024 = thin crisp
-  // boundary that survives additive blending + projection softening. The eye locks onto
-  // this bright contour and reads "pointed arch" instead of amorphous warm zone.
-  ctx.lineWidth = 5;  // v56: 4→5px — survives bilinear on mobile, tighter arch read
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.center.set(0.5, 0.5);
-  tex.rotation = 0; // v19: no texture rotation — plane mesh orientation handles diagonal
-  return tex;
-}
+// v58: Mashrabiya lattice texture — replaces procedural arch
+// Loaded from reference image: white openings = light, black lattice = blocked.
+// With additive blending, black→0 (invisible), white→adds warm light through the geometric screen.
+const _texLoader = new THREE.TextureLoader();
+const _mashrabiyaTex = _texLoader.load('references/mashrabiya-pattern.jpg');
+_mashrabiyaTex.colorSpace = THREE.SRGBColorSpace;
+_mashrabiyaTex.wrapS = THREE.ClampToEdgeWrapping;
+_mashrabiyaTex.wrapT = THREE.ClampToEdgeWrapping;
+_mashrabiyaTex.minFilter = THREE.LinearMipmapLinearFilter;
+_mashrabiyaTex.magFilter = THREE.LinearFilter;
 
-// v21: edge-only arch outline — stroke with no fill, reads as silhouette boundary
-function _makeArchOutlineTexture() {
-  const sz = 1024;
-  const c = document.createElement('canvas');
-  c.width = sz; c.height = sz;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, sz, sz);
-  const cx = sz / 2;
-  const archW = sz * 0.202;
-  const baseY = sz * 0.62;
-  const springY = sz * 0.42;
-  const peakY = sz * 0.04;
-  ctx.beginPath();
-  ctx.moveTo(cx - archW, baseY);
-  ctx.lineTo(cx - archW, springY);
-  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
-  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
-  ctx.lineTo(cx + archW, baseY);
-  ctx.closePath();
-  // stroke only — no fill
-  // v57: blur the outline — softens painted-edge read into diffused light boundary
-  ctx.filter = 'blur(6px)';
-  ctx.lineWidth = 14;  // v57: 6→14px — wider stroke + blur = soft atmospheric edge, not crisp paint
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-  ctx.filter = 'none';
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.center.set(0.5, 0.5);
-  tex.rotation = 0;
-  return tex;
-}
+// Gobo copy — separate texture instance for the SpotLight .map
+const _mashrabiyaGobo = _texLoader.load('references/mashrabiya-pattern.jpg');
+_mashrabiyaGobo.colorSpace = THREE.SRGBColorSpace;
+_mashrabiyaGobo.wrapS = THREE.ClampToEdgeWrapping;
+_mashrabiyaGobo.wrapT = THREE.ClampToEdgeWrapping;
+_mashrabiyaGobo.minFilter = THREE.LinearMipmapLinearFilter;
+_mashrabiyaGobo.magFilter = THREE.LinearFilter;
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffc870, 6); // v57: 0→6 — hybrid: low gobo for real light interaction, stamps carry shape
+const gobo = new THREE.SpotLight(0xffc870, 8); // v58: 6→8 — mashrabiya lattice needs more gobo for geometric pattern to read on floor/cube
 gobo.position.set(-6, 16, 3);
 gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
 gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
@@ -227,7 +171,7 @@ gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
 gobo.shadow.bias = -0.001;
 gobo.shadow.camera.near = 1;
 gobo.shadow.camera.far = 25;
-gobo.map = _makeArchTexture(); // v57: re-enable gobo texture — real light/shadow interaction through arch shape
+gobo.map = _mashrabiyaGobo; // v58: mashrabiya lattice on gobo — real light casts geometric pattern onto floor and cube
 scene.add(gobo, gobo.target);
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
@@ -384,74 +328,49 @@ godRayMesh.rotation.y = Math.PI * 0.10; // slight tilt toward camera, follows be
 godRayMesh.visible = false;
 scene.add(godRayMesh);
 
-// ARCH FLOOR STAMP — additive overlay guarantees pointed arch reads on mobile.
-// SpotLight.map gobo irradiance on dark floor (albedo 0x18182a) is PBR-dim vs AdditiveBlending rays.
-// This stamp uses the same arch texture laid flat: additive blend, black areas contribute 0,
-// white arch interior adds warm amber directly. UV orientation with rotation.x=-PI/2 + canvas flipY:
-//   canvas bottom (legs, y≈0.99*sz) → UV V≈0 → world +Z (toward camera) ✓
-//   canvas top   (tip,  y≈0.04*sz) → UV V≈1 → world -Z (away, behind cube) ✓
-// Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
-//
-// v20: stamps are PRIMARY arch shape. Gobo is fill only.
-// PlaneGeometry +Y = arch tip direction. rotation.x = -PI/2 lays flat on floor.
-// rotation.z = -PI*0.2 — less steep diagonal, tip in frame, base off-screen left (+X, -Z on screen).
-// Using map (not alphaMap) with transparent:true preserves edge stroke detail.
-const _archStampTex = _makeArchTexture();
+// MASHRABIYA FLOOR STAMP — v58: replaces procedural arch with Islamic geometric lattice
+// Additive blend: white openings → warm light, black lattice → 0 (invisible).
+// PlaneGeometry sized to match the tall narrow panel (~1:3.5 aspect).
+// Same position/rotation as v57: (-3.5, y, 0), -PI*0.2 diagonal.
+// Two layers: bloom underlayer (wider, dimmer corona) + base stamp (sharp lattice pattern).
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(15.4, 34),  // v56: 14→15.4 (10% wider per client)
+  new THREE.PlaneGeometry(10, 34),  // v58: aspect ~1:3.4 matches mashrabiya panel proportions
   new THREE.MeshBasicMaterial({
-    map: _archStampTex,
+    map: _mashrabiyaTex,
     color: new THREE.Color(0xff7020),
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.08,  // v57: 0.06→0.08 — bloom corona compensates lower exposure, arch reads as projected light
+    opacity: 0.10,  // v58: bloom halo through lattice openings
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archBloomMesh.position.set(-3.5, 0.019, 0); // v56: -3→-3.5, pull arch tip into frame
+archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
+archBloomMesh.position.set(-3.5, 0.019, 0);
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
-// BASE STAMP — primary arch silhouette, the hero shape
+// BASE STAMP — primary mashrabiya silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(12.1, 28),  // v56: 11→12.1 (10% wider per client)
+  new THREE.PlaneGeometry(8.5, 30),  // v58: tall narrow mashrabiya panel — star motifs read clearly
   new THREE.MeshBasicMaterial({
-    map: _archStampTex,
-    color: new THREE.Color(0xffaa40),
+    map: _mashrabiyaTex,
+    color: new THREE.Color(0xffe0a0),  // v58: warm white-gold — light filtering through sacred screen
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.30,  // v57: 0.25→0.30 — compensate lower exposure, arch interior stays bright
+    opacity: 0.35,  // v58: primary lattice brightness — geometric pattern reads on dark floor
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archFloorMesh.position.set(-3.5, 0.022, 0); // v56: -3→-3.5, pull arch tip into frame
+archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
+archFloorMesh.position.set(-3.5, 0.022, 0);
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
-// OUTLINE STAMP — v21: edge-only arch for silhouette definition
-const _archOutlineTex = _makeArchOutlineTexture();
-const archOutlineMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(12.1, 28),  // v56: 11→12.1 (10% wider per client)
-  new THREE.MeshBasicMaterial({
-    map: _archOutlineTex,
-    color: new THREE.Color(0xffcc66),
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-    opacity: 0.30,  // v57: 0.55→0.30 — wider blurred stroke + lower opacity = diffused light edge, not painted line
-  })
-);
-archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archOutlineMesh.position.set(-3.5, 0.024, 0); // v56: -3→-3.5, pull arch tip into frame
-archOutlineMesh.renderOrder = 3;
-scene.add(archOutlineMesh);
+// v58: outline stamp removed — mashrabiya lattice carries its own intricate edges
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
