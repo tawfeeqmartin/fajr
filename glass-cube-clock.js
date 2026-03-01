@@ -215,6 +215,8 @@ gobo.shadow.bias = -0.001;
   // Soften edges with slight Gaussian blur via repeated draws
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.center.set(0.5, 0.5);
+  tex.rotation = Math.PI * 0.75; // rotate so arch peak casts toward top-right
   gobo.map = tex;
 })();
 
