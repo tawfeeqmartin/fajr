@@ -1172,6 +1172,13 @@ function _clearCompassTimeout() {
 // Init compass at page load (Android: registers listener immediately; iOS: waits for user gesture in _toggleCompassMode)
 _initCompass();
 
+// iOS: silently request compass permission on first tap anywhere (tawaf-gl pattern)
+// This means by the time the user taps the compass button, permission is already granted
+document.addEventListener('click', function _iosCompassInit() {
+  _requestCompassPermission();
+  document.removeEventListener('click', _iosCompassInit);
+}, { once: true });
+
 // ── Position tracking ──
 function adhanPosition(){
   if(adhanAudio&&!adhanAudio.paused) return adhanAudio.currentTime;
@@ -2444,7 +2451,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=68';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=69';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
