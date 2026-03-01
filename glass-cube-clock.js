@@ -149,10 +149,10 @@ function _makeArchTexture() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, sz, sz);
   const cx = sz / 2;
-  const archW = sz * 0.30;
-  const baseY = sz * 0.88;
-  const springY = sz * 0.40;
-  const peakY = sz * 0.05;
+  const archW = sz * 0.46;   // fills ~92% of canvas — arch edge IS the cone boundary, shape reads on floor
+  const baseY = sz * 0.99;   // legs reach canvas bottom edge
+  const springY = sz * 0.42;
+  const peakY = sz * 0.04;
   ctx.beginPath();
   ctx.moveTo(cx - archW, baseY);
   ctx.lineTo(cx - archW, springY);
@@ -165,16 +165,16 @@ function _makeArchTexture() {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
-  tex.rotation = Math.PI * 0.75; // orient arch peak toward upper-right floor from camera POV
+  tex.rotation = 0; // natural projection — arch tip faces away from camera, legs open toward viewer
   return tex;
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xfff4d6, 20);
-gobo.position.set(-2.0, 16, 5.0);   // further from cube axis — shaft crosses diagonally, floor gets the pattern
-gobo.target.position.set(1.5, 0, -1.0); // upper-right floor from camera POV (+X, -Z)
-gobo.angle = 0.32;   // wider so arch legs read clearly on floor beyond cube
-gobo.penumbra = 0.0;
+const gobo = new THREE.SpotLight(0xfff4d6, 22);
+gobo.position.set(-2.0, 16, 5.0);
+gobo.target.position.set(0.3, 0, -2.0); // centered in visible floor area, pool stays in frame
+gobo.angle = 0.28;   // slightly wider than arch fill — arch edge (not cone edge) is the floor boundary
+gobo.penumbra = 0.05; // hair of softness at cone boundary, arch edge stays crisp
 gobo.decay = 1.5;
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
@@ -204,12 +204,12 @@ coldCounter.decay = 1.4;
 coldCounter.castShadow = false;
 scene.add(coldCounter, coldCounter.target);
 
-// VIOLET RIM — Swarovski edge catch
-const violetRim = new THREE.SpotLight(0x7050e0, 4);
+// VIOLET RIM — Swarovski edge catch — sharpened to actually separate cube from dark bg
+const violetRim = new THREE.SpotLight(0x8055f0, 6);
 violetRim.position.set(-4, 9, -2);
 violetRim.target.position.set(0, 0.6, 0);
-violetRim.angle = 0.20;
-violetRim.penumbra = 0.3;
+violetRim.angle = 0.18; // tighter cone — cleaner rim, no floor spill
+violetRim.penumbra = 0.2;
 violetRim.decay = 1.4;
 violetRim.castShadow = false;
 scene.add(violetRim, violetRim.target);
@@ -240,7 +240,7 @@ const cubeSun = new THREE.PointLight(0xe8f2ff, 105, 14);
 cubeSun.position.set(0, 1.0, -2.0);
 scene.add(cubeSun);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.58));
+scene.add(new THREE.AmbientLight(0xffffff, 0.28)); // pulled way down — shadow has to mean something
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
 const tawafSpot = new THREE.SpotLight(0xffffff, 12);
@@ -253,8 +253,8 @@ scene.add(tawafSpot, tawafSpot.target);
 const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
-    uOpacity: { value: 0.18 },
-    uColor:   { value: new THREE.Color(0x4466cc) },
+    uOpacity: { value: 0.22 }, // deeper pool — feels like the floor breathes
+    uColor:   { value: new THREE.Color(0x1a2888) }, // richer indigo, less cyan
   },
   vertexShader: `
     varying vec2 vUv;
@@ -390,7 +390,7 @@ const cubeMat = new THREE.ShaderMaterial({
     uSpecLightPos: { value: new THREE.Vector3(0, 3.5, -3) },
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 1.875 },
-    uInternalGlow:  { value: 0 },
+    uInternalGlow:  { value: 0.04 }, // whisper of trapped sacred warmth — always present
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
