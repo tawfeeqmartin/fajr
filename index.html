@@ -1134,8 +1134,11 @@ function _requestCompassPermission() {
     DeviceOrientationEvent.requestPermission().then(function(state) {
       if (state === 'granted') {
         window.addEventListener('deviceorientation', adhanCompassHandler, true);
+        _clearCompassTimeout();
       }
-    }).catch(function(){});
+    }).catch(function(e){
+      console.warn('[compass] permission error:', e);
+    });
   }
 }
 // Compass timeout — detect when no data arrives
@@ -1147,27 +1150,27 @@ function _startCompassTimeout() {
     if (adhanCompassEventCount === startCount && fsCompassOn) {
       if (!_compassTimeoutEl) {
         _compassTimeoutEl = document.createElement('div');
-        _compassTimeoutEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(30px,8vmin,80px));left:0;right:0;text-align:center;z-index:220;font-family:var(--font);font-size:clamp(.75rem,1.8vmin,1rem);font-weight:300;color:rgba(232,228,220,.5);padding:0 2rem;transition:opacity .5s ease;pointer-events:none';
+        _compassTimeoutEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(30px,8vmin,80px));left:0;right:0;text-align:center;z-index:220;font-family:var(--font);font-size:clamp(.75rem,1.8vmin,1rem);font-weight:300;color:rgba(232,228,220,.6);padding:0 2rem;transition:opacity .5s ease;cursor:pointer';
+        _compassTimeoutEl.addEventListener('click', function() {
+          _compassTimeoutEl.style.opacity = '0';
+          _requestCompassPermission();
+          _startCompassTimeout();
+        });
         document.getElementById('clockFullscreen').appendChild(_compassTimeoutEl);
       }
-      _compassTimeoutEl.textContent = 'No compass signal — check Settings → Privacy → Location Services → Compass';
+      _compassTimeoutEl.textContent = 'Tap here to enable compass';
       _compassTimeoutEl.style.opacity = '1';
       // Retry check — if data arrives later, handler clears the message
     }
-  }, 3000);
+  }, 5000);
 }
 function _clearCompassTimeout() {
   if (_compassTimeoutTimer) { clearTimeout(_compassTimeoutTimer); _compassTimeoutTimer = null; }
   if (_compassTimeoutEl) _compassTimeoutEl.style.opacity = '0';
 }
 
-// Init compass at page load
+// Init compass at page load (Android: registers listener immediately; iOS: waits for user gesture in _toggleCompassMode)
 _initCompass();
-// First click anywhere grants iOS permission (like tawaf-gl)
-document.addEventListener('click', function _iosCompass() {
-  _requestCompassPermission();
-  document.removeEventListener('click', _iosCompass);
-}, { once: true });
 
 // ── Position tracking ──
 function adhanPosition(){
