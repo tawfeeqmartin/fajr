@@ -40,7 +40,7 @@ let dpr = calcDpr(W, H);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.toneMapping = THREE.AgXToneMapping;
-renderer.toneMappingExposure = 0.88; // Chris: darker stage, sacred contrast
+renderer.toneMappingExposure = 0.95; // v57: 1.25→0.95 — darken outside arch, dramatic contrast with bright interior
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
@@ -140,213 +140,90 @@ scene.add(back, back.target);
 // One dominant sacred shaft. Darkness as co-designer. Floor is the canvas.
 // Inspired by: Nasir al-Mulk, Tadao Ando, Lubezki, Deakins.
 
-// v65: Procedural mashrabiya texture — 10-fold Islamic rosette pattern
-// White background with black lattice lines. 1024×2048 tall panel.
-// 10-pointed star rosettes in hex-packed grid, interlocking kite/arrow shapes,
-// small 5-pointed stars in gaps. Gradient depth blur (crisp bottom, soft top).
-// White areas = light passes through screen openings. Black = lattice wood.
-
-function _makeMashrabiyaTexture() {
-  const W = 1024, H = 2048;
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  const TAU = Math.PI * 2;
-
-  // White background — openings where light passes through
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, W, H);
-
-  // --- 10-fold rosette construction ---
-  const R = 220;             // rosette outer radius
-  const innerR = R * 0.38;   // inner star radius
-  const N = 10;              // 10-pointed star
-
-  // Hex-packed grid: 2 columns, ~4 rows, offset alternating rows
-  const colSpacing = 512;
-  const rowSpacing = 512;
-  const centers = [];
-  for (let row = -1; row <= 5; row++) {
-    for (let col = -1; col <= 2; col++) {
-      const offset = (((row % 2) + 2) % 2 === 1) ? colSpacing / 2 : 0;
-      centers.push({
-        x: col * colSpacing + colSpacing / 2 + offset,
-        y: row * rowSpacing + rowSpacing / 2
-      });
-    }
-  }
-
-  // Outer and inner points for a rosette at (cx, cy)
-  function getRosettePoints(cx, cy) {
-    const outer = [], inner = [];
-    for (let i = 0; i < N; i++) {
-      const aOuter = (i / N) * TAU - TAU / 4;
-      const aInner = ((i + 0.5) / N) * TAU - TAU / 4;
-      outer.push({ x: cx + Math.cos(aOuter) * R, y: cy + Math.sin(aOuter) * R });
-      inner.push({ x: cx + Math.cos(aInner) * innerR, y: cy + Math.sin(aInner) * innerR });
-    }
-    return { outer, inner };
-  }
-
-  function drawLattice(context) {
-    context.beginPath();
-    context.strokeStyle = '#000000';
-    context.lineWidth = 18;
-    context.lineJoin = 'round';
-    context.lineCap = 'round';
-
-    for (const c of centers) {
-      const { outer, inner } = getRosettePoints(c.x, c.y);
-
-      // Star spokes: each outer point → two adjacent inner points
-      for (let i = 0; i < N; i++) {
-        const prev = (i - 1 + N) % N;
-        context.moveTo(outer[i].x, outer[i].y);
-        context.lineTo(inner[i].x, inner[i].y);
-        context.moveTo(outer[i].x, outer[i].y);
-        context.lineTo(inner[prev].x, inner[prev].y);
-      }
-
-      // Inner ring — close the star center
-      for (let i = 0; i < N; i++) {
-        const next = (i + 1) % N;
-        context.moveTo(inner[i].x, inner[i].y);
-        context.lineTo(inner[next].x, inner[next].y);
-      }
-
-      // Outer decagon — kite/arrow outlines
-      for (let i = 0; i < N; i++) {
-        const next = (i + 1) % N;
-        context.moveTo(outer[i].x, outer[i].y);
-        context.lineTo(outer[next].x, outer[next].y);
-      }
-    }
-
-    // Inter-rosette lattice — connect nearest outer points between neighbours
-    for (let a = 0; a < centers.length; a++) {
-      const ca = centers[a];
-      const ptsA = getRosettePoints(ca.x, ca.y);
-      for (let b = a + 1; b < centers.length; b++) {
-        const cb = centers[b];
-        const dist = Math.hypot(cb.x - ca.x, cb.y - ca.y);
-        if (dist > colSpacing * 1.2) continue;
-
-        const ptsB = getRosettePoints(cb.x, cb.y);
-        let bestDist = Infinity, bestAi = 0, bestBi = 0;
-        for (let i = 0; i < N; i++) {
-          for (let j = 0; j < N; j++) {
-            const d = Math.hypot(ptsA.outer[i].x - ptsB.outer[j].x,
-                                 ptsA.outer[i].y - ptsB.outer[j].y);
-            if (d < bestDist) { bestDist = d; bestAi = i; bestBi = j; }
-          }
-        }
-        // Direct bridge
-        context.moveTo(ptsA.outer[bestAi].x, ptsA.outer[bestAi].y);
-        context.lineTo(ptsB.outer[bestBi].x, ptsB.outer[bestBi].y);
-
-        // Flanking kite edges
-        const aNext = (bestAi + 1) % N, aPrev = (bestAi - 1 + N) % N;
-        const bNext = (bestBi + 1) % N, bPrev = (bestBi - 1 + N) % N;
-        context.moveTo(ptsA.outer[aNext].x, ptsA.outer[aNext].y);
-        context.lineTo(ptsB.outer[bPrev].x, ptsB.outer[bPrev].y);
-        context.moveTo(ptsA.outer[aPrev].x, ptsA.outer[aPrev].y);
-        context.lineTo(ptsB.outer[bNext].x, ptsB.outer[bNext].y);
-
-        // Small 5-pointed star in the gap between rosettes
-        const mx = (ca.x + cb.x) / 2, my = (ca.y + cb.y) / 2;
-        const starR = bestDist * 0.18;
-        for (let i = 0; i < 5; i++) {
-          const a1 = (i / 5) * TAU - TAU / 4;
-          const a2 = ((i + 2) / 5) * TAU - TAU / 4;
-          context.moveTo(mx + Math.cos(a1) * starR, my + Math.sin(a1) * starR);
-          context.lineTo(mx + Math.cos(a2) * starR, my + Math.sin(a2) * starR);
-        }
-      }
-    }
-
-    context.stroke();
-  }
-
-  // --- 1. Draw CRISP lattice (slight AA softness) ---
-  ctx.filter = 'blur(5px)';
-  drawLattice(ctx);
+// Procedural Islamic arch gobo texture
+function _makeArchTexture() {
+  const sz = 1024; // v12: 512→1024 — double resolution, arch edges survive projection + bilinear filtering
+  const c = document.createElement('canvas');
+  c.width = sz; c.height = sz;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, sz, sz);
+  const cx = sz / 2;
+  const archW = sz * 0.202;  // v16: 0.238→0.202 — 15% narrower lancet slit
+  const baseY = sz * 0.62;   // v9: legs clipped at 62% — bottom 38% of canvas is dark so arch feet never appear in frame
+  const springY = sz * 0.42;
+  const peakY = sz * 0.04;
+  // v12: sharper lancet/ogee — walls stay vertical longer, tip converges tighter.
+  // CP1 at wall-x with springY*0.55 (was 0.5) keeps sides straighter before the curve.
+  // CP2 at archW*0.06 (was 0.12) pulls tip control points closer to center → sharper point.
+  ctx.beginPath();
+  ctx.moveTo(cx - archW, baseY);
+  ctx.lineTo(cx - archW, springY);
+  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
+  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
+  ctx.lineTo(cx + archW, baseY);
+  ctx.closePath();
+  // v65: heavy blur — no hard edges, reads as diffused projected light
+  ctx.filter = 'blur(18px)';
+  ctx.fillStyle = '#e8e0d8';
+  ctx.fill();
   ctx.filter = 'none';
-
-  // --- Gradient depth blur: crisp near (bottom), soft far (top) ---
-
-  // --- 2. Draw BLURRED lattice on temp canvas ---
-  const blurCanvas = document.createElement('canvas');
-  blurCanvas.width = W; blurCanvas.height = H;
-  const bCtx = blurCanvas.getContext('2d');
-  bCtx.fillStyle = '#ffffff';
-  bCtx.fillRect(0, 0, W, H);
-  bCtx.filter = 'blur(36px)';
-  drawLattice(bCtx);
-  bCtx.filter = 'none';
-
-  // --- 3. Crossfade: crisp at bottom, blurred at top ---
-  const fadeCanvas = document.createElement('canvas');
-  fadeCanvas.width = W; fadeCanvas.height = H;
-  const fCtx = fadeCanvas.getContext('2d');
-  fCtx.drawImage(blurCanvas, 0, 0);
-  fCtx.globalCompositeOperation = 'destination-in';
-  const depthGrad = fCtx.createLinearGradient(0, 0, 0, H);
-  depthGrad.addColorStop(0, 'rgba(255,255,255,1)');   // top: fully blurred
-  depthGrad.addColorStop(0.7, 'rgba(255,255,255,0.3)'); // Chris: blur still present at 70%
-  depthGrad.addColorStop(1, 'rgba(255,255,255,0)');   // bottom: fully crisp
-  fCtx.fillStyle = depthGrad;
-  fCtx.fillRect(0, 0, W, H);
-  fCtx.globalCompositeOperation = 'source-over';
-
-  // Erase crisp where blur takes over
-  ctx.globalCompositeOperation = 'destination-out';
-  const eraseGrad = ctx.createLinearGradient(0, 0, 0, H);
-  eraseGrad.addColorStop(0, 'rgba(0,0,0,1)');         // top: fully erase crisp
-  eraseGrad.addColorStop(0.6, 'rgba(0,0,0,0.15)');    // Chris: start keeping crisp earlier
-  eraseGrad.addColorStop(1, 'rgba(0,0,0,0)');         // bottom: fully crisp
-  ctx.fillStyle = eraseGrad;
-  ctx.fillRect(0, 0, W, H);
-  ctx.globalCompositeOperation = 'source-over';
-
-  // Composite blurred on top — depth crossfade complete
-  ctx.drawImage(fadeCanvas, 0, 0);
-
-  // --- 4. Lateral edge fade: blur and fade the left/right sides ---
-  ctx.globalCompositeOperation = 'destination-in';
-  const sideGrad = ctx.createLinearGradient(0, 0, W, 0);
-  sideGrad.addColorStop(0, 'rgba(255,255,255,0)');
-  sideGrad.addColorStop(0.18, 'rgba(255,255,255,1)');
-  sideGrad.addColorStop(0.82, 'rgba(255,255,255,1)');
-  sideGrad.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = sideGrad;
-  ctx.fillRect(0, 0, W, H);
-  ctx.globalCompositeOperation = 'source-over';
-
-  const tex = new THREE.CanvasTexture(canvas);
+  // no edge stroke — blur carries the shape
+  const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.wrapS = THREE.ClampToEdgeWrapping;  // horizontal: single tile
-  tex.wrapT = THREE.RepeatWrapping; // Chris: tile vertically along long axis
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.repeat.set(1, 4); // Chris: 4 rosette repeats along tiled stamp length
+  tex.center.set(0.5, 0.5);
+  tex.rotation = 0; // v19: no texture rotation — plane mesh orientation handles diagonal
   return tex;
 }
-const _mashrabiyaTex = _makeMashrabiyaTexture();
-const _mashrabiyaGobo = _makeMashrabiyaTexture();
+
+// v21: edge-only arch outline — stroke with no fill, reads as silhouette boundary
+function _makeArchOutlineTexture() {
+  const sz = 1024;
+  const c = document.createElement('canvas');
+  c.width = sz; c.height = sz;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, sz, sz);
+  const cx = sz / 2;
+  const archW = sz * 0.202;
+  const baseY = sz * 0.62;
+  const springY = sz * 0.42;
+  const peakY = sz * 0.04;
+  ctx.beginPath();
+  ctx.moveTo(cx - archW, baseY);
+  ctx.lineTo(cx - archW, springY);
+  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
+  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
+  ctx.lineTo(cx + archW, baseY);
+  ctx.closePath();
+  // stroke only — no fill
+  // v57: blur the outline — softens painted-edge read into diffused light boundary
+  ctx.filter = 'blur(6px)';
+  ctx.lineWidth = 14;  // v57: 6→14px — wider stroke + blur = soft atmospheric edge, not crisp paint
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  ctx.filter = 'none';
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.center.set(0.5, 0.5);
+  tex.rotation = 0;
+  return tex;
+}
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffd898, 6); // Chris: warmer amber, stronger sacred shaft
+const gobo = new THREE.SpotLight(0xffc870, 6); // v57: 0→6 — hybrid: low gobo for real light interaction, stamps carry shape
 gobo.position.set(-6, 16, 3);
 gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
-gobo.angle = 0.55;    // Chris: wider cone for tiled pattern coverage
-gobo.penumbra = 0.7;  // Chris: softer penumbra, more ethereal
+gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
+gobo.penumbra = 0.85;  // v65: 0.6→0.85 — very soft edge, atmospheric fill
 gobo.decay = 1.0;
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
 gobo.shadow.bias = -0.001;
 gobo.shadow.camera.near = 1;
 gobo.shadow.camera.far = 25;
-gobo.map = _mashrabiyaGobo; // v65: 10-fold rosette mashrabiya gobo — white passes light, black blocks
+gobo.map = _makeArchTexture(); // v57: re-enable gobo texture — real light/shadow interaction through arch shape
 scene.add(gobo, gobo.target);
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
@@ -503,48 +380,57 @@ godRayMesh.rotation.y = Math.PI * 0.10; // slight tilt toward camera, follows be
 godRayMesh.visible = false;
 scene.add(godRayMesh);
 
-// MASHRABIYA FLOOR STAMP — v65: 10-fold Islamic rosette pattern
-// White-on-black texture used as .map — white areas glow with stamp color, black is dark.
-// PlaneGeometry sized to match the tall narrow 1:2 panel.
-// Two layers: bloom underlayer (wider, dimmer corona) + base stamp (sharp lattice pattern).
+// ARCH FLOOR STAMP — additive overlay guarantees pointed arch reads on mobile.
+// SpotLight.map gobo irradiance on dark floor (albedo 0x18182a) is PBR-dim vs AdditiveBlending rays.
+// This stamp uses the same arch texture laid flat: additive blend, black areas contribute 0,
+// white arch interior adds warm amber directly. UV orientation with rotation.x=-PI/2 + canvas flipY:
+//   canvas bottom (legs, y≈0.99*sz) → UV V≈0 → world +Z (toward camera) ✓
+//   canvas top   (tip,  y≈0.04*sz) → UV V≈1 → world -Z (away, behind cube) ✓
+// Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
+//
+// v20: stamps are PRIMARY arch shape. Gobo is fill only.
+// PlaneGeometry +Y = arch tip direction. rotation.x = -PI/2 lays flat on floor.
+// rotation.z = -PI*0.2 — less steep diagonal, tip in frame, base off-screen left (+X, -Z on screen).
+// Using map (not alphaMap) with transparent:true preserves edge stroke detail.
+const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(3.5, 28),  // Chris: 4x taller for tiled rosette coverage
+  new THREE.PlaneGeometry(15.4, 34),  // v56: 14→15.4 (10% wider per client)
   new THREE.MeshBasicMaterial({
-    map: _mashrabiyaTex,
-    color: new THREE.Color(0xffaa50), // Chris: warmer bloom — amber not orange
+    map: _archStampTex,
+    color: new THREE.Color(0xff7020),
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.04,  // Chris: whisper-level bloom
+    opacity: 0.12,  // v65: 0.08→0.12 — wider atmospheric bloom carries more of the shape
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archBloomMesh.position.set(-1, 0.019, -2.0);
+archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
+archBloomMesh.position.set(-3.5, 0.019, 0); // v56: -3→-3.5, pull arch tip into frame
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
-// BASE STAMP — primary mashrabiya silhouette, the hero shape
+// BASE STAMP — primary arch silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(3, 24),  // Chris: 4x taller for tiled rosette coverage
+  new THREE.PlaneGeometry(12.1, 28),  // v56: 11→12.1 (10% wider per client)
   new THREE.MeshBasicMaterial({
-    map: _mashrabiyaTex,
-    color: new THREE.Color(0xffe0a8),  // Chris: pale gold, like late afternoon through mashrabiya stone
+    map: _archStampTex,
+    color: new THREE.Color(0xffaa40),
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.09,
+    opacity: 0.20,  // v65: 0.30→0.20 — softer fill, bloom carries more weight
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archFloorMesh.position.set(-1, 0.022, -2.0);
+archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
+archFloorMesh.position.set(-3.5, 0.022, 0); // v56: -3→-3.5, pull arch tip into frame
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
-// v59: outline stamp removed — mashrabiya lattice carries its own intricate edges
+// v65: outline stamp REMOVED — blur on fill texture carries the shape, no hard edges
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
