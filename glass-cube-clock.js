@@ -65,7 +65,7 @@ const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
 const scene = new THREE.Scene();
 // Dark scene — glass refraction and dichroic dispersion pop against near-black
 scene.background = new THREE.Color(0x0d0d12);
-scene.fog = new THREE.FogExp2(0x0d0d12, 0.048);
+scene.fog = new THREE.FogExp2(0x0d0d12, 0.035);
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 
@@ -136,23 +136,11 @@ back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
 scene.add(back, back.target);
 
-// ── LIGHTING RIG (Chris lookdev notes, Feb 28) ──
-// Philosophy: arch is a "memory of a place", not a projection of a shape.
-// Prayer beams = clock voice. Arch = chapel walls. Walls don't speak over the call to prayer.
+// ── LIGHTING RIG: Quibla of Light (Chris lookdev, Feb 28) ──
+// One dominant sacred shaft. Darkness as co-designer. Floor is the canvas.
+// Inspired by: Nasir al-Mulk, Tadao Ando, Lubezki, Deakins.
 
-// KEY LIGHT — Rembrandt foundation, no gobo (clean key)
-const gobo = new THREE.SpotLight(0xffffff, 55);
-gobo.position.set(-3.5, 7.5, 4.0);
-gobo.target.position.set(0.3, 0, 0.5);
-gobo.angle = 0.32;
-gobo.penumbra = 0.25;
-gobo.decay = 1.4;
-gobo.castShadow = true;
-gobo.shadow.mapSize.set(_isMobile ? 512 : 1024, _isMobile ? 512 : 1024);
-gobo.shadow.bias = -0.001;
-scene.add(gobo, gobo.target);
-
-// ── Procedural Islamic arch gobo texture ──
+// Procedural Islamic arch gobo texture
 function _makeArchTexture() {
   const sz = 512;
   const c = document.createElement('canvas');
@@ -160,13 +148,11 @@ function _makeArchTexture() {
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, sz, sz);
-
   const cx = sz / 2;
   const archW = sz * 0.30;
   const baseY = sz * 0.88;
   const springY = sz * 0.40;
   const peakY = sz * 0.05;
-
   ctx.beginPath();
   ctx.moveTo(cx - archW, baseY);
   ctx.lineTo(cx - archW, springY);
@@ -176,56 +162,69 @@ function _makeArchTexture() {
   ctx.closePath();
   ctx.fillStyle = '#fff';
   ctx.fill();
-
-  // Concentric decorative arches (subtle)
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  ctx.lineWidth = 1.2;
-  for (let i = 1; i <= 3; i++) {
-    const off = i * 10;
-    const aw = archW + off, sy = springY - off * 0.3, py = peakY - off * 0.6;
-    ctx.beginPath();
-    ctx.moveTo(cx - aw, baseY + off * 0.4);
-    ctx.lineTo(cx - aw, sy);
-    ctx.bezierCurveTo(cx - aw, sy * 0.5, cx - aw * 0.12, py + sz * 0.1, cx, py);
-    ctx.bezierCurveTo(cx + aw * 0.12, py + sz * 0.1, cx + aw, sy * 0.5, cx + aw, sy);
-    ctx.lineTo(cx + aw, baseY + off * 0.4);
-    ctx.stroke();
-  }
-
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.center.set(0.5, 0.5);
-  tex.rotation = Math.PI * 0.75; // rotate arch peak toward top-right of floor
   return tex;
 }
 
-// ARCH GOBO — dedicated accent SpotLight (warm candlelight, atmospheric)
-// Projects arch onto floor in front of cube + spills onto top face
-const archGobo = new THREE.SpotLight(0xfff5e6, 10);
-archGobo.position.set(-2.0, 9.5, 5.5);
-archGobo.target.position.set(0, -0.5, -1.0);  // aim in front of cube, not directly at it
-archGobo.angle = 0.35;
-archGobo.penumbra = 0.25;
-archGobo.decay = 1.4;
-archGobo.castShadow = true;
-archGobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
-archGobo.shadow.bias = -0.001;
-archGobo.map = _makeArchTexture();
-scene.add(archGobo, archGobo.target);
+// SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
+const gobo = new THREE.SpotLight(0xfff4d6, 45);
+gobo.position.set(-0.5, 16, 3.0);
+gobo.target.position.set(0, 0, 0);
+gobo.angle = 0.22;
+gobo.penumbra = 0.0;
+gobo.decay = 1.5;
+gobo.castShadow = true;
+gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
+gobo.shadow.bias = -0.001;
+gobo.shadow.camera.near = 1;
+gobo.shadow.camera.far = 25;
+gobo.map = _makeArchTexture();
+scene.add(gobo, gobo.target);
 
-// GHOST ARCH — soft spectral fill from opposite side (bilateral sacred symmetry)
-const ghostGobo = new THREE.SpotLight(0x2a1a4a, 4);
-ghostGobo.position.set(2.5, 7.0, 2.0);
-ghostGobo.target.position.set(0, 0, 0);
-ghostGobo.angle = 0.45;
-ghostGobo.penumbra = 0.6;
-ghostGobo.decay = 1.4;
-ghostGobo.castShadow = false;
-ghostGobo.map = _makeArchTexture();
-scene.add(ghostGobo, ghostGobo.target);
+// CUBE BACKLIGHT — glass transmission (Swarovski technique)
+const cubeBack = new THREE.SpotLight(0xffeedd, 7);
+cubeBack.position.set(0.5, 10, -5);
+cubeBack.target.position.set(0, 0.6, 0);
+cubeBack.angle = 0.18;
+cubeBack.penumbra = 0.7;
+cubeBack.decay = 2;
+cubeBack.castShadow = false;
+scene.add(cubeBack, cubeBack.target);
+
+// COLD COUNTER — Deakins warm/cold split
+const coldCounter = new THREE.SpotLight(0x0a1855, 6);
+coldCounter.position.set(5, 7, 1);
+coldCounter.target.position.set(0, 0.6, 0);
+coldCounter.angle = 0.30;
+coldCounter.penumbra = 0.5;
+coldCounter.decay = 1.4;
+coldCounter.castShadow = false;
+scene.add(coldCounter, coldCounter.target);
+
+// VIOLET RIM — Swarovski edge catch
+const violetRim = new THREE.SpotLight(0x7050e0, 4);
+violetRim.position.set(-4, 9, -2);
+violetRim.target.position.set(0, 0.6, 0);
+violetRim.angle = 0.20;
+violetRim.penumbra = 0.3;
+violetRim.decay = 1.4;
+violetRim.castShadow = false;
+scene.add(violetRim, violetRim.target);
+
+// GHOST FILL — floor separation from pure black
+const ghostFill = new THREE.PointLight(0x0c0520, 1.2);
+ghostFill.position.set(0, 3, 0);
+ghostFill.decay = 2;
+ghostFill.distance = 15;
+scene.add(ghostFill);
+
+// PRAYER AMBIENT — hemisphere for colored shadow fill
+const prayerAmbient = new THREE.HemisphereLight(0x1a0830, 0x0a1520, 0.4);
+scene.add(prayerAmbient);
 
 // COOL RIM — catches back edges of cube, separates silhouette from bg
-const rim = new THREE.SpotLight(0x8060c0, 11);
+const rim = new THREE.SpotLight(0x8060c0, 5);
 rim.position.set(-1.5, 5.5, -3.5);
 rim.target.position.set(0, 0.6, 0);
 rim.angle = 0.45; rim.penumbra = 0.85;
