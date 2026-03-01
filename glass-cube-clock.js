@@ -170,7 +170,7 @@ function _makeArchTexture() {
 }
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
-const gobo = new THREE.SpotLight(0xfff4d6, 22);
+const gobo = new THREE.SpotLight(0xfff4d6, 30);
 gobo.position.set(-2.0, 16, 5.0);
 gobo.target.position.set(0.3, 0, -2.0); // centered in visible floor area, pool stays in frame
 gobo.angle = 0.28;   // slightly wider than arch fill — arch edge (not cone edge) is the floor boundary
@@ -240,7 +240,7 @@ const cubeSun = new THREE.PointLight(0xe8f2ff, 105, 14);
 cubeSun.position.set(0, 1.0, -2.0);
 scene.add(cubeSun);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.28)); // pulled way down — shadow has to mean something
+scene.add(new THREE.AmbientLight(0xffffff, 0.16)); // pulled way down — shadow has to mean something
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
 const tawafSpot = new THREE.SpotLight(0xffffff, 12);
@@ -389,8 +389,8 @@ const cubeMat = new THREE.ShaderMaterial({
     uAspect:  { value: W / H },
     uSpecLightPos: { value: new THREE.Vector3(0, 3.5, -3) },
     uCamWorldPos:  { value: new THREE.Vector3() },
-    uSpecIntensity: { value: 1.875 },
-    uInternalGlow:  { value: 0.04 }, // whisper of trapped sacred warmth — always present
+    uSpecIntensity: { value: 2.8 },
+    uInternalGlow:  { value: 0.14 }, // trapped sacred warmth — glows at Fresnel edges
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
@@ -456,8 +456,8 @@ floorRay(135, 0xffffff, 0xcccccc, 0.40, 9.12, 0.62);   // SECOND (white)
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
 [
-  {c:0x6600ff,i:5.5,d:3.2,x:-1.6,y:0.06,z:-0.4},
-  {c:0x0033ff,i:5.0,d:2.8,x:-1.1,y:0.06,z:-0.7},
+  {c:0x6600ff,i:2.2,d:3.2,x:-1.6,y:0.06,z:-0.4},
+  {c:0x0033ff,i:1.8,d:2.8,x:-1.1,y:0.06,z:-0.7},
   {c:0x00aaff,i:3.5,d:2.4,x: 0.6,y:0.06,z:-1.0},
   {c:0xffffff,i:2.0,d:1.8,x: 0.8,y:0.06,z: 0.3},
   {c:0xffee00,i:4.5,d:2.2,x: 0.8,y:0.06,z: 0.9},
