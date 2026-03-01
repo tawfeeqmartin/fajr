@@ -149,7 +149,76 @@ gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 512 : 1024, _isMobile ? 512 : 1024);
 gobo.shadow.bias = -0.001;
 
-// Gobo texture removed — arch is now a 2D screen overlay (see index.html)
+// ── Islamic arch gobo texture (procedural) ──
+// Pointed arch silhouette inspired by Masjid al-Haram window framing the Ka'bah
+(function() {
+  const sz = 512;
+  const c = document.createElement('canvas');
+  c.width = sz; c.height = sz;
+  const ctx = c.getContext('2d');
+
+  // Black = blocked light, white = pass-through
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, sz, sz);
+
+  // Draw pointed Islamic arch opening (white)
+  const cx = sz / 2;
+  const archW = sz * 0.32;       // half-width of arch at base (narrower)
+  const baseY = sz * 0.85;       // bottom of arch
+  const springY = sz * 0.42;     // where curves start (spring line)
+  const peakY = sz * 0.06;       // tip of pointed arch
+
+  ctx.beginPath();
+  // Start bottom-left
+  ctx.moveTo(cx - archW, baseY);
+  // Left side straight up to spring line
+  ctx.lineTo(cx - archW, springY);
+  // Left arc curving to peak — two-center pointed arch
+  // Control points create the ogee/lancet shape
+  ctx.bezierCurveTo(
+    cx - archW, springY * 0.55,     // cp1: pulls left side up
+    cx - archW * 0.15, peakY + sz * 0.12, // cp2: curves toward center near peak
+    cx, peakY                        // end: pointed tip
+  );
+  // Right arc (mirror)
+  ctx.bezierCurveTo(
+    cx + archW * 0.15, peakY + sz * 0.12,
+    cx + archW, springY * 0.55,
+    cx + archW, springY
+  );
+  // Right side down
+  ctx.lineTo(cx + archW, baseY);
+  ctx.closePath();
+
+  // Fill arch opening white with soft edge
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+
+  // Subtle geometric rosette pattern in the surround (thin white lines)
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1.5;
+  // Concentric pointed arches as decorative frame
+  for (let i = 1; i <= 3; i++) {
+    const off = i * 12;
+    const aw = archW + off;
+    const sy = springY - off * 0.3;
+    const py = peakY - off * 0.8;
+    ctx.beginPath();
+    ctx.moveTo(cx - aw, baseY + off * 0.5);
+    ctx.lineTo(cx - aw, sy);
+    ctx.bezierCurveTo(cx - aw, sy * 0.55, cx - aw * 0.15, py + sz * 0.12, cx, py);
+    ctx.bezierCurveTo(cx + aw * 0.15, py + sz * 0.12, cx + aw, sy * 0.55, cx + aw, sy);
+    ctx.lineTo(cx + aw, baseY + off * 0.5);
+    ctx.stroke();
+  }
+
+  // Soften edges with slight Gaussian blur via repeated draws
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.center.set(0.5, 0.5);
+  tex.rotation = Math.PI * 1.5; // arch peak projects toward top-right from upper-left light
+  gobo.map = tex;
+})();
 
 scene.add(gobo, gobo.target);
 
