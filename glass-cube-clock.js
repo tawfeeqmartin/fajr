@@ -200,11 +200,11 @@ function _makeArchTexture() {
 
 // ARCH GOBO — dedicated accent SpotLight (warm candlelight, atmospheric)
 // Projects arch onto floor in front of cube + spills onto top face
-const archGobo = new THREE.SpotLight(0xfff5e6, 12);
+const archGobo = new THREE.SpotLight(0xfff5e6, 6);
 archGobo.position.set(-2.0, 9.5, 5.5);
-archGobo.target.position.set(0, 0, 0);
-archGobo.angle = 0.28;
-archGobo.penumbra = 0.08;
+archGobo.target.position.set(0, -0.5, -1.0);  // aim in front of cube, not directly at it
+archGobo.angle = 0.35;
+archGobo.penumbra = 0.25;
 archGobo.decay = 1.4;
 archGobo.castShadow = true;
 archGobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
