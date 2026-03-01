@@ -136,91 +136,92 @@ back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
 scene.add(back, back.target);
 
-// GOBO KEY — upper-front-left, broad wash (not a tight spot).
-// Shapes the floor with a gentle gradient pool, defines front/top cube faces.
-// Wide angle + soft penumbra = falloff is gradual, not a hard disco-spot.
-const gobo = new THREE.SpotLight(0xffffff, 72);
-gobo.position.set(-3.5, 6.5, 3.2);
+// ── LIGHTING RIG (Chris lookdev notes, Feb 28) ──
+// Philosophy: arch is a "memory of a place", not a projection of a shape.
+// Prayer beams = clock voice. Arch = chapel walls. Walls don't speak over the call to prayer.
+
+// KEY LIGHT — Rembrandt foundation, no gobo (clean key)
+const gobo = new THREE.SpotLight(0xffffff, 55);
+gobo.position.set(-3.5, 7.5, 4.0);
 gobo.target.position.set(0.3, 0, 0.5);
-gobo.angle = 0.42;       // wider cone — broad wash over cube + floor
-gobo.penumbra = 0.3;     // tighter falloff to preserve arch gobo shape
+gobo.angle = 0.32;
+gobo.penumbra = 0.25;
 gobo.decay = 1.4;
 gobo.castShadow = true;
 gobo.shadow.mapSize.set(_isMobile ? 512 : 1024, _isMobile ? 512 : 1024);
 gobo.shadow.bias = -0.001;
+scene.add(gobo, gobo.target);
 
-// ── Islamic arch gobo texture (procedural) ──
-// Pointed arch silhouette inspired by Masjid al-Haram window framing the Ka'bah
-(function() {
+// ── Procedural Islamic arch gobo texture ──
+function _makeArchTexture() {
   const sz = 512;
   const c = document.createElement('canvas');
   c.width = sz; c.height = sz;
   const ctx = c.getContext('2d');
-
-  // Black = blocked light, white = pass-through
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, sz, sz);
 
-  // Draw pointed Islamic arch opening (white)
   const cx = sz / 2;
-  const archW = sz * 0.32;       // half-width of arch at base (narrower)
-  const baseY = sz * 0.85;       // bottom of arch
-  const springY = sz * 0.42;     // where curves start (spring line)
-  const peakY = sz * 0.06;       // tip of pointed arch
+  const archW = sz * 0.30;
+  const baseY = sz * 0.88;
+  const springY = sz * 0.40;
+  const peakY = sz * 0.05;
 
   ctx.beginPath();
-  // Start bottom-left
   ctx.moveTo(cx - archW, baseY);
-  // Left side straight up to spring line
   ctx.lineTo(cx - archW, springY);
-  // Left arc curving to peak — two-center pointed arch
-  // Control points create the ogee/lancet shape
-  ctx.bezierCurveTo(
-    cx - archW, springY * 0.55,     // cp1: pulls left side up
-    cx - archW * 0.15, peakY + sz * 0.12, // cp2: curves toward center near peak
-    cx, peakY                        // end: pointed tip
-  );
-  // Right arc (mirror)
-  ctx.bezierCurveTo(
-    cx + archW * 0.15, peakY + sz * 0.12,
-    cx + archW, springY * 0.55,
-    cx + archW, springY
-  );
-  // Right side down
+  ctx.bezierCurveTo(cx - archW, springY * 0.5, cx - archW * 0.12, peakY + sz * 0.1, cx, peakY);
+  ctx.bezierCurveTo(cx + archW * 0.12, peakY + sz * 0.1, cx + archW, springY * 0.5, cx + archW, springY);
   ctx.lineTo(cx + archW, baseY);
   ctx.closePath();
-
-  // Fill arch opening white with soft edge
   ctx.fillStyle = '#fff';
   ctx.fill();
 
-  // Subtle geometric rosette pattern in the surround (thin white lines)
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 1.5;
-  // Concentric pointed arches as decorative frame
+  // Concentric decorative arches (subtle)
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1.2;
   for (let i = 1; i <= 3; i++) {
-    const off = i * 12;
-    const aw = archW + off;
-    const sy = springY - off * 0.3;
-    const py = peakY - off * 0.8;
+    const off = i * 10;
+    const aw = archW + off, sy = springY - off * 0.3, py = peakY - off * 0.6;
     ctx.beginPath();
-    ctx.moveTo(cx - aw, baseY + off * 0.5);
+    ctx.moveTo(cx - aw, baseY + off * 0.4);
     ctx.lineTo(cx - aw, sy);
-    ctx.bezierCurveTo(cx - aw, sy * 0.55, cx - aw * 0.15, py + sz * 0.12, cx, py);
-    ctx.bezierCurveTo(cx + aw * 0.15, py + sz * 0.12, cx + aw, sy * 0.55, cx + aw, sy);
-    ctx.lineTo(cx + aw, baseY + off * 0.5);
+    ctx.bezierCurveTo(cx - aw, sy * 0.5, cx - aw * 0.12, py + sz * 0.1, cx, py);
+    ctx.bezierCurveTo(cx + aw * 0.12, py + sz * 0.1, cx + aw, sy * 0.5, cx + aw, sy);
+    ctx.lineTo(cx + aw, baseY + off * 0.4);
     ctx.stroke();
   }
 
-  // Soften edges with slight Gaussian blur via repeated draws
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
-  tex.rotation = Math.PI * 1.5; // arch peak projects toward top-right from upper-left light
-  gobo.map = tex;
-})();
+  return tex;
+}
 
-scene.add(gobo, gobo.target);
+// ARCH GOBO — dedicated accent SpotLight (warm candlelight, atmospheric)
+// Projects arch onto floor in front of cube + spills onto top face
+const archGobo = new THREE.SpotLight(0xfff5e6, 12);
+archGobo.position.set(-2.0, 9.5, 5.5);
+archGobo.target.position.set(0, 0, 0);
+archGobo.angle = 0.28;
+archGobo.penumbra = 0.08;
+archGobo.decay = 1.4;
+archGobo.castShadow = true;
+archGobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
+archGobo.shadow.bias = -0.001;
+archGobo.map = _makeArchTexture();
+scene.add(archGobo, archGobo.target);
+
+// GHOST ARCH — soft spectral fill from opposite side (bilateral sacred symmetry)
+const ghostGobo = new THREE.SpotLight(0x2a1a4a, 4);
+ghostGobo.position.set(2.5, 7.0, 2.0);
+ghostGobo.target.position.set(0, 0, 0);
+ghostGobo.angle = 0.45;
+ghostGobo.penumbra = 0.6;
+ghostGobo.decay = 1.4;
+ghostGobo.castShadow = false;
+ghostGobo.map = _makeArchTexture();
+scene.add(ghostGobo, ghostGobo.target);
 
 // COOL RIM — catches back edges of cube, separates silhouette from bg
 const rim = new THREE.SpotLight(0x8060c0, 11);
