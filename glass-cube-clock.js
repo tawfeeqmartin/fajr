@@ -140,24 +140,182 @@ scene.add(back, back.target);
 // One dominant sacred shaft. Darkness as co-designer. Floor is the canvas.
 // Inspired by: Nasir al-Mulk, Tadao Ando, Lubezki, Deakins.
 
-// v58: Mashrabiya lattice texture — replaces procedural arch
-// Loaded from reference image: white openings = light, black lattice = blocked.
-// With additive blending, black→0 (invisible), white→adds warm light through the geometric screen.
-const _texLoader = new THREE.TextureLoader();
-const _mashrabiyaTex = _texLoader.load('references/mashrabiya-pattern.jpg');
-_mashrabiyaTex.colorSpace = THREE.SRGBColorSpace;
-_mashrabiyaTex.wrapS = THREE.ClampToEdgeWrapping;
-_mashrabiyaTex.wrapT = THREE.ClampToEdgeWrapping;
-_mashrabiyaTex.minFilter = THREE.LinearMipmapLinearFilter;
-_mashrabiyaTex.magFilter = THREE.LinearFilter;
+// v59: Procedural mashrabiya texture — 8-fold Islamic geometric pattern
+// Constructed from circle-and-polygon method: circles on grid intersections,
+// construction lines between intersection points, extract the star-and-cross motif.
+// 8-fold symmetry = Rub el Hizb (✳), the 8-pointed star ubiquitous in Islamic art.
+// Reflects Tawhid (unity from one center), infinity (seamless tiling), and the
+// 8 angels bearing the Throne. Background transparent, openings white with soft edges.
 
-// Gobo copy — separate texture instance for the SpotLight .map
-const _mashrabiyaGobo = _texLoader.load('references/mashrabiya-pattern.jpg');
-_mashrabiyaGobo.colorSpace = THREE.SRGBColorSpace;
-_mashrabiyaGobo.wrapS = THREE.ClampToEdgeWrapping;
-_mashrabiyaGobo.wrapT = THREE.ClampToEdgeWrapping;
-_mashrabiyaGobo.minFilter = THREE.LinearMipmapLinearFilter;
-_mashrabiyaGobo.magFilter = THREE.LinearFilter;
+function _makeMashrabiyaTexture() {
+  const S = 1024;
+  const canvas = document.createElement('canvas');
+  canvas.width = S; canvas.height = S;
+  const ctx = canvas.getContext('2d');
+
+  // Clear to fully transparent
+  ctx.clearRect(0, 0, S, S);
+
+  // --- 8-fold rosette construction ---
+  // The classic Islamic 8-fold pattern: overlapping squares rotated 45° form
+  // an 8-pointed star (octagram). The negative space creates crosses and smaller
+  // stars. We tile this across the canvas.
+  //
+  // Construction: from a circle of radius R, inscribe two squares at 0° and 45°.
+  // Their intersections define the 8-pointed star vertices. The pattern tiles
+  // on a square grid where cell = 2R.
+
+  const COLS = 5;   // number of rosette centers across
+  const cell = S / COLS;
+  const R = cell * 0.42; // rosette radius — slight breathing room
+
+  // Soft white stroke for the openings (light passing through the screen)
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = 2.0;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // We'll draw onto a temp canvas, then blur for soft edges
+  const tmp = document.createElement('canvas');
+  tmp.width = S; tmp.height = S;
+  const tc = tmp.getContext('2d');
+  tc.clearRect(0, 0, S, S);
+  tc.strokeStyle = 'rgba(255,255,255,0.9)';
+  tc.lineWidth = 2.0;
+  tc.lineCap = 'round';
+  tc.lineJoin = 'round';
+
+  // Draw an 8-pointed star (octagram) at center (cx, cy) with radius r.
+  // Formed by two overlapping squares rotated 22.5° apart — connecting
+  // alternating vertices of a regular octagon gives the classic khatam shape.
+  function drawOctagram(cx, cy, r) {
+    const pts = [];
+    // 16 points: alternating outer (star tips) and inner (star notches)
+    // Inner radius from octagram geometry: r * cos(π/8) / cos(π/8) — for
+    // a proper octagram {8/2}, inner vertices sit at r * cos(π/4) ≈ 0.4142r
+    // from center along the bisecting angles.
+    const innerR = r * 0.42;
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2 - Math.PI / 2;
+      const rad = (i % 2 === 0) ? r : innerR;
+      pts.push({ x: cx + Math.cos(angle) * rad, y: cy + Math.sin(angle) * rad });
+    }
+    tc.beginPath();
+    tc.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+      tc.lineTo(pts[i].x, pts[i].y);
+    }
+    tc.closePath();
+    tc.stroke();
+  }
+
+  // Draw connecting cross-pattern lines between adjacent rosettes.
+  // In Islamic geometric patterns, the interstice between stars forms
+  // elongated hexagons and cross shapes — these are the "openings"
+  // that light passes through.
+  function drawInterstitial(cx, cy, r) {
+    // Small inner octagon — the hub of each rosette
+    const innerR = r * 0.28;
+    const hubPts = [];
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      hubPts.push({ x: cx + Math.cos(angle) * innerR, y: cy + Math.sin(angle) * innerR });
+    }
+    tc.beginPath();
+    tc.moveTo(hubPts[0].x, hubPts[0].y);
+    for (let i = 1; i < hubPts.length; i++) tc.lineTo(hubPts[i].x, hubPts[i].y);
+    tc.closePath();
+    tc.stroke();
+  }
+
+  // Draw secondary construction lines — the extended kite shapes
+  // between star tips, forming the characteristic Islamic cross motif.
+  function drawKites(cx, cy, r, cell) {
+    const tipR = r;
+    const midR = r * 0.7;
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      const nextAngle = ((i + 1) / 8) * Math.PI * 2 - Math.PI / 2;
+      const midAngle = ((i + 0.5) / 8) * Math.PI * 2 - Math.PI / 2;
+
+      // Kite: tip → mid-edge → next-tip (the petal shapes between stars)
+      tc.beginPath();
+      tc.moveTo(cx + Math.cos(angle) * tipR, cy + Math.sin(angle) * tipR);
+      tc.lineTo(cx + Math.cos(midAngle) * midR, cy + Math.sin(midAngle) * midR);
+      tc.lineTo(cx + Math.cos(nextAngle) * tipR, cy + Math.sin(nextAngle) * tipR);
+      tc.stroke();
+    }
+  }
+
+  // Tile the pattern: rosettes at grid centers + half-offsets for seamless repeat
+  // Extend beyond canvas bounds so edge rosettes complete properly
+  for (let row = -1; row <= COLS + 1; row++) {
+    for (let col = -1; col <= COLS + 1; col++) {
+      const cx = (col + 0.5) * cell;
+      const cy = (row + 0.5) * cell;
+
+      // Primary rosette
+      drawOctagram(cx, cy, R);
+      drawInterstitial(cx, cy, R);
+      drawKites(cx, cy, R, cell);
+
+      // Half-offset rosettes (brick pattern) — smaller rosettes in the gaps
+      // These create the secondary star pattern between primary rosettes
+      const hx = cx + cell * 0.5;
+      const hy = cy + cell * 0.5;
+      const smallR = R * 0.52;
+      drawOctagram(hx, hy, smallR);
+      drawInterstitial(hx, hy, smallR);
+    }
+  }
+
+  // Add very fine construction circles at each rosette center (barely visible)
+  // This echoes the circle-grid construction method of classical Islamic geometry
+  tc.strokeStyle = 'rgba(255,255,255,0.2)';
+  tc.lineWidth = 0.8;
+  for (let row = -1; row <= COLS + 1; row++) {
+    for (let col = -1; col <= COLS + 1; col++) {
+      const cx = (col + 0.5) * cell;
+      const cy = (row + 0.5) * cell;
+      tc.beginPath();
+      tc.arc(cx, cy, R * 0.18, 0, Math.PI * 2);
+      tc.stroke();
+    }
+  }
+
+  // Composite the temp canvas onto main with slight blur for soft edges
+  // (light through a stone screen has diffused edges, not pixel-sharp lines)
+  ctx.filter = 'blur(1.5px)';
+  ctx.drawImage(tmp, 0, 0);
+  ctx.filter = 'none';
+
+  // Second pass: overlay a crisper version at lower opacity for definition
+  ctx.globalAlpha = 0.4;
+  ctx.drawImage(tmp, 0, 0);
+  ctx.globalAlpha = 1.0;
+
+  // Radial vignette — fade edges to transparent so the pattern doesn't
+  // have hard rectangular borders (light through a screen falls off at edges)
+  const grad = ctx.createRadialGradient(S/2, S/2, S * 0.15, S/2, S/2, S * 0.52);
+  grad.addColorStop(0, 'rgba(0,0,0,0)');
+  grad.addColorStop(0.7, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, 'rgba(0,0,0,1)');
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, S, S);
+  ctx.globalCompositeOperation = 'source-over';
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.ClampToEdgeWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  return tex;
+}
+
+const _mashrabiyaTex = _makeMashrabiyaTexture();
+const _mashrabiyaGobo = _makeMashrabiyaTexture();
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
 const gobo = new THREE.SpotLight(0xffc870, 8); // v58: 6→8 — mashrabiya lattice needs more gobo for geometric pattern to read on floor/cube
@@ -171,7 +329,7 @@ gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
 gobo.shadow.bias = -0.001;
 gobo.shadow.camera.near = 1;
 gobo.shadow.camera.far = 25;
-gobo.map = _mashrabiyaGobo; // v58: mashrabiya lattice on gobo — real light casts geometric pattern onto floor and cube
+gobo.map = _mashrabiyaGobo; // v59: procedural mashrabiya on gobo — real light casts 8-fold geometric pattern onto floor and cube
 scene.add(gobo, gobo.target);
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
@@ -328,8 +486,8 @@ godRayMesh.rotation.y = Math.PI * 0.10; // slight tilt toward camera, follows be
 godRayMesh.visible = false;
 scene.add(godRayMesh);
 
-// MASHRABIYA FLOOR STAMP — v58: replaces procedural arch with Islamic geometric lattice
-// Additive blend: white openings → warm light, black lattice → 0 (invisible).
+// MASHRABIYA FLOOR STAMP — v59: procedural 8-fold Islamic geometric pattern
+// Additive blend: white openings → warm light, transparent background → invisible.
 // PlaneGeometry sized to match the tall narrow panel (~1:3.5 aspect).
 // Same position/rotation as v57: (-3.5, y, 0), -PI*0.2 diagonal.
 // Two layers: bloom underlayer (wider, dimmer corona) + base stamp (sharp lattice pattern).
@@ -370,7 +528,7 @@ archFloorMesh.position.set(-3.5, 0.022, 0);
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
-// v58: outline stamp removed — mashrabiya lattice carries its own intricate edges
+// v59: outline stamp removed — mashrabiya lattice carries its own intricate edges
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
