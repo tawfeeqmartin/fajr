@@ -142,7 +142,8 @@ scene.add(back, back.target);
 
 // Procedural Islamic arch gobo texture
 function _makeArchTexture() {
-  const sz = 1024; // v12: 512→1024 — double resolution, arch edges survive projection + bilinear filtering
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const sz = 1024 * dpr; // v12: 512→1024 — double resolution, arch edges survive projection + bilinear filtering; scaled by DPR so blur looks consistent across devices
   const c = document.createElement('canvas');
   c.width = sz; c.height = sz;
   const ctx = c.getContext('2d');
@@ -164,16 +165,34 @@ function _makeArchTexture() {
   ctx.lineTo(cx + archW, baseY);
   ctx.closePath();
   // v67: extreme blur — no visible edges, pure diffused glow
-  ctx.filter = 'blur(40px)';
+  ctx.filter = `blur(${40 * dpr}px)`;
   ctx.fillStyle = '#e8e0d8';
   ctx.fill();
   ctx.filter = 'none';
   // second pass: re-blur the entire canvas for ultra-soft falloff
   const imgData = ctx.getImageData(0, 0, sz, sz);
   ctx.putImageData(imgData, 0, 0);
-  ctx.filter = 'blur(24px)';
+  ctx.filter = `blur(${24 * dpr}px)`;
   ctx.drawImage(c, 0, 0);
   ctx.filter = 'none';
+  // v68: edge vignette — fade all 4 edges to black so PlaneGeometry boundary dissolves
+  const edgeFade = 0.18; // fraction of canvas that fades out
+  // left edge
+  let g = ctx.createLinearGradient(0, 0, sz * edgeFade, 0);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, sz * edgeFade, sz);
+  // right edge
+  g = ctx.createLinearGradient(sz, 0, sz * (1 - edgeFade), 0);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(sz * (1 - edgeFade), 0, sz * edgeFade, sz);
+  // top edge
+  g = ctx.createLinearGradient(0, 0, 0, sz * edgeFade);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, sz, sz * edgeFade);
+  // bottom edge
+  g = ctx.createLinearGradient(0, sz, 0, sz * (1 - edgeFade));
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, sz * (1 - edgeFade), sz, sz * edgeFade);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
@@ -183,7 +202,8 @@ function _makeArchTexture() {
 
 // v21: edge-only arch outline — stroke with no fill, reads as silhouette boundary
 function _makeArchOutlineTexture() {
-  const sz = 1024;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const sz = 1024 * dpr;
   const c = document.createElement('canvas');
   c.width = sz; c.height = sz;
   const ctx = c.getContext('2d');
@@ -203,8 +223,8 @@ function _makeArchOutlineTexture() {
   ctx.closePath();
   // stroke only — no fill
   // v57: blur the outline — softens painted-edge read into diffused light boundary
-  ctx.filter = 'blur(6px)';
-  ctx.lineWidth = 14;  // v57: 6→14px — wider stroke + blur = soft atmospheric edge, not crisp paint
+  ctx.filter = `blur(${6 * dpr}px)`;
+  ctx.lineWidth = 14 * dpr;  // v57: 6→14px — wider stroke + blur = soft atmospheric edge, not crisp paint; scaled by DPR
   ctx.strokeStyle = '#ffffff';
   ctx.lineJoin = 'round';
   ctx.stroke();
