@@ -40,7 +40,7 @@ let dpr = calcDpr(W, H);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.toneMapping = THREE.AgXToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.25; // v56: 1.2→1.25 — open midtones, arch warmth breathes
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
@@ -169,7 +169,7 @@ function _makeArchTexture() {
   // v12: bright edge stroke — window frame light diffraction. 4px at 1024 = thin crisp
   // boundary that survives additive blending + projection softening. The eye locks onto
   // this bright contour and reads "pointed arch" instead of amorphous warm zone.
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 5;  // v56: 4→5px — survives bilinear on mobile, tighter arch read
   ctx.strokeStyle = '#ffffff';
   ctx.lineJoin = 'round';
   ctx.stroke();
@@ -328,7 +328,7 @@ scene.add(fogLayerMesh);
 const warmFogMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
-    uOpacity: { value: 0.07 },
+    uOpacity: { value: 0.09 },  // v56: 0.07→0.09 — lower frame breathes, not dead
     uColor:   { value: new THREE.Color(0x9e4200) }, // deep amber, not blown out
   },
   vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
@@ -397,7 +397,7 @@ const _archStampTex = _makeArchTexture();
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(14, 34),  // v31: scaled down 25% to fit viewport
+  new THREE.PlaneGeometry(15.4, 34),  // v56: 14→15.4 (10% wider per client)
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xff7020),
@@ -405,17 +405,17 @@ const archBloomMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.04,
+    opacity: 0.06,  // v56: 0.04→0.06 — bloom earns its layer, real atmospheric corona
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archBloomMesh.position.set(-3, 0.019, 0); // v32: closer to camera, further left
+archBloomMesh.position.set(-3.5, 0.019, 0); // v56: -3→-3.5, pull arch tip into frame
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
 // BASE STAMP — primary arch silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(11, 28),  // v31: scaled down 25% to fit viewport
+  new THREE.PlaneGeometry(12.1, 28),  // v56: 11→12.1 (10% wider per client)
   new THREE.MeshBasicMaterial({
     map: _archStampTex,
     color: new THREE.Color(0xffaa40),
@@ -427,14 +427,14 @@ const archFloorMesh = new THREE.Mesh(
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archFloorMesh.position.set(-3, 0.022, 0); // v32: closer to camera, further left
+archFloorMesh.position.set(-3.5, 0.022, 0); // v56: -3→-3.5, pull arch tip into frame
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
 // OUTLINE STAMP — v21: edge-only arch for silhouette definition
 const _archOutlineTex = _makeArchOutlineTexture();
 const archOutlineMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(11, 28),  // v31: scaled down 25%
+  new THREE.PlaneGeometry(12.1, 28),  // v56: 11→12.1 (10% wider per client)
   new THREE.MeshBasicMaterial({
     map: _archOutlineTex,
     color: new THREE.Color(0xffcc66),
@@ -446,7 +446,7 @@ const archOutlineMesh = new THREE.Mesh(
   })
 );
 archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archOutlineMesh.position.set(-3, 0.024, 0); // v32: closer to camera, further left
+archOutlineMesh.position.set(-3.5, 0.024, 0); // v56: -3→-3.5, pull arch tip into frame
 archOutlineMesh.renderOrder = 3;
 scene.add(archOutlineMesh);
 
