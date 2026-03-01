@@ -1,5 +1,41 @@
 # CHANGELOG — A Gift of Time
 
+## Quibla of Light — v1–v3 Sacred Shaft Iterations (Feb 28, 2026)
+
+### Philosophy
+One dominant sacred shaft. Darkness as co-designer. Floor is the canvas.
+Inspired by: Nasir al-Mulk, Tadao Ando, Lubezki, Deakins.
+
+### `64b7712` — v1: Quibla of Light (initial rig)
+- Sacred shaft gobo key: position (−2.0, 12, 5.0), intensity 45, angle 0.45, warm amber
+- Arch texture: `tex.rotation = Math.PI * 0.75` (tip aimed upper-right)
+- Backlight (0x4040a0, 10) for FBO glass transmission
+- Cold counter (0x0a1855, 6) — Deakins warm/cold split
+- Violet rim (0x8055f0, 6) — edge catch, cube separation
+- Prayer ambient: hemisphere (0x1a0830/0x0a1520, 0.28)
+- Ambient 0.16 — shadow has to mean something
+- **Result:** concept established; cube top face blown out, scene too bright overall
+
+### `b5c10dd` — v2: Fix blowout
+- Shaft intensity 45 → 20; position y raised to 16 (steeper angle)
+- Cone narrowed: angle 0.45 → 0.22
+- `tex.rotation` adjusted; wider cone target repositioned
+- **Result:** blowout fixed; arch too dim and shape lost inside tight cone
+
+### `b398f6b` — v3: Arch reads — sacred geometry
+- Shaft intensity 20 → 30; angle 0.22 → 0.30
+- Arch texture fill 92%: `archW = sz * 0.46` — "arch edge IS the cone boundary"
+- `tex.rotation = 0` — natural floor projection (tip away from camera, legs toward viewer)
+- Ambient raised to 0.28; violet rim tightened (angle 0.18) — cleaner rim, no floor spill
+- Internal glow (`uInternalGlow = 0.14`) — trapped warmth at Fresnel edges
+- godRay volume plane added along beam path (mid-column air-mass)
+- warmFogMesh (amber, additive) — sacred warmth counterbalances cold indigo fog
+- **Result:** scene much better — dark, soul, cube not blown, prayer beams pop. BUT arch
+  reads as diagonal light boundary, not pointed arch silhouette. 92% fill means arch edge ≈
+  cone boundary; no dark frame projects, no readable arch shape.
+
+---
+
 ## Lighting Rig Overhaul (Feb 28, 2026)
 
 ### Chris Lookdev Notes — Islamic Arch Gobo

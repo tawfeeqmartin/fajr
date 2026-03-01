@@ -149,7 +149,7 @@ function _makeArchTexture() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, sz, sz);
   const cx = sz / 2;
-  const archW = sz * 0.46;   // fills ~92% of canvas — arch edge IS the cone boundary, shape reads on floor
+  const archW = sz * 0.28;   // 56% fill — arch surrounded by 22% dark margin each side; full shape (tip + both legs) projects within cone, silhouette reads as pointed arch
   const baseY = sz * 0.99;   // legs reach canvas bottom edge
   const springY = sz * 0.42;
   const peakY = sz * 0.04;
@@ -172,8 +172,8 @@ function _makeArchTexture() {
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
 const gobo = new THREE.SpotLight(0xfff4d6, 30);
 gobo.position.set(-2.0, 16, 5.0);
-gobo.target.position.set(0.3, 0, -2.0); // centered in visible floor area, pool stays in frame
-gobo.angle = 0.28;   // slightly wider than arch fill — arch edge (not cone edge) is the floor boundary
+gobo.target.position.set(0.5, 0, 1.5); // foreground floor — arch fills the dead lower frame zone
+gobo.angle = 0.32;   // slightly wider — dark frame (44% of texture) projects around arch, silhouette readable
 gobo.penumbra = 0.05; // hair of softness at cone boundary, arch edge stays crisp
 gobo.decay = 1.5;
 gobo.castShadow = true;
@@ -253,7 +253,7 @@ scene.add(tawafSpot, tawafSpot.target);
 const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
-    uOpacity: { value: 0.22 }, // deeper pool — feels like the floor breathes
+    uOpacity: { value: 0.27 }, // deeper pool — feels like the floor breathes
     uColor:   { value: new THREE.Color(0x1a2888) }, // richer indigo, less cyan
   },
   vertexShader: `
@@ -277,6 +277,61 @@ const fogLayerMesh = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), fogLayerMat
 fogLayerMesh.rotation.x = -Math.PI / 2;
 fogLayerMesh.position.y = 0.018;
 scene.add(fogLayerMesh);
+
+// WARM FLOOR GLOW — sacred amber pool in the foreground floor zone.
+// Additive: only adds warmth, never darkens. Fills the dead lower frame area.
+// Counterbalances the cold indigo fog — sacred warmth vs night cold.
+const warmFogMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime:    { value: 0 },
+    uOpacity: { value: 0.17 },
+    uColor:   { value: new THREE.Color(0x9e4200) }, // deep amber, not blown out
+  },
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform float uTime, uOpacity; uniform vec3 uColor;
+    varying vec2 vUv;
+    void main() {
+      vec2 c = vUv - 0.5;
+      float dist = length(c) * 2.5;
+      float fog = 1.0 - smoothstep(0.05, 1.0, dist);
+      float breath = 0.88 + 0.12 * sin(uTime * 0.52 + 0.9);
+      gl_FragColor = vec4(uColor, fog * uOpacity * breath);
+    }
+  `,
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+});
+const warmFogMesh = new THREE.Mesh(new THREE.PlaneGeometry(55, 55), warmFogMat);
+warmFogMesh.rotation.x = -Math.PI / 2;
+warmFogMesh.position.set(1.2, 0.017, 3.8); // foreground right — follows gobo pool
+scene.add(warmFogMesh);
+
+// SACRED SHAFT COLUMN — god ray in the gobo beam path.
+// Gives the shaft air-mass: light you feel, not just see.
+// Positioned along beam from (-2, 16, 5) → (0.5, 0, 1.5), mid-column at y≈6.
+const godRayMat = new THREE.ShaderMaterial({
+  uniforms: { uTime: { value: 0 }, uOpacity: { value: 0.09 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform float uTime, uOpacity;
+    varying vec2 vUv;
+    void main() {
+      float sx = exp(-pow((vUv.x - 0.5) * 5.5, 2.0));
+      float sy = smoothstep(0.0, 0.10, vUv.y) * smoothstep(1.0, 0.38, vUv.y);
+      float breath = 0.90 + 0.10 * sin(uTime * 0.38 + vUv.y * 2.5);
+      vec3 col = mix(vec3(1.0, 0.96, 0.85), vec3(1.0, 0.80, 0.48), vUv.y * 0.8);
+      float a = sx * sy * uOpacity * breath;
+      if (a < 0.003) discard;
+      gl_FragColor = vec4(col, a);
+    }
+  `,
+  transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+});
+const godRayMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.26, 13), godRayMat);
+// Along beam midpoint: lerp((-2,16,5), (0.5,0,1.5), 0.55) ≈ (-0.6, 7.2, 3.1)
+godRayMesh.position.set(-0.6, 7.2, 3.1);
+godRayMesh.rotation.y = Math.PI * 0.10; // slight tilt toward camera, follows beam oblique
+scene.add(godRayMesh);
 
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
@@ -1068,6 +1123,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   const t = clock.getElapsedTime();
   cubeMat.uniforms.uTime.value = t;
   fogLayerMat.uniforms.uTime.value = t;
+  warmFogMat.uniforms.uTime.value = t;
+  godRayMat.uniforms.uTime.value = t;
 
   // Sync hands to real clock time
   const now = new Date();
