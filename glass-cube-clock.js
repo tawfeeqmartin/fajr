@@ -176,7 +176,7 @@ function _makeArchTexture() {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
-  tex.rotation = 0; // natural projection — arch tip faces away from camera, legs open toward viewer
+  tex.rotation = -Math.PI * 0.35; // v15: rotate texture so arch tip projects toward upper-right (+X, -Z) on floor
   return tex;
 }
 
@@ -377,8 +377,8 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.04, // v12: 0.07→0.04 — less atmospheric wash so base stamp edge definition reads; halo not shape
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.35, 0); // v14: ~63° steeper diagonal — arch spans bottom-left to upper-right corner
-archBloomMesh.position.set(0, 0.019, -0.5); // v14: centered on viewport — arch frames entire scene
+archBloomMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.12, 0); // v15: -22° — tip toward (+X, -Z) upper-right corner
+archBloomMesh.position.set(2, 0.019, -2); // v15: center offset so tip lands at ~(4, -4) upper-right
 archBloomMesh.renderOrder = 1; // below base stamp
 scene.add(archBloomMesh);
 
@@ -394,8 +394,8 @@ const archFloorMesh = new THREE.Mesh(
     opacity: 0.26,  // v10: 0.20→0.26 — compensates gobo 60→48 pull; arch floor pool reads at same warmth. Additive carries the shape now.
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.35, 0); // v14: matches bloom — steeper diagonal bottom-left to upper-right
-archFloorMesh.position.set(0, 0.022, -0.5); // v14: centered — matches bloom, arch frames entire scene
+archFloorMesh.rotation.set(-Math.PI / 2, -Math.PI * 0.12, 0); // v15: matches bloom — tip toward upper-right
+archFloorMesh.position.set(2, 0.022, -2); // v15: matches bloom — tip at ~(4, -4) upper-right corner
 archFloorMesh.renderOrder = 2; // above fog layers and bloom
 scene.add(archFloorMesh);
 
