@@ -195,12 +195,13 @@ function _makeArchTexture() {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.center.set(0.5, 0.5);
+  tex.rotation = Math.PI * 0.75; // rotate arch peak toward top-right of floor
   return tex;
 }
 
 // ARCH GOBO — dedicated accent SpotLight (warm candlelight, atmospheric)
 // Projects arch onto floor in front of cube + spills onto top face
-const archGobo = new THREE.SpotLight(0xfff5e6, 6);
+const archGobo = new THREE.SpotLight(0xfff5e6, 10);
 archGobo.position.set(-2.0, 9.5, 5.5);
 archGobo.target.position.set(0, -0.5, -1.0);  // aim in front of cube, not directly at it
 archGobo.angle = 0.35;
