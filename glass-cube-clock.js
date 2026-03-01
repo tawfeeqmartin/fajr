@@ -187,18 +187,41 @@ function _makeMashrabiyaTexture() {
   const ROWS = 4;
   const cellX = S / COLS;
   const cellY = S / ROWS;
-  const starR = 120;
+  const starR = 150;
 
-  tc.fillStyle = 'rgba(255,255,255,0.9)';
+  tc.fillStyle = '#ffffff';
 
+  // Collect star centers for connecting lines
+  const centers = [];
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      drawStar((col + 0.5) * cellX, (row + 0.5) * cellY, starR);
+      const cx = (col + 0.5) * cellX;
+      const cy = (row + 0.5) * cellY;
+      centers.push({x: cx, y: cy});
+      drawStar(cx, cy, starR);
     }
   }
 
-  // Heavy blur — soft pools of light, not crisp geometry
-  ctx.filter = 'blur(8px)';
+  // Thin connecting lines between adjacent star centers — geometric structure
+  tc.strokeStyle = 'rgba(255,255,255,0.3)';
+  tc.lineWidth = 1;
+  for (let i = 0; i < centers.length; i++) {
+    for (let j = i + 1; j < centers.length; j++) {
+      const dx = centers[i].x - centers[j].x;
+      const dy = centers[i].y - centers[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Connect only adjacent stars (within ~1.2 cell diagonals)
+      if (dist < Math.max(cellX, cellY) * 1.2) {
+        tc.beginPath();
+        tc.moveTo(centers[i].x, centers[i].y);
+        tc.lineTo(centers[j].x, centers[j].y);
+        tc.stroke();
+      }
+    }
+  }
+
+  // Moderate blur — crisp enough for stars, soft enough for light
+  ctx.filter = 'blur(3px)';
   ctx.drawImage(tmp, 0, 0);
   ctx.filter = 'none';
 
@@ -225,7 +248,7 @@ const _mashrabiyaTex = _makeMashrabiyaTexture();
 const _mashrabiyaGobo = _makeMashrabiyaTexture();
 
 // SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffc870, 8); // v58: 6→8 — mashrabiya lattice needs more gobo for geometric pattern to read on floor/cube
+const gobo = new THREE.SpotLight(0xffc870, 10); // v62: 8→10 — stronger gobo for readable star pattern
 gobo.position.set(-6, 16, 3);
 gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
 gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
@@ -427,7 +450,7 @@ const archFloorMesh = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    opacity: 0.40,  // v60: pools of warm light — pattern reads clearly
+    opacity: 0.45,  // v62: stronger presence — pattern reads clearly
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
