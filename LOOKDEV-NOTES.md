@@ -187,7 +187,36 @@ PBR irradiance math: gobo (intensity 40, decay 1.5) at distance 16.6m delivers o
 
 **Key lesson:** SpotLight.map gobo PBR irradiance on a very dark floor (albedo 0x071) cannot compete with AdditiveBlending floor effects unless intensity is extreme. Belt-and-suspenders: keep the gobo for realistic PBR shadow + light, but always back it with an additive stamp at the same target position.
 
-### v8: Two-Layer Arch + Cube Glow (current)
+### v9: Oblique Arch — legs hidden, projection angled (current)
+
+**CLIENT FEEDBACK (Tawfeeq, Feb 28 2026):**
+- "I don't want to see the bottom of the arch in frame"
+- "Find a composition where the arch doesn't project so straight on"
+
+**ROOT CAUSE — Legs in frame:**
+`baseY = sz * 0.99` drew arch legs to the canvas bottom edge. With stamp centered at z=1.5 and plane height 7–9m, the leg texture mapped to world z≈5–6m — directly in the lower-frame foreground. Camera at z=15 sees z=5–6 at the bottom of the viewport. Both problems (legs visible, straight-on composition) trace back to the same origin: stamp centered close to camera, axis-aligned, legs filling near plane.
+
+**Fix A — Clip the legs from texture:**
+`baseY = sz * 0.62` (was `0.99`). Legs now stop at 62% down the canvas; the bottom 38% is black. In additive blending, black = 0 contribution — no arch feet in frame, no matter where the stamp is positioned. The arch reads as an OPENING (arch body + tip) rather than a full architectural element with feet on the floor. This is compositionally correct: you are INSIDE or oblique to the arch, not standing in front of it.
+
+**Fix B — Oblique rotation:**
+`archBloomMesh.rotation.set(-Math.PI/2, Math.PI*0.22, 0)` and same for `archFloorMesh`. The `rotation.y = Math.PI*0.22` (~40°) in XYZ Euler order rotates the flat horizontal arch pattern around world Y after it's been laid flat by Rx(-PI/2). Result: arch tip points to back-left (-0.635, 0, -0.772 direction), legs exit toward front-right. Light comes through the arch like a side-window, not a straight overhead slot.
+
+**Fix C — Reposition stamps behind cube:**
+`position.set(-0.5, 0, -1.0)` (was `(0.5, 0, 1.5)`). Stamp center is now behind and left of the cube. Arch legs (at short baseY=0.62) end at world ~(0.19, 0, -0.17) — right at the cube base where the cube geometry partly occludes the floor. Arch tip lands at ~(-2.5, 0, -3.5) — deep back-left, appears upper-left in frame.
+
+**Fix D — Gobo swung far left:**
+`gobo.position.set(-6, 16, 3)` (was `(-2.0, 16, 5.0)`). Target: `(-0.5, 0, -1.0)`. Throw distance ~17.4m (similar), decay 1.0 unchanged — floor irradiance maintained. Extreme lateral position means the PBR gobo shadow is genuinely oblique: cone footprint elongated across the floor, shadow hard on the left flank, arch interior lit from the left. Angle widened 0.32→0.35 to cover the wider oblique footprint.
+
+**Expected composition:**
+- Upper-left: arch body and tip glow amber against dark floor, deep in mid-ground
+- Center: cube lit from left by oblique gobo, Deakins warm/cold split sharpened (gobo more lateral = more cube-left warmth)
+- Lower/right foreground: deep indigo shadow — no arch legs, no stamp edge visible
+- Overall read: light coming through an arch opening from the left, as if the viewer is partially inside the aperture or looking across the sacred space
+
+**Key principle learned:** "Straight-on" arch = stamp centered on camera axis, legs toward viewer. To break it: rotate stamp Y + swing gobo lateral + push stamp center behind the focal subject (cube). Three independent moves that all reinforce the same directional read.
+
+### v8: Two-Layer Arch + Cube Glow
 
 **V7 render diagnosis:**
 - Arch stamp shape reads correctly (v4/v6 progress intact) — silhouette is there.

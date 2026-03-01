@@ -150,7 +150,7 @@ function _makeArchTexture() {
   ctx.fillRect(0, 0, sz, sz);
   const cx = sz / 2;
   const archW = sz * 0.28;   // 56% fill — arch surrounded by 22% dark margin each side; full shape (tip + both legs) projects within cone, silhouette reads as pointed arch
-  const baseY = sz * 0.99;   // legs reach canvas bottom edge
+  const baseY = sz * 0.62;   // v9: legs clipped at 62% — bottom 38% of canvas is dark so arch feet never appear in frame
   const springY = sz * 0.42;
   const peakY = sz * 0.04;
   ctx.beginPath();
@@ -171,9 +171,9 @@ function _makeArchTexture() {
 
 // SACRED SHAFT — dominant gobo key (the Tadao Ando slit)
 const gobo = new THREE.SpotLight(0xffc870, 60); // v8: 50→60 — more floor irradiance; candlelight amber saturated enough to survive AgX as warm, not grey
-gobo.position.set(-2.0, 16, 5.0);
-gobo.target.position.set(0.5, 0, 1.5); // foreground floor — arch fills the dead lower frame zone
-gobo.angle = 0.32;   // slightly wider — dark frame (44% of texture) projects around arch, silhouette readable
+gobo.position.set(-6, 16, 3);          // v9: swung far left — oblique shaft angle, light enters from side like real arch opening
+gobo.target.position.set(-0.5, 0, -1.0); // v9: behind cube — arch lands in mid-ground, legs clip behind cube base
+gobo.angle = 0.35;   // v9: 0.32→0.35 — slightly wider to cover oblique floor footprint from extreme lateral angle
 gobo.penumbra = 0.05; // hair of softness at cone boundary, arch edge stays crisp
 gobo.decay = 1.0; // v6: 1.5→1.0 — less falloff over 16m throw, arch pool hits floor hard enough to read
 gobo.castShadow = true;
@@ -366,8 +366,8 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.07, // very dim — halo only, not structural shape
   })
 );
-archBloomMesh.rotation.x = -Math.PI / 2;
-archBloomMesh.position.set(0.5, 0.019, 1.5); // same target, just below base stamp
+archBloomMesh.rotation.set(-Math.PI / 2, Math.PI * 0.22, 0); // v9: rotation.y=0.22π (~40°) — arch angled obliquely on floor; tip points back-left, legs exit right-front (cropped by baseY clip)
+archBloomMesh.position.set(-0.5, 0.019, -1.0); // v9: behind cube — arch legs land at cube base, hidden; arch body opens back-left
 archBloomMesh.renderOrder = 1; // below base stamp
 scene.add(archBloomMesh);
 
@@ -383,8 +383,8 @@ const archFloorMesh = new THREE.Mesh(
     opacity: 0.20,  // v8: 0.14→0.20 — with saturated amber color, stacking with gobo (0xffc870) stays warm not grey. Sacred pool needs to glow.
   })
 );
-archFloorMesh.rotation.x = -Math.PI / 2;
-archFloorMesh.position.set(0.5, 0.022, 1.5); // matches gobo target — arch sits on foreground floor
+archFloorMesh.rotation.set(-Math.PI / 2, Math.PI * 0.22, 0); // v9: matches bloom — same oblique 40° rotation, arch reads as perspective-foreshortened opening
+archFloorMesh.position.set(-0.5, 0.022, -1.0); // v9: matches bloom + gobo target
 archFloorMesh.renderOrder = 2; // above fog layers and bloom
 scene.add(archFloorMesh);
 
