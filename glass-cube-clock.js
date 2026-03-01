@@ -409,7 +409,7 @@ const archBloomMesh = new THREE.Mesh(
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archBloomMesh.position.set(-1.0, 0.019, -3); // v31: push back for viewport fit
+archBloomMesh.position.set(-2, 0.019, -1); // v32: closer to camera, further left
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
@@ -427,7 +427,7 @@ const archFloorMesh = new THREE.Mesh(
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archFloorMesh.position.set(-1.0, 0.022, -3); // v31: push back for viewport fit
+archFloorMesh.position.set(-2, 0.022, -1); // v32: closer to camera, further left
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
@@ -446,7 +446,7 @@ const archOutlineMesh = new THREE.Mesh(
   })
 );
 archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archOutlineMesh.position.set(-1.0, 0.024, -3); // v31: push back for viewport fit
+archOutlineMesh.position.set(-2, 0.024, -1); // v32: closer to camera, further left
 archOutlineMesh.renderOrder = 3;
 scene.add(archOutlineMesh);
 
