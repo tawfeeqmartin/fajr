@@ -409,7 +409,7 @@ const archBloomMesh = new THREE.Mesh(
   })
 );
 archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archBloomMesh.position.set(-1.0, 0.019, -3); // v29: pull arch further left
+archBloomMesh.position.set(-1.0, 0.019, -2); // v30: pull dome down into frame
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
@@ -427,7 +427,7 @@ const archFloorMesh = new THREE.Mesh(
   })
 );
 archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archFloorMesh.position.set(-1.0, 0.022, -3); // v29: pull arch further left
+archFloorMesh.position.set(-1.0, 0.022, -2); // v30: pull dome down into frame
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
@@ -446,7 +446,7 @@ const archOutlineMesh = new THREE.Mesh(
   })
 );
 archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
-archOutlineMesh.position.set(-1.0, 0.024, -3); // v29: pull arch further left
+archOutlineMesh.position.set(-1.0, 0.024, -2); // v30: pull dome down into frame
 archOutlineMesh.renderOrder = 3;
 scene.add(archOutlineMesh);
 
