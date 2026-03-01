@@ -391,7 +391,7 @@ scene.add(godRayMesh);
 //
 // v20: stamps are PRIMARY arch shape. Gobo is fill only.
 // PlaneGeometry +Y = arch tip direction. rotation.x = -PI/2 lays flat on floor.
-// rotation.z = -PI*0.25 flips diagonal so tip points upper-right (+X, -Z on screen).
+// rotation.z = -PI*0.2 — less steep diagonal, tip in frame, base off-screen left (+X, -Z on screen).
 // Using map (not alphaMap) with transparent:true preserves edge stroke detail.
 const _archStampTex = _makeArchTexture();
 
@@ -408,8 +408,8 @@ const archBloomMesh = new THREE.Mesh(
     opacity: 0.04,
   })
 );
-archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.25); // v20: flip diagonal — tip toward upper-right
-archBloomMesh.position.set(4, 0.019, -4); // v20: shifted right & back so tip reaches upper-right corner
+archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
+archBloomMesh.position.set(3, 0.019, -3); // v23: pull back so dome tip stays inside viewport
 archBloomMesh.renderOrder = 1;
 scene.add(archBloomMesh);
 
@@ -426,8 +426,8 @@ const archFloorMesh = new THREE.Mesh(
     opacity: 0.15,  // v21: low fill warmth — outline stamp carries silhouette
   })
 );
-archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.25); // v20: flip diagonal — tip toward upper-right
-archFloorMesh.position.set(4, 0.022, -4); // v20: shifted right & back so tip reaches upper-right corner
+archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
+archFloorMesh.position.set(3, 0.022, -3); // v23: pull back so dome tip stays inside viewport
 archFloorMesh.renderOrder = 2;
 scene.add(archFloorMesh);
 
@@ -445,8 +445,8 @@ const archOutlineMesh = new THREE.Mesh(
     opacity: 0.35,
   })
 );
-archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.25);
-archOutlineMesh.position.set(4, 0.024, -4);
+archOutlineMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2);
+archOutlineMesh.position.set(3, 0.024, -3);
 archOutlineMesh.renderOrder = 3;
 scene.add(archOutlineMesh);
 
