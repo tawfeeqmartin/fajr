@@ -140,89 +140,174 @@ scene.add(back, back.target);
 // One dominant sacred shaft. Darkness as co-designer. Floor is the canvas.
 // Inspired by: Nasir al-Mulk, Tadao Ando, Lubezki, Deakins.
 
-// v59: Procedural mashrabiya texture — 8-fold Islamic geometric pattern
-// Constructed from circle-and-polygon method: circles on grid intersections,
-// construction lines between intersection points, extract the star-and-cross motif.
-// 8-fold symmetry = Rub el Hizb (✳), the 8-pointed star ubiquitous in Islamic art.
-// Reflects Tawhid (unity from one center), infinity (seamless tiling), and the
-// 8 angels bearing the Throne. Background transparent, openings white with soft edges.
+// v65: Procedural mashrabiya texture — 10-fold Islamic rosette pattern
+// White background with black lattice lines. 1024×2048 tall panel.
+// 10-pointed star rosettes in hex-packed grid, interlocking kite/arrow shapes,
+// small 5-pointed stars in gaps. Gradient depth blur (crisp bottom, soft top).
+// White areas = light passes through screen openings. Black = lattice wood.
 
 function _makeMashrabiyaTexture() {
-  const S = 1024;
+  const W = 1024, H = 2048;
   const canvas = document.createElement('canvas');
-  canvas.width = S; canvas.height = S;
+  canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
+  const TAU = Math.PI * 2;
 
-  // Clear to fully transparent
-  ctx.clearRect(0, 0, S, S);
+  // White background — openings where light passes through
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
 
-  // Classical Islamic construction: overlapping circles whose intersections
-  // naturally create star-and-petal (vesica piscis) patterns — no polygons needed.
-  const COLS = 3;
-  const ROWS = 5;
-  const cellX = S / COLS;
-  const cellY = S / ROWS;
-  const R = 130;
+  // --- 10-fold rosette construction ---
+  const R = 220;             // rosette outer radius
+  const innerR = R * 0.38;   // inner star radius
+  const N = 10;              // 10-pointed star
 
-  function drawCircles(context) {
-    context.strokeStyle = '#ffffff';
-    context.lineWidth = 3;
-    for (let row = 0; row < ROWS; row++) {
-      for (let col = 0; col < COLS; col++) {
-        const cx = (col + 0.5) * cellX;
-        const cy = (row + 0.5) * cellY;
-        context.beginPath();
-        context.arc(cx, cy, R, 0, Math.PI * 2);
-        context.stroke();
-      }
+  // Hex-packed grid: 2 columns, ~4 rows, offset alternating rows
+  const colSpacing = 512;
+  const rowSpacing = 512;
+  const centers = [];
+  for (let row = -1; row <= 5; row++) {
+    for (let col = -1; col <= 2; col++) {
+      const offset = (((row % 2) + 2) % 2 === 1) ? colSpacing / 2 : 0;
+      centers.push({
+        x: col * colSpacing + colSpacing / 2 + offset,
+        y: row * rowSpacing + rowSpacing / 2
+      });
     }
   }
 
-  // --- 1. Draw CRISP circles (slight AA blur) ---
-  ctx.filter = 'blur(2px)';
-  drawCircles(ctx);
+  // Outer and inner points for a rosette at (cx, cy)
+  function getRosettePoints(cx, cy) {
+    const outer = [], inner = [];
+    for (let i = 0; i < N; i++) {
+      const aOuter = (i / N) * TAU - TAU / 4;
+      const aInner = ((i + 0.5) / N) * TAU - TAU / 4;
+      outer.push({ x: cx + Math.cos(aOuter) * R, y: cy + Math.sin(aOuter) * R });
+      inner.push({ x: cx + Math.cos(aInner) * innerR, y: cy + Math.sin(aInner) * innerR });
+    }
+    return { outer, inner };
+  }
+
+  function drawLattice(context) {
+    context.beginPath();
+    context.strokeStyle = '#000000';
+    context.lineWidth = 18;
+    context.lineJoin = 'round';
+    context.lineCap = 'round';
+
+    for (const c of centers) {
+      const { outer, inner } = getRosettePoints(c.x, c.y);
+
+      // Star spokes: each outer point → two adjacent inner points
+      for (let i = 0; i < N; i++) {
+        const prev = (i - 1 + N) % N;
+        context.moveTo(outer[i].x, outer[i].y);
+        context.lineTo(inner[i].x, inner[i].y);
+        context.moveTo(outer[i].x, outer[i].y);
+        context.lineTo(inner[prev].x, inner[prev].y);
+      }
+
+      // Inner ring — close the star center
+      for (let i = 0; i < N; i++) {
+        const next = (i + 1) % N;
+        context.moveTo(inner[i].x, inner[i].y);
+        context.lineTo(inner[next].x, inner[next].y);
+      }
+
+      // Outer decagon — kite/arrow outlines
+      for (let i = 0; i < N; i++) {
+        const next = (i + 1) % N;
+        context.moveTo(outer[i].x, outer[i].y);
+        context.lineTo(outer[next].x, outer[next].y);
+      }
+    }
+
+    // Inter-rosette lattice — connect nearest outer points between neighbours
+    for (let a = 0; a < centers.length; a++) {
+      const ca = centers[a];
+      const ptsA = getRosettePoints(ca.x, ca.y);
+      for (let b = a + 1; b < centers.length; b++) {
+        const cb = centers[b];
+        const dist = Math.hypot(cb.x - ca.x, cb.y - ca.y);
+        if (dist > colSpacing * 1.2) continue;
+
+        const ptsB = getRosettePoints(cb.x, cb.y);
+        let bestDist = Infinity, bestAi = 0, bestBi = 0;
+        for (let i = 0; i < N; i++) {
+          for (let j = 0; j < N; j++) {
+            const d = Math.hypot(ptsA.outer[i].x - ptsB.outer[j].x,
+                                 ptsA.outer[i].y - ptsB.outer[j].y);
+            if (d < bestDist) { bestDist = d; bestAi = i; bestBi = j; }
+          }
+        }
+        // Direct bridge
+        context.moveTo(ptsA.outer[bestAi].x, ptsA.outer[bestAi].y);
+        context.lineTo(ptsB.outer[bestBi].x, ptsB.outer[bestBi].y);
+
+        // Flanking kite edges
+        const aNext = (bestAi + 1) % N, aPrev = (bestAi - 1 + N) % N;
+        const bNext = (bestBi + 1) % N, bPrev = (bestBi - 1 + N) % N;
+        context.moveTo(ptsA.outer[aNext].x, ptsA.outer[aNext].y);
+        context.lineTo(ptsB.outer[bPrev].x, ptsB.outer[bPrev].y);
+        context.moveTo(ptsA.outer[aPrev].x, ptsA.outer[aPrev].y);
+        context.lineTo(ptsB.outer[bNext].x, ptsB.outer[bNext].y);
+
+        // Small 5-pointed star in the gap between rosettes
+        const mx = (ca.x + cb.x) / 2, my = (ca.y + cb.y) / 2;
+        const starR = bestDist * 0.18;
+        for (let i = 0; i < 5; i++) {
+          const a1 = (i / 5) * TAU - TAU / 4;
+          const a2 = ((i + 2) / 5) * TAU - TAU / 4;
+          context.moveTo(mx + Math.cos(a1) * starR, my + Math.sin(a1) * starR);
+          context.lineTo(mx + Math.cos(a2) * starR, my + Math.sin(a2) * starR);
+        }
+      }
+    }
+
+    context.stroke();
+  }
+
+  // --- 1. Draw CRISP lattice (slight AA softness) ---
+  ctx.filter = 'blur(1px)';
+  drawLattice(ctx);
   ctx.filter = 'none';
 
-  // --- Gradient blur: crisp near (bottom), soft far (top) — depth-of-field ---
+  // --- Gradient depth blur: crisp near (bottom), soft far (top) ---
 
-  // --- 2. Draw BLURRED circles on temp canvas ---
+  // --- 2. Draw BLURRED lattice on temp canvas ---
   const blurCanvas = document.createElement('canvas');
-  blurCanvas.width = S; blurCanvas.height = S;
+  blurCanvas.width = W; blurCanvas.height = H;
   const bCtx = blurCanvas.getContext('2d');
-  bCtx.filter = 'blur(7px)';
-  drawCircles(bCtx);
+  bCtx.fillStyle = '#ffffff';
+  bCtx.fillRect(0, 0, W, H);
+  bCtx.filter = 'blur(8px)';
+  drawLattice(bCtx);
   bCtx.filter = 'none';
 
-  // --- 3. Mask blurred canvas: opaque at top, transparent at bottom ---
-  bCtx.globalCompositeOperation = 'destination-in';
-  const depthGrad = bCtx.createLinearGradient(0, 0, 0, S);
+  // --- 3. Crossfade: crisp at bottom, blurred at top ---
+  const fadeCanvas = document.createElement('canvas');
+  fadeCanvas.width = W; fadeCanvas.height = H;
+  const fCtx = fadeCanvas.getContext('2d');
+  fCtx.drawImage(blurCanvas, 0, 0);
+  fCtx.globalCompositeOperation = 'destination-in';
+  const depthGrad = fCtx.createLinearGradient(0, 0, 0, H);
   depthGrad.addColorStop(0, 'rgba(255,255,255,1)');   // top: keep blurred
-  depthGrad.addColorStop(1, 'rgba(255,255,255,0)');   // bottom: discard
-  bCtx.fillStyle = depthGrad;
-  bCtx.fillRect(0, 0, S, S);
-  bCtx.globalCompositeOperation = 'source-over';
+  depthGrad.addColorStop(1, 'rgba(255,255,255,0)');   // bottom: discard blurred
+  fCtx.fillStyle = depthGrad;
+  fCtx.fillRect(0, 0, W, H);
+  fCtx.globalCompositeOperation = 'source-over';
 
-  // --- 4. Erase crisp where blur takes over ---
+  // Erase crisp where blur takes over
   ctx.globalCompositeOperation = 'destination-out';
-  const eraseGrad = ctx.createLinearGradient(0, 0, 0, S);
+  const eraseGrad = ctx.createLinearGradient(0, 0, 0, H);
   eraseGrad.addColorStop(0, 'rgba(0,0,0,1)');         // top: erase crisp
   eraseGrad.addColorStop(1, 'rgba(0,0,0,0)');         // bottom: keep crisp
   ctx.fillStyle = eraseGrad;
-  ctx.fillRect(0, 0, S, S);
+  ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = 'source-over';
 
-  // --- 5. Composite blurred on top — depth crossfade ---
-  ctx.drawImage(blurCanvas, 0, 0);
-
-  // Radial vignette — fade edges to transparent
-  const grad = ctx.createRadialGradient(S/2, S/2, S * 0.15, S/2, S/2, S * 0.52);
-  grad.addColorStop(0, 'rgba(0,0,0,0)');
-  grad.addColorStop(0.7, 'rgba(0,0,0,0)');
-  grad.addColorStop(1, 'rgba(0,0,0,1)');
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, S, S);
-  ctx.globalCompositeOperation = 'source-over';
+  // Composite blurred on top — depth crossfade complete
+  ctx.drawImage(fadeCanvas, 0, 0);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -247,7 +332,7 @@ gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
 gobo.shadow.bias = -0.001;
 gobo.shadow.camera.near = 1;
 gobo.shadow.camera.far = 25;
-gobo.map = _mashrabiyaGobo; // v59: procedural mashrabiya on gobo — real light casts 8-fold geometric pattern onto floor and cube
+gobo.map = _mashrabiyaGobo; // v65: 10-fold rosette mashrabiya gobo — white passes light, black blocks
 scene.add(gobo, gobo.target);
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
@@ -404,15 +489,14 @@ godRayMesh.rotation.y = Math.PI * 0.10; // slight tilt toward camera, follows be
 godRayMesh.visible = false;
 scene.add(godRayMesh);
 
-// MASHRABIYA FLOOR STAMP — v59: procedural 8-fold Islamic geometric pattern
-// Additive blend: white openings → warm light, transparent background → invisible.
-// PlaneGeometry sized to match the tall narrow panel (~1:3.5 aspect).
-// Same position/rotation as v57: (-3.5, y, 0), -PI*0.2 diagonal.
+// MASHRABIYA FLOOR STAMP — v65: 10-fold Islamic rosette pattern
+// White-on-black texture used as .map — white areas glow with stamp color, black is dark.
+// PlaneGeometry sized to match the tall narrow 1:2 panel.
 // Two layers: bloom underlayer (wider, dimmer corona) + base stamp (sharp lattice pattern).
 
 // BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
 const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 34),  // v58: aspect ~1:3.4 matches mashrabiya panel proportions
+  new THREE.PlaneGeometry(10, 20),  // v65: 1:2 aspect matches 1024×2048 mashrabiya panel
   new THREE.MeshBasicMaterial({
     map: _mashrabiyaTex,
     color: new THREE.Color(0xff7020),
@@ -430,7 +514,7 @@ scene.add(archBloomMesh);
 
 // BASE STAMP — primary mashrabiya silhouette, the hero shape
 const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(8.5, 30),  // v58: tall narrow mashrabiya panel — star motifs read clearly
+  new THREE.PlaneGeometry(8.5, 17),  // v65: 1:2 aspect matches 1024×2048 mashrabiya panel
   new THREE.MeshBasicMaterial({
     map: _mashrabiyaTex,
     color: new THREE.Color(0xffd090),  // v60: golden hour warmth
