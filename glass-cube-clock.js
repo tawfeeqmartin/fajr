@@ -756,6 +756,7 @@ const OP_ACTIVE = 0.75;
 
 
 let prayerSectors = [];
+let _activePrayer = null; // { startAng, endAng, color, color2, intensity }
 let ptSectorsRebuilt = false;
 
 function addBeam(ang, color, color2, initOp, width) {
@@ -939,8 +940,9 @@ function updatePrayerWindows(now) {
     u.uColor1.value.set(ps.def.color);
     u.uColor2.value.set(ps.def.color2);
     if (!_compassMode) _prayerDisc.visible = true;
+    _activePrayer = { startAng: ps.startAng, endAng: ps.endAng, color: ps.def.color, color2: ps.def.color2, intensity: u.uIntensity.value };
   } else {
-    // no-op
+    _activePrayer = null;
   }
   if (u.uIntensity.value < 0.001 || _compassMode) _prayerDisc.visible = false;
 
@@ -1098,22 +1100,18 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     // 6 o'clock = fraction 0.5 on the dial. Proximity = cos-based falloff.
     const hFrac = (h / 12) % 1, mFrac = (m / 60) % 1, sFrac = (s / 60) % 1;
     const sixDist = (f) => Math.max(0, Math.cos((f - 0.5) * TAU)); // 1 at 6, 0 at 12
-    // Prayer beam at 6 o'clock check: does the active beam span the 6 o'clock angle?
-    // 6 o'clock on the dial = time 360 min (6:00). Convert to angle:
-    const sixAngle = ptTimeToAngle(360); // angle at 6 o'clock
+    // Prayer beam at 6 o'clock check
     let prayerAtSix = 0, prayerC1 = 0, prayerC2 = 0;
-    if (activeIdx >= 0) {
-      const ps = allSectors[activeIdx];
-      // Normalize angles to check if sixAngle falls within [endAng, startAng] (CCW winding)
-      let sa = ps.startAng, ea = ps.endAng, sa6 = sixAngle;
-      // Unwrap for comparison
+    if (_activePrayer) {
+      const sixAngle = ptTimeToAngle(360);
+      let sa = _activePrayer.startAng, ea = _activePrayer.endAng, sa6 = sixAngle;
       while (ea > sa) ea -= TAU;
       while (sa6 > sa) sa6 -= TAU;
       while (sa6 < ea) sa6 += TAU;
       if (sa6 <= sa && sa6 >= ea) {
-        prayerAtSix = u.uIntensity.value; // use current faded-in intensity
-        prayerC1 = ps.def.color;
-        prayerC2 = ps.def.color2;
+        prayerAtSix = _activePrayer.intensity;
+        prayerC1 = _activePrayer.color;
+        prayerC2 = _activePrayer.color2;
       }
     }
     window._handGlow = { h: sixDist(hFrac), m: sixDist(mFrac), s: sixDist(sFrac), p: prayerAtSix, pc1: prayerC1, pc2: prayerC2 };
