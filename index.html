@@ -327,20 +327,28 @@ body.mode-info .info-dots{opacity:1;pointer-events:auto}
 .compass-onboard{
   position:fixed;inset:0;z-index:900;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  opacity:0;pointer-events:none;transition:opacity .6s ease;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
 }
-.compass-onboard-content{text-align:center;color:rgba(232,228,220,.8);font-family:var(--font)}
-.compass-onboard-icon{width:80px;height:90px;color:rgba(232,228,220,.5);margin-bottom:1.25rem}
-.compass-onboard-rotate,.compass-onboard-rotate2{
-  animation:compassSway 2s ease-in-out infinite;transform-origin:32px 32px;
-}
-.compass-onboard-arrow,.compass-onboard-arrow2{
-  animation:compassSway 2s ease-in-out infinite;transform-origin:32px 32px;
-}
-@keyframes compassSway{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
+.compass-onboard-content{text-align:center;color:rgba(232,228,220,.85);font-family:var(--font);padding:2rem}
+.compass-onboard-icon{width:90px;height:90px;margin:0 auto 1.5rem;display:block}
 .compass-onboard-text{font-size:1.1rem;font-weight:400;letter-spacing:.02em;margin-bottom:.4rem}
-.compass-onboard-sub{font-size:.8rem;font-weight:300;color:rgba(232,228,220,.4);letter-spacing:.02em}
+.compass-onboard-sub{font-size:.8rem;font-weight:300;color:rgba(232,228,220,.4);letter-spacing:.02em;margin-bottom:1.4rem}
+/* Accuracy arc progress */
+.compass-onboard-arc{margin:0 auto;display:block}
+.compass-onboard-arc-track{stroke:rgba(255,255,255,.1);fill:none}
+.compass-onboard-arc-fill{fill:none;stroke:rgba(180,160,255,.7);stroke-linecap:round;
+  transition:stroke-dashoffset .6s ease,stroke .4s ease;transform-origin:center;transform:rotate(-90deg)}
+.compass-onboard-arc-label{font-family:var(--font);fill:rgba(232,228,220,.5);font-size:10px;text-anchor:middle}
+/* Good state */
+.compass-onboard-good{font-size:1.3rem;font-weight:300;color:rgba(180,255,200,.9);letter-spacing:.05em;
+  opacity:0;transition:opacity .4s ease;margin-top:.5rem}
+/* Figure-8 phone animation */
+@keyframes fig8X{0%{transform:translateX(0) rotate(0deg)}25%{transform:translateX(18px) rotate(12deg)}
+  50%{transform:translateX(0) rotate(0deg)}75%{transform:translateX(-18px) rotate(-12deg)}100%{transform:translateX(0) rotate(0deg)}}
+@keyframes fig8Y{0%{transform:translateY(0)}25%{transform:translateY(-10px)}50%{transform:translateY(10px)}
+  75%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+.compass-fig8{animation:fig8X 2.4s ease-in-out infinite;display:block;margin:0 auto}
 
 /* ── Mode states ── */
 body.mode-clock .scroll-section,
@@ -1068,6 +1076,7 @@ function adhanCompassHandler(e){
   const ACCURACY_THRESHOLD = 25; // degrees
   _compassCalibrated = (acc > 0 && acc <= ACCURACY_THRESHOLD);
   window._compassCalibrated = _compassCalibrated;
+  _compassOnboardUpdateArc(acc);
 
   // Circular moving average (5 samples) to smooth jitter
   _compassHeadingBuf.push(h);
@@ -2317,45 +2326,116 @@ const _clockSVG = '<circle cx="12" cy="12" r="9.5"/><line x1="12" y1="12" x2="12
 // ── Compass Onboarding Overlay ──
 var _compassOnboardEl = null;
 var _compassOnboardTimer = null;
-function _showCompassOnboarding() {
-  if (!_compassOnboardEl) {
-    _compassOnboardEl = document.createElement('div');
-    _compassOnboardEl.className = 'compass-onboard';
-    _compassOnboardEl.innerHTML =
-      '<div class="compass-onboard-content">' +
-        '<svg class="compass-onboard-icon" viewBox="0 0 64 72" fill="none" stroke="currentColor" stroke-width="1">' +
-          '<rect x="18" y="4" width="28" height="56" rx="5"/>' +
-          '<rect x="18" y="4" width="28" height="56" rx="5" fill="rgba(13,13,18,.6)" stroke="none"/>' +
-          '<rect x="18" y="4" width="28" height="56" rx="5"/>' +
-          '<g stroke="rgba(232,228,220,.7)" stroke-width=".7" fill="none">' +
-            '<polygon points="32,25 37,28 37,34 32,37 27,34 27,28"/>' +
-            '<line x1="32" y1="25" x2="32" y2="31"/>' +
-            '<line x1="37" y1="28" x2="32" y2="31"/>' +
-            '<line x1="27" y1="28" x2="32" y2="31"/>' +
-          '</g>' +
+var _compassOnboardArcEl = null;
+var _compassOnboardGoodEl = null;
+var _compassOnboardDismissed = false; // session-level: don't re-show once calibrated
 
-          '<path class="compass-onboard-rotate" d="M50 18c4 5 6 10 6 16s-2 12-6 16" opacity=".6"/>' +
-          '<path class="compass-onboard-rotate2" d="M14 50c-4-5-6-10-6-16s2-12 6-16" opacity=".6"/>' +
-          '<path class="compass-onboard-arrow" d="M56 18l2-4 4 2" opacity=".6"/>' +
-          '<path class="compass-onboard-arrow2" d="M8 50l-2 4-4-2" opacity=".6"/>' +
-        '</svg>' +
-        '<div class="compass-onboard-text">Move your phone to find Qibla</div>' +
-        '<div class="compass-onboard-sub">Point toward Makkah — the cube will light up</div>' +
-      '</div>';
-    _compassOnboardEl.onclick = _hideCompassOnboarding;
-    document.body.appendChild(_compassOnboardEl);
+var _ONBOARD_ARC_R = 30;
+var _ONBOARD_ARC_CIRC = 2 * Math.PI * _ONBOARD_ARC_R;
+
+function _buildCompassOnboarding() {
+  if (_compassOnboardEl) return;
+  _compassOnboardEl = document.createElement('div');
+  _compassOnboardEl.className = 'compass-onboard';
+  _compassOnboardEl.innerHTML =
+    '<div class="compass-onboard-content">' +
+      // Figure-8 phone SVG
+      '<svg class="compass-fig8 compass-onboard-icon" viewBox="0 0 64 80" fill="none" stroke="rgba(232,228,220,.55)" stroke-width="1.2">' +
+        '<rect x="20" y="6" width="24" height="48" rx="4"/>' +
+        '<rect x="20" y="6" width="24" height="48" rx="4" fill="rgba(13,13,18,.7)" stroke="none"/>' +
+        '<rect x="20" y="6" width="24" height="48" rx="4"/>' +
+        '<circle cx="32" cy="49" r="2.5" fill="none"/>' +
+        // Cube icon on phone screen
+        '<g stroke="rgba(232,228,220,.6)" stroke-width=".8" fill="none">' +
+          '<polygon points="32,20 38,23.5 38,30.5 32,34 26,30.5 26,23.5"/>' +
+          '<line x1="32" y1="20" x2="32" y2="27"/>' +
+          '<line x1="38" y1="23.5" x2="32" y2="27"/>' +
+          '<line x1="26" y1="23.5" x2="32" y2="27"/>' +
+        '</g>' +
+        // Figure-8 path hint
+        '<path d="M10 68 Q32 56 54 68 Q32 80 10 68Z" stroke="rgba(232,228,220,.15)" stroke-width=".8" fill="none"/>' +
+      '</svg>' +
+      '<div class="compass-onboard-text">Calibrating compass</div>' +
+      '<div class="compass-onboard-sub">Move your phone in a figure‑8</div>' +
+      // Arc progress ring
+      '<svg class="compass-onboard-arc" width="72" height="72" viewBox="0 0 72 72">' +
+        '<circle class="compass-onboard-arc-track" cx="36" cy="36" r="' + _ONBOARD_ARC_R + '" stroke-width="3"/>' +
+        '<circle class="compass-onboard-arc-fill" cx="36" cy="36" r="' + _ONBOARD_ARC_R + '" stroke-width="3"' +
+          ' stroke-dasharray="' + _ONBOARD_ARC_CIRC + '" stroke-dashoffset="' + _ONBOARD_ARC_CIRC + '"/>' +
+        '<text class="compass-onboard-arc-label" x="36" y="40">––°</text>' +
+      '</svg>' +
+      '<div class="compass-onboard-good">✓ Compass ready</div>' +
+    '</div>';
+  _compassOnboardEl.addEventListener('click', function() { _hideCompassOnboarding(false); });
+  document.body.appendChild(_compassOnboardEl);
+  _compassOnboardArcEl = _compassOnboardEl.querySelector('.compass-onboard-arc-fill');
+  _compassOnboardGoodEl = _compassOnboardEl.querySelector('.compass-onboard-good');
+}
+
+function _showCompassOnboarding() {
+  // Skip entirely if already calibrated this session
+  if (_compassOnboardDismissed) return;
+  if (sessionStorage.getItem('agot_compass_ok') === '1') {
+    _compassOnboardDismissed = true;
+    return;
   }
+  // If already calibrated on open, flash good and dismiss quickly
+  if (_compassCalibrated) {
+    _compassOnboardDismissed = true;
+    sessionStorage.setItem('agot_compass_ok', '1');
+    return;
+  }
+  _buildCompassOnboarding();
   _compassOnboardEl.style.opacity = '1';
   _compassOnboardEl.style.pointerEvents = 'auto';
   clearTimeout(_compassOnboardTimer);
-  _compassOnboardTimer = setTimeout(_hideCompassOnboarding, 5000);
+  _compassOnboardUpdateArc(_compassAccuracy);
 }
-function _hideCompassOnboarding() {
+
+function _compassOnboardUpdateArc(accuracy) {
+  if (!_compassOnboardEl || _compassOnboardDismissed) return;
+  if (_compassOnboardEl.style.opacity === '0') return;
+  var arcEl = _compassOnboardArcEl;
+  var labelEl = _compassOnboardEl.querySelector('.compass-onboard-arc-label');
+  if (!arcEl) return;
+
+  var WORST = 60, BEST = 25; // degrees
+  var clamped = Math.min(Math.max(accuracy > 0 ? accuracy : WORST, BEST), WORST);
+  var progress = (WORST - clamped) / (WORST - BEST); // 0→1 as accuracy improves
+  var offset = _ONBOARD_ARC_CIRC * (1 - progress);
+  arcEl.style.strokeDashoffset = offset;
+  // Color: red→amber→green
+  var hue = Math.round(progress * 130); // 0=red, 130=green
+  arcEl.style.stroke = 'hsl(' + hue + ',70%,65%)';
+  if (labelEl) labelEl.textContent = accuracy > 0 ? Math.round(accuracy) + '°' : '––°';
+
+  if (_compassCalibrated) {
+    // Show "good" state briefly then dismiss
+    var textEl = _compassOnboardEl.querySelector('.compass-onboard-text');
+    var subEl  = _compassOnboardEl.querySelector('.compass-onboard-sub');
+    var figEl  = _compassOnboardEl.querySelector('.compass-fig8');
+    if (textEl) textEl.style.opacity = '0';
+    if (subEl)  subEl.style.opacity  = '0';
+    if (figEl)  figEl.style.opacity  = '0';
+    arcEl.style.stroke = 'rgba(140,255,180,.8)';
+    arcEl.style.strokeDashoffset = '0';
+    if (labelEl) labelEl.textContent = '✓';
+    if (_compassOnboardGoodEl) _compassOnboardGoodEl.style.opacity = '1';
+    clearTimeout(_compassOnboardTimer);
+    _compassOnboardTimer = setTimeout(function() { _hideCompassOnboarding(true); }, 1200);
+  }
+}
+
+function _hideCompassOnboarding(calibrated) {
   if (_compassOnboardEl) {
     _compassOnboardEl.style.opacity = '0';
     _compassOnboardEl.style.pointerEvents = 'none';
   }
   clearTimeout(_compassOnboardTimer);
+  if (calibrated) {
+    _compassOnboardDismissed = true;
+    sessionStorage.setItem('agot_compass_ok', '1');
+  }
 }
 
 function _toggleCompassMode(forceState) {
