@@ -5,7 +5,7 @@
 <meta name="color-scheme" content="dark light">
 <style>html,body{background:#0d0d12!important}body{opacity:0}</style>
 <link rel="icon" href="data:,">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>A Gift of Time — Prayer Times, Islamic Prayer Clock, Qibla Compass & Spatial Adhan</title>
 <meta name="description" content="A Gift of Time — a beautiful prayer clock for Muslims. Accurate prayer times, Qibla compass, spatial adhan toward Makkah, Ramadan fasting timer, and 11 dial designs named after Surahs. Free, no ads, no tracking — sadaqah jariyah.">
 <meta name="keywords" content="A Gift of Time, prayer times, Islamic prayer times, prayer clock, Muslim prayer app, salah times, namaz times, Fajr time, Dhuhr time, Asr time, Maghrib time, Isha time, Qibla compass, Qibla direction, adhan notification, spatial adhan, Ramadan fasting clock, suhoor iftar timer, prayer reminder, Al-Fajr, Ash-Shams, Al-Asr, Al-Qadr, An-Nur, Al-Kawthar, Al-Mulk, Ar-Rahman, Al-Kahf, Ya-Sin, Al-Fatihah, Surah Yusuf, Islamic art, sadaqah jariyah, free Muslim app, agiftoftime">
@@ -146,14 +146,16 @@ if(location.hash==='#clock'){document.documentElement.classList.add('clock-direc
   --font:'Inter',system-ui,-apple-system,sans-serif;
   --clock-size:min(864px,95vw);
 }
-html{font-size:16px;color-scheme:dark}
+html{font-size:16px;color-scheme:dark;touch-action:pan-x pan-y}
 body{
   font-family:var(--font);background:#0d0d12;color:var(--text);
   font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;
   overflow-x:clip;width:100%;
   transition:color 1s ease;
   opacity:0;
+  touch-action:pan-x pan-y;
 }
+a,button,input,select,[role="button"]{touch-action:manipulation}
 body.clock-ready{opacity:1;transition:opacity .4s ease,color 1s ease}
 body::after{display:none;
 }
