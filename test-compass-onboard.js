@@ -66,12 +66,22 @@ async function getOnboardState(page) {
     const arcFill = document.querySelector('.compass-onboard-arc-fill');
     const goodEl = document.querySelector('.compass-onboard-good');
     const textEl = document.querySelector('.compass-onboard-text');
+    // Read dashoffset from inline style (set by JS) or attribute (set in HTML)
+    var arcOffset = null, arcCirc = null;
+    if (arcFill) {
+      arcOffset = arcFill.style.strokeDashoffset !== ''
+        ? parseFloat(arcFill.style.strokeDashoffset)
+        : parseFloat(arcFill.getAttribute('stroke-dashoffset') || '0');
+      arcCirc = arcFill.style.strokeDasharray !== ''
+        ? parseFloat(arcFill.style.strokeDasharray)
+        : parseFloat(arcFill.getAttribute('stroke-dasharray') || '0');
+    }
     return {
       exists: true,
       visible: parseFloat(style.opacity) > 0.1,
-      arcStroke: arcFill ? arcFill.style.stroke : null,
-      arcOffset: arcFill ? parseFloat(arcFill.style.strokeDashoffset) : null,
-      arcCirc: arcFill ? parseFloat(arcFill.style.strokeDasharray) : null,
+      arcStroke: arcFill ? (arcFill.style.stroke || arcFill.getAttribute('stroke')) : null,
+      arcOffset,
+      arcCirc,
       goodVisible: goodEl ? parseFloat(window.getComputedStyle(goodEl).opacity) > 0.1 : false,
       text: textEl ? textEl.textContent : null
     };
@@ -148,9 +158,9 @@ async function runTests() {
   assert('arc fully filled', s3.arcOffset !== null && s3.arcOffset < 5,
     `offset=${s3.arcOffset}`);
 
-  // ── TEST 4: Auto-dismisses after ~1.2s ───────────────────────────
-  console.log('\nTest 4: Auto-dismisses after calibration');
-  await new Promise(r => setTimeout(r, 2000));
+  // ── TEST 4: Auto-dismisses after ready(1s) + hold(4s) ────────────
+  console.log('\nTest 4: Auto-dismisses after calibration + hold instruction');
+  await new Promise(r => setTimeout(r, 6500)); // 1s ready + 4s hold + 1.5s buffer
   await shot(page, '4-dismissed');
   const s4 = await getOnboardState(page);
   assert('overlay dismissed', !s4.visible, `visible=${s4.visible}`);
@@ -165,6 +175,56 @@ async function runTests() {
   await shot(page, '5-no-repeat');
   const s5 = await getOnboardState(page);
   assert('onboarding not shown again', !s5.visible, `visible=${s5.visible}`);
+
+  // ── TEST 5b: Hold instruction shows after calibration ────────────
+  console.log('\nTest 5b: Hold instruction shows after calibration flash');
+  // Re-open a fresh session to test the hold state
+  await page.evaluate(() => switchMode('clock'));
+  await new Promise(r => setTimeout(r, 400));
+  await page.evaluate(() => { sessionStorage.removeItem('agot_compass_ok'); window._resetCompassOnboard(); });
+  await new Promise(r => setTimeout(r, 200));
+  await openCompass(page);
+  // Calibrate immediately
+  await fireCompass(page, 10);
+  // Wait for ready flash (1s) then check hold state
+  await new Promise(r => setTimeout(r, 1200));
+  await shot(page, '5b-hold-instruction');
+  const s5b = await page.evaluate(() => {
+    const holdEl = document.querySelector('.compass-onboard-hold');
+    const state = window._compassOnboardState;
+    return {
+      state,
+      holdVisible: holdEl ? parseFloat(window.getComputedStyle(holdEl).opacity) > 0.1 : false
+    };
+  });
+  assert('hold state active', s5b.state === 'hold', `state=${s5b.state}`);
+  assert('hold instruction visible', s5b.holdVisible);
+  // Wait for auto-dismiss
+  await new Promise(r => setTimeout(r, 4500));
+
+  // ── TEST 5c: No-signal state ──────────────────────────────────────
+  console.log('\nTest 5c: No-signal state shows when no compass events');
+  await page.evaluate(() => switchMode('clock'));
+  await new Promise(r => setTimeout(r, 400));
+  await page.evaluate(() => { sessionStorage.removeItem('agot_compass_ok'); window._resetCompassOnboard(); });
+  await new Promise(r => setTimeout(r, 200));
+  await openCompass(page);
+  // Manually trigger no-signal (bypass 5s timeout)
+  await page.evaluate(() => { if(typeof _compassOnboardShowNoSignal === 'function') _compassOnboardShowNoSignal(); });
+  await new Promise(r => setTimeout(r, 400));
+  await shot(page, '5c-no-signal');
+  const s5c = await page.evaluate(() => {
+    const noSigEl = document.querySelector('.compass-onboard-nosig');
+    const retryBtn = document.querySelector('.compass-onboard-retry');
+    return {
+      state: window._compassOnboardState,
+      noSigVisible: noSigEl ? parseFloat(window.getComputedStyle(noSigEl).opacity) > 0.1 : false,
+      retryVisible: !!retryBtn
+    };
+  });
+  assert('no-signal state active', s5c.state === 'no-signal', `state=${s5c.state}`);
+  assert('no-signal message visible', s5c.noSigVisible);
+  assert('retry button present', s5c.retryVisible);
 
   // ── TEST 6: Shows again after sessionStorage cleared ─────────────
   console.log('\nTest 6: Shows again after sessionStorage cleared (new session)');
