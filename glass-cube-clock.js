@@ -597,7 +597,8 @@ const dichroicFrag = `
     vec3 Vw = normalize(uCamWorldPos - vWorldPos);
 
     // ── Transmission: boost brightness — dichroic glass is bright, not dark ──
-    vec3 col = refracted * 1.7;
+    // Slight blue-green tint is physically correct for optical glass (kills warm artifacts)
+    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 1.7;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
     col = mix(col, col * irid * 1.4, diagF * 0.22);
@@ -609,7 +610,7 @@ const dichroicFrag = `
     // ── Sky/environment reflection: top face catches overhead light ──
     // Nw.y → 1 means surface faces up → reflects sky. Should be brightest face.
     float skyFacing = max(Nw.y, 0.0);
-    col += pow(skyFacing, 1.8) * vec3(0.90, 0.94, 1.00) * 0.40;
+    col += pow(skyFacing, 1.3) * vec3(0.90, 0.94, 1.00) * 0.55;
 
     // ── Edge catch: crisp rim light at silhouette — "you could cut yourself" ──
     float NdotV = max(dot(Nw, Vw), 0.0);
@@ -647,7 +648,7 @@ const cubeMat = new THREE.ShaderMaterial({
     uFresnel: { value: 6.0 },
     uTime:    { value: 0 },
     uAspect:  { value: W / H },
-    uSpecLightPos: { value: new THREE.Vector3(0, 3.5, -3) },
+    uSpecLightPos: { value: new THREE.Vector3(2.5, 4.0, 2.5) },
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 2.8 },
     uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
