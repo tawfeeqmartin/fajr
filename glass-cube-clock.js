@@ -592,28 +592,44 @@ const dichroicFrag = `
     float fresnel = pow(1.0 - cosT, uFresnel);
     vec3 irid = thinFilm(cosT, uTime);
 
-    vec3 col = refracted;
-    col = mix(col, col * irid * 1.6, diagF * 0.35);
-    col += irid * diagF * fresnel * 0.40;
-    col += fresnel * 0.20;
-
-    // ── Animated specular edge highlight ──
+    // ── World-space lighting vectors (shared by all world-space effects) ──
     vec3 Nw = normalize(vWorldNormal);
     vec3 Vw = normalize(uCamWorldPos - vWorldPos);
+
+    // ── Transmission: boost brightness — dichroic glass is bright, not dark ──
+    vec3 col = refracted * 1.7;
+
+    // ── Dichroic iridescence: surface-only, tight diagonal band ──
+    col = mix(col, col * irid * 1.4, diagF * 0.22);
+    col += irid * diagF * fresnel * 0.20;
+
+    // ── Fresnel edge: cool blue-white, sharp (glass = cold at edges) ──
+    col += vec3(0.80, 0.92, 1.00) * fresnel * 0.30;
+
+    // ── Sky/environment reflection: top face catches overhead light ──
+    // Nw.y → 1 means surface faces up → reflects sky. Should be brightest face.
+    float skyFacing = max(Nw.y, 0.0);
+    col += pow(skyFacing, 1.2) * vec3(0.90, 0.94, 1.00) * 0.60;
+
+    // ── Edge catch: crisp rim light at silhouette — "you could cut yourself" ──
+    float NdotV = max(dot(Nw, Vw), 0.0);
+    float edgeCatch = pow(1.0 - NdotV, 4.5);
+    col += vec3(0.70, 0.85, 1.00) * edgeCatch * 1.80;
+
+    // ── Specular: razor-sharp needle, only at grazing (no 0.4 ambient) ──
     vec3 Lw = normalize(uSpecLightPos - vWorldPos);
     vec3 Hw = normalize(Lw + Vw);
-    float fresnelW = pow(1.0 - max(dot(Nw, Vw), 0.0), 4.0);
+    float fresnelW = pow(1.0 - NdotV, 4.0);
     float spec = pow(max(dot(Nw, Hw), 0.0), 256.0);
-    col += vec3(1.0, 0.95, 0.9) * uSpecIntensity * spec * (0.4 + 0.6 * fresnelW);
+    col += vec3(1.00, 0.97, 0.95) * uSpecIntensity * spec * fresnelW;
 
-    // Internal glow: warm emissive light trapped inside, brighter at edges (fresnel)
+    // ── Internal glow (prayer-time animation only, off by default) ──
     float glowFresnel = pow(1.0 - cosT, 2.5);
-    vec3 glowCol = mix(vec3(1.0, 0.88, 0.55), vec3(1.0, 0.65, 0.2), glowFresnel);
+    vec3 glowCol = mix(vec3(0.85, 0.92, 1.00), vec3(0.70, 0.85, 1.00), glowFresnel);
     col += glowCol * uInternalGlow * (0.2 + 0.8 * glowFresnel);
 
-    // Top-face scrim — digital barn door: tames gobo blowout on upward-facing glass
-    // Only the top face (Nw.y→1) is darkened; sides and bottom untouched.
-    col *= 1.0 - 0.08 * smoothstep(0.85, 0.98, Nw.y);
+    // ── Top-face scrim: only extreme grazing (essentially removed) ──
+    col *= 1.0 - 0.06 * smoothstep(0.88, 0.99, Nw.y);
 
     gl_FragColor = vec4(col, 1.0);
   }
