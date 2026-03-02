@@ -593,9 +593,9 @@ const dichroicFrag = `
     vec3 irid = thinFilm(cosT, uTime);
 
     vec3 col = refracted;
-    col = mix(col, col * irid * 1.6, diagF * 0.65);
-    col += irid * diagF * fresnel * 0.75;
-    col += fresnel * 0.55;
+    col = mix(col, col * irid * 1.6, diagF * 0.35);
+    col += irid * diagF * fresnel * 0.40;
+    col += fresnel * 0.20;
 
     // ── Animated specular edge highlight ──
     vec3 Nw = normalize(vWorldNormal);
@@ -603,7 +603,7 @@ const dichroicFrag = `
     vec3 Lw = normalize(uSpecLightPos - vWorldPos);
     vec3 Hw = normalize(Lw + Vw);
     float fresnelW = pow(1.0 - max(dot(Nw, Vw), 0.0), 4.0);
-    float spec = pow(max(dot(Nw, Hw), 0.0), 24.0);
+    float spec = pow(max(dot(Nw, Hw), 0.0), 256.0);
     col += vec3(1.0, 0.95, 0.9) * uSpecIntensity * spec * (0.4 + 0.6 * fresnelW);
 
     // Internal glow: warm emissive light trapped inside, brighter at edges (fresnel)
@@ -613,7 +613,7 @@ const dichroicFrag = `
 
     // Top-face scrim — digital barn door: tames gobo blowout on upward-facing glass
     // Only the top face (Nw.y→1) is darkened; sides and bottom untouched.
-    col *= 1.0 - 0.55 * smoothstep(0.4, 0.92, Nw.y);
+    col *= 1.0 - 0.25 * smoothstep(0.7, 0.95, Nw.y);
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -623,18 +623,18 @@ const cubeMat = new THREE.ShaderMaterial({
   uniforms: {
     uScene:   { value: null },
     uRes:     { value: new THREE.Vector2(W * dpr, H * dpr) },
-    uIorR:    { value: 1.14 },
-    uIorG:    { value: 1.18 },
-    uIorB:    { value: 1.23 },
-    uAb:      { value: 0.10 },
+    uIorR:    { value: 1.50 },
+    uIorG:    { value: 1.56 },
+    uIorB:    { value: 1.63 },
+    uAb:      { value: 0.05 },
     uDich:    { value: 0.70 },
-    uFresnel: { value: 2.0 },
+    uFresnel: { value: 6.0 },
     uTime:    { value: 0 },
     uAspect:  { value: W / H },
     uSpecLightPos: { value: new THREE.Vector3(0, 3.5, -3) },
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 2.8 },
-    uInternalGlow:  { value: 0.24 }, // v8: 0.14→0.24 — cube Fresnel edges glow warm amber, ties cube visually to arch below. glowFresnel ^ 2.5 concentrates warmth at edge grazes where dichroic reads.
+    uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
