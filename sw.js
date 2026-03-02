@@ -1,11 +1,10 @@
 // A Gift of Time — Service Worker
-const CACHE_NAME = 'rc-v178';
+const CACHE_NAME = 'rc-v179';
 const ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/clock.js',
-  '/studio.hdr',
+  '/glass-cube-clock.js',
   '/icon-192.png',
   '/icon-512.png',
   '/og-image.png',
