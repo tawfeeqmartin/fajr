@@ -613,7 +613,7 @@ const dichroicFrag = `
 
     // Top-face scrim — digital barn door: tames gobo blowout on upward-facing glass
     // Only the top face (Nw.y→1) is darkened; sides and bottom untouched.
-    col *= 1.0 - 0.25 * smoothstep(0.7, 0.95, Nw.y);
+    col *= 1.0 - 0.08 * smoothstep(0.85, 0.98, Nw.y);
 
     gl_FragColor = vec4(col, 1.0);
   }
