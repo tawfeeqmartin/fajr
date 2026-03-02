@@ -1070,8 +1070,9 @@ function adhanCompassHandler(e){
   adhanHasCompass=true;
   adhanCompassEventCount++;
 
-  // Track accuracy from iOS webkitCompassAccuracy
-  const acc = (typeof e.webkitCompassAccuracy === 'number') ? e.webkitCompassAccuracy : -1;
+  // Track accuracy from iOS webkitCompassAccuracy (window._mockCompassAccuracy overrides for testing)
+  const acc = (typeof window._mockCompassAccuracy === 'number') ? window._mockCompassAccuracy
+            : (typeof e.webkitCompassAccuracy === 'number') ? e.webkitCompassAccuracy : -1;
   _compassAccuracy = acc;
   const ACCURACY_THRESHOLD = 25; // degrees
   _compassCalibrated = (acc > 0 && acc <= ACCURACY_THRESHOLD);
@@ -2329,6 +2330,12 @@ var _compassOnboardTimer = null;
 var _compassOnboardArcEl = null;
 var _compassOnboardGoodEl = null;
 var _compassOnboardDismissed = false; // session-level: don't re-show once calibrated
+window._resetCompassOnboard = function() {
+  _compassOnboardDismissed = false;
+  _compassCalibrated = false;
+  _compassAccuracy = -1;
+  window._mockCompassAccuracy = undefined;
+}; // test hook
 
 var _ONBOARD_ARC_R = 30;
 var _ONBOARD_ARC_CIRC = 2 * Math.PI * _ONBOARD_ARC_R;
