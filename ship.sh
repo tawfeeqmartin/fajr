@@ -37,7 +37,7 @@ const puppeteer = require('puppeteer-core');
   const b = await puppeteer.launch({
     executablePath: '/usr/bin/google-chrome-stable',
     args: ['--no-sandbox','--disable-gpu-sandbox','--use-gl=angle','--use-angle=gl-egl','--ozone-platform=headless','--ignore-gpu-blocklist','--disable-dev-shm-usage','--in-process-gpu','--enable-webgl'],
-    headless: true
+    headless: 'new'
   });
   const p = await b.newPage();
   await p.setViewport({width:430, height:932, deviceScaleFactor:1});
