@@ -563,7 +563,7 @@ const dichroicFrag = `
   varying vec3 vWorldNormal;
 
   vec3 thinFilm(float cosT, float t) {
-    float p = 6.28318 * 2.5 * cosT + t * 0.35;
+    float p = 6.28318 * 5.0 * cosT + t * 0.25;
     return vec3(0.5+0.5*cos(p), 0.5+0.5*cos(p-2.094), 0.5+0.5*cos(p+2.094));
   }
 
@@ -601,7 +601,7 @@ const dichroicFrag = `
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
     col = mix(col, col * irid * 1.4, diagF * 0.22);
-    col += irid * diagF * fresnel * 0.20;
+    col += irid * diagF * fresnel * 0.12;
 
     // ── Fresnel edge: cool blue-white, sharp (glass = cold at edges) ──
     col += vec3(0.80, 0.92, 1.00) * fresnel * 0.30;
@@ -609,7 +609,7 @@ const dichroicFrag = `
     // ── Sky/environment reflection: top face catches overhead light ──
     // Nw.y → 1 means surface faces up → reflects sky. Should be brightest face.
     float skyFacing = max(Nw.y, 0.0);
-    col += pow(skyFacing, 1.2) * vec3(0.90, 0.94, 1.00) * 0.60;
+    col += pow(skyFacing, 1.8) * vec3(0.90, 0.94, 1.00) * 0.40;
 
     // ── Edge catch: crisp rim light at silhouette — "you could cut yourself" ──
     float NdotV = max(dot(Nw, Vw), 0.0);
