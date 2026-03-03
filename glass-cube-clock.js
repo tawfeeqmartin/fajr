@@ -1724,7 +1724,7 @@ function _devBuildPanel() {
   if (!document.getElementById('_devNumStyle')) {
     var st = document.createElement('style');
     st.id = '_devNumStyle';
-    st.textContent = '._dNum{width:42px;background:#1a1a2a;color:#fff;border:1px solid #444;border-radius:3px;font:10px monospace;padding:1px 3px;text-align:right;}._dNum:focus{border-color:#66f;outline:none;}';
+    st.textContent = '._dNum{width:48px;background:#1a1a2a;color:#fff;border:1px solid #444;border-radius:3px;font:10px monospace;padding:1px 3px;text-align:right;-moz-appearance:textfield;}._dNum:focus{border-color:#66f;outline:none;}._dNum::-webkit-inner-spin-button,._dNum::-webkit-outer-spin-button{opacity:1;}';
     document.head.appendChild(st);
   }
 
@@ -1955,7 +1955,7 @@ function _devBuildPanel() {
       var curW = wInp ? parseFloat(wInp.value) / 10 : _handDefs[i].w;
       _devRebuildHandGeo(i, curW, val);
       var vSpan = document.querySelector('._dHandLenV[data-hi="' + i + '"]');
-      if (vSpan) vSpan.textContent = val.toFixed(1);
+      if (vSpan) vSpan.textContent = val.toFixed(2);
     });
   });
 
@@ -2143,30 +2143,30 @@ function _devRefreshWindowList() {
       +   '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'
       +     '<span style="color:#888;width:56px;flex-shrink:0">Intensity</span>'
       +     '<input type="range" class="_dOvInt" data-prayer="' + d.name + '"'
-      +       ' min="0" max="30" value="' + Math.round(intVal * 10) + '" step="1" style="flex:1;min-width:0">'
+      +       ' min="0" max="300" value="' + Math.round(intVal * 100) + '" step="1" style="flex:1;min-width:0">'
       +     '<span class="_dOvIntV" data-prayer="' + d.name + '"'
       +       ' style="color:' + (intSet ? '#fff' : '#555') + ';width:32px;text-align:right;font-size:9px">'
-      +       (intSet ? intVal.toFixed(1) : 'global') + '</span>'
+      +       (intSet ? intVal.toFixed(2) : 'global') + '</span>'
       +     '<button class="_dOvIntR" data-prayer="' + d.name + '"'
       +       ' title="Reset to global" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
       +   '</div>'
       +   '<div style="display:flex;align-items:center;gap:4px">'
       +     '<span style="color:#888;width:56px;flex-shrink:0">Spread</span>'
       +     '<input type="range" class="_dOvSp" data-prayer="' + d.name + '"'
-      +       ' min="5" max="50" value="' + Math.round(spVal * 10) + '" step="1" style="flex:1;min-width:0">'
+      +       ' min="5" max="500" value="' + Math.round(spVal * 100) + '" step="1" style="flex:1;min-width:0">'
       +     '<span class="_dOvSpV" data-prayer="' + d.name + '"'
       +       ' style="color:' + (spSet ? '#fff' : '#555') + ';width:32px;text-align:right;font-size:9px">'
-      +       (spSet ? spVal.toFixed(1) : '2.2') + '</span>'
+      +       (spSet ? spVal.toFixed(2) : '2.2') + '</span>'
       +     '<button class="_dOvSpR" data-prayer="' + d.name + '"'
       +       ' title="Reset spread" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
       +   '</div>'
       +   '<div style="display:flex;align-items:center;gap:4px;margin-top:3px">'
       +     '<span style="color:#888;width:56px;flex-shrink:0">Width</span>'
       +     '<input type="range" class="_dOvWd" data-prayer="' + d.name + '"'
-      +       ' min="5" max="20" value="' + Math.round(wdVal * 10) + '" step="1" style="flex:1;min-width:0">'
+      +       ' min="5" max="200" value="' + Math.round(wdVal * 100) + '" step="1" style="flex:1;min-width:0">'
       +     '<span class="_dOvWdV" data-prayer="' + d.name + '"'
       +       ' style="color:' + (wdSet ? '#fff' : '#555') + ';width:32px;text-align:right;font-size:9px">'
-      +       (wdSet ? wdVal.toFixed(1) : '1.0') + '</span>'
+      +       (wdSet ? wdVal.toFixed(2) : '1.0') + '</span>'
       +     '<button class="_dOvWdR" data-prayer="' + d.name + '"'
       +       ' title="Reset width" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
       +   '</div>'
@@ -2205,12 +2205,12 @@ function _devRefreshWindowList() {
   el.querySelectorAll('._dOvInt').forEach(function(inp) {
     inp.addEventListener('input', function() {
       var pname = inp.dataset.prayer;
-      var val   = parseFloat(inp.value) / 10;
+      var val   = parseFloat(inp.value) / 100;
       if (!_devWindowOverrides[pname]) _devWindowOverrides[pname] = {};
       _devWindowOverrides[pname].intensity = val;
       window._devWindowOverrides = _devWindowOverrides;
       var vSpan = el.querySelector('._dOvIntV[data-prayer="' + pname + '"]');
-      if (vSpan) { vSpan.textContent = val.toFixed(1); vSpan.style.color = '#fff'; }
+      if (vSpan) { vSpan.textContent = val.toFixed(2); vSpan.style.color = '#fff'; }
     });
   });
 
@@ -2222,7 +2222,7 @@ function _devRefreshWindowList() {
       window._devWindowOverrides = _devWindowOverrides;
       var inp   = el.querySelector('._dOvInt[data-prayer="' + pname + '"]');
       var vSpan = el.querySelector('._dOvIntV[data-prayer="' + pname + '"]');
-      if (inp)   inp.value = Math.round(OP_ACTIVE * 10);
+      if (inp)   inp.value = Math.round(OP_ACTIVE * 100);
       if (vSpan) { vSpan.textContent = 'global'; vSpan.style.color = '#555'; }
     });
   });
@@ -2231,12 +2231,12 @@ function _devRefreshWindowList() {
   el.querySelectorAll('._dOvSp').forEach(function(inp) {
     inp.addEventListener('input', function() {
       var pname = inp.dataset.prayer;
-      var val   = parseFloat(inp.value) / 10;
+      var val   = parseFloat(inp.value) / 100;
       if (!_devWindowOverrides[pname]) _devWindowOverrides[pname] = {};
       _devWindowOverrides[pname].spread = val;
       window._devWindowOverrides = _devWindowOverrides;
       var vSpan = el.querySelector('._dOvSpV[data-prayer="' + pname + '"]');
-      if (vSpan) { vSpan.textContent = val.toFixed(1); vSpan.style.color = '#fff'; }
+      if (vSpan) { vSpan.textContent = val.toFixed(2); vSpan.style.color = '#fff'; }
     });
   });
 
@@ -2248,7 +2248,7 @@ function _devRefreshWindowList() {
       window._devWindowOverrides = _devWindowOverrides;
       var inp   = el.querySelector('._dOvSp[data-prayer="' + pname + '"]');
       var vSpan = el.querySelector('._dOvSpV[data-prayer="' + pname + '"]');
-      if (inp)   inp.value = 22; // 2.2 * 10
+      if (inp)   inp.value = 220; // 2.2 * 100
       if (vSpan) { vSpan.textContent = '2.2'; vSpan.style.color = '#555'; }
     });
   });
@@ -2257,12 +2257,12 @@ function _devRefreshWindowList() {
   el.querySelectorAll('._dOvWd').forEach(function(inp) {
     inp.addEventListener('input', function() {
       var pname = inp.dataset.prayer;
-      var val   = parseFloat(inp.value) / 10;
+      var val   = parseFloat(inp.value) / 100;
       if (!_devWindowOverrides[pname]) _devWindowOverrides[pname] = {};
       _devWindowOverrides[pname].width = val;
       window._devWindowOverrides = _devWindowOverrides;
       var vSpan = el.querySelector('._dOvWdV[data-prayer="' + pname + '"]');
-      if (vSpan) { vSpan.textContent = val.toFixed(1); vSpan.style.color = '#fff'; }
+      if (vSpan) { vSpan.textContent = val.toFixed(2); vSpan.style.color = '#fff'; }
     });
   });
 
@@ -2274,7 +2274,7 @@ function _devRefreshWindowList() {
       window._devWindowOverrides = _devWindowOverrides;
       var inp   = el.querySelector('._dOvWd[data-prayer="' + pname + '"]');
       var vSpan = el.querySelector('._dOvWdV[data-prayer="' + pname + '"]');
-      if (inp)   inp.value = 10; // 1.0 * 10
+      if (inp)   inp.value = 100; // 1.0 * 100
       if (vSpan) { vSpan.textContent = '1.0'; vSpan.style.color = '#555'; }
     });
   });
@@ -2316,9 +2316,9 @@ function _devRefreshWindowList() {
 
   // ── Convert per-prayer value spans to editable number inputs ──────────────
   var prayerNumPairs = [
-    { spanCls: '_dOvIntV', sliderCls: '_dOvInt', div: 10, step: '0.1' },
-    { spanCls: '_dOvSpV',  sliderCls: '_dOvSp',  div: 10, step: '0.1' },
-    { spanCls: '_dOvWdV',  sliderCls: '_dOvWd',  div: 10, step: '0.1' },
+    { spanCls: '_dOvIntV', sliderCls: '_dOvInt', div: 100, step: '0.01' },
+    { spanCls: '_dOvSpV',  sliderCls: '_dOvSp',  div: 100, step: '0.01' },
+    { spanCls: '_dOvWdV',  sliderCls: '_dOvWd',  div: 100, step: '0.01' },
     { spanCls: '_dOvEfV',  sliderCls: '_dOvEf',  div: 1,  step: '1' }
   ];
   prayerNumPairs.forEach(function(pair) {
