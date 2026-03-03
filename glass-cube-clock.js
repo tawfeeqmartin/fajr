@@ -1607,6 +1607,15 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     3.5,
     -Math.cos(secAngle) * specRadius
   );
+  // Elastic camera pull on swipe — spring toward target, then ease back to base
+  var _camBaseX = 0.2; // from CAM_LANDING.pos[0]
+  if (Math.abs(_swipeCamPull) > 0.001) {
+    _swipeCamPull *= 0.92; // spring decay (~60fps, settles in ~1s)
+    if (Math.abs(_swipeCamPull) < 0.001) _swipeCamPull = 0;
+  }
+  camera.position.x = _camBaseX + _swipeCamPull;
+  camera.lookAt(0, -0.8, 1.0);
+
   cubeMat.uniforms.uCamWorldPos.value.copy(camera.position);
 
   // Tawaf spot orbits at second-hand speed
@@ -2660,6 +2669,7 @@ function _swipeShowPreview(idx) {
 var _swipeTimeOverride = null; // minutes from midnight (current), or null for live
 var _swipeTimeTarget  = null; // where we're lerping TO
 var _swipeTawafPhase = 0;     // 0-1, decays to 0 — drives CCW sweep on revert
+var _swipeCamPull = 0;        // -1 to 1, elastic camera offset on swipe
 
 window._swipeRevert = _swipeRevert;
 function _swipeRevert(instant) {
@@ -2667,6 +2677,7 @@ function _swipeRevert(instant) {
   _swipeTimeOverride = null;
   _swipeTimeTarget = null;
   clearTimeout(_swipeRevertTimer);
+  _swipeCamPull = 0; // release camera
   if (!instant) _swipeTawafPhase = 1.0; // CCW sweep only on natural revert, not mode switch
   // Kill label immediately
   if (_swipeLabelEl) {
@@ -2716,6 +2727,7 @@ document.addEventListener('touchmove', function(e) {
     _swipeSwiping = true;
     var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
     var dir = dx > 0 ? 1 : -1; // swipe right = next prayer, swipe left = previous
+    _swipeCamPull = dir * 0.6; // elastic camera pull in swipe direction
     _swipeShowPreview(baseIdx + dir);
     _swipeStartX = touch.clientX; // reset for next swipe in same gesture
   }
