@@ -2071,6 +2071,7 @@ function _updateCompassDist() {
 }
 function _setPrayerLocation(lat, lon, locationName) {
   _userLatDeg = lat; _userLonDeg = lon;
+  _updateCompassDist(); // refresh distance when location changes
   // Compute times instantly via adhan-js
   const t = _computePrayerTimes(lat, lon);
   // Store for glass-cube-clock beams
