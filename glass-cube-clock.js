@@ -2650,9 +2650,9 @@ function _swipeShowPreview(idx) {
   if (_swipeTimeOverride === null) _swipeTimeOverride = ps.startMin; // first swipe: no lerp needed
   _swipeTimeTarget = ps.startMin;
 
-  // Auto-revert after 3 seconds
+  // Auto-revert after 5 seconds (gives animation time to settle + breathe)
   clearTimeout(_swipeRevertTimer);
-  _swipeRevertTimer = setTimeout(_swipeRevert, 3000);
+  _swipeRevertTimer = setTimeout(_swipeRevert, 5000);
 }
 
 var _swipeTimeOverride = null; // minutes from midnight (current), or null for live
