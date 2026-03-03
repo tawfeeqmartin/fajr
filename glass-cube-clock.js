@@ -1373,8 +1373,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   godRayMat.uniforms.uTime.value = t;
   _shaftMat.uniforms.time.value = t;
 
-  // Sync hands to real clock time
-  const now = new Date();
+  // Sync hands to clock time (real or dev override)
+  const now = (typeof _getDevNow === 'function' && _devActive) ? _getDevNow() : new Date();
   const h = (now.getHours() % 12) + now.getMinutes() / 60 + now.getSeconds() / 3600;
   const m = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
@@ -2351,7 +2351,13 @@ function _devUpdateBoundaries() {
 function _getDevNow() {
   if (_devTimeOverride) {
     var d = new Date();
-    d.setHours(_devTimeOverride.h, _devTimeOverride.m, 0, 0);
+    // Use fractional _devSimMinutes for smooth second-hand motion during speed playback
+    var totalSec = _devSimMinutes * 60;
+    var hrs = Math.floor(totalSec / 3600) % 24;
+    var mins = Math.floor((totalSec % 3600) / 60);
+    var secs = Math.floor(totalSec % 60);
+    var ms = Math.floor((totalSec % 1) * 1000);
+    d.setHours(hrs, mins, secs, ms);
     return d;
   }
   return new Date();
