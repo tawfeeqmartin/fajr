@@ -610,7 +610,7 @@ const dichroicFrag = `
     // ── Sky/environment reflection: top face catches overhead light ──
     // Nw.y → 1 means surface faces up → reflects sky. Should be brightest face.
     float skyFacing = max(Nw.y, 0.0);
-    col += pow(skyFacing, 1.3) * vec3(0.90, 0.94, 1.00) * 0.55;
+    col += pow(skyFacing, 1.8) * vec3(0.90, 0.94, 1.00) * 0.45;
 
     // ── Edge catch: crisp rim light at silhouette — "you could cut yourself" ──
     float NdotV = max(dot(Nw, Vw), 0.0);
