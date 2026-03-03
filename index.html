@@ -2623,7 +2623,7 @@ function _toggleCompassMode(forceState) {
     // Compass info overlay — heading + distance to Makkah
     if(!window._compassDbgEl){
       window._compassDbgEl = document.createElement('div');
-      window._compassDbgEl.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(80px,14vmin,110px));left:0;right:0;text-align:center;z-index:960;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px';
+      window._compassDbgEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(110px,22vmin,150px));left:0;right:0;text-align:center;z-index:960;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px';
       window._compassDbgEl.innerHTML =
         '<div id="_compassHeadingLine" style="font:300 clamp(.7rem,1.6vmin,.85rem)/1.3 var(--font);color:rgba(232,228,220,.45);letter-spacing:.04em"></div>' +
         '<div id="_compassDistLine" style="font:300 clamp(.65rem,1.4vmin,.75rem)/1.3 var(--font);color:rgba(120,160,255,.5);letter-spacing:.06em"></div>';
