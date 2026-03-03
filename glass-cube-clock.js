@@ -100,7 +100,17 @@ function onResize() {
   cubeMat.uniforms.uRes.value.set(W * dpr, H * dpr);
   cubeMat.uniforms.uAspect.value = W / H;
 }
-// Only resize on orientation change — NOT on scroll/chrome show/hide
+// Desktop: resize on window resize. Mobile: only on orientation change.
+var _resizeTimer = null;
+window.addEventListener('resize', function() {
+  // Debounce to avoid hammering during drag-resize
+  if (_resizeTimer) clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(function() {
+    _stableW = window.innerWidth;
+    _stableH = window.innerHeight;
+    onResize();
+  }, 100);
+});
 window.addEventListener('orientationchange', function() {
   setTimeout(function() {
     _stableW = window.innerWidth;
