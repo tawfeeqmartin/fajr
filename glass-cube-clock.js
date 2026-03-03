@@ -1435,9 +1435,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     }
     now = new Date();
     var _swH = Math.floor(_swipeTimeOverride / 60);
-    var _swM = _swipeTimeOverride % 60;
-    var _swFrac = _swipeTimeOverride - Math.floor(_swipeTimeOverride);
-    now.setHours(_swH, _swM, Math.floor(_swFrac * 60), 0);
+    var _swM = Math.floor(_swipeTimeOverride % 60);
+    now.setHours(_swH, _swM, 0, 0); // freeze seconds at 0 during preview
   } else {
     now = new Date();
   }
