@@ -720,6 +720,40 @@ podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
+// ─── IRRADIANCE PROBES — Phase 1 ─────────────────────────────────────────────
+// CubeCamera (64px) placed at cube world center, updated every 60 frames.
+// Captures the live scene — prayer beams, lit floor, tawaf spot — from the
+// cube's perspective. Two outputs:
+//   1. cubeRenderTarget.texture → dichroic shader uniform (real reflections)
+//   2. LightProbeGenerator SH bake → LightProbe in scene (podium indirect light)
+//
+// Performance: 6-face render every ~1 second + async GPU readback = ~0.05ms/frame.
+// Mobile Safari safe — throttle guards against stacking async calls.
+
+const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(64, {
+  type: THREE.HalfFloatType,
+  format: THREE.RGBAFormat,          // required for readRenderTargetPixels
+  colorSpace: THREE.LinearSRGBColorSpace,
+});
+
+// near=0.1 (inside the 1.2-unit cube body), far=40 (well past scene bounds)
+const probeCamera = new THREE.CubeCamera(0.1, 40, cubeRenderTarget);
+probeCamera.position.set(0, CUBE_Y, 0); // world center of the glass cube
+scene.add(probeCamera);
+
+// Wire cubemap to dichroic shader immediately — returns black until first update
+cubeMat.uniforms.uCubeEnvMap.value = cubeRenderTarget.texture;
+
+// LightProbe: receives SH coefficients from CubeCamera bake.
+// Podium (MeshPhysicalMaterial) responds to scene LightProbes automatically.
+// intensity=0.25 — barely perceptible wash of prayer color on podium faces.
+const lightProbe = new THREE.LightProbe(undefined, 0.25);
+scene.add(lightProbe);
+
+// Probe update state
+let _probeFrameCount  = 0;
+let _probeUpdatePending = false;
+
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
 // Three floor rays as H / M / S clock hands, synced to real time.
 // Lengths stepped by golden ratio φ from second hand.
@@ -1660,6 +1694,25 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     const sl = document.getElementById('_devTimeSlider');
     const lb = document.getElementById('_devTimeLabel');
     if (sl) { const v = now.getHours()*60+now.getMinutes(); sl.value = v; if (lb) lb.textContent = _fmtMin(v); }
+  }
+
+  // ── Irradiance probe update (throttled: every 60 frames ≈ 1s at 60fps) ──
+  // Run BEFORE FBO pass while scene is in clean state.
+  // Hide cubeMesh so the probe captures the environment, not itself.
+  if (!_probeUpdatePending) {
+    _probeFrameCount++;
+    if (_probeFrameCount % 60 === 0) {
+      cubeMesh.visible = false;
+      probeCamera.update(renderer, scene);
+      cubeMesh.visible = true;
+      _probeUpdatePending = true;
+      LightProbeGenerator.fromCubeRenderTarget(renderer, cubeRenderTarget)
+        .then(newProbe => {
+          lightProbe.sh.copy(newProbe.sh);
+          _probeUpdatePending = false;
+        })
+        .catch(() => { _probeUpdatePending = false; });
+    }
   }
 
   // FBO pass
@@ -2660,12 +2713,13 @@ function _swipeShowPreview(idx) {
   _swipeLabelEl.style.opacity = '1';
 
   // Fill the nav pill circle with prayer color
-  var clockCircle = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle');
-  if (clockCircle) {
-    clockCircle.setAttribute('fill', hex);
-    clockCircle.setAttribute('fill-opacity', '0.5');
-    clockCircle.setAttribute('stroke', hex);
-    clockCircle.style.filter = 'drop-shadow(0 0 10px ' + hex + ')';
+  // Update glow bar to prayer color during swipe
+  var _pillSlider = document.getElementById('modePillSlider');
+  if (_pillSlider) {
+    _pillSlider.style.setProperty('--pill-glow-bar', hex);
+    _pillSlider.style.setProperty('--pill-glow-bar-shadow', hex + '73');
+    _pillSlider.style.setProperty('--pill-glow-bar-soft', hex + '26');
+    _pillSlider.style.setProperty('--pill-glow', hex + '1f');
   }
 
   // Color ONLY the selected prayer — others stay default (no dimming)
@@ -2708,13 +2762,7 @@ function _swipeRevert(instant) {
     _swipeLabelEl.style.opacity = '0';
   }
   // Remove pill fill + tint
-  var clockCircle = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle');
-  if (clockCircle) {
-    clockCircle.setAttribute('fill', 'none');
-    clockCircle.removeAttribute('fill-opacity');
-    clockCircle.setAttribute('stroke', 'currentColor');
-    clockCircle.style.filter = '';
-  }
+  // Glow bar reverts to current prayer color via _displayPrayerTimes re-render
   // Reset prayer bar highlights immediately
   document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
     sp.style.opacity = '';
