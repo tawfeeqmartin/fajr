@@ -297,8 +297,8 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 75, 14);
-cubeSun.position.set(0, 0.4, -2.5);
+const cubeSun = new THREE.PointLight(0xe8f2ff, 85, 14);
+cubeSun.position.set(0, 1.0, -2.0);
 scene.add(cubeSun);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.07)); // v57: 0.16→0.07 — deeper darkness outside arch, shadow is absolute
