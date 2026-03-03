@@ -1638,17 +1638,44 @@ function _devStartSpeed() {
 // ─────────────────────────────────────────────────────────────────────────────
 function _devPatchDiscShaders() {
   [_prayerDiscMat, _nextDiscMat, _thirdDiscMat].forEach(function(mat) {
-    if (mat.uniforms.uFalloff) return; // already patched
-    mat.uniforms.uFalloff = { value: 2.2 };
-    mat.fragmentShader = mat.fragmentShader
-      .replace(
-        'uniform float uIntensity, uOuterRadius;',
-        'uniform float uIntensity, uOuterRadius, uFalloff;'
-      )
-      .replace(
-        'exp(-r / uOuterRadius * 2.2)',
-        'exp(-r / uOuterRadius * uFalloff)'
+    if (mat._devPatched) return; // already patched
+    mat._devPatched = true;
+
+    // Ensure all dev uniforms exist
+    if (!mat.uniforms.uFalloff)  mat.uniforms.uFalloff  = { value: 2.2 };
+    if (!mat.uniforms.uWidth)    mat.uniforms.uWidth    = { value: 1.0 };
+    if (!mat.uniforms.uEdgeFade) mat.uniforms.uEdgeFade = { value: 12.0 };
+
+    var fs = mat.fragmentShader;
+
+    // Patch uniform declaration — add uFalloff if missing
+    if (fs.indexOf('uFalloff') === -1) {
+      // Could be "uOuterRadius;" or "uOuterRadius, uWidth, uEdgeFade;"
+      fs = fs.replace(
+        /uniform float uIntensity, uOuterRadius([^;]*);/,
+        'uniform float uIntensity, uOuterRadius, uFalloff$1;'
       );
+    }
+
+    // Patch radial falloff: hardcoded 2.2 → uFalloff
+    fs = fs.replace(
+      'exp(-r / uOuterRadius * 2.2)',
+      'exp(-r / uOuterRadius * uFalloff)'
+    );
+
+    // Patch angular width: hSpan → hSpan * uWidth
+    fs = fs.replace(
+      'float normDist = abs(d) / max(hSpan, 0.001);',
+      'float normDist = abs(d) / max(hSpan * uWidth, 0.001);'
+    );
+
+    // Patch edge fade: hardcoded 12.0 → uEdgeFade
+    fs = fs.replace(
+      'max(normDist - 0.97, 0.0) * 12.0',
+      'max(normDist - 0.97, 0.0) * uEdgeFade'
+    );
+
+    mat.fragmentShader = fs;
     mat.needsUpdate = true;
   });
 }
