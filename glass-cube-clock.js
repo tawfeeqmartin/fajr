@@ -803,7 +803,7 @@ function floorRay(az, c1, c2, w, len, op) {
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
-floorRay(135, 0x9900ff, 0xff00ff, 0.30, 4.80, 1.45);   // HOUR   (violet)  φ base
+floorRay(135, 0x9900ff, 0xff00ff, 0.40, 4.00, 1.45);   // HOUR   (violet)  shorter + wider
 floorRay(135, 0x1133ff, 0x00aaff, 0.30, 7.77, 1.50);   // MINUTE (blue)    4.80 × φ
 floorRay(135, 0xffffff, 0xcccccc, 0.30, 12.56, 1.20);  // SECOND (white)   4.80 × φ²
 
