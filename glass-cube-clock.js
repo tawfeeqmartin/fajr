@@ -2629,19 +2629,22 @@ function _swipeRevert() {
   if (clockBtn) clockBtn.style.filter = '';
 }
 
-// Touch handlers — only in clock mode, not compass/info
-renderer.domElement.addEventListener('touchstart', function(e) {
+// Touch handlers — bound to document, filtered to clock mode only
+document.addEventListener('touchstart', function(e) {
   if (_compassMode || document.body.classList.contains('mode-info')) return;
-  if (_devActive) return; // don't interfere with dev panel
+  if (_devActive) return;
+  // Don't capture touches on interactive elements
+  if (e.target.closest('button,a,input,select,textarea,.mode-pill,.loc-picker,.fs-dial-picker')) return;
   var touch = e.touches[0];
   _swipeStartX = touch.clientX;
   _swipeStartY = touch.clientY;
   _swipeSwiping = false;
 }, { passive: true });
 
-renderer.domElement.addEventListener('touchmove', function(e) {
+document.addEventListener('touchmove', function(e) {
   if (_compassMode || document.body.classList.contains('mode-info')) return;
   if (_devActive) return;
+  if (_swipeStartX === 0 && _swipeStartY === 0) return;
   var touch = e.touches[0];
   var dx = touch.clientX - _swipeStartX;
   var dy = touch.clientY - _swipeStartY;
@@ -2655,8 +2658,10 @@ renderer.domElement.addEventListener('touchmove', function(e) {
   }
 }, { passive: true });
 
-renderer.domElement.addEventListener('touchend', function() {
+document.addEventListener('touchend', function() {
   _swipeSwiping = false;
+  _swipeStartX = 0;
+  _swipeStartY = 0;
 }, { passive: true });
 
 // Arrow keys for desktop testing
