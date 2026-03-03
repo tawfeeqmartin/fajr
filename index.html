@@ -218,22 +218,60 @@ body::after{display:none;
   position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px));
   left:50%;transform:translateX(-50%);z-index:950;
   display:flex;align-items:center;justify-content:center;gap:0;
-  width:232px;height:56px;
-  background:rgba(18,18,22,0.35);
-  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
-  border:1px solid rgba(232,228,220,.1);border-radius:999px;
-  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  padding:5px;
+  background:#161616;
+  border:1px solid rgba(255,255,255,.06);border-radius:999px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
 }
 .mode-pill-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:none;border:none;cursor:pointer;padding:0;
-  min-height:44px;min-width:44px;
-  color:rgba(232,228,220,.35);transition:none;
+  width:60px;height:52px;
+  border-radius:16px;
+  color:rgba(255,255,255,.45);
+  transition:color .3s ease;
+  z-index:2;
 }
 .mode-pill-btn svg{width:22px;height:22px;transition:none}
 .mode-pill-btn .mode-dot{display:none}
-.mode-pill-btn.active{color:rgba(232,228,220,.9)}
-.mode-pill-btn.active svg{filter:drop-shadow(0 0 6px rgba(232,228,220,.3))}
+.mode-pill-btn.active{color:rgba(255,255,255,.95)}
+
+/* Sliding glass tile indicator */
+.mode-pill-slider{
+  position:absolute;top:5px;left:5px;
+  width:60px;height:52px;
+  border-radius:16px;
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);
+  border-top-color:rgba(255,255,255,.14);
+  border-bottom-color:rgba(255,255,255,.04);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  z-index:1;
+  overflow:visible;
+}
+/* Inner glow gradient — lit from below */
+.mode-pill-slider::before{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:radial-gradient(ellipse 60% 50% at 50% 100%, var(--pill-glow,rgba(232,150,48,.12)) 0%, transparent 70%);
+  pointer-events:none;
+}
+/* Glow bar — tiny LED at bottom */
+.mode-pill-slider::after{
+  content:'';position:absolute;
+  bottom:6px;left:50%;transform:translateX(-50%);
+  width:36%;height:2px;
+  background:var(--pill-glow-bar,#e89830);
+  border-radius:2px;
+  box-shadow:0 0 8px 2px var(--pill-glow-bar-shadow,rgba(232,150,48,.45)),
+             0 0 20px 6px var(--pill-glow-bar-soft,rgba(232,150,48,.15)),
+             0 -6px 16px 3px var(--pill-glow-bar-soft,rgba(232,150,48,.1));
+}
+/* Slider positions */
+.mode-pill-slider[data-pos="0"]{transform:translateX(0)}
+.mode-pill-slider[data-pos="1"]{transform:translateX(60px)}
+.mode-pill-slider[data-pos="2"]{transform:translateX(120px)}
 .mode-label{
   position:fixed;
   bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 62px);
@@ -1951,6 +1989,15 @@ function _displayPrayerTimes(t, hijri) {
   }).join(' · ');
   // Fullscreen prayer bar
   const fsEl = document.getElementById('fsPrayerTimes'); if(fsEl) fsEl.innerHTML = html;
+  // Update nav pill glow to current prayer color
+  var _pillSlider = document.getElementById('modePillSlider');
+  if (_pillSlider && activeP && prayerColors[activeP]) {
+    var gc = prayerColors[activeP];
+    _pillSlider.style.setProperty('--pill-glow-bar', gc);
+    _pillSlider.style.setProperty('--pill-glow-bar-shadow', gc + '73'); // 45% alpha
+    _pillSlider.style.setProperty('--pill-glow-bar-soft', gc + '26'); // 15% alpha
+    _pillSlider.style.setProperty('--pill-glow', gc + '1f'); // 12% alpha
+  }
   // Landing prayer bar
   const lpt = document.getElementById('landingPrayerTimes'); if(lpt) lpt.innerHTML = html;
   
@@ -2253,6 +2300,12 @@ function switchMode(mode) {
   document.querySelectorAll('.mode-pill-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === mode);
   });
+  // Slide the glass tile
+  var _pillSlider = document.getElementById('modePillSlider');
+  if (_pillSlider) {
+    var _posMap = {clock:'0', compass:'1', info:'2'};
+    _pillSlider.setAttribute('data-pos', _posMap[mode] || '0');
+  }
   
   // Update page label
   var _ml = document.getElementById('modeLabel');
@@ -2769,7 +2822,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=145';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=146';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -3008,18 +3061,16 @@ setTimeout(setupScrollObservers,500);
 
 <!-- Mode Pill -->
 <div class="mode-label" id="modeLabel">CLOCK</div>
-<div class="mode-pill" id="modePill">
+<div class="mode-pill" id="modePill" style="position:fixed;overflow:visible">
+  <div class="mode-pill-slider" id="modePillSlider" data-pos="0"></div>
   <button class="mode-pill-btn active" data-mode="clock" aria-label="Clock" onclick="switchMode('clock')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/></svg>
-    <span class="mode-dot"></span>
   </button>
   <button class="mode-pill-btn" data-mode="compass" aria-label="Compass" onclick="switchMode('compass')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3.5" y="3.5" width="17" height="17" transform="rotate(45 12 12)"/></svg>
-    <span class="mode-dot"></span>
   </button>
   <button class="mode-pill-btn" data-mode="info" aria-label="Info" onclick="switchMode('info')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2L22 22H2Z"/></svg>
-    <span class="mode-dot"></span>
   </button>
 </div>
 </body>
