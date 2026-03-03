@@ -731,7 +731,7 @@ function floorRay(az, c1, c2, w, len, op) {
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
 floorRay(135, 0x9900ff, 0xff00ff, 0.40, 3.48, 0.88);   // HOUR   (violet)
 floorRay(135, 0x1133ff, 0x00aaff, 0.40, 5.64, 0.92);   // MINUTE (blue)
-floorRay(135, 0xffffff, 0xcccccc, 0.40, 9.12, 0.62);   // SECOND (white)
+floorRay(135, 0xffffff, 0xcccccc, 0.40, 9.12, 0.82);   // SECOND (white)
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
 // v5: warm caustics (red/orange/yellow) pulled directly under cube base, short distance.
@@ -1109,7 +1109,7 @@ function makeSectorGeom(radius, thetaHalf, segments) {
 }
 
 const SECTOR_RADIUS = 9.12;  // matches second-hand length
-const OP_ACTIVE = 0.75;
+const OP_ACTIVE = 1.8;
 
 
 let prayerSectors = [];
@@ -1146,7 +1146,7 @@ function buildPrayerSectors() {
 // ── Polar disc prayer beam (single CircleGeometry + fragment shader) ──
 const _prayerDiscGeo = new THREE.CircleGeometry(SECTOR_RADIUS * 1.3, 64);
 const _prayerDiscMat = new THREE.ShaderMaterial({
-  transparent: true, depthWrite: false, side: THREE.DoubleSide,
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   uniforms: {
     uStartAngle: { value: 0.0 },
     uEndAngle:   { value: 0.0 },
@@ -1171,7 +1171,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     varying vec2  vPos;
     void main() {
       float r = length(vPos);
-      float radial = exp(-r / uOuterRadius * 2.8);
+      float radial = exp(-r / uOuterRadius * 1.6);
 
       float angle = atan(vPos.x, -vPos.y);
 
@@ -1239,7 +1239,7 @@ prismGroup.add(_thirdDisc);
 
 
 
-const OP_STEP = 0.275; // intensity drop per consecutive prayer
+const OP_STEP = 0.18; // intensity drop per consecutive prayer
 
 function updatePrayerWindows(now) {
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
