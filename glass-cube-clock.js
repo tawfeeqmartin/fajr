@@ -1548,9 +1548,9 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     if (_swipeTawafPhase > 0.001) {
       // Ease-out curve for smooth deceleration
       var tawafOffset = _swipeTawafPhase * _swipeTawafPhase * TAU; // quadratic ease-out
-      clockRays[0].mesh.rotation.y += tawafOffset * 0.3;  // hour: subtle
-      clockRays[1].mesh.rotation.y += tawafOffset * 0.6;  // minute: medium
-      clockRays[2].mesh.rotation.y += tawafOffset;         // second: full sweep
+      clockRays[0].mesh.rotation.y -= tawafOffset * 0.3;  // hour: subtle
+      clockRays[1].mesh.rotation.y -= tawafOffset * 0.6;  // minute: medium
+      clockRays[2].mesh.rotation.y -= tawafOffset;         // second: full sweep
       _swipeTawafPhase *= 0.955; // decay ~1.5 seconds at 60fps
       if (_swipeTawafPhase < 0.001) _swipeTawafPhase = 0;
     }
