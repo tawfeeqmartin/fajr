@@ -1169,6 +1169,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     uOuterRadius:{ value: SECTOR_RADIUS },
     uWidth:      { value: 1.0 },
     uEdgeFade:   { value: 12.0 },
+    uFalloff:    { value: 2.2 },
   },
   vertexShader: `
     varying vec2 vPos;
@@ -1182,11 +1183,11 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     #define TAU 6.28318530
     uniform float uStartAngle, uEndAngle;
     uniform vec3  uColor1, uColor2;
-    uniform float uIntensity, uOuterRadius, uWidth, uEdgeFade;
+    uniform float uIntensity, uOuterRadius, uWidth, uEdgeFade, uFalloff;
     varying vec2  vPos;
     void main() {
       float r = length(vPos);
-      float radial = exp(-r / uOuterRadius * 2.2) * smoothstep(0.0, 0.5, r);
+      float radial = exp(-r / uOuterRadius * uFalloff) * smoothstep(0.0, 0.5, r);
 
       float angle = atan(vPos.x, -vPos.y);
 
@@ -1231,6 +1232,7 @@ _nextDiscMat.uniforms = {
   uOuterRadius:{ value: SECTOR_RADIUS },
   uWidth:      { value: 1.0 },
   uEdgeFade:   { value: 12.0 },
+  uFalloff:    { value: 2.2 },
 };
 const _nextDisc = new THREE.Mesh(_prayerDiscGeo, _nextDiscMat);
 _nextDisc.rotation.x = -Math.PI / 2;
@@ -1249,6 +1251,7 @@ _thirdDiscMat.uniforms = {
   uOuterRadius:{ value: SECTOR_RADIUS },
   uWidth:      { value: 1.0 },
   uEdgeFade:   { value: 12.0 },
+  uFalloff:    { value: 2.2 },
 };
 const _thirdDisc = new THREE.Mesh(_prayerDiscGeo, _thirdDiscMat);
 _thirdDisc.rotation.x = -Math.PI / 2;
@@ -1636,49 +1639,8 @@ function _devStartSpeed() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Patch disc shaders: inject uFalloff uniform so per-window spread works
 // ─────────────────────────────────────────────────────────────────────────────
-function _devPatchDiscShaders() {
-  [_prayerDiscMat, _nextDiscMat, _thirdDiscMat].forEach(function(mat) {
-    if (mat._devPatched) return; // already patched
-    mat._devPatched = true;
-
-    // Ensure all dev uniforms exist
-    if (!mat.uniforms.uFalloff)  mat.uniforms.uFalloff  = { value: 2.2 };
-    if (!mat.uniforms.uWidth)    mat.uniforms.uWidth    = { value: 1.0 };
-    if (!mat.uniforms.uEdgeFade) mat.uniforms.uEdgeFade = { value: 12.0 };
-
-    var fs = mat.fragmentShader;
-
-    // Patch uniform declaration — add uFalloff if missing
-    if (fs.indexOf('uFalloff') === -1) {
-      // Could be "uOuterRadius;" or "uOuterRadius, uWidth, uEdgeFade;"
-      fs = fs.replace(
-        /uniform float uIntensity, uOuterRadius([^;]*);/,
-        'uniform float uIntensity, uOuterRadius, uFalloff$1;'
-      );
-    }
-
-    // Patch radial falloff: hardcoded 2.2 → uFalloff
-    fs = fs.replace(
-      'exp(-r / uOuterRadius * 2.2)',
-      'exp(-r / uOuterRadius * uFalloff)'
-    );
-
-    // Patch angular width: hSpan → hSpan * uWidth
-    fs = fs.replace(
-      'float normDist = abs(d) / max(hSpan, 0.001);',
-      'float normDist = abs(d) / max(hSpan * uWidth, 0.001);'
-    );
-
-    // Patch edge fade: hardcoded 12.0 → uEdgeFade
-    fs = fs.replace(
-      'max(normDist - 0.97, 0.0) * 12.0',
-      'max(normDist - 0.97, 0.0) * uEdgeFade'
-    );
-
-    mat.fragmentShader = fs;
-    mat.needsUpdate = true;
-  });
-}
+// All disc shader uniforms (uFalloff, uWidth, uEdgeFade) are baked into the
+// initial ShaderMaterial — no runtime patching needed.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Monkey-patch updatePrayerWindows: window count limiting + per-window overrides
@@ -1739,7 +1701,7 @@ function _devPatchDiscShaders() {
 // ─────────────────────────────────────────────────────────────────────────────
 function _devBuildPanel() {
   if (document.getElementById('_devPanel')) return;
-  _devPatchDiscShaders();
+  // Disc shaders already have all uniforms baked in — no patching needed
 
   var timeNow = new Date();
   var initMin = timeNow.getHours() * 60 + timeNow.getMinutes();
@@ -1757,6 +1719,14 @@ function _devBuildPanel() {
     'backdrop-filter:blur(8px)',
     'border:1px solid rgba(255,255,255,0.12)'
   ].join(';');
+
+  // Inject style for number inputs
+  if (!document.getElementById('_devNumStyle')) {
+    var st = document.createElement('style');
+    st.id = '_devNumStyle';
+    st.textContent = '._dNum{width:42px;background:#1a1a2a;color:#fff;border:1px solid #444;border-radius:3px;font:10px monospace;padding:1px 3px;text-align:right;}._dNum:focus{border-color:#66f;outline:none;}';
+    document.head.appendChild(st);
+  }
 
   function sec(label) {
     return '<div style="color:#fff;font-size:9px;letter-spacing:0.8px;font-weight:700;'
@@ -2086,6 +2056,45 @@ function _devBuildPanel() {
   });
 
   _devRefreshWindowList();
+
+  // ── Convert hand value spans to editable number inputs ────────────────────
+  function _devWireHandNumInput(cls, sliderCls, divisor) {
+    document.querySelectorAll(cls).forEach(function(span) {
+      var i = span.dataset.hi;
+      var inp = document.createElement('input');
+      inp.type = 'number';
+      inp.className = '_dNum';
+      inp.step = divisor >= 10 ? '0.01' : '0.1';
+      inp.value = span.textContent;
+      inp.dataset.hi = i;
+      span.replaceWith(inp);
+      inp.addEventListener('change', function() {
+        var val = parseFloat(inp.value);
+        if (isNaN(val)) return;
+        var sl = document.querySelector(sliderCls + '[data-hi="' + i + '"]');
+        if (sl) { sl.value = Math.round(val * divisor); sl.dispatchEvent(new Event('input')); }
+      });
+      var sl = document.querySelector(sliderCls + '[data-hi="' + i + '"]');
+      if (sl) {
+        sl.addEventListener('input', function() {
+          inp.value = (parseFloat(sl.value) / divisor).toFixed(divisor >= 10 ? 2 : 1);
+        });
+      }
+    });
+  }
+  _devWireHandNumInput('._dHandLenV', '._dHandLen', 10);
+  _devWireHandNumInput('._dHandWV', '._dHandW', 10);
+  _devWireHandNumInput('._dHandOpV', '._dHandOp', 10);
+
+  // Convert global OP value spans to editable
+  ['_devOpActiveV', '_devOpStepV'].forEach(function(id) {
+    var span = document.getElementById(id);
+    if (!span) return;
+    var inp = document.createElement('input');
+    inp.type = 'number'; inp.className = '_dNum'; inp.id = id;
+    inp.step = '0.1'; inp.value = span.textContent;
+    span.replaceWith(inp);
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2302,6 +2311,39 @@ function _devRefreshWindowList() {
       var pname = chk.dataset.prayer;
       _devBoundaryPerPrayer[pname] = chk.checked;
       _devUpdateBoundaries();
+    });
+  });
+
+  // ── Convert per-prayer value spans to editable number inputs ──────────────
+  var prayerNumPairs = [
+    { spanCls: '_dOvIntV', sliderCls: '_dOvInt', div: 10, step: '0.1' },
+    { spanCls: '_dOvSpV',  sliderCls: '_dOvSp',  div: 10, step: '0.1' },
+    { spanCls: '_dOvWdV',  sliderCls: '_dOvWd',  div: 10, step: '0.1' },
+    { spanCls: '_dOvEfV',  sliderCls: '_dOvEf',  div: 1,  step: '1' }
+  ];
+  prayerNumPairs.forEach(function(pair) {
+    el.querySelectorAll('.' + pair.spanCls).forEach(function(span) {
+      var pname = span.dataset.prayer;
+      var inp = document.createElement('input');
+      inp.type = 'number'; inp.className = '_dNum ' + pair.spanCls;
+      inp.dataset.prayer = pname;
+      inp.step = pair.step; inp.value = span.textContent === 'global' ? '' : span.textContent;
+      inp.placeholder = span.textContent;
+      inp.style.color = span.style.color;
+      span.replaceWith(inp);
+      inp.addEventListener('change', function() {
+        var val = parseFloat(inp.value);
+        if (isNaN(val)) return;
+        var sl = el.querySelector('.' + pair.sliderCls + '[data-prayer="' + pname + '"]');
+        if (sl) { sl.value = Math.round(val * pair.div); sl.dispatchEvent(new Event('input')); }
+      });
+      var sl = el.querySelector('.' + pair.sliderCls + '[data-prayer="' + pname + '"]');
+      if (sl) {
+        sl.addEventListener('input', function() {
+          inp.value = (parseFloat(sl.value) / pair.div).toFixed(pair.div >= 10 ? 1 : 0);
+          inp.style.color = '#fff';
+        });
+      }
     });
   });
 }
