@@ -679,7 +679,7 @@ const podiumMesh = new THREE.Mesh(
   new THREE.BoxGeometry(PODIUM_W, PODIUM_H, PODIUM_W),
   podiumMats
 );
-podiumMesh.position.y = -PODIUM_H / 2 - 0.08; // top face slightly below y=0, tiny gap beneath cube
+podiumMesh.position.y = -PODIUM_H / 2 - 0.03; // top face just below hand beams (y≈0.008) — whisper gap
 podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
