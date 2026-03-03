@@ -2714,14 +2714,19 @@ function _swipeRevert(instant) {
 }
 
 // Touch handlers — bound to document, filtered to clock mode only
+var _swipeDragOriginX = 0;     // finger X at drag start (never resets during gesture)
+var _swipeDragBaseIdx = -1;    // prayer index at drag start
+var _swipeLastTriggeredIdx = -1; // last prayer we triggered (prevent re-fire)
+var _swipeDragging = false;    // true = finger is down and dragging horizontally
+
 document.addEventListener('touchstart', function(e) {
   if (_compassMode || document.body.classList.contains('mode-info')) return;
   if (_devActive) return;
-  // Don't capture touches on interactive elements
   if (e.target.closest('button,a,input,select,textarea,.mode-pill,.loc-picker,.fs-dial-picker')) return;
   var touch = e.touches[0];
   _swipeStartX = touch.clientX;
   _swipeStartY = touch.clientY;
+  _swipeDragging = false;
   _swipeSwiping = false;
 }, { passive: true });
 
@@ -2732,21 +2737,51 @@ document.addEventListener('touchmove', function(e) {
   var touch = e.touches[0];
   var dx = touch.clientX - _swipeStartX;
   var dy = touch.clientY - _swipeStartY;
-  // Only trigger on horizontal swipe (dx > dy) with minimum threshold
-  if (!_swipeSwiping && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+
+  // Detect horizontal drag intent
+  if (!_swipeDragging && Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    _swipeDragging = true;
     _swipeSwiping = true;
-    var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
-    var dir = dx > 0 ? 1 : -1; // swipe right = next prayer, swipe left = previous
-    var _camPrev = _swipeCamTarget;
-    _swipeCamTarget = Math.max(-0.3491, Math.min(0.3491, _swipeCamTarget + dir * 0.1745)); // +10° per swipe, ±20° max
-    // Rubber-band: if clamped at edge, kick velocity to overshoot ~2° then spring back
-    if (_swipeCamTarget === _camPrev) _swipeCamVel += dir * 0.012;
-    _swipeShowPreview(baseIdx + dir);
-    _swipeStartX = touch.clientX; // reset for next swipe in same gesture
+    _swipeDragOriginX = touch.clientX;
+    _swipeDragBaseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
+    _swipeLastTriggeredIdx = _swipeDragBaseIdx;
+  }
+
+  if (_swipeDragging) {
+    var totalDx = touch.clientX - _swipeDragOriginX;
+    var screenW = window.innerWidth || 430;
+
+    // Map finger drag directly to camera orbit (±20° = ±0.3491 rad)
+    var rawAngle = (totalDx / screenW) * 0.70; // full screen drag ≈ 40°
+    _swipeCamTarget = Math.max(-0.3491, Math.min(0.3491, rawAngle));
+    // Rubber-band: if clamped, let angle overshoot slightly via direct assignment
+    if (Math.abs(rawAngle) > 0.3491) {
+      var excess = rawAngle - _swipeCamTarget;
+      _swipeCamTarget += excess * 0.15; // 15% of excess = subtle rubber-band
+    }
+    // Finger-follows: drive angle directly (bypass spring during drag)
+    _swipeCamAngle = _swipeCamTarget;
+    _swipeCamVel = 0;
+
+    // Prayer threshold: every ~80px triggers next/prev prayer
+    var prayerOffset = Math.round(totalDx / 80);
+    var targetIdx = _swipeDragBaseIdx + prayerOffset;
+    targetIdx = ((targetIdx % 7) + 7) % 7;
+    if (targetIdx !== _swipeLastTriggeredIdx) {
+      _swipeLastTriggeredIdx = targetIdx;
+      _swipeShowPreview(targetIdx);
+    }
   }
 }, { passive: true });
 
 document.addEventListener('touchend', function() {
+  if (_swipeDragging) {
+    // Release: spring back to 0 (tawaf return handles it)
+    _swipeCamTarget = 0;
+    // Give a little velocity kick for elastic settle
+    _swipeCamVel = -_swipeCamAngle * 0.08;
+  }
+  _swipeDragging = false;
   _swipeSwiping = false;
   _swipeStartX = 0;
   _swipeStartY = 0;
