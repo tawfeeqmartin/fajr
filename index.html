@@ -2430,10 +2430,7 @@ function _buildCompassOnboarding() {
         '">Try again</button>' +
       '</div>' +
       // Hold instruction state
-      '<div class="compass-onboard-hold" style="opacity:0;transition:opacity .4s ease">' +
-        '<div class="compass-onboard-hold-text">Hold your phone in front of you</div>' +
-        '<div class="compass-onboard-hold-sub">Turn slowly until you face Makkah</div>' +
-      '</div>' +
+      '<div class="compass-onboard-hold" style="display:none"></div>' +
     '</div>';
   _compassOnboardEl.addEventListener('click', function(e) {
     // Retry button handles its own click — don't dismiss on retry tap
@@ -2506,8 +2503,8 @@ function _compassOnboardSetState(state) {
     if (figEl) figEl.style.opacity='1';
     if (fig8Arrows) fig8Arrows.style.opacity='0';
     if (sweepGroup) { sweepGroup.style.opacity='1'; sweepGroup.style.transition='opacity .4s ease'; }
-    if (textEl) { textEl.style.opacity='1'; textEl.textContent='Find Makkah'; }
-    if (holdEl) holdEl.style.opacity='1';
+    if (textEl) { textEl.style.opacity='1'; textEl.textContent='Hold your phone in front of you'; }
+    if (subEl)  { subEl.style.opacity='1';  subEl.textContent='Turn slowly until you face Makkah'; }
   }
 }
 
