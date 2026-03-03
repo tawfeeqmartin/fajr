@@ -1924,14 +1924,23 @@ window._displayPrayerTimes = _displayPrayerTimes;
 function _displayPrayerTimes(t, hijri) {
   if (hijri) window._lastHijri = hijri;
   const names = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam'];
-  const prayerColors = {Fajr:'#6633ee',Dhuhr:'#00bb44',Asr:'#00bb44',Maghrib:'#ff9900',Isha:'#8811ff',Qiyam:'#8811ff'};
+  const prayerColors = {Fajr:'#6633ee',Sunrise:'#ff9900',Dhuhr:'#00bb44',Asr:'#00bb44',Maghrib:'#ff9900',Isha:'#8811ff',Qiyam:'#8811ff'};
   const now = new Date(), nowM = now.getHours()*60+now.getMinutes();
   const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
-  // Find current active prayer (last salah whose time has passed — not Sunrise/Qiyam)
+  // Find current active prayer window — matches beam sectors exactly
+  // Sectors: Tahajjud(Midnight→Fajr), Fajr(Fajr→Sunrise), Dhuha(Sunrise→Dhuhr),
+  //          Dhuhr(Dhuhr→Asr), Asr(Asr→Maghrib), Maghrib(Maghrib→Isha), Isha(Isha→Midnight)
   let activeP = '';
-  const salahOnly = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
-  for (let i = salahOnly.length - 1; i >= 0; i--) {
-    if (t[salahOnly[i]] && toM(t[salahOnly[i]]) <= nowM) { activeP = salahOnly[i]; break; }
+  const sectors = [
+    {name:'Isha',     start:'Isha'},
+    {name:'Maghrib',  start:'Maghrib'},
+    {name:'Asr',      start:'Asr'},
+    {name:'Dhuhr',    start:'Dhuhr'},
+    {name:'Sunrise',  start:'Sunrise'},  // Dhuha window — maps to Sunrise span
+    {name:'Fajr',     start:'Fajr'}
+  ];
+  for (let i = 0; i < sectors.length; i++) {
+    if (t[sectors[i].start] && toM(t[sectors[i].start]) <= nowM) { activeP = sectors[i].name; break; }
   }
   const grey = ['Sunrise','Qiyam'];
   const html = names.map(p => {
