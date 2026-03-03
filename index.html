@@ -2349,7 +2349,7 @@ function switchMode(mode) {
     if(prev === 'compass' && fsCompassOn) _toggleCompassMode(false);
     closeClockFullscreen();
     document.body.classList.remove('chrome-hidden');
-    window.scrollTo(0, 0);
+    // Scroll position preserved — only resets on page refresh
   }
 }
 
@@ -2842,7 +2842,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=165';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=166';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
