@@ -2179,8 +2179,12 @@ function _updateCompassDist() {
   var mi = km * 0.621371;
   el.textContent = Math.round(km).toLocaleString() + ' km · ' + Math.round(mi).toLocaleString() + ' mi to Makkah';
 }
-function _setPrayerLocation(lat, lon, locationName) {
+function _setPrayerLocation(lat, lon, locationName, _skipSave) {
   _userLatDeg = lat; _userLonDeg = lon;
+  // Persist preferred location
+  if (!_skipSave) {
+    try { localStorage.setItem('agot_loc', JSON.stringify({lat:lat,lon:lon,name:locationName||''})); } catch(e){}
+  }
   _updateCompassDist(); // refresh distance when location changes
   // Compute times instantly via adhan-js
   const t = _computePrayerTimes(lat, lon);
@@ -2218,6 +2222,17 @@ function _setPrayerLocation(lat, lon, locationName) {
 function fsSetPrayerTimes(t, hijri) { _displayPrayerTimes(t, hijri); }
 
 async function fsFetchPrayer() {
+  // Restore saved city preference
+  try {
+    var _saved = localStorage.getItem('agot_loc');
+    if (_saved) {
+      var _loc = JSON.parse(_saved);
+      if (_loc.lat && _loc.lon) {
+        _setPrayerLocation(_loc.lat, _loc.lon, _loc.name || '', true);
+        return; // skip GPS/IP — user chose this city
+      }
+    }
+  } catch(e){}
   // GPS — most accurate (fires in parallel, resolves async)
   if(navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -2826,7 +2841,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=162';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=163';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
