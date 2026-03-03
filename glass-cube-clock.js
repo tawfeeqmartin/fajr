@@ -2754,14 +2754,15 @@ document.addEventListener('touchmove', function(e) {
     // Map finger drag directly to camera orbit (±20° = ±0.3491 rad)
     var rawAngle = (totalDx / screenW) * 0.70; // full screen drag ≈ 40°
     _swipeCamTarget = Math.max(-0.3491, Math.min(0.3491, rawAngle));
-    // Rubber-band: if clamped, let angle overshoot slightly via direct assignment
+    // Rubber-band at edges: finger keeps pulling, orbit resists with spring feel
     if (Math.abs(rawAngle) > 0.3491) {
       var excess = rawAngle - _swipeCamTarget;
-      _swipeCamTarget += excess * 0.15; // 15% of excess = subtle rubber-band
+      _swipeCamTarget += excess * 0.20; // 20% of excess bleeds through
     }
-    // Finger-follows: drive angle directly (bypass spring during drag)
-    _swipeCamAngle = _swipeCamTarget;
-    _swipeCamVel = 0;
+    // Finger-follows with elastic spring toward target
+    var _dragSpring = (_swipeCamTarget - _swipeCamAngle) * 0.35;
+    _swipeCamVel = (_swipeCamVel + _dragSpring) * 0.55; // underdamped = slight wiggle on pull
+    _swipeCamAngle += _swipeCamVel;
 
     // Prayer threshold: every ~80px triggers next/prev prayer
     var prayerOffset = Math.round(totalDx / 80);
