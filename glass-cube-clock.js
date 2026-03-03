@@ -2617,6 +2617,7 @@ function _swipeShowPreview(idx) {
   // Create/update the preview label above nav pill
   if (!_swipeLabelEl) {
     _swipeLabelEl = document.createElement('div');
+    _swipeLabelEl.id = '_swipeLabel';
     _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 72px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
     document.body.appendChild(_swipeLabelEl);
   }
@@ -2660,6 +2661,7 @@ var _swipeTimeOverride = null; // minutes from midnight (current), or null for l
 var _swipeTimeTarget  = null; // where we're lerping TO
 var _swipeTawafPhase = 0;     // 0-1, decays to 0 — drives CCW sweep on revert
 
+window._swipeRevert = _swipeRevert;
 function _swipeRevert(instant) {
   _swipePreviewIdx = -1;
   _swipeTimeOverride = null;
