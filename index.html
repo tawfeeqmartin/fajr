@@ -1155,7 +1155,10 @@ function adhanCompassHandler(e){
     const qd = adhanQiblaAngle !== null ? (adhanQiblaAngle*180/Math.PI).toFixed(1) : 'null';
     const rel = adhanQiblaAngle !== null ? ((adhanQiblaAngle - adhanDeviceHeading)*180/Math.PI).toFixed(1) : '?';
     var hlEl = document.getElementById('_compassHeadingLine');
-    if(hlEl) hlEl.textContent = String(smoothed.toFixed(0)).padStart(3,' ')+'° heading · '+String(qd).padStart(3,' ')+'° qibla · accuracy '+String(acc.toFixed(0)).padStart(2,' ')+'°'+(_compassCalibrated?' ✓':'');
+    if(hlEl) {
+      var _pad = function(n,w){ var s=String(n); while(s.length<w) s='0'+s; return s; };
+      hlEl.innerHTML = _pad(smoothed.toFixed(0),3)+'° heading · '+_pad(qd,3)+'° qibla · accuracy '+_pad(acc.toFixed(0),2)+'°'+(_compassCalibrated?' ✓':'');
+    }
   }
   // Clear any "no compass" message
   if (_compassTimeoutEl && _compassTimeoutEl.style.opacity !== '0') {
