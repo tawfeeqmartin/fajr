@@ -3,7 +3,7 @@
 // Three.js FBO dichroic shader, per-channel IOR, real-time H:M:S hands
 
 import * as THREE from 'three';
-import { LightProbeGenerator } from 'three/addons/lights/LightProbeGenerator.js';
+// LightProbeGenerator removed — no irradiance probes
 
 
 // ─── CONTAINER DETECTION ──────────────────────────────────────────────────────
@@ -562,8 +562,7 @@ const dichroicFrag = `
   uniform vec3      uCamWorldPos;
   uniform float     uSpecIntensity;
   uniform float     uInternalGlow;
-  uniform samplerCube uCubeEnvMap;
-  uniform float       uCubeEnvIntensity;
+  // CubeEnvMap removed — no irradiance probes
 
   varying vec3 vViewNormal;
   varying vec3 vViewDir;
@@ -667,7 +666,7 @@ const dichroicFrag = `
     // Fresnel color shift at grazing angles
     float topFresnel = pow(1.0 - NdotV, 3.0) * topFace;
     col += vec3(0.25, 0.15, 0.55) * topFresnel * 0.30;
-    // (env reflection boost for top face applied after irradiance probe section below)
+    // Top-face iridescence applied above
 
     // ── Bottom-face glow: cool emission separates cube from dark podium ──
     float bottomFace = smoothstep(-0.5, -0.92, Nw.y);
@@ -675,18 +674,6 @@ const dichroicFrag = `
     // ── Bottom-edge rim: catch light at cube base perimeter ──
     float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
     col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.45;
-
-    // ── Irradiance probe: real environment reflections from CubeCamera ──
-    // Reflects the live lit scene (prayer beams, floor colors) into the glass.
-    // Fresnel-weighted: glass reflects strongest at grazing angles (edges).
-    vec3 reflDir = reflect(-Vw, Nw);
-    vec3 envRefl = textureCube(uCubeEnvMap, reflDir).rgb;
-    float envFresnel = pow(1.0 - NdotV, 2.0);
-    // Env reflection: 25% base at normal incidence (glass always shows some env), ramps to full at grazing
-    col += envRefl * uCubeEnvIntensity * (0.25 + 0.75 * envFresnel);
-
-    // ── Top-face env reflection boost (declared after envRefl is computed) ──
-    col += envRefl * topFace * 0.20;
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -708,8 +695,7 @@ const cubeMat = new THREE.ShaderMaterial({
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 2.8 },
     uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
-    uCubeEnvMap:       { value: null },  // irradiance probe: set after CubeCamera created
-    uCubeEnvIntensity: { value: 0.50 }, // 0.35→0.50 — env reflections now visible on all faces, sells glass
+    // CubeEnvMap uniforms removed — no probes
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
@@ -734,11 +720,12 @@ const PODIUM_H = 20; // tall enough to extend past any visible floor
 // Design intent: polished obsidian monolith — catches cube light, breathes with prayer color.
 // High clearcoat + low roughness = glass-like specular reflections on column faces.
 // Podium materials reverted to pre-reactive state — static emissive, no envMap reactivity
-const podiumBase = { roughness: 0.4, metalness: 0.05, clearcoat: 0.4, clearcoatRoughness: 0.15, color: 0x14141f, fog: false };
+// Podium materials: polished obsidian. Top face = high clearcoat for light pools.
+const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x12121c, fog: false };
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x0c0c18, emissiveIntensity: 0.5 }), // +y top — dichroic spill
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141428, emissiveIntensity: 0.8, roughness: 0.15, clearcoat: 0.8, clearcoatRoughness: 0.06 }), // +y top — polished
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x020204, emissiveIntensity: 0.1 }), // -y bottom — invisible
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x161630, emissiveIntensity: 0.9 }), // +z front — FILL face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x030306, emissiveIntensity: 0.1 }), // -z back — hidden
@@ -752,39 +739,7 @@ podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
-// ─── IRRADIANCE PROBES — Phase 1 ─────────────────────────────────────────────
-// CubeCamera (64px) placed at cube world center, updated every 60 frames.
-// Captures the live scene — prayer beams, lit floor, tawaf spot — from the
-// cube's perspective. Two outputs:
-//   1. cubeRenderTarget.texture → dichroic shader uniform (real reflections)
-//   2. LightProbeGenerator SH bake → LightProbe in scene (podium indirect light)
-//
-// Performance: 6-face render every ~1 second + async GPU readback = ~0.05ms/frame.
-// Mobile Safari safe — throttle guards against stacking async calls.
-
-const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(64, {
-  type: THREE.HalfFloatType,
-  format: THREE.RGBAFormat,          // required for readRenderTargetPixels
-  colorSpace: THREE.LinearSRGBColorSpace,
-});
-
-// near=0.1 (inside the 1.2-unit cube body), far=40 (well past scene bounds)
-const probeCamera = new THREE.CubeCamera(0.1, 40, cubeRenderTarget);
-probeCamera.position.set(0, CUBE_Y, 0); // world center of the glass cube
-scene.add(probeCamera);
-
-// Wire cubemap to dichroic shader immediately — returns black until first update
-cubeMat.uniforms.uCubeEnvMap.value = cubeRenderTarget.texture;
-
-// LightProbe: receives SH coefficients from CubeCamera bake.
-// Podium (MeshPhysicalMaterial) responds to scene LightProbes automatically.
-// intensity=0.25 — barely perceptible wash of prayer color on podium faces.
-const lightProbe = new THREE.LightProbe(undefined, 0.25);
-scene.add(lightProbe);
-
-// Probe update state
-let _probeFrameCount  = 0;
-let _probeUpdatePending = false;
+// Irradiance probes removed — Tawfeeq preferred pre-probe look
 
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
 // Three floor rays as H / M / S clock hands, synced to real time.
@@ -1727,27 +1682,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     if (sl) { const v = now.getHours()*60+now.getMinutes(); sl.value = v; if (lb) lb.textContent = _fmtMin(v); }
   }
 
-  // ── Irradiance probe update (throttled: every 60 frames ≈ 1s at 60fps) ──
-  // Run BEFORE FBO pass while scene is in clean state.
-  // Hide cubeMesh so the probe captures the environment, not itself.
-  if (!_probeUpdatePending) {
-    _probeFrameCount++;
-    if (_probeFrameCount % 60 === 0) {
-      cubeMesh.visible = false;
-      probeCamera.update(renderer, scene);
-      cubeMesh.visible = true;
-      _probeUpdatePending = true;
-      LightProbeGenerator.fromCubeRenderTarget(renderer, cubeRenderTarget)
-        .then(newProbe => {
-          lightProbe.sh.copy(newProbe.sh);
-          _probeUpdatePending = false;
-          // Podium envMap wiring removed — reactive lighting disabled
-        })
-        .catch(() => { _probeUpdatePending = false; });
-    }
-  }
-
-  // Podium reactive emissive REMOVED — Tawfeeq disliked the popping/jumping
+  // Probes + reactive podium removed
 
   // FBO pass
   cubeMesh.visible = false;
