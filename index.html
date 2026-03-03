@@ -2076,6 +2076,8 @@ function closeLocationPicker() {
 function locUseGPS() {
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
+    _locSelectedCity = null; // clear selection so closeLocationPicker doesn't override GPS
+    adhanQiblaAngle = null;
     _setPrayerLocation(pos.coords.latitude, pos.coords.longitude);
     closeLocationPicker();
   }, () => {}, { maximumAge: 0, timeout: 10000 });
