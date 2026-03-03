@@ -1608,8 +1608,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     -Math.cos(secAngle) * specRadius
   );
   // Damped spring camera orbit — elastic overshoot + boundary bounce
-  var _camStiffness = (_swipePreviewIdx >= 0) ? 0.30 : 0.04; // instant during drag, measured on release
-  var _camDamping = (_swipePreviewIdx >= 0) ? 0.58 : 0.82; // tight during drag, smooth glide home
+  var _camStiffness = (_swipePreviewIdx >= 0) ? 0.30 : 0.018; // instant during drag, very slow on release
+  var _camDamping = (_swipePreviewIdx >= 0) ? 0.58 : 0.92; // tight during drag, critically damped home — no wiggle
   var _camAccel = (_swipeCamTarget - _swipeCamAngle) * _camStiffness;
   _swipeCamVel = (_swipeCamVel + _camAccel) * _camDamping;
   _swipeCamAngle += _swipeCamVel;
@@ -2776,10 +2776,9 @@ document.addEventListener('touchmove', function(e) {
 
 document.addEventListener('touchend', function() {
   if (_swipeDragging) {
-    // Release: spring back to 0 (tawaf return handles it)
+    // Release: spring back to 0 — no velocity kick, pure measured drift
     _swipeCamTarget = 0;
-    // Give a little velocity kick for elastic settle
-    _swipeCamVel = -_swipeCamAngle * 0.08;
+    _swipeCamVel = 0;
   }
   _swipeDragging = false;
   _swipeSwiping = false;
