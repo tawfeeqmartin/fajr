@@ -1975,11 +1975,19 @@ const LOC_CITIES = [
 
 let _locSelectedCity = null;
 
+var _locSearchResults = [];  // geocoded results appended to filtered list
+var _locSearchTimer = null;
+
 function _buildCityList(filter) {
   const list = document.getElementById('locCityList');
   if (!list) return;
-  const q = (filter || '').toLowerCase();
-  const cities = q ? LOC_CITIES.filter(c => c.name.toLowerCase().includes(q)) : LOC_CITIES;
+  const q = (filter || '').toLowerCase().trim();
+  // Local matches first
+  const local = q ? LOC_CITIES.filter(c => c.name.toLowerCase().includes(q)) : LOC_CITIES;
+  // Merge geocoded results (de-dup by name)
+  const localNames = new Set(local.map(c => c.name.toLowerCase()));
+  const extra = _locSearchResults.filter(c => !localNames.has(c.name.toLowerCase()));
+  const cities = local.concat(extra);
   list.innerHTML = '';
   cities.forEach(c => {
     const div = document.createElement('div');
@@ -1992,6 +2000,31 @@ function _buildCityList(filter) {
     div.onclick = () => _selectCity(c);
     list.appendChild(div);
   });
+  // Trigger geocode search for 3+ characters
+  if (q.length >= 3) {
+    clearTimeout(_locSearchTimer);
+    _locSearchTimer = setTimeout(() => _geocodeSearch(q), 350);
+  } else {
+    _locSearchResults = [];
+  }
+}
+
+function _geocodeSearch(q) {
+  fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=8&language=en&format=json')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.results) { _locSearchResults = []; return; }
+      _locSearchResults = data.results.map(r => ({
+        name: r.name + (r.admin1 ? ', ' + r.admin1 : '') + (r.country ? ', ' + r.country : ''),
+        sub: null,
+        lat: r.latitude,
+        lon: r.longitude
+      }));
+      // Re-render with new results
+      const inp = document.getElementById('locSearchInput');
+      if (inp) _buildCityList(inp.value);
+    })
+    .catch(() => {});
 }
 
 function _selectCity(city) {
