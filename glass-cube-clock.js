@@ -1026,6 +1026,34 @@ function _syncCompassFromAdhan() {
   if (typeof adhanQiblaAngle !== 'undefined' && adhanQiblaAngle !== null) _compassQibla = adhanQiblaAngle;
 }
 
+// ─── TAHAJJUD — LAST THIRD OF THE NIGHT ───────────────────────────────────
+// "Our Lord descends every night to the lowest heaven in the last third of the night"
+// — Bukhari & Muslim
+// Detection: last ⅓ of night = Isha + 2/3 × (Fajr_next - Isha)
+var _tahajjudActive = false;
+var _tahajjudBlend  = 0.0;    // 0 = normal, 1 = full tahajjud state (lerps)
+var _tahajjudStartMin = 0;    // calculated start time in minutes from midnight
+var _tahajjudForced = false;  // dev panel override
+var _tahajjudLastCheck = 0;   // throttle: check once per 10 seconds
+
+function _isLastThird(now) {
+  var T = window._prayerTimings;
+  if (!T || !T.Isha || !T.Fajr) return false;
+  var ishaMin  = ptParseMin(T.Isha);
+  var fajrMin  = ptParseMin(T.Fajr);
+  // Fajr is next day — add 24h if needed
+  if (fajrMin <= ishaMin) fajrMin += 1440;
+  var nightDuration = fajrMin - ishaMin;
+  var lastThirdStart = ishaMin + Math.floor(nightDuration * 2 / 3);
+  _tahajjudStartMin = lastThirdStart % 1440;
+  // Current time in minutes
+  var h = now.getHours(), m = now.getMinutes();
+  var nowMin = h * 60 + m;
+  // Handle midnight wrap: if now < Isha, we're past midnight — add 24h
+  if (nowMin < ishaMin) nowMin += 1440;
+  return nowMin >= lastThirdStart && nowMin < fajrMin;
+}
+
 // ─── PRAYER WINDOW SECTORS ────────────────────────────────────────────────
 // Seven glowing fan/pie-slice sectors on the floor, one per Islamic prayer window.
 // Subtle atmospheric floor glow — cube remains the visual hero.
@@ -1395,6 +1423,20 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   const h = (now.getHours() % 12) + now.getMinutes() / 60 + now.getSeconds() / 3600;
   const m = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
+
+  // ── Tahajjud — last third of the night ──
+  var _tahajjudNow = Date.now();
+  if (_tahajjudNow - _tahajjudLastCheck > 10000) {
+    _tahajjudLastCheck = _tahajjudNow;
+    _tahajjudActive = _tahajjudForced || _isLastThird(now);
+  }
+  var _tahajjudTarget = _tahajjudActive ? 1.0 : 0.0;
+  _tahajjudBlend += (_tahajjudTarget - _tahajjudBlend) * 0.008; // ~8 second lerp
+  if (Math.abs(_tahajjudBlend - _tahajjudTarget) < 0.001) _tahajjudBlend = _tahajjudTarget;
+
+  // Expose for dev panel readout
+  window._tahajjudBlend = _tahajjudBlend;
+  window._tahajjudActive = _tahajjudActive;
 
   if (_compassMode) {
     // Pull latest compass data from adhan globals
@@ -1857,6 +1899,19 @@ function _devBuildPanel() {
     '</div>' +
     '<button id="_devResetAll" style="' + btnBase(false) + ';width:100%">↺ Reset All</button>' +
 
+    sec('Tahajjud — Last Third') +
+    '<div style="margin-bottom:8px">' +
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer">' +
+        '<input type="checkbox" id="_devTahajjudForce">' +
+        '<span style="color:#aaa">Force Tahajjud mode</span>' +
+      '</label>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:10px;color:#777;margin-bottom:4px">' +
+      '<span>Blend: <span id="_devTahajjudBlend" style="color:#fff">0.00</span></span>' +
+      '<span>Starts: <span id="_devTahajjudStart" style="color:#fff">--:--</span></span>' +
+      '<span id="_devTahajjudStatus" style="color:#555">inactive</span>' +
+    '</div>' +
+
     '</div>'; // end _devBody
 
   document.body.appendChild(panel);
@@ -2028,6 +2083,29 @@ function _devBuildPanel() {
     _devShowBoundaries = e.target.checked;
     _devUpdateBoundaries();
   });
+
+  // ── Tahajjud force toggle ─────────────────────────────────────────────────
+  document.getElementById('_devTahajjudForce').addEventListener('change', function(e) {
+    _tahajjudForced = e.target.checked;
+    _tahajjudLastCheck = 0; // force re-check immediately
+  });
+
+  // ── Tahajjud readout update (every 500ms) ───────────────────────────────────
+  setInterval(function() {
+    var blendEl = document.getElementById('_devTahajjudBlend');
+    var startEl = document.getElementById('_devTahajjudStart');
+    var statusEl = document.getElementById('_devTahajjudStatus');
+    if (blendEl) blendEl.textContent = (window._tahajjudBlend || 0).toFixed(2);
+    if (startEl) {
+      var sm = _tahajjudStartMin;
+      var hh = Math.floor(sm / 60) % 24, mm = sm % 60;
+      startEl.textContent = (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+    }
+    if (statusEl) {
+      statusEl.textContent = window._tahajjudActive ? 'ACTIVE' : 'inactive';
+      statusEl.style.color = window._tahajjudActive ? '#88ff88' : '#555';
+    }
+  }, 500);
 
   // ── Reset All ───────────────────────────────────────────────────────────────
   document.getElementById('_devResetAll').addEventListener('click', function() {
