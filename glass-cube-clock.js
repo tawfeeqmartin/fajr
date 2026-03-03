@@ -707,7 +707,7 @@ const cubeMat = new THREE.ShaderMaterial({
     uSpecIntensity: { value: 2.8 },
     uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
     uCubeEnvMap:       { value: null },  // irradiance probe: set after CubeCamera created
-    uCubeEnvIntensity: { value: 0.35 }, // subtle — 0.35 is barely perceptible at normal angles
+    uCubeEnvIntensity: { value: 0.50 }, // 0.35→0.50 — env reflections now visible on all faces, sells glass
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
@@ -795,7 +795,7 @@ const FRAG = `
   uniform vec3 c1,c2; uniform float op; varying vec2 vUv;
   void main(){
     vec3 col=mix(c1,c2,pow(clamp(vUv.y,0.,1.),0.6));
-    float sx=exp(-pow((vUv.x-0.5)*4.8,2.0));
+    float sx=exp(-pow((vUv.x-0.5)*5.6,2.0));  // 4.8→5.6 — tighter beam, precision optics feel
     float sy=smoothstep(0.0,0.08,vUv.y)*smoothstep(1.0,0.36,vUv.y);
     gl_FragColor=vec4(col,sx*sy*op);
   }
