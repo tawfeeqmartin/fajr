@@ -2676,7 +2676,7 @@ document.addEventListener('touchmove', function(e) {
   if (!_swipeSwiping && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
     _swipeSwiping = true;
     var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
-    var dir = dx > 0 ? -1 : 1; // swipe right = previous, swipe left = next
+    var dir = dx > 0 ? 1 : -1; // swipe right = next prayer, swipe left = previous
     _swipeShowPreview(baseIdx + dir);
     _swipeStartX = touch.clientX; // reset for next swipe in same gesture
   }
