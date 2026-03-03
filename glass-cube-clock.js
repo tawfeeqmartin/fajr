@@ -593,7 +593,7 @@ const dichroicFrag = `
     // ── Transmission: boost brightness — dichroic glass is bright, not dark ──
     // Slight blue-green tint is physically correct for optical glass (kills warm artifacts)
     // Bottom-face attenuation: reduce transmission where normal faces down (cubeSun direct hit)
-    float bottomAtten = 1.0 - 0.45 * smoothstep(-0.3, -0.95, Nw.y);
+    float bottomAtten = 1.0 - 0.25 * smoothstep(-0.3, -0.95, Nw.y);
     vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 1.7 * bottomAtten;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
@@ -628,9 +628,12 @@ const dichroicFrag = `
     // ── Top-face scrim: only extreme grazing (essentially removed) ──
     col *= 1.0 - 0.06 * smoothstep(0.88, 0.99, Nw.y);
 
-    // ── Bottom-edge rim: subtle highlight to separate cube from podium ──
-    float bottomEdge = smoothstep(-0.5, -0.85, Nw.y) * edgeCatch;
-    col += vec3(0.5, 0.6, 0.9) * bottomEdge * 0.4;
+    // ── Bottom-face glow: subtle cool emission to separate cube from dark podium ──
+    float bottomFace = smoothstep(-0.5, -0.92, Nw.y);
+    col += vec3(0.35, 0.45, 0.7) * bottomFace * 0.18;
+    // ── Bottom-edge rim: view-independent edge catch at cube/podium seam ──
+    float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
+    col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.35;
 
     gl_FragColor = vec4(col, 1.0);
   }
