@@ -2734,7 +2734,7 @@ document.addEventListener('touchmove', function(e) {
     _swipeSwiping = true;
     var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
     var dir = dx > 0 ? 1 : -1; // swipe right = next prayer, swipe left = previous
-    _swipeCamTarget = dir * 1.5708; // 90° orbit — full tawaf quarter-turn
+    _swipeCamTarget = Math.max(-0.7854, Math.min(0.7854, _swipeCamTarget + dir * 0.3927)); // +22.5° per swipe, ±45° max
     _swipeShowPreview(baseIdx + dir);
     _swipeStartX = touch.clientX; // reset for next swipe in same gesture
   }
