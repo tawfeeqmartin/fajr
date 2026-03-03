@@ -1608,10 +1608,8 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     -Math.cos(secAngle) * specRadius
   );
   // Damped spring camera orbit — elastic overshoot + boundary bounce
-  // Stiffness scales with distance — further from center = slower exhale
-  var _camDist = Math.abs(_swipeCamAngle);
-  var _camStiffness = (_swipePreviewIdx >= 0) ? 0.30 : (0.03 + 0.03 * (1 - _camDist / 0.35)); // far = 0.03, near = 0.06
-  var _camDamping = 0.58; // tighter spring — one clean overshoot, no wobble
+  var _camStiffness = (_swipePreviewIdx >= 0) ? 0.30 : 0.04; // instant during drag, measured on release
+  var _camDamping = (_swipePreviewIdx >= 0) ? 0.58 : 0.82; // tight during drag, smooth glide home
   var _camAccel = (_swipeCamTarget - _swipeCamAngle) * _camStiffness;
   _swipeCamVel = (_swipeCamVel + _camAccel) * _camDamping;
   _swipeCamAngle += _swipeCamVel;
