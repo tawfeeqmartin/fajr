@@ -628,8 +628,9 @@ const dichroicFrag = `
     col += vec3(0.80, 0.92, 1.00) * fresnel * 0.35;
 
     // ── Side-face ambient: subtle fill so faces read as glass even without strong light ──
+    // Boosted to prevent the right face reading as a dark void during orbit
     float sideFacing = 1.0 - abs(Nw.y); // peaks on vertical faces
-    col += vec3(0.20, 0.25, 0.40) * sideFacing * 0.12;
+    col += vec3(0.20, 0.25, 0.42) * sideFacing * 0.22;
 
     // ── Sky/environment reflection: top face catches overhead light ──
     // Nw.y → 1 means surface faces up → reflects sky. Should be brightest face.
@@ -679,7 +680,8 @@ const dichroicFrag = `
     vec3 reflDir = reflect(-Vw, Nw);
     vec3 envRefl = textureCube(uCubeEnvMap, reflDir).rgb;
     float envFresnel = pow(1.0 - NdotV, 2.0);
-    col += envRefl * uCubeEnvIntensity * (0.15 + 0.85 * envFresnel);
+    // Env reflection: 25% base at normal incidence (glass always shows some env), ramps to full at grazing
+    col += envRefl * uCubeEnvIntensity * (0.25 + 0.75 * envFresnel);
 
     // ── Top-face env reflection boost (declared after envRefl is computed) ──
     col += envRefl * topFace * 0.25;
@@ -736,7 +738,7 @@ const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x0c0c18, emissiveIntensity: 0.4, roughness: 0.25 }), // -x left — subtle edge
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141428, emissiveIntensity: 0.6, roughness: 0.12, envMapIntensity: 2.5 }), // +y top — polished mirror, prayer color reactive
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x020204, emissiveIntensity: 0.1 }), // -y bottom — invisible
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.5, envMapIntensity: 2.0 }), // +z front — FILL face
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.5, envMapIntensity: 0.3 }), // +z front — FILL face (low envMap to avoid beam pop)
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x030306, emissiveIntensity: 0.1 }), // -z back — hidden
 ];
 const podiumMesh = new THREE.Mesh(
@@ -1760,14 +1762,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     // Key face (+x, index 0): catch spill from prayer beam — subtle, not saturated
     const keyTarget = pMix.clone().multiplyScalar(0.03);
     podiumMats[0].emissive.lerp(keyTarget, 0.015);
-    // Front face (+z, index 4): whisper wash
-    const frontTarget = pMix.clone().multiplyScalar(0.02);
-    podiumMats[4].emissive.lerp(frontTarget, 0.015);
+    // Front face (+z, index 4): static — no reactive emissive to avoid popping
   } else {
     // Revert to default cool tones when no prayer active
     podiumMats[2].emissive.lerp(new THREE.Color(0x1a1a30), 0.01);
     podiumMats[0].emissive.lerp(new THREE.Color(0x3a3a60), 0.01);
-    podiumMats[4].emissive.lerp(new THREE.Color(0x18182e), 0.01);
+    // Front face stays static — no revert needed
   }
 
   // FBO pass
