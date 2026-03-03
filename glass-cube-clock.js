@@ -752,9 +752,9 @@ function floorRay(az, c1, c2, w, len, op) {
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
-floorRay(135, 0x9900ff, 0xff00ff, 0.40, 4.80, 1.45);   // HOUR   (violet)  φ base
-floorRay(135, 0x1133ff, 0x00aaff, 0.40, 7.77, 1.50);   // MINUTE (blue)    4.80 × φ
-floorRay(135, 0xffffff, 0xcccccc, 0.40, 12.56, 1.20);  // SECOND (white)   4.80 × φ²
+floorRay(135, 0x9900ff, 0xff00ff, 0.30, 4.80, 1.45);   // HOUR   (violet)  φ base
+floorRay(135, 0x1133ff, 0x00aaff, 0.30, 7.77, 1.50);   // MINUTE (blue)    4.80 × φ
+floorRay(135, 0xffffff, 0xcccccc, 0.30, 12.56, 1.20);  // SECOND (white)   4.80 × φ²
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
 // v5: warm caustics (red/orange/yellow) pulled directly under cube base, short distance.
@@ -1795,9 +1795,9 @@ function _devBuildPanel() {
     sec('Clock Hands') +
     (function() {
       var hands = [
-        { name: 'Hour', color: '#9900ff', defLen: 4.80, defW: 0.40, defOp: 1.45 },
-        { name: 'Minute', color: '#1133ff', defLen: 7.77, defW: 0.40, defOp: 1.50 },
-        { name: 'Second', color: '#ffffff', defLen: 12.56, defW: 0.40, defOp: 1.20 }
+        { name: 'Hour', color: '#9900ff', defLen: 4.80, defW: 0.30, defOp: 1.45 },
+        { name: 'Minute', color: '#1133ff', defLen: 7.77, defW: 0.30, defOp: 1.50 },
+        { name: 'Second', color: '#ffffff', defLen: 12.56, defW: 0.30, defOp: 1.20 }
       ];
       return hands.map(function(h, i) {
         var ray = clockRays[i];
@@ -1953,9 +1953,9 @@ function _devBuildPanel() {
 
   // ── Clock hand sliders ───────────────────────────────────────────────────────
   var _handDefs = [
-    { len: 4.80, w: 0.40, op: 1.45 },
-    { len: 7.77, w: 0.40, op: 1.50 },
-    { len: 12.56, w: 0.40, op: 1.20 }
+    { len: 4.80, w: 0.30, op: 1.45 },
+    { len: 7.77, w: 0.30, op: 1.50 },
+    { len: 12.56, w: 0.30, op: 1.20 }
   ];
 
   function _devRebuildHandGeo(i, newW, newLen) {
