@@ -2219,6 +2219,8 @@ function switchMode(mode) {
   if(mode === _currentMode) return;
   const prev = _currentMode;
   _currentMode = mode;
+  // Kill any active swipe preview immediately
+  if (typeof _swipeRevert === 'function') _swipeRevert();
   
   // Update body class
   document.body.classList.remove('mode-clock','mode-compass','mode-info');
