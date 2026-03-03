@@ -560,6 +560,8 @@ const dichroicFrag = `
   uniform vec3      uCamWorldPos;
   uniform float     uSpecIntensity;
   uniform float     uInternalGlow;
+  uniform samplerCube uCubeEnvMap;
+  uniform float       uCubeEnvIntensity;
 
   varying vec3 vViewNormal;
   varying vec3 vViewDir;
@@ -650,6 +652,14 @@ const dichroicFrag = `
     float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
     col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.45;
 
+    // ── Irradiance probe: real environment reflections from CubeCamera ──
+    // Reflects the live lit scene (prayer beams, floor colors) into the glass.
+    // Fresnel-weighted: glass reflects strongest at grazing angles (edges).
+    vec3 reflDir = reflect(-Vw, Nw);
+    vec3 envRefl = textureCube(uCubeEnvMap, reflDir).rgb;
+    float envFresnel = pow(1.0 - NdotV, 2.0);
+    col += envRefl * uCubeEnvIntensity * (0.15 + 0.85 * envFresnel);
+
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -670,6 +680,8 @@ const cubeMat = new THREE.ShaderMaterial({
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 2.8 },
     uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
+    uCubeEnvMap:       { value: null },  // irradiance probe: set after CubeCamera created
+    uCubeEnvIntensity: { value: 0.35 }, // subtle — 0.35 is barely perceptible at normal angles
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
