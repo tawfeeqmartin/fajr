@@ -1610,7 +1610,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // Cinematic camera orbit on swipe — arcs around the cube
   if (Math.abs(_swipeCamAngle - _swipeCamTarget) > 0.0001) {
     // Ease-out on pull (0.10), slower on return to sync with tawaf (0.955 decay ≈ 0.045 lerp)
-    var _camLerp = _swipeCamTarget !== 0 ? 0.10 : 0.045;
+    var _camLerp = _swipeCamTarget !== 0 ? 0.04 : 0.025; // slow sweep out, slower drift home
     _swipeCamAngle += (_swipeCamTarget - _swipeCamAngle) * _camLerp;
     if (Math.abs(_swipeCamAngle - _swipeCamTarget) < 0.0001) _swipeCamAngle = _swipeCamTarget;
   }
@@ -2734,7 +2734,7 @@ document.addEventListener('touchmove', function(e) {
     _swipeSwiping = true;
     var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
     var dir = dx > 0 ? 1 : -1; // swipe right = next prayer, swipe left = previous
-    _swipeCamTarget = dir * 0.045; // ~2.5° orbit arc in swipe direction
+    _swipeCamTarget = dir * 1.5708; // 90° orbit — full tawaf quarter-turn
     _swipeShowPreview(baseIdx + dir);
     _swipeStartX = touch.clientX; // reset for next swipe in same gesture
   }
