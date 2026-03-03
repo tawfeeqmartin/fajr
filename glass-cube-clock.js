@@ -322,15 +322,7 @@ tawafSpot.angle = 0.4; tawafSpot.penumbra = 0.9;
 tawafSpot.distance = 4.5; // cap: reaches cube (~4.2u) but not arch floor zone (~5.7u from this position)
 scene.add(tawafSpot, tawafSpot.target);
 
-// PODIUM EDGE CATCH — raking light that catches the right face during orbit
-// Positioned far right, aimed at podium center. Tight cone so it only grazes the edge.
-const podiumEdge = new THREE.SpotLight(0x6070a0, 3.5);
-podiumEdge.position.set(5, 2.0, 2.0);
-podiumEdge.target.position.set(0, -2, 0);
-podiumEdge.angle = 0.35; podiumEdge.penumbra = 0.9;
-podiumEdge.decay = 1.8; podiumEdge.distance = 12;
-podiumEdge.castShadow = false;
-scene.add(podiumEdge, podiumEdge.target);
+// Podium edge spotlight removed — reverted to pre-Chris lighting
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
@@ -633,14 +625,23 @@ const dichroicFrag = `
     col += vec3(0.20, 0.25, 0.42) * sideFacing * 0.22;
 
     // ── Sky/environment reflection: top face catches overhead light ──
-    // Nw.y → 1 means surface faces up → reflects sky. Should be brightest face.
+    // v155 scored 8.9 at 0.45 but top was slightly hot. Dial back to 0.38.
     float skyFacing = max(Nw.y, 0.0);
-    col += pow(skyFacing, 1.8) * vec3(0.90, 0.94, 1.00) * 0.45;
+    col += pow(skyFacing, 1.8) * vec3(0.90, 0.94, 1.00) * 0.38;
 
     // ── Edge catch: crisp rim light at silhouette — "you could cut yourself" ──
     float NdotV = max(dot(Nw, Vw), 0.0);
     float edgeCatch = pow(1.0 - NdotV, 4.5);
     col += vec3(0.70, 0.85, 1.00) * edgeCatch * 1.80;
+
+    // ── Shadow-side glass fill: subtle reflected skylight on faces facing away from key ──
+    // Without this, faces in shadow read as dark solid rather than dark glass.
+    // Key light comes from camera-left/behind (cubeSun at 0,0.2,-2.8 + cubeBack at 0.5,10,-5).
+    // Shadow side = faces with positive Nw.x (facing right).
+    float shadowSide = smoothstep(0.1, 0.7, Nw.x) * sideFacing; // right-facing vertical faces
+    col += vec3(0.15, 0.18, 0.30) * shadowSide * 0.35; // cool blue fill, subtle
+    // Also boost Fresnel on shadow side — glass edge reads even without direct light
+    col += vec3(0.50, 0.60, 0.80) * edgeCatch * shadowSide * 0.45;
 
     // ── Specular: razor-sharp needle, only at grazing (no 0.4 ambient) ──
     vec3 Lw = normalize(uSpecLightPos - vWorldPos);
@@ -658,13 +659,14 @@ const dichroicFrag = `
     // At 33° elevation the top face normal faces the camera at NdotV ≈ 0.54.
     // Real dichroic glass shows thin-film interference at this angle — color shifts
     // as the view angle changes. Previously this was a flat scrim that killed the glass read.
+    // ── Top-face dichroic iridescence (reverted to v155 approach — scored 8.9) ──
     float topFace = smoothstep(0.5, 0.92, Nw.y);
     vec3 topIrid = thinFilm(NdotV, uTime * 0.4);
-    // Blend iridescence: multiply existing color + additive shimmer
-    col = mix(col, col * topIrid * 1.6 + topIrid * 0.18, topFace * 0.45);
-    // Fresnel color shift: at grazing angles the top face shifts toward cool blue-violet
+    // Blend: multiplicative color tint + subtle additive shimmer.
+    col = mix(col, col * topIrid * 1.6 + topIrid * 0.18, topFace * 0.40);
+    // Fresnel color shift at grazing angles
     float topFresnel = pow(1.0 - NdotV, 3.0) * topFace;
-    col += vec3(0.25, 0.15, 0.55) * topFresnel * 0.35;
+    col += vec3(0.25, 0.15, 0.55) * topFresnel * 0.30;
     // (env reflection boost for top face applied after irradiance probe section below)
 
     // ── Bottom-face glow: cool emission separates cube from dark podium ──
@@ -684,7 +686,7 @@ const dichroicFrag = `
     col += envRefl * uCubeEnvIntensity * (0.25 + 0.75 * envFresnel);
 
     // ── Top-face env reflection boost (declared after envRefl is computed) ──
-    col += envRefl * topFace * 0.25;
+    col += envRefl * topFace * 0.20;
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -731,14 +733,14 @@ const PODIUM_H = 20; // tall enough to extend past any visible floor
 // ── Podium materials (Chris lookdev, Mar 3) ──
 // Design intent: polished obsidian monolith — catches cube light, breathes with prayer color.
 // High clearcoat + low roughness = glass-like specular reflections on column faces.
-// envMap wired from CubeCamera in animation loop → real-time environment reflections.
-const podiumBase = { roughness: 0.18, metalness: 0.12, clearcoat: 0.8, clearcoatRoughness: 0.06, color: 0x0e0e16, fog: false, envMapIntensity: 1.8 };
+// Podium materials reverted to pre-reactive state — static emissive, no envMap reactivity
+const podiumBase = { roughness: 0.4, metalness: 0.05, clearcoat: 0.4, clearcoatRoughness: 0.15, color: 0x14141f, fog: false };
 const podiumMats = [
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x2a2a48, emissiveIntensity: 1.5, envMapIntensity: 2.2 }), // +x right — KEY face
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x0c0c18, emissiveIntensity: 0.4, roughness: 0.25 }), // -x left — subtle edge
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141428, emissiveIntensity: 0.6, roughness: 0.12, envMapIntensity: 2.5 }), // +y top — polished mirror, prayer color reactive
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x0c0c18, emissiveIntensity: 0.5 }), // +y top — dichroic spill
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x020204, emissiveIntensity: 0.1 }), // -y bottom — invisible
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.5, envMapIntensity: 0.3 }), // +z front — FILL face (low envMap to avoid beam pop)
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x161630, emissiveIntensity: 0.9 }), // +z front — FILL face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x030306, emissiveIntensity: 0.1 }), // -z back — hidden
 ];
 const podiumMesh = new THREE.Mesh(
@@ -1739,36 +1741,13 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         .then(newProbe => {
           lightProbe.sh.copy(newProbe.sh);
           _probeUpdatePending = false;
-          // Wire CubeCamera cubemap to podium materials as envMap
-          // Only needs to happen once — texture object stays the same, content auto-updates.
-          if (!podiumMats[0].envMap) {
-            const envTex = cubeRenderTarget.texture;
-            podiumMats.forEach(m => { m.envMap = envTex; m.needsUpdate = true; });
-          }
+          // Podium envMap wiring removed — reactive lighting disabled
         })
         .catch(() => { _probeUpdatePending = false; });
     }
   }
 
-  // ── Podium reactive emissive: top face + key face respond to active prayer color ──
-  if (_activePrayer && _activePrayer.intensity > 0.01) {
-    const pCol = new THREE.Color(_activePrayer.color);
-    const pCol2 = new THREE.Color(_activePrayer.color2);
-    const pMix = pCol.clone().lerp(pCol2, 0.3); // blend toward lighter end
-    // Top face (+y, index 2): subtle prayer-colored glow — beam light pools on surface
-    const topTarget = pMix.clone().multiplyScalar(0.06);
-    podiumMats[2].emissive.lerp(topTarget, 0.02);
-    podiumMats[2].emissiveIntensity += (1.5 - podiumMats[2].emissiveIntensity) * 0.02;
-    // Key face (+x, index 0): catch spill from prayer beam — subtle, not saturated
-    const keyTarget = pMix.clone().multiplyScalar(0.03);
-    podiumMats[0].emissive.lerp(keyTarget, 0.015);
-    // Front face (+z, index 4): static — no reactive emissive to avoid popping
-  } else {
-    // Revert to default cool tones when no prayer active
-    podiumMats[2].emissive.lerp(new THREE.Color(0x1a1a30), 0.01);
-    podiumMats[0].emissive.lerp(new THREE.Color(0x3a3a60), 0.01);
-    // Front face stays static — no revert needed
-  }
+  // Podium reactive emissive REMOVED — Tawfeeq disliked the popping/jumping
 
   // FBO pass
   cubeMesh.visible = false;
