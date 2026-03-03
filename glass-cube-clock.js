@@ -2765,7 +2765,7 @@ document.addEventListener('touchmove', function(e) {
     _swipeCamAngle += _swipeCamVel;
 
     // One drag = one prayer step in the swipe direction
-    var prayerDir = totalDx > 30 ? 1 : totalDx < -30 ? -1 : 0;
+    var prayerDir = totalDx > 30 ? -1 : totalDx < -30 ? 1 : 0; // swipe left = next, swipe right = previous
     var targetIdx = ((_swipeDragBaseIdx + prayerDir) % 7 + 7) % 7;
     if (targetIdx !== _swipeLastTriggeredIdx) {
       _swipeLastTriggeredIdx = targetIdx;
