@@ -1560,268 +1560,564 @@ document.body.classList.add('clock-ready');
 
 // ─── DEV PANEL ────────────────────────────────────────────────────────────────
 // Activate with ?dev in URL or press D key
-var _devActive = false;
-var _devTimeOverride = null; // null = real time, else { h, m }
-var _devCustomWindows = []; // [{name, startH, startM, endH, endM, color}]
-var _devShowBoundaries = true;
-var _devBoundaryBeams = [];
 
+// ── Core state (referenced by animation loop + updatePrayerWindows) ───────────
+var _devActive      = false;
+var _devTimeOverride = null;   // null = real time, else { h, m }
+var _devShowBoundaries = true;
+var _devBoundaryBeams  = [];
+var _devCustomSectors  = [];   // kept empty; updatePrayerWindows references it
+var _devSnapIntensity  = false; // snap disc intensities instantly on next frame
+
+// ── Speed / simulation ────────────────────────────────────────────────────────
+var _devSpeed        = 1;      // active multiplier: 1, 2, 5, 10, 50
+var _devSimMinutes   = 0;      // floating-point minutes for simulation
+var _devSpeedInterval = null;
+var _devLastSpeedMs  = null;
+
+// ── Prayer window controls ────────────────────────────────────────────────────
+var _devWindowCount   = 3;     // 1, 2, or 3
+window._devWindowCount = 3;    // exposed for monkey-patch
+var _devWindowOverrides = {};  // { prayerName: { intensity: null|number, spread: null|number } }
+window._devWindowOverrides = _devWindowOverrides;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function _fmtMin(m) {
+  var h = Math.floor(m / 60) % 24, mm = m % 60;
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  var h12  = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ampm;
+}
+
+function _devJumpToTime(min) {
+  min = ((Math.floor(min) % 1440) + 1440) % 1440;
+  _devSimMinutes   = min;
+  _devTimeOverride = { h: Math.floor(min / 60), m: min % 60 };
+  _devSnapIntensity = true;
+  var sl = document.getElementById('_devTimeSlider');
+  var lb = document.getElementById('_devTimeLabel');
+  var lc = document.getElementById('_devTimeLive');
+  if (sl) sl.value = min;
+  if (lb) lb.textContent = _fmtMin(min);
+  if (lc) lc.checked = false;
+}
+
+function _devStopSpeed() {
+  if (_devSpeedInterval) { clearInterval(_devSpeedInterval); _devSpeedInterval = null; }
+}
+
+function _devStartSpeed() {
+  _devStopSpeed();
+  if (_devSpeed <= 1) return;
+  _devLastSpeedMs = Date.now();
+  _devSpeedInterval = setInterval(function() {
+    var now = Date.now();
+    var deltaMs = now - (_devLastSpeedMs || now);
+    _devLastSpeedMs = now;
+    _devSimMinutes = (_devSimMinutes + (deltaMs / 60000) * _devSpeed) % 1440;
+    var intMin = Math.floor(_devSimMinutes);
+    _devTimeOverride = { h: Math.floor(intMin / 60), m: intMin % 60 };
+    var sl = document.getElementById('_devTimeSlider');
+    var lb = document.getElementById('_devTimeLabel');
+    if (sl) sl.value = intMin;
+    if (lb) lb.textContent = _fmtMin(intMin);
+  }, 50);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Patch disc shaders: inject uFalloff uniform so per-window spread works
+// ─────────────────────────────────────────────────────────────────────────────
+function _devPatchDiscShaders() {
+  [_prayerDiscMat, _nextDiscMat, _thirdDiscMat].forEach(function(mat) {
+    if (mat.uniforms.uFalloff) return; // already patched
+    mat.uniforms.uFalloff = { value: 2.2 };
+    mat.fragmentShader = mat.fragmentShader
+      .replace(
+        'uniform float uIntensity, uOuterRadius;',
+        'uniform float uIntensity, uOuterRadius, uFalloff;'
+      )
+      .replace(
+        'exp(-r / uOuterRadius * 2.2)',
+        'exp(-r / uOuterRadius * uFalloff)'
+      );
+    mat.needsUpdate = true;
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Monkey-patch updatePrayerWindows: window count limiting + per-window overrides
+// ─────────────────────────────────────────────────────────────────────────────
+(function() {
+  var _orig = updatePrayerWindows;
+  updatePrayerWindows = function(now) {
+    _orig(now);
+    if (!_devActive) return;
+
+    // ── Window count limiting ────────────────────────────────────────────────
+    var wc = window._devWindowCount != null ? window._devWindowCount : 3;
+    if (wc < 3) _thirdDisc.visible = false;
+    if (wc < 2) _nextDisc.visible  = false;
+
+    // ── Per-window overrides (intensity + spread) ────────────────────────────
+    var ov = window._devWindowOverrides;
+    if (!ov || !prayerSectors.length) return;
+
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    var aIdx = -1, nIdx = -1, tIdx = -1;
+    var bestDist = 99999, secondBest = 99999;
+    prayerSectors.forEach(function(ps, i) {
+      var wraps    = ps.startMin > ps.endMin;
+      var isActive = wraps
+        ? (nowMin >= ps.startMin || nowMin < ps.endMin)
+        : (nowMin >= ps.startMin && nowMin < ps.endMin);
+      if (isActive) { aIdx = i; return; }
+      var dist = (ps.startMin - nowMin + 1440) % 1440;
+      if (dist < bestDist)          { secondBest = bestDist; tIdx = nIdx; bestDist = dist; nIdx = i; }
+      else if (dist < secondBest)   { secondBest = dist; tIdx = i; }
+    });
+
+    function applyOv(mat, disc, idx) {
+      // Always reset falloff so clearing a spread override takes effect next frame
+      if (mat.uniforms.uFalloff) mat.uniforms.uFalloff.value = 2.2;
+      if (idx < 0 || !disc.visible) return;
+      var ps = prayerSectors[idx];
+      if (!ps || !ps.def) return;
+      var o = ov[ps.def.name];
+      if (!o) return;
+      if (o.intensity != null) mat.uniforms.uIntensity.value = o.intensity;
+      if (o.spread    != null && mat.uniforms.uFalloff) mat.uniforms.uFalloff.value = o.spread;
+    }
+
+    applyOv(_prayerDiscMat, _prayerDisc,  aIdx);
+    applyOv(_nextDiscMat,   _nextDisc,    nIdx);
+    applyOv(_thirdDiscMat,  _thirdDisc,   tIdx);
+  };
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Panel builder
+// ─────────────────────────────────────────────────────────────────────────────
 function _devBuildPanel() {
   if (document.getElementById('_devPanel')) return;
-  const panel = document.createElement('div');
-  panel.id = '_devPanel';
-  panel.style.cssText = 'position:fixed;top:8px;left:8px;z-index:99999;background:rgba(0,0,0,0.88);color:#ccc;font:10px/1.4 monospace;padding:10px;border-radius:8px;max-height:90vh;overflow-y:auto;width:220px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1)';
+  _devPatchDiscShaders();
 
-  // Time override
-  const timeNow = new Date();
-  panel.innerHTML = `
-    <div style="color:#fff;font-size:13px;margin-bottom:8px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
-      <span>🕐 Dev Panel</span>
-      <button id="_devMinimize" style="background:none;border:none;color:#888;font:bold 14px monospace;cursor:pointer;padding:0 4px">−</button>
-    </div>
-    <div id="_devBody">
-    <div style="margin-bottom:8px">
-      <label style="color:#888">Time Override</label><br>
-      <input type="range" id="_devTimeSlider" min="0" max="1439" value="${timeNow.getHours()*60+timeNow.getMinutes()}" style="width:200px">
-      <span id="_devTimeLabel" style="color:#fff;margin-left:6px">${_fmtMin(timeNow.getHours()*60+timeNow.getMinutes())}</span>
-      <br><label><input type="checkbox" id="_devTimeLive" checked> Live time</label>
-    </div>
-    <div style="margin-bottom:8px">
-      <label><input type="checkbox" id="_devBoundaries" checked> Show boundaries</label>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:4px">
-      <div style="color:#fff;font-size:12px;margin-bottom:6px">Active Prayer Windows</div>
-      <div id="_devWindowList"></div>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">
-      <div style="color:#fff;font-size:12px;margin-bottom:6px">Custom Debug Windows</div>
-      <div id="_devCustomList"></div>
-      <button id="_devAddWindow" style="margin-top:4px;font:11px monospace;background:#333;color:#ccc;border:1px solid #555;border-radius:4px;padding:3px 10px;cursor:pointer">+ Add window</button>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">
-      <div style="color:#fff;font-size:12px;margin-bottom:6px">Intensity</div>
-      <label style="color:#888">Active: </label><input type="range" id="_devOpActive" min="0" max="30" value="${OP_ACTIVE*10}" style="width:120px"><span id="_devOpActiveV" style="color:#fff;margin-left:4px">${OP_ACTIVE}</span><br>
-      <label style="color:#888">Step: </label><input type="range" id="_devOpStep" min="0" max="10" value="${OP_STEP*10}" style="width:120px"><span id="_devOpStepV" style="color:#fff;margin-left:4px">${OP_STEP}</span>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">
-      <div style="color:#fff;font-size:12px;margin-bottom:6px">Layout</div>
-      <label style="color:#888">Spacer: </label><input type="range" id="_devSpacer" min="20" max="100" value="100" style="width:120px"><span id="_devSpacerV" style="color:#fff;margin-left:4px">100vh</span>
-    </div>
-    </div>
-  `;
+  var timeNow = new Date();
+  var initMin = timeNow.getHours() * 60 + timeNow.getMinutes();
+  _devSimMinutes = initMin;
+
+  var panel = document.createElement('div');
+  panel.id = '_devPanel';
+  panel.style.cssText = [
+    'position:fixed;top:8px;left:8px;z-index:99999',
+    'background:rgba(0,0,0,0.92)',
+    'color:#ccc;font:10px/1.5 monospace',
+    'padding:10px;border-radius:8px',
+    'max-height:92vh;overflow-y:auto',
+    'width:240px',
+    'backdrop-filter:blur(8px)',
+    'border:1px solid rgba(255,255,255,0.12)'
+  ].join(';');
+
+  function sec(label) {
+    return '<div style="color:#fff;font-size:9px;letter-spacing:0.8px;font-weight:700;'
+         + 'margin:10px 0 5px;opacity:0.55;text-transform:uppercase">' + label + '</div>';
+  }
+  function btnBase(active) {
+    return 'font:10px monospace;border:1px solid #555;border-radius:3px;padding:2px 6px;cursor:pointer;'
+         + 'background:' + (active ? '#3a3a66' : '#2a2a2a') + ';color:' + (active ? '#aaf' : '#aaa');
+  }
+  function hr() {
+    return '<div style="border-top:1px solid rgba(255,255,255,0.08);margin:8px 0"></div>';
+  }
+
+  var speedBtns = [1, 2, 5, 10, 50].map(function(v) {
+    return '<button data-speed="' + v + '" style="flex:1;' + btnBase(v === 1) + '">' + v + 'x</button>';
+  }).join('');
+
+  var wcBtns = [1, 2, 3].map(function(v) {
+    return '<button data-wc="' + v + '" style="' + btnBase(v === _devWindowCount) + '">' + v + '</button>';
+  }).join('');
+
+  panel.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+      '<span style="color:#fff;font-size:12px;font-weight:700">🕐 Dev Panel</span>' +
+      '<button id="_devMinimize" style="background:none;border:none;color:#888;font:bold 14px monospace;cursor:pointer;padding:0 4px">−</button>' +
+    '</div>' +
+    '<div id="_devBody">' +
+
+    sec('Time Control') +
+    '<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">' +
+      '<input type="range" id="_devTimeSlider" min="0" max="1439" value="' + initMin + '" style="flex:1;min-width:0">' +
+      '<span id="_devTimeLabel" style="color:#fff;white-space:nowrap;font-size:11px;min-width:58px;text-align:right">' + _fmtMin(initMin) + '</span>' +
+    '</div>' +
+    '<div id="_devSpeedBtns" style="display:flex;gap:3px;margin-bottom:5px">' + speedBtns + '</div>' +
+    '<div style="display:flex;align-items:center;gap:8px">' +
+      '<label style="display:flex;align-items:center;gap:4px;cursor:pointer">' +
+        '<input type="checkbox" id="_devTimeLive" checked>' +
+        '<span style="color:#aaa">Live</span>' +
+      '</label>' +
+      '<button id="_devTimeReset" style="' + btnBase(false) + '">Reset</button>' +
+    '</div>' +
+
+    hr() +
+    sec('Prayer Windows') +
+    '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
+      '<span style="color:#888">Windows:</span>' +
+      '<div id="_devWcBtns" style="display:flex;gap:3px">' + wcBtns + '</div>' +
+    '</div>' +
+    '<div id="_devWindowList"></div>' +
+
+    hr() +
+    sec('Global Controls') +
+    '<div style="margin-bottom:3px">' +
+      '<div style="display:flex;align-items:center;gap:5px">' +
+        '<span style="color:#888;width:54px;flex-shrink:0">Intensity</span>' +
+        '<input type="range" id="_devOpActive" min="0" max="30" value="' + Math.round(OP_ACTIVE * 10) + '" style="flex:1;min-width:0">' +
+        '<span id="_devOpActiveV" style="color:#fff;width:24px;text-align:right">' + OP_ACTIVE.toFixed(1) + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-bottom:6px">' +
+      '<div style="display:flex;align-items:center;gap:5px">' +
+        '<span style="color:#888;width:54px;flex-shrink:0">Step</span>' +
+        '<input type="range" id="_devOpStep" min="0" max="10" value="' + Math.round(OP_STEP * 10) + '" style="flex:1;min-width:0">' +
+        '<span id="_devOpStepV" style="color:#fff;width:24px;text-align:right">' + OP_STEP.toFixed(2) + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-bottom:8px">' +
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer">' +
+        '<input type="checkbox" id="_devBoundaries"' + (_devShowBoundaries ? ' checked' : '') + '>' +
+        '<span style="color:#aaa">Boundary lines</span>' +
+      '</label>' +
+    '</div>' +
+    '<button id="_devResetAll" style="' + btnBase(false) + ';width:100%">↺ Reset All</button>' +
+
+    '</div>'; // end _devBody
+
   document.body.appendChild(panel);
 
-  // Minimize toggle
+  // ── Minimize ────────────────────────────────────────────────────────────────
   document.getElementById('_devMinimize').addEventListener('click', function() {
     var body = document.getElementById('_devBody');
-    if (body.style.display === 'none') {
-      body.style.display = '';
-      this.textContent = '−';
-    } else {
-      body.style.display = 'none';
-      this.textContent = '+';
+    if (body.style.display === 'none') { body.style.display = ''; this.textContent = '−'; }
+    else                               { body.style.display = 'none'; this.textContent = '+'; }
+  });
+
+  // ── Time slider ─────────────────────────────────────────────────────────────
+  var slider  = document.getElementById('_devTimeSlider');
+  var label   = document.getElementById('_devTimeLabel');
+  var liveChk = document.getElementById('_devTimeLive');
+
+  slider.addEventListener('input', function() {
+    liveChk.checked = false;
+    var min = parseInt(slider.value);
+    _devSimMinutes   = min;
+    label.textContent = _fmtMin(min);
+    _devTimeOverride = { h: Math.floor(min / 60), m: min % 60 };
+    if (_devSpeed > 1) _devStartSpeed();
+  });
+
+  liveChk.addEventListener('change', function() {
+    if (liveChk.checked) {
+      _devStopSpeed();
+      _devTimeOverride = null;
+      _devSpeed = 1;
+      _devUpdateSpeedBtns();
     }
   });
 
-  // Slider events
-  const slider = document.getElementById('_devTimeSlider');
-  const label = document.getElementById('_devTimeLabel');
-  const liveChk = document.getElementById('_devTimeLive');
-  slider.addEventListener('input', function() {
-    liveChk.checked = false;
-    const min = parseInt(slider.value);
-    label.textContent = _fmtMin(min);
-    _devTimeOverride = { h: Math.floor(min/60), m: min%60 };
-  });
-  liveChk.addEventListener('change', function() {
-    if (liveChk.checked) _devTimeOverride = null;
+  document.getElementById('_devTimeReset').addEventListener('click', function() {
+    _devStopSpeed();
+    _devSpeed = 1;
+    _devTimeOverride = null;
+    liveChk.checked = true;
+    var now = new Date();
+    var v = now.getHours() * 60 + now.getMinutes();
+    slider.value = v;
+    label.textContent = _fmtMin(v);
+    _devSimMinutes = v;
+    _devUpdateSpeedBtns();
   });
 
-  // Boundaries toggle
+  // ── Speed buttons ───────────────────────────────────────────────────────────
+  function _devUpdateSpeedBtns() {
+    document.querySelectorAll('#_devSpeedBtns button').forEach(function(btn) {
+      var v = parseInt(btn.dataset.speed);
+      var active = (v === _devSpeed);
+      btn.style.background = active ? '#3a3a66' : '#2a2a2a';
+      btn.style.color       = active ? '#aaf'    : '#aaa';
+    });
+  }
+
+  document.getElementById('_devSpeedBtns').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-speed]');
+    if (!btn) return;
+    _devSpeed = parseInt(btn.dataset.speed);
+    _devUpdateSpeedBtns();
+    _devStopSpeed();
+    if (_devSpeed === 1) {
+      if (liveChk.checked) _devTimeOverride = null;
+    } else {
+      liveChk.checked = false;
+      if (!_devTimeOverride) {
+        var now = new Date();
+        _devSimMinutes   = now.getHours() * 60 + now.getMinutes();
+        _devTimeOverride = { h: Math.floor(_devSimMinutes / 60), m: Math.floor(_devSimMinutes) % 60 };
+      }
+      _devStartSpeed();
+    }
+  });
+
+  // ── Window count buttons ────────────────────────────────────────────────────
+  function _devUpdateWcBtns() {
+    document.querySelectorAll('#_devWcBtns button').forEach(function(btn) {
+      var v = parseInt(btn.dataset.wc);
+      var active = (v === _devWindowCount);
+      btn.style.background = active ? '#3a3a66' : '#2a2a2a';
+      btn.style.color       = active ? '#aaf'    : '#aaa';
+    });
+  }
+
+  document.getElementById('_devWcBtns').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-wc]');
+    if (!btn) return;
+    _devWindowCount = parseInt(btn.dataset.wc);
+    window._devWindowCount = _devWindowCount;
+    _devUpdateWcBtns();
+  });
+
+  // ── Global intensity sliders ────────────────────────────────────────────────
+  document.getElementById('_devOpActive').addEventListener('input', function(e) {
+    window._OP_ACTIVE_OVERRIDE = parseFloat(e.target.value) / 10;
+    document.getElementById('_devOpActiveV').textContent = window._OP_ACTIVE_OVERRIDE.toFixed(1);
+  });
+
+  document.getElementById('_devOpStep').addEventListener('input', function(e) {
+    window._OP_STEP_OVERRIDE = parseFloat(e.target.value) / 10;
+    document.getElementById('_devOpStepV').textContent = window._OP_STEP_OVERRIDE.toFixed(2);
+  });
+
+  // ── Boundaries toggle ───────────────────────────────────────────────────────
   document.getElementById('_devBoundaries').addEventListener('change', function(e) {
     _devShowBoundaries = e.target.checked;
     _devUpdateBoundaries();
   });
 
-  // Intensity sliders
-  document.getElementById('_devOpActive').addEventListener('input', function(e) {
-    window._OP_ACTIVE_OVERRIDE = parseFloat(e.target.value) / 10;
-    document.getElementById('_devOpActiveV').textContent = window._OP_ACTIVE_OVERRIDE.toFixed(1);
-  });
-  document.getElementById('_devOpStep').addEventListener('input', function(e) {
-    window._OP_STEP_OVERRIDE = parseFloat(e.target.value) / 10;
-    document.getElementById('_devOpStepV').textContent = window._OP_STEP_OVERRIDE.toFixed(1);
-  });
-  document.getElementById('_devSpacer').addEventListener('input', function(e) {
-    var v = e.target.value;
-    document.documentElement.style.setProperty('--spacer-h', v + 'vh');
-    document.getElementById('_devSpacerV').textContent = v + 'vh';
-  });
+  // ── Reset All ───────────────────────────────────────────────────────────────
+  document.getElementById('_devResetAll').addEventListener('click', function() {
+    _devStopSpeed();
+    _devSpeed = 1;
+    _devUpdateSpeedBtns();
+    _devTimeOverride = null;
+    liveChk.checked  = true;
+    var now = new Date();
+    var v   = now.getHours() * 60 + now.getMinutes();
+    slider.value = v;
+    label.textContent = _fmtMin(v);
+    _devSimMinutes = v;
 
-  // Add custom window button
-  document.getElementById('_devAddWindow').addEventListener('click', _devAddCustomWindow);
+    window._OP_ACTIVE_OVERRIDE = null;
+    window._OP_STEP_OVERRIDE   = null;
+    document.getElementById('_devOpActive').value = Math.round(OP_ACTIVE * 10);
+    document.getElementById('_devOpActiveV').textContent = OP_ACTIVE.toFixed(1);
+    document.getElementById('_devOpStep').value = Math.round(OP_STEP * 10);
+    document.getElementById('_devOpStepV').textContent = OP_STEP.toFixed(2);
+
+    _devWindowOverrides        = {};
+    window._devWindowOverrides = _devWindowOverrides;
+    _devWindowCount            = 3;
+    window._devWindowCount     = 3;
+    _devUpdateWcBtns();
+
+    [_prayerDiscMat, _nextDiscMat, _thirdDiscMat].forEach(function(mat) {
+      if (mat.uniforms.uFalloff) mat.uniforms.uFalloff.value = 2.2;
+    });
+
+    _devRefreshWindowList();
+  });
 
   _devRefreshWindowList();
 }
 
-function _fmtMin(m) {
-  const h = Math.floor(m / 60), mm = m % 60;
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ampm;
-}
-
-var _devSnapIntensity = false;
-function _devJumpToTime(min) {
-  const slider = document.getElementById('_devTimeSlider');
-  const label = document.getElementById('_devTimeLabel');
-  const liveChk = document.getElementById('_devTimeLive');
-  if (slider) { slider.value = min; }
-  if (label) { label.textContent = _fmtMin(min); }
-  if (liveChk) { liveChk.checked = false; }
-  _devTimeOverride = { h: Math.floor(min/60), m: min%60 };
-  _devSnapIntensity = true; // snap discs instantly on next frame
-}
-
+// ─────────────────────────────────────────────────────────────────────────────
+// Prayer window list — collapsible per-prayer rows
+// ─────────────────────────────────────────────────────────────────────────────
 function _devRefreshWindowList() {
-  const el = document.getElementById('_devWindowList');
+  var el = document.getElementById('_devWindowList');
   if (!el) return;
-  const T = window._prayerTimings || PT_FALLBACK;
-  el.innerHTML = PRAYER_WINDOWS_DEF.map(function(d, i) {
-    const startMin = ptParseMin(T[d.startKey] || '0:00');
-    const endMin = ptParseMin(T[d.endKey] || '0:00');
-    const midMin = d.startKey === 'Midnight' ? (startMin + Math.floor(((endMin - startMin + 1440) % 1440) / 2)) % 1440 : startMin + 5;
-    return '<div style="padding:2px 0;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px" data-min="' + midMin + '">' +
-      '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#' + d.color.toString(16).padStart(6,'0') + '"></span>' +
-      '<span style="flex:1">' + d.name + ': ' + (T[d.startKey]||'?') + ' → ' + (T[d.endKey]||'?') + '</span>' +
-      '<button data-start="' + startMin + '" style="font:9px monospace;background:#333;color:#8f8;border:1px solid #555;border-radius:3px;padding:1px 5px;cursor:pointer">▶ Start</button>' +
-      '<button data-mid="' + midMin + '" style="font:9px monospace;background:#333;color:#ff8;border:1px solid #555;border-radius:3px;padding:1px 5px;cursor:pointer">● Mid</button>' +
-      '<button data-end="' + Math.max(endMin - 2, 0) + '" style="font:9px monospace;background:#333;color:#f88;border:1px solid #555;border-radius:3px;padding:1px 5px;cursor:pointer">■ End</button>' +
-      '</div>';
-  }).join('');
-  el.querySelectorAll('[data-start]').forEach(function(btn) {
-    btn.addEventListener('click', function(e) { e.stopPropagation(); _devJumpToTime(parseInt(btn.dataset.start)); });
-  });
-  el.querySelectorAll('[data-mid]').forEach(function(btn) {
-    btn.addEventListener('click', function(e) { e.stopPropagation(); _devJumpToTime(parseInt(btn.dataset.mid)); });
-  });
-  el.querySelectorAll('[data-end]').forEach(function(btn) {
-    btn.addEventListener('click', function(e) { e.stopPropagation(); _devJumpToTime(parseInt(btn.dataset.end)); });
-  });
-}
+  var T = window._prayerTimings || PT_FALLBACK;
 
-var _devCustomIdCounter = 0;
-function _devAddCustomWindow() {
-  const id = ++_devCustomIdCounter;
-  const colors = ['#ff0000','#00ff00','#0088ff','#ff8800','#ff00ff','#00ffcc','#ffff00'];
-  const color = colors[_devCustomWindows.length % colors.length];
-  const win = { id, name: 'Debug ' + id, startH: 12, startM: 0, endH: 14, endM: 0, color: color };
-  _devCustomWindows.push(win);
-  _devRenderCustomList();
-  _devApplyCustomWindows();
-}
+  var rows = PRAYER_WINDOWS_DEF.map(function(d) {
+    var startMin = ptParseMin(T[d.startKey] || '0:00');
+    var endMin   = ptParseMin(T[d.endKey]   || '0:00');
+    var midMin   = d.startKey === 'Midnight'
+      ? (startMin + Math.floor(((endMin - startMin + 1440) % 1440) / 2)) % 1440
+      : startMin + 5;
+    var ov       = _devWindowOverrides[d.name] || {};
+    var colorHex = '#' + d.color.toString(16).padStart(6, '0');
+    var intSet   = ov.intensity != null;
+    var spSet    = ov.spread    != null;
+    var intVal   = intSet ? ov.intensity : OP_ACTIVE;
+    var spVal    = spSet  ? ov.spread    : 2.2;
 
-function _devRemoveCustomWindow(id) {
-  _devCustomWindows = _devCustomWindows.filter(function(w) { return w.id !== id; });
-  _devRenderCustomList();
-  _devApplyCustomWindows();
-}
+    var jumpBtnS = function(dkey, val, col, lbl) {
+      return '<button class="_dJmp" data-jump="' + val + '" style="'
+        + 'background:#2a2a2a;color:' + col + ';border:1px solid #555;border-radius:3px;'
+        + 'font:9px monospace;padding:1px 5px;cursor:pointer">' + lbl + '</button>';
+    };
 
-function _devRenderCustomList() {
-  const el = document.getElementById('_devCustomList');
-  if (!el) return;
-  el.innerHTML = _devCustomWindows.map(function(w) {
-    return '<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)" data-id="' + w.id + '">' +
-      '<input type="color" value="' + w.color + '" data-field="color" style="width:20px;height:16px;border:none;padding:0;vertical-align:middle;cursor:pointer"> ' +
-      '<input type="text" value="' + w.name + '" data-field="name" style="width:50px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px 3px"> ' +
-      '<input type="number" value="' + w.startH + '" data-field="startH" min="0" max="23" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px">:' +
-      '<input type="number" value="' + w.startM + '" data-field="startM" min="0" max="59" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px"> → ' +
-      '<input type="number" value="' + w.endH + '" data-field="endH" min="0" max="23" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px">:' +
-      '<input type="number" value="' + w.endM + '" data-field="endM" min="0" max="59" style="width:28px;background:#222;color:#fff;border:1px solid #444;border-radius:2px;font:10px monospace;padding:1px"> ' +
-      '<button data-remove="' + w.id + '" style="background:#600;color:#faa;border:1px solid #844;border-radius:2px;font:10px monospace;padding:0 5px;cursor:pointer">✕</button>' +
-      '</div>';
-  }).join('');
-
-  // Wire events
-  el.querySelectorAll('[data-remove]').forEach(function(btn) {
-    btn.addEventListener('click', function() { _devRemoveCustomWindow(parseInt(btn.dataset.remove)); });
+    return '<details style="margin-bottom:2px">'
+      + '<summary style="display:flex;align-items:center;gap:5px;cursor:pointer;'
+      +   'list-style:none;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)'
+      +   ';user-select:none">'
+      +   '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;'
+      +     'background:' + colorHex + ';flex-shrink:0"></span>'
+      +   '<span style="flex:1;color:#ccc">' + d.name + '</span>'
+      +   jumpBtnS('start', startMin,              '#8f8', '▶')
+      +   jumpBtnS('mid',   midMin,                '#ff8', '●')
+      +   jumpBtnS('end',   Math.max(endMin-2, 0), '#f88', '■')
+      + '</summary>'
+      + '<div style="padding:5px 0 4px 14px" data-prayer="' + d.name + '">'
+      +   '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'
+      +     '<span style="color:#888;width:56px;flex-shrink:0">Intensity</span>'
+      +     '<input type="range" class="_dOvInt" data-prayer="' + d.name + '"'
+      +       ' min="0" max="30" value="' + Math.round(intVal * 10) + '" step="1" style="flex:1;min-width:0">'
+      +     '<span class="_dOvIntV" data-prayer="' + d.name + '"'
+      +       ' style="color:' + (intSet ? '#fff' : '#555') + ';width:32px;text-align:right;font-size:9px">'
+      +       (intSet ? intVal.toFixed(1) : 'global') + '</span>'
+      +     '<button class="_dOvIntR" data-prayer="' + d.name + '"'
+      +       ' title="Reset to global" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
+      +   '</div>'
+      +   '<div style="display:flex;align-items:center;gap:4px">'
+      +     '<span style="color:#888;width:56px;flex-shrink:0">Spread</span>'
+      +     '<input type="range" class="_dOvSp" data-prayer="' + d.name + '"'
+      +       ' min="5" max="50" value="' + Math.round(spVal * 10) + '" step="1" style="flex:1;min-width:0">'
+      +     '<span class="_dOvSpV" data-prayer="' + d.name + '"'
+      +       ' style="color:' + (spSet ? '#fff' : '#555') + ';width:32px;text-align:right;font-size:9px">'
+      +       (spSet ? spVal.toFixed(1) : '2.2') + '</span>'
+      +     '<button class="_dOvSpR" data-prayer="' + d.name + '"'
+      +       ' title="Reset spread" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
+      +   '</div>'
+      + '</div>'
+      + '</details>';
   });
-  el.querySelectorAll('[data-field]').forEach(function(inp) {
-    inp.addEventListener('change', function() {
-      const row = inp.closest('[data-id]');
-      const id = parseInt(row.dataset.id);
-      const w = _devCustomWindows.find(function(x) { return x.id === id; });
-      if (!w) return;
-      const f = inp.dataset.field;
-      if (f === 'color' || f === 'name') w[f] = inp.value;
-      else w[f] = parseInt(inp.value) || 0;
-      _devApplyCustomWindows();
+
+  el.innerHTML = rows.join('');
+
+  // ── Jump buttons (stop propagation so <details> doesn't toggle) ────────────
+  el.querySelectorAll('._dJmp').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      _devJumpToTime(parseInt(btn.dataset.jump));
+    });
+  });
+
+  // ── Intensity override ──────────────────────────────────────────────────────
+  el.querySelectorAll('._dOvInt').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var pname = inp.dataset.prayer;
+      var val   = parseFloat(inp.value) / 10;
+      if (!_devWindowOverrides[pname]) _devWindowOverrides[pname] = {};
+      _devWindowOverrides[pname].intensity = val;
+      window._devWindowOverrides = _devWindowOverrides;
+      var vSpan = el.querySelector('._dOvIntV[data-prayer="' + pname + '"]');
+      if (vSpan) { vSpan.textContent = val.toFixed(1); vSpan.style.color = '#fff'; }
+    });
+  });
+
+  el.querySelectorAll('._dOvIntR').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var pname = btn.dataset.prayer;
+      if (_devWindowOverrides[pname]) _devWindowOverrides[pname].intensity = null;
+      window._devWindowOverrides = _devWindowOverrides;
+      var inp   = el.querySelector('._dOvInt[data-prayer="' + pname + '"]');
+      var vSpan = el.querySelector('._dOvIntV[data-prayer="' + pname + '"]');
+      if (inp)   inp.value = Math.round(OP_ACTIVE * 10);
+      if (vSpan) { vSpan.textContent = 'global'; vSpan.style.color = '#555'; }
+    });
+  });
+
+  // ── Spread override ─────────────────────────────────────────────────────────
+  el.querySelectorAll('._dOvSp').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var pname = inp.dataset.prayer;
+      var val   = parseFloat(inp.value) / 10;
+      if (!_devWindowOverrides[pname]) _devWindowOverrides[pname] = {};
+      _devWindowOverrides[pname].spread = val;
+      window._devWindowOverrides = _devWindowOverrides;
+      var vSpan = el.querySelector('._dOvSpV[data-prayer="' + pname + '"]');
+      if (vSpan) { vSpan.textContent = val.toFixed(1); vSpan.style.color = '#fff'; }
+    });
+  });
+
+  el.querySelectorAll('._dOvSpR').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var pname = btn.dataset.prayer;
+      if (_devWindowOverrides[pname]) _devWindowOverrides[pname].spread = null;
+      window._devWindowOverrides = _devWindowOverrides;
+      var inp   = el.querySelector('._dOvSp[data-prayer="' + pname + '"]');
+      var vSpan = el.querySelector('._dOvSpV[data-prayer="' + pname + '"]');
+      if (inp)   inp.value = 22; // 2.2 * 10
+      if (vSpan) { vSpan.textContent = '2.2'; vSpan.style.color = '#555'; }
     });
   });
 }
 
-// Boundary debug lines (thin beams at start/end of each visible window)
+// ─────────────────────────────────────────────────────────────────────────────
+// Boundary debug lines (thin beams at start/end of each prayer sector)
+// ─────────────────────────────────────────────────────────────────────────────
 function _devUpdateBoundaries() {
-  // Clear existing
   _devBoundaryBeams.forEach(function(b) { prismGroup.remove(b); });
   _devBoundaryBeams.length = 0;
   if (!_devShowBoundaries || !_devActive) return;
 
-  const allSectors = prayerSectors.concat(_devCustomSectors || []);
+  var allSectors = prayerSectors.concat(_devCustomSectors || []);
   allSectors.forEach(function(ps) {
     [ps.startAng, ps.endAng].forEach(function(ang) {
-      const geo = new THREE.PlaneGeometry(0.08, SECTOR_RADIUS, 1, 1);
+      var geo = new THREE.PlaneGeometry(0.02, SECTOR_RADIUS, 1, 1);
       geo.translate(0, SECTOR_RADIUS / 2, 0);
-      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false });
-      const m = new THREE.Mesh(geo, mat);
-      const grp = new THREE.Group();
+      var mat = new THREE.MeshBasicMaterial({
+        color: 0xffffff, transparent: true, opacity: 0.4,
+        side: THREE.DoubleSide, depthWrite: false
+      });
+      var m    = new THREE.Mesh(geo, mat);
+      var grp  = new THREE.Group();
       grp.add(m);
-      grp.position.y = 0.04;
+      grp.position.y    = 0.04;
       grp.rotation.order = 'YXZ';
-      grp.rotation.y = ang;
-      grp.rotation.x = Math.PI / 2;
+      grp.rotation.y    = ang;
+      grp.rotation.x    = Math.PI / 2;
       prismGroup.add(grp);
       _devBoundaryBeams.push(grp);
     });
   });
 }
 
-var _devCustomSectors = [];
-function _devApplyCustomWindows() {
-  _devCustomSectors = _devCustomWindows.map(function(w) {
-    const startMin = w.startH * 60 + w.startM;
-    const endMin = w.endH * 60 + w.endM;
-    return {
-      def: { name: w.name, color: parseInt(w.color.replace('#',''), 16), color2: parseInt(w.color.replace('#',''), 16) },
-      startMin: startMin,
-      endMin: endMin,
-      startAng: ptTimeToAngle(startMin),
-      endAng: ptTimeToAngle(endMin),
-      isCustom: true
-    };
-  });
-  _devUpdateBoundaries();
-}
-
-// Override getDevNow for time simulation
+// ─────────────────────────────────────────────────────────────────────────────
+// _getDevNow — called every animation frame
+// ─────────────────────────────────────────────────────────────────────────────
 function _getDevNow() {
   if (_devTimeOverride) {
-    const d = new Date();
+    var d = new Date();
     d.setHours(_devTimeOverride.h, _devTimeOverride.m, 0, 0);
     return d;
   }
   return new Date();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Toggle dev mode
+// ─────────────────────────────────────────────────────────────────────────────
 function _devToggle() {
   _devActive = !_devActive;
-  const p = document.getElementById('_devPanel');
+  var p = document.getElementById('_devPanel');
   if (_devActive) {
     _devBuildPanel();
     document.getElementById('_devPanel').style.display = '';
     _devUpdateBoundaries();
-    // Keep canvas behind content — dev panel has its own z-index
     renderer.domElement.style.zIndex = '0';
   } else {
     if (p) p.style.display = 'none';
@@ -1829,9 +2125,18 @@ function _devToggle() {
     _devBoundaryBeams.length = 0;
     renderer.domElement.style.zIndex = '';
     _devTimeOverride = null;
+    _devStopSpeed();
   }
 }
 
-// Activate with ?dev or D key
-if (location.search.includes('dev')) { _devActive = true; setTimeout(_devBuildPanel, 100); setTimeout(_devUpdateBoundaries, 200); }
-document.addEventListener('keydown', function(e) { if (e.key === 'D' || e.key === 'd') _devToggle(); });
+// ─────────────────────────────────────────────────────────────────────────────
+// Activation — ?dev URL param or D key
+// ─────────────────────────────────────────────────────────────────────────────
+if (location.search.includes('dev')) {
+  _devActive = true;
+  setTimeout(_devBuildPanel, 100);
+  setTimeout(_devUpdateBoundaries, 200);
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'D' || e.key === 'd') _devToggle();
+});
