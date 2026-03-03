@@ -14,15 +14,27 @@ const puppeteer = require('puppeteer-core');
   const page = await browser.newPage();
   await page.setViewport({ width: 430, height: 932, deviceScaleFactor: 2 });
   
-  // Check for console errors
   page.on('console', msg => {
     if (msg.type() === 'error') console.log('CONSOLE ERROR:', msg.text());
   });
 
   await page.goto('file:///home/tawfeeq/ramadan-clock-site/index.html', { waitUntil: 'domcontentloaded' });
-  await new Promise(r => setTimeout(r, 14000));
+  
+  // Wait for Three.js to initialize
+  await new Promise(r => setTimeout(r, 6000));
+  
+  // Force prayer timings so prayer wash activates even in file:// mode
+  await page.evaluate(() => {
+    window._prayerTimings = {
+      Fajr: '05:30', Sunrise: '07:00', Dhuhr: '12:15',
+      Asr: '15:30', Maghrib: '18:00', Isha: '19:30', Midnight: '23:45'
+    };
+    window._prayerTimingsReady = true;
+  });
+  
+  // Wait for prayer sectors to build + scene to fully render with lighting
+  await new Promise(r => setTimeout(r, 10000));
 
-  // Check WebGL renderer
   const renderer = await page.evaluate(() => {
     const c = document.querySelector('canvas');
     if (!c) return 'no canvas';
