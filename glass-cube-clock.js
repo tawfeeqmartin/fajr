@@ -1974,9 +1974,9 @@ function _devRefreshWindowList() {
       +   '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;'
       +     'background:' + colorHex + ';flex-shrink:0"></span>'
       +   '<span style="flex:1;color:#ccc">' + d.name + '</span>'
-      +   jumpBtnS('start', startMin,              '#8f8', '▶')
-      +   jumpBtnS('mid',   midMin,                '#ff8', '●')
-      +   jumpBtnS('end',   Math.max(endMin-2, 0), '#f88', '■')
+      +   jumpBtnS('start', startMin,              '#8f8', 'start')
+      +   jumpBtnS('mid',   midMin,                '#ff8', 'mid')
+      +   jumpBtnS('end',   Math.max(endMin-2, 0), '#f88', 'end')
       + '</summary>'
       + '<div style="padding:5px 0 4px 14px" data-prayer="' + d.name + '">'
       +   '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'
