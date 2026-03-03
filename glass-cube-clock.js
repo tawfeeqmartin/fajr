@@ -774,9 +774,9 @@ const FRAG_PRISM_FAN = `
     float r = length(p);
     float theta = atan(p.y, p.x);
     // Radial: fade in from center (cube zone), Gaussian fade out
-    float radial = smoothstep(0.02, 0.10, r) * exp(-r * r * 3.0);
+    float radial = smoothstep(0.08, 0.20, r) * exp(-r * r * 3.0);
     // Radial intensity: brighter near cube, fading outward (sells "cast by cube")
-    float cubeIntensity = 0.3 + 0.7 * smoothstep(0.35, 0.06, r);
+    float cubeIntensity = 0.5 + 0.5 * smoothstep(0.35, 0.10, r);
     // Angular fan mask
     float ad = mod(theta - fanCenter + 3.14159, 6.28318) - 3.14159;
     float fanPos = ad / fanWidth;
@@ -1171,7 +1171,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     varying vec2  vPos;
     void main() {
       float r = length(vPos);
-      float radial = exp(-r / uOuterRadius * 2.2);
+      float radial = exp(-r / uOuterRadius * 2.2) * smoothstep(0.0, 0.15, r);
 
       float angle = atan(vPos.x, -vPos.y);
 
