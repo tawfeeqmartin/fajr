@@ -1167,6 +1167,8 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     uColor2:     { value: new THREE.Color(0xffffff) },
     uIntensity:  { value: 0.0 },
     uOuterRadius:{ value: SECTOR_RADIUS },
+    uWidth:      { value: 1.0 },
+    uEdgeFade:   { value: 12.0 },
   },
   vertexShader: `
     varying vec2 vPos;
@@ -1180,7 +1182,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     #define TAU 6.28318530
     uniform float uStartAngle, uEndAngle;
     uniform vec3  uColor1, uColor2;
-    uniform float uIntensity, uOuterRadius;
+    uniform float uIntensity, uOuterRadius, uWidth, uEdgeFade;
     varying vec2  vPos;
     void main() {
       float r = length(vPos);
@@ -1197,9 +1199,9 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
       // Signed angular distance with wrapping
       float d = angle - mid;
       d = d - TAU * floor((d + PI) / TAU);
-      float normDist = abs(d) / max(hSpan, 0.001);
+      float normDist = abs(d) / max(hSpan * uWidth, 0.001);
       // Flat-top — stays bright to 90% of window, sharper rolloff at edges
-      float angular = exp(-pow(max(normDist - 0.97, 0.0) * 12.0, 2.0));
+      float angular = exp(-pow(max(normDist - 0.97, 0.0) * uEdgeFade, 2.0));
 
       // Dichroic color shift across fan
       float colorT = clamp(0.5 + d / max(hSpan * 2.0, 0.001), 0.0, 1.0);
@@ -1227,6 +1229,8 @@ _nextDiscMat.uniforms = {
   uColor2:     { value: new THREE.Color(0x00ff00) },
   uIntensity:  { value: 0.0 },
   uOuterRadius:{ value: SECTOR_RADIUS },
+  uWidth:      { value: 1.0 },
+  uEdgeFade:   { value: 12.0 },
 };
 const _nextDisc = new THREE.Mesh(_prayerDiscGeo, _nextDiscMat);
 _nextDisc.rotation.x = -Math.PI / 2;
@@ -1243,6 +1247,8 @@ _thirdDiscMat.uniforms = {
   uColor2:     { value: new THREE.Color(0x00ff00) },
   uIntensity:  { value: 0.0 },
   uOuterRadius:{ value: SECTOR_RADIUS },
+  uWidth:      { value: 1.0 },
+  uEdgeFade:   { value: 12.0 },
 };
 const _thirdDisc = new THREE.Mesh(_prayerDiscGeo, _thirdDiscMat);
 _thirdDisc.rotation.x = -Math.PI / 2;
@@ -1679,15 +1685,19 @@ function _devPatchDiscShaders() {
     });
 
     function applyOv(mat, disc, idx) {
-      // Always reset falloff so clearing a spread override takes effect next frame
-      if (mat.uniforms.uFalloff) mat.uniforms.uFalloff.value = 2.2;
+      // Always reset overrideable uniforms so clearing takes effect next frame
+      if (mat.uniforms.uFalloff)   mat.uniforms.uFalloff.value   = 2.2;
+      if (mat.uniforms.uWidth)     mat.uniforms.uWidth.value     = 1.0;
+      if (mat.uniforms.uEdgeFade)  mat.uniforms.uEdgeFade.value  = 12.0;
       if (idx < 0 || !disc.visible) return;
       var ps = prayerSectors[idx];
       if (!ps || !ps.def) return;
       var o = ov[ps.def.name];
       if (!o) return;
       if (o.intensity != null) mat.uniforms.uIntensity.value = o.intensity;
-      if (o.spread    != null && mat.uniforms.uFalloff) mat.uniforms.uFalloff.value = o.spread;
+      if (o.spread    != null && mat.uniforms.uFalloff)  mat.uniforms.uFalloff.value  = o.spread;
+      if (o.width     != null && mat.uniforms.uWidth)    mat.uniforms.uWidth.value    = o.width;
+      if (o.edgeFade  != null && mat.uniforms.uEdgeFade) mat.uniforms.uEdgeFade.value = o.edgeFade;
     }
 
     applyOv(_prayerDiscMat, _prayerDisc,  aIdx);
@@ -1931,7 +1941,9 @@ function _devBuildPanel() {
     _devUpdateWcBtns();
 
     [_prayerDiscMat, _nextDiscMat, _thirdDiscMat].forEach(function(mat) {
-      if (mat.uniforms.uFalloff) mat.uniforms.uFalloff.value = 2.2;
+      if (mat.uniforms.uFalloff)  mat.uniforms.uFalloff.value  = 2.2;
+      if (mat.uniforms.uWidth)    mat.uniforms.uWidth.value    = 1.0;
+      if (mat.uniforms.uEdgeFade) mat.uniforms.uEdgeFade.value = 12.0;
     });
 
     _devRefreshWindowList();
@@ -1956,10 +1968,14 @@ function _devRefreshWindowList() {
       : startMin + 5;
     var ov       = _devWindowOverrides[d.name] || {};
     var colorHex = '#' + d.color.toString(16).padStart(6, '0');
-    var intSet   = ov.intensity != null;
-    var spSet    = ov.spread    != null;
-    var intVal   = intSet ? ov.intensity : OP_ACTIVE;
-    var spVal    = spSet  ? ov.spread    : 2.2;
+    var intSet   = ov.intensity  != null;
+    var spSet    = ov.spread     != null;
+    var wdSet    = ov.width      != null;
+    var efSet    = ov.edgeFade   != null;
+    var intVal   = intSet ? ov.intensity  : OP_ACTIVE;
+    var spVal    = spSet  ? ov.spread     : 2.2;
+    var wdVal    = wdSet  ? ov.width      : 1.0;
+    var efVal    = efSet  ? ov.edgeFade   : 12.0;
 
     var jumpBtnS = function(dkey, val, col, lbl) {
       return '<button class="_dJmp" data-jump="' + val + '" style="'
@@ -1998,6 +2014,26 @@ function _devRefreshWindowList() {
       +       (spSet ? spVal.toFixed(1) : '2.2') + '</span>'
       +     '<button class="_dOvSpR" data-prayer="' + d.name + '"'
       +       ' title="Reset spread" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
+      +   '</div>'
+      +   '<div style="display:flex;align-items:center;gap:4px;margin-top:3px">'
+      +     '<span style="color:#888;width:56px;flex-shrink:0">Width</span>'
+      +     '<input type="range" class="_dOvWd" data-prayer="' + d.name + '"'
+      +       ' min="5" max="20" value="' + Math.round(wdVal * 10) + '" step="1" style="flex:1;min-width:0">'
+      +     '<span class="_dOvWdV" data-prayer="' + d.name + '"'
+      +       ' style="color:' + (wdSet ? '#fff' : '#555') + ';width:32px;text-align:right;font-size:9px">'
+      +       (wdSet ? wdVal.toFixed(1) : '1.0') + '</span>'
+      +     '<button class="_dOvWdR" data-prayer="' + d.name + '"'
+      +       ' title="Reset width" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
+      +   '</div>'
+      +   '<div style="display:flex;align-items:center;gap:4px;margin-top:3px">'
+      +     '<span style="color:#888;width:56px;flex-shrink:0">Edge fade</span>'
+      +     '<input type="range" class="_dOvEf" data-prayer="' + d.name + '"'
+      +       ' min="2" max="30" value="' + Math.round(efVal) + '" step="1" style="flex:1;min-width:0">'
+      +     '<span class="_dOvEfV" data-prayer="' + d.name + '"'
+      +       ' style="color:' + (efSet ? '#fff' : '#555') + ';width:32px;text-align:right;font-size:9px">'
+      +       (efSet ? efVal.toFixed(0) : '12') + '</span>'
+      +     '<button class="_dOvEfR" data-prayer="' + d.name + '"'
+      +       ' title="Reset edge fade" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
       +   '</div>'
       + '</div>'
       + '</details>';
@@ -2062,6 +2098,58 @@ function _devRefreshWindowList() {
       var vSpan = el.querySelector('._dOvSpV[data-prayer="' + pname + '"]');
       if (inp)   inp.value = 22; // 2.2 * 10
       if (vSpan) { vSpan.textContent = '2.2'; vSpan.style.color = '#555'; }
+    });
+  });
+
+  // ── Width override ──────────────────────────────────────────────────────────
+  el.querySelectorAll('._dOvWd').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var pname = inp.dataset.prayer;
+      var val   = parseFloat(inp.value) / 10;
+      if (!_devWindowOverrides[pname]) _devWindowOverrides[pname] = {};
+      _devWindowOverrides[pname].width = val;
+      window._devWindowOverrides = _devWindowOverrides;
+      var vSpan = el.querySelector('._dOvWdV[data-prayer="' + pname + '"]');
+      if (vSpan) { vSpan.textContent = val.toFixed(1); vSpan.style.color = '#fff'; }
+    });
+  });
+
+  el.querySelectorAll('._dOvWdR').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var pname = btn.dataset.prayer;
+      if (_devWindowOverrides[pname]) _devWindowOverrides[pname].width = null;
+      window._devWindowOverrides = _devWindowOverrides;
+      var inp   = el.querySelector('._dOvWd[data-prayer="' + pname + '"]');
+      var vSpan = el.querySelector('._dOvWdV[data-prayer="' + pname + '"]');
+      if (inp)   inp.value = 10; // 1.0 * 10
+      if (vSpan) { vSpan.textContent = '1.0'; vSpan.style.color = '#555'; }
+    });
+  });
+
+  // ── Edge Fade override ──────────────────────────────────────────────────────
+  el.querySelectorAll('._dOvEf').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var pname = inp.dataset.prayer;
+      var val   = parseFloat(inp.value);
+      if (!_devWindowOverrides[pname]) _devWindowOverrides[pname] = {};
+      _devWindowOverrides[pname].edgeFade = val;
+      window._devWindowOverrides = _devWindowOverrides;
+      var vSpan = el.querySelector('._dOvEfV[data-prayer="' + pname + '"]');
+      if (vSpan) { vSpan.textContent = val.toFixed(0); vSpan.style.color = '#fff'; }
+    });
+  });
+
+  el.querySelectorAll('._dOvEfR').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var pname = btn.dataset.prayer;
+      if (_devWindowOverrides[pname]) _devWindowOverrides[pname].edgeFade = null;
+      window._devWindowOverrides = _devWindowOverrides;
+      var inp   = el.querySelector('._dOvEf[data-prayer="' + pname + '"]');
+      var vSpan = el.querySelector('._dOvEfV[data-prayer="' + pname + '"]');
+      if (inp)   inp.value = 12;
+      if (vSpan) { vSpan.textContent = '12'; vSpan.style.color = '#555'; }
     });
   });
 }
