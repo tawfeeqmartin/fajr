@@ -3,6 +3,7 @@
 // Three.js FBO dichroic shader, per-channel IOR, real-time H:M:S hands
 
 import * as THREE from 'three';
+import { LightProbeGenerator } from 'three/addons/lights/LightProbeGenerator.js';
 
 
 // ─── CONTAINER DETECTION ──────────────────────────────────────────────────────
