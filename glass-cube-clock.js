@@ -1780,6 +1780,41 @@ function _devBuildPanel() {
     '<div id="_devWindowList"></div>' +
 
     hr() +
+    sec('Clock Hands') +
+    (function() {
+      var hands = [
+        { name: 'Hour', color: '#9900ff', defLen: 3.48, defW: 0.40, defOp: 1.45 },
+        { name: 'Minute', color: '#1133ff', defLen: 5.64, defW: 0.40, defOp: 1.50 },
+        { name: 'Second', color: '#ffffff', defLen: 9.12, defW: 0.40, defOp: 1.20 }
+      ];
+      return hands.map(function(h, i) {
+        var ray = clockRays[i];
+        var curOp = ray ? ray.mesh.children[0].material.uniforms.op.value : h.defOp;
+        return '<div style="margin-bottom:5px">'
+          + '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">'
+          +   '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + h.color + '"></span>'
+          +   '<span style="color:#ccc;font-weight:600">' + h.name + '</span>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">'
+          +   '<span style="color:#888;width:32px;flex-shrink:0;font-size:9px">Len</span>'
+          +   '<input type="range" class="_dHandLen" data-hi="' + i + '" min="10" max="150" value="' + Math.round(h.defLen * 10) + '" style="flex:1;min-width:0">'
+          +   '<span class="_dHandLenV" data-hi="' + i + '" style="color:#fff;width:28px;text-align:right;font-size:9px">' + h.defLen.toFixed(1) + '</span>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">'
+          +   '<span style="color:#888;width:32px;flex-shrink:0;font-size:9px">Wid</span>'
+          +   '<input type="range" class="_dHandW" data-hi="' + i + '" min="1" max="20" value="' + Math.round(h.defW * 10) + '" style="flex:1;min-width:0">'
+          +   '<span class="_dHandWV" data-hi="' + i + '" style="color:#fff;width:28px;text-align:right;font-size:9px">' + h.defW.toFixed(2) + '</span>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:4px">'
+          +   '<span style="color:#888;width:32px;flex-shrink:0;font-size:9px">Int</span>'
+          +   '<input type="range" class="_dHandOp" data-hi="' + i + '" min="0" max="30" value="' + Math.round(curOp * 10) + '" style="flex:1;min-width:0">'
+          +   '<span class="_dHandOpV" data-hi="' + i + '" style="color:#fff;width:28px;text-align:right;font-size:9px">' + curOp.toFixed(2) + '</span>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    })() +
+
+    hr() +
     sec('Global Controls') +
     '<div style="margin-bottom:3px">' +
       '<div style="display:flex;align-items:center;gap:5px">' +
@@ -1897,6 +1932,58 @@ function _devBuildPanel() {
     _devUpdateWcBtns();
   });
 
+  // ── Clock hand sliders ───────────────────────────────────────────────────────
+  var _handDefs = [
+    { len: 3.48, w: 0.40, op: 1.45 },
+    { len: 5.64, w: 0.40, op: 1.50 },
+    { len: 9.12, w: 0.40, op: 1.20 }
+  ];
+
+  function _devRebuildHandGeo(i, newW, newLen) {
+    var ray = clockRays[i];
+    if (!ray) return;
+    var child = ray.mesh.children[0];
+    child.geometry.dispose();
+    var g = new THREE.PlaneGeometry(newW, newLen, 1, 16);
+    g.translate(0, newLen / 2, 0);
+    child.geometry = g;
+  }
+
+  document.querySelectorAll('._dHandLen').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var i = parseInt(inp.dataset.hi);
+      var val = parseFloat(inp.value) / 10;
+      var wInp = document.querySelector('._dHandW[data-hi="' + i + '"]');
+      var curW = wInp ? parseFloat(wInp.value) / 10 : _handDefs[i].w;
+      _devRebuildHandGeo(i, curW, val);
+      var vSpan = document.querySelector('._dHandLenV[data-hi="' + i + '"]');
+      if (vSpan) vSpan.textContent = val.toFixed(1);
+    });
+  });
+
+  document.querySelectorAll('._dHandW').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var i = parseInt(inp.dataset.hi);
+      var val = parseFloat(inp.value) / 10;
+      var lInp = document.querySelector('._dHandLen[data-hi="' + i + '"]');
+      var curLen = lInp ? parseFloat(lInp.value) / 10 : _handDefs[i].len;
+      _devRebuildHandGeo(i, val, curLen);
+      var vSpan = document.querySelector('._dHandWV[data-hi="' + i + '"]');
+      if (vSpan) vSpan.textContent = val.toFixed(2);
+    });
+  });
+
+  document.querySelectorAll('._dHandOp').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var i = parseInt(inp.dataset.hi);
+      var val = parseFloat(inp.value) / 10;
+      var ray = clockRays[i];
+      if (ray) ray.mesh.children[0].material.uniforms.op.value = val;
+      var vSpan = document.querySelector('._dHandOpV[data-hi="' + i + '"]');
+      if (vSpan) vSpan.textContent = val.toFixed(2);
+    });
+  });
+
   // ── Global intensity sliders ────────────────────────────────────────────────
   document.getElementById('_devOpActive').addEventListener('input', function(e) {
     window._OP_ACTIVE_OVERRIDE = parseFloat(e.target.value) / 10;
@@ -1944,6 +2031,25 @@ function _devBuildPanel() {
       if (mat.uniforms.uFalloff)  mat.uniforms.uFalloff.value  = 2.2;
       if (mat.uniforms.uWidth)    mat.uniforms.uWidth.value    = 1.0;
       if (mat.uniforms.uEdgeFade) mat.uniforms.uEdgeFade.value = 12.0;
+    });
+
+    // Reset clock hands
+    _handDefs.forEach(function(def, i) {
+      _devRebuildHandGeo(i, def.w, def.len);
+      var ray = clockRays[i];
+      if (ray) ray.mesh.children[0].material.uniforms.op.value = def.op;
+      var lInp = document.querySelector('._dHandLen[data-hi="' + i + '"]');
+      var wInp = document.querySelector('._dHandW[data-hi="' + i + '"]');
+      var oInp = document.querySelector('._dHandOp[data-hi="' + i + '"]');
+      if (lInp) lInp.value = Math.round(def.len * 10);
+      if (wInp) wInp.value = Math.round(def.w * 10);
+      if (oInp) oInp.value = Math.round(def.op * 10);
+      var lV = document.querySelector('._dHandLenV[data-hi="' + i + '"]');
+      var wV = document.querySelector('._dHandWV[data-hi="' + i + '"]');
+      var oV = document.querySelector('._dHandOpV[data-hi="' + i + '"]');
+      if (lV) lV.textContent = def.len.toFixed(1);
+      if (wV) wV.textContent = def.w.toFixed(2);
+      if (oV) oV.textContent = def.op.toFixed(2);
     });
 
     _devRefreshWindowList();
