@@ -1171,7 +1171,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     varying vec2  vPos;
     void main() {
       float r = length(vPos);
-      float radial = exp(-r / uOuterRadius * 2.2) * smoothstep(0.0, 0.15, r);
+      float radial = exp(-r / uOuterRadius * 2.2) * smoothstep(0.0, 1.5, r);
 
       float angle = atan(vPos.x, -vPos.y);
 
