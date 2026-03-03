@@ -1572,6 +1572,7 @@ var _devActive      = false;
 var _devTimeOverride = null;   // null = real time, else { h, m }
 var _devShowBoundaries = true;
 var _devBoundaryBeams  = [];
+var _devBoundaryPerPrayer = {}; // keyed by prayer name, true = show
 var _devCustomSectors  = [];   // kept empty; updatePrayerWindows references it
 var _devSnapIntensity  = false; // snap disc intensities instantly on next frame
 
@@ -2052,6 +2053,8 @@ function _devBuildPanel() {
       if (oV) oV.textContent = def.op.toFixed(2);
     });
 
+    _devBoundaryPerPrayer = {};
+    _devUpdateBoundaries();
     _devRefreshWindowList();
   });
 
@@ -2140,6 +2143,13 @@ function _devRefreshWindowList() {
       +       (efSet ? efVal.toFixed(0) : '12') + '</span>'
       +     '<button class="_dOvEfR" data-prayer="' + d.name + '"'
       +       ' title="Reset edge fade" style="background:none;border:none;color:#555;cursor:pointer;font:11px monospace;padding:0 2px">↺</button>'
+      +   '</div>'
+      +   '<div style="display:flex;align-items:center;gap:4px;margin-top:4px">'
+      +     '<label style="display:flex;align-items:center;gap:4px;cursor:pointer">'
+      +       '<input type="checkbox" class="_dOvBnd" data-prayer="' + d.name + '"'
+      +         (_devBoundaryPerPrayer[d.name] ? ' checked' : '') + '>'
+      +       '<span style="color:#888;font-size:9px">Boundary lines</span>'
+      +     '</label>'
       +   '</div>'
       + '</div>'
       + '</details>';
@@ -2258,6 +2268,15 @@ function _devRefreshWindowList() {
       if (vSpan) { vSpan.textContent = '12'; vSpan.style.color = '#555'; }
     });
   });
+
+  // ── Per-prayer boundary checkbox ────────────────────────────────────────────
+  el.querySelectorAll('._dOvBnd').forEach(function(chk) {
+    chk.addEventListener('change', function() {
+      var pname = chk.dataset.prayer;
+      _devBoundaryPerPrayer[pname] = chk.checked;
+      _devUpdateBoundaries();
+    });
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2266,10 +2285,19 @@ function _devRefreshWindowList() {
 function _devUpdateBoundaries() {
   _devBoundaryBeams.forEach(function(b) { prismGroup.remove(b); });
   _devBoundaryBeams.length = 0;
-  if (!_devShowBoundaries || !_devActive) return;
+  if (!_devActive) return;
 
   var allSectors = prayerSectors.concat(_devCustomSectors || []);
+  var anyPerPrayer = Object.keys(_devBoundaryPerPrayer).some(function(k) { return _devBoundaryPerPrayer[k]; });
+
   allSectors.forEach(function(ps) {
+    // If any per-prayer checkbox is on, only show those. Otherwise respect global toggle.
+    var pName = ps.def ? ps.def.name : '';
+    if (anyPerPrayer) {
+      if (!_devBoundaryPerPrayer[pName]) return;
+    } else {
+      if (!_devShowBoundaries) return;
+    }
     [ps.startAng, ps.endAng].forEach(function(ang) {
       var geo = new THREE.PlaneGeometry(0.02, SECTOR_RADIUS, 1, 1);
       geo.translate(0, SECTOR_RADIUS / 2, 0);
