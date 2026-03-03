@@ -1009,13 +1009,13 @@ function _syncCompassFromAdhan() {
 // Active: 0.18 max opacity, upcoming: 0.08, Fajr dim: 0.05.
 
 const PRAYER_WINDOWS_DEF = [
-  { name: 'Tahajjud', startKey: 'Midnight', endKey: 'Fajr',    color: 0x7700ee, color2: 0xcc66ff, isFajr: false },
-  { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x3311cc, color2: 0x8866ee, isFajr: true  },
+  { name: 'Tahajjud', startKey: 'Midnight', endKey: 'Fajr',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
+  { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x5522dd, color2: 0xaa77ff, isFajr: true  },
   { name: 'Dhuha',   startKey: 'Sunrise',  endKey: 'Dhuhr',    color: 0xff9900, color2: 0xffee44, isFajr: false },
   { name: 'Dhuhr',   startKey: 'Dhuhr',    endKey: 'Asr',      color: 0x00bb44, color2: 0x66ff99, isFajr: false },
   { name: 'Asr',     startKey: 'Asr',      endKey: 'Maghrib',  color: 0xff8800, color2: 0xffcc44, isFajr: false },
   { name: 'Maghrib', startKey: 'Maghrib',  endKey: 'Isha',     color: 0xff2200, color2: 0xff8866, isFajr: false },
-  { name: 'Isha',    startKey: 'Isha',     endKey: 'Midnight', color: 0x0055ff, color2: 0x44aaff, isFajr: false },
+  { name: 'Isha',    startKey: 'Isha',     endKey: 'Midnight', color: 0x1166ff, color2: 0x55ccff, isFajr: false },
 ];
 
 // ── Hour hand contrast colors per prayer (complementary hue + boosted intensity) ──
