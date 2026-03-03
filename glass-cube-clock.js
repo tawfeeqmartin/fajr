@@ -1544,6 +1544,17 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     clockRays[1].mesh.rotation.y = clockRays[1].initY - (m / 60) * TAU;   // minute
     clockRays[2].mesh.rotation.y = clockRays[2].initY - (s / 60) * TAU;   // second
 
+    // Tawaf flourish — CCW sweep on swipe revert
+    if (_swipeTawafPhase > 0.001) {
+      // Ease-out curve for smooth deceleration
+      var tawafOffset = _swipeTawafPhase * _swipeTawafPhase * TAU; // quadratic ease-out
+      clockRays[0].mesh.rotation.y += tawafOffset * 0.3;  // hour: subtle
+      clockRays[1].mesh.rotation.y += tawafOffset * 0.6;  // minute: medium
+      clockRays[2].mesh.rotation.y += tawafOffset;         // second: full sweep
+      _swipeTawafPhase *= 0.955; // decay ~1.5 seconds at 60fps
+      if (_swipeTawafPhase < 0.001) _swipeTawafPhase = 0;
+    }
+
     // Expose hand proximity to 6 o'clock (bottom) for nav pill dichroic effect
     // 6 o'clock = fraction 0.5 on the dial. Proximity = cos-based falloff.
     const hFrac = (h / 12) % 1, mFrac = (m / 60) % 1, sFrac = (s / 60) % 1;
@@ -2633,10 +2644,12 @@ function _swipeShowPreview(idx) {
 }
 
 var _swipeTimeOverride = null; // minutes from midnight, or null for live
+var _swipeTawafPhase = 0;     // 0-1, decays to 0 — drives CCW sweep on revert
 
 function _swipeRevert() {
   _swipePreviewIdx = -1;
   _swipeTimeOverride = null;
+  _swipeTawafPhase = 1.0; // trigger one full CCW tawaf sweep
   // Fade out label
   if (_swipeLabelEl) _swipeLabelEl.style.opacity = '0';
   // Remove pill fill + tint
