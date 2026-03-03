@@ -1284,7 +1284,7 @@ function updatePrayerWindows(now) {
   // ── Active prayer disc (full intensity) ──
   const _opA = window._OP_ACTIVE_OVERRIDE != null ? window._OP_ACTIVE_OVERRIDE : OP_ACTIVE;
   const _opS = window._OP_STEP_OVERRIDE != null ? window._OP_STEP_OVERRIDE : OP_STEP;
-  const _lerpRate = _devSnapIntensity ? 1.0 : 0.03;
+  const _lerpRate = (_devSnapIntensity || window._forceTimeMin != null) ? 1.0 : 0.03;
   if (_devSnapIntensity) _devSnapIntensity = false;
   const u = _prayerDiscMat.uniforms;
   const activeTarget = activeIdx >= 0 ? _opA : 0.0;
@@ -1505,7 +1505,14 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   tawafSpot.position.z = -Math.cos(tawafAngle) * 3;
 
   // Update prayer window sector opacities
-  const prayerNow = (typeof _getDevNow === 'function' && _devActive) ? _getDevNow() : now;
+  let prayerNow;
+  if (window._forceTimeMin != null) {
+    prayerNow = new Date(now);
+    prayerNow.setHours(Math.floor(window._forceTimeMin / 60), window._forceTimeMin % 60, 0, 0);
+    if (!ptSectorsRebuilt) { window._prayerTimingsReady = true; buildPrayerSectors(); ptSectorsRebuilt = true; }
+  } else {
+    prayerNow = (typeof _getDevNow === 'function' && _devActive) ? _getDevNow() : now;
+  }
   updatePrayerWindows(prayerNow);
 
   // Update dev time slider readout if live
