@@ -562,7 +562,8 @@ const dichroicFrag = `
   uniform vec3      uCamWorldPos;
   uniform float     uSpecIntensity;
   uniform float     uInternalGlow;
-  // CubeEnvMap removed — no irradiance probes
+  uniform samplerCube uCubeEnvMap;
+  uniform float       uCubeEnvIntensity;
 
   varying vec3 vViewNormal;
   varying vec3 vViewDir;
@@ -675,6 +676,14 @@ const dichroicFrag = `
     float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
     col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.45;
 
+    // ── Irradiance probe: real environment reflections from CubeCamera ──
+    vec3 reflDir = reflect(-Vw, Nw);
+    vec3 envRefl = textureCube(uCubeEnvMap, reflDir).rgb;
+    float envFresnel = pow(1.0 - NdotV, 2.0);
+    col += envRefl * uCubeEnvIntensity * (0.25 + 0.75 * envFresnel);
+    // Top-face env reflection boost
+    col += envRefl * topFace * 0.20;
+
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -694,7 +703,9 @@ const cubeMat = new THREE.ShaderMaterial({
     uSpecLightPos: { value: new THREE.Vector3(2.5, 4.0, 2.5) },
     uCamWorldPos:  { value: new THREE.Vector3() },
     uSpecIntensity: { value: 2.8 },
-    uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
+    uInternalGlow:  { value: 0.0 },
+    uCubeEnvMap:       { value: null },
+    uCubeEnvIntensity: { value: 0.50 },
     // CubeEnvMap uniforms removed — no probes
   },
   vertexShader: dichroicVert,
@@ -739,7 +750,26 @@ podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
-// Irradiance probes removed — Tawfeeq preferred pre-probe look
+// ── PODIUM LIGHTING (Chris lookdev) ──────────────────────────────────────────
+const podiumPrayerWash = new THREE.PointLight(0x1a1a30, 0, 6);
+podiumPrayerWash.position.set(0, 0.25, 0); podiumPrayerWash.decay = 1.5;
+scene.add(podiumPrayerWash);
+const podiumTopSpot = new THREE.SpotLight(0xc0a880, 10);
+podiumTopSpot.position.set(0, 3.5, 0.8);
+podiumTopSpot.target.position.set(0, -0.3, 0);
+podiumTopSpot.angle = 0.45; podiumTopSpot.penumbra = 0.80;
+podiumTopSpot.decay = 1.3; podiumTopSpot.distance = 8; podiumTopSpot.castShadow = false;
+scene.add(podiumTopSpot, podiumTopSpot.target);
+
+// ── CUBE ENV PROBE (CubeCamera for glass reflections) ────────────────────────
+const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(64, {
+  type: THREE.HalfFloatType, format: THREE.RGBAFormat, colorSpace: THREE.LinearSRGBColorSpace,
+});
+const probeCamera = new THREE.CubeCamera(0.1, 40, cubeRenderTarget);
+probeCamera.position.set(0, 0.60, 0);
+scene.add(probeCamera);
+cubeMat.uniforms.uCubeEnvMap.value = cubeRenderTarget.texture;
+let _probeFrameCount = 0;
 
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
 // Three floor rays as H / M / S clock hands, synced to real time.
@@ -1682,7 +1712,22 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     if (sl) { const v = now.getHours()*60+now.getMinutes(); sl.value = v; if (lb) lb.textContent = _fmtMin(v); }
   }
 
-  // Probes + reactive podium removed
+  // ── CubeCamera probe update (every 60 frames) ──
+  _probeFrameCount++;
+  if (_probeFrameCount % 60 === 0) {
+    cubeMesh.visible = false;
+    probeCamera.update(renderer, scene);
+    cubeMesh.visible = true;
+  }
+
+  // ── Podium prayer wash ──
+  if (_activePrayer && _activePrayer.intensity > 0.01 && !_compassMode) {
+    const _washCol = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(_activePrayer.color2), 0.35);
+    podiumPrayerWash.color.lerp(_washCol, 0.06);
+    podiumPrayerWash.intensity += (4.0 - podiumPrayerWash.intensity) * 0.04;
+  } else {
+    podiumPrayerWash.intensity *= 0.97;
+  }
 
   // FBO pass
   cubeMesh.visible = false;
