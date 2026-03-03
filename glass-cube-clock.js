@@ -297,7 +297,7 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 105, 14);
+const cubeSun = new THREE.PointLight(0xe8f2ff, 78, 14);
 cubeSun.position.set(0, 1.0, -2.0);
 scene.add(cubeSun);
 
@@ -729,9 +729,9 @@ function floorRay(az, c1, c2, w, len, op) {
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
-floorRay(135, 0x9900ff, 0xff00ff, 0.40, 3.48, 0.88);   // HOUR   (violet)
-floorRay(135, 0x1133ff, 0x00aaff, 0.40, 5.64, 0.92);   // MINUTE (blue)
-floorRay(135, 0xffffff, 0xcccccc, 0.40, 9.12, 0.70);   // SECOND (white)
+floorRay(135, 0x9900ff, 0xff00ff, 0.40, 3.48, 1.45);   // HOUR   (violet)
+floorRay(135, 0x1133ff, 0x00aaff, 0.40, 5.64, 1.50);   // MINUTE (blue)
+floorRay(135, 0xffffff, 0xcccccc, 0.40, 9.12, 1.20);   // SECOND (white)
 
 // ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
 // v5: warm caustics (red/orange/yellow) pulled directly under cube base, short distance.
