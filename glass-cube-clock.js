@@ -2651,12 +2651,10 @@ function _swipeRevert() {
     clockCircle.setAttribute('stroke', 'currentColor');
     clockCircle.style.filter = '';
   }
-  // Remove prayer bar underline
-  document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
-    sp.style.textDecoration = '';
-    sp.style.color = '';
-    sp.style.fontWeight = '';
-  });
+  // Re-render prayer bar to restore default formatting
+  if (window._prayerTimings && typeof _displayPrayerTimes === 'function') {
+    _displayPrayerTimes(window._prayerTimings, window._lastHijri || null);
+  }
 }
 
 // Touch handlers — bound to document, filtered to clock mode only

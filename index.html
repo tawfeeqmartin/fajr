@@ -1918,6 +1918,7 @@ function _computePrayerTimes(lat, lon) {
 }
 
 function _displayPrayerTimes(t, hijri) {
+  if (hijri) window._lastHijri = hijri;
   const names = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam'];
   const now = new Date(), nowM = now.getHours()*60+now.getMinutes();
   const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
@@ -2740,7 +2741,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=107';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=108';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
