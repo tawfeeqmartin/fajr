@@ -2842,7 +2842,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=166';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=167';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -2893,7 +2893,18 @@ setTimeout(setupScrollObservers,500);
   function startTour(){
     if(tourActive) return;
     tourActive=true;
+    // Start from user's current scroll position, not the top
     tourIdx=0;
+    const _sc=document.getElementById('infoScroller');
+    const _scrollEl = _sc || document.documentElement;
+    const _vh = window.innerHeight;
+    for(let i=TOUR_SECTIONS.length-1; i>=0; i--){
+      const _el=document.getElementById(TOUR_SECTIONS[i].id);
+      if(_el){
+        const _r=_el.getBoundingClientRect();
+        if(_r.top < _vh * 0.5){ tourIdx=i; break; }
+      }
+    }
     // Scroll snap already removed — natural scroll
     // Request fullscreen on mobile for immersive demo
     try{
@@ -2935,11 +2946,8 @@ setTimeout(setupScrollObservers,500);
   function advanceTour(){
     if(!tourActive) return;
     if(tourIdx >= TOUR_SECTIONS.length){
-      tourIdx=0;
-      tourScrolling=true;
-      const _sc=document.getElementById('infoScroller');if(_sc)_sc.scrollTo({top:0,behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'});
-      setTimeout(()=>{tourScrolling=false;},1500);
-      tourTimer=setTimeout(()=>advanceTour(), 2000);
+      // Tour complete — stop, don't loop back to top
+      stopTour();
       return;
     }
     const sec=TOUR_SECTIONS[tourIdx];
