@@ -2657,7 +2657,7 @@ function _swipeShowPreview(idx) {
 
   // Color ONLY the selected prayer — others stay default (no dimming)
   document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
-    if (sp.dataset.prayer === def.name || (def.name === 'Tahajjud' && sp.dataset.prayer === 'Qiyam')) {
+    if (sp.dataset.prayer === def.name || (def.name === 'Tahajjud' && sp.dataset.prayer === 'Qiyam') || (def.name === 'Dhuha' && sp.dataset.prayer === 'Sunrise')) {
       sp.style.color = hex;
     } else {
       sp.style.color = '';
