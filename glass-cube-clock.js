@@ -1170,6 +1170,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     uWidth:      { value: 1.0 },
     uEdgeFade:   { value: 12.0 },
     uFalloff:    { value: 2.2 },
+    uHoleSize:   { value: 0.5 },
   },
   vertexShader: `
     varying vec2 vPos;
@@ -1183,11 +1184,11 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     #define TAU 6.28318530
     uniform float uStartAngle, uEndAngle;
     uniform vec3  uColor1, uColor2;
-    uniform float uIntensity, uOuterRadius, uWidth, uEdgeFade, uFalloff;
+    uniform float uIntensity, uOuterRadius, uWidth, uEdgeFade, uFalloff, uHoleSize;
     varying vec2  vPos;
     void main() {
       float r = length(vPos);
-      float radial = exp(-r / uOuterRadius * uFalloff) * smoothstep(0.0, 0.5, r);
+      float radial = exp(-r / uOuterRadius * uFalloff) * smoothstep(0.0, uHoleSize, r);
 
       float angle = atan(vPos.x, -vPos.y);
 
@@ -1233,6 +1234,7 @@ _nextDiscMat.uniforms = {
   uWidth:      { value: 1.0 },
   uEdgeFade:   { value: 12.0 },
   uFalloff:    { value: 2.2 },
+    uHoleSize:   { value: 0.5 },
 };
 const _nextDisc = new THREE.Mesh(_prayerDiscGeo, _nextDiscMat);
 _nextDisc.rotation.x = -Math.PI / 2;
@@ -1252,6 +1254,7 @@ _thirdDiscMat.uniforms = {
   uWidth:      { value: 1.0 },
   uEdgeFade:   { value: 12.0 },
   uFalloff:    { value: 2.2 },
+    uHoleSize:   { value: 0.5 },
 };
 const _thirdDisc = new THREE.Mesh(_prayerDiscGeo, _thirdDiscMat);
 _thirdDisc.rotation.x = -Math.PI / 2;
@@ -1828,6 +1831,13 @@ function _devBuildPanel() {
         '<span id="_devOpStepV" style="color:#fff;width:24px;text-align:right">' + OP_STEP.toFixed(2) + '</span>' +
       '</div>' +
     '</div>' +
+    '<div style="margin-bottom:6px">' +
+      '<div style="display:flex;align-items:center;gap:5px">' +
+        '<span style="color:#888;width:54px;flex-shrink:0">Hole</span>' +
+        '<input type="range" id="_devHoleSize" min="0" max="300" value="50" style="flex:1;min-width:0">' +
+        '<span id="_devHoleSizeV" style="color:#fff;width:24px;text-align:right">0.50</span>' +
+      '</div>' +
+    '</div>' +
     '<div style="margin-bottom:8px">' +
       '<label style="display:flex;align-items:center;gap:5px;cursor:pointer">' +
         '<input type="checkbox" id="_devBoundaries"' + (_devShowBoundaries ? ' checked' : '') + '>' +
@@ -1993,6 +2003,15 @@ function _devBuildPanel() {
     document.getElementById('_devOpStepV').textContent = window._OP_STEP_OVERRIDE.toFixed(2);
   });
 
+  // ── Hole size (center cutout under cube) ─────────────────────────────────────
+  document.getElementById('_devHoleSize').addEventListener('input', function(e) {
+    var val = parseFloat(e.target.value) / 100;
+    [_prayerDiscMat, _nextDiscMat, _thirdDiscMat].forEach(function(m) {
+      m.uniforms.uHoleSize.value = val;
+    });
+    document.getElementById('_devHoleSizeV').textContent = val.toFixed(2);
+  });
+
   // ── Boundaries toggle ───────────────────────────────────────────────────────
   document.getElementById('_devBoundaries').addEventListener('change', function(e) {
     _devShowBoundaries = e.target.checked;
@@ -2029,6 +2048,7 @@ function _devBuildPanel() {
       if (mat.uniforms.uFalloff)  mat.uniforms.uFalloff.value  = 2.2;
       if (mat.uniforms.uWidth)    mat.uniforms.uWidth.value    = 1.0;
       if (mat.uniforms.uEdgeFade) mat.uniforms.uEdgeFade.value = 12.0;
+      if (mat.uniforms.uHoleSize) mat.uniforms.uHoleSize.value = 0.5;
     });
 
     // Reset clock hands
