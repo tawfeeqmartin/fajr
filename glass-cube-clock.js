@@ -308,7 +308,7 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 55, 14);
+const cubeSun = new THREE.PointLight(0xe8f2ff, 35, 14); // v: 55→42→35 — preserve prismatic color, no blown white
 cubeSun.position.set(0, 0.2, -2.8);
 scene.add(cubeSun);
 
@@ -606,7 +606,8 @@ const dichroicFrag = `
     // ── Transmission: boost brightness — dichroic glass is bright, not dark ──
     // Slight blue-green tint is physically correct for optical glass (kills warm artifacts)
     // Bottom-face attenuation: reduce transmission where normal faces down (cubeSun direct hit)
-    float bottomAtten = 1.0 - 0.25 * smoothstep(-0.3, -0.95, Nw.y);
+    // Bottom-face attenuation: strong clamp preserves prismatic color in the hotspot
+    float bottomAtten = 1.0 - 0.55 * smoothstep(-0.3, -0.95, Nw.y);
     vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 1.7 * bottomAtten;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
@@ -642,8 +643,18 @@ const dichroicFrag = `
     vec3 glowCol = mix(vec3(0.85, 0.92, 1.00), vec3(0.70, 0.85, 1.00), glowFresnel);
     col += glowCol * uInternalGlow * (0.2 + 0.8 * glowFresnel);
 
-    // ── Top-face scrim: only extreme grazing (essentially removed) ──
-    col *= 1.0 - 0.06 * smoothstep(0.88, 0.99, Nw.y);
+    // ── Top-face dichroic iridescence (Chris lookdev, Mar 3) ──
+    // At 33° elevation the top face normal faces the camera at NdotV ≈ 0.54.
+    // Real dichroic glass shows thin-film interference at this angle — color shifts
+    // as the view angle changes. Previously this was a flat scrim that killed the glass read.
+    float topFace = smoothstep(0.5, 0.92, Nw.y);
+    vec3 topIrid = thinFilm(NdotV, uTime * 0.4);
+    // Blend iridescence: multiply existing color + additive shimmer
+    col = mix(col, col * topIrid * 1.6 + topIrid * 0.18, topFace * 0.45);
+    // Fresnel color shift: at grazing angles the top face shifts toward cool blue-violet
+    float topFresnel = pow(1.0 - NdotV, 3.0) * topFace;
+    col += vec3(0.25, 0.15, 0.55) * topFresnel * 0.35;
+    // (env reflection boost for top face applied after irradiance probe section below)
 
     // ── Bottom-face glow: cool emission separates cube from dark podium ──
     float bottomFace = smoothstep(-0.5, -0.92, Nw.y);
@@ -659,6 +670,9 @@ const dichroicFrag = `
     vec3 envRefl = textureCube(uCubeEnvMap, reflDir).rgb;
     float envFresnel = pow(1.0 - NdotV, 2.0);
     col += envRefl * uCubeEnvIntensity * (0.15 + 0.85 * envFresnel);
+
+    // ── Top-face env reflection boost (declared after envRefl is computed) ──
+    col += envRefl * topFace * 0.25;
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -702,13 +716,17 @@ prismGroup.rotation.y = Math.PI / 4;
 const PODIUM_W = 1.2 * 2.2; // 2.64 — double the cube width
 const PODIUM_H = 20; // tall enough to extend past any visible floor
 // Per-face materials: BoxGeometry groups = +x, -x, +y, -y, +z, -z
-const podiumBase = { roughness: 0.4, metalness: 0.05, clearcoat: 0.4, clearcoatRoughness: 0.15, color: 0x14141f, fog: false };
+// ── Podium materials (Chris lookdev, Mar 3) ──
+// Design intent: polished obsidian monolith — catches cube light, breathes with prayer color.
+// High clearcoat + low roughness = glass-like specular reflections on column faces.
+// envMap wired from CubeCamera in animation loop → real-time environment reflections.
+const podiumBase = { roughness: 0.18, metalness: 0.12, clearcoat: 0.8, clearcoatRoughness: 0.06, color: 0x0e0e16, fog: false, envMapIntensity: 1.8 };
 const podiumMats = [
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x0c0c18, emissiveIntensity: 0.5 }), // +y top — dichroic spill
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x2a2a48, emissiveIntensity: 1.5, envMapIntensity: 2.2 }), // +x right — KEY face
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x0c0c18, emissiveIntensity: 0.4, roughness: 0.25 }), // -x left — subtle edge
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141428, emissiveIntensity: 0.6, roughness: 0.12, envMapIntensity: 2.5 }), // +y top — polished mirror, prayer color reactive
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x020204, emissiveIntensity: 0.1 }), // -y bottom — invisible
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x161630, emissiveIntensity: 0.9 }), // +z front — FILL face
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.5, envMapIntensity: 2.0 }), // +z front — FILL face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x030306, emissiveIntensity: 0.1 }), // -z back — hidden
 ];
 const podiumMesh = new THREE.Mesh(
@@ -1710,9 +1728,37 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         .then(newProbe => {
           lightProbe.sh.copy(newProbe.sh);
           _probeUpdatePending = false;
+          // Wire CubeCamera cubemap to podium materials as envMap
+          // Only needs to happen once — texture object stays the same, content auto-updates.
+          if (!podiumMats[0].envMap) {
+            const envTex = cubeRenderTarget.texture;
+            podiumMats.forEach(m => { m.envMap = envTex; m.needsUpdate = true; });
+          }
         })
         .catch(() => { _probeUpdatePending = false; });
     }
+  }
+
+  // ── Podium reactive emissive: top face + key face respond to active prayer color ──
+  if (_activePrayer && _activePrayer.intensity > 0.01) {
+    const pCol = new THREE.Color(_activePrayer.color);
+    const pCol2 = new THREE.Color(_activePrayer.color2);
+    const pMix = pCol.clone().lerp(pCol2, 0.3); // blend toward lighter end
+    // Top face (+y, index 2): subtle prayer-colored glow — beam light pools on surface
+    const topTarget = pMix.clone().multiplyScalar(0.06);
+    podiumMats[2].emissive.lerp(topTarget, 0.02);
+    podiumMats[2].emissiveIntensity += (1.5 - podiumMats[2].emissiveIntensity) * 0.02;
+    // Key face (+x, index 0): catch spill from prayer beam — subtle, not saturated
+    const keyTarget = pMix.clone().multiplyScalar(0.03);
+    podiumMats[0].emissive.lerp(keyTarget, 0.015);
+    // Front face (+z, index 4): whisper wash
+    const frontTarget = pMix.clone().multiplyScalar(0.02);
+    podiumMats[4].emissive.lerp(frontTarget, 0.015);
+  } else {
+    // Revert to default cool tones when no prayer active
+    podiumMats[2].emissive.lerp(new THREE.Color(0x1a1a30), 0.01);
+    podiumMats[0].emissive.lerp(new THREE.Color(0x3a3a60), 0.01);
+    podiumMats[4].emissive.lerp(new THREE.Color(0x18182e), 0.01);
   }
 
   // FBO pass
