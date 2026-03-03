@@ -1353,12 +1353,13 @@ function updatePrayerWindows(now) {
   const activeTarget = activeIdx >= 0 ? _opA : 0.0;
   u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, activeTarget, _lerpRate);
 
+  var _angLerp = _swipeTimeOverride !== null ? 0.08 : _lerpRate; // faster during swipe for responsive feel
   if (activeIdx >= 0) {
     const ps = allSectors[activeIdx];
-    u.uStartAngle.value = ps.startAng;
-    u.uEndAngle.value = ps.endAng;
-    u.uColor1.value.set(ps.def.color);
-    u.uColor2.value.set(ps.def.color2);
+    u.uStartAngle.value = THREE.MathUtils.lerp(u.uStartAngle.value, ps.startAng, _angLerp);
+    u.uEndAngle.value = THREE.MathUtils.lerp(u.uEndAngle.value, ps.endAng, _angLerp);
+    u.uColor1.value.lerp(new THREE.Color(ps.def.color), _angLerp);
+    u.uColor2.value.lerp(new THREE.Color(ps.def.color2), _angLerp);
     if (!_compassMode) _prayerDisc.visible = true;
     _activePrayer = { startAng: ps.startAng, endAng: ps.endAng, color: ps.def.color, color2: ps.def.color2, intensity: u.uIntensity.value };
   } else {
