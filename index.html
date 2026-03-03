@@ -229,8 +229,8 @@ body::after{display:none;
   position:relative;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:none;border:none;cursor:pointer;padding:0;
-  width:60px;height:52px;
-  border-radius:16px;
+  width:48px;height:48px;
+  border-radius:50%;
   color:rgba(255,255,255,.45);
   transition:color .3s ease;
   z-index:2;
@@ -242,8 +242,8 @@ body::after{display:none;
 /* Sliding glass tile indicator */
 .mode-pill-slider{
   position:absolute;top:5px;left:5px;
-  width:60px;height:52px;
-  border-radius:16px;
+  width:48px;height:48px;
+  border-radius:50%;
   background:rgba(255,255,255,.06);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border:1px solid rgba(255,255,255,.1);
@@ -255,7 +255,7 @@ body::after{display:none;
 }
 /* Inner glow gradient — lit from below */
 .mode-pill-slider::before{
-  content:'';position:absolute;inset:0;border-radius:16px;
+  content:'';position:absolute;inset:0;border-radius:50%;
   background:radial-gradient(ellipse 60% 50% at 50% 100%, var(--pill-glow,rgba(232,150,48,.12)) 0%, transparent 70%);
   pointer-events:none;
 }
@@ -272,8 +272,8 @@ body::after{display:none;
 }
 /* Slider positions */
 .mode-pill-slider[data-pos="0"]{transform:translateX(0)}
-.mode-pill-slider[data-pos="1"]{transform:translateX(60px)}
-.mode-pill-slider[data-pos="2"]{transform:translateX(120px)}
+.mode-pill-slider[data-pos="1"]{transform:translateX(48px)}
+.mode-pill-slider[data-pos="2"]{transform:translateX(96px)}
 .mode-label{
   position:fixed;
   bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 62px);
@@ -2824,7 +2824,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=160';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=161';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
