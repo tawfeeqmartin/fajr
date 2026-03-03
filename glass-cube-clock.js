@@ -322,6 +322,16 @@ tawafSpot.angle = 0.4; tawafSpot.penumbra = 0.9;
 tawafSpot.distance = 4.5; // cap: reaches cube (~4.2u) but not arch floor zone (~5.7u from this position)
 scene.add(tawafSpot, tawafSpot.target);
 
+// PODIUM EDGE CATCH — raking light that catches the right face during orbit
+// Positioned far right, aimed at podium center. Tight cone so it only grazes the edge.
+const podiumEdge = new THREE.SpotLight(0x6070a0, 3.5);
+podiumEdge.position.set(5, 2.0, 2.0);
+podiumEdge.target.position.set(0, -2, 0);
+podiumEdge.angle = 0.35; podiumEdge.penumbra = 0.9;
+podiumEdge.decay = 1.8; podiumEdge.distance = 12;
+podiumEdge.castShadow = false;
+scene.add(podiumEdge, podiumEdge.target);
+
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
@@ -821,18 +831,17 @@ floorRay(135, 0x9900ff, 0xff00ff, 0.30, 4.80, 1.45);   // HOUR   (violet)  φ ba
 floorRay(135, 0x1133ff, 0x00aaff, 0.30, 7.77, 1.50);   // MINUTE (blue)    4.80 × φ
 floorRay(135, 0xffffff, 0xcccccc, 0.30, 12.56, 1.20);  // SECOND (white)   4.80 × φ²
 
-// ─── FLOOR CAUSTICS ───────────────────────────────────────────────────────────
-// v5: warm caustics (red/orange/yellow) pulled directly under cube base, short distance.
-// Previously at z=0.9–1.5 they flooded the gobo arch projection zone — red fill
-// in the dark frame destroyed the arch silhouette. Now contained to cube footprint only.
+// ─── FLOOR CAUSTICS (Chris lookdev Mar 3 — softer, wider pools) ──────────────
+// Reduced intensities, wider distance = soft colored pools, not blown white convergence.
+// Spread further from cube center so they don't stack into a single hotspot.
 [
-  {c:0x6600ff,i:1.8,d:2.5,x:-1.6,y:0.06,z:-0.4},
-  {c:0x0033ff,i:1.4,d:2.2,x:-1.1,y:0.06,z:-0.7},
-  {c:0x00aaff,i:2.8,d:2.0,x: 0.6,y:0.06,z:-1.0},
-  {c:0xffffff,i:1.5,d:1.4,x: 0.2,y:0.06,z: 0.1},
-  {c:0xffee00,i:2.2,d:1.2,x: 0.3,y:0.06,z:-0.2},
-  {c:0xff8800,i:2.0,d:1.2,x:-0.2,y:0.06,z: 0.0},
-  {c:0xff2200,i:1.8,d:1.0,x:-0.4,y:0.06,z:-0.3},
+  {c:0x6600ff,i:1.2,d:3.2,x:-1.8,y:0.06,z:-0.5},
+  {c:0x0033ff,i:0.9,d:2.8,x:-1.3,y:0.06,z:-0.9},
+  {c:0x00aaff,i:1.6,d:2.8,x: 0.8,y:0.06,z:-1.2},
+  {c:0xeeeeff,i:0.7,d:2.0,x: 0.3,y:0.06,z: 0.3},  // was white 1.5 — almost halved
+  {c:0xffee00,i:1.2,d:1.8,x: 0.5,y:0.06,z:-0.4},  // was 2.2 — tamed
+  {c:0xff8800,i:1.2,d:1.8,x:-0.4,y:0.06,z: 0.2},
+  {c:0xff2200,i:1.0,d:1.5,x:-0.6,y:0.06,z:-0.4},
 ].forEach(({c,i,d,x,y,z})=>{ const pl=new THREE.PointLight(c,i,d); pl.position.set(x,y,z); scene.add(pl); });
 
 // ─── FULLSCREEN HOOK (called by openClockFullscreen in index.html) ─────────────
