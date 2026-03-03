@@ -601,7 +601,11 @@ const dichroicFrag = `
     col += irid * diagF * fresnel * 0.12;
 
     // ── Fresnel edge: cool blue-white, sharp (glass = cold at edges) ──
-    col += vec3(0.80, 0.92, 1.00) * fresnel * 0.30;
+    col += vec3(0.80, 0.92, 1.00) * fresnel * 0.35;
+
+    // ── Side-face ambient: subtle fill so faces read as glass even without strong light ──
+    float sideFacing = 1.0 - abs(Nw.y); // peaks on vertical faces
+    col += vec3(0.20, 0.25, 0.40) * sideFacing * 0.12;
 
     // ── Sky/environment reflection: top face catches overhead light ──
     // Nw.y → 1 means surface faces up → reflects sky. Should be brightest face.
