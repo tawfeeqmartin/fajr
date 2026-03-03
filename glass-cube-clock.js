@@ -1610,7 +1610,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // Cinematic camera orbit on swipe — arcs around the cube
   if (Math.abs(_swipeCamAngle - _swipeCamTarget) > 0.0001) {
     // Ease-out on pull (0.10), slower on return to sync with tawaf (0.955 decay ≈ 0.045 lerp)
-    var _camLerp = _swipeCamTarget !== 0 ? 0.25 : 0.03; // instant reward on swipe, gentle drift home
+    var _camLerp = (_swipePreviewIdx >= 0) ? 0.25 : 0.03; // snappy during ANY swipe, gentle only on auto-revert
     _swipeCamAngle += (_swipeCamTarget - _swipeCamAngle) * _camLerp;
     if (Math.abs(_swipeCamAngle - _swipeCamTarget) < 0.0001) _swipeCamAngle = _swipeCamTarget;
   }
