@@ -2625,6 +2625,7 @@ function _swipeShowPreview(idx) {
   _swipeLabelEl.innerHTML =
     '<div style="font-size:clamp(.6rem,1.2vw,.75rem);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:' + hex + ';opacity:.7;margin-bottom:2px">' + def.name + '</div>' +
     '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>';
+  _swipeLabelEl.style.display = 'block';
   _swipeLabelEl.style.opacity = '1';
 
   // Fill the nav pill circle with prayer color
@@ -2667,10 +2668,8 @@ function _swipeRevert(instant) {
   if (!instant) _swipeTawafPhase = 1.0; // CCW sweep only on natural revert, not mode switch
   // Kill label immediately
   if (_swipeLabelEl) {
-    _swipeLabelEl.style.transition = 'none';
+    _swipeLabelEl.style.display = 'none';
     _swipeLabelEl.style.opacity = '0';
-    // Re-enable transition after paint
-    setTimeout(function() { if (_swipeLabelEl) _swipeLabelEl.style.transition = 'opacity .3s ease'; }, 50);
   }
   // Remove pill fill + tint
   var clockCircle = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle');
