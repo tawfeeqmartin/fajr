@@ -1418,8 +1418,18 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   godRayMat.uniforms.uTime.value = t;
   _shaftMat.uniforms.time.value = t;
 
-  // Sync hands to clock time (real or dev override)
-  const now = (typeof _getDevNow === 'function' && _devActive) ? _getDevNow() : new Date();
+  // Sync hands to clock time (real, dev override, or swipe preview)
+  var now;
+  if (typeof _getDevNow === 'function' && _devActive) {
+    now = _getDevNow();
+  } else if (typeof _swipeTimeOverride === 'number' && _swipeTimeOverride !== null) {
+    now = new Date();
+    var _swH = Math.floor(_swipeTimeOverride / 60);
+    var _swM = _swipeTimeOverride % 60;
+    now.setHours(_swH, _swM, 0, 0);
+  } else {
+    now = new Date();
+  }
   const h = (now.getHours() % 12) + now.getMinutes() / 60 + now.getSeconds() / 3600;
   const m = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
@@ -2545,4 +2555,116 @@ if (location.search.includes('dev')) {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'D' || e.key === 'd') _devToggle();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRAYER SWIPE — swipe left/right to preview prayer times
+// ─────────────────────────────────────────────────────────────────────────────
+var _swipeStartX = 0, _swipeStartY = 0, _swipeSwiping = false;
+var _swipePreviewIdx = -1;   // -1 = live mode, 0-6 = prayer index
+var _swipeRevertTimer = null;
+var _swipeLabelEl = null;
+var _swipeFadeTimer = null;
+
+function _swipeGetCurrentIdx() {
+  // Find which prayer is currently active (live)
+  var T = window._prayerTimings;
+  if (!T) return 0;
+  var now = new Date();
+  var nowMin = now.getHours() * 60 + now.getMinutes();
+  for (var i = 0; i < prayerSectors.length; i++) {
+    var s = prayerSectors[i].startMin, e = prayerSectors[i].endMin;
+    if (e < s) { // wraps midnight
+      if (nowMin >= s || nowMin < e) return i;
+    } else {
+      if (nowMin >= s && nowMin < e) return i;
+    }
+  }
+  return 0;
+}
+
+function _swipeShowPreview(idx) {
+  if (!prayerSectors.length) return;
+  idx = ((idx % 7) + 7) % 7; // wrap 0-6
+  _swipePreviewIdx = idx;
+  var ps = prayerSectors[idx];
+  var def = ps.def;
+  var T = window._prayerTimings;
+  var timeStr = T ? (T[def.startKey] || '').split(' ')[0] : '';
+
+  // Create/update the preview label above nav pill
+  if (!_swipeLabelEl) {
+    _swipeLabelEl = document.createElement('div');
+    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 72px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
+    document.body.appendChild(_swipeLabelEl);
+  }
+  var c = new THREE.Color(def.color);
+  var hex = '#' + c.getHexString();
+  _swipeLabelEl.innerHTML =
+    '<div style="font-size:clamp(.6rem,1.2vw,.75rem);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:' + hex + ';opacity:.7;margin-bottom:2px">' + def.name + '</div>' +
+    '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>';
+  _swipeLabelEl.style.opacity = '1';
+
+  // Tint the active nav pill button circle
+  var clockBtn = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle, .mode-pill-btn[data-mode="clock"] svg');
+  if (clockBtn) clockBtn.style.filter = 'drop-shadow(0 0 8px ' + hex + ')';
+
+  // Override clock time to this prayer's start
+  _swipeTimeOverride = ps.startMin;
+
+  // Auto-revert after 3 seconds
+  clearTimeout(_swipeRevertTimer);
+  _swipeRevertTimer = setTimeout(_swipeRevert, 3000);
+}
+
+var _swipeTimeOverride = null; // minutes from midnight, or null for live
+
+function _swipeRevert() {
+  _swipePreviewIdx = -1;
+  _swipeTimeOverride = null;
+  // Fade out label
+  if (_swipeLabelEl) _swipeLabelEl.style.opacity = '0';
+  // Remove pill tint
+  var clockBtn = document.querySelector('.mode-pill-btn[data-mode="clock"] svg');
+  if (clockBtn) clockBtn.style.filter = '';
+}
+
+// Touch handlers — only in clock mode, not compass/info
+renderer.domElement.addEventListener('touchstart', function(e) {
+  if (_compassMode || document.body.classList.contains('mode-info')) return;
+  if (_devActive) return; // don't interfere with dev panel
+  var touch = e.touches[0];
+  _swipeStartX = touch.clientX;
+  _swipeStartY = touch.clientY;
+  _swipeSwiping = false;
+}, { passive: true });
+
+renderer.domElement.addEventListener('touchmove', function(e) {
+  if (_compassMode || document.body.classList.contains('mode-info')) return;
+  if (_devActive) return;
+  var touch = e.touches[0];
+  var dx = touch.clientX - _swipeStartX;
+  var dy = touch.clientY - _swipeStartY;
+  // Only trigger on horizontal swipe (dx > dy) with minimum threshold
+  if (!_swipeSwiping && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    _swipeSwiping = true;
+    var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
+    var dir = dx > 0 ? -1 : 1; // swipe right = previous, swipe left = next
+    _swipeShowPreview(baseIdx + dir);
+    _swipeStartX = touch.clientX; // reset for next swipe in same gesture
+  }
+}, { passive: true });
+
+renderer.domElement.addEventListener('touchend', function() {
+  _swipeSwiping = false;
+}, { passive: true });
+
+// Arrow keys for desktop testing
+document.addEventListener('keydown', function(e) {
+  if (_compassMode || document.body.classList.contains('mode-info')) return;
+  if (_devActive) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
+    _swipeShowPreview(baseIdx + (e.key === 'ArrowRight' ? 1 : -1));
+  }
 });
