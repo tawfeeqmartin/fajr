@@ -1423,10 +1423,21 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   if (typeof _getDevNow === 'function' && _devActive) {
     now = _getDevNow();
   } else if (typeof _swipeTimeOverride === 'number' && _swipeTimeOverride !== null) {
+    // Lerp toward target for smooth hand travel between prayers
+    if (_swipeTimeTarget !== null && _swipeTimeOverride !== _swipeTimeTarget) {
+      var _swDiff = _swipeTimeTarget - _swipeTimeOverride;
+      // Handle midnight wrap — take the short path
+      if (_swDiff > 720) _swDiff -= 1440;
+      if (_swDiff < -720) _swDiff += 1440;
+      var _swStep = _swDiff * 0.12; // ~0.5s ease at 60fps
+      if (Math.abs(_swStep) < 0.3) _swipeTimeOverride = _swipeTimeTarget;
+      else _swipeTimeOverride = (_swipeTimeOverride + _swStep + 1440) % 1440;
+    }
     now = new Date();
     var _swH = Math.floor(_swipeTimeOverride / 60);
     var _swM = _swipeTimeOverride % 60;
-    now.setHours(_swH, _swM, 0, 0);
+    var _swFrac = _swipeTimeOverride - Math.floor(_swipeTimeOverride);
+    now.setHours(_swH, _swM, Math.floor(_swFrac * 60), 0);
   } else {
     now = new Date();
   }
@@ -2635,20 +2646,23 @@ function _swipeShowPreview(idx) {
     }
   });
 
-  // Override clock time to this prayer's start
-  _swipeTimeOverride = ps.startMin;
+  // Animate clock time to this prayer's start
+  if (_swipeTimeOverride === null) _swipeTimeOverride = ps.startMin; // first swipe: no lerp needed
+  _swipeTimeTarget = ps.startMin;
 
   // Auto-revert after 3 seconds
   clearTimeout(_swipeRevertTimer);
   _swipeRevertTimer = setTimeout(_swipeRevert, 3000);
 }
 
-var _swipeTimeOverride = null; // minutes from midnight, or null for live
+var _swipeTimeOverride = null; // minutes from midnight (current), or null for live
+var _swipeTimeTarget  = null; // where we're lerping TO
 var _swipeTawafPhase = 0;     // 0-1, decays to 0 — drives CCW sweep on revert
 
 function _swipeRevert() {
   _swipePreviewIdx = -1;
   _swipeTimeOverride = null;
+  _swipeTimeTarget = null;
   _swipeTawafPhase = 1.0; // trigger one full CCW tawaf sweep
   // Fade out label
   if (_swipeLabelEl) _swipeLabelEl.style.opacity = '0';
