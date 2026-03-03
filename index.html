@@ -1927,11 +1927,11 @@ function _displayPrayerTimes(t, hijri) {
   const prayerColors = {Fajr:'#6633ee',Dhuhr:'#00bb44',Asr:'#00bb44',Maghrib:'#ff9900',Isha:'#8811ff',Qiyam:'#8811ff'};
   const now = new Date(), nowM = now.getHours()*60+now.getMinutes();
   const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
-  // Find current active prayer (last one whose time has passed)
+  // Find current active prayer (last salah whose time has passed — not Sunrise/Qiyam)
   let activeP = '';
-  const mainPrayers = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam'];
-  for (let i = mainPrayers.length - 1; i >= 0; i--) {
-    if (t[mainPrayers[i]] && toM(t[mainPrayers[i]]) <= nowM) { activeP = mainPrayers[i]; break; }
+  const salahOnly = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+  for (let i = salahOnly.length - 1; i >= 0; i--) {
+    if (t[salahOnly[i]] && toM(t[salahOnly[i]]) <= nowM) { activeP = salahOnly[i]; break; }
   }
   const grey = ['Sunrise','Qiyam'];
   const html = names.map(p => {
