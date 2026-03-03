@@ -739,7 +739,24 @@ podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
-// Irradiance probes removed — Tawfeeq preferred pre-probe look
+// ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
+// Just two scene lights to illuminate the podium surface. No material changes.
+// Warm SpotLight: hits the front face (camera-visible) from above-forward
+const podiumFrontWash = new THREE.SpotLight(0xc0a880, 12);
+podiumFrontWash.position.set(0, 4.0, 6.0);
+podiumFrontWash.target.position.set(0, -2.5, 0);
+podiumFrontWash.angle = 0.50; podiumFrontWash.penumbra = 0.75;
+podiumFrontWash.decay = 1.2; podiumFrontWash.distance = 12;
+podiumFrontWash.castShadow = false;
+scene.add(podiumFrontWash, podiumFrontWash.target);
+// Lower fill: very subtle, reveals podium form without flattening
+const podiumLowFill = new THREE.SpotLight(0x606080, 4);
+podiumLowFill.position.set(0, -2.0, 8.0);
+podiumLowFill.target.position.set(0, -5.0, 0);
+podiumLowFill.angle = 0.55; podiumLowFill.penumbra = 0.90;
+podiumLowFill.decay = 1.5; podiumLowFill.distance = 14;
+podiumLowFill.castShadow = false;
+scene.add(podiumLowFill, podiumLowFill.target);
 
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
 // Three floor rays as H / M / S clock hands, synced to real time.
