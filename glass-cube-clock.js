@@ -1412,32 +1412,7 @@ function updatePrayerWindows(now) {
     u.uColor2.value.lerp(new THREE.Color(ps.def.color2), _angLerp);
     if (!_compassMode) _prayerDisc.visible = true;
     _activePrayer = { startAng: ps.startAng, endAng: ps.endAng, color: ps.def.color, color2: ps.def.color2, intensity: u.uIntensity.value };
-    // ── Pill dichroic: tint nav pill glass with active prayer color ──
-    if (_pillTintFrame++ % 90 === 0) { // throttle: every ~1.5s at 60fps
-      var _pc = new THREE.Color(ps.def.color);
-      var _pc2 = new THREE.Color(ps.def.color2);
-      var _pm = _pc.clone().lerp(_pc2, 0.4);
-      var _pr = Math.round(_pm.r * 255), _pg = Math.round(_pm.g * 255), _pb = Math.round(_pm.b * 255);
-      var _pill = document.querySelector('.mode-pill');
-      if (_pill) {
-        _pill.style.setProperty('--pill-bg',
-          'linear-gradient(130deg,' +
-          'rgba('+Math.round(_pr*.07)+','+Math.round(_pg*.03)+','+Math.round(_pb*.17)+',.72) 0%,' +
-          'rgba('+Math.round(_pr*.03)+','+Math.round(_pg*.05)+','+Math.round(_pb*.15)+',.68) 45%,' +
-          'rgba('+Math.round(_pr*.02)+','+Math.round(_pg*.07)+','+Math.round(_pb*.16)+',.68) 70%,' +
-          'rgba('+Math.round(_pr*.06)+','+Math.round(_pg*.02)+','+Math.round(_pb*.16)+',.72))');
-        _pill.style.setProperty('--pill-border-top', 'rgba('+Math.round(_pr*.76)+','+Math.round(_pg*.84)+',255,.32)');
-        _pill.style.setProperty('--pill-rim', 'rgba('+Math.round(_pr*.47)+','+Math.round(_pg*.59)+',255,.1)');
-        _pill.style.setProperty('--pill-halo', 'rgba('+Math.round(_pr*.31)+','+Math.round(_pg*.39)+',255,.07)');
-        _pill.style.setProperty('--pill-sweep',
-          'linear-gradient(108deg,transparent,' +
-          'rgba('+_pr+','+Math.round(_pg*.3)+',255,.14) 14%,' +
-          'rgba('+Math.round(_pr*.24)+','+Math.round(_pg*.55)+',255,.18) 28%,' +
-          'rgba('+Math.round(_pr*.27)+','+Math.round(_pg*.86)+','+Math.round(_pb*.78)+',.12) 44%,' +
-          'rgba('+Math.round(_pr*.24)+','+Math.round(_pg*.51)+',255,.16) 60%,' +
-          'rgba('+_pr+','+Math.round(_pg*.24)+',255,.13) 76%,transparent)');
-      }
-    }
+
   } else {
     _activePrayer = null;
   }
@@ -1482,7 +1457,6 @@ const clock = new THREE.Clock();
 
 prismGroup.rotation.y = Math.PI / 4;
 
-var _pillTintFrame = 89; // triggers on first check (89+1 % 90 === 0)
 let _themeFrameCount = 3599; // triggers on first frame
 const _themeBuf = new Uint8Array(4);
 const _themeMeta = document.querySelector('meta[name="theme-color"]');

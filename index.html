@@ -219,54 +219,12 @@ body::after{display:none;
   left:50%;transform:translateX(-50%);z-index:950;
   display:flex;align-items:center;justify-content:center;gap:0;
   padding:5px;
-  /* Dichroic glass base — JS updates these vars per active prayer */
-  background:var(--pill-bg, linear-gradient(130deg,rgba(18,8,45,.72),rgba(8,14,38,.68) 45%,rgba(6,18,42,.68) 70%,rgba(16,6,42,.72)));
-  backdrop-filter:blur(20px) saturate(210%);
-  -webkit-backdrop-filter:blur(20px) saturate(210%);
-  /* Fresnel border — JS updates via --pill-border-* */
-  border:1px solid transparent;
-  border-top-color:var(--pill-border-top, rgba(195,215,255,.32));
-  border-left-color:var(--pill-border-left, rgba(155,120,255,.18));
-  border-right-color:var(--pill-border-right, rgba(100,175,255,.16));
-  border-bottom-color:var(--pill-border-bottom, rgba(60,35,160,.28));
-  border-radius:20px;
-  /* Depth + prayer-tinted outer halo */
-  box-shadow:
-    0 6px 32px rgba(0,0,0,.5),
-    0 0 0 1px var(--pill-rim, rgba(120,150,255,.1)),
-    0 0 18px var(--pill-halo, rgba(80,100,255,.07)),
-    inset 0 1px 0 var(--pill-inset, rgba(210,225,255,.14));
-  transition:background .8s ease, border-color .8s ease, box-shadow .8s ease;
+  background:rgba(13,13,18,.55);
+  backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;
+  box-shadow:0 4px 24px rgba(0,0,0,.3);
 }
-/* Layer 1 — thin-film spectral sweep (violet → blue → cyan → blue → violet) */
-.mode-pill::before{
-  content:'';
-  position:absolute;inset:0;
-  border-radius:19px;
-  background:var(--pill-sweep, linear-gradient(108deg,transparent 0%,rgba(170,70,255,.14) 14%,rgba(60,140,255,.18) 28%,rgba(70,220,200,.12) 44%,rgba(60,130,255,.16) 60%,rgba(190,60,255,.13) 76%,transparent 100%));
-  mix-blend-mode:screen;
-  pointer-events:none;
-  z-index:0;
-}
-/* Layer 2 — specular streak: bright diagonal slash like light catching a glass edge */
-.mode-pill::after{
-  content:'';
-  position:absolute;inset:0;
-  border-radius:19px;
-  background:linear-gradient(
-    72deg,
-    transparent 0%,
-    transparent 30%,
-    rgba(210,225,255,.06) 38%,
-    rgba(230,240,255,.14) 44%,
-    rgba(210,225,255,.06) 50%,
-    transparent 58%,
-    transparent 100%
-  );
-  mix-blend-mode:screen;
-  pointer-events:none;
-  z-index:0;
-}
+
 .mode-pill-btn{
   position:relative;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -2866,7 +2824,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=158';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=159';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
