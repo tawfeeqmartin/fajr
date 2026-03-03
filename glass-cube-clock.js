@@ -1573,7 +1573,7 @@ document.body.classList.add('clock-ready');
 // ── Core state (referenced by animation loop + updatePrayerWindows) ───────────
 var _devActive      = false;
 var _devTimeOverride = null;   // null = real time, else { h, m }
-var _devShowBoundaries = true;
+var _devShowBoundaries = false;
 var _devBoundaryBeams  = [];
 var _devBoundaryPerPrayer = {}; // keyed by prayer name, true = show
 var _devCustomSectors  = [];   // kept empty; updatePrayerWindows references it
