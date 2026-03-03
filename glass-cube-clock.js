@@ -1798,17 +1798,17 @@ function _devBuildPanel() {
           + '</div>'
           + '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">'
           +   '<span style="color:#888;width:32px;flex-shrink:0;font-size:9px">Len</span>'
-          +   '<input type="range" class="_dHandLen" data-hi="' + i + '" min="10" max="150" value="' + Math.round(h.defLen * 10) + '" style="flex:1;min-width:0">'
+          +   '<input type="range" class="_dHandLen" data-hi="' + i + '" min="100" max="1500" value="' + Math.round(h.defLen * 100) + '" style="flex:1;min-width:0">'
           +   '<span class="_dHandLenV" data-hi="' + i + '" style="color:#fff;width:28px;text-align:right;font-size:9px">' + h.defLen.toFixed(1) + '</span>'
           + '</div>'
           + '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">'
           +   '<span style="color:#888;width:32px;flex-shrink:0;font-size:9px">Wid</span>'
-          +   '<input type="range" class="_dHandW" data-hi="' + i + '" min="1" max="20" value="' + Math.round(h.defW * 10) + '" style="flex:1;min-width:0">'
+          +   '<input type="range" class="_dHandW" data-hi="' + i + '" min="10" max="200" value="' + Math.round(h.defW * 100) + '" style="flex:1;min-width:0">'
           +   '<span class="_dHandWV" data-hi="' + i + '" style="color:#fff;width:28px;text-align:right;font-size:9px">' + h.defW.toFixed(2) + '</span>'
           + '</div>'
           + '<div style="display:flex;align-items:center;gap:4px">'
           +   '<span style="color:#888;width:32px;flex-shrink:0;font-size:9px">Int</span>'
-          +   '<input type="range" class="_dHandOp" data-hi="' + i + '" min="0" max="30" value="' + Math.round(curOp * 10) + '" style="flex:1;min-width:0">'
+          +   '<input type="range" class="_dHandOp" data-hi="' + i + '" min="0" max="300" value="' + Math.round(curOp * 100) + '" style="flex:1;min-width:0">'
           +   '<span class="_dHandOpV" data-hi="' + i + '" style="color:#fff;width:28px;text-align:right;font-size:9px">' + curOp.toFixed(2) + '</span>'
           + '</div>'
           + '</div>';
@@ -1820,14 +1820,14 @@ function _devBuildPanel() {
     '<div style="margin-bottom:3px">' +
       '<div style="display:flex;align-items:center;gap:5px">' +
         '<span style="color:#888;width:54px;flex-shrink:0">Intensity</span>' +
-        '<input type="range" id="_devOpActive" min="0" max="30" value="' + Math.round(OP_ACTIVE * 10) + '" style="flex:1;min-width:0">' +
+        '<input type="range" id="_devOpActive" min="0" max="300" value="' + Math.round(OP_ACTIVE * 100) + '" style="flex:1;min-width:0">' +
         '<span id="_devOpActiveV" style="color:#fff;width:24px;text-align:right">' + OP_ACTIVE.toFixed(1) + '</span>' +
       '</div>' +
     '</div>' +
     '<div style="margin-bottom:6px">' +
       '<div style="display:flex;align-items:center;gap:5px">' +
         '<span style="color:#888;width:54px;flex-shrink:0">Step</span>' +
-        '<input type="range" id="_devOpStep" min="0" max="10" value="' + Math.round(OP_STEP * 10) + '" style="flex:1;min-width:0">' +
+        '<input type="range" id="_devOpStep" min="0" max="100" value="' + Math.round(OP_STEP * 100) + '" style="flex:1;min-width:0">' +
         '<span id="_devOpStepV" style="color:#fff;width:24px;text-align:right">' + OP_STEP.toFixed(2) + '</span>' +
       '</div>' +
     '</div>' +
@@ -1960,9 +1960,9 @@ function _devBuildPanel() {
   document.querySelectorAll('._dHandLen').forEach(function(inp) {
     inp.addEventListener('input', function() {
       var i = parseInt(inp.dataset.hi);
-      var val = parseFloat(inp.value) / 10;
+      var val = parseFloat(inp.value) / 100;
       var wInp = document.querySelector('._dHandW[data-hi="' + i + '"]');
-      var curW = wInp ? parseFloat(wInp.value) / 10 : _handDefs[i].w;
+      var curW = wInp ? parseFloat(wInp.value) / 100 : _handDefs[i].w;
       _devRebuildHandGeo(i, curW, val);
       var vSpan = document.querySelector('._dHandLenV[data-hi="' + i + '"]');
       if (vSpan) vSpan.textContent = val.toFixed(2);
@@ -1972,9 +1972,9 @@ function _devBuildPanel() {
   document.querySelectorAll('._dHandW').forEach(function(inp) {
     inp.addEventListener('input', function() {
       var i = parseInt(inp.dataset.hi);
-      var val = parseFloat(inp.value) / 10;
+      var val = parseFloat(inp.value) / 100;
       var lInp = document.querySelector('._dHandLen[data-hi="' + i + '"]');
-      var curLen = lInp ? parseFloat(lInp.value) / 10 : _handDefs[i].len;
+      var curLen = lInp ? parseFloat(lInp.value) / 100 : _handDefs[i].len;
       _devRebuildHandGeo(i, val, curLen);
       var vSpan = document.querySelector('._dHandWV[data-hi="' + i + '"]');
       if (vSpan) vSpan.textContent = val.toFixed(2);
@@ -1984,7 +1984,7 @@ function _devBuildPanel() {
   document.querySelectorAll('._dHandOp').forEach(function(inp) {
     inp.addEventListener('input', function() {
       var i = parseInt(inp.dataset.hi);
-      var val = parseFloat(inp.value) / 10;
+      var val = parseFloat(inp.value) / 100;
       var ray = clockRays[i];
       if (ray) ray.mesh.children[0].material.uniforms.op.value = val;
       var vSpan = document.querySelector('._dHandOpV[data-hi="' + i + '"]');
@@ -1994,12 +1994,12 @@ function _devBuildPanel() {
 
   // ── Global intensity sliders ────────────────────────────────────────────────
   document.getElementById('_devOpActive').addEventListener('input', function(e) {
-    window._OP_ACTIVE_OVERRIDE = parseFloat(e.target.value) / 10;
+    window._OP_ACTIVE_OVERRIDE = parseFloat(e.target.value) / 100;
     document.getElementById('_devOpActiveV').textContent = window._OP_ACTIVE_OVERRIDE.toFixed(1);
   });
 
   document.getElementById('_devOpStep').addEventListener('input', function(e) {
-    window._OP_STEP_OVERRIDE = parseFloat(e.target.value) / 10;
+    window._OP_STEP_OVERRIDE = parseFloat(e.target.value) / 100;
     document.getElementById('_devOpStepV').textContent = window._OP_STEP_OVERRIDE.toFixed(2);
   });
 
@@ -2033,9 +2033,9 @@ function _devBuildPanel() {
 
     window._OP_ACTIVE_OVERRIDE = null;
     window._OP_STEP_OVERRIDE   = null;
-    document.getElementById('_devOpActive').value = Math.round(OP_ACTIVE * 10);
+    document.getElementById('_devOpActive').value = Math.round(OP_ACTIVE * 100);
     document.getElementById('_devOpActiveV').textContent = OP_ACTIVE.toFixed(1);
-    document.getElementById('_devOpStep').value = Math.round(OP_STEP * 10);
+    document.getElementById('_devOpStep').value = Math.round(OP_STEP * 100);
     document.getElementById('_devOpStepV').textContent = OP_STEP.toFixed(2);
 
     _devWindowOverrides        = {};
@@ -2059,9 +2059,9 @@ function _devBuildPanel() {
       var lInp = document.querySelector('._dHandLen[data-hi="' + i + '"]');
       var wInp = document.querySelector('._dHandW[data-hi="' + i + '"]');
       var oInp = document.querySelector('._dHandOp[data-hi="' + i + '"]');
-      if (lInp) lInp.value = Math.round(def.len * 10);
-      if (wInp) wInp.value = Math.round(def.w * 10);
-      if (oInp) oInp.value = Math.round(def.op * 10);
+      if (lInp) lInp.value = Math.round(def.len * 100);
+      if (wInp) wInp.value = Math.round(def.w * 100);
+      if (oInp) oInp.value = Math.round(def.op * 100);
       var lV = document.querySelector('._dHandLenV[data-hi="' + i + '"]');
       var wV = document.querySelector('._dHandWV[data-hi="' + i + '"]');
       var oV = document.querySelector('._dHandOpV[data-hi="' + i + '"]');
@@ -2102,9 +2102,9 @@ function _devBuildPanel() {
       }
     });
   }
-  _devWireHandNumInput('._dHandLenV', '._dHandLen', 10);
-  _devWireHandNumInput('._dHandWV', '._dHandW', 10);
-  _devWireHandNumInput('._dHandOpV', '._dHandOp', 10);
+  _devWireHandNumInput('._dHandLenV', '._dHandLen', 100);
+  _devWireHandNumInput('._dHandWV', '._dHandW', 100);
+  _devWireHandNumInput('._dHandOpV', '._dHandOp', 100);
 
   // Convert global OP value spans to editable
   ['_devOpActiveV', '_devOpStepV'].forEach(function(id) {
