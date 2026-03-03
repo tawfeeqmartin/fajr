@@ -1920,6 +1920,7 @@ function _computePrayerTimes(lat, lon) {
   };
 }
 
+window._displayPrayerTimes = _displayPrayerTimes;
 function _displayPrayerTimes(t, hijri) {
   if (hijri) window._lastHijri = hijri;
   const names = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam'];
@@ -2219,8 +2220,8 @@ function switchMode(mode) {
   if(mode === _currentMode) return;
   const prev = _currentMode;
   _currentMode = mode;
-  // Kill any active swipe preview immediately
-  if (typeof _swipeRevert === 'function') _swipeRevert();
+  // Kill any active swipe preview immediately (instant=true: no tawaf, no fade)
+  if (typeof _swipeRevert === 'function') _swipeRevert(true);
   
   // Update body class
   document.body.classList.remove('mode-clock','mode-compass','mode-info');
@@ -2746,7 +2747,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=117';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=118';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

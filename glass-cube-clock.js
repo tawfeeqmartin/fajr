@@ -2659,13 +2659,19 @@ var _swipeTimeOverride = null; // minutes from midnight (current), or null for l
 var _swipeTimeTarget  = null; // where we're lerping TO
 var _swipeTawafPhase = 0;     // 0-1, decays to 0 — drives CCW sweep on revert
 
-function _swipeRevert() {
+function _swipeRevert(instant) {
   _swipePreviewIdx = -1;
   _swipeTimeOverride = null;
   _swipeTimeTarget = null;
-  _swipeTawafPhase = 1.0; // trigger one full CCW tawaf sweep
-  // Fade out label
-  if (_swipeLabelEl) _swipeLabelEl.style.opacity = '0';
+  clearTimeout(_swipeRevertTimer);
+  if (!instant) _swipeTawafPhase = 1.0; // CCW sweep only on natural revert, not mode switch
+  // Kill label immediately
+  if (_swipeLabelEl) {
+    _swipeLabelEl.style.transition = 'none';
+    _swipeLabelEl.style.opacity = '0';
+    // Re-enable transition after paint
+    setTimeout(function() { if (_swipeLabelEl) _swipeLabelEl.style.transition = 'opacity .3s ease'; }, 50);
+  }
   // Remove pill fill + tint
   var clockCircle = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle');
   if (clockCircle) {
@@ -2674,9 +2680,14 @@ function _swipeRevert() {
     clockCircle.setAttribute('stroke', 'currentColor');
     clockCircle.style.filter = '';
   }
+  // Reset prayer bar highlights immediately
+  document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
+    sp.style.opacity = '';
+    sp.style.color = '';
+  });
   // Re-render prayer bar to restore default formatting
-  if (window._prayerTimings && typeof _displayPrayerTimes === 'function') {
-    _displayPrayerTimes(window._prayerTimings, window._lastHijri || null);
+  if (window._prayerTimings && typeof window._displayPrayerTimes === 'function') {
+    window._displayPrayerTimes(window._prayerTimings, window._lastHijri || null);
   }
 }
 
