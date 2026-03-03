@@ -2655,14 +2655,14 @@ function _swipeShowPreview(idx) {
     clockCircle.style.filter = 'drop-shadow(0 0 10px ' + hex + ')';
   }
 
-  // Highlight the matching prayer in the top bar — NO layout changes (sticky text)
+  // Color ONLY the selected prayer — others stay default (no dimming)
   document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
     if (sp.dataset.prayer === def.name || (def.name === 'Tahajjud' && sp.dataset.prayer === 'Qiyam')) {
       sp.style.color = hex;
-      sp.style.opacity = '1';
     } else {
-      sp.style.opacity = '0.3';
+      sp.style.color = '';
     }
+    sp.style.opacity = '';
   });
 
   // Animate clock time to this prayer's start
