@@ -1607,12 +1607,14 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     3.5,
     -Math.cos(secAngle) * specRadius
   );
-  // Cinematic camera orbit on swipe — arcs around the cube
-  if (Math.abs(_swipeCamAngle - _swipeCamTarget) > 0.0001) {
-    // Ease-out on pull (0.10), slower on return to sync with tawaf (0.955 decay ≈ 0.045 lerp)
-    var _camLerp = (_swipePreviewIdx >= 0) ? 0.25 : 0.03; // snappy during ANY swipe, gentle only on auto-revert
-    _swipeCamAngle += (_swipeCamTarget - _swipeCamAngle) * _camLerp;
-    if (Math.abs(_swipeCamAngle - _swipeCamTarget) < 0.0001) _swipeCamAngle = _swipeCamTarget;
+  // Damped spring camera orbit — elastic overshoot + boundary bounce
+  var _camStiffness = (_swipePreviewIdx >= 0) ? 0.15 : 0.06; // snappy during swipe, gentle on revert
+  var _camDamping = 0.72; // <1 = underdamped = overshoot
+  var _camAccel = (_swipeCamTarget - _swipeCamAngle) * _camStiffness;
+  _swipeCamVel = (_swipeCamVel + _camAccel) * _camDamping;
+  _swipeCamAngle += _swipeCamVel;
+  if (Math.abs(_swipeCamVel) < 0.00005 && Math.abs(_swipeCamAngle - _swipeCamTarget) < 0.0001) {
+    _swipeCamAngle = _swipeCamTarget; _swipeCamVel = 0;
   }
   // Orbit camera around lookAt pivot (0, -0.8, 1.0)
   var _pivotX = 0, _pivotZ = 1.0;
@@ -2677,6 +2679,7 @@ var _swipeTimeTarget  = null; // where we're lerping TO
 var _swipeTawafPhase = 0;     // 0-1, decays to 0 — drives CCW sweep on revert
 var _swipeCamAngle = 0;       // current orbit angle offset (radians)
 var _swipeCamTarget = 0;      // target orbit angle
+var _swipeCamVel = 0;         // angular velocity for spring physics
 
 window._swipeRevert = _swipeRevert;
 function _swipeRevert(instant) {
@@ -2734,7 +2737,10 @@ document.addEventListener('touchmove', function(e) {
     _swipeSwiping = true;
     var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
     var dir = dx > 0 ? 1 : -1; // swipe right = next prayer, swipe left = previous
+    var _camPrev = _swipeCamTarget;
     _swipeCamTarget = Math.max(-0.3491, Math.min(0.3491, _swipeCamTarget + dir * 0.1745)); // +10° per swipe, ±20° max
+    // Rubber-band: if clamped at edge, kick velocity to overshoot ~2° then spring back
+    if (_swipeCamTarget === _camPrev) _swipeCamVel += dir * 0.012;
     _swipeShowPreview(baseIdx + dir);
     _swipeStartX = touch.clientX; // reset for next swipe in same gesture
   }
