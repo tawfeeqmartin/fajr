@@ -2605,9 +2605,28 @@ function _swipeShowPreview(idx) {
     '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>';
   _swipeLabelEl.style.opacity = '1';
 
-  // Tint the active nav pill button circle
-  var clockBtn = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle, .mode-pill-btn[data-mode="clock"] svg');
-  if (clockBtn) clockBtn.style.filter = 'drop-shadow(0 0 8px ' + hex + ')';
+  // Fill the nav pill circle with prayer color
+  var clockCircle = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle');
+  if (clockCircle) {
+    clockCircle.setAttribute('fill', hex);
+    clockCircle.setAttribute('fill-opacity', '0.5');
+    clockCircle.setAttribute('stroke', hex);
+    clockCircle.style.filter = 'drop-shadow(0 0 10px ' + hex + ')';
+  }
+
+  // Underline the matching prayer in the top bar
+  document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
+    if (sp.dataset.prayer === def.name || (def.name === 'Tahajjud' && sp.dataset.prayer === 'Qiyam')) {
+      sp.style.textDecoration = 'underline';
+      sp.style.textUnderlineOffset = '3px';
+      sp.style.color = hex;
+      sp.style.fontWeight = '500';
+    } else {
+      sp.style.textDecoration = '';
+      sp.style.color = '';
+      sp.style.fontWeight = '';
+    }
+  });
 
   // Override clock time to this prayer's start
   _swipeTimeOverride = ps.startMin;
@@ -2624,9 +2643,20 @@ function _swipeRevert() {
   _swipeTimeOverride = null;
   // Fade out label
   if (_swipeLabelEl) _swipeLabelEl.style.opacity = '0';
-  // Remove pill tint
-  var clockBtn = document.querySelector('.mode-pill-btn[data-mode="clock"] svg');
-  if (clockBtn) clockBtn.style.filter = '';
+  // Remove pill fill + tint
+  var clockCircle = document.querySelector('.mode-pill-btn[data-mode="clock"] svg circle');
+  if (clockCircle) {
+    clockCircle.setAttribute('fill', 'none');
+    clockCircle.removeAttribute('fill-opacity');
+    clockCircle.setAttribute('stroke', 'currentColor');
+    clockCircle.style.filter = '';
+  }
+  // Remove prayer bar underline
+  document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
+    sp.style.textDecoration = '';
+    sp.style.color = '';
+    sp.style.fontWeight = '';
+  });
 }
 
 // Touch handlers — bound to document, filtered to clock mode only

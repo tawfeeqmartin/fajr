@@ -1927,7 +1927,7 @@ function _displayPrayerTimes(t, hijri) {
     let style = 'color:#e0e0e0';
     if (p === nextP) style = 'color:#c0392b;font-weight:600';
     else if (grey.includes(p)) style = 'color:#666';
-    return `<span style="${style}">${p} ${t[p]}</span>`;
+    return `<span data-prayer="${p}" style="${style};transition:all .3s ease">${p} ${t[p]}</span>`;
   }).join(' · ');
   // Fullscreen prayer bar
   const fsEl = document.getElementById('fsPrayerTimes'); if(fsEl) fsEl.innerHTML = html;
@@ -2740,7 +2740,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=106';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=107';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
