@@ -751,14 +751,16 @@ podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
 // ── PODIUM LIGHTING (Chris lookdev) ──────────────────────────────────────────
-const podiumPrayerWash = new THREE.PointLight(0x1a1a30, 0, 6);
-podiumPrayerWash.position.set(0, 0.25, 0); podiumPrayerWash.decay = 1.5;
+const podiumPrayerWash = new THREE.PointLight(0x1a1a30, 0, 8);
+podiumPrayerWash.position.set(0, 0.5, 0.8); podiumPrayerWash.decay = 1.2;
 scene.add(podiumPrayerWash);
-const podiumTopSpot = new THREE.SpotLight(0xc0a880, 10);
-podiumTopSpot.position.set(0, 3.5, 0.8);
-podiumTopSpot.target.position.set(0, -0.3, 0);
-podiumTopSpot.angle = 0.45; podiumTopSpot.penumbra = 0.80;
-podiumTopSpot.decay = 1.3; podiumTopSpot.distance = 8; podiumTopSpot.castShadow = false;
+// Podium front wash: aimed at the upper portion of the front face (which the camera SEES).
+// The top face is barely visible at 33° elevation — front face is the visual target.
+const podiumTopSpot = new THREE.SpotLight(0xc0a880, 12);
+podiumTopSpot.position.set(0, 4.0, 6.0); // further forward to hit front face
+podiumTopSpot.target.position.set(0, -2.5, 0); // aim at upper front face
+podiumTopSpot.angle = 0.50; podiumTopSpot.penumbra = 0.75;
+podiumTopSpot.decay = 1.2; podiumTopSpot.distance = 12; podiumTopSpot.castShadow = false;
 scene.add(podiumTopSpot, podiumTopSpot.target);
 
 // ── CUBE ENV PROBE (CubeCamera for glass reflections) ────────────────────────
