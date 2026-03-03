@@ -2614,17 +2614,13 @@ function _swipeShowPreview(idx) {
     clockCircle.style.filter = 'drop-shadow(0 0 10px ' + hex + ')';
   }
 
-  // Underline the matching prayer in the top bar
+  // Highlight the matching prayer in the top bar — NO layout changes (sticky text)
   document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
     if (sp.dataset.prayer === def.name || (def.name === 'Tahajjud' && sp.dataset.prayer === 'Qiyam')) {
-      sp.style.textDecoration = 'underline';
-      sp.style.textUnderlineOffset = '3px';
       sp.style.color = hex;
-      sp.style.fontWeight = '500';
+      sp.style.opacity = '1';
     } else {
-      sp.style.textDecoration = '';
-      sp.style.color = '';
-      sp.style.fontWeight = '';
+      sp.style.opacity = '0.3';
     }
   });
 
