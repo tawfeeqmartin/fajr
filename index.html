@@ -1149,7 +1149,8 @@ function adhanCompassHandler(e){
   if(window._compassDbgEl){
     const qd = adhanQiblaAngle !== null ? (adhanQiblaAngle*180/Math.PI).toFixed(1) : 'null';
     const rel = adhanQiblaAngle !== null ? ((adhanQiblaAngle - adhanDeviceHeading)*180/Math.PI).toFixed(1) : '?';
-    window._compassDbgEl.textContent = 'H:'+smoothed.toFixed(0)+'° Q:'+qd+'° R:'+rel+'° A:'+acc.toFixed(0)+'° src:'+(typeof e.webkitCompassHeading==='number'?'wk':'alpha')+(_compassJumpCount?' J:'+_compassJumpCount:'')+(_compassCalibrated?' ✓':' ⏳');
+    var hlEl = document.getElementById('_compassHeadingLine');
+    if(hlEl) hlEl.textContent = smoothed.toFixed(0)+'° heading · '+qd+'° qibla · accuracy '+acc.toFixed(0)+'°'+(_compassCalibrated?' ✓':'');
   }
   // Clear any "no compass" message
   if (_compassTimeoutEl && _compassTimeoutEl.style.opacity !== '0') {
@@ -2054,7 +2055,22 @@ document.addEventListener('click', function(e) {
   if (picker && picker.classList.contains('open') && e.target === picker) closeLocationPicker();
 });
 
+var _userLatDeg = null, _userLonDeg = null;
+function _haversineKm(lat1, lon1, lat2, lon2) {
+  var R = 6371, toRad = Math.PI / 180;
+  var dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
+  var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*toRad)*Math.cos(lat2*toRad)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function _updateCompassDist() {
+  var el = document.getElementById('_compassDistLine');
+  if (!el || _userLatDeg === null) return;
+  var km = _haversineKm(_userLatDeg, _userLonDeg, 21.4225, 39.8262);
+  var mi = km * 0.621371;
+  el.textContent = Math.round(km).toLocaleString() + ' km · ' + Math.round(mi).toLocaleString() + ' mi to Makkah';
+}
 function _setPrayerLocation(lat, lon, locationName) {
+  _userLatDeg = lat; _userLonDeg = lon;
   // Compute times instantly via adhan-js
   const t = _computePrayerTimes(lat, lon);
   // Store for glass-cube-clock beams
@@ -2604,13 +2620,18 @@ function _toggleCompassMode(forceState) {
     history.pushState({compass:true}, '', '#clock');
     // Start compass timeout detection
     _startCompassTimeout();
-    // Debug overlay (temporary)
+    // Compass info overlay — heading + distance to Makkah
     if(!window._compassDbgEl){
       window._compassDbgEl = document.createElement('div');
-      window._compassDbgEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + 90px);left:0;right:0;text-align:center;z-index:999;font:11px/1.3 monospace;color:rgba(255,255,0,.7);pointer-events:none;text-shadow:0 1px 2px #000';
+      window._compassDbgEl.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(80px,14vmin,110px));left:0;right:0;text-align:center;z-index:960;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px';
+      window._compassDbgEl.innerHTML =
+        '<div id="_compassHeadingLine" style="font:300 clamp(.7rem,1.6vmin,.85rem)/1.3 var(--font);color:rgba(232,228,220,.45);letter-spacing:.04em"></div>' +
+        '<div id="_compassDistLine" style="font:300 clamp(.65rem,1.4vmin,.75rem)/1.3 var(--font);color:rgba(120,160,255,.5);letter-spacing:.06em"></div>';
       document.body.appendChild(window._compassDbgEl);
     }
-    window._compassDbgEl.style.display = 'block';
+    window._compassDbgEl.style.display = 'flex';
+    // Show distance to Makkah if we have user location
+    _updateCompassDist();
     // Calibration overlay — shown until accuracy is acceptable
     if(!window._compassCalibEl){
       window._compassCalibEl = document.createElement('div');
@@ -2638,6 +2659,7 @@ function _toggleCompassMode(forceState) {
     // Clear timeout UI
     _clearCompassTimeout();
     if(window._compassDbgEl) window._compassDbgEl.style.display = 'none';
+    // Keep distance updated for next open
     if(window._compassCalibEl) window._compassCalibEl.style.opacity = '0';
     _hideCompassOnboarding();
   }
