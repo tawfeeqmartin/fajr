@@ -1109,7 +1109,7 @@ function makeSectorGeom(radius, thetaHalf, segments) {
 }
 
 const SECTOR_RADIUS = 9.12;  // matches second-hand length
-const OP_ACTIVE = 1.8;
+const OP_ACTIVE = 1.2;
 
 
 let prayerSectors = [];
@@ -1239,7 +1239,7 @@ prismGroup.add(_thirdDisc);
 
 
 
-const OP_STEP = 0.18; // intensity drop per consecutive prayer
+const OP_STEP = 0.22; // intensity drop per consecutive prayer
 
 function updatePrayerWindows(now) {
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
