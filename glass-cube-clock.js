@@ -297,7 +297,7 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 45, 14);
+const cubeSun = new THREE.PointLight(0xe8f2ff, 55, 14);
 cubeSun.position.set(0, 0.2, -2.8);
 scene.add(cubeSun);
 
@@ -592,7 +592,9 @@ const dichroicFrag = `
 
     // ── Transmission: boost brightness — dichroic glass is bright, not dark ──
     // Slight blue-green tint is physically correct for optical glass (kills warm artifacts)
-    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 1.7;
+    // Bottom-face attenuation: reduce transmission where normal faces down (cubeSun direct hit)
+    float bottomAtten = 1.0 - 0.45 * smoothstep(-0.3, -0.95, Nw.y);
+    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 1.7 * bottomAtten;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
     col = mix(col, col * irid * 1.4, diagF * 0.22);
@@ -625,6 +627,10 @@ const dichroicFrag = `
 
     // ── Top-face scrim: only extreme grazing (essentially removed) ──
     col *= 1.0 - 0.06 * smoothstep(0.88, 0.99, Nw.y);
+
+    // ── Bottom-edge rim: subtle highlight to separate cube from podium ──
+    float bottomEdge = smoothstep(-0.5, -0.85, Nw.y) * edgeCatch;
+    col += vec3(0.5, 0.6, 0.9) * bottomEdge * 0.4;
 
     gl_FragColor = vec4(col, 1.0);
   }
