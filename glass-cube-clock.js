@@ -2764,10 +2764,9 @@ document.addEventListener('touchmove', function(e) {
     _swipeCamVel = (_swipeCamVel + _dragSpring) * 0.55; // underdamped = slight wiggle on pull
     _swipeCamAngle += _swipeCamVel;
 
-    // Prayer threshold: every ~80px triggers next/prev prayer
-    var prayerOffset = Math.round(totalDx / 80);
-    var targetIdx = _swipeDragBaseIdx + prayerOffset;
-    targetIdx = ((targetIdx % 7) + 7) % 7;
+    // One drag = one prayer step in the swipe direction
+    var prayerDir = totalDx > 30 ? 1 : totalDx < -30 ? -1 : 0;
+    var targetIdx = ((_swipeDragBaseIdx + prayerDir) % 7 + 7) % 7;
     if (targetIdx !== _swipeLastTriggeredIdx) {
       _swipeLastTriggeredIdx = targetIdx;
       _swipeShowPreview(targetIdx);
