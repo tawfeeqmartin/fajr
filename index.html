@@ -336,15 +336,18 @@ body.mode-info .info-dots{opacity:1;pointer-events:auto}
 .compass-onboard-icon{width:90px;height:90px;margin:0 auto 1.5rem;display:block}
 .compass-onboard-text{font-size:1.1rem;font-weight:400;letter-spacing:.02em;margin-bottom:.4rem}
 .compass-onboard-sub{font-size:.8rem;font-weight:300;color:rgba(232,228,220,.4);letter-spacing:.02em;margin-bottom:1.4rem}
-/* Accuracy arc progress */
+/* Accuracy arc progress — soft violet, matches app palette */
 .compass-onboard-arc{margin:0 auto;display:block}
-.compass-onboard-arc-track{stroke:rgba(255,255,255,.1);fill:none}
-.compass-onboard-arc-fill{fill:none;stroke:rgba(180,160,255,.7);stroke-linecap:round;
+.compass-onboard-arc-track{stroke:rgba(180,160,255,.08);fill:none}
+.compass-onboard-arc-fill{fill:none;stroke:rgba(180,160,255,.5);stroke-linecap:round;
   transition:stroke-dashoffset .6s ease,stroke .4s ease;transform-origin:center;transform:rotate(-90deg)}
-.compass-onboard-arc-label{font-family:var(--font);fill:rgba(232,228,220,.5);font-size:10px;text-anchor:middle}
-/* Good state */
-.compass-onboard-good{font-size:1.3rem;font-weight:300;color:rgba(180,255,200,.9);letter-spacing:.05em;
-  opacity:0;transition:opacity .4s ease;margin-top:.5rem}
+.compass-onboard-arc-label{font-family:var(--font);fill:rgba(232,228,220,.4);font-size:10px;text-anchor:middle}
+/* Ready state — subtle, matches app aesthetic (no harsh green) */
+.compass-onboard-good{font-size:1.1rem;font-weight:300;color:rgba(200,190,255,.85);letter-spacing:.04em;
+  opacity:0;transition:opacity .5s ease;margin-top:.8rem}
+/* Hold state text — matches main text styling */
+.compass-onboard-hold-text{font-size:1.1rem;font-weight:400;letter-spacing:.02em;margin-bottom:.4rem;color:rgba(232,228,220,.85)}
+.compass-onboard-hold-sub{font-size:.8rem;font-weight:300;color:rgba(232,228,220,.4);letter-spacing:.02em}
 /* Figure-8 arrow path animation (phone stays static) */
 @keyframes fig8Trace{0%{stroke-dashoffset:200}100%{stroke-dashoffset:0}}
 @keyframes fig8Arrow{
@@ -2414,7 +2417,7 @@ function _buildCompassOnboarding() {
           ' stroke-dasharray="' + _ONBOARD_ARC_CIRC + '" stroke-dashoffset="' + _ONBOARD_ARC_CIRC + '"/>' +
         '<text class="compass-onboard-arc-label" x="36" y="40">––°</text>' +
       '</svg>' +
-      '<div class="compass-onboard-good">✓ Compass ready</div>' +
+      '<div class="compass-onboard-good">Compass calibrated</div>' +
       // No-signal state
       '<div class="compass-onboard-nosig" style="opacity:0;transition:opacity .4s ease">' +
         '<div style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.5);margin-bottom:1rem;line-height:1.5">' +
@@ -2428,9 +2431,8 @@ function _buildCompassOnboarding() {
       '</div>' +
       // Hold instruction state
       '<div class="compass-onboard-hold" style="opacity:0;transition:opacity .4s ease">' +
-        '<div style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.55);line-height:1.6;max-width:220px;margin:0 auto">' +
-          'Hold your phone in front of you<br>and turn slowly until you face Makkah.' +
-        '</div>' +
+        '<div class="compass-onboard-hold-text">Hold your phone in front of you</div>' +
+        '<div class="compass-onboard-hold-sub">Turn slowly until you face Makkah</div>' +
       '</div>' +
     '</div>';
   _compassOnboardEl.addEventListener('click', function(e) {
@@ -2528,12 +2530,12 @@ function _compassOnboardUpdateArc(accuracy) {
   var clamped = Math.min(Math.max(accuracy > 0 ? accuracy : WORST, BEST), WORST);
   var progress = (WORST - clamped) / (WORST - BEST);
   arcEl.style.strokeDashoffset = _ONBOARD_ARC_CIRC * (1 - progress);
-  arcEl.style.stroke = 'hsl(' + Math.round(progress * 130) + ',70%,65%)';
+  arcEl.style.stroke = 'hsl(' + Math.round(260 + progress * 20) + ',' + Math.round(40 + progress * 30) + '%,' + Math.round(55 + progress * 15) + '%)';
   if (labelEl) labelEl.textContent = accuracy > 0 ? Math.round(accuracy) + '\u00b0' : '\u2013\u2013\u00b0';
 
   if (_compassCalibrated) {
     // Transition: calibrating → ready → hold → dismiss
-    arcEl.style.stroke = 'rgba(140,255,180,.8)';
+    arcEl.style.stroke = 'rgba(200,190,255,.7)';
     arcEl.style.strokeDashoffset = '0';
     if (labelEl) labelEl.textContent = '\u2713';
     _compassOnboardSetState('ready');
