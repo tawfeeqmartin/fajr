@@ -1180,7 +1180,7 @@ const _prayerDiscMat = new THREE.ShaderMaterial({
     uWidth:      { value: 1.0 },
     uEdgeFade:   { value: 12.0 },
     uFalloff:    { value: 2.2 },
-    uHoleSize:   { value: 0.5 },
+    uHoleSize:   { value: 0.74 },
   },
   vertexShader: `
     varying vec2 vPos;
@@ -1244,7 +1244,7 @@ _nextDiscMat.uniforms = {
   uWidth:      { value: 1.0 },
   uEdgeFade:   { value: 12.0 },
   uFalloff:    { value: 2.2 },
-    uHoleSize:   { value: 0.5 },
+    uHoleSize:   { value: 0.74 },
 };
 const _nextDisc = new THREE.Mesh(_prayerDiscGeo, _nextDiscMat);
 _nextDisc.rotation.x = -Math.PI / 2;
@@ -1264,7 +1264,7 @@ _thirdDiscMat.uniforms = {
   uWidth:      { value: 1.0 },
   uEdgeFade:   { value: 12.0 },
   uFalloff:    { value: 2.2 },
-    uHoleSize:   { value: 0.5 },
+    uHoleSize:   { value: 0.74 },
 };
 const _thirdDisc = new THREE.Mesh(_prayerDiscGeo, _thirdDiscMat);
 _thirdDisc.rotation.x = -Math.PI / 2;
