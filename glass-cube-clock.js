@@ -1340,7 +1340,8 @@ function updatePrayerWindows(now) {
 
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
-  const nextTarget = nextIdx >= 0 ? (_devActive ? _opA : Math.max(_opA - _opS, 0.0)) : 0.0;
+  const _maxWindows = window._devWindowCount != null ? window._devWindowCount : 1;
+  const nextTarget = (nextIdx >= 0 && _maxWindows >= 2) ? (_devActive ? _opA : Math.max(_opA - _opS, 0.0)) : 0.0;
   nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, _lerpRate);
 
   if (nextIdx >= 0) {
@@ -1355,7 +1356,7 @@ function updatePrayerWindows(now) {
 
   // ── Third prayer disc (prayer after next) ──
   const tu = _thirdDiscMat.uniforms;
-  const thirdTarget = thirdIdx >= 0 ? (_devActive ? _opA : Math.max(_opA - _opS * 2, 0.0)) : 0.0;
+  const thirdTarget = (thirdIdx >= 0 && _maxWindows >= 3) ? (_devActive ? _opA : Math.max(_opA - _opS * 2, 0.0)) : 0.0;
   tu.uIntensity.value = THREE.MathUtils.lerp(tu.uIntensity.value, thirdTarget, _lerpRate);
 
   if (thirdIdx >= 0) {
@@ -1599,8 +1600,8 @@ var _devSpeedInterval = null;
 var _devLastSpeedMs  = null;
 
 // ── Prayer window controls ────────────────────────────────────────────────────
-var _devWindowCount   = 3;     // 1, 2, or 3
-window._devWindowCount = 3;    // exposed for monkey-patch
+var _devWindowCount   = 1;     // 1, 2, or 3 — default 1 (only active prayer)
+window._devWindowCount = 1;    // exposed for monkey-patch
 var _devWindowOverrides = {};  // { prayerName: { intensity: null|number, spread: null|number } }
 window._devWindowOverrides = _devWindowOverrides;
 
