@@ -603,7 +603,7 @@ const dichroicVert = `
     vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
     vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
     vViewNormal = normalize(normalMatrix * normal);
-    vViewDir = normalize(-mvPos.xyz);
+    vViewDir = -mvPos.xyz; // DO NOT normalize here — interpolation of normalized vectors creates triangle-edge seams
     gl_Position = projectionMatrix * mvPos;
   }
 `;
@@ -668,8 +668,9 @@ const dichroicFrag = `
     float diagInput = vLocalPos.x + vLocalPos.y
                     + faceY * (vLocalPos.z * 1.4 - vLocalPos.y * 0.7)
                     + faceZ * (vLocalPos.y * 1.1 - vLocalPos.x * 0.8);
-    float diagF = exp(-abs(diagInput) * 3.5) * uDich;
-    vec3  dn    = normalize(mix(n, normalize(vec3(1.0, 1.0, 0.0)), diagF * 0.35));
+    float diagRaw = sin(diagInput * 1.8) * 0.5 + 0.5; // gentle wave, no peaked line
+    float diagF = diagRaw * uDich;
+    vec3  dn    = normalize(mix(n, normalize(vec3(1.0, 1.0, 0.0)), diagF * 0.08));
 
     vec3 rR = refract(-e, dn, 1.0/iorR);
     vec3 rG = refract(-e, dn, 1.0/iorG);
@@ -797,7 +798,7 @@ const cubeMat = new THREE.ShaderMaterial({
 });
 
 const cubeGroup = new THREE.Group();
-const cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), cubeMat);
+const cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2, 4, 4, 4), cubeMat);
 cubeMesh.position.y = CUBE_Y;
 cubeMesh.castShadow = true;
 cubeGroup.add(cubeMesh);
