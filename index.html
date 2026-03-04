@@ -424,6 +424,29 @@ body.mode-info .info-dots{opacity:1;pointer-events:auto}
 .compass-sweep-arrow.reverse{animation:sweepRL 2s ease-in-out infinite}
 .compass-converge{animation:arrowPulse 1.5s ease-in-out infinite}
 
+/* ── Clock onboarding ── */
+.clock-onboard{
+  position:fixed;inset:0;z-index:900;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+}
+.clock-onboard.active{opacity:1;pointer-events:auto}
+.clock-onboard-body{text-align:center;color:rgba(232,228,220,.85);font-family:var(--font);padding:2rem}
+.clock-onboard-visual{min-height:100px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem}
+.clock-onboard-text{font-size:1.1rem;font-weight:400;letter-spacing:.02em;margin-bottom:.4rem}
+.clock-onboard-sub{font-size:.8rem;font-weight:300;color:rgba(232,228,220,.4);letter-spacing:.02em;margin-bottom:1.4rem}
+.clock-onboard-dots{display:flex;gap:8px;justify-content:center;margin-top:.5rem}
+.clock-onboard-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(180,160,255,.4);background:transparent;transition:background .3s ease,border-color .3s ease}
+.clock-onboard-dot.active{background:rgba(180,160,255,.5);border-color:rgba(180,160,255,.7)}
+/* Clock onboard arrow animations */
+@keyframes clockArrowUp{0%,100%{transform:translateY(8px);opacity:.3}50%{transform:translateY(-8px);opacity:.9}}
+@keyframes clockArrowLeft{0%,100%{transform:translateX(16px);opacity:.3}50%{transform:translateX(-16px);opacity:.9}}
+@keyframes clockArrowRight{0%,100%{transform:translateX(-16px);opacity:.3}50%{transform:translateX(16px);opacity:.9}}
+.clock-onboard-arrow-up{animation:clockArrowUp 1.6s ease-in-out infinite}
+.clock-onboard-arrow-left{animation:clockArrowLeft 2s ease-in-out infinite}
+.clock-onboard-arrow-right{animation:clockArrowRight 2s ease-in-out infinite}
+
 /* ── Mode states ── */
 body.mode-clock .scroll-section,
 body.mode-clock footer{display:none!important}
@@ -2342,6 +2365,8 @@ function switchMode(mode) {
     closeClockFullscreen();
     openClockFullscreen();
     window.scrollTo(0, 0);
+    // Clock onboarding — show on first visit
+    if (typeof _showClockOnboarding === 'function') setTimeout(_showClockOnboarding, 4000);
   } else if(mode === 'compass') {
     openClockFullscreen();
     if(!fsCompassOn) _toggleCompassMode(true);
@@ -2358,10 +2383,146 @@ document.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('mode-clock');
   // Auto-open fullscreen clock on load
   if(typeof openClockFullscreen === 'function') openClockFullscreen();
+  // Clock onboarding on first load
+  setTimeout(function(){ if(typeof _showClockOnboarding==='function') _showClockOnboarding(); }, 4000);
   // Fade page label after initial show
   var _ml = document.getElementById('modeLabel');
   if(_ml){ _ml._fadeTimer = setTimeout(function(){ _ml.style.opacity = '0'; }, 2500); }
 });
+
+// ── Clock onboarding ──
+var _clockOnboardEl = null;
+var _clockOnboardStep = 0;
+var _clockOnboardSteps = [
+  {
+    visual: function() {
+      return '<svg width="60" height="80" viewBox="0 0 60 80" fill="none" class="clock-onboard-arrow-up">' +
+        '<line x1="30" y1="60" x2="30" y2="10" stroke="rgba(180,160,255,.7)" stroke-width="2" stroke-linecap="round"/>' +
+        '<polyline points="18,22 30,10 42,22" stroke="rgba(180,160,255,.7)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>';
+    },
+    text: 'Tap your city to change location',
+    sub: 'Prayer times update automatically'
+  },
+  {
+    visual: function() {
+      return '<svg width="120" height="120" viewBox="0 0 120 120" fill="none">' +
+        '<circle cx="60" cy="60" r="48" stroke="rgba(232,228,220,.2)" stroke-width="1.5"/>' +
+        // Hour hand — magenta
+        '<line x1="60" y1="60" x2="60" y2="28" stroke="rgba(220,80,180,.85)" stroke-width="3" stroke-linecap="round"/>' +
+        // Minute hand — blue
+        '<line x1="60" y1="60" x2="85" y2="45" stroke="rgba(100,160,255,.85)" stroke-width="2" stroke-linecap="round"/>' +
+        // Second hand — white
+        '<line x1="60" y1="60" x2="45" y2="85" stroke="rgba(232,228,220,.7)" stroke-width="1.2" stroke-linecap="round"/>' +
+        '<circle cx="60" cy="60" r="3" fill="rgba(232,228,220,.5)"/>' +
+      '</svg>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-left:16px;text-align:left;font-size:.8rem;font-weight:300">' +
+        '<span style="color:rgba(220,80,180,.85)">⏤ Hour</span>' +
+        '<span style="color:rgba(100,160,255,.85)">⏤ Minute</span>' +
+        '<span style="color:rgba(232,228,220,.7)">⏤ Second</span>' +
+      '</div>';
+    },
+    text: 'Three hands, three rhythms',
+    sub: 'Hour · Minute · Second'
+  },
+  {
+    visual: function() {
+      return '<div style="display:flex;align-items:center;gap:24px">' +
+        '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" class="clock-onboard-arrow-left">' +
+          '<line x1="35" y1="20" x2="5" y2="20" stroke="rgba(180,160,255,.7)" stroke-width="2" stroke-linecap="round"/>' +
+          '<polyline points="15,10 5,20 15,30" stroke="rgba(180,160,255,.7)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+        '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" class="clock-onboard-arrow-right">' +
+          '<line x1="5" y1="20" x2="35" y2="20" stroke="rgba(180,160,255,.7)" stroke-width="2" stroke-linecap="round"/>' +
+          '<polyline points="25,10 35,20 25,30" stroke="rgba(180,160,255,.7)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+      '</div>';
+    },
+    text: 'Swipe to preview prayer times',
+    sub: 'Returns to now after a few seconds'
+  },
+  {
+    visual: function() { return ''; },
+    text: "You\u2019re all set",
+    sub: 'Tap anywhere to begin'
+  }
+];
+
+function _buildClockOnboarding() {
+  if (_clockOnboardEl) return;
+  _clockOnboardEl = document.createElement('div');
+  _clockOnboardEl.className = 'clock-onboard';
+  _clockOnboardEl.innerHTML =
+    '<div class="clock-onboard-body">' +
+      '<div class="clock-onboard-visual"></div>' +
+      '<div class="clock-onboard-text"></div>' +
+      '<div class="clock-onboard-sub"></div>' +
+      '<div class="clock-onboard-dots">' +
+        '<span class="clock-onboard-dot"></span>' +
+        '<span class="clock-onboard-dot"></span>' +
+        '<span class="clock-onboard-dot"></span>' +
+        '<span class="clock-onboard-dot"></span>' +
+      '</div>' +
+    '</div>';
+  _clockOnboardEl.addEventListener('click', function() {
+    _clockOnboardAdvance();
+  });
+  document.body.appendChild(_clockOnboardEl);
+}
+
+function _clockOnboardAdvance() {
+  _clockOnboardStep++;
+  if (_clockOnboardStep >= _clockOnboardSteps.length) {
+    _dismissClockOnboarding();
+    return;
+  }
+  _clockOnboardRender();
+  // Auto-dismiss on last step (step index 3)
+  if (_clockOnboardStep === _clockOnboardSteps.length - 1) {
+    setTimeout(function() { _dismissClockOnboarding(); }, 2000);
+  }
+}
+
+function _clockOnboardRender() {
+  if (!_clockOnboardEl) return;
+  var step = _clockOnboardSteps[_clockOnboardStep];
+  var visualEl = _clockOnboardEl.querySelector('.clock-onboard-visual');
+  var textEl = _clockOnboardEl.querySelector('.clock-onboard-text');
+  var subEl = _clockOnboardEl.querySelector('.clock-onboard-sub');
+  var dots = _clockOnboardEl.querySelectorAll('.clock-onboard-dot');
+  if (visualEl) visualEl.innerHTML = step.visual();
+  if (textEl) textEl.textContent = step.text;
+  if (subEl) subEl.textContent = step.sub;
+  for (var i = 0; i < dots.length; i++) {
+    dots[i].classList.toggle('active', i === _clockOnboardStep);
+  }
+}
+
+function _showClockOnboarding() {
+  if (localStorage.getItem('agot_clock_onboarded')) return;
+  _buildClockOnboarding();
+  _clockOnboardStep = 0;
+  _clockOnboardRender();
+  // Small delay so transition fires
+  requestAnimationFrame(function() {
+    _clockOnboardEl.classList.add('active');
+  });
+}
+
+function _dismissClockOnboarding() {
+  if (!_clockOnboardEl) return;
+  localStorage.setItem('agot_clock_onboarded', '1');
+  _clockOnboardEl.classList.remove('active');
+  // Clean up after transition
+  setTimeout(function() {
+    if (_clockOnboardEl && _clockOnboardEl.parentNode) {
+      _clockOnboardEl.parentNode.removeChild(_clockOnboardEl);
+      _clockOnboardEl = null;
+    }
+  }, 600);
+}
+
+window._resetClockOnboard = function() { localStorage.removeItem('agot_clock_onboarded'); };
 
 // ── Nav pill dichroic glow — DISABLED, keeping code for future use ──
 // (function(){ ... tickPill ... })();
@@ -2842,7 +3003,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=174';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=175';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
