@@ -344,15 +344,17 @@ prayerWash.distance = 12;
 prayerWash.castShadow = false;
 scene.add(prayerWash, prayerWash.target);
 
-// PRAYER RIM — behind-right, catches cube back edges in prayer color2.
-// Tight cone: reads on cube silhouette edges, not the floor or background.
+// PRAYER RIM — side-right, catches cube right face edge in prayer color2.
+// Positioned to the SIDE (not behind) so it doesn't illuminate the FBO background.
+// The FBO captures the scene behind the cube — any light there bleeds into refraction.
+// Side placement means it lights the cube edge without coloring the background.
 const prayerRim = new THREE.SpotLight(0x111122, 0);
-prayerRim.position.set(3.5, 4.5, -3.5);
+prayerRim.position.set(4.0, 3.0, 1.5);
 prayerRim.target.position.set(0, 0.5, 0);
-prayerRim.angle = 0.16;
-prayerRim.penumbra = 0.70;
-prayerRim.decay = 1.8;
-prayerRim.distance = 9;
+prayerRim.angle = 0.14;
+prayerRim.penumbra = 0.65;
+prayerRim.decay = 2.0;
+prayerRim.distance = 7;
 prayerRim.castShadow = false;
 scene.add(prayerRim, prayerRim.target);
 
@@ -361,8 +363,8 @@ const _prayerWashColor = new THREE.Color(0x111122);
 const _prayerRimColor = new THREE.Color(0x111122);
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
-const PRAYER_WASH_MAX = 1.8;   // subtle podium tint, not a flood
-const PRAYER_RIM_MAX = 1.2;    // edge whisper, not a colored rim light
+const PRAYER_WASH_MAX = 1.5;   // subtle podium tint, not a flood
+const PRAYER_RIM_MAX = 0.8;    // edge whisper — barely there, just a hint of color on the silhouette
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
