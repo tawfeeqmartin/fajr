@@ -243,21 +243,14 @@ body::after{display:none;
 .mode-pill-slider{
   position:absolute;top:5px;left:5px;
   width:48px;height:48px;
-  border-radius:12px;
-  background:rgba(255,255,255,.06);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  
-  
-  
+  background:none;
   transition:transform .3s cubic-bezier(.4,0,.2,1);
   z-index:1;
   overflow:visible;
 }
-/* Inner glow gradient — lit from below */
+/* No background tile — glow bar only */
 .mode-pill-slider::before{
-  content:'';position:absolute;inset:0;border-radius:12px;
-  background:radial-gradient(ellipse 60% 50% at 50% 100%, var(--pill-glow,rgba(232,150,48,.12)) 0%, transparent 70%);
-  pointer-events:none;
+  display:none;
 }
 /* Glow bar — tiny LED at bottom */
 .mode-pill-slider::after{
@@ -3003,7 +2996,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=177';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=178';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
