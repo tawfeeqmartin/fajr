@@ -365,8 +365,8 @@ const _prayerWashColor = new THREE.Color(0x111122);
 const _prayerRimColor = new THREE.Color(0x111122);
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
-const PRAYER_WASH_MAX = 2.5;   // podium tint — bolder since FBO-isolated
-const PRAYER_RIM_MAX = 1.5;    // edge color catch — visible but controlled
+const PRAYER_WASH_MAX = 2.0;   // podium atmospheric tint — visible but not a color flood
+const PRAYER_RIM_MAX = 1.2;    // edge color catch — hint of prayer on cube silhouette
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
@@ -1787,11 +1787,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // Smooth lerp of color + intensity toward active prayer, or fade to zero.
   if (_activePrayer && !_compassMode) {
     // Active prayer: lerp toward prayer color and target intensity.
-    // Wash uses primary color desaturated 30% toward warm neutral — atmospheric, not neon.
-    // Rim uses secondary (lighter) color at full saturation — edge catch can be purer.
-    const _prWash = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(0x998877), 0.30);
+    // Wash uses primary color desaturated 35% toward warm neutral — atmospheric, not neon.
+    // Rim uses secondary (lighter) color desaturated 15% — edge catch stays richer.
+    const _prWash = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(0x998877), 0.35);
     _prayerWashColor.lerp(_prWash, PRAYER_LIGHT_LERP);
-    _prayerRimColor.lerp(new THREE.Color(_activePrayer.color2), PRAYER_LIGHT_LERP);
+    const _prRim = new THREE.Color(_activePrayer.color2).lerp(new THREE.Color(0xaaaaaa), 0.15);
+    _prayerRimColor.lerp(_prRim, PRAYER_LIGHT_LERP);
     _prayerWashIntensity += (PRAYER_WASH_MAX - _prayerWashIntensity) * PRAYER_LIGHT_LERP;
     _prayerRimIntensity += (PRAYER_RIM_MAX - _prayerRimIntensity) * PRAYER_LIGHT_LERP;
   } else {
