@@ -1,72 +1,61 @@
-# Prayer-Reactive Spotlights — Chris Ready for Review
-## Chris, Lookdev — Seven Heavens Studio — Mar 4, 2026
+# CHRIS-READY — Prayer Light v8d
 
-### What I Built
-Two SpotLight accents that smoothly transition color/intensity to match the active prayer window. The scene's atmosphere shifts with sacred time — like sunrise warming a room before you notice it.
+## What Changed (commit `482b9ac`)
 
-### Light Placement
+### New: `prayerSlash` SpotLight
+- **Position:** (4.0, 1.0, 1.8) — far right, just above podium top, slightly forward
+- **Target:** (0, -1.5, 1.32) — upper-mid of podium front face
+- **Cone:** 0.14 rad (~8°), penumbra 0.55, decay 1.8, distance 7
+- **Effect:** Sharp colored diagonal streak on podium front face from the right. Partial coverage only — one face, not flooding.
+- **Intensity:** 14.0 — strong enough to read as obvious color against dark podium
 
-**1. Prayer Wash** (above-forward-left: -3, 5, 5.5)
-- Aimed at podium center (-1.5y), angle 0.40, penumbra 0.88
-- Washes the obsidian plinth face and surrounding background in prayer color
-- Max intensity: 2.0 | Decay: 1.5 | Distance: 13
-- Color: primary prayer color desaturated 35% toward warm neutral (0x998877)
-- This is the KEY accent — visible atmospheric tint on the podium column
+### Repositioned: `prayerRim` SpotLight
+- **From:** (3.5, 5.0, -3.5) aimed at (0, 0.5, 0) — was flooding from above
+- **To:** (2.5, 2.5, -3.0) aimed at (0, 0.57, 0) — behind-right, grazes cube at ~45°
+- **Cone:** tightened to 0.20 rad, decay 1.5, distance 8
+- **Effect:** Colored rim catch on glass cube edges
 
-**2. Prayer Rim** (behind-right: 3.5, 5, -3.5)
-- Aimed at cube center (0.5y), angle 0.20, penumbra 0.72
-- Catches cube back edges and background in prayer color2 (lighter variant)
-- Max intensity: 1.2 | Decay: 1.7 | Distance: 10
-- Color: secondary prayer color desaturated 15% toward neutral (0xaaaaaa)
-- Subtle edge definition — a hint of prayer on the silhouette
+### Repositioned: `prayerGlow` PointLight
+- **From:** (0, -0.6, 0.8) radius 6, intensity 8.0 — was spilling onto podium
+- **To:** (0, 0.57, 0) radius 2.5, intensity 0.8 — inside cube, barely-there tint
 
-### FBO Isolation (Critical Detail)
-Both lights are hidden (`visible = false`) during the FBO render pass. The glass cube's ShaderMaterial refracts what the FBO captures behind it. Without isolation, prayer-colored light bleeds into the FBO background → the glass refracts colored content → the cube turns into a tinted blob. Visibility toggle is the cleanest solution — one toggle per frame, zero overhead.
+### Disabled: `prayerWash` SpotLight
+- Max intensity set to 0.0 — was the main cause of blue/green flooding
+- Light still exists and lerps, just does nothing. Easy to re-enable.
 
-### Transition Behavior
-- **Lerp rate:** 0.022/frame (~3 seconds at 60fps)
-- **Active prayer:** color lerps toward prayer color, intensity lerps toward max
-- **No active prayer:** intensity lerps toward 0 (fade to invisible)
-- **Compass mode:** lights disabled (lerp to 0) — compass has its own visual language
-- Transitions feel organic, like slow breathing. No snapping.
+### Untouched:
+- All podium materials (0x12121c, all emissive values)
+- Prayer color definitions
+- All other scene lights
 
-### Color Processing
-- Wash desaturates prayer color 35% toward warm neutral — atmospheric, not neon
-- Rim desaturates 15% — edge catch can be slightly richer
-- This prevents saturated colors (especially green/violet) from looking garish
+## Renders (`.crew/renders/prayer-{name}-v8.png`)
 
-### Per-Prayer Atmospheric Read
-| Prayer | Atmosphere | Notes |
-|--------|-----------|-------|
-| Tahajjud | Deep violet mystical | Most dramatic — appropriate for deepest night prayer |
-| Fajr | Indigo/lavender dawn | Cool night-to-dawn transition |
-| Dhuha | Warm amber/golden | Sunrise warmth, complementary with existing warm lighting |
-| Dhuhr | Subtle green tint | Green mixes with existing cool tones — fresh noon feel |
-| Asr | Warm amber/orange | Afternoon warmth, beautiful on obsidian podium |
-| Maghrib | Red-orange sunset | Dramatic lower atmosphere, sunset drama |
-| Isha | Cool blue night | Blends naturally with existing blue scene palette |
+| Prayer | Color | Slash | Podium Dark | Cube Rim | Score |
+|--------|-------|-------|-------------|----------|-------|
+| Tahajjud | Violet | ✓ diagonal | ✓✓ very dark | ✓ pink/violet edges | 4/5 |
+| Fajr | Blue-violet | ✓ defined streak | ✓✓ deep black | ✓ blue-purple edges | 4/5 |
+| Dhuha | Amber | ✓✓ bold golden | ✓✓ dark base | ✓ warm gold edges | 4.5/5 |
+| Dhuhr | Green | ✓ visible | ✓ mostly dark | ✓ teal-green | 3.5/5 |
+| Asr | Orange | ✓ strong slab | ✓✓ dark | ✓ warm edges | 4/5 |
+| Maghrib | Red | ✓✓ most dramatic | ✓✓ cinematic | ✓ red-violet edges | 4.5/5 |
+| Isha | Blue | ✓ visible streak | ✓ dark | ✓ cyan-blue | 3.5/5 |
 
-### Performance
-- 2 SpotLights (no shadow casting) = negligible GPU cost
-- One lerp operation per frame per light (color + intensity)
-- One visibility toggle per frame per light (FBO isolation)
-- No new geometry, no new materials, no new shaders
+## Honest Assessment
 
-### Files Changed
-- `glass-cube-clock.js` — all changes
+**What works well:**
+- Dark podium preserved across all 7 — no more flat/colorful podium
+- Colored slash reads as a SLASH, not a wash (esp. red, amber, violet)
+- Cube catches colored rim light at edges
+- Each prayer has distinctly different color mood
 
-### Renders
-All renders in `.crew/renders/prayer-*-v5.png` (7 prayers)
+**What's imperfect:**
+- Blue (Isha) and green (Dhuhr) still show some background color bloom — this is mostly from the prayer beam shader sectors radiating into the scene, not from my SpotLights (wash is disabled, glow is at 0.8)
+- Warm colors (red, amber, orange) create stronger slash contrast than cool colors
+- The "pink/magenta core" seen in all renders is the cube's base lighting (cubeBack/cubeSun) — not prayer-related
 
-### What I Didn't Do
-- No irradiance probes / CubeCamera / LightProbe (constraint respected)
-- No area lights (SpotLights only, as specified)
-- No changes to existing lighting rig (all additive)
-- No floor pool light (floor already has prayer discs + caustics + fog)
+**Potential next steps if Tawfeeq wants more:**
+- Could add a second slash from the left to create an X pattern
+- Could re-enable wash at 0.5 for very subtle atmospheric lift (warm colors only?)
+- Blue/green could benefit from slightly desaturated slash color to reduce bloom perception
 
-### Open Questions for Chef/Tawfeeq
-1. The existing prayer disc beams contribute significant color to the FBO background (visible as colored cube tint at Tahajjud/Dhuha). This predates my spotlights. Should we also hide prayer discs during FBO for even cleaner glass?
-2. Intensity calibration: current values are conservative. Happy to dial up if Tawfeeq wants more drama.
-
----
-*Ready for chef QC review. Do not git push.*
+## DO NOT PUSH — chef reviews first.

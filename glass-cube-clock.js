@@ -652,24 +652,24 @@ const dichroicFrag = `
     // Per-face IOR shift — each face bends light at a different spread
     // Side: wider red-blue split (strongly prismatic). Top: blue-shifted, tight.
     // Front: green-shifted, medium spread. Creates distinct chromatic character.
-    float iorShiftR = faceX * 0.10 - faceY * 0.06 + faceZ * (-0.02);
-    float iorShiftG = faceX * (-0.04) + faceY * 0.05 - faceZ * 0.05;
-    float iorShiftB = faceX * (-0.08) + faceY * 0.03 + faceZ * 0.08;
+    float iorShiftR = faceX * 0.05 - faceY * 0.04 + faceZ * (-0.015);
+    float iorShiftG = faceX * (-0.025) + faceY * 0.03 - faceZ * 0.03;
+    float iorShiftB = faceX * (-0.045) + faceY * 0.02 + faceZ * 0.045;
     float iorR = uIorR + iorShiftR;
     float iorG = uIorG + iorShiftG;
     float iorB = uIorB + iorShiftB;
 
     // Per-face aberration strength — side faces get MORE spread, top gets LESS
-    float abScale = 1.0 + faceX * 0.7 - faceY * 0.3 + faceZ * 0.25;
+    float abScale = 1.0 + faceX * 0.35 - faceY * 0.3 + faceZ * 0.15;
 
     // Per-face dichroic band: rotate the diagonal axis per face
     // Side: x-y diagonal (default). Top: x-z sweep. Front: y-z sweep.
     // Stronger rotation so bands run in clearly different directions.
     float diagInput = vLocalPos.x + vLocalPos.y
-                    + faceY * (vLocalPos.z * 2.5 - vLocalPos.y * 1.2)
-                    + faceZ * (vLocalPos.y * 2.0 - vLocalPos.x * 1.5);
-    float diagF = exp(-abs(diagInput) * 7.0) * uDich;
-    vec3  dn    = normalize(mix(n, normalize(vec3(1.0, 1.0, 0.0)), diagF));
+                    + faceY * (vLocalPos.z * 1.4 - vLocalPos.y * 0.7)
+                    + faceZ * (vLocalPos.y * 1.1 - vLocalPos.x * 0.8);
+    float diagF = exp(-abs(diagInput) * 3.5) * uDich;
+    vec3  dn    = normalize(mix(n, normalize(vec3(1.0, 1.0, 0.0)), diagF * 0.35));
 
     vec3 rR = refract(-e, dn, 1.0/iorR);
     vec3 rG = refract(-e, dn, 1.0/iorG);
