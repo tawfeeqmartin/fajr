@@ -41,7 +41,7 @@ let dpr = calcDpr(W, H);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.toneMapping = THREE.AgXToneMapping;
-renderer.toneMappingExposure = 1.35; // v170: 1.15→1.35 — brighter overall, glass reads luminous
+renderer.toneMappingExposure = 0.95; // v57: 1.25→0.95 — darken outside arch, dramatic contrast with bright interior
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
@@ -257,7 +257,7 @@ gobo.map = _makeArchTexture();
 // scene.add(gobo, gobo.target);
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
-const cubeBack = new THREE.SpotLight(0xffeedd, 20); // v170: 12→20 — stronger backlight for FBO transmission
+const cubeBack = new THREE.SpotLight(0xffeedd, 7);
 cubeBack.position.set(0.5, 10, -5);
 cubeBack.target.position.set(0, 0.6, 0);
 cubeBack.angle = 0.18;
@@ -308,29 +308,11 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 85, 18); // v170: 55→85, r14→18 — brighter + wider backlight feeds FBO transmission
+const cubeSun = new THREE.PointLight(0xe8f2ff, 35, 14); // v: 55→42→35 — preserve prismatic color, no blown white
 cubeSun.position.set(0, 0.2, -2.8);
 scene.add(cubeSun);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.07)); // v57: 0.16→0.07 — deeper darkness outside arch, shadow is absolute
-
-// v170c: FBO CONTENT LIGHTS — instead of a visible scrim, add lights that illuminate
-// the scene BEHIND the cube. This gives the FBO pass bright content to refract naturally.
-// Key insight: glass needs bright things behind it. Light the floor/fog/podium behind the cube.
-const _fboFill1 = new THREE.SpotLight(0xaabbee, 18);
-_fboFill1.position.set(0, 6, -6);
-_fboFill1.target.position.set(0, 0, -2);
-_fboFill1.angle = 0.6; _fboFill1.penumbra = 0.9; _fboFill1.decay = 1.2;
-_fboFill1.castShadow = false;
-scene.add(_fboFill1, _fboFill1.target);
-
-// Side fill — illuminates the podium faces visible through the cube
-const _fboFill2 = new THREE.SpotLight(0x8888cc, 10);
-_fboFill2.position.set(-4, 4, -4);
-_fboFill2.target.position.set(0, 0, 0);
-_fboFill2.angle = 0.5; _fboFill2.penumbra = 0.8; _fboFill2.decay = 1.5;
-_fboFill2.castShadow = false;
-scene.add(_fboFill2, _fboFill2.target);
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
 const tawafSpot = new THREE.SpotLight(0xffffff, 8); // v10: 12→8 — orbiting overhead was spiking cube top face during passes
@@ -546,7 +528,7 @@ shaftMesh.renderOrder = 0;
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
 scene.add(prismGroup);
-const CUBE_Y = 0.58; // v168: flush with podium top (podium top=-0.02, cube half=0.6 → 0.58)
+const CUBE_Y = 0.60;
 
 // ─── FBO DICHROIC GLASS SHADER ────────────────────────────────────────────────
 const dichroicVert = `
@@ -598,8 +580,8 @@ const dichroicFrag = `
     vec3 n  = normalize(vViewNormal);
     vec3 e  = normalize(vViewDir);
 
-    float diagF = exp(-abs(vLocalPos.x + vLocalPos.y) * 1.8) * uDich * 0.25; // v170: ultra-soft
-    vec3  dn    = n; // v170b: NO normal perturbation — eliminates chevron/crescent artifact entirely
+    float diagF = exp(-abs(vLocalPos.x + vLocalPos.y) * 7.0) * uDich;
+    vec3  dn    = normalize(mix(n, normalize(vec3(1.0, 1.0, 0.0)), diagF));
 
     vec3 rR = refract(-e, dn, 1.0/uIorR);
     vec3 rG = refract(-e, dn, 1.0/uIorG);
@@ -626,12 +608,12 @@ const dichroicFrag = `
     // Slight blue-green tint is physically correct for optical glass (kills warm artifacts)
     // Bottom-face attenuation: reduce transmission where normal faces down (cubeSun direct hit)
     // Bottom-face attenuation: strong clamp preserves prismatic color in the hotspot
-    float bottomAtten = 1.0 - 0.40 * smoothstep(-0.3, -0.95, Nw.y);
-    vec3 col = refracted * vec3(0.98, 0.99, 1.02) * 3.2 * bottomAtten; // v170b: 6.5→3.2 — balanced: transmits without blowout
+    float bottomAtten = 1.0 - 0.55 * smoothstep(-0.3, -0.95, Nw.y);
+    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 1.7 * bottomAtten;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
-    col = mix(col, col * irid * 1.1, diagF * 0.08); // v170: 0.15→0.08 — barely-there tint, no visible band
-    col += irid * diagF * fresnel * 0.02; // v170: 0.06→0.02 — almost zero additive, no crescent possible
+    col = mix(col, col * irid * 1.4, diagF * 0.22);
+    col += irid * diagF * fresnel * 0.12;
 
     // ── Fresnel edge: cool blue-white, sharp (glass = cold at edges) ──
     col += vec3(0.80, 0.92, 1.00) * fresnel * 0.35;
@@ -704,8 +686,8 @@ const cubeMat = new THREE.ShaderMaterial({
     uIorR:    { value: 1.50 },
     uIorG:    { value: 1.56 },
     uIorB:    { value: 1.63 },
-    uAb:      { value: 0.14 }, // v170: 0.09→0.14 — wider refraction sampling catches more light
-    uDich:    { value: 0.15 }, // v170: 0.28→0.15 — minimal dispersion, clean crystal glass
+    uAb:      { value: 0.05 },
+    uDich:    { value: 0.70 },
     uFresnel: { value: 6.0 },
     uTime:    { value: 0 },
     uAspect:  { value: W / H },
@@ -752,7 +734,7 @@ const podiumMesh = new THREE.Mesh(
   new THREE.BoxGeometry(PODIUM_W, PODIUM_H, PODIUM_W),
   podiumMats
 );
-podiumMesh.position.y = -PODIUM_H / 2 - 0.02; // v169: drop 0.02 below cube base — deliberate shadow gap reads as "floating on pedestal"
+podiumMesh.position.y = -PODIUM_H / 2 - 0.03; // top face just below hand beams (y≈0.008) — whisper gap
 podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
@@ -1485,7 +1467,6 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   cubeMat.uniforms.uTime.value = t;
   fogLayerMat.uniforms.uTime.value = t;
   warmFogMat.uniforms.uTime.value = t;
-  if (typeof _scrimMat !== 'undefined' && _scrimMat) _scrimMat.uniforms.uTime.value = t;
   godRayMat.uniforms.uTime.value = t;
   _shaftMat.uniforms.time.value = t;
 
@@ -2820,7 +2801,7 @@ document.addEventListener('touchmove', function(e) {
 
     // Map finger drag directly to camera orbit (±20° = ±0.3491 rad)
     var rawAngle = (totalDx / screenW) * 0.70; // full screen drag ≈ 40°
-    _swipeCamTarget = 0; // v168: camera orbit disabled — prayer swipe only
+    _swipeCamTarget = Math.max(-0.3491, Math.min(0.3491, rawAngle));
     // Rubber-band at edges: finger keeps pulling, orbit resists with spring feel
     if (Math.abs(rawAngle) > 0.3491) {
       var excess = rawAngle - _swipeCamTarget;
