@@ -580,20 +580,55 @@ const dichroicFrag = `
     vec3 n  = normalize(vViewNormal);
     vec3 e  = normalize(vViewDir);
 
-    float diagF = exp(-abs(vLocalPos.x + vLocalPos.y) * 7.0) * uDich;
+    // ── Per-face optical differentiation (Chris lookdev, Mar 3) ──────────
+    // Each cube face should read as a distinct optical surface — different
+    // chromatic spread, different refraction depth, different dichroic band.
+    // Use world normal to identify which face dominates this fragment.
+    vec3 Nabs = abs(normalize(vWorldNormal));
+    // Face weights: how much this fragment belongs to each axis face
+    float faceX = smoothstep(0.6, 0.95, Nabs.x); // side faces (left/right)
+    float faceY = smoothstep(0.6, 0.95, Nabs.y); // top/bottom
+    float faceZ = smoothstep(0.6, 0.95, Nabs.z); // front/back
+
+    // Per-face IOR shift — each face bends light at a different spread
+    // Side: wider red-blue split (strongly prismatic). Top: blue-shifted, tight.
+    // Front: green-shifted, medium spread. Creates distinct chromatic character.
+    float iorShiftR = faceX * 0.10 - faceY * 0.06 + faceZ * (-0.02);
+    float iorShiftG = faceX * (-0.04) + faceY * 0.05 - faceZ * 0.05;
+    float iorShiftB = faceX * (-0.08) + faceY * 0.03 + faceZ * 0.08;
+    float iorR = uIorR + iorShiftR;
+    float iorG = uIorG + iorShiftG;
+    float iorB = uIorB + iorShiftB;
+
+    // Per-face aberration strength — side faces get MORE spread, top gets LESS
+    float abScale = 1.0 + faceX * 0.7 - faceY * 0.3 + faceZ * 0.25;
+
+    // Per-face dichroic band: rotate the diagonal axis per face
+    // Side: x-y diagonal (default). Top: x-z sweep. Front: y-z sweep.
+    // Stronger rotation so bands run in clearly different directions.
+    float diagInput = vLocalPos.x + vLocalPos.y
+                    + faceY * (vLocalPos.z * 2.5 - vLocalPos.y * 1.2)
+                    + faceZ * (vLocalPos.y * 2.0 - vLocalPos.x * 1.5);
+    float diagF = exp(-abs(diagInput) * 7.0) * uDich;
     vec3  dn    = normalize(mix(n, normalize(vec3(1.0, 1.0, 0.0)), diagF));
 
-    vec3 rR = refract(-e, dn, 1.0/uIorR);
-    vec3 rG = refract(-e, dn, 1.0/uIorG);
-    vec3 rB = refract(-e, dn, 1.0/uIorB);
+    vec3 rR = refract(-e, dn, 1.0/iorR);
+    vec3 rG = refract(-e, dn, 1.0/iorG);
+    vec3 rB = refract(-e, dn, 1.0/iorB);
     if(length(rR)<0.001) rR = -e;
     if(length(rG)<0.001) rG = -e;
     if(length(rB)<0.001) rB = -e;
 
-    vec2 abXY = vec2(uAb / uAspect, uAb);
-    float R = texture2D(uScene, clamp(uv + rR.xy * abXY, 0.001, 0.999)).r;
-    float G = texture2D(uScene, clamp(uv + rG.xy * abXY, 0.001, 0.999)).g;
-    float B = texture2D(uScene, clamp(uv + rB.xy * abXY, 0.001, 0.999)).b;
+    // Per-face UV offset — each face samples a distinctly different FBO region
+    // Larger offsets = more visual separation between faces
+    vec2 faceUvOff = vec2(
+      dot(normalize(vWorldNormal), vec3(0.025, -0.015, 0.018)),
+      dot(normalize(vWorldNormal), vec3(-0.018, 0.022, -0.013))
+    );
+    vec2 abXY = vec2(uAb / uAspect, uAb) * abScale;
+    float R = texture2D(uScene, clamp(uv + faceUvOff + rR.xy * abXY, 0.001, 0.999)).r;
+    float G = texture2D(uScene, clamp(uv + faceUvOff + rG.xy * abXY, 0.001, 0.999)).g;
+    float B = texture2D(uScene, clamp(uv + faceUvOff + rB.xy * abXY, 0.001, 0.999)).b;
     vec3 refracted = vec3(R, G, B);
 
     float cosT   = clamp(dot(e, n), 0.0, 1.0);
