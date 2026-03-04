@@ -328,33 +328,35 @@ scene.add(tawafSpot, tawafSpot.target);
 // Two accent spotlights that breathe with the active prayer window color.
 // Concept: the scene's atmosphere shifts with sacred time — not decoration, but
 // ambient awareness. Like sunrise warming a room before you notice it.
-// These are ADDITIVE to the existing rig. Intensity starts at 0, lerps in when
-// a prayer window is active. Smooth 2.5s color/intensity transitions.
+//
+// KEY DESIGN: On layer 1, excluded from FBO pass. The glass cube shader refracts
+// what the FBO captures behind the cube. If prayer lights color that background,
+// the cube itself turns into a colored blob. Layer isolation means these lights
+// ONLY affect the final composite (podium, floor, fog, cube surface lighting)
+// without bleeding into the glass refraction. This is the showroom solution.
+const PRAYER_LIGHT_LAYER = 1;
 
-// PRAYER WASH — above-forward-left, grazes podium front face in prayer color.
-// Positioned low enough to catch the podium column, not flood the background.
-// Complements podiumFrontWash (warm, 12i) with a colored accent (1.8i max).
+// PRAYER WASH — above-forward-left, washes podium front face in prayer color.
+// Atmospheric pool that tints the obsidian plinth with sacred time.
 const prayerWash = new THREE.SpotLight(0x111122, 0);
-prayerWash.position.set(-2.5, 3.5, 6.0);
-prayerWash.target.position.set(0, -2.0, 0);
-prayerWash.angle = 0.35;
-prayerWash.penumbra = 0.90;
-prayerWash.decay = 1.6;
-prayerWash.distance = 12;
+prayerWash.position.set(-3.0, 5.0, 5.5);
+prayerWash.target.position.set(0, -1.5, 0);
+prayerWash.angle = 0.40;
+prayerWash.penumbra = 0.88;
+prayerWash.decay = 1.5;
+prayerWash.distance = 13;
 prayerWash.castShadow = false;
 scene.add(prayerWash, prayerWash.target);
 
-// PRAYER RIM — side-right, catches cube right face edge in prayer color2.
-// Positioned to the SIDE (not behind) so it doesn't illuminate the FBO background.
-// The FBO captures the scene behind the cube — any light there bleeds into refraction.
-// Side placement means it lights the cube edge without coloring the background.
+// PRAYER RIM — behind-right, catches cube back edges in prayer color2.
+// Hidden during FBO pass via visibility toggle — safe from glass refraction bleed.
 const prayerRim = new THREE.SpotLight(0x111122, 0);
-prayerRim.position.set(4.0, 3.0, 1.5);
+prayerRim.position.set(3.5, 5.0, -3.5);
 prayerRim.target.position.set(0, 0.5, 0);
-prayerRim.angle = 0.14;
-prayerRim.penumbra = 0.65;
-prayerRim.decay = 2.0;
-prayerRim.distance = 7;
+prayerRim.angle = 0.20;
+prayerRim.penumbra = 0.72;
+prayerRim.decay = 1.7;
+prayerRim.distance = 10;
 prayerRim.castShadow = false;
 scene.add(prayerRim, prayerRim.target);
 
@@ -363,8 +365,8 @@ const _prayerWashColor = new THREE.Color(0x111122);
 const _prayerRimColor = new THREE.Color(0x111122);
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
-const PRAYER_WASH_MAX = 1.5;   // subtle podium tint, not a flood
-const PRAYER_RIM_MAX = 0.8;    // edge whisper — barely there, just a hint of color on the silhouette
+const PRAYER_WASH_MAX = 2.5;   // podium tint — bolder since FBO-isolated
+const PRAYER_RIM_MAX = 1.5;    // edge color catch — visible but controlled
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
@@ -1804,12 +1806,18 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   prayerRim.color.copy(_prayerRimColor);
   prayerRim.intensity = _prayerRimIntensity;
 
-  // FBO pass
+  // FBO pass — prayer accent lights temporarily disabled so their color
+  // doesn't bleed into the glass refraction texture. The FBO captures the scene
+  // behind the cube; colored lights there make the glass refract colored content.
   cubeMesh.visible = false;
+  prayerWash.visible = false;
+  prayerRim.visible = false;
   renderer.setRenderTarget(fboRT);
   renderer.render(scene, camera);
   renderer.setRenderTarget(null);
   cubeMesh.visible = true;
+  prayerWash.visible = true;
+  prayerRim.visible = true;
   cubeMat.uniforms.uScene.value = fboRT.texture;
 
   renderer.render(scene, camera);
