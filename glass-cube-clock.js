@@ -801,7 +801,7 @@ const PODIUM_H = 20; // tall enough to extend past any visible floor
 // High clearcoat + low roughness = glass-like specular reflections on column faces.
 // Podium materials reverted to pre-reactive state — static emissive, no envMap reactivity
 // Podium materials: polished obsidian. Top face = high clearcoat for light pools.
-const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x12121c, fog: false };
+const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x2a2a3a, fog: false }; // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
@@ -837,6 +837,17 @@ podiumLowFill.angle = 0.55; podiumLowFill.penumbra = 0.90;
 podiumLowFill.decay = 1.5; podiumLowFill.distance = 14;
 podiumLowFill.castShadow = false;
 scene.add(podiumLowFill, podiumLowFill.target);
+
+// ── PRAYER GLOW — PointLight at podium base (Approach B, Chris v7) ──────────
+// PointLight has no surface-color dependency — paints everything in radius.
+// Positioned just below cube, inside podium top face gap. Subtle sacred glow.
+const prayerGlow = new THREE.PointLight(0x111122, 0, 6); // v7: starts off, 6 unit radius
+prayerGlow.position.set(0, -0.6, 0.8); // slightly forward toward camera for visibility
+prayerGlow.castShadow = false;
+scene.add(prayerGlow);
+const _prayerGlowColor = new THREE.Color(0x111122);
+let _prayerGlowIntensity = 0;
+const PRAYER_GLOW_MAX = 8.0; // v7: enough to tint podium, not overpower scene
 
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
 // Three floor rays as H / M / S clock hands, synced to real time.
@@ -1807,18 +1818,49 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   prayerRim.color.copy(_prayerRimColor);
   prayerRim.intensity = _prayerRimIntensity;
 
+  // ── Prayer PointLight glow at podium base (Approach B, Chris v7) ──────────
+  if (_activePrayer && !_compassMode) {
+    const _prGlow = new THREE.Color(_activePrayer.color);
+    _prayerGlowColor.lerp(_prGlow, PRAYER_LIGHT_LERP);
+    _prayerGlowIntensity += (PRAYER_GLOW_MAX - _prayerGlowIntensity) * PRAYER_LIGHT_LERP;
+  } else {
+    _prayerGlowColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
+    _prayerGlowIntensity += (0 - _prayerGlowIntensity) * PRAYER_LIGHT_LERP;
+  }
+  prayerGlow.color.copy(_prayerGlowColor);
+  prayerGlow.intensity = _prayerGlowIntensity;
+
+  // ── Podium top-face emissive tint (Approach C, Chris v7) ──────────────────
+  // podiumMats[2] is the +y top face — lerp emissive color toward prayer color.
+  // Emissive ignores incoming light entirely — always visible regardless of albedo.
+  if (_activePrayer && !_compassMode) {
+    const _prEmit = new THREE.Color(_activePrayer.color).multiplyScalar(0.25); // v7: 25% saturation — subtle, not neon
+    podiumMats[2].emissive.lerp(_prEmit, PRAYER_LIGHT_LERP);
+    podiumMats[2].emissiveIntensity += (2.5 - podiumMats[2].emissiveIntensity) * PRAYER_LIGHT_LERP; // v7: boost from 0.8 toward 2.5
+    // Also tint front face (+z, index 4) subtly
+    podiumMats[4].emissive.lerp(_prEmit.clone().multiplyScalar(0.6), PRAYER_LIGHT_LERP);
+    podiumMats[4].emissiveIntensity += (1.8 - podiumMats[4].emissiveIntensity) * PRAYER_LIGHT_LERP;
+  } else {
+    podiumMats[2].emissive.lerp(new THREE.Color(0x141428), PRAYER_LIGHT_LERP);
+    podiumMats[2].emissiveIntensity += (0.8 - podiumMats[2].emissiveIntensity) * PRAYER_LIGHT_LERP;
+    podiumMats[4].emissive.lerp(new THREE.Color(0x161630), PRAYER_LIGHT_LERP);
+    podiumMats[4].emissiveIntensity += (0.9 - podiumMats[4].emissiveIntensity) * PRAYER_LIGHT_LERP;
+  }
+
   // FBO pass — prayer accent lights temporarily disabled so their color
   // doesn't bleed into the glass refraction texture. The FBO captures the scene
   // behind the cube; colored lights there make the glass refract colored content.
   cubeMesh.visible = false;
   prayerWash.visible = false;
   prayerRim.visible = false;
+  prayerGlow.visible = false; // v7: hide PointLight during FBO too
   renderer.setRenderTarget(fboRT);
   renderer.render(scene, camera);
   renderer.setRenderTarget(null);
   cubeMesh.visible = true;
   prayerWash.visible = true;
   prayerRim.visible = true;
+  prayerGlow.visible = true;
   cubeMat.uniforms.uScene.value = fboRT.texture;
 
   renderer.render(scene, camera);
