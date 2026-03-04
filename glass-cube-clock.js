@@ -881,32 +881,35 @@ const FRAG_PRISM_FAN = `
     vec2 p = vUv * 2.0 - 1.0;
     float r = length(p);
     float theta = atan(p.y, p.x);
-    // Radial: fade in from center (cube zone), Gaussian fade out
-    float radial = smoothstep(0.08, 0.20, r) * exp(-r * r * 3.0);
-    // Radial intensity: brighter near cube, fading outward (sells "cast by cube")
-    float cubeIntensity = 0.5 + 0.5 * smoothstep(0.35, 0.10, r);
-    // Angular fan mask
+    // Radial: sharp start from cube, focused reach, fades before screen edge
+    float radial = smoothstep(0.04, 0.12, r) * exp(-r * r * 2.5);
+    // Radial intensity: bright near cube, fades outward
+    float cubeIntensity = 0.55 + 0.45 * smoothstep(0.40, 0.08, r);
+    // Angular fan mask — SHARP edges, precise prism split (Dark Side of the Moon feel)
     float ad = mod(theta - fanCenter + 3.14159, 6.28318) - 3.14159;
     float fanPos = ad / fanWidth;
-    float fanMask = smoothstep(1.0, 0.55, abs(fanPos));
-    // Spectral color: map position through rainbow
+    float fanMask = smoothstep(1.0, 0.82, abs(fanPos));
+    // Spectral color: saturated rainbow bands — each band reads distinctly
     float t2 = fanPos * 0.5 + 0.5; // 0..1
     vec3 col;
-    if (t2 < 0.2) {
-      col = mix(vec3(0.3, 0.0, 1.0), vec3(0.1, 0.5, 1.0), t2 / 0.2);
-    } else if (t2 < 0.4) {
-      col = mix(vec3(0.1, 0.5, 1.0), vec3(0.2, 1.0, 0.4), (t2-0.2) / 0.2);
-    } else if (t2 < 0.6) {
-      col = mix(vec3(0.2, 1.0, 0.4), vec3(1.0, 0.8, 0.0), (t2-0.4) / 0.2);
-    } else if (t2 < 0.8) {
-      col = mix(vec3(1.0, 0.8, 0.0), vec3(1.0, 0.5, 0.0), (t2-0.6) / 0.2);
+    if (t2 < 0.15) {
+      col = mix(vec3(0.4, 0.0, 1.0), vec3(0.1, 0.4, 1.0), t2 / 0.15);
+    } else if (t2 < 0.35) {
+      col = mix(vec3(0.1, 0.4, 1.0), vec3(0.0, 1.0, 0.3), (t2-0.15) / 0.2);
+    } else if (t2 < 0.55) {
+      col = mix(vec3(0.0, 1.0, 0.3), vec3(1.0, 0.9, 0.0), (t2-0.35) / 0.2);
+    } else if (t2 < 0.75) {
+      col = mix(vec3(1.0, 0.9, 0.0), vec3(1.0, 0.4, 0.0), (t2-0.55) / 0.2);
     } else {
-      col = mix(vec3(1.0, 0.5, 0.0), vec3(1.0, 0.15, 0.1), (t2-0.8) / 0.2);
+      col = mix(vec3(1.0, 0.4, 0.0), vec3(1.0, 0.05, 0.05), (t2-0.75) / 0.25);
     }
-    // Caustic shimmer
-    float shimmer = 0.9 + 0.1 * sin(r * 40.0 + time * 0.5 + theta * 3.0);
-    float bandIntensity = 1.0 - 0.3 * pow(abs(fanPos), 2.0);
-    gl_FragColor = vec4(col * shimmer, radial * fanMask * bandIntensity * cubeIntensity * op);
+    // Caustic shimmer — subtle, high freq
+    float shimmer = 0.92 + 0.08 * sin(r * 50.0 + time * 0.6 + theta * 4.0);
+    // Band intensity: flat across fan, slight dip at edges only
+    float bandIntensity = 1.0 - 0.15 * pow(abs(fanPos), 3.0);
+    // Tuned color boost — bright enough to read against dark scene, not blown out
+    float a = radial * fanMask * bandIntensity * cubeIntensity * op;
+    gl_FragColor = vec4(col * shimmer * 1.6, a);
   }
 `;
 const FRAG_ENTRY_BEAM = `
@@ -916,11 +919,13 @@ const FRAG_ENTRY_BEAM = `
     vec2 p = vUv * 2.0 - 1.0;
     float r = length(p);
     float theta = atan(p.y, p.x);
-    float radial = smoothstep(0.02, 0.12, r) * exp(-r * r * 5.0);
+    // Focused beam: tight radial, holds intensity further
+    float radial = smoothstep(0.02, 0.08, r) * exp(-r * r * 2.5);
     float ad = mod(theta - fanCenter + 3.14159, 6.28318) - 3.14159;
-    float fanMask = smoothstep(1.0, 0.4, abs(ad / fanWidth));
-    vec3 col = mix(vec3(1.0, 0.98, 0.94), vec3(1.0, 0.85, 0.4), r);
-    gl_FragColor = vec4(col, radial * fanMask * op);
+    // Sharp angular cutoff — reads as a precise beam, not a glow
+    float fanMask = smoothstep(1.0, 0.5, abs(ad / fanWidth));
+    vec3 col = mix(vec3(1.0, 0.97, 0.90), vec3(1.0, 0.80, 0.35), r * 0.8);
+    gl_FragColor = vec4(col * 2.5, radial * fanMask * op);
   }
 `;
 
@@ -949,14 +954,14 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
   var fanAngle = Math.PI / 2 - Math.PI / 4 + Math.PI; // flipped 180° to 6 o'clock
   var entryAngle = fanAngle + Math.PI; // opposite = entry beam
 
-  // Layer 1: Spectral fan disc (main rainbow effect)
-  _qiblaFanDisc = mkPrismDisc(12, FRAG_PRISM_FAN, fanAngle, 0.35, 0.0);
+  // Layer 1: Spectral fan disc (main rainbow effect — narrow, precise)
+  _qiblaFanDisc = mkPrismDisc(10, FRAG_PRISM_FAN, fanAngle, 0.25, 0.0);
 
-  // Layer 2: Bloom underlayer (wider, dimmer halo)
-  _qiblaBloomDisc = mkPrismDisc(14, FRAG_PRISM_FAN, fanAngle, 0.55, 0.0);
+  // Layer 2: Bloom underlayer (slightly wider, supports the fan edges)
+  _qiblaBloomDisc = mkPrismDisc(12, FRAG_PRISM_FAN, fanAngle, 0.35, 0.0);
 
-  // Layer 3: Entry beam (narrow white beam from 12 o'clock)
-  _qiblaEntryDisc = mkPrismDisc(4, FRAG_ENTRY_BEAM, entryAngle, 0.07, 0.0);
+  // Layer 3: Entry beam (focused white beam from 12 o'clock)
+  _qiblaEntryDisc = mkPrismDisc(5, FRAG_ENTRY_BEAM, entryAngle, 0.05, 0.0);
 
   // Layer 5: Caustic PointLight under cube — makes cube edges glow with fan colors
   var _causticLight = new THREE.PointLight(0xff8844, 0.0, 8);
@@ -975,6 +980,7 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
       _compassMode = true;
       _compassAligned = true;
       _compassLocked = true; // prevent _syncCompassFromAdhan from overwriting
+      window._compassCalibrated = true; // required: animation loop checks this to maintain _compassAligned
       _compassQibla = 0.4;
       _compassHeading = 0.4;
       clockRays[0].mesh.children[0].material.uniforms.op.value = 0;
@@ -1000,13 +1006,13 @@ var _qiblaExitCaustic = null;
       uniform float op, time;
       varying vec2 vUv;
       void main() {
-        // Soft center falloff — beam shape painted by shader, reads as light
-        float cx = exp(-pow((vUv.x - 0.5) * 10.0, 2.0));
-        float cy = smoothstep(0.0, 0.15, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
+        // Sharp center beam — reads as focused light entering the prism
+        float cx = exp(-pow((vUv.x - 0.5) * 6.0, 2.0));
+        float cy = smoothstep(0.0, 0.08, vUv.y) * smoothstep(1.0, 0.6, vUv.y);
         float a = cx * cy * op;
         if (a < 0.005) discard;
-        float flicker = 0.92 + 0.08 * sin(time * 2.0 + vUv.y * 8.0);
-        vec3 col = mix(vec3(1.0, 0.95, 0.85), vec3(1.0, 0.82, 0.5), vUv.y);
+        float flicker = 0.94 + 0.06 * sin(time * 1.5 + vUv.y * 6.0);
+        vec3 col = mix(vec3(1.0, 0.96, 0.88), vec3(1.0, 0.85, 0.5), vUv.y * 0.7);
         gl_FragColor = vec4(col * flicker, a);
       }
     `,
@@ -1571,44 +1577,44 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       if(_qiblaBloomDisc) _qiblaBloomDisc.material.uniforms.time.value = t;
 
       if (_compassAligned) {
-        // Shadow disc + caustic light
+        // Shadow disc + caustic light — warm glow on cube base, not blown out
         if(window._qiblaCausticLight){
-          window._qiblaCausticLight.intensity = Math.min(window._qiblaCausticLight.intensity + 0.03, 0.5 * breathe);
+          window._qiblaCausticLight.intensity = Math.min(window._qiblaCausticLight.intensity + 0.06, 1.8 * breathe);
         }
-        // Fan disc fades in
+        // Fan disc fades in — primary prism rainbow, precise and clear
         if(_qiblaFanDisc){
           _qiblaFanDisc.visible = true;
           var fop = _qiblaFanDisc.material.uniforms.op.value;
-          _qiblaFanDisc.material.uniforms.op.value = Math.min(fop + 0.04, 0.55 * breathe);
+          _qiblaFanDisc.material.uniforms.op.value = Math.min(fop + 0.06, 0.9 * breathe);
         }
-        // Bloom underlayer
+        // Bloom underlayer — subtle halo, supports fan edges
         if(_qiblaBloomDisc){
           _qiblaBloomDisc.visible = true;
           var bop = _qiblaBloomDisc.material.uniforms.op.value;
-          _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.02, 0.22 * breathe);
+          _qiblaBloomDisc.material.uniforms.op.value = Math.min(bop + 0.03, 0.18 * breathe);
         }
-        // Entry beam disc
+        // Entry beam disc — concentrated white beam entering the prism
         if(_qiblaEntryDisc){
           _qiblaEntryDisc.visible = true;
           var eop = _qiblaEntryDisc.material.uniforms.op.value;
-          _qiblaEntryDisc.material.uniforms.op.value = Math.min(eop + 0.04, 0.18 * breathe);
+          _qiblaEntryDisc.material.uniforms.op.value = Math.min(eop + 0.06, 0.45 * breathe);
         }
         // 3D Entry beam strip (horizontal floor plane, no billboard needed)
         if(_qiblaEntryBeam){
           _qiblaEntryBeam.visible = true;
           _qiblaEntryBeam.material.uniforms.time.value = t;
           var ebop = _qiblaEntryBeam.material.uniforms.op.value;
-          _qiblaEntryBeam.material.uniforms.op.value = Math.min(ebop + 0.05, 0.35 * breathe);
+          _qiblaEntryBeam.material.uniforms.op.value = Math.min(ebop + 0.06, 0.65 * breathe);
         }
         // Exit face caustic hotspot (horizontal floor plane, no billboard needed)
         if(_qiblaExitCaustic){
           _qiblaExitCaustic.visible = true;
           _qiblaExitCaustic.material.uniforms.time.value = t;
           var ecop = _qiblaExitCaustic.material.uniforms.op.value;
-          _qiblaExitCaustic.material.uniforms.op.value = Math.min(ecop + 0.04, 0.5 * breathe);
+          _qiblaExitCaustic.material.uniforms.op.value = Math.min(ecop + 0.06, 0.8 * breathe);
         }
-        // Internal glow on cube
-        cubeMat.uniforms.uInternalGlow.value = Math.min(cubeMat.uniforms.uInternalGlow.value + 0.02, 0.3 * breathe);
+        // Internal glow on cube — subtle, prism should glow from within
+        cubeMat.uniforms.uInternalGlow.value = Math.min(cubeMat.uniforms.uInternalGlow.value + 0.03, 0.4 * breathe);
       } else if (!_compassDevMode) {
         // Fade out shadow + caustic
         if(window._qiblaCausticLight && window._qiblaCausticLight.intensity > 0.01){ window._qiblaCausticLight.intensity *= 0.9; } else if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }

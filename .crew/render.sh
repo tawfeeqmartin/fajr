@@ -36,7 +36,8 @@ const puppeteer = require('puppeteer-core');
   });
   const page = await browser.newPage();
   await page.setViewport({width:430, height:932, deviceScaleFactor:2});
-  await page.goto('http://localhost:7747/', {waitUntil:'domcontentloaded'});
+  var url = process.env.RENDER_URL || 'http://localhost:7747/';
+  await page.goto(url, {waitUntil:'domcontentloaded'});
   await new Promise(r => setTimeout(r, 12000));
   const renderer = await page.evaluate(() => {
     const c = document.querySelector('canvas');
