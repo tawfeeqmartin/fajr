@@ -2801,7 +2801,7 @@ document.addEventListener('touchmove', function(e) {
 
     // Map finger drag directly to camera orbit (±20° = ±0.3491 rad)
     var rawAngle = (totalDx / screenW) * 0.70; // full screen drag ≈ 40°
-    _swipeCamTarget = Math.max(-0.3491, Math.min(0.3491, rawAngle));
+    _swipeCamTarget = 0; // camera orbit disabled — prayer swipe only
     // Rubber-band at edges: finger keeps pulling, orbit resists with spring feel
     if (Math.abs(rawAngle) > 0.3491) {
       var excess = rawAngle - _swipeCamTarget;
