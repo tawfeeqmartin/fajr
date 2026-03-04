@@ -339,34 +339,48 @@ const PRAYER_LIGHT_LAYER = 1;
 // PRAYER WASH — above-forward-left, washes podium front face in prayer color.
 // Atmospheric pool that tints the obsidian plinth with sacred time.
 const prayerWash = new THREE.SpotLight(0x111122, 0);
-prayerWash.position.set(-3.0, 5.0, 5.5);
-prayerWash.target.position.set(0, -1.5, 0);
-prayerWash.angle = 0.65;      // v6: 0.40→0.65 — wider cone to flood podium
-prayerWash.penumbra = 0.80;
-prayerWash.decay = 0.8;       // v6: 1.5→0.8 — less falloff so light reaches surface
-prayerWash.distance = 18;     // v6: 13→18 — longer reach
+prayerWash.position.set(-2.0, -1.5, 4.0);   // v8: low & forward — atmospheric fog tint, not podium flood
+prayerWash.target.position.set(0, -4.0, 0);  // v8: aimed at dark floor/fog zone below podium
+prayerWash.angle = 0.90;      // v8: wide wash for ambient fog tint
+prayerWash.penumbra = 1.0;    // v8: fully soft edges — no hotspot
+prayerWash.decay = 1.2;       // v8: moderate falloff
+prayerWash.distance = 14;     // v8: reaches fog but dies before overwhelming
 prayerWash.castShadow = false;
 scene.add(prayerWash, prayerWash.target);
 
 // PRAYER RIM — behind-right, catches cube back edges in prayer color2.
 // Hidden during FBO pass via visibility toggle — safe from glass refraction bleed.
 const prayerRim = new THREE.SpotLight(0x111122, 0);
-prayerRim.position.set(3.5, 5.0, -3.5);
-prayerRim.target.position.set(0, 0.5, 0);
-prayerRim.angle = 0.35;       // v6: 0.20→0.35 — wider rim catch
-prayerRim.penumbra = 0.65;
-prayerRim.decay = 0.8;        // v6: 1.7→0.8 — less falloff
-prayerRim.distance = 15;      // v6: 10→15 — longer reach
+prayerRim.position.set(2.5, 2.5, -3.0);     // v8: behind-right, above cube — grazes edges at ~45°
+prayerRim.target.position.set(0, 0.57, 0);   // v8: aimed at cube center (CUBE_Y)
+prayerRim.angle = 0.20;       // v8d: very tight cone — grazes cube edges only, minimal scene spill
+prayerRim.penumbra = 0.80;    // v8d: soft falloff so the tight cone doesn't look harsh
+prayerRim.decay = 1.5;        // v8d: dies faster after cube — less background spill
+prayerRim.distance = 8;       // v8d: shorter reach — hits cube then dies
 prayerRim.castShadow = false;
 scene.add(prayerRim, prayerRim.target);
+
+// v8: podium slash — tight colored edge-catch on front face, sharp angle from right
+const prayerSlash = new THREE.SpotLight(0x111122, 0);
+prayerSlash.position.set(4.0, 1.0, 1.8);      // v8b: more to the side, sharp grazing angle on front face
+prayerSlash.target.position.set(0, -1.5, 1.32); // v8b: aimed at upper-mid of front face — diagonal catch
+prayerSlash.angle = 0.14;      // v8b: tighter cone — sharp slash, partial coverage only
+prayerSlash.penumbra = 0.55;   // soft edges so it blends
+prayerSlash.decay = 1.8;       // v8b: dies faster — stays contained
+prayerSlash.distance = 7;      // v8b: shorter reach, stays on podium face
+prayerSlash.castShadow = false;
+scene.add(prayerSlash, prayerSlash.target);
 
 // Lerp state for prayer accent lights
 const _prayerWashColor = new THREE.Color(0x111122);
 const _prayerRimColor = new THREE.Color(0x111122);
+const _prayerSlashColor = new THREE.Color(0x111122);
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
-const PRAYER_WASH_MAX = 18.0;  // v6: 2→18 — prayer color MUST dominate the podium, unmistakable
-const PRAYER_RIM_MAX = 12.0;   // v6: 1.2→12 — strong rim color on cube silhouette
+let _prayerSlashIntensity = 0;
+const PRAYER_WASH_MAX = 0.0;   // v8d: DISABLED — slash is hero, wash was flooding blue/green
+const PRAYER_RIM_MAX = 5.0;    // v8d: Fresnel edge catch on glass cube
+const PRAYER_SLASH_MAX = 14.0;  // v8d: hero podium slash — must read as obvious color on dark surface
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
@@ -801,7 +815,7 @@ const PODIUM_H = 20; // tall enough to extend past any visible floor
 // High clearcoat + low roughness = glass-like specular reflections on column faces.
 // Podium materials reverted to pre-reactive state — static emissive, no envMap reactivity
 // Podium materials: polished obsidian. Top face = high clearcoat for light pools.
-const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x2a2a3a, fog: false }; // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
+const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x12121c, fog: false }; // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
@@ -841,13 +855,13 @@ scene.add(podiumLowFill, podiumLowFill.target);
 // ── PRAYER GLOW — PointLight at podium base (Approach B, Chris v7) ──────────
 // PointLight has no surface-color dependency — paints everything in radius.
 // Positioned just below cube, inside podium top face gap. Subtle sacred glow.
-const prayerGlow = new THREE.PointLight(0x111122, 0, 6); // v7: starts off, 6 unit radius
-prayerGlow.position.set(0, -0.6, 0.8); // slightly forward toward camera for visibility
+const prayerGlow = new THREE.PointLight(0x111122, 0, 2.5); // v8c: very tight radius — cube-only glow, no podium spill
+prayerGlow.position.set(0, 0.57, 0);   // v8: at cube center — colored glow emanates from within
 prayerGlow.castShadow = false;
 scene.add(prayerGlow);
 const _prayerGlowColor = new THREE.Color(0x111122);
 let _prayerGlowIntensity = 0;
-const PRAYER_GLOW_MAX = 8.0; // v7: enough to tint podium, not overpower scene
+const PRAYER_GLOW_MAX = 0.8; // v8d: barely-there inner glow — cube tint only
 
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
 // Three floor rays as H / M / S clock hands, synced to real time.
@@ -1806,17 +1820,25 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     _prayerRimColor.lerp(_prRim, PRAYER_LIGHT_LERP);
     _prayerWashIntensity += (PRAYER_WASH_MAX - _prayerWashIntensity) * PRAYER_LIGHT_LERP;
     _prayerRimIntensity += (PRAYER_RIM_MAX - _prayerRimIntensity) * PRAYER_LIGHT_LERP;
+    // v8: slash — uses primary color for obvious podium edge-catch
+    const _prSlash = new THREE.Color(_activePrayer.color);
+    _prayerSlashColor.lerp(_prSlash, PRAYER_LIGHT_LERP);
+    _prayerSlashIntensity += (PRAYER_SLASH_MAX - _prayerSlashIntensity) * PRAYER_LIGHT_LERP;
   } else {
     // No active prayer or compass mode: fade to zero
     _prayerWashColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
     _prayerRimColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
+    _prayerSlashColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
     _prayerWashIntensity += (0 - _prayerWashIntensity) * PRAYER_LIGHT_LERP;
     _prayerRimIntensity += (0 - _prayerRimIntensity) * PRAYER_LIGHT_LERP;
+    _prayerSlashIntensity += (0 - _prayerSlashIntensity) * PRAYER_LIGHT_LERP;
   }
   prayerWash.color.copy(_prayerWashColor);
   prayerWash.intensity = _prayerWashIntensity;
   prayerRim.color.copy(_prayerRimColor);
   prayerRim.intensity = _prayerRimIntensity;
+  prayerSlash.color.copy(_prayerSlashColor);
+  prayerSlash.intensity = _prayerSlashIntensity;
 
   // ── Prayer PointLight glow at podium base (Approach B, Chris v7) ──────────
   if (_activePrayer && !_compassMode) {
@@ -1834,27 +1856,14 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     active: !!_activePrayer,
     color: _activePrayer ? _activePrayer.color : null,
     washI: _prayerWashIntensity.toFixed(1),
+    rimI: _prayerRimIntensity.toFixed(1),
+    slashI: _prayerSlashIntensity.toFixed(1),
     glowI: _prayerGlowIntensity.toFixed(1),
     washHex: '#' + _prayerWashColor.getHexString(),
+    slashHex: '#' + _prayerSlashColor.getHexString(),
     glowHex: '#' + _prayerGlowColor.getHexString(),
   };
 
-  // ── Podium top-face emissive tint (Approach C, Chris v7) ──────────────────
-  // podiumMats[2] is the +y top face — lerp emissive color toward prayer color.
-  // Emissive ignores incoming light entirely — always visible regardless of albedo.
-  if (_activePrayer && !_compassMode) {
-    const _prEmit = new THREE.Color(_activePrayer.color).multiplyScalar(0.25); // v7: 25% saturation — subtle, not neon
-    podiumMats[2].emissive.lerp(_prEmit, PRAYER_LIGHT_LERP);
-    podiumMats[2].emissiveIntensity += (2.5 - podiumMats[2].emissiveIntensity) * PRAYER_LIGHT_LERP; // v7: boost from 0.8 toward 2.5
-    // Also tint front face (+z, index 4) subtly
-    podiumMats[4].emissive.lerp(_prEmit.clone().multiplyScalar(0.6), PRAYER_LIGHT_LERP);
-    podiumMats[4].emissiveIntensity += (1.8 - podiumMats[4].emissiveIntensity) * PRAYER_LIGHT_LERP;
-  } else {
-    podiumMats[2].emissive.lerp(new THREE.Color(0x141428), PRAYER_LIGHT_LERP);
-    podiumMats[2].emissiveIntensity += (0.8 - podiumMats[2].emissiveIntensity) * PRAYER_LIGHT_LERP;
-    podiumMats[4].emissive.lerp(new THREE.Color(0x161630), PRAYER_LIGHT_LERP);
-    podiumMats[4].emissiveIntensity += (0.9 - podiumMats[4].emissiveIntensity) * PRAYER_LIGHT_LERP;
-  }
 
   // FBO pass — prayer accent lights temporarily disabled so their color
   // doesn't bleed into the glass refraction texture. The FBO captures the scene
@@ -1862,6 +1871,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   cubeMesh.visible = false;
   prayerWash.visible = false;
   prayerRim.visible = false;
+  prayerSlash.visible = false; // v8: hide slash during FBO
   prayerGlow.visible = false; // v7: hide PointLight during FBO too
   renderer.setRenderTarget(fboRT);
   renderer.render(scene, camera);
@@ -1869,6 +1879,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   cubeMesh.visible = true;
   prayerWash.visible = true;
   prayerRim.visible = true;
+  prayerSlash.visible = true;
   prayerGlow.visible = true;
   cubeMat.uniforms.uScene.value = fboRT.texture;
 
