@@ -308,7 +308,7 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 35, 14); // v: 55→42→35 — preserve prismatic color, no blown white
+const cubeSun = new THREE.PointLight(0xe8f2ff, 50, 14); // v170: 35→50 — luminous glass, boosted transmission compensates
 cubeSun.position.set(0, 0.2, -2.8);
 scene.add(cubeSun);
 
@@ -528,7 +528,7 @@ shaftMesh.renderOrder = 0;
 // ─── PRISM GROUP ──────────────────────────────────────────────────────────────
 const prismGroup = new THREE.Group();
 scene.add(prismGroup);
-const CUBE_Y = 0.60;
+const CUBE_Y = 0.57;
 
 // ─── FBO DICHROIC GLASS SHADER ────────────────────────────────────────────────
 const dichroicVert = `
@@ -609,7 +609,7 @@ const dichroicFrag = `
     // Bottom-face attenuation: reduce transmission where normal faces down (cubeSun direct hit)
     // Bottom-face attenuation: strong clamp preserves prismatic color in the hotspot
     float bottomAtten = 1.0 - 0.55 * smoothstep(-0.3, -0.95, Nw.y);
-    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 1.7 * bottomAtten;
+    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 2.8 * bottomAtten;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
     col = mix(col, col * irid * 1.4, diagF * 0.22);
@@ -621,7 +621,7 @@ const dichroicFrag = `
     // ── Side-face ambient: subtle fill so faces read as glass even without strong light ──
     // Boosted to prevent the right face reading as a dark void during orbit
     float sideFacing = 1.0 - abs(Nw.y); // peaks on vertical faces
-    col += vec3(0.20, 0.25, 0.42) * sideFacing * 0.22;
+    col += vec3(0.22, 0.28, 0.45) * sideFacing * 0.30;
 
     // ── Sky/environment reflection: top face catches overhead light ──
     // v155 scored 8.9 at 0.45 but top was slightly hot. Dial back to 0.38.
@@ -686,9 +686,9 @@ const cubeMat = new THREE.ShaderMaterial({
     uIorR:    { value: 1.50 },
     uIorG:    { value: 1.56 },
     uIorB:    { value: 1.63 },
-    uAb:      { value: 0.05 },
+    uAb:      { value: 0.09 },
     uDich:    { value: 0.70 },
-    uFresnel: { value: 6.0 },
+    uFresnel: { value: 4.0 },
     uTime:    { value: 0 },
     uAspect:  { value: W / H },
     uSpecLightPos: { value: new THREE.Vector3(2.5, 4.0, 2.5) },
