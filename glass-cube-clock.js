@@ -1829,6 +1829,15 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   }
   prayerGlow.color.copy(_prayerGlowColor);
   prayerGlow.intensity = _prayerGlowIntensity;
+  // v7: expose debug state for render pipeline
+  window._prayerDebug = {
+    active: !!_activePrayer,
+    color: _activePrayer ? _activePrayer.color : null,
+    washI: _prayerWashIntensity.toFixed(1),
+    glowI: _prayerGlowIntensity.toFixed(1),
+    washHex: '#' + _prayerWashColor.getHexString(),
+    glowHex: '#' + _prayerGlowColor.getHexString(),
+  };
 
   // ── Podium top-face emissive tint (Approach C, Chris v7) ──────────────────
   // podiumMats[2] is the +y top face — lerp emissive color toward prayer color.
@@ -1902,6 +1911,10 @@ window._devWindowCount = 1;    // exposed for monkey-patch
 var _devWindowOverrides = {};  // { prayerName: { intensity: null|number, spread: null|number } }
 window._devWindowOverrides = _devWindowOverrides;
 
+// v7: expose for GPU Chrome render pipeline (module scope → window)
+window._devJumpToTime = null; // set after function definition below
+window._prayerDebug = null;   // set in render loop
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1924,6 +1937,7 @@ function _devJumpToTime(min) {
   if (lb) lb.textContent = _fmtMin(min);
   if (lc) lc.checked = false;
 }
+window._devJumpToTime = _devJumpToTime; // v7: expose for render pipeline
 
 function _devStopSpeed() {
   if (_devSpeedInterval) { clearInterval(_devSpeedInterval); _devSpeedInterval = null; }
