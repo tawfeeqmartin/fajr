@@ -1,52 +1,72 @@
-# CHRIS-READY — Lookdev Pass Complete
+# Prayer-Reactive Spotlights — Chris Ready for Review
+## Chris, Lookdev — Seven Heavens Studio — Mar 4, 2026
 
-**Date:** 2026-03-03
-**Branch:** main (v172+2 commits, unpushed)
-**Commits:**
-- `bc10a73` — Per-face optical differentiation
-- `fe38853` — Compass prism beam sharpening + dev mode alignment bugfix
+### What I Built
+Two SpotLight accents that smoothly transition color/intensity to match the active prayer window. The scene's atmosphere shifts with sacred time — like sunrise warming a room before you notice it.
+
+### Light Placement
+
+**1. Prayer Wash** (above-forward-left: -3, 5, 5.5)
+- Aimed at podium center (-1.5y), angle 0.40, penumbra 0.88
+- Washes the obsidian plinth face and surrounding background in prayer color
+- Max intensity: 2.0 | Decay: 1.5 | Distance: 13
+- Color: primary prayer color desaturated 35% toward warm neutral (0x998877)
+- This is the KEY accent — visible atmospheric tint on the podium column
+
+**2. Prayer Rim** (behind-right: 3.5, 5, -3.5)
+- Aimed at cube center (0.5y), angle 0.20, penumbra 0.72
+- Catches cube back edges and background in prayer color2 (lighter variant)
+- Max intensity: 1.2 | Decay: 1.7 | Distance: 10
+- Color: secondary prayer color desaturated 15% toward neutral (0xaaaaaa)
+- Subtle edge definition — a hint of prayer on the silhouette
+
+### FBO Isolation (Critical Detail)
+Both lights are hidden (`visible = false`) during the FBO render pass. The glass cube's ShaderMaterial refracts what the FBO captures behind it. Without isolation, prayer-colored light bleeds into the FBO background → the glass refracts colored content → the cube turns into a tinted blob. Visibility toggle is the cleanest solution — one toggle per frame, zero overhead.
+
+### Transition Behavior
+- **Lerp rate:** 0.022/frame (~3 seconds at 60fps)
+- **Active prayer:** color lerps toward prayer color, intensity lerps toward max
+- **No active prayer:** intensity lerps toward 0 (fade to invisible)
+- **Compass mode:** lights disabled (lerp to 0) — compass has its own visual language
+- Transitions feel organic, like slow breathing. No snapping.
+
+### Color Processing
+- Wash desaturates prayer color 35% toward warm neutral — atmospheric, not neon
+- Rim desaturates 15% — edge catch can be slightly richer
+- This prevents saturated colors (especially green/violet) from looking garish
+
+### Per-Prayer Atmospheric Read
+| Prayer | Atmosphere | Notes |
+|--------|-----------|-------|
+| Tahajjud | Deep violet mystical | Most dramatic — appropriate for deepest night prayer |
+| Fajr | Indigo/lavender dawn | Cool night-to-dawn transition |
+| Dhuha | Warm amber/golden | Sunrise warmth, complementary with existing warm lighting |
+| Dhuhr | Subtle green tint | Green mixes with existing cool tones — fresh noon feel |
+| Asr | Warm amber/orange | Afternoon warmth, beautiful on obsidian podium |
+| Maghrib | Red-orange sunset | Dramatic lower atmosphere, sunset drama |
+| Isha | Cool blue night | Blends naturally with existing blue scene palette |
+
+### Performance
+- 2 SpotLights (no shadow casting) = negligible GPU cost
+- One lerp operation per frame per light (color + intensity)
+- One visibility toggle per frame per light (FBO isolation)
+- No new geometry, no new materials, no new shaders
+
+### Files Changed
+- `glass-cube-clock.js` — all changes
+
+### Renders
+All renders in `.crew/renders/prayer-*-v5.png` (7 prayers)
+
+### What I Didn't Do
+- No irradiance probes / CubeCamera / LightProbe (constraint respected)
+- No area lights (SpotLights only, as specified)
+- No changes to existing lighting rig (all additive)
+- No floor pool light (floor already has prayer discs + caustics + fog)
+
+### Open Questions for Chef/Tawfeeq
+1. The existing prayer disc beams contribute significant color to the FBO background (visible as colored cube tint at Tahajjud/Dhuha). This predates my spotlights. Should we also hide prayer discs during FBO for even cleaner glass?
+2. Intensity calibration: current values are conservative. Happy to dial up if Tawfeeq wants more drama.
 
 ---
-
-## Fix 1: Cube Face Differentiation
-
-**Problem:** Three visible cube faces showed identical refraction/distortion patterns — read as same texture repeated 3x.
-
-**Solution:** Per-face optical variation using `vWorldNormal` as face discriminator:
-- **Per-face IOR shift** — Side faces get wider red-blue prismatic split, top face is tighter/bluer, front face is green-shifted. Each face bends light with distinct chromatic character.
-- **Per-face aberration scale** — Side faces get 70% more chromatic spread, top face gets 30% less. Different depth of refraction per face.
-- **Per-face dichroic band rotation** — Side: default x+y diagonal. Top: x+z sweep. Front: y-z sweep. Bands run in different directions on each face.
-- **Per-face UV offset** — Each face samples a different region of the FBO texture, preventing identical distortion patterns.
-
-**Result:** Left face reads cool/deep blue, front face has warm chromatic aberration (visible orange/rainbow), top face has distinct band direction. Each face is optically unique.
-
-**Renders:** `face-diff-v2.png` (final)
-
----
-
-## Fix 2: Compass Prism Beams
-
-**Problem:** Prism beam in compass mode was invisible — lost all symbolic clarity.
-
-**Root Cause:** Dev mode bug — `window._compassCalibrated` was never set, so `_compassAligned` reverted to `false` on the next animation frame after the 500ms init. Fan disc never became visible.
-
-**Fixes applied:**
-1. **Bug fix:** Set `window._compassCalibrated = true` in compass dev mode init
-2. **Fan shader:** Tighter radial falloff (`exp(-r²*2.5)`), sharper angular mask (smoothstep 0.82), 1.6x color boost for additive visibility
-3. **Fan width:** Narrowed from 0.35 to 0.25 radians — precise prism, not flood light
-4. **Entry beam:** Wider strip (6.0 center), more visible (0.65 max opacity)
-5. **Entry disc:** Tighter focus (0.05 rad), brighter (0.45 max)
-6. **Caustic light:** Boosted to 1.8x (was 0.5 — invisible)
-7. **Bloom disc:** Pulled back (0.18 max) to avoid washing out the fan
-
-**Result:** Clear prism symbolic read — white light enters from above, cube splits it into distinct rainbow spectrum (VIBGYOR) directed at viewer. Entry beam visible, fan precise and intentional.
-
-**Renders:** `compass-v5.png` (final)
-
----
-
-## Normal Mode Verified
-Normal clock mode unaffected — `normal-verify.png` confirms face differentiation works beautifully with the existing light rig.
-
-## Status
-Ready for chef review. Do NOT push — 2 commits ahead of origin/main.
+*Ready for chef QC review. Do not git push.*
