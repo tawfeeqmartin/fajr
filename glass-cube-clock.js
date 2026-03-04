@@ -331,29 +331,28 @@ scene.add(tawafSpot, tawafSpot.target);
 // These are ADDITIVE to the existing rig. Intensity starts at 0, lerps in when
 // a prayer window is active. Smooth 2.5s color/intensity transitions.
 
-// PRAYER WASH — above-left, washes podium front face in prayer color.
-// Complements podiumFrontWash (warm, 12i) with a colored accent (3i max).
-// High penumbra = soft atmospheric pool, not a hard spotlight circle.
+// PRAYER WASH — above-forward-left, grazes podium front face in prayer color.
+// Positioned low enough to catch the podium column, not flood the background.
+// Complements podiumFrontWash (warm, 12i) with a colored accent (1.8i max).
 const prayerWash = new THREE.SpotLight(0x111122, 0);
-prayerWash.position.set(-3.5, 6.0, 5.0);
-prayerWash.target.position.set(0, -1.5, 0);
-prayerWash.angle = 0.45;
-prayerWash.penumbra = 0.88;
-prayerWash.decay = 1.4;
-prayerWash.distance = 14;
+prayerWash.position.set(-2.5, 3.5, 6.0);
+prayerWash.target.position.set(0, -2.0, 0);
+prayerWash.angle = 0.35;
+prayerWash.penumbra = 0.90;
+prayerWash.decay = 1.6;
+prayerWash.distance = 12;
 prayerWash.castShadow = false;
 scene.add(prayerWash, prayerWash.target);
 
-// PRAYER RIM — behind-right, catches cube back edges in prayer color.
-// Opposite axis from violetRim (left-behind). Creates colored edge separation.
-// Tight angle so it reads on cube edges, not the floor.
+// PRAYER RIM — behind-right, catches cube back edges in prayer color2.
+// Tight cone: reads on cube silhouette edges, not the floor or background.
 const prayerRim = new THREE.SpotLight(0x111122, 0);
-prayerRim.position.set(3.0, 5.0, -4.0);
-prayerRim.target.position.set(0, 0.4, 0);
-prayerRim.angle = 0.22;
-prayerRim.penumbra = 0.75;
-prayerRim.decay = 1.6;
-prayerRim.distance = 10;
+prayerRim.position.set(3.5, 4.5, -3.5);
+prayerRim.target.position.set(0, 0.5, 0);
+prayerRim.angle = 0.16;
+prayerRim.penumbra = 0.70;
+prayerRim.decay = 1.8;
+prayerRim.distance = 9;
 prayerRim.castShadow = false;
 scene.add(prayerRim, prayerRim.target);
 
@@ -362,9 +361,9 @@ const _prayerWashColor = new THREE.Color(0x111122);
 const _prayerRimColor = new THREE.Color(0x111122);
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
-const PRAYER_WASH_MAX = 3.0;
-const PRAYER_RIM_MAX = 2.0;
-const PRAYER_LIGHT_LERP = 0.025; // ~2.5s transition at 60fps
+const PRAYER_WASH_MAX = 1.8;   // subtle podium tint, not a flood
+const PRAYER_RIM_MAX = 1.2;    // edge whisper, not a colored rim light
+const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
@@ -1783,9 +1782,11 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // ── Prayer-reactive accent spotlights (Chris lookdev, Mar 4) ──────────────
   // Smooth lerp of color + intensity toward active prayer, or fade to zero.
   if (_activePrayer && !_compassMode) {
-    // Active prayer: lerp toward prayer color and target intensity
-    const _prCol = new THREE.Color(_activePrayer.color);
-    _prayerWashColor.lerp(_prCol, PRAYER_LIGHT_LERP);
+    // Active prayer: lerp toward prayer color and target intensity.
+    // Wash uses primary color desaturated 30% toward warm neutral — atmospheric, not neon.
+    // Rim uses secondary (lighter) color at full saturation — edge catch can be purer.
+    const _prWash = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(0x998877), 0.30);
+    _prayerWashColor.lerp(_prWash, PRAYER_LIGHT_LERP);
     _prayerRimColor.lerp(new THREE.Color(_activePrayer.color2), PRAYER_LIGHT_LERP);
     _prayerWashIntensity += (PRAYER_WASH_MAX - _prayerWashIntensity) * PRAYER_LIGHT_LERP;
     _prayerRimIntensity += (PRAYER_RIM_MAX - _prayerRimIntensity) * PRAYER_LIGHT_LERP;
