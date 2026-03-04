@@ -1485,7 +1485,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   cubeMat.uniforms.uTime.value = t;
   fogLayerMat.uniforms.uTime.value = t;
   warmFogMat.uniforms.uTime.value = t;
-  _scrimMat.uniforms.uTime.value = t;
+  if (typeof _scrimMat !== 'undefined' && _scrimMat) _scrimMat.uniforms.uTime.value = t;
   godRayMat.uniforms.uTime.value = t;
   _shaftMat.uniforms.time.value = t;
 
