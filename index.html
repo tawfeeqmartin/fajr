@@ -770,6 +770,36 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
 </section>
 
+<!-- 5. CREDITS -->
+<section class="scroll-section" id="sec-credits">
+  <div class="reveal">
+    <div class="section-header"><p class="section-label">Gratitude</p>
+    <h2 class="section-title">Credits &amp; Gratitude</h2></div>
+    <div style="margin-top:1.25rem;text-align:left;max-width:380px;margin-left:auto;margin-right:auto">
+      <div style="margin-bottom:1.1rem">
+        <p style="font-size:.88rem;font-weight:400;color:rgba(232,228,220,.82);margin-bottom:.15rem">Muhib Waqar</p>
+        <p style="font-size:.78rem;font-weight:200;color:rgba(232,228,220,.4);line-height:1.4">Du'a collection (DuaOS)</p>
+      </div>
+      <div style="margin-bottom:1.1rem">
+        <p style="font-size:.88rem;font-weight:400;color:rgba(232,228,220,.82);margin-bottom:.15rem">Adhan.js</p>
+        <p style="font-size:.78rem;font-weight:200;color:rgba(232,228,220,.4);line-height:1.4">Prayer time calculations</p>
+      </div>
+      <div style="margin-bottom:1.1rem">
+        <p style="font-size:.88rem;font-weight:400;color:rgba(232,228,220,.82);margin-bottom:.15rem">AlAdhan</p>
+        <p style="font-size:.78rem;font-weight:200;color:rgba(232,228,220,.4);line-height:1.4">Prayer time data</p>
+      </div>
+      <div style="margin-bottom:1.1rem">
+        <p style="font-size:.88rem;font-weight:400;color:rgba(232,228,220,.82);margin-bottom:.15rem">Quran.com</p>
+        <p style="font-size:.78rem;font-weight:200;color:rgba(232,228,220,.4);line-height:1.4">Quranic &amp; Sunnah references</p>
+      </div>
+      <div style="margin-bottom:0">
+        <p style="font-size:.88rem;font-weight:400;color:rgba(232,228,220,.82);margin-bottom:.15rem">Kauthar Martin</p>
+        <p style="font-size:.78rem;font-weight:200;color:rgba(232,228,220,.4);line-height:1.4">Lookdev &amp; visual direction</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Footer -->
 <footer>
   <p style="margin-bottom:.5rem">&copy; 2025–2026 Kauthar Martin &amp; <a href="https://tawfeeqmartin.com" target="_blank" rel="noopener">Tawfeeq Martin</a></p>
@@ -2307,7 +2337,7 @@ fsFetchPrayer();
 // They naturally scroll over the fixed canvas.
 
 /* ── Info Dot Nav ── */
-const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-install'];
+const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-install','sec-credits'];
 const _infoScroller = document.getElementById('infoScroller');
 function _infoGoTo(idx) {
   const el = document.getElementById(_infoSections[idx]);
@@ -3229,6 +3259,7 @@ setTimeout(setupScrollObservers,500);
   <button class="info-dot" data-section="sec-dials" onclick="_infoGoTo(1)"></button>
   <button class="info-dot" data-section="sec-qibla" onclick="_infoGoTo(2)"></button>
   <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(3)"></button>
+  <button class="info-dot" data-section="sec-credits" onclick="_infoGoTo(4)"></button>
 </div>
 
 <!-- Location Picker -->
@@ -3339,7 +3370,7 @@ setTimeout(setupScrollObservers,500);
     html+='<div style="font-size:0.82rem;font-weight:300;color:rgba(232,228,220,0.85);line-height:1.5;'+(_expanded?'':'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;')+';margin-bottom:8px">'+_esc(english)+'</div>';
     html+='<div style="font-size:0.65rem;color:rgba(232,228,220,0.4);margin-bottom:'+(_expanded||total<2?'4':'8')+'px">'+_esc(ref)+(_expanded?'':' · Tap to expand')+'</div>';
     if (total>1) html+='<button onclick="window._duaNext(event)" style="background:none;border:none;padding:0;cursor:pointer;font-family:var(--font);font-size:0.72rem;font-weight:300;color:'+color+';letter-spacing:.05em">Another du\u2019a ('+(_currentIdx+1)+'/'+total+') →</button>';
-    html+='<div style="font-size:0.58rem;color:rgba(232,228,220,0.2);margin-top:6px">Du\u2019as from duaOS · @muhibwqr</div>';
+
     _duaCardEl.innerHTML=html;
   }
 
