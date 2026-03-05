@@ -643,7 +643,7 @@ const dichroicFrag = `
     // Second octave — faster, finer detail
     wx += sin(wp.z * 7.3 - wp.y * 5.1 + t * 0.8) * 0.35;
     wy += cos(wp.x * 6.7 + wp.z * 4.9 - t * 0.7) * 0.35;
-    return vec2(wx, wy) * 0.005; // amplitude: visible bending without distortion overload
+    return vec2(wx, wy) * 0.007; // amplitude: noticeable bending, still clean
   }
 
   vec3 thinFilm(float cosT, float t) {
