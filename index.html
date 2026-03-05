@@ -127,7 +127,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@200;300;400;500;600&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/thin/style.css">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css">
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
@@ -3014,7 +3014,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=191';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=192';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -3273,5 +3273,119 @@ setTimeout(setupScrollObservers,500);
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2L22 22H2Z"/></svg>
   </button>
 </div>
+
+<!-- DUA CARD FEATURE — duaOS data by @muhibwqr (open source) -->
+<script>
+(function() {
+  var _DUAS = [];
+
+  // Prayer → preferred tags (in priority order)
+  var _PRAYER_TAGS = {
+    'Qiyam':   [['sayyid al-istighfar','morning'],['forgiveness','repentance']],
+    'Fajr':    [['morning','new day'],['guidance','goals']],
+    'Sunrise': null,
+    'Dhuha':   [['gratitude','provision'],['goals']],
+    'Dhuhr':   [['comprehensive','balance'],['goals','guidance']],
+    'Asr':     [['steadfastness','patience'],['strength','difficulty']],
+    'Maghrib': [['protection','safety'],['evening','forgiveness']],
+    'Isha':    [['forgiveness','repentance'],['spirituality','heart']]
+  };
+
+  function _scoreDua(dua, tags) {
+    var score = 0, dt = dua.tags || [];
+    tags.forEach(function(t){ if(dt.indexOf(t)>=0) score++; });
+    return score;
+  }
+
+  function _getDuasForPrayer(name) {
+    var groups = _PRAYER_TAGS[name];
+    if (!groups) return [];
+    var scored = _DUAS.map(function(d){
+      var best=0;
+      groups.forEach(function(grp,gi){ var s=_scoreDua(d,grp); if(s>0) best=Math.max(best,s*(groups.length-gi)); });
+      return {dua:d,score:best};
+    }).filter(function(x){return x.score>0;});
+    scored.sort(function(a,b){return b.score-a.score;});
+    return scored.map(function(x){return x.dua;});
+  }
+
+  var _duaCardEl=null, _currentPrayer=null, _currentMatches=[], _currentIdx=0, _expanded=false, _currentColor='rgba(232,228,220,0.6)';
+
+  function _createCard() {
+    if (_duaCardEl) return;
+    _duaCardEl = document.createElement('div');
+    _duaCardEl.id = '_duaCard';
+    _duaCardEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 72px + 88px);left:50%;transform:translateX(-50%);z-index:950;width:min(340px,90vw);background:rgba(13,13,18,0.82);border-radius:12px;padding:14px 16px 10px;font-family:var(--font);display:none;opacity:0;transition:opacity .3s ease;pointer-events:auto;box-sizing:border-box';
+    document.body.appendChild(_duaCardEl);
+    _duaCardEl.addEventListener('click', _toggleExpand);
+  }
+
+  function _toggleExpand(){ _expanded=!_expanded; _renderCard(); }
+
+  window._duaNext = function(e){ if(e) e.stopPropagation(); _currentIdx=(_currentIdx+1)%_currentMatches.length; _expanded=false; _renderCard(); };
+
+  function _esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function _renderCard() {
+    if (!_duaCardEl||!_currentMatches.length) return;
+    var dua=_currentMatches[_currentIdx];
+    var color=_currentColor;
+    var arabic=dua.arabic||'';
+    var english=dua.content||dua.english||'';
+    var ref=(dua.reference||'').trim();
+    var total=_currentMatches.length;
+    var html='';
+    if (_expanded && arabic) html+='<div style="direction:rtl;text-align:right;font-family:Amiri,serif;font-size:1.05rem;color:rgba(232,228,220,0.92);line-height:1.7;margin-bottom:10px">'+_esc(arabic)+'</div>';
+    html+='<div style="font-size:0.82rem;font-weight:300;color:rgba(232,228,220,0.85);line-height:1.5;'+(_expanded?'':'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;')+';margin-bottom:8px">'+_esc(english)+'</div>';
+    html+='<div style="font-size:0.65rem;color:rgba(232,228,220,0.4);margin-bottom:'+(_expanded||total<2?'4':'8')+'px">'+_esc(ref)+(_expanded?'':' · Tap to expand')+'</div>';
+    if (total>1) html+='<button onclick="window._duaNext(event)" style="background:none;border:none;padding:0;cursor:pointer;font-family:var(--font);font-size:0.72rem;font-weight:300;color:'+color+';letter-spacing:.05em">Another du\u2019a ('+(_currentIdx+1)+'/'+total+') →</button>';
+    html+='<div style="font-size:0.58rem;color:rgba(232,228,220,0.2);margin-top:6px">Du\u2019as from duaOS · @muhibwqr</div>';
+    _duaCardEl.innerHTML=html;
+  }
+
+  function _showForPrayer(name, color) {
+    if (!_DUAS.length) return; // data not loaded yet
+    if (!_duaCardEl) _createCard();
+    if (name==='Sunrise'){ _hideCard(); return; }
+    _currentColor=color||'rgba(232,228,220,0.6)';
+    if (name!==_currentPrayer){ _currentPrayer=name; _currentMatches=_getDuasForPrayer(name); _currentIdx=0; _expanded=false; }
+    if (!_currentMatches.length){ _hideCard(); return; }
+    _renderCard();
+    _duaCardEl.style.display='block';
+    requestAnimationFrame(function(){ _duaCardEl.style.opacity='1'; });
+  }
+
+  function _hideCard() {
+    if (!_duaCardEl) return;
+    _duaCardEl.style.opacity='0';
+    setTimeout(function(){ if(_duaCardEl) _duaCardEl.style.display='none'; },300);
+  }
+
+  function _watchSwipeLabel() {
+    var bodyObs = new MutationObserver(function(){
+      var lbl=document.getElementById('_swipeLabel');
+      if (!lbl) return;
+      bodyObs.disconnect();
+      var lblObs = new MutationObserver(function(){
+        if (lbl.style.display==='none'||lbl.style.opacity==='0'){ _hideCard(); }
+        else if (lbl.style.display!=='none'){
+          var nameEl=lbl.querySelector('div:first-child');
+          if (nameEl){ var nm=nameEl.textContent.trim(), col=nameEl.style.color; _showForPrayer(nm,col); }
+        }
+      });
+      lblObs.observe(lbl,{attributes:true,attributeFilter:['style']});
+    });
+    bodyObs.observe(document.body,{childList:true,subtree:true});
+  }
+
+  // Load duas.json lazily
+  fetch('duas.json').then(function(r){return r.json();}).then(function(d){
+    _DUAS=d;
+    _createCard();
+    _watchSwipeLabel();
+  }).catch(function(e){ console.warn('duaOS: failed to load duas.json',e); });
+})();
+</script>
+
 </body>
 </html>
