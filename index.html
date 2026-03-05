@@ -1980,7 +1980,15 @@ window._displayPrayerTimes = _displayPrayerTimes;
 function _displayPrayerTimes(t, hijri) {
   if (hijri) window._lastHijri = hijri;
   const names = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam'];
-  const prayerColors = {Fajr:'#6633ee',Sunrise:'#ff9900',Dhuhr:'#00bb44',Asr:'#00bb44',Maghrib:'#ff9900',Isha:'#8811ff',Qiyam:'#8811ff'};
+  const prayerColors = {
+    Tahajjud:'#8811ff', Qiyam:'#8811ff',
+    Fajr:'#6633ee',
+    Sunrise:'#ff9900', Dhuha:'#ff9900',
+    Dhuhr:'#00bb44',
+    Asr:'#ff8800',
+    Maghrib:'#ff2200',
+    Isha:'#1166ff'
+  };
   const now = new Date(), nowM = now.getHours()*60+now.getMinutes();
   const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
   // Find current active prayer window — matches beam sectors exactly
@@ -2994,7 +3002,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=181';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=182';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
