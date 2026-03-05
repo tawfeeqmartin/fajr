@@ -362,12 +362,12 @@ scene.add(prayerRim, prayerRim.target);
 
 // v8: podium slash — tight colored edge-catch on front face, sharp angle from right
 const prayerSlash = new THREE.SpotLight(0x111122, 0);
-prayerSlash.position.set(2.0, 1.5, 4.5);      // v9: face the front face properly (NdotL 0.10→0.75)
-prayerSlash.target.position.set(0, -1.5, 1.32); // aimed at upper-mid of front face
-prayerSlash.angle = 0.18;      // slightly wider for coverage
+prayerSlash.position.set(2.0, 1.5, 4.5); // v9: faces front face properly (NdotL 0.75)
+prayerSlash.target.position.set(0, -1.5, 1.32); // v8b: aimed at upper-mid of front face — diagonal catch
+prayerSlash.angle = 0.18;
 prayerSlash.penumbra = 0.55;   // soft edges so it blends
-prayerSlash.decay = 1.8;
-prayerSlash.distance = 9;      // longer reach from new position
+prayerSlash.decay = 1.8;       // v8b: dies faster — stays contained
+prayerSlash.distance = 9;
 prayerSlash.castShadow = false;
 scene.add(prayerSlash, prayerSlash.target);
 
@@ -380,7 +380,7 @@ let _prayerRimIntensity = 0;
 let _prayerSlashIntensity = 0;
 const PRAYER_WASH_MAX = 0.0;   // v8d: DISABLED — slash is hero, wash was flooding blue/green
 const PRAYER_RIM_MAX = 5.0;    // v8d: Fresnel edge catch on glass cube
-const PRAYER_SLASH_MAX = 25.0;  // v9: boosted — NdotL fix + color lift = needs less but going safe
+const PRAYER_SLASH_MAX = 25.0; // v9: boosted intensity
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
@@ -629,23 +629,6 @@ const dichroicFrag = `
   varying vec3 vWorldPos;
   varying vec3 vWorldNormal;
 
-  // ── World-space UV wobble noise (Chris, Mar 4) ──────────────────────
-  // Adds subtle internal distortion to FBO refraction WITHOUT using the
-  // diagF normal path (which causes seam artifacts on left/right faces).
-  // Uses world position → continuous across all face boundaries.
-  // Two octaves of sin-based pseudo-noise, time-animated for living glass.
-  vec2 glassWobble(vec3 wp, float t) {
-    // First octave — slow, large-scale bending
-    float wx = sin(wp.x * 3.7 + wp.y * 2.3 + t * 0.4) *
-               cos(wp.z * 2.9 - wp.x * 1.8 + t * 0.3);
-    float wy = cos(wp.y * 3.1 + wp.z * 2.7 - t * 0.35) *
-               sin(wp.x * 2.5 + wp.y * 1.6 + t * 0.45);
-    // Second octave — faster, finer detail
-    wx += sin(wp.z * 7.3 - wp.y * 5.1 + t * 0.8) * 0.35;
-    wy += cos(wp.x * 6.7 + wp.z * 4.9 - t * 0.7) * 0.35;
-    return vec2(wx, wy) * 0.007; // amplitude: noticeable bending, still clean
-  }
-
   vec3 thinFilm(float cosT, float t) {
     float p = 6.28318 * 5.0 * cosT + t * 0.25;
     return vec3(0.5+0.5*cos(p), 0.5+0.5*cos(p-2.094), 0.5+0.5*cos(p+2.094));
@@ -703,16 +686,9 @@ const dichroicFrag = `
       dot(normalize(vWorldNormal), vec3(-0.018, 0.022, -0.013))
     );
     vec2 abXY = vec2(uAb / uAspect, uAb) * abScale;
-
-    // ── UV wobble: subtle internal distortion via world-space noise ──
-    // Per-channel offset variation creates micro chromatic bending.
-    // Seam-safe: uses vWorldPos (continuous) not vLocalPos (per-triangle).
-    vec2 wob  = glassWobble(vWorldPos, uTime);
-    vec2 wobR = wob * 1.15;  // red bends slightly more
-    vec2 wobB = wob * 0.85;  // blue bends slightly less
-    float R = texture2D(uScene, clamp(uv + faceUvOff + rR.xy * abXY + wobR, 0.001, 0.999)).r;
-    float G = texture2D(uScene, clamp(uv + faceUvOff + rG.xy * abXY + wob,  0.001, 0.999)).g;
-    float B = texture2D(uScene, clamp(uv + faceUvOff + rB.xy * abXY + wobB, 0.001, 0.999)).b;
+    float R = texture2D(uScene, clamp(uv + faceUvOff + rR.xy * abXY, 0.001, 0.999)).r;
+    float G = texture2D(uScene, clamp(uv + faceUvOff + rG.xy * abXY, 0.001, 0.999)).g;
+    float B = texture2D(uScene, clamp(uv + faceUvOff + rB.xy * abXY, 0.001, 0.999)).b;
     vec3 refracted = vec3(R, G, B);
 
     float cosT   = clamp(dot(e, n), 0.0, 1.0);
@@ -840,7 +816,7 @@ const PODIUM_H = 20; // tall enough to extend past any visible floor
 // High clearcoat + low roughness = glass-like specular reflections on column faces.
 // Podium materials reverted to pre-reactive state — static emissive, no envMap reactivity
 // Podium materials: polished obsidian. Top face = high clearcoat for light pools.
-const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x1a1a28, fog: false }; // v9: lifted from 0x12121c — still obsidian, 1.5x more light response // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
+const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x1a1a28, fog: false }; // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
