@@ -1992,9 +1992,12 @@ function _displayPrayerTimes(t, hijri) {
   const now = new Date(), nowM = now.getHours()*60+now.getMinutes();
   const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
   // Find current active prayer window — matches beam sectors exactly
-  // Sectors: Tahajjud(Midnight→Fajr), Fajr(Fajr→Sunrise), Dhuha(Sunrise→Dhuhr),
-  //          Dhuhr(Dhuhr→Asr), Asr(Asr→Maghrib), Maghrib(Maghrib→Isha), Isha(Isha→Midnight)
+  // Sectors: Tahajjud(Midnight→Fajr), Fajr(Fajr→Sunrise), Sunrise forbidden(Sunrise→Sunrise+20),
+  //          Dhuha(Sunrise+20→Dhuhr), Dhuhr(Dhuhr→Asr), Asr(Asr→Maghrib), Maghrib(Maghrib→Isha), Isha(Isha→Midnight)
   let activeP = '';
+  let _sunriseForbidden = false;
+  const _sunriseMin = t.Sunrise ? toM(t.Sunrise) : 0;
+  const _dhuhaStart = _sunriseMin + 20;
   const sectors = [
     {name:'Isha',     start:'Isha'},
     {name:'Maghrib',  start:'Maghrib'},
@@ -2006,11 +2009,20 @@ function _displayPrayerTimes(t, hijri) {
   for (let i = 0; i < sectors.length; i++) {
     if (t[sectors[i].start] && toM(t[sectors[i].start]) <= nowM) { activeP = sectors[i].name; break; }
   }
-  const grey = ['Sunrise','Qiyam'];
+  // Check if we're in the 20-min sunrise forbidden window
+  if (activeP === 'Sunrise' && nowM < _dhuhaStart) {
+    _sunriseForbidden = true;
+  }
+  const grey = ['Qiyam']; // Sunrise only grey during forbidden window, handled below
   const html = names.map(p => {
     let style = 'color:#e0e0e0';
-    if (p === activeP && prayerColors[p]) style = 'color:' + prayerColors[p];
+    if (p === activeP && prayerColors[p]) {
+      // During sunrise forbidden window, show Sunrise in grey instead of orange
+      if (p === 'Sunrise' && _sunriseForbidden) style = 'color:#888888';
+      else style = 'color:' + prayerColors[p];
+    }
     else if (grey.includes(p)) style = 'color:#666';
+    else if (p === 'Sunrise' && !_sunriseForbidden && activeP !== 'Sunrise') style = 'color:#666'; // non-active Sunrise stays grey
     return `<span data-prayer="${p}" style="${style};transition:all .3s ease">${p} ${t[p]}</span>`;
   }).join(' · ');
   // Fullscreen prayer bar
@@ -2018,7 +2030,7 @@ function _displayPrayerTimes(t, hijri) {
   // Update nav pill glow to current prayer color
   var _pillSlider = document.getElementById('modePillSlider');
   if (_pillSlider && activeP && prayerColors[activeP]) {
-    var gc = prayerColors[activeP];
+    var gc = (activeP === 'Sunrise' && _sunriseForbidden) ? '#888888' : prayerColors[activeP];
     _pillSlider.style.setProperty('--pill-glow-bar', gc);
     _pillSlider.style.setProperty('--pill-glow-bar-shadow', gc + '73'); // 45% alpha
     _pillSlider.style.setProperty('--pill-glow-bar-soft', gc + '26'); // 15% alpha

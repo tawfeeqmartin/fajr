@@ -1217,9 +1217,10 @@ function _isLastThird(now) {
 // Active: 0.18 max opacity, upcoming: 0.08, Fajr dim: 0.05.
 
 const PRAYER_WINDOWS_DEF = [
-  { name: 'Qiyam', startKey: 'Midnight', endKey: 'Fajr',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
+  { name: 'Qiyam',   startKey: 'Midnight', endKey: 'Fajr',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
   { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x6633ee, color2: 0xbb88ff, isFajr: true  },
-  { name: 'Sunrise', startKey: 'Sunrise',  endKey: 'Dhuhr',    color: 0xff9900, color2: 0xffee44, isFajr: false },
+  { name: 'Sunrise', startKey: 'Sunrise',  endKey: 'Sunrise', endOffset: 20, color: 0x888888, color2: 0x888888, isFajr: false, isForbidden: true },
+  { name: 'Dhuha',   startKey: 'Sunrise', startOffset: 20, endKey: 'Dhuhr', color: 0xff9900, color2: 0xffee44, isFajr: false },
   { name: 'Dhuhr',   startKey: 'Dhuhr',    endKey: 'Asr',      color: 0x00bb44, color2: 0x66ff99, isFajr: false },
   { name: 'Asr',     startKey: 'Asr',      endKey: 'Maghrib',  color: 0xff8800, color2: 0xffcc44, isFajr: false },
   { name: 'Maghrib', startKey: 'Maghrib',  endKey: 'Isha',     color: 0xff2200, color2: 0xff8866, isFajr: false },
@@ -1237,6 +1238,7 @@ const HOUR_ACTIVE_OP  = 2.2;  // ~2.5x boost when inside a beam
 const HOUR_CONTRAST = {
   Tahajjud: { c1: new THREE.Color(0xffcc44), c2: new THREE.Color(0xffee88) }, // gold vs purple
   Fajr:     { c1: new THREE.Color(0xff9933), c2: new THREE.Color(0xffcc66) }, // warm amber vs indigo
+  Sunrise:  { c1: new THREE.Color(0x888888), c2: new THREE.Color(0xaaaaaa) }, // grey — forbidden window
   Dhuha:    { c1: new THREE.Color(0x6622cc), c2: new THREE.Color(0x9944ff) }, // deep violet vs gold
   Dhuhr:    { c1: new THREE.Color(0xff2266), c2: new THREE.Color(0xff6699) }, // magenta/pink vs green
   Asr:      { c1: new THREE.Color(0x00ccff), c2: new THREE.Color(0x66eeff) }, // cyan vs amber
@@ -1343,8 +1345,8 @@ function buildPrayerSectors() {
   prayerSectors = [];
   const T = window._prayerTimings || PT_FALLBACK;
   PRAYER_WINDOWS_DEF.forEach(function(def) {
-    const startMin = ptParseMin(T[def.startKey]);
-    const endMin   = ptParseMin(T[def.endKey]);
+    const startMin = (ptParseMin(T[def.startKey]) + (def.startOffset || 0)) % 1440;
+    const endMin   = (ptParseMin(T[def.endKey]) + (def.endOffset || 0)) % 1440;
     const startAng = ptTimeToAngle(startMin);
     const endAng   = ptTimeToAngle(endMin);
     prayerSectors.push({ def, startMin, endMin, startAng, endAng });
@@ -1504,10 +1506,12 @@ function updatePrayerWindows(now) {
   // ── Active prayer disc (full intensity) ──
   const _opA = window._OP_ACTIVE_OVERRIDE != null ? window._OP_ACTIVE_OVERRIDE : OP_ACTIVE;
   const _opS = window._OP_STEP_OVERRIDE != null ? window._OP_STEP_OVERRIDE : OP_STEP;
+  const OP_FORBIDDEN = 0.25; // dim grey for forbidden windows (e.g. Sunrise)
   const _lerpRate = (_devSnapIntensity || window._forceTimeMin != null) ? 1.0 : 0.03;
   if (_devSnapIntensity) _devSnapIntensity = false;
   const u = _prayerDiscMat.uniforms;
-  const activeTarget = activeIdx >= 0 ? _opA : 0.0;
+  const _activeIsForbidden = activeIdx >= 0 && allSectors[activeIdx].def.isForbidden;
+  const activeTarget = activeIdx >= 0 ? (_activeIsForbidden ? OP_FORBIDDEN : _opA) : 0.0;
   u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, activeTarget, _lerpRate);
 
   var _angLerp = _swipeTimeOverride !== null ? 0.08 : _lerpRate; // faster during swipe for responsive feel
@@ -1528,7 +1532,9 @@ function updatePrayerWindows(now) {
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
   const _maxWindows = window._devWindowCount != null ? window._devWindowCount : 1;
-  const nextTarget = (nextIdx >= 0 && _maxWindows >= 2) ? (_devActive ? _opA : Math.max(_opA - _opS, 0.0)) : 0.0;
+  const _nextIsForbidden = nextIdx >= 0 && allSectors[nextIdx].def.isForbidden;
+  const _nextBaseOp = _nextIsForbidden ? OP_FORBIDDEN : _opA;
+  const nextTarget = (nextIdx >= 0 && _maxWindows >= 2) ? (_devActive ? _nextBaseOp : Math.max(_nextBaseOp - _opS, 0.0)) : 0.0;
   nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, _lerpRate);
 
   if (nextIdx >= 0) {
@@ -1543,7 +1549,9 @@ function updatePrayerWindows(now) {
 
   // ── Third prayer disc (prayer after next) ──
   const tu = _thirdDiscMat.uniforms;
-  const thirdTarget = (thirdIdx >= 0 && _maxWindows >= 3) ? (_devActive ? _opA : Math.max(_opA - _opS * 2, 0.0)) : 0.0;
+  const _thirdIsForbidden = thirdIdx >= 0 && allSectors[thirdIdx].def.isForbidden;
+  const _thirdBaseOp = _thirdIsForbidden ? OP_FORBIDDEN : _opA;
+  const thirdTarget = (thirdIdx >= 0 && _maxWindows >= 3) ? (_devActive ? _thirdBaseOp : Math.max(_thirdBaseOp - _opS * 2, 0.0)) : 0.0;
   tu.uIntensity.value = THREE.MathUtils.lerp(tu.uIntensity.value, thirdTarget, _lerpRate);
 
   if (thirdIdx >= 0) {
@@ -2832,7 +2840,7 @@ document.addEventListener('keydown', function(e) {
 // PRAYER SWIPE — swipe left/right to preview prayer times
 // ─────────────────────────────────────────────────────────────────────────────
 var _swipeStartX = 0, _swipeStartY = 0, _swipeSwiping = false;
-var _swipePreviewIdx = -1;   // -1 = live mode, 0-6 = prayer index
+var _swipePreviewIdx = -1;   // -1 = live mode, 0-7 = prayer index
 var _swipeRevertTimer = null;
 var _swipeLabelEl = null;
 var _swipeFadeTimer = null;
@@ -2856,12 +2864,15 @@ function _swipeGetCurrentIdx() {
 
 function _swipeShowPreview(idx) {
   if (!prayerSectors.length) return;
-  idx = ((idx % 7) + 7) % 7; // wrap 0-6
+  var _sectorCount = prayerSectors.length || 8;
+  idx = ((idx % _sectorCount) + _sectorCount) % _sectorCount;
   _swipePreviewIdx = idx;
   var ps = prayerSectors[idx];
   var def = ps.def;
   var T = window._prayerTimings;
-  var timeStr = T ? (T[def.startKey] || '').split(' ')[0] : '';
+  // Use sector's computed startMin for display (handles offsets like Sunrise+20 for Dhuha)
+  var _swH = Math.floor(ps.startMin / 60), _swMn = ps.startMin % 60;
+  var timeStr = (_swH < 10 ? '0' : '') + _swH + ':' + (_swMn < 10 ? '0' : '') + _swMn;
 
   // Create/update the preview label above nav pill
   if (!_swipeLabelEl) {
@@ -2872,9 +2883,13 @@ function _swipeShowPreview(idx) {
   }
   var c = new THREE.Color(def.color);
   var hex = '#' + c.getHexString();
+  var _subtitleText = def.isForbidden
+    ? '<div style="font-size:clamp(.55rem,1vw,.65rem);font-weight:400;letter-spacing:.1em;color:#888;opacity:.7;margin-top:2px">Avoid prayer</div>'
+    : '';
   _swipeLabelEl.innerHTML =
     '<div style="font-size:clamp(.6rem,1.2vw,.75rem);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:' + hex + ';opacity:.7;margin-bottom:2px">' + def.name + '</div>' +
-    '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>';
+    '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>' +
+    _subtitleText;
   _swipeLabelEl.style.display = 'block';
   _swipeLabelEl.style.opacity = '1';
 
@@ -2993,7 +3008,8 @@ document.addEventListener('touchmove', function(e) {
 
     // One drag = one prayer step in the swipe direction
     var prayerDir = totalDx > 30 ? -1 : totalDx < -30 ? 1 : 0; // swipe left = next, swipe right = previous
-    var targetIdx = ((_swipeDragBaseIdx + prayerDir) % 7 + 7) % 7;
+    var _scnt = prayerSectors.length || 8;
+    var targetIdx = ((_swipeDragBaseIdx + prayerDir) % _scnt + _scnt) % _scnt;
     if (targetIdx !== _swipeLastTriggeredIdx) {
       _swipeLastTriggeredIdx = targetIdx;
       _swipeShowPreview(targetIdx);
