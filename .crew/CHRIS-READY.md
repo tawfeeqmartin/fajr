@@ -1,61 +1,34 @@
-# CHRIS-READY — Prayer Light v8d
+# CHRIS-READY: Cube Face Seam/Fold Fix
 
-## What Changed (commit `482b9ac`)
+**Status:** ✅ Ready for review
+**Commit:** 7a7240e (on main, NOT pushed)
+**File:** glass-cube-clock.js
 
-### New: `prayerSlash` SpotLight
-- **Position:** (4.0, 1.0, 1.8) — far right, just above podium top, slightly forward
-- **Target:** (0, -1.5, 1.32) — upper-mid of podium front face
-- **Cone:** 0.14 rad (~8°), penumbra 0.55, decay 1.8, distance 7
-- **Effect:** Sharp colored diagonal streak on podium front face from the right. Partial coverage only — one face, not flooding.
-- **Intensity:** 14.0 — strong enough to read as obvious color against dark podium
+## Bug
+Tawfeeq reported visible fold/crease lines cutting diagonally across the left and right cube faces — "tightly compressed fold" that didn't resolve on phone or PC.
 
-### Repositioned: `prayerRim` SpotLight
-- **From:** (3.5, 5.0, -3.5) aimed at (0, 0.5, 0) — was flooding from above
-- **To:** (2.5, 2.5, -3.0) aimed at (0, 0.57, 0) — behind-right, grazes cube at ~45°
-- **Cone:** tightened to 0.20 rad, decay 1.5, distance 8
-- **Effect:** Colored rim catch on glass cube edges
+## Root Cause
+**Not the per-face differentiation code** (diagnostic proved it — zeroing all per-face effects didn't help).
 
-### Repositioned: `prayerGlow` PointLight
-- **From:** (0, -0.6, 0.8) radius 6, intensity 8.0 — was spilling onto podium
-- **To:** (0, 0.57, 0) radius 2.5, intensity 0.8 — inside cube, barely-there tint
+The actual culprit was the **vertex shader normalizing `vViewDir` before interpolation**:
+```glsl
+vViewDir = normalize(-mvPos.xyz);  // ← BUG
+```
+On a BoxGeometry with 2 triangles per face, interpolating normalized vectors creates a crease along the triangle diagonal. `lerp(normalize(A), normalize(B), t)` ≠ `normalize(lerp(A, B, t))`.
 
-### Disabled: `prayerWash` SpotLight
-- Max intensity set to 0.0 — was the main cause of blue/green flooding
-- Light still exists and lerps, just does nothing. Easy to re-enable.
+## Fix (4 changes)
+1. **`vViewDir = -mvPos.xyz`** — pass raw vector, fragment shader normalizes per-pixel
+2. **`BoxGeometry(1.2,1.2,1.2,4,4,4)`** — 4x subdivision smooths remaining interpolation artifacts
+3. **`sin(diagInput * 1.8) * 0.5 + 0.5`** — replaced peaked `exp(-|x|*7)` with smooth sinusoidal wave (no visible band line)
+4. **`diagF * 0.08`** normal distortion — was 100%, now 8% (eliminates refraction fold at dichroic band)
 
-### Untouched:
-- All podium materials (0x12121c, all emissive values)
-- Prayer color definitions
-- All other scene lights
+Also softened: IOR shifts halved, aberration scale reduced (0.7→0.35 on side faces), diagInput face rotation weights reduced.
 
-## Renders (`.crew/renders/prayer-{name}-v8.png`)
+## Per-face variation preserved
+Each face still reads optically distinct (different IOR, aberration, dichroic character). The changes only eliminate the visible seam artifacts.
 
-| Prayer | Color | Slash | Podium Dark | Cube Rim | Score |
-|--------|-------|-------|-------------|----------|-------|
-| Tahajjud | Violet | ✓ diagonal | ✓✓ very dark | ✓ pink/violet edges | 4/5 |
-| Fajr | Blue-violet | ✓ defined streak | ✓✓ deep black | ✓ blue-purple edges | 4/5 |
-| Dhuha | Amber | ✓✓ bold golden | ✓✓ dark base | ✓ warm gold edges | 4.5/5 |
-| Dhuhr | Green | ✓ visible | ✓ mostly dark | ✓ teal-green | 3.5/5 |
-| Asr | Orange | ✓ strong slab | ✓✓ dark | ✓ warm edges | 4/5 |
-| Maghrib | Red | ✓✓ most dramatic | ✓✓ cinematic | ✓ red-violet edges | 4.5/5 |
-| Isha | Blue | ✓ visible streak | ✓ dark | ✓ cyan-blue | 3.5/5 |
-
-## Honest Assessment
-
-**What works well:**
-- Dark podium preserved across all 7 — no more flat/colorful podium
-- Colored slash reads as a SLASH, not a wash (esp. red, amber, violet)
-- Cube catches colored rim light at edges
-- Each prayer has distinctly different color mood
-
-**What's imperfect:**
-- Blue (Isha) and green (Dhuhr) still show some background color bloom — this is mostly from the prayer beam shader sectors radiating into the scene, not from my SpotLights (wash is disabled, glow is at 0.8)
-- Warm colors (red, amber, orange) create stronger slash contrast than cool colors
-- The "pink/magenta core" seen in all renders is the cube's base lighting (cubeBack/cubeSun) — not prayer-related
-
-**Potential next steps if Tawfeeq wants more:**
-- Could add a second slash from the left to create an X pattern
-- Could re-enable wash at 0.5 for very subtle atmospheric lift (warm colors only?)
-- Blue/green could benefit from slightly desaturated slash color to reduce bloom perception
-
-## DO NOT PUSH — chef reviews first.
+## Verification
+- Pixel diff (v175 → fixed): max 97, 52k pixels changed by >40 levels — concentrated on side faces
+- Vision analysis confirms: fold lines on left and right faces are **eliminated**
+- Glass reads as smooth, coherent translucent solid
+- Renders: `.crew/renders/FINAL-ORIG-v175.png` (before), `.crew/renders/FINAL-FIXED.png` (after)
