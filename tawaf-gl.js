@@ -1222,34 +1222,111 @@ const _ambientLight = new THREE.AmbientLight(0x303030, 0.1);
 scene.add(_ambientLight);
 
 // ── Glass cube geometry ──
-const _glassCubeSide = 0.272;
+const _glassCubeSide = 0.45;  // larger cube = more visible refraction
 const _glassCubeGeo = new THREE.BoxGeometry(_glassCubeSide, _glassCubeSide, _glassCubeSide);
 
-// ── MeshPhysicalMaterial — perfectly clear glass ──
-const _glassCubeMat = new THREE.MeshPhysicalMaterial({
-    transmission: 1.0,
-    thickness: 0.5,             // LOW — high values make glass appear opaque
-    roughness: 0.05,            // tiny bit of roughness helps transmission
-    metalness: 0.0,
-    ior: 1.5,
-    dispersion: 3.0,            // visible chromatic aberration
+// ── CUSTOM FBO GLASS SHADER ──
+// Manual approach: render scene to FBO, then sample it through the glass
+// with per-channel IOR offsets. This bypasses Three.js's broken transmission system.
+const _glassFBO = new THREE.WebGLRenderTarget(
+    renderer.domElement.width,
+    renderer.domElement.height,
+    { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat }
+);
 
-    iridescence: 0.1,               // very subtle dichroic shimmer
-    iridescenceIOR: 2.0,
-    iridescenceThicknessRange: [200, 400],
+const _glassCubeMat = new THREE.ShaderMaterial({
+    uniforms: {
+        tBackground: { value: _glassFBO.texture },
+        uResolution: { value: new THREE.Vector2(renderer.domElement.width, renderer.domElement.height) },
+        uIOR: { value: 1.45 },
+        uChromaticSpread: { value: 0.20 },  // visible R/G/B separation
+        uFresnelPower: { value: 3.0 },
+        uFresnelColor: { value: new THREE.Color(1.0, 1.0, 1.0) },
+        uTime: { value: 0.0 },
+    },
+    vertexShader: /* glsl */`
+        varying vec3 vWorldNormal;
+        varying vec3 vViewDir;
+        varying vec3 vLocalPos;
 
-    reflectivity: 0.1,             // minimal reflection — let transmission dominate
-    envMapIntensity: 0.3,           // very low — glass should be about what's BEHIND it
+        void main() {
+            vLocalPos = position;
+            vec4 worldPos = modelMatrix * vec4(position, 1.0);
+            vWorldNormal = normalize(normalMatrix * normal);
+            vViewDir = normalize(cameraPosition - worldPos.xyz);
+            gl_Position = projectionMatrix * viewMatrix * worldPos;
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tBackground;
+        uniform vec2 uResolution;
+        uniform float uIOR;
+        uniform float uChromaticSpread;
+        uniform float uFresnelPower;
+        uniform vec3 uFresnelColor;
+        uniform float uTime;
 
-    attenuationColor: new THREE.Color(0xffffff),
-    attenuationDistance: 100.0,
+        varying vec3 vWorldNormal;
+        varying vec3 vViewDir;
+        varying vec3 vLocalPos;
 
-    clearcoat: 0.2,                 // subtle — just enough for edge glints
-    clearcoatRoughness: 0.0,
+        // Schlick Fresnel
+        float schlick(vec3 viewDir, vec3 normal, float power) {
+            return pow(1.0 - abs(dot(viewDir, normal)), power);
+        }
 
-    transparent: true,
-    opacity: 1.0,
-    side: THREE.DoubleSide,
+        // Thin-film iridescence
+        vec3 thinFilmIridescence(float angle, float thickness) {
+            float delta = thickness * angle * 6.2831853;
+            return vec3(
+                0.5 + 0.5 * cos(delta),
+                0.5 + 0.5 * cos(delta - 2.094),
+                0.5 + 0.5 * cos(delta - 4.189)
+            );
+        }
+
+        void main() {
+            vec2 screenUV = gl_FragCoord.xy / uResolution;
+            vec3 N = normalize(vWorldNormal);
+            vec3 V = normalize(vViewDir);
+
+            // Fresnel — glass edges glow, centers are transparent
+            float fres = schlick(-V, N, uFresnelPower);
+
+            // Refraction offset — displaces the background UV per normal
+            vec3 refracted = refract(V, N, 1.0 / uIOR);
+            vec2 refrOffset = refracted.xy * 0.5;  // HUGE offset for debugging
+
+            // Chromatic aberration — R/G/B each get different offsets
+            float ca = uChromaticSpread;
+            vec2 uvR = screenUV + refrOffset * (1.0 + ca);
+            vec2 uvG = screenUV + refrOffset;
+            vec2 uvB = screenUV + refrOffset * (1.0 - ca);
+
+            // DEBUG: sample at exact screen UV to verify FBO works
+            vec3 debugBg = texture2D(tBackground, screenUV).rgb;
+            // Also sample with offsets
+            float r = texture2D(tBackground, uvR).r;
+            float g = texture2D(tBackground, uvG).g;
+            float b = texture2D(tBackground, uvB).b;
+            vec3 refractedColor = debugBg; // USE DEBUG — shows exact background
+
+            // Internal diagonal beam-splitter
+            float diagDist = abs(vLocalPos.x - vLocalPos.z) / 1.414;
+            float diagMask = smoothstep(0.035, 0.0, diagDist);
+            float cosAngle = abs(dot(-V, normalize(vec3(1.0, 1.0, 0.0))));
+            vec3 iriColor = thinFilmIridescence(cosAngle, 3.0 + sin(uTime * 0.5) * 0.5);
+
+            // Composite
+            vec3 color = refractedColor;
+            color = mix(color, iriColor * 1.0, diagMask * 0.5);    // diagonal iridescence
+            color = mix(color, uFresnelColor * 1.8, fres * 0.45);  // Fresnel edge highlights
+
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `,
+    transparent: false,  // glass fills its area completely
+    side: THREE.FrontSide,
     depthTest: true,
     depthWrite: true,
 });
@@ -1259,7 +1336,7 @@ const _glassCubeMat = new THREE.MeshPhysicalMaterial({
 
 // ── Diagonal internal beam-splitter plane ──
 // Real dichroic cubes have an internal diagonal coating that splits light.
-const _diagonalGeo = new THREE.PlaneGeometry(_glassCubeSide * 0.95, _glassCubeSide * 1.34);
+const _diagonalGeo = new THREE.PlaneGeometry(_glassCubeSide * 0.9, _glassCubeSide * 1.27);
 const _diagonalMat = new THREE.MeshPhysicalMaterial({
     transmission: 0.92,
     thickness: 0.1,
@@ -1284,6 +1361,7 @@ _diagonalPlane.renderOrder = 9;
 // ── Assemble the glass cube ──
 const glassCube = new THREE.Mesh(_glassCubeGeo, _glassCubeMat);
 // Diagonal plane temporarily disabled for debugging glass transmission
+// Diagonal plane disabled — custom shader simulates it internally via diagDist
 // glassCube.add(_diagonalPlane);
 glassCube.rotation.set(
     THREE.MathUtils.degToRad(12),
@@ -1294,7 +1372,7 @@ glassCube.position.set(0, 0, 0.1);
 glassCube.renderOrder = 0;  // renders before atenReignQuad so transmission FBO captures ring meshes
 scene.add(glassCube);
 
-// Debug sphere removed — transmission FBO confirmed working with MeshBasicMaterial
+// Debug plane removed — glass transmission confirmed working with two-pass render
 
 // ═══════════════════════════════════════════════════════════════
 // 3D RING GEOMETRY — Seven Heavens as real geometry
@@ -1321,13 +1399,13 @@ const _ringBounds = [
 // Z depths — staggered so inner rings are close to the cube, outer rings are far
 // Glass cube is at z=0.1; rings go behind it
 const _ringDepths = [
-    -0.05,   // Ring 0: behind cube (inner — visible through glass)
-    -0.10,   // Ring 1: behind cube
-    -0.15,   // Ring 2: behind cube
-     0.12,   // Ring 3: IN FRONT of cube — rings wrap around it
-     0.16,   // Ring 4: in front
-     0.20,   // Ring 5: in front
-     0.24,   // Ring 6: outermost, in front (closest to camera)
+    -0.15,   // Ring 0: behind cube (inner — visible through glass)
+    -0.35,   // Ring 1: behind cube
+    -0.60,   // Ring 2: behind cube — deeper = more perspective shift
+     0.15,   // Ring 3: IN FRONT of cube — rings wrap around it
+     0.35,   // Ring 4: in front
+     0.60,   // Ring 5: in front
+     0.90,   // Ring 6: outermost, closest to camera — most perspective
 ];
 
 // Create ring meshes with simple ShaderMaterial for smooth blending
@@ -1373,26 +1451,32 @@ for (let i = 0; i < 7; i++) {
     const outerR = outerUV * _ringScale;
 
     const geo = new THREE.RingGeometry(innerR, outerR, 128, 1);
-    // MeshBasicMaterial — required for glass transmission FBO compatibility.
+    // MeshStandardMaterial with emissive — required for glass transmission FBO.
     // ShaderMaterial is invisible to Three.js's transmission pre-pass.
-    // We lose the inner→outer gradient but gain working glass refraction.
-    const mat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(0.5, 0.5, 0.5),
+    // Emissive rings glow and create visible refraction through the glass cube.
+    const mat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(0x000000),           // no diffuse (all light is emissive)
+        emissive: new THREE.Color(0.5, 0.5, 0.5),   // will be updated per prayer
+        emissiveIntensity: 2.0,                      // bright enough to refract visibly
         side: THREE.DoubleSide,
         transparent: false,
         depthTest: true,
         depthWrite: true,
+        roughness: 1.0,
+        metalness: 0.0,
     });
     // Compatibility shim — code that sets ring colors uses uniforms.uColorInner.value
-    // This shim redirects those calls to mat.color
+    // Redirect to mat.emissive for MeshStandardMaterial
     mat.uniforms = {
-        uColorInner:  { value: mat.color },
-        uColorOuter:  { value: new THREE.Color(0.5, 0.5, 0.5) }, // ignored but prevents errors
-        uBreath:      { value: 0.0 }, // ignored — no gradient animation with BasicMaterial
+        uColorInner:  { value: mat.emissive },
+        uColorOuter:  { value: new THREE.Color(0.5, 0.5, 0.5) },
+        uBreath:      { value: 0.0 },
     };
 
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(0, 0, _ringDepths[i]);
+    // No tilt — rings face the camera. Perspective comes from Z-depth spread
+    // and the 22° camera elevation.
     // Rings behind glass (i<3): renderOrder < 0 (captured by transmission FBO)
     // Rings in front (i>=3): renderOrder > 0 (render after glass, frame the cube)
     mesh.renderOrder = i < 3 ? (-10 + (2 - i)) : (5 + i);
@@ -3074,9 +3158,20 @@ function update(timestamp) {
     // Pass 2: Show aten quad → render scene again WITHOUT clearing
     //         The aten quad (transparent, additive, depthTest:false) composites
     //         its beams on top of the glass render.
-    atenReignQuad.visible = false;
+    // ── CUSTOM FBO GLASS RENDER PIPELINE ──
+    // Step 1: Render everything EXCEPT the glass cube to the FBO
+    //         This captures what's "behind" the glass (rings, background, beams)
+    glassCube.visible = false;
+    renderer.setRenderTarget(_glassFBO);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+    glassCube.visible = true;
+
+    // Step 2: Update glass shader uniforms
+    _glassCubeMat.uniforms.uTime.value = performance.now() * 0.001;
+
+    // Step 3: Normal render with the glass cube using the FBO texture
     composer.render();
-    atenReignQuad.visible = true;
 
     updateUI(now, vars);
 }
@@ -3143,6 +3238,9 @@ function onResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(W, H);
     composer.setSize(W, H);
+    // Update glass FBO size
+    _glassFBO.setSize(W * renderer.getPixelRatio(), H * renderer.getPixelRatio());
+    _glassCubeMat.uniforms.uResolution.value.set(W * renderer.getPixelRatio(), H * renderer.getPixelRatio());
 
     // Update aspect ratio for ring and vignette shaders (keeps circles circular)
     const newAspectRatio = W / H;

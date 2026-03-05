@@ -219,10 +219,8 @@ body::after{display:none;
   left:50%;transform:translateX(-50%);z-index:950;
   display:flex;align-items:center;justify-content:center;gap:0;
   padding:5px;
-  background:rgba(13,13,18,.55);
-  backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
+  background:none;
   border:none;border-radius:20px;
-  box-shadow:0 4px 24px rgba(0,0,0,.3);
 }
 
 .mode-pill-btn{
@@ -2996,7 +2994,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=179';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=180';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
