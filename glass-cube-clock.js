@@ -362,12 +362,12 @@ scene.add(prayerRim, prayerRim.target);
 
 // v8: podium slash — tight colored edge-catch on front face, sharp angle from right
 const prayerSlash = new THREE.SpotLight(0x111122, 0);
-prayerSlash.position.set(4.0, 1.0, 1.8);      // v8b: more to the side, sharp grazing angle on front face
-prayerSlash.target.position.set(0, -1.5, 1.32); // v8b: aimed at upper-mid of front face — diagonal catch
-prayerSlash.angle = 0.14;      // v8b: tighter cone — sharp slash, partial coverage only
+prayerSlash.position.set(2.0, 1.5, 4.5);      // v9: face the front face properly (NdotL 0.10→0.75)
+prayerSlash.target.position.set(0, -1.5, 1.32); // aimed at upper-mid of front face
+prayerSlash.angle = 0.18;      // slightly wider for coverage
 prayerSlash.penumbra = 0.55;   // soft edges so it blends
-prayerSlash.decay = 1.8;       // v8b: dies faster — stays contained
-prayerSlash.distance = 7;      // v8b: shorter reach, stays on podium face
+prayerSlash.decay = 1.8;
+prayerSlash.distance = 9;      // longer reach from new position
 prayerSlash.castShadow = false;
 scene.add(prayerSlash, prayerSlash.target);
 
@@ -380,7 +380,7 @@ let _prayerRimIntensity = 0;
 let _prayerSlashIntensity = 0;
 const PRAYER_WASH_MAX = 0.0;   // v8d: DISABLED — slash is hero, wash was flooding blue/green
 const PRAYER_RIM_MAX = 5.0;    // v8d: Fresnel edge catch on glass cube
-const PRAYER_SLASH_MAX = 14.0;  // v8d: hero podium slash — must read as obvious color on dark surface
+const PRAYER_SLASH_MAX = 25.0;  // v9: boosted — NdotL fix + color lift = needs less but going safe
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
@@ -840,7 +840,7 @@ const PODIUM_H = 20; // tall enough to extend past any visible floor
 // High clearcoat + low roughness = glass-like specular reflections on column faces.
 // Podium materials reverted to pre-reactive state — static emissive, no envMap reactivity
 // Podium materials: polished obsidian. Top face = high clearcoat for light pools.
-const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x12121c, fog: false }; // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
+const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x1a1a28, fog: false }; // v9: lifted from 0x12121c — still obsidian, 1.5x more light response // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
