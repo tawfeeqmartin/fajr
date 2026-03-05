@@ -1217,9 +1217,9 @@ function _isLastThird(now) {
 // Active: 0.18 max opacity, upcoming: 0.08, Fajr dim: 0.05.
 
 const PRAYER_WINDOWS_DEF = [
-  { name: 'Tahajjud', startKey: 'Midnight', endKey: 'Fajr',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
+  { name: 'Qiyam', startKey: 'Midnight', endKey: 'Fajr',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
   { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x6633ee, color2: 0xbb88ff, isFajr: true  },
-  { name: 'Dhuha',   startKey: 'Sunrise',  endKey: 'Dhuhr',    color: 0xff9900, color2: 0xffee44, isFajr: false },
+  { name: 'Sunrise', startKey: 'Sunrise',  endKey: 'Dhuhr',    color: 0xff9900, color2: 0xffee44, isFajr: false },
   { name: 'Dhuhr',   startKey: 'Dhuhr',    endKey: 'Asr',      color: 0x00bb44, color2: 0x66ff99, isFajr: false },
   { name: 'Asr',     startKey: 'Asr',      endKey: 'Maghrib',  color: 0xff8800, color2: 0xffcc44, isFajr: false },
   { name: 'Maghrib', startKey: 'Maghrib',  endKey: 'Isha',     color: 0xff2200, color2: 0xff8866, isFajr: false },
@@ -2890,7 +2890,7 @@ function _swipeShowPreview(idx) {
 
   // Color ONLY the selected prayer — others stay default (no dimming)
   document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) {
-    if (sp.dataset.prayer === def.name || (def.name === 'Tahajjud' && sp.dataset.prayer === 'Qiyam') || (def.name === 'Dhuha' && sp.dataset.prayer === 'Sunrise')) {
+    if (sp.dataset.prayer === def.name) {
       sp.style.color = hex;
     } else {
       sp.style.color = '';
