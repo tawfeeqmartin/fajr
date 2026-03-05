@@ -1,61 +1,50 @@
-# CHRIS-READY.md — Prayer Spotlights v7 (Triple Approach)
+# CHRIS-READY — World-Space UV Wobble (v180 feedback)
 
-**Status:** ✅ READY FOR CHEF REVIEW  
-**Date:** 2026-03-04  
-**Branch:** main (local, not pushed)  
-**Commits:** `4fde826` (v7 impl) → `f23075a` (window expose)
+**Date:** 2026-03-04
+**Branch:** main (commits `dae9a15` → `d858c03`)
+**File:** glass-cube-clock.js
 
----
+## What Changed
 
-## Problem Diagnosis
+Added `glassWobble()` — a world-space noise function that applies subtle UV displacement
+to FBO refraction sample coordinates. This adds organic internal bending/variation to the
+glass prism without touching the `diagF * 0.08` normal distortion path.
 
-Prayer spotlights were invisible because the podium base color was `0x12121c` (near-black).  
-In PBR lighting: `diffuse = lightColor × surfaceColor`. When surfaceColor ≈ black → output ≈ zero.  
-Increasing spotlight intensity had zero effect — the surface absorbed everything.
+### Technical Approach
+- **Two-octave sin-based noise** using `vWorldPos` (world position = continuous across all face boundaries, zero seam risk)
+- **Per-channel UV variation**: red bends 15% more, blue 15% less → micro chromatic wobble
+- **Time-animated** via `uTime` — glass feels alive, not static
+- **Amplitude**: `0.007` — noticeable bending, not overwhelming
 
-## Solution: Triple Approach (all three combined)
+### What Was NOT Changed
+- `diagF * 0.08` cap — **preserved exactly as-is** from seam fix commit `7a7240e`
+- No changes to the normal distortion path
+- No changes to IOR values, fresnel, dichroic, or any other shader parameters
 
-### Approach A: Lift Podium Color
-- `podiumBase.color`: `0x12121c` → `0x2a2a3a`
-- Still dark, still moody — but mid-dark instead of light-absorbing black
-- Colored SpotLights can now paint the surface visibly
+## Why This Approach
+The original `diagF` path uses `vLocalPos` which has per-triangle discontinuities →
+seam artifacts on left/right faces. The UV wobble operates in a completely different
+space:
+1. Uses `vWorldPos` (interpolated from `modelMatrix * position`, continuous)
+2. Applied AFTER refraction ray calculation, directly to FBO texture lookup UV
+3. Face-agnostic — no face detection, no local position, no triangle boundaries
 
-### Approach B: Prayer PointLight at Podium Base
-- New `prayerGlow` PointLight at `(0, -0.6, 0.8)` — just below cube, slightly forward
-- Max intensity: 8.0, radius: 6 units
-- PointLight has no surface-color dependency — illuminates regardless of albedo
-- Lerps color to match active prayer, same rate as wash/rim (0.022)
-- Hidden during FBO pass to prevent glass refraction bleed
+## Renders
+All 7 prayer states rendered on GPU Chrome (RTX A6000):
+- fajr, sunrise, dhuhr, asr, maghrib, isha, tahajjud
+- Screenshots in `/home/openclaw-agent/.openclaw/workspace/renders/wobble-*.png`
+- Console: ZERO errors, ZERO warnings
+- Renderer: `ANGLE (D3D12 (NVIDIA RTX A6000), OpenGL ES 3.1)`
 
-### Approach C: Emissive Tint on Podium Faces
-- Podium top face (+y, mat index 2): emissive lerps to 25% of prayer color, intensity → 2.5
-- Podium front face (+z, mat index 4): emissive lerps to 15% of prayer color, intensity → 1.8
-- Emissive ignores incoming light entirely — always visible
-- Fades back to default when no prayer is active
+## Seam Check
+✅ No fold seam artifacts detected on left/right faces across all 7 states.
+The wobble path is mathematically incapable of producing seams (world-space, continuous).
 
-## Also Added
-- `window._devJumpToTime` — exposed module-scoped function for render pipeline
-- `window._prayerDebug` — real-time debug state (active, colors, intensities)
-- Updated `render-all-prayers.sh` — renders all 7 prayers with dev panel hidden
+## Tuning
+Amplitude is a single float on line ~645: `return vec2(wx, wy) * 0.007;`
+- `0.003` = barely perceptible
+- `0.005` = subtle
+- `0.007` = noticeable (current)
+- `0.010` = strong — test first
 
-## Render Results (v7c — clean, no dev panel)
-
-All 7 prayers clearly distinct:
-
-| Prayer | Color Hex | Podium Tint | Mood | Verdict |
-|--------|-----------|-------------|------|---------|
-| Tahajjud | `#8811ff` | Deep purple | Mystical, nocturnal | ✅ Excellent |
-| Fajr | `#6633ee` | Cool blue-violet | Pre-dawn twilight | ✅ Distinct from Tahajjud |
-| Dhuha | `#ff9900` | Rich gold/amber | Warm radiant morning | ✅ Excellent |
-| Dhuhr | `#00bb44` | Vivid emerald | Centered, grounded | ✅ Excellent |
-| Asr | `#ff8800` | Deep amber-orange | Late afternoon warmth | ✅ Distinct from Dhuha |
-| Maghrib | `#ff2200` | Crimson red | Dramatic sunset fire | ✅ Excellent |
-| Isha | `#1166ff` | Royal blue | Deep tranquility | ✅ Excellent |
-
-Vision model rated: **★★★★½ — Showroom-Worthy**  
-Quote: *"This looks like it belongs on an Apple Design Award stage."*
-
-## Renders Location
-`.crew/renders/prayer-{name}-v7c.png` — 7 clean screenshots, 430×932 @2x DPR
-
-## NOT pushed — awaiting chef review.
+Chef: review renders, adjust amplitude to taste. Do NOT push until approved.
