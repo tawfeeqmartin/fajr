@@ -629,6 +629,23 @@ const dichroicFrag = `
   varying vec3 vWorldPos;
   varying vec3 vWorldNormal;
 
+  // ── World-space UV wobble noise (Chris, Mar 4) ──────────────────────
+  // Adds subtle internal distortion to FBO refraction WITHOUT using the
+  // diagF normal path (which causes seam artifacts on left/right faces).
+  // Uses world position → continuous across all face boundaries.
+  // Two octaves of sin-based pseudo-noise, time-animated for living glass.
+  vec2 glassWobble(vec3 wp, float t) {
+    // First octave — slow, large-scale bending
+    float wx = sin(wp.x * 3.7 + wp.y * 2.3 + t * 0.4) *
+               cos(wp.z * 2.9 - wp.x * 1.8 + t * 0.3);
+    float wy = cos(wp.y * 3.1 + wp.z * 2.7 - t * 0.35) *
+               sin(wp.x * 2.5 + wp.y * 1.6 + t * 0.45);
+    // Second octave — faster, finer detail
+    wx += sin(wp.z * 7.3 - wp.y * 5.1 + t * 0.8) * 0.35;
+    wy += cos(wp.x * 6.7 + wp.z * 4.9 - t * 0.7) * 0.35;
+    return vec2(wx, wy) * 0.003; // amplitude: subtle — just enough to feel alive
+  }
+
   vec3 thinFilm(float cosT, float t) {
     float p = 6.28318 * 5.0 * cosT + t * 0.25;
     return vec3(0.5+0.5*cos(p), 0.5+0.5*cos(p-2.094), 0.5+0.5*cos(p+2.094));
@@ -686,9 +703,16 @@ const dichroicFrag = `
       dot(normalize(vWorldNormal), vec3(-0.018, 0.022, -0.013))
     );
     vec2 abXY = vec2(uAb / uAspect, uAb) * abScale;
-    float R = texture2D(uScene, clamp(uv + faceUvOff + rR.xy * abXY, 0.001, 0.999)).r;
-    float G = texture2D(uScene, clamp(uv + faceUvOff + rG.xy * abXY, 0.001, 0.999)).g;
-    float B = texture2D(uScene, clamp(uv + faceUvOff + rB.xy * abXY, 0.001, 0.999)).b;
+
+    // ── UV wobble: subtle internal distortion via world-space noise ──
+    // Per-channel offset variation creates micro chromatic bending.
+    // Seam-safe: uses vWorldPos (continuous) not vLocalPos (per-triangle).
+    vec2 wob  = glassWobble(vWorldPos, uTime);
+    vec2 wobR = wob * 1.15;  // red bends slightly more
+    vec2 wobB = wob * 0.85;  // blue bends slightly less
+    float R = texture2D(uScene, clamp(uv + faceUvOff + rR.xy * abXY + wobR, 0.001, 0.999)).r;
+    float G = texture2D(uScene, clamp(uv + faceUvOff + rG.xy * abXY + wob,  0.001, 0.999)).g;
+    float B = texture2D(uScene, clamp(uv + faceUvOff + rB.xy * abXY + wobB, 0.001, 0.999)).b;
     vec3 refracted = vec3(R, G, B);
 
     float cosT   = clamp(dot(e, n), 0.0, 1.0);
