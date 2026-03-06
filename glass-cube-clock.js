@@ -3031,12 +3031,68 @@ document.addEventListener('touchend', function() {
   _swipeStartY = 0;
 }, { passive: true });
 
-// Arrow keys for desktop testing
+// Arrow keys for desktop
 document.addEventListener('keydown', function(e) {
   if (_compassMode || document.body.classList.contains('mode-info')) return;
   if (_devActive) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault();
     var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
     _swipeShowPreview(baseIdx + (e.key === 'ArrowRight' ? 1 : -1));
   }
 });
+
+// Mouse drag for desktop prayer swipe
+(function() {
+  var _mouseStartX = 0, _mouseStartY = 0, _mouseDragging = false, _mouseSwiping = false;
+  var _mouseDragOriginX = 0, _mouseDragBaseIdx = -1, _mouseLastIdx = -1;
+
+  document.addEventListener('mousedown', function(e) {
+    if (_compassMode || document.body.classList.contains('mode-info')) return;
+    if (_devActive) return;
+    if (e.button !== 0) return;
+    if (e.target.closest('button,a,input,select,textarea,.mode-pill,.loc-picker,.fs-dial-picker')) return;
+    _mouseStartX = e.clientX;
+    _mouseStartY = e.clientY;
+    _mouseDragging = false;
+    _mouseSwiping = false;
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (_mouseStartX === 0 && _mouseStartY === 0) return;
+    if (_compassMode || document.body.classList.contains('mode-info')) return;
+    var dx = e.clientX - _mouseStartX;
+    var dy = e.clientY - _mouseStartY;
+
+    if (!_mouseDragging && Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      _mouseDragging = true;
+      _mouseSwiping = true;
+      _mouseDragOriginX = e.clientX;
+      _mouseDragBaseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
+      _mouseLastIdx = _mouseDragBaseIdx;
+    }
+
+    if (_mouseDragging) {
+      var totalDx = e.clientX - _mouseDragOriginX;
+      var prayerDir = totalDx > 30 ? -1 : totalDx < -30 ? 1 : 0;
+      var _scnt = prayerSectors.length || 8;
+      var targetIdx = ((_mouseDragBaseIdx + prayerDir) % _scnt + _scnt) % _scnt;
+      if (targetIdx !== _mouseLastIdx) {
+        _mouseLastIdx = targetIdx;
+        _swipeShowPreview(targetIdx);
+      }
+    }
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (_mouseDragging) {
+      _swipeCamTarget = 0;
+      _swipeCamVel = 0;
+    }
+    _mouseDragging = false;
+    _mouseSwiping = false;
+    _mouseStartX = 0;
+    _mouseStartY = 0;
+  });
+})();
