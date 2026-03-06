@@ -836,7 +836,7 @@ scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotate
 
 // ── Shadow square — feathered cube shadow on podium top face ──────────
 var _shadowSquare = (function() {
-  var size = 1.3; // slightly larger than cube (~1.1 diagonal footprint at 45°)
+  var size = 1.8; // generous coverage for caustic dots at front edges
   var geo = new THREE.PlaneGeometry(size, size);
   var mat = new THREE.ShaderMaterial({
     transparent: true,
@@ -858,7 +858,7 @@ var _shadowSquare = (function() {
   var mesh = new THREE.Mesh(geo, mat);
   mesh.rotation.x = -Math.PI / 2;
   mesh.rotation.z = Math.PI / 4; // match cube's 45° rotation
-  mesh.position.set(0, -0.024, 0); // just above podium top face
+  mesh.position.set(0, -0.024, 0.15); // just above podium, shifted forward to catch front-face dots
   return mesh;
 })();
 scene.add(_shadowSquare);
