@@ -738,7 +738,19 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
 </section>
 
-<!-- 4. INSTALL -->
+<!-- 4. HOW IT WORKS -->
+<section class="scroll-section" id="sec-how">
+  <div class="reveal">
+    <div class="section-header"><p class="section-label">How It Works</p>
+    <h2 class="section-title">A quick guide.</h2></div>
+    <p class="section-body" style="margin-bottom:1.5rem">Tap to replay the walkthrough.</p>
+    <button onclick="if(typeof switchMode==='function')switchMode('clock');setTimeout(function(){_clockOnboardEl=null;if(typeof _showClockOnboarding==='function')_showClockOnboarding(true);},600);" class="btn btn-outline" style="font-size:.9rem;padding:.7rem 1.5rem;display:inline-flex;align-items:center;gap:.5rem">
+      <i class="ph-thin ph-question"></i> Show me how
+    </button>
+  </div>
+</section>
+
+<!-- 5. INSTALL -->
 <section class="scroll-section" id="sec-install">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Install</p>
@@ -2509,8 +2521,8 @@ function _clockOnboardRender() {
   }
 }
 
-function _showClockOnboarding() {
-  if (localStorage.getItem('agot_clock_onboarded')) return;
+function _showClockOnboarding(force) {
+  if (!force && localStorage.getItem('agot_clock_onboarded')) return;
   _buildClockOnboarding();
   _clockOnboardStep = 0;
   _clockOnboardRender();
@@ -3014,7 +3026,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=196';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=197';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
