@@ -2487,9 +2487,50 @@ function _buildClockOnboarding() {
         '<span class="clock-onboard-dot"></span>' +
       '</div>' +
     '</div>';
+  // Tap to advance (but not during swipe)
+  var _obSwiped = false;
   _clockOnboardEl.addEventListener('click', function() {
+    if (_obSwiped) { _obSwiped = false; return; }
     _clockOnboardAdvance();
   });
+
+  // Swipe left/right to navigate steps
+  var _obSx = 0, _obSy = 0;
+  _clockOnboardEl.addEventListener('touchstart', function(e) {
+    _obSx = e.touches[0].clientX;
+    _obSy = e.touches[0].clientY;
+    _obSwiped = false;
+  }, { passive: true });
+  _clockOnboardEl.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - _obSx;
+    var dy = e.changedTouches[0].clientY - _obSy;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      _obSwiped = true;
+      if (dx < 0) {
+        // Swipe left → next
+        _clockOnboardAdvance();
+      } else {
+        // Swipe right → previous
+        if (_clockOnboardStep > 0) {
+          _clockOnboardStep--;
+          _clockOnboardRender();
+        }
+      }
+    }
+  }, { passive: true });
+
+  // Mouse drag for desktop
+  var _obMx = 0;
+  _clockOnboardEl.addEventListener('mousedown', function(e) { _obMx = e.clientX; _obSwiped = false; });
+  _clockOnboardEl.addEventListener('mouseup', function(e) {
+    var dx = e.clientX - _obMx;
+    if (Math.abs(dx) > 40) {
+      _obSwiped = true;
+      if (dx < 0) _clockOnboardAdvance();
+      else if (_clockOnboardStep > 0) { _clockOnboardStep--; _clockOnboardRender(); }
+    }
+  });
+
   document.body.appendChild(_clockOnboardEl);
 }
 
@@ -3026,7 +3067,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=198';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=199';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
