@@ -2968,6 +2968,23 @@ window._exportFrame = function(opts) {
       camera.updateProjectionMatrix();
       fboRT.setSize(expW * expDpr, expH * expDpr);
 
+      // Two-pass render — matches main render loop for sharp dichroic refraction
+      // Pass 1: FBO backface scene (hide cube + prayer accent lights)
+      cubeMesh.visible = false;
+      prayerWash.visible = false;
+      prayerRim.visible = false;
+      prayerSlash.visible = false;
+      prayerGlow.visible = false;
+      renderer.setRenderTarget(fboRT);
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      cubeMesh.visible = true;
+      prayerWash.visible = true;
+      prayerRim.visible = true;
+      prayerSlash.visible = true;
+      prayerGlow.visible = true;
+      cubeMat.uniforms.uScene.value = fboRT.texture;
+      // Pass 2: final composite with fresh FBO
       renderer.render(scene, camera);
 
       canvas.toBlob(function(blob) {
