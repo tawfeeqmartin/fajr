@@ -1682,7 +1682,7 @@ function startNavClock(){
     fsC._toggleBound = true;
   }
   updateNavClock();
-  _navClockTimer=setInterval(updateNavClock,250);
+  _navClockTimer=setInterval(updateNavClock,1000);
 }
 function updateNavClock(){
   const t=window._prayerTimings;
@@ -1729,8 +1729,11 @@ function updateNavClock(){
   // keep prayer bars in lockstep with countdown color + boundary timing
   if (typeof window._displayPrayerTimes==='function') window._displayPrayerTimes(t, window._lastHijri||null, nowM);
 
-  const swipeActive=(typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null);
-  const preview=swipeActive&&window._swipePreviewPrayer?window._swipePreviewPrayer:'';
+  const swipeActive=((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null) || (typeof window._swipeTimeTarget==='number'&&window._swipeTimeTarget!==null));
+  let preview=swipeActive&&window._swipePreviewPrayer?window._swipePreviewPrayer:'';
+  // Prevent one-tick bounce at swipe start before preview prayer is populated.
+  if (swipeActive && !preview && window._lastSwipePreviewPrayer) preview = window._lastSwipePreviewPrayer;
+  if (preview) window._lastSwipePreviewPrayer = preview;
 
   const _labelName = n => n==='Tahajjud' ? 'Qiyam' : n;
   let navLabel='until '+_labelName(next.name);
@@ -3203,7 +3206,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=260';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=261';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
