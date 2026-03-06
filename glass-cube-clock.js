@@ -1907,7 +1907,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       depthWrite: false,
       uniforms: {
         uTime: { value: 0 },
-        uStrength: { value: 0.18 },
+        uStrength: { value: 0.35 },
         tScene: { value: null }
       },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }',
