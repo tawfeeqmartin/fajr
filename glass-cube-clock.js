@@ -3094,6 +3094,9 @@ document.addEventListener('keydown', function(e) {
     if (_mouseDragging) {
       _swipeCamTarget = 0;
       _swipeCamVel = 0;
+      // Guard chrome toggle from firing on mouse drag release
+      window._chromeSwipeGuard = true;
+      setTimeout(function() { window._chromeSwipeGuard = false; }, 300);
     }
     _mouseDragging = false;
     _mouseSwiping = false;
