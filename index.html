@@ -431,7 +431,7 @@ body.mode-info .info-dots{opacity:1;pointer-events:auto}
 .clock-onboard-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(180,160,255,.4);background:transparent;transition:background .3s ease,border-color .3s ease}
 .clock-onboard-dot.active{background:rgba(180,160,255,.5);border-color:rgba(180,160,255,.7)}
 /* Clock onboard arrow animations */
-@keyframes clockArrowUp{0%,100%{transform:translateY(8px);opacity:.3}50%{transform:translateY(-8px);opacity:.9}}
+@keyframes clockArrowUp{0%,100%{transform:translate(6px,6px);opacity:.3}50%{transform:translate(-6px,-6px);opacity:.9}}
 @keyframes clockArrowLeft{0%,100%{transform:translateX(16px);opacity:.3}50%{transform:translateX(-16px);opacity:.9}}
 @keyframes clockArrowRight{0%,100%{transform:translateX(-16px);opacity:.3}50%{transform:translateX(16px);opacity:.9}}
 .clock-onboard-arrow-up{animation:clockArrowUp 1.6s ease-in-out infinite}
@@ -2422,9 +2422,9 @@ var _clockOnboardStep = 0;
 var _clockOnboardSteps = [
   {
     visual: function() {
-      return '<svg width="60" height="80" viewBox="0 0 60 80" fill="none" class="clock-onboard-arrow-up">' +
-        '<line x1="30" y1="60" x2="30" y2="10" stroke="rgba(180,160,255,.7)" stroke-width="2" stroke-linecap="round"/>' +
-        '<polyline points="18,22 30,10 42,22" stroke="rgba(180,160,255,.7)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+      return '<svg width="80" height="80" viewBox="0 0 80 80" fill="none" class="clock-onboard-arrow-up">' +
+        '<line x1="60" y1="65" x2="20" y2="15" stroke="rgba(180,160,255,.7)" stroke-width="2" stroke-linecap="round"/>' +
+        '<polyline points="18,30 20,15 35,17" stroke="rgba(180,160,255,.7)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
       '</svg>';
     },
     text: 'Tap your city in the top left',
@@ -3083,7 +3083,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=204';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=205';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
