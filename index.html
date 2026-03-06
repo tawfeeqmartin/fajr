@@ -2506,12 +2506,16 @@ function _buildClockOnboarding() {
     var dy = e.changedTouches[0].clientY - _obSy;
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       _obSwiped = true;
+      // Keep flag alive long enough to block the click event
+      setTimeout(function() { _obSwiped = false; }, 300);
       if (dx < 0) {
         // Swipe left → next
         _clockOnboardAdvance();
       } else {
         // Swipe right → previous
         if (_clockOnboardStep > 0) {
+          // Cancel auto-dismiss if swiping back from last step
+          if (_clockOnboardAutoTimer) { clearTimeout(_clockOnboardAutoTimer); _clockOnboardAutoTimer = null; }
           _clockOnboardStep--;
           _clockOnboardRender();
         }
@@ -2526,14 +2530,21 @@ function _buildClockOnboarding() {
     var dx = e.clientX - _obMx;
     if (Math.abs(dx) > 40) {
       _obSwiped = true;
-      if (dx < 0) _clockOnboardAdvance();
-      else if (_clockOnboardStep > 0) { _clockOnboardStep--; _clockOnboardRender(); }
+      setTimeout(function() { _obSwiped = false; }, 300);
+      if (dx < 0) {
+        _clockOnboardAdvance();
+      } else if (_clockOnboardStep > 0) {
+        if (_clockOnboardAutoTimer) { clearTimeout(_clockOnboardAutoTimer); _clockOnboardAutoTimer = null; }
+        _clockOnboardStep--;
+        _clockOnboardRender();
+      }
     }
   });
 
   document.body.appendChild(_clockOnboardEl);
 }
 
+var _clockOnboardAutoTimer = null;
 function _clockOnboardAdvance() {
   _clockOnboardStep++;
   if (_clockOnboardStep >= _clockOnboardSteps.length) {
@@ -2541,9 +2552,11 @@ function _clockOnboardAdvance() {
     return;
   }
   _clockOnboardRender();
+  // Clear any pending auto-dismiss
+  if (_clockOnboardAutoTimer) { clearTimeout(_clockOnboardAutoTimer); _clockOnboardAutoTimer = null; }
   // Auto-dismiss on last step (step index 3)
   if (_clockOnboardStep === _clockOnboardSteps.length - 1) {
-    setTimeout(function() { _dismissClockOnboarding(); }, 2000);
+    _clockOnboardAutoTimer = setTimeout(function() { _dismissClockOnboarding(); }, 2000);
   }
 }
 
@@ -3067,7 +3080,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=200';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=201';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
