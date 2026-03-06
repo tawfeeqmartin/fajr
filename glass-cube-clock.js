@@ -1997,7 +1997,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         '  float vig=1.0-smoothstep(0.35,0.85,length((uv-0.5)*vec2(1.1,1.3)));',
         '  vig=max(vig,0.15);',
         // Final amplitude
-        '  float amplitude=0.576*ampMask*vig*uIntensity;',
+        '  float amplitude=0.259*ampMask*vig*uIntensity;',
         '  vec3 outColor=max(tintDir*blendedGrain*amplitude,vec3(0.0));',
         '  gl_FragColor=vec4(outColor,1.0);',
         '}'
