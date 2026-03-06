@@ -312,6 +312,13 @@ const cubeSun = new THREE.PointLight(0xe8f2ff, 50, 14); // v170: 35→50 — lum
 cubeSun.position.set(0, 0.2, -2.8);
 scene.add(cubeSun);
 
+// SOLAR ARC KEY — subtle day progression for timelapse readability.
+// Dawn (warm/low) → Noon (cool/high) → Dusk (warm/low) → Night (off).
+const solarKey = new THREE.DirectionalLight(0xffffff, 0);
+solarKey.position.set(-6, 3, 5);
+solarKey.target.position.set(0, 0.6, 0);
+scene.add(solarKey, solarKey.target);
+
 scene.add(new THREE.AmbientLight(0xffffff, 0.07)); // v57: 0.16→0.07 — deeper darkness outside arch, shadow is absolute
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
@@ -1465,6 +1472,7 @@ prismGroup.add(_thirdDisc);
 
 
 const OP_STEP = 0.22; // intensity drop per consecutive prayer
+const PRAYER_BLEND_MIN = 10; // minutes before boundary to crossfade active→next
 
 function updatePrayerWindows(now) {
   if (window._prayerTimingsReady && !ptSectorsRebuilt) {
@@ -1514,7 +1522,17 @@ function updatePrayerWindows(now) {
   if (_devSnapIntensity) _devSnapIntensity = false;
   const u = _prayerDiscMat.uniforms;
   const _activeIsForbidden = activeIdx >= 0 && allSectors[activeIdx].def.isForbidden;
-  const activeTarget = activeIdx >= 0 ? (_activeIsForbidden ? OP_FORBIDDEN : _opA) : 0.0;
+  const _activeBase = activeIdx >= 0 ? (_activeIsForbidden ? OP_FORBIDDEN : _opA) : 0.0;
+
+  // Boundary interpolation: fade active out while next fades in before transition.
+  var _blendDur = Math.max(1, window._PRAYER_BLEND_MIN || PRAYER_BLEND_MIN);
+  var _boundaryBlend = 0;
+  if (activeIdx >= 0 && nextIdx >= 0) {
+    var _minsToNext = (allSectors[nextIdx].startMin - nowMin + 1440) % 1440;
+    if (_minsToNext <= _blendDur) _boundaryBlend = 1.0 - (_minsToNext / _blendDur);
+  }
+
+  const activeTarget = _activeBase * (1.0 - _boundaryBlend);
   u.uIntensity.value = THREE.MathUtils.lerp(u.uIntensity.value, activeTarget, _lerpRate);
 
   var _angLerp = _swipeTimeOverride !== null ? 0.08 : _lerpRate; // faster during swipe for responsive feel
@@ -1537,7 +1555,12 @@ function updatePrayerWindows(now) {
   const _maxWindows = window._devWindowCount != null ? window._devWindowCount : 1;
   const _nextIsForbidden = nextIdx >= 0 && allSectors[nextIdx].def.isForbidden;
   const _nextBaseOp = _nextIsForbidden ? OP_FORBIDDEN : _opA;
-  const nextTarget = (nextIdx >= 0 && _maxWindows >= 2) ? (_devActive ? _nextBaseOp : Math.max(_nextBaseOp - _opS, 0.0)) : 0.0;
+  var _nextAnticipation = (nextIdx >= 0 && _maxWindows >= 2)
+    ? (_devActive ? _nextBaseOp : Math.max(_nextBaseOp - _opS, 0.0))
+    : 0.0;
+  // During boundary blend, next disc ramps toward full active intensity.
+  var _nextBlendBoost = (nextIdx >= 0) ? (_nextBaseOp * _boundaryBlend) : 0.0;
+  const nextTarget = Math.max(_nextAnticipation, _nextBlendBoost);
   nu.uIntensity.value = THREE.MathUtils.lerp(nu.uIntensity.value, nextTarget, _lerpRate);
 
   if (nextIdx >= 0) {
@@ -1581,7 +1604,11 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
 (function loop() {
   requestAnimationFrame(loop);
-  const t = clock.getElapsedTime();
+  let t = clock.getElapsedTime();
+  // Loop-safe timelapse mode: bind shader time to forced day-phase (no seam on loop).
+  if (window._forceTimeMin != null) {
+    t = (window._forceTimeMin / 1440) * 60.0;
+  }
   cubeMat.uniforms.uTime.value = t;
   fogLayerMat.uniforms.uTime.value = t;
   warmFogMat.uniforms.uTime.value = t;
@@ -1592,6 +1619,17 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   var now;
   if (typeof _getDevNow === 'function' && _devActive) {
     now = _getDevNow();
+  } else if (window._forceTimeMin != null) {
+    // Deterministic render mode (timelapse): drive H/M/S directly from forced timeline.
+    var _fm = ((window._forceTimeMin % 1440) + 1440) % 1440;
+    var _fh = Math.floor(_fm / 60);
+    var _fminFloat = _fm % 60;
+    var _fmi = Math.floor(_fminFloat);
+    var _fsecFloat = (_fminFloat - _fmi) * 60;
+    var _fsec = Math.floor(_fsecFloat);
+    var _fms = Math.floor((_fsecFloat - _fsec) * 1000);
+    now = new Date();
+    now.setHours(_fh, _fmi, _fsec, _fms);
   } else if (typeof _swipeTimeOverride === 'number' && _swipeTimeOverride !== null) {
     // Lerp toward target for smooth hand travel between prayers
     if (_swipeTimeTarget !== null && _swipeTimeOverride !== _swipeTimeTarget) {
@@ -1614,6 +1652,43 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   const m = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
 
+  // ── Solar day progression (subtle) ────────────────────────────────────────
+  var _nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+  var _sr = 360, _ss = 1080; // fallback 06:00→18:00
+  if (window._prayerTimings && window._prayerTimings.Sunrise && window._prayerTimings.Maghrib) {
+    var _toM = function(_s){ var _p=String(_s).split(':').map(Number); return (_p[0]||0)*60 + (_p[1]||0); };
+    _sr = _toM(window._prayerTimings.Sunrise);
+    _ss = _toM(window._prayerTimings.Maghrib);
+  }
+  var _daySpan = Math.max(1, _ss - _sr);
+  var _dayT = (_nowMin - _sr) / _daySpan;               // 0..1 during daylight
+  var _dayPhase = Math.max(0, Math.min(1, _dayT));
+  var _sunLift = (_dayT > 0 && _dayT < 1) ? Math.sin(_dayPhase * Math.PI) : 0; // 0 night, 1 noon
+
+  // Hour-hand synced orbit (exact): light tracks directly over the hour hand path.
+  var _hourAng = (h / 12) * TAU;
+
+  // Color temperature shift: dawn warm -> noon cool -> dusk warm
+  var _dawn = new THREE.Color(0xffb37a), _noon = new THREE.Color(0xf2f7ff), _dusk = new THREE.Color(0xff9966);
+  var _solarC = _dayPhase < 0.5
+    ? _dawn.clone().lerp(_noon, _dayPhase * 2)
+    : _noon.clone().lerp(_dusk, (_dayPhase - 0.5) * 2);
+
+  // Broad environmental key (still tied to TOD for scene mood)
+  solarKey.position.set(Math.sin(_hourAng) * 7.2, 2.2 + _sunLift * 7.8, -Math.cos(_hourAng) * 6.0 - 0.8);
+  solarKey.color.copy(_solarC);
+  solarKey.intensity = 0.12 + _sunLift * 1.55;
+
+  // Plinth-top highlight orbit: circular, clockwise, exactly over hour-hand trajectory.
+  var _cubeDayC = _solarC.clone().lerp(new THREE.Color(0xe8f2ff), 0.30);
+  cubeSun.color.copy(_cubeDayC);
+  cubeSun.intensity = 30 + _sunLift * 36;
+  cubeSun.position.set(
+    Math.sin(_hourAng) * 2.75,
+    1.15 + _sunLift * 0.90,
+    -Math.cos(_hourAng) * 2.75
+  );
+
   // ── Tahajjud — last third of the night ──
   var _tahajjudNow = Date.now();
   if (_tahajjudNow - _tahajjudLastCheck > 10000) {
@@ -1621,8 +1696,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     _tahajjudActive = _tahajjudForced || _isLastThird(now);
   }
   var _tahajjudTarget = _tahajjudActive ? 1.0 : 0.0;
-  _tahajjudBlend += (_tahajjudTarget - _tahajjudBlend) * 0.008; // ~8 second lerp
-  if (Math.abs(_tahajjudBlend - _tahajjudTarget) < 0.001) _tahajjudBlend = _tahajjudTarget;
+  if (window._forceTimeMin != null) {
+    _tahajjudBlend = _tahajjudTarget; // deterministic timelapse (no history seam)
+  } else {
+    _tahajjudBlend += (_tahajjudTarget - _tahajjudBlend) * 0.008; // ~8 second lerp
+    if (Math.abs(_tahajjudBlend - _tahajjudTarget) < 0.001) _tahajjudBlend = _tahajjudTarget;
+  }
 
   // Expose for dev panel readout
   window._tahajjudBlend = _tahajjudBlend;
@@ -1822,28 +1901,30 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
   // ── Prayer-reactive accent spotlights (Chris lookdev, Mar 4) ──────────────
   // Smooth lerp of color + intensity toward active prayer, or fade to zero.
+  // In forced-time renders (timelapse), snap to avoid loop seam pops from history-dependent lerps.
+  const _prLerp = (window._forceTimeMin != null) ? 1.0 : PRAYER_LIGHT_LERP;
   if (_activePrayer && !_compassMode) {
     // Active prayer: lerp toward prayer color and target intensity.
     // Wash uses primary color desaturated 35% toward warm neutral — atmospheric, not neon.
     // Rim uses secondary (lighter) color desaturated 15% — edge catch stays richer.
     const _prWash = new THREE.Color(_activePrayer.color); // v6: pure color, no grey desaturation
-    _prayerWashColor.lerp(_prWash, PRAYER_LIGHT_LERP);
+    _prayerWashColor.lerp(_prWash, _prLerp);
     const _prRim = new THREE.Color(_activePrayer.color2); // v6: pure color2, no grey desaturation
-    _prayerRimColor.lerp(_prRim, PRAYER_LIGHT_LERP);
-    _prayerWashIntensity += (PRAYER_WASH_MAX - _prayerWashIntensity) * PRAYER_LIGHT_LERP;
-    _prayerRimIntensity += (PRAYER_RIM_MAX - _prayerRimIntensity) * PRAYER_LIGHT_LERP;
+    _prayerRimColor.lerp(_prRim, _prLerp);
+    _prayerWashIntensity += (PRAYER_WASH_MAX - _prayerWashIntensity) * _prLerp;
+    _prayerRimIntensity += (PRAYER_RIM_MAX - _prayerRimIntensity) * _prLerp;
     // v8: slash — uses primary color for obvious podium edge-catch
     const _prSlash = new THREE.Color(_activePrayer.color);
-    _prayerSlashColor.lerp(_prSlash, PRAYER_LIGHT_LERP);
-    _prayerSlashIntensity += (PRAYER_SLASH_MAX - _prayerSlashIntensity) * PRAYER_LIGHT_LERP;
+    _prayerSlashColor.lerp(_prSlash, _prLerp);
+    _prayerSlashIntensity += (PRAYER_SLASH_MAX - _prayerSlashIntensity) * _prLerp;
   } else {
     // No active prayer or compass mode: fade to zero
-    _prayerWashColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
-    _prayerRimColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
-    _prayerSlashColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
-    _prayerWashIntensity += (0 - _prayerWashIntensity) * PRAYER_LIGHT_LERP;
-    _prayerRimIntensity += (0 - _prayerRimIntensity) * PRAYER_LIGHT_LERP;
-    _prayerSlashIntensity += (0 - _prayerSlashIntensity) * PRAYER_LIGHT_LERP;
+    _prayerWashColor.lerp(new THREE.Color(0x111122), _prLerp);
+    _prayerRimColor.lerp(new THREE.Color(0x111122), _prLerp);
+    _prayerSlashColor.lerp(new THREE.Color(0x111122), _prLerp);
+    _prayerWashIntensity += (0 - _prayerWashIntensity) * _prLerp;
+    _prayerRimIntensity += (0 - _prayerRimIntensity) * _prLerp;
+    _prayerSlashIntensity += (0 - _prayerSlashIntensity) * _prLerp;
   }
   prayerWash.color.copy(_prayerWashColor);
   prayerWash.intensity = _prayerWashIntensity;
@@ -1855,11 +1936,11 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // ── Prayer PointLight glow at podium base (Approach B, Chris v7) ──────────
   if (_activePrayer && !_compassMode) {
     const _prGlow = new THREE.Color(_activePrayer.color);
-    _prayerGlowColor.lerp(_prGlow, PRAYER_LIGHT_LERP);
-    _prayerGlowIntensity += (PRAYER_GLOW_MAX - _prayerGlowIntensity) * PRAYER_LIGHT_LERP;
+    _prayerGlowColor.lerp(_prGlow, _prLerp);
+    _prayerGlowIntensity += (PRAYER_GLOW_MAX - _prayerGlowIntensity) * _prLerp;
   } else {
-    _prayerGlowColor.lerp(new THREE.Color(0x111122), PRAYER_LIGHT_LERP);
-    _prayerGlowIntensity += (0 - _prayerGlowIntensity) * PRAYER_LIGHT_LERP;
+    _prayerGlowColor.lerp(new THREE.Color(0x111122), _prLerp);
+    _prayerGlowIntensity += (0 - _prayerGlowIntensity) * _prLerp;
   }
   prayerGlow.color.copy(_prayerGlowColor);
   prayerGlow.intensity = _prayerGlowIntensity;
@@ -1898,34 +1979,40 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   renderer.render(scene, camera);
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
-  // The actual Stripe/Linear/Vercel technique. CSS filter, zero GPU cost.
-  // Adaptive opacity: dark prayers get full grain, bright prayers fade it.
-  var _grainPrayerOpacity = {
-    'Qiyam': 0.70, 'Fajr': 0.55, 'Sunrise': 0.20, 'Dhuha': 0.15,
-    'Dhuhr': 0.25, 'Asr': 0.30, 'Maghrib': 0.55, 'Isha': 0.65
-  };
-  var _grainBaseOpacity = 0.45; // between prayers
-  if (window._grainOverlay) {
-    var _gpName = _activePrayer && prayerSectors.length > 0
-      ? (prayerSectors.find(function(s){ return s.def.color === _activePrayer.color; }) || {}).def
-      : null;
-    var _gpTarget = _gpName ? (_grainPrayerOpacity[_gpName.name] || _grainBaseOpacity) : _grainBaseOpacity;
-    var _gpCur = parseFloat(window._grainOverlay.style.opacity) || 0.70;
-    var _gpNext = _gpCur + (_gpTarget - _gpCur) * 0.03; // smooth lerp
-    window._grainOverlay.style.opacity = _gpNext.toFixed(3);
-  }
-  if (!window._grainOverlay) {
-    var _grainSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    _grainSvg.setAttribute('width','0');
-    _grainSvg.setAttribute('height','0');
-    _grainSvg.style.position = 'absolute';
-    _grainSvg.innerHTML = '<filter id="grainFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>';
-    document.body.appendChild(_grainSvg);
-    var _grainEl = document.createElement('div');
-    _grainEl.id = 'grainOverlay';
-    _grainEl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;filter:url(#grainFilter);opacity:0.70;mix-blend-mode:soft-light;background:white;';
-    document.body.appendChild(_grainEl);
-    window._grainOverlay = _grainEl;
+  // Disabled by default for now (can be re-enabled via window._grainEnabled = true).
+  if (window._grainEnabled === undefined) window._grainEnabled = false;
+  if (!window._grainEnabled) {
+    if (window._grainOverlay) window._grainOverlay.style.display = 'none';
+  } else {
+    // Adaptive opacity: dark prayers get full grain, bright prayers fade it.
+    var _grainPrayerOpacity = {
+      'Qiyam': 0.70, 'Fajr': 0.55, 'Sunrise': 0.20, 'Dhuha': 0.15,
+      'Dhuhr': 0.25, 'Asr': 0.30, 'Maghrib': 0.55, 'Isha': 0.65
+    };
+    var _grainBaseOpacity = 0.45; // between prayers
+    if (window._grainOverlay) {
+      window._grainOverlay.style.display = '';
+      var _gpName = _activePrayer && prayerSectors.length > 0
+        ? (prayerSectors.find(function(s){ return s.def.color === _activePrayer.color; }) || {}).def
+        : null;
+      var _gpTarget = _gpName ? (_grainPrayerOpacity[_gpName.name] || _grainBaseOpacity) : _grainBaseOpacity;
+      var _gpCur = parseFloat(window._grainOverlay.style.opacity) || 0.70;
+      var _gpNext = _gpCur + (_gpTarget - _gpCur) * 0.03; // smooth lerp
+      window._grainOverlay.style.opacity = _gpNext.toFixed(3);
+    }
+    if (!window._grainOverlay) {
+      var _grainSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      _grainSvg.setAttribute('width','0');
+      _grainSvg.setAttribute('height','0');
+      _grainSvg.style.position = 'absolute';
+      _grainSvg.innerHTML = '<filter id="grainFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>';
+      document.body.appendChild(_grainSvg);
+      var _grainEl = document.createElement('div');
+      _grainEl.id = 'grainOverlay';
+      _grainEl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;filter:url(#grainFilter);opacity:0.70;mix-blend-mode:soft-light;background:white;';
+      document.body.appendChild(_grainEl);
+      window._grainOverlay = _grainEl;
+    }
   }
 
   // Sample top-left pixel and sync theme-color meta tag (~once per minute)

@@ -8,7 +8,7 @@ const URL_BASE = 'http://localhost:7747/#clock';
 const OUT = path.join(__dirname, 'renders', 'timelapse');
 const FRAMES = 720;       // 24s at 30fps — 2-min steps for smooth minute hand
 const TOTAL_MIN = 1440;   // full 24h cycle
-const STEP = TOTAL_MIN / FRAMES; // 2 min per frame → minute hand moves 12° per frame
+const STEP = TOTAL_MIN / FRAMES; // loop-safe playback: last->first is one normal frame step
 const SIZE = { w: 1080, h: 1080, dpr: 2 }; // square for social, full res
 
 async function run() {
@@ -71,12 +71,13 @@ async function run() {
   console.log(`Capturing ${FRAMES} frames (24h cycle)...`);
 
   for (let i = 0; i < FRAMES; i++) {
-    const min = Math.round(i * STEP) % 1440;
+    const min = (i * STEP) % 1440;
 
-    // Set time directly
+    // Set deterministic render time (loop-safe, no stateful swipe lerps)
     await page.evaluate(m => {
-      window._swipeTimeOverride = m;
-      window._swipeTimeTarget = m;
+      window._forceTimeMin = m;
+      window._swipeTimeOverride = null;
+      window._swipeTimeTarget = null;
       if (window._swipeRevertTimer) clearTimeout(window._swipeRevertTimer);
     }, min);
 

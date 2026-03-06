@@ -1674,7 +1674,13 @@ function updateNavClock(){
   const t=window._prayerTimings;
   if(!t)return;
   const now=new Date();
-  const nowS=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+  // Use preview/swipe time when available so top-right countdown follows prayer preview.
+  let nowS=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+  if (typeof window._swipeTimeOverride === 'number' && window._swipeTimeOverride !== null) {
+    nowS = Math.floor(window._swipeTimeOverride * 60);
+  } else if (typeof window._forceTimeMin === 'number' && window._forceTimeMin !== null) {
+    nowS = Math.floor(window._forceTimeMin * 60);
+  }
   const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
   const toSec=s=>{const[hh,mm]=s.split(':').map(Number);return hh*3600+mm*60;};
   {
@@ -1692,7 +1698,9 @@ function updateNavClock(){
     }
     const nh=Math.floor(navDiff/3600);const nrm=navDiff%3600;const nm=Math.floor(nrm/60);const ns=nrm%60;
     const timeStr=nh+':'+(nm<10?'0':'')+nm+':<span class="nav-sec">'+(ns<10?'0':'')+ns+'</span>';
-    const countdownHtml='<div class="nav-label">'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
+    const _headlineColor = window._activePrayerColor || '';
+    const _labelStyle = _headlineColor ? ' style="color:'+_headlineColor+'"' : '';
+    const countdownHtml='<div class="nav-label"'+_labelStyle+'>'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
     const fsC=document.getElementById('fsCountdown');if(fsC)fsC.innerHTML=countdownHtml;
   }
   // All prayer times
@@ -2042,10 +2050,15 @@ function _displayPrayerTimes(t, hijri) {
   }).join(' · ');
   // Fullscreen prayer bar
   const fsEl = document.getElementById('fsPrayerTimes'); if(fsEl) fsEl.innerHTML = html;
+  // Cache active prayer + color for countdown/headline tint
+  var _activeColor = (activeP === 'Sunrise' && _sunriseForbidden) ? '#888888' : (prayerColors[activeP] || '');
+  window._activePrayerName = activeP || '';
+  window._activePrayerColor = _activeColor;
+
   // Update nav pill glow to current prayer color
   var _pillSlider = document.getElementById('modePillSlider');
-  if (_pillSlider && activeP && prayerColors[activeP]) {
-    var gc = (activeP === 'Sunrise' && _sunriseForbidden) ? '#888888' : prayerColors[activeP];
+  if (_pillSlider && _activeColor) {
+    var gc = _activeColor;
     _pillSlider.style.setProperty('--pill-glow-bar', gc);
     _pillSlider.style.setProperty('--pill-glow-bar-shadow', gc + '73'); // 45% alpha
     _pillSlider.style.setProperty('--pill-glow-bar-soft', gc + '26'); // 15% alpha
@@ -3083,7 +3096,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=239';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=240';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
