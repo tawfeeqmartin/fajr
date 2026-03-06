@@ -34,9 +34,12 @@ async function run() {
   const page = await browser.newPage();
   await page.setViewport({ width: 430, height: 932, deviceScaleFactor: 2 });
 
-  // Skip onboarding
+  // Skip onboarding + set location (LA) so prayers load
   await page.goto(URL, { waitUntil: 'domcontentloaded' });
-  await page.evaluate(() => localStorage.setItem('agot_clock_onboarded', '1'));
+  await page.evaluate(() => {
+    localStorage.setItem('agot_clock_onboarded', '1');
+    localStorage.setItem('agot_loc', JSON.stringify({ lat: 34.0522, lon: -118.2437, name: 'Los Angeles' }));
+  });
   await page.reload({ waitUntil: 'domcontentloaded' });
 
   // Wait for Three.js + HDRI
@@ -53,21 +56,19 @@ async function run() {
   });
   console.log('GPU:', gpu);
 
-  // Wait for _exportFrame to be available (dev panel must init)
-  await page.evaluate(() => {
-    // Activate dev mode to register export functions
-    if (typeof _devActive !== 'undefined' && !_devActive) {
-      _devActive = true;
-      if (typeof _buildDevPanel === 'function') _buildDevPanel();
-    }
-  });
-  // Give dev panel a moment
-  await new Promise(r => setTimeout(r, 1000));
-
-  // Check prayer count
-  const prayerCount = await page.evaluate(() =>
-    typeof prayerSectors !== 'undefined' ? prayerSectors.length : 0
-  );
+  // Wait for prayer data — check _prayerTimingsReady + prayerSectors
+  let prayerCount = 0;
+  for (let retry = 0; retry < 30; retry++) {
+    prayerCount = await page.evaluate(() => {
+      // Force rebuild if timings exist but sectors haven't built
+      if (window._prayerTimingsReady && typeof buildPrayerSectors === 'function' && prayerSectors.length === 0) {
+        buildPrayerSectors();
+      }
+      return typeof prayerSectors !== 'undefined' ? prayerSectors.length : 0;
+    });
+    if (prayerCount > 0) break;
+    await new Promise(r => setTimeout(r, 1000));
+  }
   console.log(`Prayer sectors: ${prayerCount}`);
 
   // Export each prayer at each size using global _exportFrame

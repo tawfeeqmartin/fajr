@@ -1323,9 +1323,10 @@ const SECTOR_RADIUS = 9.12;  // matches second-hand length
 const OP_ACTIVE = 1.2;
 
 
-let prayerSectors = [];
-let _activePrayer = null; // { startAng, endAng, color, color2, intensity }
-let ptSectorsRebuilt = false;
+var prayerSectors = [];
+window.prayerSectors = prayerSectors; // expose for export API
+var _activePrayer = null; // { startAng, endAng, color, color2, intensity }
+var ptSectorsRebuilt = false;
 
 function addBeam(ang, color, color2, initOp, width) {
   const w = width || 0.72;
@@ -1342,8 +1343,9 @@ function addBeam(ang, color, color2, initOp, width) {
   return { grp, mat };
 }
 
+window.buildPrayerSectors = buildPrayerSectors;
 function buildPrayerSectors() {
-  prayerSectors = [];
+  prayerSectors.length = 0; // clear without reassigning (keeps window.prayerSectors ref)
   const T = window._prayerTimings || PT_FALLBACK;
   PRAYER_WINDOWS_DEF.forEach(function(def) {
     const startMin = (ptParseMin(T[def.startKey]) + (def.startOffset || 0)) % 1440;
@@ -2526,145 +2528,6 @@ function _devBuildPanel() {
     span.replaceWith(inp);
   });
 
-  // ── Export helpers (dev panel reads from UI, global API accepts opts) ──────
-
-  // Global export API — returns Promise<Blob>
-  // opts: { width, height, dpr, hideChrome, prayer, download, filename }
-  window._exportFrame = function(opts) {
-    opts = opts || {};
-    var expW   = opts.width  || W;
-    var expH   = opts.height || H;
-    var expDpr = opts.dpr    || 2;
-    var hide   = opts.hideChrome !== false; // default true
-
-    return new Promise(function(resolve) {
-      // Set prayer if requested
-      var prayerSet = false;
-      if (typeof opts.prayer === 'number' && typeof _swipeShowPreview === 'function') {
-        _swipeShowPreview(opts.prayer);
-        prayerSet = true;
-      }
-
-      function doCapture() {
-        // Hide chrome
-        var chromeEls = [];
-        if (hide) {
-          document.querySelectorAll(
-            '.fs-header,.mode-pill,.compass-chrome,#fsTapHint,.mode-label,._devPanel,#_devPanel,.clock-onboard'
-          ).forEach(function(el) {
-            if (el.style.display !== 'none' && getComputedStyle(el).opacity !== '0') {
-              chromeEls.push({ el: el, prev: el.style.visibility });
-              el.style.visibility = 'hidden';
-            }
-          });
-          document.body.classList.add('chrome-hidden');
-        }
-
-        // Save state
-        var origW = W, origH = H, origDpr = dpr;
-        var canvas = renderer.domElement;
-        var origCW = canvas.style.width, origCH = canvas.style.height;
-
-        // Resize
-        renderer.setPixelRatio(expDpr);
-        renderer.setSize(expW, expH, false);
-        canvas.style.width  = expW + 'px';
-        canvas.style.height = expH + 'px';
-        camera.aspect = expW / expH;
-        camera.updateProjectionMatrix();
-        fboRT.setSize(expW * expDpr, expH * expDpr);
-
-        // Render
-        renderer.render(scene, camera);
-
-        canvas.toBlob(function(blob) {
-          // Restore
-          renderer.setPixelRatio(origDpr);
-          renderer.setSize(origW, origH, false);
-          canvas.style.width  = origCW;
-          canvas.style.height = origCH;
-          camera.aspect = origW / origH;
-          camera.updateProjectionMatrix();
-          fboRT.setSize(origW * origDpr, origH * origDpr);
-
-          // Restore chrome
-          chromeEls.forEach(function(c) { c.el.style.visibility = c.prev; });
-          if (hide) document.body.classList.remove('chrome-hidden');
-
-          // Auto-download if requested
-          if (opts.download !== false && opts.filename) {
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = opts.filename;
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-
-          resolve(blob);
-        }, 'image/png');
-      }
-
-      // Wait for prayer preview to settle if we changed it
-      if (prayerSet) setTimeout(doCapture, 800);
-      else doCapture();
-    });
-  };
-
-  // Export all prayers — returns Promise<Object[]> [{name, blob}]
-  window._exportAllPrayers = function(opts) {
-    opts = opts || {};
-    var results = [];
-    var idx = 0;
-    return new Promise(function(resolve) {
-      function next() {
-        if (idx >= prayerSectors.length) {
-          if (typeof _swipeRevert === 'function') _swipeRevert();
-          resolve(results);
-          return;
-        }
-        var name = prayerSectors[idx].def ? prayerSectors[idx].def.name : 'prayer-' + idx;
-        window._exportFrame(Object.assign({}, opts, {
-          prayer: idx,
-          filename: opts.download !== false ? ('agot-' + name + '-' + (opts.width||W) + 'x' + (opts.height||H) + '.png') : null
-        })).then(function(blob) {
-          results.push({ name: name, idx: idx, blob: blob });
-          idx++;
-          setTimeout(next, 300);
-        });
-      }
-      next();
-    });
-  };
-
-  // Start/stop WebM recording — returns Promise<Blob> on stop
-  window._recordWebM = function(opts) {
-    opts = opts || {};
-    var canvas = renderer.domElement;
-    var dur = opts.duration || 10000;
-    var stream = canvas.captureStream(opts.fps || 30);
-    var recorder = new MediaRecorder(stream, {
-      mimeType: 'video/webm;codecs=vp9',
-      videoBitsPerSecond: opts.bitrate || 8000000
-    });
-    var chunks = [];
-    return new Promise(function(resolve) {
-      recorder.ondataavailable = function(e) { if (e.data.size > 0) chunks.push(e.data); };
-      recorder.onstop = function() {
-        var blob = new Blob(chunks, { type: 'video/webm' });
-        if (opts.filename) {
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = url; a.download = opts.filename; a.click();
-          URL.revokeObjectURL(url);
-        }
-        resolve(blob);
-      };
-      recorder.start();
-      setTimeout(function() { recorder.stop(); }, dur);
-    });
-  };
-
   // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
   function _devExportGetSize() {
     var sel = document.getElementById('_devExportSize');
@@ -3059,6 +2922,133 @@ function _devToggle() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Activation — ?dev URL param or D key
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPORT API — global, works without dev panel open
+// _exportFrame(opts)        → Promise<Blob>  (single PNG)
+// _exportAllPrayers(opts)   → Promise<[{name,blob}]>
+// _recordWebM(opts)         → Promise<Blob>  (WebM video)
+// ─────────────────────────────────────────────────────────────────────────────
+window._exportFrame = function(opts) {
+  opts = opts || {};
+  var expW   = opts.width  || W;
+  var expH   = opts.height || H;
+  var expDpr = opts.dpr    || 2;
+  var hide   = opts.hideChrome !== false;
+
+  return new Promise(function(resolve) {
+    var prayerSet = false;
+    if (typeof opts.prayer === 'number' && typeof _swipeShowPreview === 'function') {
+      _swipeShowPreview(opts.prayer);
+      prayerSet = true;
+    }
+
+    function doCapture() {
+      var chromeEls = [];
+      if (hide) {
+        document.querySelectorAll(
+          '.fs-header,.mode-pill,.compass-chrome,#fsTapHint,.mode-label,._devPanel,#_devPanel,.clock-onboard'
+        ).forEach(function(el) {
+          if (el.style.display !== 'none' && getComputedStyle(el).opacity !== '0') {
+            chromeEls.push({ el: el, prev: el.style.visibility });
+            el.style.visibility = 'hidden';
+          }
+        });
+        document.body.classList.add('chrome-hidden');
+      }
+
+      var origW = W, origH = H, origDpr = dpr;
+      var canvas = renderer.domElement;
+      var origCW = canvas.style.width, origCH = canvas.style.height;
+
+      renderer.setPixelRatio(expDpr);
+      renderer.setSize(expW, expH, false);
+      canvas.style.width  = expW + 'px';
+      canvas.style.height = expH + 'px';
+      camera.aspect = expW / expH;
+      camera.updateProjectionMatrix();
+      fboRT.setSize(expW * expDpr, expH * expDpr);
+
+      renderer.render(scene, camera);
+
+      canvas.toBlob(function(blob) {
+        renderer.setPixelRatio(origDpr);
+        renderer.setSize(origW, origH, false);
+        canvas.style.width  = origCW;
+        canvas.style.height = origCH;
+        camera.aspect = origW / origH;
+        camera.updateProjectionMatrix();
+        fboRT.setSize(origW * origDpr, origH * origDpr);
+
+        chromeEls.forEach(function(c) { c.el.style.visibility = c.prev; });
+        if (hide) document.body.classList.remove('chrome-hidden');
+
+        if (opts.download !== false && opts.filename) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url; a.download = opts.filename; a.click();
+          URL.revokeObjectURL(url);
+        }
+        resolve(blob);
+      }, 'image/png');
+    }
+
+    if (prayerSet) setTimeout(doCapture, 800);
+    else doCapture();
+  });
+};
+
+window._exportAllPrayers = function(opts) {
+  opts = opts || {};
+  var results = [];
+  var idx = 0;
+  return new Promise(function(resolve) {
+    function next() {
+      if (idx >= prayerSectors.length) {
+        if (typeof _swipeRevert === 'function') _swipeRevert();
+        resolve(results);
+        return;
+      }
+      var name = prayerSectors[idx].def ? prayerSectors[idx].def.name : 'prayer-' + idx;
+      window._exportFrame(Object.assign({}, opts, {
+        prayer: idx,
+        filename: opts.download !== false ? ('agot-' + name + '-' + (opts.width||W) + 'x' + (opts.height||H) + '.png') : null
+      })).then(function(blob) {
+        results.push({ name: name, idx: idx, blob: blob });
+        idx++;
+        setTimeout(next, 300);
+      });
+    }
+    next();
+  });
+};
+
+window._recordWebM = function(opts) {
+  opts = opts || {};
+  var canvas = renderer.domElement;
+  var dur = opts.duration || 10000;
+  var stream = canvas.captureStream(opts.fps || 30);
+  var recorder = new MediaRecorder(stream, {
+    mimeType: 'video/webm;codecs=vp9',
+    videoBitsPerSecond: opts.bitrate || 8000000
+  });
+  var chunks = [];
+  return new Promise(function(resolve) {
+    recorder.ondataavailable = function(e) { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = function() {
+      var blob = new Blob(chunks, { type: 'video/webm' });
+      if (opts.filename) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = opts.filename; a.click();
+        URL.revokeObjectURL(url);
+      }
+      resolve(blob);
+    };
+    recorder.start();
+    setTimeout(function() { recorder.stop(); }, dur);
+  });
+};
+
 if (location.search.includes('dev')) {
   _devActive = true;
   setTimeout(_devBuildPanel, 100);
