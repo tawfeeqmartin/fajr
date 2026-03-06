@@ -1908,7 +1908,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     document.body.appendChild(_grainSvg);
     var _grainEl = document.createElement('div');
     _grainEl.id = 'grainOverlay';
-    _grainEl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;filter:url(#grainFilter);opacity:0.70;mix-blend-mode:soft-light;background:white;';
+    _grainEl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;filter:url(#grainFilter);opacity:0.85;mix-blend-mode:soft-light;background:white;';
     document.body.appendChild(_grainEl);
     window._grainOverlay = _grainEl;
   }
@@ -2566,7 +2566,7 @@ function _devBuildPanel() {
   document.getElementById('_devGrainStrength').addEventListener('input', function() {
     var v = parseFloat(this.value) / 100;
     document.getElementById('_devGrainStrengthV').textContent = v.toFixed(2);
-    if (window._grainOverlay) window._grainOverlay.style.opacity = v * 0.70;
+    if (window._grainOverlay) window._grainOverlay.style.opacity = v * 0.85;
   });
 
   // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
