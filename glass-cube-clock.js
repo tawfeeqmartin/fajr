@@ -3139,7 +3139,7 @@ if (location.search.includes('dev')) {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'D' || e.key === 'd') _devToggle();
-  // G key — quick grain A/B toggle
+  // G key — quick grain A/B toggle (desktop)
   if (e.key === 'G' || e.key === 'g') {
     if (window._grainScene) {
       window._grainScene.visible = !window._grainScene.visible;
@@ -3147,6 +3147,16 @@ document.addEventListener('keydown', function(e) {
       if (chk) chk.checked = window._grainScene.visible;
     }
   }
+});
+
+// Three-finger tap — grain A/B toggle (mobile)
+document.addEventListener('touchstart', function(e) {
+  if (e.touches.length === 3 && window._grainScene) {
+    window._grainScene.visible = !window._grainScene.visible;
+    var chk = document.getElementById('_devGrainToggle');
+    if (chk) chk.checked = window._grainScene.visible;
+  }
+}, { passive: true
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
