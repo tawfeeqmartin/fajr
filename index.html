@@ -2129,19 +2129,27 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
     _sunriseForbidden = true;
   }
   const grey = ['Qiyam']; // Sunrise only grey during forbidden window, handled below
-  const _swipePinned = _swipePreviewActive ? window._swipePreviewPrayer : '';
   const html = names.map(p => {
     let style = 'color:#e0e0e0';
     const _isActive = (p === activeP);
-    const _sensitive = (p === 'Qiyam' || p === 'Sunrise');
-    const _allowHighlight = _isActive && (!_sensitive || !_swipePreviewActive || _swipePinned === p);
-    if (_allowHighlight && prayerColors[p]) {
-      // During sunrise forbidden window, show Sunrise in grey instead of orange
-      if (p === 'Sunrise' && _sunriseForbidden) style = 'color:#888888';
-      else style = 'color:' + prayerColors[p];
+
+    if (_swipePreviewActive) {
+      // Swipe UX: keep all non-selected times at default brightness (no distracting dimming).
+      if (_isActive && prayerColors[p]) {
+        if (p === 'Sunrise' && _sunriseForbidden) style = 'color:#888888';
+        else style = 'color:' + prayerColors[p];
+      } else {
+        style = 'color:#e0e0e0';
+      }
+    } else {
+      if (_isActive && prayerColors[p]) {
+        if (p === 'Sunrise' && _sunriseForbidden) style = 'color:#888888';
+        else style = 'color:' + prayerColors[p];
+      }
+      else if (grey.includes(p)) style = 'color:#666';
+      else if (p === 'Sunrise' && !_sunriseForbidden && activeP !== 'Sunrise') style = 'color:#666';
     }
-    else if (grey.includes(p)) style = 'color:#666';
-    else if (p === 'Sunrise' && !_sunriseForbidden && activeP !== 'Sunrise') style = 'color:#666'; // non-active Sunrise stays grey
+
     return `<span data-prayer="${p}" style="${style};transition:all .3s ease">${p} ${t[p]}</span>`;
   }).join(' · ');
   // Fullscreen prayer bar
@@ -3192,7 +3200,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=256';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=257';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
