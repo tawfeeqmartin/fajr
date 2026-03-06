@@ -1687,14 +1687,16 @@ function updateNavClock(){
   const nowM=Math.floor(nowS/60)%1440;
 
   const prayerColors={Tahajjud:'#8811ff',Qiyam:'#8811ff',Fajr:'#6633ee',Sunrise:'#ff9900',Dhuha:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff'};
-  const sunriseM=Math.floor(toSec(t.Sunrise)/60), dhuhaM=sunriseM+20;
+  const _normMin = m => ((Math.floor(m)%1440)+1440)%1440;
+  const sunriseM=_normMin(toSec(t.Sunrise)/60), dhuhaM=_normMin(sunriseM+20);
+  const qiyamM=_normMin(toSec(t.Midnight||'00:00')/60);
   const marks={
-    Tahajjud:Math.floor(toSec(t.Midnight||'00:00')/60), Fajr:Math.floor(toSec(t.Fajr)/60), Sunrise:sunriseM,
-    Dhuha:dhuhaM, Dhuhr:Math.floor(toSec(t.Dhuhr)/60), Asr:Math.floor(toSec(t.Asr)/60),
-    Maghrib:Math.floor(toSec(t.Maghrib)/60), Isha:Math.floor(toSec(t.Isha)/60)
+    Qiyam:qiyamM, Tahajjud:qiyamM, Fajr:_normMin(toSec(t.Fajr)/60), Sunrise:sunriseM,
+    Dhuha:dhuhaM, Dhuhr:_normMin(toSec(t.Dhuhr)/60), Asr:_normMin(toSec(t.Asr)/60),
+    Maghrib:_normMin(toSec(t.Maghrib)/60), Isha:_normMin(toSec(t.Isha)/60)
   };
   const sectors=[
-    {name:'Tahajjud',start:marks.Tahajjud,end:marks.Fajr},
+    {name:'Qiyam',start:marks.Qiyam,end:marks.Fajr},
     {name:'Fajr',start:marks.Fajr,end:marks.Sunrise},
     {name:'Sunrise',start:marks.Sunrise,end:marks.Dhuha},
     {name:'Dhuha',start:marks.Dhuha,end:marks.Dhuhr},
@@ -1706,7 +1708,7 @@ function updateNavClock(){
   const inRange=(m,a,b)=>a<=b?(m>=a&&m<b):(m>=a||m<b);
   let active='Isha';
   for(const s of sectors){ if(inRange(nowM,s.start,s.end)){ active=s.name; break; } }
-  const starts=Object.entries(marks).map(([n,m])=>({name:n,m}));
+  const starts=Object.entries(marks).filter(([n])=>n!=='Tahajjud').map(([n,m])=>({name:n,m}));
   let next=starts[0], best=1e9;
   for(const s of starts){ const d=(s.m-nowM+1440)%1440; if(d>0&&d<best){best=d; next=s;} }
 
@@ -3133,7 +3135,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=248';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=249';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
