@@ -2251,6 +2251,19 @@ function _devBuildPanel() {
       '<span id="_devTahajjudStatus" style="color:#555">inactive</span>' +
     '</div>' +
 
+    sec('Film Grain') +
+    '<div style="display:flex;flex-direction:column;gap:6px">' +
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer">' +
+        '<input type="checkbox" id="_devGrainToggle" checked>' +
+        '<span style="color:#aaa">Enable grain</span>' +
+      '</label>' +
+      '<div style="display:flex;gap:4px;align-items:center">' +
+        '<label style="color:#888;font-size:9px;white-space:nowrap">Strength</label>' +
+        '<input type="range" id="_devGrainStrength" min="0" max="50" value="18" style="flex:1">' +
+        '<span id="_devGrainStrengthV" style="color:#fff;font-size:10px;width:28px;text-align:right">0.18</span>' +
+      '</div>' +
+    '</div>' +
+
     sec('Export') +
     '<div style="display:flex;flex-direction:column;gap:6px">' +
       '<div style="display:flex;gap:4px;align-items:center">' +
@@ -2573,6 +2586,18 @@ function _devBuildPanel() {
     inp.type = 'number'; inp.className = '_dNum'; inp.id = id;
     inp.step = '0.1'; inp.value = span.textContent;
     span.replaceWith(inp);
+  });
+
+  // ── Film grain controls ──────────────────────────────────────────────────────
+  document.getElementById('_devGrainToggle').addEventListener('change', function(e) {
+    if (window._grainScene) {
+      window._grainScene.visible = e.target.checked;
+    }
+  });
+  document.getElementById('_devGrainStrength').addEventListener('input', function() {
+    var v = parseFloat(this.value) / 100;
+    document.getElementById('_devGrainStrengthV').textContent = v.toFixed(2);
+    if (window._grainMat) window._grainMat.uniforms.uStrength.value = v;
   });
 
   // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
@@ -3114,6 +3139,14 @@ if (location.search.includes('dev')) {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'D' || e.key === 'd') _devToggle();
+  // G key — quick grain A/B toggle
+  if (e.key === 'G' || e.key === 'g') {
+    if (window._grainScene) {
+      window._grainScene.visible = !window._grainScene.visible;
+      var chk = document.getElementById('_devGrainToggle');
+      if (chk) chk.checked = window._grainScene.visible;
+    }
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
