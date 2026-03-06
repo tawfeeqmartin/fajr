@@ -1711,7 +1711,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   solarKey.color.copy(_solarC);
   solarKey.intensity = 0.04 + _sunLift * 0.55; // reduce broad sweep so orbit reads circular, not linear
 
-  // Plinth-top highlight orbit: circular, clockwise, exactly over hour-hand trajectory.
+  // Plinth-top highlight orbit: lock to ACTUAL hour-hand direction (exact alignment).
   var _cubeDayC = _solarC.clone().lerp(new THREE.Color(0xe8f2ff), 0.30);
   cubeSun.color.copy(_cubeDayC);
   cubeSun.intensity = 24 + _sunLift * 22; // keep secondary; plinthSun is primary orbital read
@@ -1722,10 +1722,11 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   );
 
   // Dedicated top-down moving spot for clear circular trace on plinth.
-  // Orbit constrained to plinth top (between cube edge and plinth edge).
-  var _orbitR = 1.08;
-  var _ox = Math.sin(_hourAng) * _orbitR;
-  var _oz = -Math.cos(_hourAng) * _orbitR;
+  // Use hour-hand mesh direction so sun center sits exactly on hour-hand radial line.
+  var _orbitR = 1.08; // between cube edge (~0.85) and plinth edge (~1.32)
+  var _hrDir = new THREE.Vector3(0, 0, -1).applyQuaternion(clockRays[0].mesh.quaternion).setY(0).normalize();
+  var _ox = _hrDir.x * _orbitR;
+  var _oz = _hrDir.z * _orbitR;
   plinthSun.position.set(_ox, 3.35 + _sunLift * 0.45, _oz);
   plinthSun.target.position.set(_ox, -0.03, _oz);
   // Sunrise→Dhuha hue lock, then noon cool, then warm sunset.
@@ -1737,6 +1738,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       : _noon.clone().lerp(_dusk, (_dayPhase - 0.5) / 0.5));
   plinthSun.color.copy(_sunColor);
   plinthSun.intensity = _sunLift * 12.0; // sunrise/sunset zero, noon strongest
+  window._sunDebug = {
+    hourRot: clockRays[0].mesh.rotation.y,
+    hourDir: { x: _hrDir.x, z: _hrDir.z },
+    plinthSunPos: { x: _ox, z: _oz, y: plinthSun.position.y },
+    orbitR: _orbitR,
+  };
 
   // ── Tahajjud — last third of the night ──
   var _tahajjudNow = Date.now();
