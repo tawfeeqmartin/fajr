@@ -2209,7 +2209,8 @@ function _devBuildPanel() {
         '<select id="_devExportSize" style="flex:1;background:#1a1a2a;border:1px solid #333;color:#ccc;padding:2px 4px;border-radius:4px;font:10px monospace">' +
           '<option value="1080x1080">1080×1080 (IG Square)</option>' +
           '<option value="1080x1920">1080×1920 (Stories/Reels)</option>' +
-          '<option value="1920x1080">1920×1080 (Twitter/YT)</option>' +
+          '<option value="1920x1080">1920×1080 (HD)</option>' +
+          '<option value="2160x3840">2160×3840 (Twitter/X Preferred)</option>' +
           '<option value="2160x2160">2160×2160 (4K Square)</option>' +
           '<option value="3840x2160">3840×2160 (4K UHD)</option>' +
           '<option value="current" selected>Current viewport</option>' +
