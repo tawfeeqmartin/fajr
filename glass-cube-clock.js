@@ -834,6 +834,15 @@ podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
+// ── Shadow disc — masks cubeSun caustic dots on podium front face ──────────
+var _shadowDisc = new THREE.Mesh(
+  new THREE.CircleGeometry(0.9, 32),
+  new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.6, depthWrite: false })
+);
+_shadowDisc.rotation.x = -Math.PI / 2;
+_shadowDisc.position.set(0, -0.025, 0); // just above podium top face
+scene.add(_shadowDisc);
+
 // ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
 // Just two scene lights to illuminate the podium surface. No material changes.
 // Warm SpotLight: hits the front face (camera-visible) from above-forward
