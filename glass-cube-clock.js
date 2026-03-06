@@ -1906,27 +1906,100 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       depthTest: false,
       depthWrite: false,
       uniforms: {
-        uTime: { value: 0 },
-        uStrength: { value: 0.0 },
-        tScene: { value: null }
+        uTime:       { value: 0 },
+        uResolution: { value: new THREE.Vector2(W * dpr, H * dpr) },
+        uIntensity:  { value: 1.0 },
+        uGrainScale: { value: 3.5 },
+        uSpeed:      { value: 0.04 },
+        uColorMix:   { value: 0.35 }
       },
-      vertexShader: 'varying vec2 vUv; void main(){ vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      vertexShader: 'void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }',
       fragmentShader: [
         'uniform float uTime;',
-        'uniform float uStrength;',
-        'varying vec2 vUv;',
-        // IGN — Jorge Jimenez (CoD:AW)
-        'float ign(vec2 fc){',
-        '  return fract(52.9829189 * fract(dot(fc, vec2(0.06711056, 0.00583715))));',
+        'uniform vec2  uResolution;',
+        'uniform float uIntensity;',
+        'uniform float uGrainScale;',
+        'uniform float uSpeed;',
+        'uniform float uColorMix;',
+        // Simplex 2D — Ashima Arts (public domain)
+        'vec3 _pm(vec3 x){ return mod(((x*34.0)+1.0)*x, 289.0); }',
+        'float snoise(vec2 v){',
+        '  const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);',
+        '  vec2 i=floor(v+dot(v,C.yy));',
+        '  vec2 x0=v-i+dot(i,C.xx);',
+        '  vec2 i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);',
+        '  vec4 x12=x0.xyxy+C.xxzz;',
+        '  x12.xy-=i1;',
+        '  i=mod(i,289.0);',
+        '  vec3 p=_pm(_pm(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));',
+        '  vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);',
+        '  m=m*m*m*m;',
+        '  vec3 gx=2.0*fract(p*C.www)-1.0;',
+        '  vec3 h=abs(gx)-0.5;',
+        '  vec3 a0=gx-floor(gx+0.5);',
+        '  m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);',
+        '  vec3 g;',
+        '  g.x=a0.x*x0.x+h.x*x0.y;',
+        '  g.yz=a0.yz*x12.xz+h.yz*x12.yw;',
+        '  return 130.0*dot(m,g);',
+        '}',
+        // Scene palette approximation (where colored gradients live)
+        'vec3 sceneColor(vec2 uv){',
+        '  vec3 bg=vec3(0.051,0.051,0.071);',
+        '  float cube=exp(-length((uv-vec2(0.5,0.40))*vec2(1.3,1.9))*4.5);',
+        '  float arcL=exp(-length((uv-vec2(0.25,0.62))*vec2(3.0,2.0))*5.5);',
+        '  float arcR=exp(-length((uv-vec2(0.75,0.62))*vec2(3.0,2.0))*5.5);',
+        '  float fl=smoothstep(0.55,0.05,uv.y)*exp(-abs(uv.x-0.5)*4.5);',
+        '  vec3 col=bg;',
+        '  col+=cube*vec3(0.20,0.05,0.32)*0.8;',
+        '  col+=arcL*vec3(0.04,0.28,0.32)*0.6;',
+        '  col+=arcR*vec3(0.35,0.12,0.08)*0.6;',
+        '  col+=fl*vec3(0.12,0.20,0.30)*0.5;',
+        '  return col;',
+        '}',
+        // Gradient energy — noise lives in color TRANSITIONS
+        'float gradientEnergy(vec2 uv){',
+        '  const float E=0.007;',
+        '  vec3 dx=sceneColor(uv+vec2(E,0.0))-sceneColor(uv-vec2(E,0.0));',
+        '  vec3 dy=sceneColor(uv+vec2(0.0,E))-sceneColor(uv-vec2(0.0,E));',
+        '  vec3 lw=vec3(0.299,0.587,0.114);',
+        '  float lum=abs(dot(dx,lw))+abs(dot(dy,lw));',
+        '  vec3 cdx=dx-dot(dx,lw)*vec3(1.0);',
+        '  vec3 cdy=dy-dot(dy,lw)*vec3(1.0);',
+        '  return lum*0.4+length(cdx)+length(cdy)*1.6;',
         '}',
         'void main(){',
-        '  vec2 fc = gl_FragCoord.xy;',
-        // Animated grain
-        '  float n = ign(fc + vec2(uTime * 1000.0, uTime * 317.0));',
-        // Centered around 0
-        '  float g = (n - 0.5) * uStrength;',
-        // Additive — visible in darks AND mids
-        '  gl_FragColor = vec4(g, g, g, 1.0);',
+        '  vec2 uv=gl_FragCoord.xy/uResolution;',
+        '  vec2 px=gl_FragCoord.xy;',
+        '  float t=uTime*uSpeed;',
+        '  vec2 drift=vec2(t*0.71,t);',
+        '  float s=uGrainScale;',
+        // Multi-scale FBM grain (3 octaves like Stripe's fractalNoise)
+        '  float gMacro=snoise(px/(s*2.2)+drift*0.40);',
+        '  float gBase=snoise(px/s+drift);',
+        '  float gFine=snoise(px/(s*0.48)+drift*vec2(-1.3,0.85));',
+        '  float grain=gMacro*0.20+gBase*0.55+gFine*0.25;',
+        '  float grain01=grain*0.5+0.5;',
+        // Gradient energy mask
+        '  float energy=clamp(gradientEnergy(uv)*55.0,0.0,1.0);',
+        '  float ampMask=mix(0.20,1.0,energy);',
+        // Chromatic grain (RGB independently offset)
+        '  vec3 chromaGrain=vec3(',
+        '    snoise(px/s+drift)*0.5+0.5,',
+        '    snoise(px/s+drift+vec2(1.73,0.91))*0.5+0.5,',
+        '    snoise(px/s+drift+vec2(-0.94,2.13))*0.5+0.5',
+        '  );',
+        '  vec3 blendedGrain=mix(vec3(grain01),chromaGrain,uColorMix);',
+        // Scene tint direction
+        '  vec3 sceneTint=max(sceneColor(uv),vec3(0.038,0.038,0.052));',
+        '  vec3 tintDir=normalize(sceneTint);',
+        // Soft vignette
+        '  float vig=1.0-smoothstep(0.35,0.85,length((uv-0.5)*vec2(1.1,1.3)));',
+        '  vig=max(vig,0.15);',
+        // Final amplitude
+        '  float amplitude=0.058*ampMask*vig*uIntensity;',
+        '  vec3 outColor=max(tintDir*blendedGrain*amplitude,vec3(0.0));',
+        '  gl_FragColor=vec4(outColor,1.0);',
         '}'
       ].join('\n'),
       blending: THREE.AdditiveBlending
@@ -1940,6 +2013,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     window._grainMat = _grainMat;
   }
   window._grainMat.uniforms.uTime.value = t;
+  window._grainMat.uniforms.uResolution.value.set(W * dpr, H * dpr);
   renderer.autoClear = false;
   renderer.render(window._grainScene, window._grainCam);
   renderer.autoClear = true;
@@ -2258,9 +2332,9 @@ function _devBuildPanel() {
         '<span style="color:#aaa">Enable grain</span>' +
       '</label>' +
       '<div style="display:flex;gap:4px;align-items:center">' +
-        '<label style="color:#888;font-size:9px;white-space:nowrap">Strength</label>' +
-        '<input type="range" id="_devGrainStrength" min="0" max="50" value="18" style="flex:1">' +
-        '<span id="_devGrainStrengthV" style="color:#fff;font-size:10px;width:28px;text-align:right">0.18</span>' +
+        '<label style="color:#888;font-size:9px;white-space:nowrap">Intensity</label>' +
+        '<input type="range" id="_devGrainStrength" min="0" max="200" value="100" style="flex:1">' +
+        '<span id="_devGrainStrengthV" style="color:#fff;font-size:10px;width:28px;text-align:right">1.00</span>' +
       '</div>' +
     '</div>' +
 
@@ -2597,7 +2671,7 @@ function _devBuildPanel() {
   document.getElementById('_devGrainStrength').addEventListener('input', function() {
     var v = parseFloat(this.value) / 100;
     document.getElementById('_devGrainStrengthV').textContent = v.toFixed(2);
-    if (window._grainMat) window._grainMat.uniforms.uStrength.value = v;
+    if (window._grainMat) window._grainMat.uniforms.uIntensity.value = v;
   });
 
   // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
