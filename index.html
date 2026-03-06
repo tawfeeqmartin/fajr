@@ -2054,12 +2054,23 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
   const nowM = (typeof _overrideNowM === 'number') ? _overrideNowM : (now.getHours()*60+now.getMinutes());
   const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
   // Find current active prayer window — matches beam sectors exactly
-  // Sectors: Tahajjud(Midnight→Fajr), Fajr(Fajr→Sunrise), Sunrise forbidden(Sunrise→Sunrise+20),
+  // Sectors: Qiyam(Midnight→Fajr), Fajr(Fajr→Sunrise), Sunrise forbidden(Sunrise→Sunrise+20),
   //          Dhuha(Sunrise+20→Dhuhr), Dhuhr(Dhuhr→Asr), Asr(Asr→Maghrib), Maghrib(Maghrib→Isha), Isha(Isha→Midnight)
   let activeP = '';
   let _sunriseForbidden = false;
   const _sunriseMin = t.Sunrise ? toM(t.Sunrise) : 0;
   const _dhuhaStart = _sunriseMin + 20;
+  const _fajrMin = t.Fajr ? toM(t.Fajr) : 0;
+  const _midnightMin = t.Midnight ? toM(t.Midnight) : null;
+
+  // Qiyam has priority over Isha when we're past Islamic midnight and before Fajr.
+  if (_midnightMin !== null) {
+    const _inQiyam = (_midnightMin <= _fajrMin)
+      ? (nowM >= _midnightMin && nowM < _fajrMin)
+      : (nowM >= _midnightMin || nowM < _fajrMin);
+    if (_inQiyam) activeP = 'Qiyam';
+  }
+
   const sectors = [
     {name:'Isha',     start:'Isha'},
     {name:'Maghrib',  start:'Maghrib'},
@@ -2068,8 +2079,10 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
     {name:'Sunrise',  start:'Sunrise'},  // Dhuha window — maps to Sunrise span
     {name:'Fajr',     start:'Fajr'}
   ];
-  for (let i = 0; i < sectors.length; i++) {
-    if (t[sectors[i].start] && toM(t[sectors[i].start]) <= nowM) { activeP = sectors[i].name; break; }
+  if (!activeP) {
+    for (let i = 0; i < sectors.length; i++) {
+      if (t[sectors[i].start] && toM(t[sectors[i].start]) <= nowM) { activeP = sectors[i].name; break; }
+    }
   }
   // Check if we're in the 20-min sunrise forbidden window
   if (activeP === 'Sunrise' && nowM < _dhuhaStart) {
@@ -3135,7 +3148,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=249';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=250';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
