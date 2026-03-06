@@ -1907,16 +1907,25 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       depthWrite: false,
       uniforms: {
         uTime: { value: 0 },
-        uStrength: { value: 0.055 }
+        uStrength: { value: 0.18 },
+        tScene: { value: null }
       },
-      vertexShader: 'void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }',
       fragmentShader: [
         'uniform float uTime;',
         'uniform float uStrength;',
+        'varying vec2 vUv;',
+        // IGN — Jorge Jimenez (CoD:AW)
+        'float ign(vec2 fc){',
+        '  return fract(52.9829189 * fract(dot(fc, vec2(0.06711056, 0.00583715))));',
+        '}',
         'void main(){',
         '  vec2 fc = gl_FragCoord.xy;',
-        '  float n = fract(52.9829189 * fract(dot(fc + vec2(uTime*1000.0, uTime*317.0), vec2(0.06711056, 0.00583715))));',
+        // Animated grain
+        '  float n = ign(fc + vec2(uTime * 1000.0, uTime * 317.0));',
+        // Centered around 0
         '  float g = (n - 0.5) * uStrength;',
+        // Additive — visible in darks AND mids
         '  gl_FragColor = vec4(g, g, g, 1.0);',
         '}'
       ].join('\n'),
