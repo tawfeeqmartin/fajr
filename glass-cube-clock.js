@@ -39,7 +39,7 @@ function getSize() {
 let { w: W, h: H } = getSize();
 let dpr = calcDpr(W, H);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.toneMapping = THREE.AgXToneMapping;
 renderer.toneMappingExposure = 0.95; // v57: 1.25→0.95 — darken outside arch, dramatic contrast with bright interior
 renderer.shadowMap.enabled = true;
@@ -2202,6 +2202,36 @@ function _devBuildPanel() {
       '<span id="_devTahajjudStatus" style="color:#555">inactive</span>' +
     '</div>' +
 
+    sec('Export') +
+    '<div style="display:flex;flex-direction:column;gap:6px">' +
+      '<div style="display:flex;gap:4px;align-items:center">' +
+        '<label style="color:#888;font-size:9px;white-space:nowrap">Size</label>' +
+        '<select id="_devExportSize" style="flex:1;background:#1a1a2a;border:1px solid #333;color:#ccc;padding:2px 4px;border-radius:4px;font:10px monospace">' +
+          '<option value="1080x1080">1080×1080 (IG Square)</option>' +
+          '<option value="1080x1920">1080×1920 (Stories/Reels)</option>' +
+          '<option value="1920x1080">1920×1080 (Twitter/YT)</option>' +
+          '<option value="2160x2160">2160×2160 (4K Square)</option>' +
+          '<option value="3840x2160">3840×2160 (4K UHD)</option>' +
+          '<option value="current" selected>Current viewport</option>' +
+        '</select>' +
+      '</div>' +
+      '<div style="display:flex;gap:4px;align-items:center">' +
+        '<label style="color:#888;font-size:9px;white-space:nowrap">DPR</label>' +
+        '<select id="_devExportDpr" style="flex:1;background:#1a1a2a;border:1px solid #333;color:#ccc;padding:2px 4px;border-radius:4px;font:10px monospace">' +
+          '<option value="1">1x</option>' +
+          '<option value="2" selected>2x</option>' +
+          '<option value="3">3x</option>' +
+        '</select>' +
+      '</div>' +
+      '<label style="display:flex;align-items:center;gap:5px;cursor:pointer">' +
+        '<input type="checkbox" id="_devExportNoChrome" checked>' +
+        '<span style="color:#aaa">Hide UI chrome</span>' +
+      '</label>' +
+      '<button id="_devExportPNG" style="' + btnBase(false) + ';width:100%">📸 Export PNG</button>' +
+      '<button id="_devExportSeq" style="' + btnBase(false) + ';width:100%">🎞 Export All Prayers</button>' +
+      '<button id="_devExportWebM" style="' + btnBase(false) + ';width:100%">🎬 Record 10s WebM</button>' +
+    '</div>' +
+
     '</div>'; // end _devBody
 
   document.body.appendChild(panel);
@@ -2493,6 +2523,140 @@ function _devBuildPanel() {
     inp.type = 'number'; inp.className = '_dNum'; inp.id = id;
     inp.step = '0.1'; inp.value = span.textContent;
     span.replaceWith(inp);
+  });
+
+  // ── Export helpers ──────────────────────────────────────────────────────────
+  function _devExportGetSize() {
+    var sel = document.getElementById('_devExportSize');
+    if (!sel || sel.value === 'current') return { w: W, h: H };
+    var parts = sel.value.split('x');
+    return { w: parseInt(parts[0]), h: parseInt(parts[1]) };
+  }
+
+  function _devExportCapture(filename) {
+    var size = _devExportGetSize();
+    var expDpr = parseInt(document.getElementById('_devExportDpr').value) || 2;
+    var hideChrome = document.getElementById('_devExportNoChrome').checked;
+
+    // Hide chrome temporarily
+    var chromeEls = [];
+    if (hideChrome) {
+      document.querySelectorAll('.fs-header,.mode-pill,.compass-chrome,#fsTapHint,.mode-label,._devPanel,#_devPanel').forEach(function(el) {
+        if (el.style.display !== 'none' && getComputedStyle(el).opacity !== '0') {
+          chromeEls.push({ el: el, prev: el.style.visibility });
+          el.style.visibility = 'hidden';
+        }
+      });
+    }
+
+    // Save current state
+    var origW = W, origH = H, origDpr = dpr;
+    var canvas = renderer.domElement;
+    var origCanvasW = canvas.style.width, origCanvasH = canvas.style.height;
+
+    // Resize renderer to export size
+    renderer.setPixelRatio(expDpr);
+    renderer.setSize(size.w, size.h, false);
+    canvas.style.width = size.w + 'px';
+    canvas.style.height = size.h + 'px';
+    camera.aspect = size.w / size.h;
+    camera.updateProjectionMatrix();
+
+    // Resize FBO render target
+    fboRT.setSize(size.w * expDpr, size.h * expDpr);
+
+    // Render one frame
+    renderer.render(scene, camera);
+
+    // Capture
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename || 'agot-export.png';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      // Restore
+      renderer.setPixelRatio(origDpr);
+      renderer.setSize(origW, origH, false);
+      canvas.style.width = origCanvasW;
+      canvas.style.height = origCanvasH;
+      camera.aspect = origW / origH;
+      camera.updateProjectionMatrix();
+      fboRT.setSize(origW * origDpr, origH * origDpr);
+
+      // Restore chrome
+      chromeEls.forEach(function(c) { c.el.style.visibility = c.prev; });
+    }, 'image/png');
+  }
+
+  // Single PNG export
+  document.getElementById('_devExportPNG').addEventListener('click', function() {
+    var size = _devExportGetSize();
+    var ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    _devExportCapture('agot-' + size.w + 'x' + size.h + '-' + ts + '.png');
+  });
+
+  // Export all prayers sequence
+  document.getElementById('_devExportSeq').addEventListener('click', function() {
+    if (!prayerSectors.length) { alert('No prayer data loaded yet'); return; }
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '⏳ Exporting...';
+    var idx = 0;
+    function captureNext() {
+      if (idx >= prayerSectors.length) {
+        btn.disabled = false;
+        btn.textContent = '🎞 Export All Prayers';
+        // Revert to live
+        _swipeRevert();
+        return;
+      }
+      _swipeShowPreview(idx);
+      // Wait for render to settle
+      setTimeout(function() {
+        var name = prayerSectors[idx].def ? prayerSectors[idx].def.name : 'prayer-' + idx;
+        var size = _devExportGetSize();
+        _devExportCapture('agot-' + name + '-' + size.w + 'x' + size.h + '.png');
+        idx++;
+        setTimeout(captureNext, 500); // gap between exports
+      }, 300);
+    }
+    captureNext();
+  });
+
+  // Record WebM video
+  document.getElementById('_devExportWebM').addEventListener('click', function() {
+    var btn = this;
+    var canvas = renderer.domElement;
+    if (btn._recording) {
+      btn._recorder.stop();
+      return;
+    }
+    var stream = canvas.captureStream(30);
+    var recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 });
+    var chunks = [];
+    recorder.ondataavailable = function(e) { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = function() {
+      btn._recording = false;
+      btn.textContent = '🎬 Record 10s WebM';
+      btn.style.background = '';
+      var blob = new Blob(chunks, { type: 'video/webm' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'agot-recording-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.webm';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    recorder.start();
+    btn._recording = true;
+    btn._recorder = recorder;
+    btn.textContent = '⏹ Stop Recording';
+    btn.style.background = 'rgba(200,50,50,0.4)';
+    // Auto-stop after 10s
+    setTimeout(function() { if (btn._recording) recorder.stop(); }, 10000);
   });
 }
 
