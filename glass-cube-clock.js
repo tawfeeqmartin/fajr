@@ -1897,126 +1897,21 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
   renderer.render(scene, camera);
 
-  // ── Film grain overlay (IGN — Interleaved Gradient Noise) ──────────────────
-  // Full-screen quad composited AFTER the main scene render via AdditiveBlending.
-  // ~0.05ms on mobile — zero-cost grain that eliminates banding in dark zones.
-  if (!window._grainScene) {
-    var _grainMat = new THREE.ShaderMaterial({
-      transparent: true,
-      depthTest: false,
-      depthWrite: false,
-      uniforms: {
-        uTime:       { value: 0 },
-        uResolution: { value: new THREE.Vector2(W * dpr, H * dpr) },
-        uIntensity:  { value: 1.0 },
-        uGrainScale: { value: 3.5 },
-        uSpeed:      { value: 0.04 },
-        uColorMix:   { value: 0.35 }
-      },
-      vertexShader: 'void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }',
-      fragmentShader: [
-        'uniform float uTime;',
-        'uniform vec2  uResolution;',
-        'uniform float uIntensity;',
-        'uniform float uGrainScale;',
-        'uniform float uSpeed;',
-        'uniform float uColorMix;',
-        // Simplex 2D — Ashima Arts (public domain)
-        'vec3 _pm(vec3 x){ return mod(((x*34.0)+1.0)*x, 289.0); }',
-        'float snoise(vec2 v){',
-        '  const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);',
-        '  vec2 i=floor(v+dot(v,C.yy));',
-        '  vec2 x0=v-i+dot(i,C.xx);',
-        '  vec2 i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);',
-        '  vec4 x12=x0.xyxy+C.xxzz;',
-        '  x12.xy-=i1;',
-        '  i=mod(i,289.0);',
-        '  vec3 p=_pm(_pm(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));',
-        '  vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);',
-        '  m=m*m*m*m;',
-        '  vec3 gx=2.0*fract(p*C.www)-1.0;',
-        '  vec3 h=abs(gx)-0.5;',
-        '  vec3 a0=gx-floor(gx+0.5);',
-        '  m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);',
-        '  vec3 g;',
-        '  g.x=a0.x*x0.x+h.x*x0.y;',
-        '  g.yz=a0.yz*x12.xz+h.yz*x12.yw;',
-        '  return 130.0*dot(m,g);',
-        '}',
-        // Scene palette approximation (where colored gradients live)
-        'vec3 sceneColor(vec2 uv){',
-        '  vec3 bg=vec3(0.051,0.051,0.071);',
-        '  float cube=exp(-length((uv-vec2(0.5,0.40))*vec2(1.3,1.9))*4.5);',
-        '  float arcL=exp(-length((uv-vec2(0.25,0.62))*vec2(3.0,2.0))*5.5);',
-        '  float arcR=exp(-length((uv-vec2(0.75,0.62))*vec2(3.0,2.0))*5.5);',
-        '  float fl=smoothstep(0.55,0.05,uv.y)*exp(-abs(uv.x-0.5)*4.5);',
-        '  vec3 col=bg;',
-        '  col+=cube*vec3(0.20,0.05,0.32)*0.8;',
-        '  col+=arcL*vec3(0.04,0.28,0.32)*0.6;',
-        '  col+=arcR*vec3(0.35,0.12,0.08)*0.6;',
-        '  col+=fl*vec3(0.12,0.20,0.30)*0.5;',
-        '  return col;',
-        '}',
-        // Gradient energy — noise lives in color TRANSITIONS
-        'float gradientEnergy(vec2 uv){',
-        '  const float E=0.007;',
-        '  vec3 dx=sceneColor(uv+vec2(E,0.0))-sceneColor(uv-vec2(E,0.0));',
-        '  vec3 dy=sceneColor(uv+vec2(0.0,E))-sceneColor(uv-vec2(0.0,E));',
-        '  vec3 lw=vec3(0.299,0.587,0.114);',
-        '  float lum=abs(dot(dx,lw))+abs(dot(dy,lw));',
-        '  vec3 cdx=dx-dot(dx,lw)*vec3(1.0);',
-        '  vec3 cdy=dy-dot(dy,lw)*vec3(1.0);',
-        '  return lum*0.4+length(cdx)+length(cdy)*1.6;',
-        '}',
-        'void main(){',
-        '  vec2 uv=gl_FragCoord.xy/uResolution;',
-        '  vec2 px=gl_FragCoord.xy;',
-        '  float t=uTime*uSpeed;',
-        '  vec2 drift=vec2(t*0.71,t);',
-        '  float s=uGrainScale;',
-        // Multi-scale FBM grain (3 octaves like Stripe's fractalNoise)
-        '  float gMacro=snoise(px/(s*2.2)+drift*0.40);',
-        '  float gBase=snoise(px/s+drift);',
-        '  float gFine=snoise(px/(s*0.48)+drift*vec2(-1.3,0.85));',
-        '  float grain=gMacro*0.20+gBase*0.55+gFine*0.25;',
-        '  float grain01=grain*0.5+0.5;',
-        // Gradient energy mask
-        '  float energy=clamp(gradientEnergy(uv)*55.0,0.0,1.0);',
-        '  float ampMask=mix(0.55,1.0,energy);',
-        // Chromatic grain (RGB independently offset)
-        '  vec3 chromaGrain=vec3(',
-        '    snoise(px/s+drift)*0.5+0.5,',
-        '    snoise(px/s+drift+vec2(1.73,0.91))*0.5+0.5,',
-        '    snoise(px/s+drift+vec2(-0.94,2.13))*0.5+0.5',
-        '  );',
-        '  vec3 blendedGrain=mix(vec3(grain01),chromaGrain,uColorMix);',
-        // Scene tint direction
-        '  vec3 sceneTint=max(sceneColor(uv),vec3(0.038,0.038,0.052));',
-        '  vec3 tintDir=normalize(sceneTint);',
-        // Soft vignette
-        '  float vig=1.0-smoothstep(0.35,0.85,length((uv-0.5)*vec2(1.1,1.3)));',
-        '  vig=max(vig,0.15);',
-        // Final amplitude
-        '  float amplitude=0.259*ampMask*vig*uIntensity;',
-        '  vec3 outColor=max(tintDir*blendedGrain*amplitude,vec3(0.0));',
-        '  gl_FragColor=vec4(outColor,1.0);',
-        '}'
-      ].join('\n'),
-      blending: THREE.AdditiveBlending
-    });
-    var _grainMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), _grainMat);
-    _grainMesh.frustumCulled = false;
-    var _grainScene = new THREE.Scene();
-    _grainScene.add(_grainMesh);
-    window._grainScene = _grainScene;
-    window._grainCam = new THREE.Camera();
-    window._grainMat = _grainMat;
+  // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
+  // The actual Stripe/Linear/Vercel technique. CSS filter, zero GPU cost.
+  if (!window._grainOverlay) {
+    var _grainSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    _grainSvg.setAttribute('width','0');
+    _grainSvg.setAttribute('height','0');
+    _grainSvg.style.position = 'absolute';
+    _grainSvg.innerHTML = '<filter id="grainFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>';
+    document.body.appendChild(_grainSvg);
+    var _grainEl = document.createElement('div');
+    _grainEl.id = 'grainOverlay';
+    _grainEl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;filter:url(#grainFilter);opacity:0.15;mix-blend-mode:soft-light;background:white;';
+    document.body.appendChild(_grainEl);
+    window._grainOverlay = _grainEl;
   }
-  window._grainMat.uniforms.uTime.value = t;
-  window._grainMat.uniforms.uResolution.value.set(W * dpr, H * dpr);
-  renderer.autoClear = false;
-  renderer.render(window._grainScene, window._grainCam);
-  renderer.autoClear = true;
 
   // Sample top-left pixel and sync theme-color meta tag (~once per minute)
   if (++_themeFrameCount >= 3600) {
@@ -2664,14 +2559,14 @@ function _devBuildPanel() {
 
   // ── Film grain controls ──────────────────────────────────────────────────────
   document.getElementById('_devGrainToggle').addEventListener('change', function(e) {
-    if (window._grainScene) {
-      window._grainScene.visible = e.target.checked;
+    if (window._grainOverlay) {
+      window._grainOverlay.style.display = e.target.checked ? '' : 'none';
     }
   });
   document.getElementById('_devGrainStrength').addEventListener('input', function() {
     var v = parseFloat(this.value) / 100;
     document.getElementById('_devGrainStrengthV').textContent = v.toFixed(2);
-    if (window._grainMat) window._grainMat.uniforms.uIntensity.value = v;
+    if (window._grainOverlay) window._grainOverlay.style.opacity = v * 0.15;
   });
 
   // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
@@ -3215,20 +3110,22 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'D' || e.key === 'd') _devToggle();
   // G key — quick grain A/B toggle (desktop)
   if (e.key === 'G' || e.key === 'g') {
-    if (window._grainScene) {
-      window._grainScene.visible = !window._grainScene.visible;
+    if (window._grainOverlay) {
+      var vis = window._grainOverlay.style.display !== 'none';
+      window._grainOverlay.style.display = vis ? 'none' : '';
       var chk = document.getElementById('_devGrainToggle');
-      if (chk) chk.checked = window._grainScene.visible;
+      if (chk) chk.checked = !vis;
     }
   }
 });
 
 // Three-finger tap — grain A/B toggle (mobile)
 document.addEventListener('touchstart', function(e) {
-  if (e.touches.length === 3 && window._grainScene) {
-    window._grainScene.visible = !window._grainScene.visible;
+  if (e.touches.length === 3 && window._grainOverlay) {
+    var vis = window._grainOverlay.style.display !== 'none';
+    window._grainOverlay.style.display = vis ? 'none' : '';
     var chk = document.getElementById('_devGrainToggle');
-    if (chk) chk.checked = window._grainScene.visible;
+    if (chk) chk.checked = !vis;
   }
 }, { passive: true
 });
