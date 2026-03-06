@@ -1908,7 +1908,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     document.body.appendChild(_grainSvg);
     var _grainEl = document.createElement('div');
     _grainEl.id = 'grainOverlay';
-    _grainEl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;filter:url(#grainFilter);opacity:0.15;mix-blend-mode:soft-light;background:white;';
+    _grainEl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;filter:url(#grainFilter);opacity:0.35;mix-blend-mode:soft-light;background:white;';
     document.body.appendChild(_grainEl);
     window._grainOverlay = _grainEl;
   }
@@ -2566,7 +2566,7 @@ function _devBuildPanel() {
   document.getElementById('_devGrainStrength').addEventListener('input', function() {
     var v = parseFloat(this.value) / 100;
     document.getElementById('_devGrainStrengthV').textContent = v.toFixed(2);
-    if (window._grainOverlay) window._grainOverlay.style.opacity = v * 0.15;
+    if (window._grainOverlay) window._grainOverlay.style.opacity = v * 0.35;
   });
 
   // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
@@ -3119,13 +3119,20 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Three-finger tap — grain A/B toggle (mobile)
+// Two-finger double-tap — grain A/B toggle (mobile)
+var _grainTwoTapLast = 0;
 document.addEventListener('touchstart', function(e) {
-  if (e.touches.length === 3 && window._grainOverlay) {
-    var vis = window._grainOverlay.style.display !== 'none';
-    window._grainOverlay.style.display = vis ? 'none' : '';
-    var chk = document.getElementById('_devGrainToggle');
-    if (chk) chk.checked = !vis;
+  if (e.touches.length === 2 && window._grainOverlay) {
+    var now = Date.now();
+    if (now - _grainTwoTapLast < 400) {
+      var vis = window._grainOverlay.style.display !== 'none';
+      window._grainOverlay.style.display = vis ? 'none' : '';
+      var chk = document.getElementById('_devGrainToggle');
+      if (chk) chk.checked = !vis;
+      _grainTwoTapLast = 0;
+    } else {
+      _grainTwoTapLast = now;
+    }
   }
 }, { passive: true
 });
