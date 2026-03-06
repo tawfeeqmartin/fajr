@@ -1674,52 +1674,72 @@ function updateNavClock(){
   const t=window._prayerTimings;
   if(!t)return;
   const now=new Date();
+  const toSec=s=>{const[hh,mm]=String(s||'0:0').split(':').map(Number);return (hh||0)*3600+(mm||0)*60;};
+
   // Use preview/swipe time when available so top-right countdown follows prayer preview.
   let nowS=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
-  if (typeof window._swipeTimeOverride === 'number' && window._swipeTimeOverride !== null) {
-    nowS = Math.floor(window._swipeTimeOverride * 60);
-  } else if (typeof window._forceTimeMin === 'number' && window._forceTimeMin !== null) {
-    nowS = Math.floor(window._forceTimeMin * 60);
+  if (typeof window._swipeTimeOverride === 'number' && window._swipeTimeOverride !== null) nowS = Math.floor(window._swipeTimeOverride * 60);
+  else if (typeof window._forceTimeMin === 'number' && window._forceTimeMin !== null) nowS = Math.floor(window._forceTimeMin * 60);
+  const nowM=Math.floor(nowS/60)%1440;
+
+  const prayerColors={Tahajjud:'#8811ff',Qiyam:'#8811ff',Fajr:'#6633ee',Sunrise:'#ff9900',Dhuha:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff'};
+  const sunriseM=Math.floor(toSec(t.Sunrise)/60), dhuhaM=sunriseM+20;
+  const marks={
+    Tahajjud:Math.floor(toSec(t.Midnight||'00:00')/60), Fajr:Math.floor(toSec(t.Fajr)/60), Sunrise:sunriseM,
+    Dhuha:dhuhaM, Dhuhr:Math.floor(toSec(t.Dhuhr)/60), Asr:Math.floor(toSec(t.Asr)/60),
+    Maghrib:Math.floor(toSec(t.Maghrib)/60), Isha:Math.floor(toSec(t.Isha)/60)
+  };
+  const sectors=[
+    {name:'Tahajjud',start:marks.Tahajjud,end:marks.Fajr},
+    {name:'Fajr',start:marks.Fajr,end:marks.Sunrise},
+    {name:'Sunrise',start:marks.Sunrise,end:marks.Dhuha},
+    {name:'Dhuha',start:marks.Dhuha,end:marks.Dhuhr},
+    {name:'Dhuhr',start:marks.Dhuhr,end:marks.Asr},
+    {name:'Asr',start:marks.Asr,end:marks.Maghrib},
+    {name:'Maghrib',start:marks.Maghrib,end:marks.Isha},
+    {name:'Isha',start:marks.Isha,end:marks.Tahajjud}
+  ];
+  const inRange=(m,a,b)=>a<=b?(m>=a&&m<b):(m>=a||m<b);
+  let active='Isha';
+  for(const s of sectors){ if(inRange(nowM,s.start,s.end)){ active=s.name; break; } }
+  const starts=Object.entries(marks).map(([n,m])=>({name:n,m}));
+  let next=starts[0], best=1e9;
+  for(const s of starts){ const d=(s.m-nowM+1440)%1440; if(d>0&&d<best){best=d; next=s;} }
+
+  // keep prayer bars in lockstep with countdown color + boundary timing
+  if (typeof window._displayPrayerTimes==='function') window._displayPrayerTimes(t, window._lastHijri||null);
+
+  const swipeActive=(typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null);
+  const preview=swipeActive&&window._swipePreviewPrayer?window._swipePreviewPrayer:'';
+
+  let navLabel='until '+next.name;
+  let navDiff=((next.m-nowM+1440)%1440)*60 - (nowS%60);
+
+  if (preview && marks[preview]!=null) {
+    // In swipe-preview, target highlighted window: if currently active, count down to its end; otherwise until its start.
+    const p=sectors.find(x=>x.name===preview);
+    const targetMin=(p&&preview===active)?p.end:marks[preview];
+    navLabel='until '+preview;
+    navDiff=((targetMin-nowM+1440)%1440)*60 - (nowS%60);
+  } else {
+    const fajrS=toSec(t.Fajr), maghribS=toSec(t.Maghrib), isFasting=nowS>=fajrS&&nowS<maghribS;
+    if(!swipeActive && isFasting && window._isRamadan){ navLabel='until iftar'; navDiff=maghribS-nowS; }
   }
+
+  if(navDiff<0) navDiff=0;
+  const nh=Math.floor(navDiff/3600), nrm=navDiff%3600, nm=Math.floor(nrm/60), ns=nrm%60;
+  const timeStr=nh+':'+(nm<10?'0':'')+nm+':<span class="nav-sec">'+(ns<10?'0':'')+ns+'</span>';
+
+  const activeColor=prayerColors[active]||'';
+  window._activePrayerName=active;
+  window._activePrayerColor=activeColor;
+  const style=activeColor?' style="color:'+activeColor+'"':'';
+  const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time"'+style+'>'+timeStr+'</div>';
+  const fsC=document.getElementById('fsCountdown');if(fsC)fsC.innerHTML=countdownHtml;
+
   const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
-  const toSec=s=>{const[hh,mm]=s.split(':').map(Number);return hh*3600+mm*60;};
-  {
-    let nextP='',nextS=0;
-    const _swipeActive = (typeof window._swipeTimeOverride === 'number' && window._swipeTimeOverride !== null);
-    const _previewPrayer = _swipeActive && window._swipePreviewPrayer ? window._swipePreviewPrayer : '';
-
-    if (_previewPrayer && t[_previewPrayer]) {
-      // Swipe mode: countdown should target the highlighted prayer window.
-      nextP = _previewPrayer;
-      nextS = toSec(t[nextP]);
-      if (nextS <= nowS) nextS += 86400;
-    } else {
-      t5.forEach(p=>{const ps=toSec(t[p]);if(!nextP&&ps>nowS){nextP=p;nextS=ps;}});
-      if(!nextP){nextP='Fajr';nextS=toSec(t['Fajr'])+86400;}
-    }
-
-    const fajrS=toSec(t.Fajr);
-    const maghribS=toSec(t.Maghrib);
-    const isFasting=nowS>=fajrS&&nowS<maghribS;
-    let navLabel,navDiff,isIftar=false;
-    if(!_swipeActive && isFasting && window._isRamadan){
-      navLabel='until iftar';navDiff=maghribS-nowS;isIftar=true;
-    }else{
-      navLabel='until '+nextP;navDiff=nextS-nowS;
-    }
-    const nh=Math.floor(navDiff/3600);const nrm=navDiff%3600;const nm=Math.floor(nrm/60);const ns=nrm%60;
-    const timeStr=nh+':'+(nm<10?'0':'')+nm+':<span class="nav-sec">'+(ns<10?'0':'')+ns+'</span>';
-    const _headlineColor = window._activePrayerColor || '';
-    const _labelStyle = _headlineColor ? ' style="color:'+_headlineColor+'"' : '';
-    const countdownHtml='<div class="nav-label"'+_labelStyle+'>'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
-    const fsC=document.getElementById('fsCountdown');if(fsC)fsC.innerHTML=countdownHtml;
-  }
-  // All prayer times
   const elTimes=document.getElementById('navTimes');
-  if(elTimes&&!elTimes._set){
-    elTimes.textContent=t5.map(p=>p+' '+((t[p]||'').split(' ')[0])).join(' · ');
-    elTimes._set=true;
-  }
+  if(elTimes&&!elTimes._set){ elTimes.textContent=t5.map(p=>p+' '+((t[p]||'').split(' ')[0])).join(' · '); elTimes._set=true; }
 }
 
 // ── Service Worker + Notifications ──
@@ -3107,7 +3127,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=241';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=242';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
