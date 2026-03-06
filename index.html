@@ -1731,6 +1731,7 @@ function updateNavClock(){
 
   const _labelName = n => n==='Tahajjud' ? 'Qiyam' : n;
   let navLabel='until '+_labelName(next.name);
+  let _labelPrayer = next.name;
   let navDiff=((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
 
   if (preview && marks[preview]!=null) {
@@ -1738,6 +1739,7 @@ function updateNavClock(){
     // using REAL current time as reference.
     const targetMin=marks[preview];
     navLabel='until '+_labelName(preview);
+    _labelPrayer=preview;
     navDiff=((targetMin-actualNowM+1440)%1440)*60 - (actualNowS%60);
   } else {
     const fajrS=toSec(t.Fajr), maghribS=toSec(t.Maghrib), isFasting=actualNowS>=fajrS&&actualNowS<maghribS;
@@ -1745,9 +1747,10 @@ function updateNavClock(){
       if ((window._countdownPref || 'iftar') === 'iftar') {
         navLabel='until iftar';
         navDiff=maghribS-actualNowS;
-        active='Maghrib';
+        _labelPrayer='Maghrib';
       } else {
         navLabel='until '+_labelName(next.name);
+        _labelPrayer=next.name;
         navDiff=((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
       }
     }
@@ -1761,7 +1764,8 @@ function updateNavClock(){
   window._activePrayerName=active;
   window._activePrayerColor=activeColor;
   const _isIftarLabel = navLabel.toLowerCase() === 'until iftar';
-  const style=(activeColor && !_isIftarLabel)?' style="color:'+activeColor+'"':'';
+  const _labelColor = prayerColors[_labelPrayer] || activeColor;
+  const style=(_labelColor && !_isIftarLabel)?' style="color:'+_labelColor+'"':'';
   const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
   const fsC=document.getElementById('fsCountdown');if(fsC)fsC.innerHTML=countdownHtml;
 
@@ -3169,7 +3173,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=252';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=253';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
