@@ -1797,6 +1797,7 @@ function updateNavClock(){
   const elTimes=document.getElementById('navTimes');
   if(elTimes&&!elTimes._set){ elTimes.textContent=t5.map(p=>p+' '+((t[p]||'').split(' ')[0])).join(' · '); elTimes._set=true; }
 }
+window.updateNavClock = updateNavClock;
 
 // ── Service Worker + Notifications ──
 let swReg=null;
@@ -3215,7 +3216,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=262';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=263';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

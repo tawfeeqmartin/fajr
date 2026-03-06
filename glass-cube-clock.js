@@ -1667,6 +1667,19 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   } else {
     now = new Date();
   }
+
+  // Immediate UI sync while swiping: avoids one-tick header/countdown bounce at boundaries.
+  var _uiSwipeMin = (typeof _swipeTimeTarget === 'number' && _swipeTimeTarget !== null)
+    ? _swipeTimeTarget
+    : ((typeof _swipeTimeOverride === 'number' && _swipeTimeOverride !== null) ? _swipeTimeOverride : null);
+  if (_uiSwipeMin !== null) {
+    var _snapMin = ((Math.floor(_uiSwipeMin) % 1440) + 1440) % 1440;
+    if (window._lastUISwipeMin !== _snapMin) {
+      window._lastUISwipeMin = _snapMin;
+      if (typeof window.updateNavClock === 'function') window.updateNavClock();
+    }
+  }
+
   const h = (now.getHours() % 12) + now.getMinutes() / 60 + now.getSeconds() / 3600;
   const m = now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / 60000;
   const s = now.getSeconds() + now.getMilliseconds() / 1000;
