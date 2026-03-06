@@ -1982,7 +1982,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         '  float grain01=grain*0.5+0.5;',
         // Gradient energy mask
         '  float energy=clamp(gradientEnergy(uv)*55.0,0.0,1.0);',
-        '  float ampMask=mix(0.20,1.0,energy);',
+        '  float ampMask=mix(0.55,1.0,energy);',
         // Chromatic grain (RGB independently offset)
         '  vec3 chromaGrain=vec3(',
         '    snoise(px/s+drift)*0.5+0.5,',
@@ -1997,7 +1997,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
         '  float vig=1.0-smoothstep(0.35,0.85,length((uv-0.5)*vec2(1.1,1.3)));',
         '  vig=max(vig,0.15);',
         // Final amplitude
-        '  float amplitude=0.058*ampMask*vig*uIntensity;',
+        '  float amplitude=0.16*ampMask*vig*uIntensity;',
         '  vec3 outColor=max(tintDir*blendedGrain*amplitude,vec3(0.0));',
         '  gl_FragColor=vec4(outColor,1.0);',
         '}'
