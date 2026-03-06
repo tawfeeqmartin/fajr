@@ -1716,14 +1716,15 @@ function updateNavClock(){
   const swipeActive=(typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null);
   const preview=swipeActive&&window._swipePreviewPrayer?window._swipePreviewPrayer:'';
 
-  let navLabel='until '+next.name;
+  const _labelName = n => n==='Tahajjud' ? 'Qiyam' : n;
+  let navLabel='until '+_labelName(next.name);
   let navDiff=((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
 
   if (preview && marks[preview]!=null) {
     // In swipe-preview, always count to the NEXT occurrence of that prayer's start time
     // using REAL current time as reference.
     const targetMin=marks[preview];
-    navLabel='until '+preview;
+    navLabel='until '+_labelName(preview);
     navDiff=((targetMin-actualNowM+1440)%1440)*60 - (actualNowS%60);
   } else {
     const fajrS=toSec(t.Fajr), maghribS=toSec(t.Maghrib), isFasting=actualNowS>=fajrS&&actualNowS<maghribS;
@@ -3131,7 +3132,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=246';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=247';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
