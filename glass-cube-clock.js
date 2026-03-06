@@ -1899,6 +1899,21 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
   // The actual Stripe/Linear/Vercel technique. CSS filter, zero GPU cost.
+  // Adaptive opacity: dark prayers get full grain, bright prayers fade it.
+  var _grainPrayerOpacity = {
+    'Qiyam': 0.70, 'Fajr': 0.55, 'Sunrise': 0.20, 'Dhuha': 0.15,
+    'Dhuhr': 0.25, 'Asr': 0.30, 'Maghrib': 0.55, 'Isha': 0.65
+  };
+  var _grainBaseOpacity = 0.45; // between prayers
+  if (window._grainOverlay) {
+    var _gpName = _activePrayer && prayerSectors.length > 0
+      ? (prayerSectors.find(function(s){ return s.def.color === _activePrayer.color; }) || {}).def
+      : null;
+    var _gpTarget = _gpName ? (_grainPrayerOpacity[_gpName.name] || _grainBaseOpacity) : _grainBaseOpacity;
+    var _gpCur = parseFloat(window._grainOverlay.style.opacity) || 0.70;
+    var _gpNext = _gpCur + (_gpTarget - _gpCur) * 0.03; // smooth lerp
+    window._grainOverlay.style.opacity = _gpNext.toFixed(3);
+  }
   if (!window._grainOverlay) {
     var _grainSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
     _grainSvg.setAttribute('width','0');
