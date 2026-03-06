@@ -323,10 +323,13 @@ scene.add(solarKey, solarKey.target);
 const plinthSun = new THREE.SpotLight(0xffffff, 0);
 plinthSun.position.set(0, 3.2, -2.8);
 plinthSun.target.position.set(0, -0.03, -2.8);
-plinthSun.angle = 0.16;
-plinthSun.penumbra = 0.62;
-plinthSun.decay = 1.5;
-plinthSun.distance = 3.4;
+plinthSun.angle = 0.10;
+plinthSun.penumbra = 0.35;
+plinthSun.decay = 1.0;
+plinthSun.distance = 8.0;
+window.plinthSun = plinthSun;
+window.cubeSun = cubeSun;
+window.solarKey = solarKey;
 plinthSun.castShadow = false;
 scene.add(plinthSun, plinthSun.target);
 
@@ -838,7 +841,7 @@ const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoat
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141428, emissiveIntensity: 0.8, roughness: 0.15, clearcoat: 0.8, clearcoatRoughness: 0.06 }), // +y top — polished
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141428, emissiveIntensity: 0.8, roughness: 0.55, clearcoat: 0.15, clearcoatRoughness: 0.20 }), // +y top — roughened for sun spot diffuse read
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x020204, emissiveIntensity: 0.1 }), // -y bottom — invisible
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x161630, emissiveIntensity: 0.9 }), // +z front — FILL face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x030306, emissiveIntensity: 0.1 }), // -z back — hidden
@@ -925,6 +928,7 @@ function floorRay(az, c1, c2, w, len, op) {
   clockRays.push({ mesh: grp, initY: THREE.MathUtils.degToRad(az) });
 }
 
+window.clockRays = clockRays;
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
@@ -1722,11 +1726,15 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   );
 
   // Dedicated top-down moving spot for clear circular trace on plinth.
-  // Use hour-hand mesh direction so sun center sits exactly on hour-hand radial line.
+  // Read actual beam world direction from worldMatrix column 2 (Z-axis after Euler YXZ + X tilt).
   var _orbitR = 1.08; // between cube edge (~0.85) and plinth edge (~1.32)
-  var _hrDir = new THREE.Vector3(0, 0, -1).applyQuaternion(clockRays[0].mesh.quaternion).setY(0).normalize();
-  var _ox = _hrDir.x * _orbitR;
-  var _oz = _hrDir.z * _orbitR;
+  clockRays[0].mesh.updateWorldMatrix(true, false);
+  var _wm = clockRays[0].mesh.matrixWorld.elements;
+  var _beamX = _wm[8], _beamZ = _wm[10];
+  var _beamLen = Math.hypot(_beamX, _beamZ);
+  if (_beamLen > 0) { _beamX /= _beamLen; _beamZ /= _beamLen; }
+  var _ox = _beamX * _orbitR;
+  var _oz = _beamZ * _orbitR;
   plinthSun.position.set(_ox, 3.35 + _sunLift * 0.45, _oz);
   plinthSun.target.position.set(_ox, -0.03, _oz);
   // Sunrise→Dhuha hue lock, then noon cool, then warm sunset.
@@ -1737,12 +1745,15 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       ? _dhuhaSun.clone().lerp(_noon, (_dayPhase - 0.25) / 0.25)
       : _noon.clone().lerp(_dusk, (_dayPhase - 0.5) / 0.5));
   plinthSun.color.copy(_sunColor);
-  plinthSun.intensity = _sunLift * 12.0; // sunrise/sunset zero, noon strongest
+  // Ramp: appear at sunrise (floor 0.15), peak at noon (1.0), fade at sunset
+  var _sunRamp = (_dayT >= 0 && _dayT <= 1) ? Math.max(0.15, Math.sin(_dayPhase * Math.PI)) : 0;
+  plinthSun.intensity = _sunRamp * 400.0; // high intensity needed for tight cone to read on plinth
   window._sunDebug = {
-    hourRot: clockRays[0].mesh.rotation.y,
-    hourDir: { x: _hrDir.x, z: _hrDir.z },
+    hourAng: _hourAng,
+    beamDir: { x: _beamX.toFixed(3), z: _beamZ.toFixed(3) },
     plinthSunPos: { x: _ox, z: _oz, y: plinthSun.position.y },
     orbitR: _orbitR,
+    intensity: plinthSun.intensity,
   };
 
   // ── Tahajjud — last third of the night ──
