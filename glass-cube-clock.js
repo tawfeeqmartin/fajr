@@ -2526,7 +2526,146 @@ function _devBuildPanel() {
     span.replaceWith(inp);
   });
 
-  // ── Export helpers ──────────────────────────────────────────────────────────
+  // ── Export helpers (dev panel reads from UI, global API accepts opts) ──────
+
+  // Global export API — returns Promise<Blob>
+  // opts: { width, height, dpr, hideChrome, prayer, download, filename }
+  window._exportFrame = function(opts) {
+    opts = opts || {};
+    var expW   = opts.width  || W;
+    var expH   = opts.height || H;
+    var expDpr = opts.dpr    || 2;
+    var hide   = opts.hideChrome !== false; // default true
+
+    return new Promise(function(resolve) {
+      // Set prayer if requested
+      var prayerSet = false;
+      if (typeof opts.prayer === 'number' && typeof _swipeShowPreview === 'function') {
+        _swipeShowPreview(opts.prayer);
+        prayerSet = true;
+      }
+
+      function doCapture() {
+        // Hide chrome
+        var chromeEls = [];
+        if (hide) {
+          document.querySelectorAll(
+            '.fs-header,.mode-pill,.compass-chrome,#fsTapHint,.mode-label,._devPanel,#_devPanel,.clock-onboard'
+          ).forEach(function(el) {
+            if (el.style.display !== 'none' && getComputedStyle(el).opacity !== '0') {
+              chromeEls.push({ el: el, prev: el.style.visibility });
+              el.style.visibility = 'hidden';
+            }
+          });
+          document.body.classList.add('chrome-hidden');
+        }
+
+        // Save state
+        var origW = W, origH = H, origDpr = dpr;
+        var canvas = renderer.domElement;
+        var origCW = canvas.style.width, origCH = canvas.style.height;
+
+        // Resize
+        renderer.setPixelRatio(expDpr);
+        renderer.setSize(expW, expH, false);
+        canvas.style.width  = expW + 'px';
+        canvas.style.height = expH + 'px';
+        camera.aspect = expW / expH;
+        camera.updateProjectionMatrix();
+        fboRT.setSize(expW * expDpr, expH * expDpr);
+
+        // Render
+        renderer.render(scene, camera);
+
+        canvas.toBlob(function(blob) {
+          // Restore
+          renderer.setPixelRatio(origDpr);
+          renderer.setSize(origW, origH, false);
+          canvas.style.width  = origCW;
+          canvas.style.height = origCH;
+          camera.aspect = origW / origH;
+          camera.updateProjectionMatrix();
+          fboRT.setSize(origW * origDpr, origH * origDpr);
+
+          // Restore chrome
+          chromeEls.forEach(function(c) { c.el.style.visibility = c.prev; });
+          if (hide) document.body.classList.remove('chrome-hidden');
+
+          // Auto-download if requested
+          if (opts.download !== false && opts.filename) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = opts.filename;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+
+          resolve(blob);
+        }, 'image/png');
+      }
+
+      // Wait for prayer preview to settle if we changed it
+      if (prayerSet) setTimeout(doCapture, 800);
+      else doCapture();
+    });
+  };
+
+  // Export all prayers — returns Promise<Object[]> [{name, blob}]
+  window._exportAllPrayers = function(opts) {
+    opts = opts || {};
+    var results = [];
+    var idx = 0;
+    return new Promise(function(resolve) {
+      function next() {
+        if (idx >= prayerSectors.length) {
+          if (typeof _swipeRevert === 'function') _swipeRevert();
+          resolve(results);
+          return;
+        }
+        var name = prayerSectors[idx].def ? prayerSectors[idx].def.name : 'prayer-' + idx;
+        window._exportFrame(Object.assign({}, opts, {
+          prayer: idx,
+          filename: opts.download !== false ? ('agot-' + name + '-' + (opts.width||W) + 'x' + (opts.height||H) + '.png') : null
+        })).then(function(blob) {
+          results.push({ name: name, idx: idx, blob: blob });
+          idx++;
+          setTimeout(next, 300);
+        });
+      }
+      next();
+    });
+  };
+
+  // Start/stop WebM recording — returns Promise<Blob> on stop
+  window._recordWebM = function(opts) {
+    opts = opts || {};
+    var canvas = renderer.domElement;
+    var dur = opts.duration || 10000;
+    var stream = canvas.captureStream(opts.fps || 30);
+    var recorder = new MediaRecorder(stream, {
+      mimeType: 'video/webm;codecs=vp9',
+      videoBitsPerSecond: opts.bitrate || 8000000
+    });
+    var chunks = [];
+    return new Promise(function(resolve) {
+      recorder.ondataavailable = function(e) { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.onstop = function() {
+        var blob = new Blob(chunks, { type: 'video/webm' });
+        if (opts.filename) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url; a.download = opts.filename; a.click();
+          URL.revokeObjectURL(url);
+        }
+        resolve(blob);
+      };
+      recorder.start();
+      setTimeout(function() { recorder.stop(); }, dur);
+    });
+  };
+
+  // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
   function _devExportGetSize() {
     var sel = document.getElementById('_devExportSize');
     if (!sel || sel.value === 'current') return { w: W, h: H };
@@ -2534,107 +2673,35 @@ function _devBuildPanel() {
     return { w: parseInt(parts[0]), h: parseInt(parts[1]) };
   }
 
-  function _devExportCapture(filename) {
-    var size = _devExportGetSize();
-    var expDpr = parseInt(document.getElementById('_devExportDpr').value) || 2;
-    var hideChrome = document.getElementById('_devExportNoChrome').checked;
-
-    // Hide chrome temporarily
-    var chromeEls = [];
-    if (hideChrome) {
-      document.querySelectorAll('.fs-header,.mode-pill,.compass-chrome,#fsTapHint,.mode-label,._devPanel,#_devPanel').forEach(function(el) {
-        if (el.style.display !== 'none' && getComputedStyle(el).opacity !== '0') {
-          chromeEls.push({ el: el, prev: el.style.visibility });
-          el.style.visibility = 'hidden';
-        }
-      });
-    }
-
-    // Save current state
-    var origW = W, origH = H, origDpr = dpr;
-    var canvas = renderer.domElement;
-    var origCanvasW = canvas.style.width, origCanvasH = canvas.style.height;
-
-    // Resize renderer to export size
-    renderer.setPixelRatio(expDpr);
-    renderer.setSize(size.w, size.h, false);
-    canvas.style.width = size.w + 'px';
-    canvas.style.height = size.h + 'px';
-    camera.aspect = size.w / size.h;
-    camera.updateProjectionMatrix();
-
-    // Resize FBO render target
-    fboRT.setSize(size.w * expDpr, size.h * expDpr);
-
-    // Render one frame
-    renderer.render(scene, camera);
-
-    // Capture
-    canvas.toBlob(function(blob) {
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = filename || 'agot-export.png';
-      a.click();
-      URL.revokeObjectURL(url);
-
-      // Restore
-      renderer.setPixelRatio(origDpr);
-      renderer.setSize(origW, origH, false);
-      canvas.style.width = origCanvasW;
-      canvas.style.height = origCanvasH;
-      camera.aspect = origW / origH;
-      camera.updateProjectionMatrix();
-      fboRT.setSize(origW * origDpr, origH * origDpr);
-
-      // Restore chrome
-      chromeEls.forEach(function(c) { c.el.style.visibility = c.prev; });
-    }, 'image/png');
-  }
-
-  // Single PNG export
   document.getElementById('_devExportPNG').addEventListener('click', function() {
     var size = _devExportGetSize();
+    var expDpr = parseInt(document.getElementById('_devExportDpr').value) || 2;
+    var hide = document.getElementById('_devExportNoChrome').checked;
     var ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    _devExportCapture('agot-' + size.w + 'x' + size.h + '-' + ts + '.png');
+    window._exportFrame({
+      width: size.w, height: size.h, dpr: expDpr, hideChrome: hide,
+      filename: 'agot-' + size.w + 'x' + size.h + '-' + ts + '.png'
+    });
   });
 
-  // Export all prayers sequence
   document.getElementById('_devExportSeq').addEventListener('click', function() {
     if (!prayerSectors.length) { alert('No prayer data loaded yet'); return; }
     var btn = this;
-    btn.disabled = true;
-    btn.textContent = '⏳ Exporting...';
-    var idx = 0;
-    function captureNext() {
-      if (idx >= prayerSectors.length) {
-        btn.disabled = false;
-        btn.textContent = '🎞 Export All Prayers';
-        // Revert to live
-        _swipeRevert();
-        return;
-      }
-      _swipeShowPreview(idx);
-      // Wait for render to settle
-      setTimeout(function() {
-        var name = prayerSectors[idx].def ? prayerSectors[idx].def.name : 'prayer-' + idx;
-        var size = _devExportGetSize();
-        _devExportCapture('agot-' + name + '-' + size.w + 'x' + size.h + '.png');
-        idx++;
-        setTimeout(captureNext, 500); // gap between exports
-      }, 300);
-    }
-    captureNext();
+    btn.disabled = true; btn.textContent = '⏳ Exporting...';
+    var size = _devExportGetSize();
+    var expDpr = parseInt(document.getElementById('_devExportDpr').value) || 2;
+    var hide = document.getElementById('_devExportNoChrome').checked;
+    window._exportAllPrayers({
+      width: size.w, height: size.h, dpr: expDpr, hideChrome: hide
+    }).then(function() {
+      btn.disabled = false; btn.textContent = '🎞 Export All Prayers';
+    });
   });
 
-  // Record WebM video
   document.getElementById('_devExportWebM').addEventListener('click', function() {
     var btn = this;
+    if (btn._recording) { btn._recorder.stop(); return; }
     var canvas = renderer.domElement;
-    if (btn._recording) {
-      btn._recorder.stop();
-      return;
-    }
     var stream = canvas.captureStream(30);
     var recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 });
     var chunks = [];
@@ -2656,7 +2723,6 @@ function _devBuildPanel() {
     btn._recorder = recorder;
     btn.textContent = '⏹ Stop Recording';
     btn.style.background = 'rgba(200,50,50,0.4)';
-    // Auto-stop after 10s
     setTimeout(function() { if (btn._recording) recorder.stop(); }, 10000);
   });
 }
