@@ -1665,7 +1665,7 @@ try{
 
 // ── Nav bar live clock + next prayer ──
 let _navClockTimer=null;
-window._countdownPref = window._countdownPref || 'iftar'; // 'iftar' | 'next'
+window._countdownPref = window._countdownPref || 'auto'; // 'auto' | 'iftar' | 'next'
 function startNavClock(){
   if(_navClockTimer)return;
   const fsC=document.getElementById('fsCountdown');
@@ -1673,7 +1673,10 @@ function startNavClock(){
     fsC.style.pointerEvents='auto';
     fsC.addEventListener('click', function(e){
       e.stopPropagation();
-      window._countdownPref = (window._countdownPref === 'iftar') ? 'next' : 'iftar';
+      // cycle override: auto -> iftar -> next -> auto
+      if (window._countdownPref === 'auto') window._countdownPref = 'iftar';
+      else if (window._countdownPref === 'iftar') window._countdownPref = 'next';
+      else window._countdownPref = 'auto';
       updateNavClock();
     });
     fsC._toggleBound = true;
@@ -1744,14 +1747,19 @@ function updateNavClock(){
   } else {
     const fajrS=toSec(t.Fajr), maghribS=toSec(t.Maghrib), isFasting=actualNowS>=fajrS&&actualNowS<maghribS;
     if(!swipeActive && isFasting && window._isRamadan){
-      if ((window._countdownPref || 'iftar') === 'iftar') {
+      const _pref = (window._countdownPref || 'auto');
+      const _nextDiff = ((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
+      const _headsupSec = 20*60;
+      const _useNext = (_pref==='next') || (_pref==='auto' && _nextDiff<=_headsupSec);
+      const _useIftar = (_pref==='iftar') || (_pref==='auto' && !_useNext);
+      if (_useIftar) {
         navLabel='until iftar';
         navDiff=maghribS-actualNowS;
         _labelPrayer='Maghrib';
       } else {
         navLabel='until '+_labelName(next.name);
         _labelPrayer=next.name;
-        navDiff=((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
+        navDiff=_nextDiff;
       }
     }
   }
@@ -1766,7 +1774,11 @@ function updateNavClock(){
   const _isIftarLabel = navLabel.toLowerCase() === 'until iftar';
   const _labelColor = prayerColors[_labelPrayer] || activeColor;
   const style=(_labelColor && !_isIftarLabel)?' style="color:'+_labelColor+'"':'';
-  const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
+  let _timeStyle='';
+  if (navDiff <= 120) _timeStyle=' style="color:#ff3b30;"';
+  else if (navDiff <= 600) _timeStyle=' style="color:#ff453a;"';
+  else if (navDiff <= 1200) _timeStyle=' style="color:#ff9f0a;"';
+  const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
   const fsC=document.getElementById('fsCountdown');if(fsC)fsC.innerHTML=countdownHtml;
 
   const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
@@ -2083,13 +2095,16 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
   //          Dhuha(Sunrise+20→Dhuhr), Dhuhr(Dhuhr→Asr), Asr(Asr→Maghrib), Maghrib(Maghrib→Isha), Isha(Isha→Midnight)
   let activeP = '';
   let _sunriseForbidden = false;
+  const _swipePreviewActive = (typeof window._swipeTimeOverride === 'number' && window._swipeTimeOverride !== null && window._swipePreviewPrayer);
+  if (_swipePreviewActive) activeP = window._swipePreviewPrayer;
   const _sunriseMin = t.Sunrise ? toM(t.Sunrise) : 0;
   const _dhuhaStart = _sunriseMin + 20;
   const _fajrMin = t.Fajr ? toM(t.Fajr) : 0;
   const _midnightMin = t.Midnight ? toM(t.Midnight) : null;
 
   // Qiyam has priority over Isha when we're past Islamic midnight and before Fajr.
-  if (_midnightMin !== null) {
+  // Skip override while swipe preview explicitly pins a prayer highlight.
+  if (!_swipePreviewActive && _midnightMin !== null) {
     const _inQiyam = (_midnightMin <= _fajrMin)
       ? (nowM >= _midnightMin && nowM < _fajrMin)
       : (nowM >= _midnightMin || nowM < _fajrMin);
@@ -3173,7 +3188,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=253';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=254';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
