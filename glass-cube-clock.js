@@ -1691,7 +1691,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // Broad environmental key (still tied to TOD for scene mood)
   solarKey.position.set(Math.sin(_hourAng) * 7.2, 2.2 + _sunLift * 7.8, -Math.cos(_hourAng) * 6.0 - 0.8);
   solarKey.color.copy(_solarC);
-  solarKey.intensity = 0.12 + _sunLift * 1.55;
+  solarKey.intensity = 0.04 + _sunLift * 0.55; // reduce broad sweep so orbit reads circular, not linear
 
   // Plinth-top highlight orbit: circular, clockwise, exactly over hour-hand trajectory.
   var _cubeDayC = _solarC.clone().lerp(new THREE.Color(0xe8f2ff), 0.30);
@@ -1709,8 +1709,15 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   var _oz = -Math.cos(_hourAng) * _orbitR;
   plinthSun.position.set(_ox, 3.35 + _sunLift * 0.45, _oz);
   plinthSun.target.position.set(_ox, 0.58, _oz);
-  plinthSun.color.copy(_solarC);
-  plinthSun.intensity = 3.5 + _sunLift * 9.5;
+  // Sunrise→Dhuha hue lock, then noon cool, then warm sunset.
+  var _dhuhaSun = new THREE.Color(0xff9900);
+  var _sunColor = _dayPhase < 0.25
+    ? _dawn.clone().lerp(_dhuhaSun, _dayPhase / 0.25)
+    : (_dayPhase < 0.5
+      ? _dhuhaSun.clone().lerp(_noon, (_dayPhase - 0.25) / 0.25)
+      : _noon.clone().lerp(_dusk, (_dayPhase - 0.5) / 0.5));
+  plinthSun.color.copy(_sunColor);
+  plinthSun.intensity = _sunLift * 12.0; // sunrise/sunset zero, noon strongest
 
   // ── Tahajjud — last third of the night ──
   var _tahajjudNow = Date.now();
