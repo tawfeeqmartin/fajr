@@ -1720,9 +1720,9 @@ function updateNavClock(){
   let navDiff=((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
 
   if (preview && marks[preview]!=null) {
-    // In swipe-preview, target highlighted window: if currently active, count down to its end; otherwise until its start.
-    const p=sectors.find(x=>x.name===preview);
-    const targetMin=(p&&preview===active)?p.end:marks[preview];
+    // In swipe-preview, always count to the NEXT occurrence of that prayer's start time
+    // using REAL current time as reference.
+    const targetMin=marks[preview];
     navLabel='until '+preview;
     navDiff=((targetMin-actualNowM+1440)%1440)*60 - (actualNowS%60);
   } else {
@@ -3131,7 +3131,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=243';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=244';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
