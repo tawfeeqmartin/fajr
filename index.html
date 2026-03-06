@@ -1685,13 +1685,24 @@ function updateNavClock(){
   const toSec=s=>{const[hh,mm]=s.split(':').map(Number);return hh*3600+mm*60;};
   {
     let nextP='',nextS=0;
-    t5.forEach(p=>{const ps=toSec(t[p]);if(!nextP&&ps>nowS){nextP=p;nextS=ps;}});
-    if(!nextP){nextP='Fajr';nextS=toSec(t['Fajr'])+86400;}
+    const _swipeActive = (typeof window._swipeTimeOverride === 'number' && window._swipeTimeOverride !== null);
+    const _previewPrayer = _swipeActive && window._swipePreviewPrayer ? window._swipePreviewPrayer : '';
+
+    if (_previewPrayer && t[_previewPrayer]) {
+      // Swipe mode: countdown should target the highlighted prayer window.
+      nextP = _previewPrayer;
+      nextS = toSec(t[nextP]);
+      if (nextS <= nowS) nextS += 86400;
+    } else {
+      t5.forEach(p=>{const ps=toSec(t[p]);if(!nextP&&ps>nowS){nextP=p;nextS=ps;}});
+      if(!nextP){nextP='Fajr';nextS=toSec(t['Fajr'])+86400;}
+    }
+
     const fajrS=toSec(t.Fajr);
     const maghribS=toSec(t.Maghrib);
     const isFasting=nowS>=fajrS&&nowS<maghribS;
     let navLabel,navDiff,isIftar=false;
-    if(isFasting&&window._isRamadan){
+    if(!_swipeActive && isFasting && window._isRamadan){
       navLabel='until iftar';navDiff=maghribS-nowS;isIftar=true;
     }else{
       navLabel='until '+nextP;navDiff=nextS-nowS;
@@ -3096,7 +3107,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=240';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=241';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

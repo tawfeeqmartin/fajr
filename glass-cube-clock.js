@@ -319,6 +319,17 @@ solarKey.position.set(-6, 3, 5);
 solarKey.target.position.set(0, 0.6, 0);
 scene.add(solarKey, solarKey.target);
 
+// PLINTH ORBIT HIGHLIGHT — explicit circular top-down spot over hour-hand path.
+const plinthSun = new THREE.SpotLight(0xffffff, 0);
+plinthSun.position.set(0, 3.2, -2.8);
+plinthSun.target.position.set(0, 0.58, -2.8);
+plinthSun.angle = 0.26;
+plinthSun.penumbra = 0.78;
+plinthSun.decay = 1.4;
+plinthSun.distance = 5.0;
+plinthSun.castShadow = false;
+scene.add(plinthSun, plinthSun.target);
+
 scene.add(new THREE.AmbientLight(0xffffff, 0.07)); // v57: 0.16→0.07 — deeper darkness outside arch, shadow is absolute
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
@@ -1544,9 +1555,12 @@ function updatePrayerWindows(now) {
     u.uColor2.value.lerp(new THREE.Color(ps.def.color2), _angLerp);
     if (!_compassMode) _prayerDisc.visible = true;
     _activePrayer = { startAng: ps.startAng, endAng: ps.endAng, color: ps.def.color, color2: ps.def.color2, intensity: u.uIntensity.value };
+    // Expose highlighted prayer for UI countdown behavior during swipe preview.
+    window._swipePreviewPrayer = ps.def && ps.def.name ? ps.def.name : null;
 
   } else {
     _activePrayer = null;
+    window._swipePreviewPrayer = null;
   }
   if (u.uIntensity.value < 0.001 || _compassMode) _prayerDisc.visible = false;
 
@@ -1682,12 +1696,21 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // Plinth-top highlight orbit: circular, clockwise, exactly over hour-hand trajectory.
   var _cubeDayC = _solarC.clone().lerp(new THREE.Color(0xe8f2ff), 0.30);
   cubeSun.color.copy(_cubeDayC);
-  cubeSun.intensity = 30 + _sunLift * 36;
+  cubeSun.intensity = 24 + _sunLift * 22; // keep secondary; plinthSun is primary orbital read
   cubeSun.position.set(
     Math.sin(_hourAng) * 2.75,
     1.15 + _sunLift * 0.90,
     -Math.cos(_hourAng) * 2.75
   );
+
+  // Dedicated top-down moving spot for clear circular trace on plinth.
+  var _orbitR = 2.95;
+  var _ox = Math.sin(_hourAng) * _orbitR;
+  var _oz = -Math.cos(_hourAng) * _orbitR;
+  plinthSun.position.set(_ox, 3.35 + _sunLift * 0.45, _oz);
+  plinthSun.target.position.set(_ox, 0.58, _oz);
+  plinthSun.color.copy(_solarC);
+  plinthSun.intensity = 3.5 + _sunLift * 9.5;
 
   // ── Tahajjud — last third of the night ──
   var _tahajjudNow = Date.now();
