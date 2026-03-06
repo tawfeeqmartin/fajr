@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const CHROME = '/usr/bin/google-chrome-stable';
-const URL = 'http://localhost:7747/#clock';
+const URL_BASE = 'http://localhost:7747/#clock';
 const OUT = path.join(__dirname, 'renders');
 
 const SIZES = [
@@ -32,10 +32,12 @@ async function run() {
   });
 
   const page = await browser.newPage();
+
+  // Start at mobile size
   await page.setViewport({ width: 430, height: 932, deviceScaleFactor: 2 });
 
-  // Skip onboarding + set location (LA) so prayers load
-  await page.goto(URL, { waitUntil: 'domcontentloaded' });
+  // Skip onboarding + set location
+  await page.goto(URL_BASE, { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => {
     localStorage.setItem('agot_clock_onboarded', '1');
     localStorage.setItem('agot_loc', JSON.stringify({ lat: 34.0522, lon: -118.2437, name: 'Los Angeles' }));
@@ -56,44 +58,59 @@ async function run() {
   });
   console.log('GPU:', gpu);
 
-  // Wait for prayer data — check _prayerTimingsReady + prayerSectors
-  let prayerCount = 0;
-  for (let retry = 0; retry < 30; retry++) {
-    prayerCount = await page.evaluate(() => {
-      // Force rebuild if timings exist but sectors haven't built
-      if (window._prayerTimingsReady && typeof buildPrayerSectors === 'function' && prayerSectors.length === 0) {
-        buildPrayerSectors();
-      }
-      return typeof prayerSectors !== 'undefined' ? prayerSectors.length : 0;
+  // Wait for prayers to load
+  for (let i = 0; i < 30; i++) {
+    const n = await page.evaluate(() => {
+      if (window._prayerTimingsReady && typeof window.buildPrayerSectors === 'function' && window.prayerSectors.length === 0)
+        window.buildPrayerSectors();
+      return window.prayerSectors ? window.prayerSectors.length : 0;
     });
-    if (prayerCount > 0) break;
-    await new Promise(r => setTimeout(r, 1000));
+    if (n > 0) { console.log(`Prayer sectors: ${n}`); break; }
+    await new Promise(r => setTimeout(r, 500));
   }
-  console.log(`Prayer sectors: ${prayerCount}`);
 
-  // Export each prayer at each size using global _exportFrame
-  for (let pi = 0; pi < prayerCount; pi++) {
-    const name = await page.evaluate(i =>
-      prayerSectors[i] && prayerSectors[i].def ? prayerSectors[i].def.name : 'prayer-' + i
-    , pi);
-    console.log(`\n${name}:`);
+  // Get prayer names
+  const prayers = await page.evaluate(() =>
+    window.prayerSectors.map((ps, i) => ({ idx: i, name: ps.def ? ps.def.name : 'prayer-' + i }))
+  );
+
+  // Render each prayer at each size using page.screenshot at export viewport
+  for (const prayer of prayers) {
+    console.log(`\n${prayer.name}:`);
+
+    // Set prayer time directly (bypass lerp + auto-revert)
+    await page.evaluate(idx => {
+      var ps = window.prayerSectors[idx];
+      if (!ps) return;
+      // Set time override directly — no lerp, no auto-revert timer
+      window._swipeTimeOverride = ps.startMin;
+      window._swipeTimeTarget = ps.startMin;
+      window._swipePreviewIdx = idx;
+      // Clear any revert timer
+      if (window._swipeRevertTimer) clearTimeout(window._swipeRevertTimer);
+    }, prayer.idx);
+    // Wait for render loop to process the new time (prayer window colors, hand positions)
+    await new Promise(r => setTimeout(r, 3000));
+
+    // Hide all chrome
+    await page.evaluate(() => {
+      document.body.classList.add('chrome-hidden');
+      var dp = document.getElementById('_devPanel');
+      if (dp) dp.style.display = 'none';
+      document.querySelectorAll('.fs-header,.mode-pill,.compass-chrome,#fsTapHint,.mode-label,.clock-onboard').forEach(function(el) {
+        el.style.visibility = 'hidden';
+      });
+    });
+    await new Promise(r => setTimeout(r, 300));
 
     for (const size of SIZES) {
-      // Use the in-browser export handle — get blob as base64
-      const b64 = await page.evaluate(async (opts) => {
-        const blob = await window._exportFrame({
-          width: opts.w, height: opts.h, dpr: opts.dpr,
-          hideChrome: true, prayer: opts.prayer, download: false
-        });
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.readAsDataURL(blob);
-        });
-      }, { w: size.w, h: size.h, dpr: size.dpr, prayer: pi });
+      // Resize viewport to export dimensions
+      await page.setViewport({ width: size.w, height: size.h, deviceScaleFactor: size.dpr });
+      // Let renderer adapt + run a few frames at new size
+      await new Promise(r => setTimeout(r, 2000));
 
-      const filename = `agot-${name}-${size.label}-${size.w}x${size.h}.png`;
-      fs.writeFileSync(path.join(OUT, filename), Buffer.from(b64, 'base64'));
+      const filename = `agot-${prayer.name}-${size.label}-${size.w}x${size.h}.png`;
+      await page.screenshot({ path: path.join(OUT, filename), type: 'png' });
       console.log(`  ✓ ${filename}`);
     }
   }
@@ -102,24 +119,18 @@ async function run() {
   console.log('\nLive with chrome:');
   await page.evaluate(() => {
     if (typeof _swipeRevert === 'function') _swipeRevert();
+    document.body.classList.remove('chrome-hidden');
+    document.querySelectorAll('.fs-header,.mode-pill,.compass-chrome,#fsTapHint,.mode-label').forEach(function(el) {
+      el.style.visibility = '';
+    });
   });
-  await new Promise(r => setTimeout(r, 1500));
+  await new Promise(r => setTimeout(r, 2000));
 
   for (const size of SIZES) {
-    const b64 = await page.evaluate(async (opts) => {
-      const blob = await window._exportFrame({
-        width: opts.w, height: opts.h, dpr: opts.dpr,
-        hideChrome: false, download: false
-      });
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(blob);
-      });
-    }, { w: size.w, h: size.h, dpr: size.dpr });
-
+    await page.setViewport({ width: size.w, height: size.h, deviceScaleFactor: size.dpr });
+    await new Promise(r => setTimeout(r, 2000));
     const filename = `agot-live-chrome-${size.label}-${size.w}x${size.h}.png`;
-    fs.writeFileSync(path.join(OUT, filename), Buffer.from(b64, 'base64'));
+    await page.screenshot({ path: path.join(OUT, filename), type: 'png' });
     console.log(`  ✓ ${filename}`);
   }
 

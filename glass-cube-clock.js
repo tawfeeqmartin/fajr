@@ -2960,6 +2960,8 @@ window._exportFrame = function(opts) {
       var canvas = renderer.domElement;
       var origCW = canvas.style.width, origCH = canvas.style.height;
 
+      // Resize renderer + FBO to export resolution
+      W = expW; H = expH; dpr = expDpr;
       renderer.setPixelRatio(expDpr);
       renderer.setSize(expW, expH, false);
       canvas.style.width  = expW + 'px';
@@ -2968,45 +2970,37 @@ window._exportFrame = function(opts) {
       camera.updateProjectionMatrix();
       fboRT.setSize(expW * expDpr, expH * expDpr);
 
-      // Two-pass render — matches main render loop for sharp dichroic refraction
-      // Pass 1: FBO backface scene (hide cube + prayer accent lights)
-      cubeMesh.visible = false;
-      prayerWash.visible = false;
-      prayerRim.visible = false;
-      prayerSlash.visible = false;
-      prayerGlow.visible = false;
-      renderer.setRenderTarget(fboRT);
-      renderer.render(scene, camera);
-      renderer.setRenderTarget(null);
-      cubeMesh.visible = true;
-      prayerWash.visible = true;
-      prayerRim.visible = true;
-      prayerSlash.visible = true;
-      prayerGlow.visible = true;
-      cubeMat.uniforms.uScene.value = fboRT.texture;
-      // Pass 2: final composite with fresh FBO
-      renderer.render(scene, camera);
+      // Let the REAL render loop run 3 frames at export resolution
+      // (includes FBO two-pass, prayer window updates, lighting — everything)
+      var _framesLeft = 3;
+      function _waitFrames() {
+        if (--_framesLeft > 0) { requestAnimationFrame(_waitFrames); return; }
+        // Capture after real render loop has run
+          // Capture after real render loop has run
+        canvas.toBlob(function(blob) {
+          // Restore original size
+          W = origW; H = origH; dpr = origDpr;
+          renderer.setPixelRatio(origDpr);
+          renderer.setSize(origW, origH, false);
+          canvas.style.width  = origCW;
+          canvas.style.height = origCH;
+          camera.aspect = origW / origH;
+          camera.updateProjectionMatrix();
+          fboRT.setSize(origW * origDpr, origH * origDpr);
 
-      canvas.toBlob(function(blob) {
-        renderer.setPixelRatio(origDpr);
-        renderer.setSize(origW, origH, false);
-        canvas.style.width  = origCW;
-        canvas.style.height = origCH;
-        camera.aspect = origW / origH;
-        camera.updateProjectionMatrix();
-        fboRT.setSize(origW * origDpr, origH * origDpr);
+          chromeEls.forEach(function(c) { c.el.style.visibility = c.prev; });
+          if (hide) document.body.classList.remove('chrome-hidden');
 
-        chromeEls.forEach(function(c) { c.el.style.visibility = c.prev; });
-        if (hide) document.body.classList.remove('chrome-hidden');
-
-        if (opts.download !== false && opts.filename) {
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = url; a.download = opts.filename; a.click();
-          URL.revokeObjectURL(url);
-        }
-        resolve(blob);
-      }, 'image/png');
+          if (opts.download !== false && opts.filename) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = opts.filename; a.click();
+            URL.revokeObjectURL(url);
+          }
+          resolve(blob);
+        }, 'image/png');
+      }
+      requestAnimationFrame(_waitFrames);
     }
 
     if (prayerSet) setTimeout(doCapture, 800);
@@ -3081,6 +3075,14 @@ document.addEventListener('keydown', function(e) {
 var _swipeStartX = 0, _swipeStartY = 0, _swipeSwiping = false;
 var _swipePreviewIdx = -1;   // -1 = live mode, 0-7 = prayer index
 var _swipeRevertTimer = null;
+Object.defineProperty(window, '_swipePreviewIdx', {
+  get: function() { return _swipePreviewIdx; },
+  set: function(v) { _swipePreviewIdx = v; }
+});
+Object.defineProperty(window, '_swipeRevertTimer', {
+  get: function() { return _swipeRevertTimer; },
+  set: function(v) { _swipeRevertTimer = v; }
+});
 var _swipeLabelEl = null;
 var _swipeFadeTimer = null;
 
@@ -3167,6 +3169,15 @@ function _swipeShowPreview(idx) {
 
 var _swipeTimeOverride = null; // minutes from midnight (current), or null for live
 var _swipeTimeTarget  = null; // where we're lerping TO
+// Expose for export tooling
+Object.defineProperty(window, '_swipeTimeOverride', {
+  get: function() { return _swipeTimeOverride; },
+  set: function(v) { _swipeTimeOverride = v; }
+});
+Object.defineProperty(window, '_swipeTimeTarget', {
+  get: function() { return _swipeTimeTarget; },
+  set: function(v) { _swipeTimeTarget = v; }
+});
 var _swipeTawafPhase = 0;     // 0-1, decays to 0 — drives CCW sweep on revert
 var _swipeCamAngle = 0;       // current orbit angle offset (radians)
 var _swipeCamTarget = 0;      // target orbit angle
