@@ -322,11 +322,11 @@ scene.add(solarKey, solarKey.target);
 // PLINTH ORBIT HIGHLIGHT — explicit circular top-down spot over hour-hand path.
 const plinthSun = new THREE.SpotLight(0xffffff, 0);
 plinthSun.position.set(0, 3.2, -2.8);
-plinthSun.target.position.set(0, 0.58, -2.8);
-plinthSun.angle = 0.26;
-plinthSun.penumbra = 0.78;
-plinthSun.decay = 1.4;
-plinthSun.distance = 5.0;
+plinthSun.target.position.set(0, -0.03, -2.8);
+plinthSun.angle = 0.16;
+plinthSun.penumbra = 0.62;
+plinthSun.decay = 1.5;
+plinthSun.distance = 3.4;
 plinthSun.castShadow = false;
 scene.add(plinthSun, plinthSun.target);
 
@@ -1722,11 +1722,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   );
 
   // Dedicated top-down moving spot for clear circular trace on plinth.
-  var _orbitR = 2.95;
+  // Orbit constrained to plinth top (between cube edge and plinth edge).
+  var _orbitR = 1.08;
   var _ox = Math.sin(_hourAng) * _orbitR;
   var _oz = -Math.cos(_hourAng) * _orbitR;
   plinthSun.position.set(_ox, 3.35 + _sunLift * 0.45, _oz);
-  plinthSun.target.position.set(_ox, 0.58, _oz);
+  plinthSun.target.position.set(_ox, -0.03, _oz);
   // Sunrise→Dhuha hue lock, then noon cool, then warm sunset.
   var _dhuhaSun = new THREE.Color(0xff9900);
   var _sunColor = _dayPhase < 0.25
