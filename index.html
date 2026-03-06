@@ -1095,10 +1095,13 @@ function playDialSurah(){
 // Night mode removed — site is always dark. No-op for compatibility.
 function setNightMode(on){ pageNight=true; }
 // Tap to toggle chrome visibility in fullscreen (click = tap without drag)
+var _chromeSwipeGuard = false;
 document.addEventListener('click',function(e){
+  // Skip if a prayer swipe just happened
+  if(_chromeSwipeGuard) return;
   // Only toggle chrome in clock or compass modes
   if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
-  if(e.target.closest('button,a,.fs-dial-bar,.fs-dial-picker,.mode-pill'))return;
+  if(e.target.closest('button,a,.fs-dial-bar,.fs-dial-picker,.mode-pill,.clock-onboard'))return;
   document.body.classList.toggle('chrome-hidden');
 });
 

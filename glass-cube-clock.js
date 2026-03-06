@@ -2867,6 +2867,8 @@ function _swipeShowPreview(idx) {
   var _sectorCount = prayerSectors.length || 8;
   idx = ((idx % _sectorCount) + _sectorCount) % _sectorCount;
   _swipePreviewIdx = idx;
+  // Show chrome during prayer preview
+  document.body.classList.remove('chrome-hidden');
   var ps = prayerSectors[idx];
   var def = ps.def;
   var T = window._prayerTimings;
@@ -3024,6 +3026,9 @@ document.addEventListener('touchend', function() {
     // Release: spring back to 0 — no velocity kick, pure measured drift
     _swipeCamTarget = 0;
     _swipeCamVel = 0;
+    // Guard chrome toggle from firing on swipe release
+    window._chromeSwipeGuard = true;
+    setTimeout(function() { window._chromeSwipeGuard = false; }, 300);
   }
   _swipeDragging = false;
   _swipeSwiping = false;
