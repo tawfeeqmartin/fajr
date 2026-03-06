@@ -1501,6 +1501,11 @@ function updatePrayerWindows(now) {
   }
 
   const nowMin = now.getHours() * 60 + now.getMinutes();
+  // During swipe preview, lock sector selection to the intended target minute
+  // (not the eased/intermediate minute) to prevent header/window bounce.
+  const selMin = (typeof _swipeTimeTarget === 'number' && _swipeTimeTarget !== null)
+    ? ((Math.floor(_swipeTimeTarget) % 1440) + 1440) % 1440
+    : nowMin;
 
   // Find active prayer, next upcoming, and the one after that
   let activeIdx = -1;
@@ -1513,10 +1518,10 @@ function updatePrayerWindows(now) {
     const { startMin, endMin } = ps;
     const wraps = startMin > endMin;
     const isActive = wraps
-      ? (nowMin >= startMin) || (nowMin < endMin)
-      : (nowMin >= startMin) && (nowMin < endMin);
+      ? (selMin >= startMin) || (selMin < endMin)
+      : (selMin >= startMin) && (selMin < endMin);
     if (isActive) { activeIdx = i; return; }
-    const dist = (startMin - nowMin + 1440) % 1440;
+    const dist = (startMin - selMin + 1440) % 1440;
     if (dist < bestDist) {
       secondBest = bestDist; thirdIdx = nextIdx;
       bestDist = dist; nextIdx = i;
