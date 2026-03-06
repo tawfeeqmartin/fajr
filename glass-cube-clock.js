@@ -834,14 +834,34 @@ podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
-// ── Shadow disc — masks cubeSun caustic dots on podium front face ──────────
-var _shadowDisc = new THREE.Mesh(
-  new THREE.CircleGeometry(0.9, 32),
-  new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.6, depthWrite: false })
-);
-_shadowDisc.rotation.x = -Math.PI / 2;
-_shadowDisc.position.set(0, -0.025, 0); // just above podium top face
-scene.add(_shadowDisc);
+// ── Shadow square — feathered cube shadow on podium top face ──────────
+var _shadowSquare = (function() {
+  var size = 1.3; // slightly larger than cube (~1.1 diagonal footprint at 45°)
+  var geo = new THREE.PlaneGeometry(size, size);
+  var mat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: {},
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: [
+      'varying vec2 vUv;',
+      'void main(){',
+      '  vec2 c = vUv - 0.5;',
+      // Box distance — max of abs(x), abs(y) gives square shape
+      '  float d = max(abs(c.x), abs(c.y));',
+      // Feathered edge: solid core 0-0.3, fade 0.3-0.5
+      '  float alpha = 1.0 - smoothstep(0.25, 0.50, d);',
+      '  gl_FragColor = vec4(0.0, 0.0, 0.0, alpha * 0.55);',
+      '}'
+    ].join('\n')
+  });
+  var mesh = new THREE.Mesh(geo, mat);
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.rotation.z = Math.PI / 4; // match cube's 45° rotation
+  mesh.position.set(0, -0.024, 0); // just above podium top face
+  return mesh;
+})();
+scene.add(_shadowSquare);
 
 // ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
 // Just two scene lights to illuminate the podium surface. No material changes.
