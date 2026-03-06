@@ -1689,6 +1689,7 @@ function updateNavClock(){
   if(!t)return;
   const now=new Date();
   const toSec=s=>{const[hh,mm]=String(s||'0:0').split(':').map(Number);return (hh||0)*3600+(mm||0)*60;};
+  const _normMin=m=>((Math.floor(m)%1440)+1440)%1440;
 
   // Actual current time (always used for countdown math).
   const actualNowS=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
@@ -1701,7 +1702,6 @@ function updateNavClock(){
   const nowM=Math.floor(nowS/60)%1440;
 
   const prayerColors={Tahajjud:'#8811ff',Qiyam:'#8811ff',Fajr:'#6633ee',Sunrise:'#ff9900',Dhuha:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff'};
-  const _normMin = m => ((Math.floor(m)%1440)+1440)%1440;
   const sunriseM=_normMin(toSec(t.Sunrise)/60), dhuhaM=_normMin(sunriseM+20);
   const qiyamM=_normMin(toSec(t.Midnight||'00:00')/60);
   const marks={
@@ -1720,20 +1720,29 @@ function updateNavClock(){
     {name:'Isha',start:marks.Isha,end:marks.Tahajjud}
   ];
   const inRange=(m,a,b)=>a<=b?(m>=a&&m<b):(m>=a||m<b);
-  let active='Isha';
-  for(const s of sectors){ if(inRange(nowM,s.start,s.end)){ active=s.name; break; } }
+  const prayerAtMinute = (m) => {
+    const mm=_normMin(m);
+    for(const s of sectors){ if(inRange(mm,s.start,s.end)) return s.name; }
+    return 'Isha';
+  };
+  let active=prayerAtMinute(nowM);
   const starts=Object.entries(marks).filter(([n])=>n!=='Tahajjud').map(([n,m])=>({name:n,m}));
   let next=starts[0], best=1e9;
   for(const s of starts){ const d=(s.m-nowM+1440)%1440; if(d>0&&d<best){best=d; next=s;} }
 
+  const swipeActive=((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null) || (typeof window._swipeTimeTarget==='number'&&window._swipeTimeTarget!==null));
+  const _swipeMin = (typeof window._swipeTimeTarget==='number'&&window._swipeTimeTarget!==null)
+    ? _normMin(window._swipeTimeTarget)
+    : ((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null) ? _normMin(window._swipeTimeOverride) : null);
+  let preview = (swipeActive && _swipeMin!==null) ? prayerAtMinute(_swipeMin) : '';
+  if (preview === 'Tahajjud') preview = 'Qiyam';
+  if (preview) {
+    window._swipePreviewPrayer = preview;
+    window._lastSwipePreviewPrayer = preview;
+  }
+
   // keep prayer bars in lockstep with countdown color + boundary timing
   if (typeof window._displayPrayerTimes==='function') window._displayPrayerTimes(t, window._lastHijri||null, nowM);
-
-  const swipeActive=((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null) || (typeof window._swipeTimeTarget==='number'&&window._swipeTimeTarget!==null));
-  let preview=swipeActive&&window._swipePreviewPrayer?window._swipePreviewPrayer:'';
-  // Prevent one-tick bounce at swipe start before preview prayer is populated.
-  if (swipeActive && !preview && window._lastSwipePreviewPrayer) preview = window._lastSwipePreviewPrayer;
-  if (preview) window._lastSwipePreviewPrayer = preview;
 
   const _labelName = n => n==='Tahajjud' ? 'Qiyam' : n;
   let navLabel='until '+_labelName(next.name);
@@ -3206,7 +3215,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=261';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=262';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
