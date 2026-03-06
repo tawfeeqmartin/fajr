@@ -1738,7 +1738,7 @@ function updateNavClock(){
   window._activePrayerName=active;
   window._activePrayerColor=activeColor;
   const style=activeColor?' style="color:'+activeColor+'"':'';
-  const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time"'+style+'>'+timeStr+'</div>';
+  const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time">'+timeStr+'</div>';
   const fsC=document.getElementById('fsCountdown');if(fsC)fsC.innerHTML=countdownHtml;
 
   const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
@@ -3131,7 +3131,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=244';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=245';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
