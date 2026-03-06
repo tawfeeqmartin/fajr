@@ -2095,7 +2095,7 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
   //          Dhuha(Sunrise+20→Dhuhr), Dhuhr(Dhuhr→Asr), Asr(Asr→Maghrib), Maghrib(Maghrib→Isha), Isha(Isha→Midnight)
   let activeP = '';
   let _sunriseForbidden = false;
-  const _swipePreviewActive = (typeof window._swipeTimeOverride === 'number' && window._swipeTimeOverride !== null && window._swipePreviewPrayer);
+  const _swipePreviewActive = !!window._swipePreviewPrayer;
   if (_swipePreviewActive) activeP = window._swipePreviewPrayer;
   const _sunriseMin = t.Sunrise ? toM(t.Sunrise) : 0;
   const _dhuhaStart = _sunriseMin + 20;
@@ -2152,7 +2152,8 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
       else if (p === 'Sunrise' && !_sunriseForbidden && activeP !== 'Sunrise') style = 'color:#666';
     }
 
-    return `<span data-prayer="${p}" style="${style};transition:all .3s ease">${p} ${t[p]}</span>`;
+    const _tr = _swipePreviewActive ? 'none' : 'all .3s ease';
+    return `<span data-prayer="${p}" style="${style};transition:${_tr}">${p} ${t[p]}</span>`;
   }).join(' · ');
   // Fullscreen prayer bar
   const fsEl = document.getElementById('fsPrayerTimes'); if(fsEl) fsEl.innerHTML = html;
@@ -3202,7 +3203,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=258';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=259';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
