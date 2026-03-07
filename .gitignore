@@ -2,3 +2,17 @@
 test-render.sh
 test-*.png
 renders/
+
+# Dev-only (local)
+.claude/
+.crew/
+*.sh
+lookdev-*.mjs
+render-timelapse.js
+CHANGELOG.md
+CHRIS-READY.md
+CHRIS-RESEARCH.md
+DEVON-READY.md
+LOOKDEV-NOTES.md
+NEXT-BRIEF.md
+CLOCK-SWAP.md
