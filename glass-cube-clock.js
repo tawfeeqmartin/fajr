@@ -1892,6 +1892,19 @@ document.addEventListener('visibilitychange', function() {
   if (!window._sceneReady) {
     window._sceneReady = true;
     window._sceneReadyAt = performance.now();
+    // Expose projected cube vertices for splash alignment
+    try {
+      var _cv = [];
+      var _cg = cubeMesh.geometry.attributes.position;
+      var _seen = {};
+      for (var _ci = 0; _ci < _cg.count; _ci++) {
+        var _v3 = new THREE.Vector3(_cg.getX(_ci), _cg.getY(_ci), _cg.getZ(_ci));
+        cubeMesh.localToWorld(_v3);
+        var _ck = _v3.x.toFixed(3)+','+_v3.y.toFixed(3)+','+_v3.z.toFixed(3);
+        if (!_seen[_ck]) { _seen[_ck] = true; _v3.project(camera); _cv.push({x:(_v3.x+1)/2*W, y:(1-_v3.y)/2*H}); }
+      }
+      window._cubeScreenVerts = _cv;
+    } catch(e) {}
   }
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────

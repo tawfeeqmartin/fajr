@@ -788,6 +788,33 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       var elapsed = performance.now() - cycleStart;
       var animDone = elapsed >= ANIM_DUR;
       if (window._sceneReady && animDone) {
+        // Snap SVG to actual rendered cube position before fading
+        if (window._cubeScreenVerts && !splash._snapped) {
+          splash._snapped = true;
+          var cv = window._cubeScreenVerts;
+          var cvs = cv.slice().sort(function(a,b){return a.y-b.y;});
+          // Top 4 by y, bottom 4 by y
+          var top4 = cvs.slice(0,4).sort(function(a,b){return a.x-b.x;});
+          var bot4 = cvs.slice(4).sort(function(a,b){return a.x-b.x;});
+          var rv = {
+            tBack:cvs[0], tLeft:top4[0], tRight:top4[3], tFront:cvs[3],
+            bBack:cvs[4], bLeft:bot4[0], bRight:bot4[3], bFront:cvs[7]
+          };
+          var newEdges = [
+            'M'+rv.tLeft.x.toFixed(1)+','+rv.tLeft.y.toFixed(1)+' L'+rv.tBack.x.toFixed(1)+','+rv.tBack.y.toFixed(1)+' L'+rv.tRight.x.toFixed(1)+','+rv.tRight.y.toFixed(1)+' L'+rv.tFront.x.toFixed(1)+','+rv.tFront.y.toFixed(1)+' Z',
+            'M'+rv.bLeft.x.toFixed(1)+','+rv.bLeft.y.toFixed(1)+' L'+rv.bFront.x.toFixed(1)+','+rv.bFront.y.toFixed(1)+' L'+rv.bRight.x.toFixed(1)+','+rv.bRight.y.toFixed(1),
+            'M'+rv.tFront.x.toFixed(1)+','+rv.tFront.y.toFixed(1)+' L'+rv.bFront.x.toFixed(1)+','+rv.bFront.y.toFixed(1),
+            'M'+rv.bLeft.x.toFixed(1)+','+rv.bLeft.y.toFixed(1)+' L'+rv.tLeft.x.toFixed(1)+','+rv.tLeft.y.toFixed(1)+' L'+rv.tBack.x.toFixed(1)+','+rv.tBack.y.toFixed(1),
+            'M'+rv.bRight.x.toFixed(1)+','+rv.bRight.y.toFixed(1)+' L'+rv.tRight.x.toFixed(1)+','+rv.tRight.y.toFixed(1)+' L'+rv.tBack.x.toFixed(1)+','+rv.tBack.y.toFixed(1)
+          ];
+          var svgPaths = svg.querySelectorAll('path');
+          for (var si = 0; si < Math.min(svgPaths.length, newEdges.length); si++) {
+            svgPaths[si].setAttribute('d', newEdges[si]);
+          }
+          // Update viewBox to match actual canvas dimensions
+          var cW = document.querySelector('canvas');
+          if (cW) { svg.setAttribute('viewBox','0 0 '+cW.width/window.devicePixelRatio+' '+cW.height/window.devicePixelRatio); }
+        }
         setTimeout(function(){
           splash.style.opacity = '0';
           setTimeout(function(){ splash.remove(); }, 1400);
@@ -3454,7 +3481,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=305';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=306';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
