@@ -240,21 +240,7 @@ function _makeArchOutlineTexture() {
   return tex;
 }
 
-// SACRED SHAFT — v19: gobo as fill only, stamps carry the arch shape
-const gobo = new THREE.SpotLight(0xffc870, 6); // v57: 0→6 — hybrid: low gobo for real light interaction, stamps carry shape
-gobo.position.set(-6, 16, 3);
-gobo.target.position.set(0, 0, -2);       // v19: aim at stamp center
-gobo.angle = 0.50;    // v19: wide cone — just ambient directional warmth
-gobo.penumbra = 0.85;  // v65: 0.6→0.85 — very soft edge, atmospheric fill
-gobo.decay = 1.0;
-gobo.castShadow = true;
-gobo.shadow.mapSize.set(_isMobile ? 1024 : 2048, _isMobile ? 1024 : 2048);
-gobo.shadow.bias = -0.001;
-gobo.shadow.camera.near = 1;
-gobo.shadow.camera.far = 25;
-gobo.map = _makeArchTexture();
-// v80: arch disabled — gobo off
-// scene.add(gobo, gobo.target);
+// GOBO REMOVED v275 — was disabled (scene.add commented out) since v80, shadow map still allocated
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
 const cubeBack = new THREE.SpotLight(0xffeedd, 7);
@@ -267,14 +253,7 @@ cubeBack.castShadow = false;
 scene.add(cubeBack, cubeBack.target);
 
 // COLD COUNTER — Deakins warm/cold split
-const coldCounter = new THREE.SpotLight(0x0a1855, 6);
-coldCounter.position.set(5, 7, 1);
-coldCounter.target.position.set(0, 0.6, 0);
-coldCounter.angle = 0.30;
-coldCounter.penumbra = 0.5;
-coldCounter.decay = 1.4;
-coldCounter.castShadow = false;
-scene.add(coldCounter, coldCounter.target);
+// COLD COUNTER REMOVED v275 — merged into back spot
 
 // VIOLET RIM — Swarovski edge catch — sharpened to actually separate cube from dark bg
 const violetRim = new THREE.SpotLight(0x8055f0, 6);
@@ -287,15 +266,10 @@ violetRim.castShadow = false;
 scene.add(violetRim, violetRim.target);
 
 // GHOST FILL — floor separation from pure black
-const ghostFill = new THREE.PointLight(0x0c0520, 0.5); // v57: 1.2→0.5 — less floor fill, darker surround
-ghostFill.position.set(0, 3, 0);
-ghostFill.decay = 2;
-ghostFill.distance = 15;
-scene.add(ghostFill);
+// GHOST FILL REMOVED v275 — ambient already covers floor
 
 // PRAYER AMBIENT — hemisphere for colored shadow fill
-const prayerAmbient = new THREE.HemisphereLight(0x1a0830, 0x0a1520, 0.18); // v57: 0.4→0.18 — crush ambient so arch interior reads bright by contrast
-scene.add(prayerAmbient);
+// PRAYER AMBIENT REMOVED v275 — AmbientLight 0.07 already provides fill
 
 // COOL RIM — catches back edges of cube, separates silhouette from bg
 const rim = new THREE.SpotLight(0x8060c0, 5);
@@ -314,10 +288,7 @@ scene.add(cubeSun);
 
 // SOLAR ARC KEY — subtle day progression for timelapse readability.
 // Dawn (warm/low) → Noon (cool/high) → Dusk (warm/low) → Night (off).
-const solarKey = new THREE.DirectionalLight(0xffffff, 0);
-solarKey.position.set(-6, 3, 5);
-solarKey.target.position.set(0, 0.6, 0);
-scene.add(solarKey, solarKey.target);
+// SOLAR KEY REMOVED v275 — plinthSun orbit handles solar effect
 
 // PLINTH ORBIT HIGHLIGHT — explicit circular top-down spot over hour-hand path.
 const plinthSun = new THREE.SpotLight(0xffffff, 0);
@@ -329,7 +300,7 @@ plinthSun.decay = 1.0;
 plinthSun.distance = 8.0;
 window.plinthSun = plinthSun;
 window.cubeSun = cubeSun;
-window.solarKey = solarKey;
+// window.solarKey removed v275
 plinthSun.castShadow = true;
 plinthSun.shadow.mapSize.width = 512;
 plinthSun.shadow.mapSize.height = 512;
@@ -340,12 +311,7 @@ scene.add(plinthSun, plinthSun.target);
 scene.add(new THREE.AmbientLight(0xffffff, 0.07)); // v57: 0.16→0.07 — deeper darkness outside arch, shadow is absolute
 
 // 12 o'clock spotlight — catches top edge during tawaf rotation
-const tawafSpot = new THREE.SpotLight(0xffffff, 8); // v10: 12→8 — orbiting overhead was spiking cube top face during passes
-tawafSpot.position.set(0, 3.5, -3);
-tawafSpot.target.position.set(0, 0.5, 0);
-tawafSpot.angle = 0.4; tawafSpot.penumbra = 0.9;
-tawafSpot.distance = 4.5; // cap: reaches cube (~4.2u) but not arch floor zone (~5.7u from this position)
-scene.add(tawafSpot, tawafSpot.target);
+// TAWAF SPOT REMOVED v275 — plinthSun orbit now handles solar circumnavigation
 
 // Podium edge spotlight removed — reverted to pre-Chris lighting
 
@@ -871,13 +837,7 @@ podiumFrontWash.decay = 1.2; podiumFrontWash.distance = 12;
 podiumFrontWash.castShadow = false;
 scene.add(podiumFrontWash, podiumFrontWash.target);
 // Lower fill: very subtle, reveals podium form without flattening
-const podiumLowFill = new THREE.SpotLight(0x606080, 4);
-podiumLowFill.position.set(0, -2.0, 8.0);
-podiumLowFill.target.position.set(0, -5.0, 0);
-podiumLowFill.angle = 0.55; podiumLowFill.penumbra = 0.90;
-podiumLowFill.decay = 1.5; podiumLowFill.distance = 14;
-podiumLowFill.castShadow = false;
-scene.add(podiumLowFill, podiumLowFill.target);
+// PODIUM LOW FILL REMOVED v275 — podiumFrontWash covers podium
 
 // ── PRAYER GLOW — PointLight at podium base (Approach B, Chris v7) ──────────
 // PointLight has no surface-color dependency — paints everything in radius.
@@ -1714,11 +1674,6 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     ? _dawn.clone().lerp(_noon, _dayPhase * 2)
     : _noon.clone().lerp(_dusk, (_dayPhase - 0.5) * 2);
 
-  // Broad environmental key (still tied to TOD for scene mood)
-  solarKey.position.set(Math.sin(_hourAng) * 7.2, 2.2 + _sunLift * 7.8, -Math.cos(_hourAng) * 6.0 - 0.8);
-  solarKey.color.copy(_solarC);
-  solarKey.intensity = 0.04 + _sunLift * 0.55; // reduce broad sweep so orbit reads circular, not linear
-
   // Plinth-top highlight orbit: lock to ACTUAL hour-hand direction (exact alignment).
   var _cubeDayC = _solarC.clone().lerp(new THREE.Color(0xe8f2ff), 0.30);
   cubeSun.color.copy(_cubeDayC);
@@ -1954,10 +1909,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
   cubeMat.uniforms.uCamWorldPos.value.copy(camera.position);
 
-  // Tawaf spot orbits at second-hand speed
-  const tawafAngle = (s / 60) * TAU;
-  tawafSpot.position.x = Math.sin(tawafAngle) * 3;
-  tawafSpot.position.z = -Math.cos(tawafAngle) * 3;
+
 
   // Update prayer window sector opacities
   let prayerNow;
