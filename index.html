@@ -2255,21 +2255,25 @@ var _cityTz = null; // IANA timezone string e.g. 'Asia/Riyadh'
 function _cityNow() {
   var d = new Date();
   if (!_cityTz) return d;
-  // Use Intl to get the city's local time components
+  // Use Intl to get the city's local time components, then build a Date
+  // where getHours/getMinutes/getSeconds return the CITY's local time.
+  // Trick: set the Date so local-tz getters return city values by offsetting.
   try {
     var parts = new Intl.DateTimeFormat('en-US', {
       timeZone: _cityTz, hour12: false,
       year:'numeric', month:'numeric', day:'numeric',
-      hour:'numeric', minute:'numeric', second:'numeric',
-      fractionalSecondDigits: 3
+      hour:'numeric', minute:'numeric', second:'numeric'
     }).formatToParts(d);
     var p = {};
     parts.forEach(function(x){ p[x.type] = x.value; });
-    // Build a date in city's local time (use UTC setters to avoid device tz interference)
-    var cd = new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour === 24 ? 0 : +p.hour, +p.minute, +p.second, +(p.fractionalSecond || 0)));
+    var cityH = +p.hour === 24 ? 0 : +p.hour;
+    // Create a date TODAY in device timezone but with city's H:M:S
+    var cd = new Date(d);
+    cd.setFullYear(+p.year, +p.month - 1, +p.day);
+    cd.setHours(cityH, +p.minute, +p.second, d.getMilliseconds());
     return cd;
   } catch(e) {
-    return d; // fallback to device time
+    return d;
   }
 }
 
@@ -3278,7 +3282,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=278';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=279';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
