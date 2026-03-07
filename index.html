@@ -448,7 +448,7 @@ body.mode-compass footer,
 body.mode-compass .clock-sticky{display:none!important}
 
 body.mode-info .clock-sticky{display:none}
-body.mode-info .fs-city-block,body.mode-info .fs-countdown,body.mode-info .fs-header{opacity:0!important;pointer-events:none;transition:none}
+body.mode-info #headerBar,body.mode-info .fs-header{opacity:0!important;pointer-events:none;transition:none}
 body.mode-info .scroll-section,
 body.mode-info footer{display:block}
 body.mode-info{overflow:hidden}
@@ -617,27 +617,28 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .iftar-gold{color:#ffd966!important}
 
 /* ── Fullscreen city + countdown (mirror nav positions) ── */
-.fs-city-block{
+#headerBar{
   position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(.6rem,1.5vmin,1rem));
-  left:clamp(1rem,3vmin,1.5rem);z-index:210;
-  display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1;
+  left:0;right:0;z-index:210;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:0 clamp(1rem,3vmin,1.5rem);
   pointer-events:none;transition:opacity .5s ease;
+}
+body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
+body.mode-info #headerBar{opacity:0!important;pointer-events:none}
+.fs-city-block{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1;
+  flex-shrink:0;
 }
 .fs-city-time{
-  position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(.6rem,1.5vmin,1rem));
-  left:50%;transform:translateX(-50%);z-index:210;
   font-family:var(--font);font-size:clamp(.8rem,2vw,1rem);font-weight:300;
   letter-spacing:.06em;color:rgba(232,228,220,.65);
-  pointer-events:none;transition:opacity .5s ease;
   font-variant-numeric:tabular-nums;
+  flex-shrink:0;padding-top:2px;
 }
-body.chrome-hidden .fs-city-time{opacity:0!important;pointer-events:none}
-body.mode-info .fs-city-time{opacity:0!important;pointer-events:none}
 .fs-countdown{
-  position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(.6rem,1.5vmin,1rem));
-  right:clamp(1rem,3vmin,1.5rem);z-index:210;
   text-align:right;line-height:1;font-family:var(--font);
-  pointer-events:none;transition:opacity .5s ease;
+  flex-shrink:0;
 }
 .fs-countdown .nav-label{font-size:clamp(.5rem,1.2vw,.65rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,228,220,.4);line-height:1}
 .fs-countdown .nav-time{font-size:clamp(1rem,3vw,1.3rem);font-weight:600;letter-spacing:.02em;color:rgba(232,228,220,.75);line-height:1.1;font-variant-numeric:tabular-nums}
@@ -645,8 +646,6 @@ body.mode-info .fs-city-time{opacity:0!important;pointer-events:none}
 /* Hide in compass mode */
 /* Header stays visible in all modes including compass */
 /* Tap-to-hide: all UI hidden in clock/compass */
-body.chrome-hidden .fs-city-block,
-body.chrome-hidden .fs-countdown,
 body.chrome-hidden .fs-header,
 body.chrome-hidden .mode-label,
 body.chrome-hidden .mode-pill,
@@ -663,13 +662,15 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 </head>
 <body>
 
-<!-- Global Header (shared across all modes) -->
-<div id="fsCityBlock" class="fs-city-block" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto">
-  <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-  <span id="fsCityName" class="nav-city-name">—</span>
+<!-- Global Header Bar (shared across all modes) -->
+<div id="headerBar">
+  <div id="fsCityBlock" class="fs-city-block" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto">
+    <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    <span id="fsCityName" class="nav-city-name">—</span>
+  </div>
+  <div id="fsCityTime" class="fs-city-time"></div>
+  <div id="fsCountdown" class="fs-countdown"></div>
 </div>
-<div id="fsCityTime" class="fs-city-time"></div>
-<div id="fsCountdown" class="fs-countdown"></div>
 <div id="fsHeader" class="fs-header">
   <div class="fs-datetime" id="fsDateTime"></div>
   <div class="fs-location" id="fsLocation"></div>
@@ -3282,7 +3283,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=279';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=280';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
