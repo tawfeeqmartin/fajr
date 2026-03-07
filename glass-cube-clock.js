@@ -1772,6 +1772,11 @@ document.addEventListener('visibilitychange', function() {
     clockRays[0].mesh.rotation.y = clockRays[0].initY - (h / 12) * TAU;   // hour
     clockRays[1].mesh.rotation.y = clockRays[1].initY - (m / 60) * TAU;   // minute
     clockRays[2].mesh.rotation.y = clockRays[2].initY - (s / 60) * TAU;   // second
+    // Always recover hour/minute opacity in normal mode (guards against splash/compass resets).
+    var _hMatN = clockRays[0].mesh.children[0].material;
+    var _mMatN = clockRays[1].mesh.children[0].material;
+    _hMatN.uniforms.op.value += (1.45 - _hMatN.uniforms.op.value) * 0.18;
+    _mMatN.uniforms.op.value += (1.50 - _mMatN.uniforms.op.value) * 0.18;
 
     // Tawaf flourish — CCW sweep on swipe revert
     if (_swipeTawafPhase > 0.001) {
@@ -1818,10 +1823,23 @@ document.addEventListener('visibilitychange', function() {
   }
 
   // During splash, suppress live hand beam visibility to avoid pre-splash artifacts.
-  if (window._splashActive) {
+  // Safety: if splash DOM is gone, auto-clear flag so hands return in scene.
+  var _splashEl = document.getElementById('splash');
+  if (window._splashActive && _splashEl) {
     for (var _ri = 0; _ri < clockRays.length; _ri++) {
       var _rm = clockRays[_ri].mesh.children[0].material;
       _rm.uniforms.op.value = 0;
+    }
+  } else if (window._splashActive && !_splashEl) {
+    window._splashActive = false;
+  }
+
+  // Recover hand opacity after splash clamp (hour/min are not continuously reset elsewhere).
+  if (!window._splashActive && window._currentMode !== 'compass') {
+    var _targets = [1.45, 1.50, (_prayerDisc && _prayerDisc.visible) ? 0.40 : 0.62];
+    for (var _ri2 = 0; _ri2 < clockRays.length; _ri2++) {
+      var _m2 = clockRays[_ri2].mesh.children[0].material;
+      _m2.uniforms.op.value += (_targets[_ri2] - _m2.uniforms.op.value) * 0.18;
     }
   }
 

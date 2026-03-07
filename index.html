@@ -2096,26 +2096,29 @@ function _cycleCountdownPref(){
   else window._countdownPref = 'auto';
   updateNavClock();
 }
-if(!window._countdownToggleBound){
-  var _countdownTap = function(e){
-    var el = e.target && e.target.closest ? e.target.closest('#fsCountdown') : null;
-    if(!el) return;
-    if(e && e.preventDefault) e.preventDefault();
-    if(e && e.stopPropagation) e.stopPropagation();
-    // Keep chrome alive while user is actively toggling countdown.
-    if(typeof _showChrome === 'function') _showChrome();
-    else if(typeof _resetChromeTimer === 'function') _resetChromeTimer();
-    _cycleCountdownPref();
-  };
-  if (window.PointerEvent) {
-    // One physical tap => one pointerup. No click handler to avoid double-fires.
-    document.addEventListener('pointerup', _countdownTap);
+var _lastCountdownTapAt = 0;
+function _handleCountdownToggle(e){
+  var fsC = document.getElementById('fsCountdown');
+  if(!fsC) return;
+  if(e && e.preventDefault) e.preventDefault();
+  if(e && e.stopPropagation) e.stopPropagation();
+  var nowMs = Date.now();
+  if(nowMs - _lastCountdownTapAt < 380) return; // dedupe touchend+click pairs
+  _lastCountdownTapAt = nowMs;
+  // Keep chrome alive while user is actively toggling countdown.
+  if(typeof _showChrome === 'function') _showChrome();
+  else if(typeof _resetChromeTimer === 'function') _resetChromeTimer();
+
+  // Intuitive toggle: if currently showing iftar, go to next; if showing next, go to iftar.
+  // 'auto' is startup behavior only; once user taps, we switch to explicit mode.
+  var labelEl = fsC.querySelector('.nav-label');
+  var label = (labelEl && labelEl.textContent || '').toLowerCase();
+  if (window._countdownPref === 'auto') {
+    window._countdownPref = label.indexOf('iftar') !== -1 ? 'next' : 'iftar';
   } else {
-    // Legacy fallback
-    document.addEventListener('touchend', _countdownTap);
-    document.addEventListener('click', _countdownTap);
+    window._countdownPref = (window._countdownPref === 'iftar') ? 'next' : 'iftar';
   }
-  window._countdownToggleBound = true;
+  updateNavClock();
 }
 function startNavClock(){
   if(_navClockTimer)return;
@@ -2233,7 +2236,15 @@ function updateNavClock(){
   else if (navDiff <= 600) _timeStyle=' style="color:#ff453a;"';
   else if (navDiff <= 1200) _timeStyle=' style="color:#ff9f0a;"';
   const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
-  const fsC=document.getElementById('fsCountdown');if(fsC)fsC.innerHTML=countdownHtml;
+  const fsC=document.getElementById('fsCountdown');
+  if(fsC){
+    fsC.innerHTML = countdownHtml;
+    if(!fsC._toggleBound){
+      fsC.addEventListener('click', _handleCountdownToggle);
+      fsC.addEventListener('touchend', _handleCountdownToggle, {passive:false});
+      fsC._toggleBound = true;
+    }
+  }
 
   const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
   const elTimes=document.getElementById('navTimes');
@@ -3717,7 +3728,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=338';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=339';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
