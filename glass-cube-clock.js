@@ -28,6 +28,9 @@ document.body.appendChild(_lvhEl);
 var _stableW = window.innerWidth;
 var _stableH = _lvhEl.offsetHeight || window.innerHeight;
 document.body.removeChild(_lvhEl);
+// Expose for splash alignment
+window._canvasW = _stableW;
+window._canvasH = _stableH;
 
 function getSize() {
   if (CONTAINED) {

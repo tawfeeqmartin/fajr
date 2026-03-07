@@ -668,162 +668,124 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 <body>
 <!-- Splash screen — cube wireframe computed from camera projection -->
 <div id="splash" style="position:fixed;top:0;left:0;width:100vw;height:100lvh;z-index:9999;background:#0d0d12;transition:opacity 1.2s ease">
-  <canvas id="splashCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
   <style>
     @keyframes splashDraw { to { stroke-dashoffset: 0; } }
   </style>
   <script>
   (function(){
-    // Camera params (must match glass-cube-clock.js exactly)
-    var camPos = [0.2, 9.7, 15.0], fov = 35, lookAt = [0, -0.8, 1.0];
-    var CUBE_Y = 0.57, half = 0.6, rot = Math.PI / 4;
-    var cosR = Math.cos(rot), sinR = Math.sin(rot);
-
-    // 8 cube vertices: local -> rotated -> world
-    var localV = [];
-    for (var x = -1; x <= 1; x += 2)
-      for (var y = -1; y <= 1; y += 2)
-        for (var z = -1; z <= 1; z += 2)
-          localV.push([x * half, y * half + CUBE_Y, z * half]);
-
-    var worldV = localV.map(function(v) {
-      return [v[0]*cosR + v[2]*sinR, v[1], -v[0]*sinR + v[2]*cosR];
-    });
-
+    // Camera params (MUST match glass-cube-clock.js exactly)
+    var camPos=[0.2,9.7,15.0], fov=35, lookAt=[0,-0.8,1.0];
+    var CUBE_Y=0.57, half=0.6, rot=Math.PI/4;
+    var cosR=Math.cos(rot), sinR=Math.sin(rot);
+    // 8 cube vertices: local -> rotated
+    var localV=[], worldV=[];
+    for(var x=-1;x<=1;x+=2)for(var y=-1;y<=1;y+=2)for(var z=-1;z<=1;z+=2){
+      var lv=[x*half,y*half+CUBE_Y,z*half];
+      localV.push(lv);
+      worldV.push([lv[0]*cosR+lv[2]*sinR, lv[1], -lv[0]*sinR+lv[2]*cosR]);
+    }
     // View matrix
-    function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
-    function norm(v){var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);return [v[0]/l,v[1]/l,v[2]/l];}
-    function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+    function sub(a,b){return[a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+    function norm(v){var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);return[v[0]/l,v[1]/l,v[2]/l];}
+    function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
     function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+    var fwd=norm(sub(lookAt,camPos));
+    var right=norm(cross(fwd,[0,1,0]));
+    var up=cross(right,fwd);
+    var tanHalf=Math.tan(fov*Math.PI/360);
 
-    var fwd = norm(sub(lookAt, camPos));
-    var right = norm(cross(fwd, [0,1,0]));
-    var up = cross(right, fwd);
-    var tanHalf = Math.tan(fov * Math.PI / 360);
+    function project(v,w,h){
+      var rel=sub(v,camPos);
+      var cz=dot(rel,fwd),cx=dot(rel,right),cy=dot(rel,up);
+      return[(cx/(cz*tanHalf*(w/h))+1)/2*w, (1-cy/(cz*tanHalf))/2*h];
+    }
+    function getVerts(w,h){
+      var sv=worldV.map(function(v,i){return{s:project(v,w,h),ly:localV[i][1]};});
+      var top=sv.filter(function(v){return v.ly>CUBE_Y;}).sort(function(a,b){return a.s[1]-b.s[1];});
+      var bot=sv.filter(function(v){return v.ly<CUBE_Y;}).sort(function(a,b){return a.s[1]-b.s[1];});
+      return{tBack:top[0].s,tLeft:top[1].s,tRight:top[2].s,tFront:top[3].s,
+             bBack:bot[0].s,bLeft:bot[1].s,bRight:bot[2].s,bFront:bot[3].s};
+    }
+    function buildPaths(v){return[
+      {d:'M'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1)+' L'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' Z',
+       stroke:'rgba(255,255,255,.9)',dash:'400',delay:'.3s'},
+      {d:'M'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1)+' L'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1),
+       stroke:'rgba(255,255,255,.25)',dash:'200',delay:'.7s'},
+      {d:'M'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1),
+       stroke:'rgba(255,255,255,.25)',dash:'90',delay:'1.0s'},
+      {d:'M'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1)+' L'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1),
+       stroke:'#8844ee',dash:'200',delay:'1.3s'},
+      {d:'M'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1)+' L'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1),
+       stroke:'#4488ff',dash:'200',delay:'1.7s'}
+    ];}
 
-    function project(v, w, h) {
-      var rel = sub(v, camPos);
-      var cz = dot(rel, fwd), cx = dot(rel, right), cy = dot(rel, up);
-      var aspect = w / h;
-      var ndcX = cx / (cz * tanHalf * aspect);
-      var ndcY = cy / (cz * tanHalf);
-      return [(ndcX + 1) / 2 * w, (1 - ndcY) / 2 * h];
+    var splash=document.getElementById('splash');
+    var svg, corrected=false;
+
+    function buildSVG(w,h){
+      if(svg) svg.remove();
+      var v=getVerts(w,h);
+      svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('style','position:absolute;top:0;left:0;width:100vw;height:100lvh');
+      svg.setAttribute('viewBox','0 0 '+w+' '+h);
+      svg.setAttribute('fill','none');
+      buildPaths(v).forEach(function(e){
+        var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+        p.setAttribute('d',e.d);
+        p.setAttribute('stroke',e.stroke);
+        p.setAttribute('stroke-width','1');
+        p.setAttribute('stroke-linecap','round');
+        p.setAttribute('stroke-linejoin','round');
+        p.setAttribute('style','stroke-dasharray:'+e.dash+';stroke-dashoffset:'+e.dash+';animation:splashDraw .8s ease-out '+e.delay+' forwards');
+        svg.appendChild(p);
+      });
+      splash.insertBefore(svg, splash.firstChild);
     }
 
-    // Sort vertices into named positions by world coords
-    function getVerts(w, h) {
-      var sv = worldV.map(function(v,i){ return {w:v, s:project(v,w,h), ly:localV[i][1]}; });
-      // Top 4 (y > CUBE_Y) and bottom 4
-      var top = sv.filter(function(v){return v.ly > CUBE_Y;}).sort(function(a,b){return a.s[1]-b.s[1];});
-      var bot = sv.filter(function(v){return v.ly < CUBE_Y;}).sort(function(a,b){return a.s[1]-b.s[1];});
-      // top: [back, left, right, front], bot: [back, left, right, front]
-      return {
-        tBack:top[0].s, tLeft:top[1].s, tRight:top[2].s, tFront:top[3].s,
-        bBack:bot[0].s, bLeft:bot[1].s, bRight:bot[2].s, bFront:bot[3].s
-      };
-    }
-
-    // Build SVG dynamically
-    // Use 100lvh for height — matches how Three.js canvas sizes itself
-    var _splashLvh = document.createElement('div');
-    _splashLvh.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+    // Initial build with best available measurement
+    var _splashLvh=document.createElement('div');
+    _splashLvh.style.cssText='position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
     document.body.appendChild(_splashLvh);
-    var w = window.innerWidth, h = _splashLvh.offsetHeight || window.innerHeight;
+    var initW=window.innerWidth, initH=_splashLvh.offsetHeight||window.innerHeight;
     document.body.removeChild(_splashLvh);
-    var v = getVerts(w, h);
-    var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('style','position:absolute;top:0;left:0;width:100vw;height:100lvh');
-    svg.setAttribute('viewBox','0 0 '+w+' '+h);
-    svg.setAttribute('fill','none');
+    buildSVG(initW, initH);
 
-    var edges = [
-      // Top face (white) — draws first
-      {d:'M'+v.tLeft[0]+','+v.tLeft[1]+' L'+v.tBack[0]+','+v.tBack[1]+' L'+v.tRight[0]+','+v.tRight[1]+' L'+v.tFront[0]+','+v.tFront[1]+' Z',
-       stroke:'rgba(255,255,255,.9)', sw:'1', dash:'400', delay:'.3s'},
-      // Bottom V
-      {d:'M'+v.bLeft[0]+','+v.bLeft[1]+' L'+v.bFront[0]+','+v.bFront[1]+' L'+v.bRight[0]+','+v.bRight[1],
-       stroke:'rgba(255,255,255,.25)', sw:'1', dash:'200', delay:'.7s'},
-      // Front vertical
-      {d:'M'+v.tFront[0]+','+v.tFront[1]+' L'+v.bFront[0]+','+v.bFront[1],
-       stroke:'rgba(255,255,255,.25)', sw:'1', dash:'90', delay:'1.0s'},
-      // Left face (violet) — colored, draws last
-      {d:'M'+v.bLeft[0]+','+v.bLeft[1]+' L'+v.tLeft[0]+','+v.tLeft[1]+' L'+v.tBack[0]+','+v.tBack[1],
-       stroke:'#8844ee', sw:'1', dash:'200', delay:'1.3s'},
-      // Right face (blue) — colored, draws last
-      {d:'M'+v.bRight[0]+','+v.bRight[1]+' L'+v.tRight[0]+','+v.tRight[1]+' L'+v.tBack[0]+','+v.tBack[1],
-       stroke:'#4488ff', sw:'1', dash:'200', delay:'1.7s'}
-    ];
-
-    edges.forEach(function(e) {
-      var p = document.createElementNS('http://www.w3.org/2000/svg','path');
-      p.setAttribute('d', e.d);
-      p.setAttribute('stroke', e.stroke);
-      p.setAttribute('stroke-width', e.sw);
-      p.setAttribute('stroke-linecap', 'round');
-      p.setAttribute('stroke-linejoin', 'round');
-      p.setAttribute('style','stroke-dasharray:'+e.dash+';stroke-dashoffset:'+e.dash+';animation:splashDraw .8s ease-out '+e.delay+' forwards');
-      svg.appendChild(p);
-    });
-
-    // Remove the placeholder canvas, add SVG
-    var c = document.getElementById('splashCanvas');
-    if(c) c.remove();
-    document.getElementById('splash').insertBefore(svg, document.getElementById('splash').firstChild);
+    // When Three.js exposes its actual W/H, rebuild if different
+    function tryCorrect(){
+      if(corrected) return;
+      if(window._canvasW && window._canvasH){
+        if(window._canvasW !== initW || window._canvasH !== initH){
+          corrected=true;
+          buildSVG(window._canvasW, window._canvasH);
+        } else {
+          corrected=true; // same values, no rebuild needed
+        }
+      }
+    }
 
     // Animation loop controller
-    var ANIM_DUR = 3400, HOLD = 2000;
-    var paths = svg.querySelectorAll('path');
-    var cycleStart = performance.now();
-    function resetAnim() {
-      paths.forEach(function(p) {
-        p.style.animation = 'none';
-        p.offsetHeight;
-        p.style.animation = '';
+    var ANIM_DUR=3400, HOLD=2000;
+    var cycleStart=performance.now();
+    function resetAnim(){
+      if(!svg) return;
+      svg.querySelectorAll('path').forEach(function(p){
+        p.style.animation='none'; p.offsetHeight; p.style.animation='';
       });
-      cycleStart = performance.now();
+      cycleStart=performance.now();
     }
-    function check() {
-      var splash = document.getElementById('splash');
-      if (!splash) return;
-      var elapsed = performance.now() - cycleStart;
-      var animDone = elapsed >= ANIM_DUR;
-      if (window._sceneReady && animDone) {
-        // Snap SVG to actual rendered cube position before fading
-        if (window._cubeScreenVerts && !splash._snapped) {
-          splash._snapped = true;
-          var cv = window._cubeScreenVerts;
-          var cvs = cv.slice().sort(function(a,b){return a.y-b.y;});
-          // Top 4 by y, bottom 4 by y
-          var top4 = cvs.slice(0,4).sort(function(a,b){return a.x-b.x;});
-          var bot4 = cvs.slice(4).sort(function(a,b){return a.x-b.x;});
-          var rv = {
-            tBack:cvs[0], tLeft:top4[0], tRight:top4[3], tFront:cvs[3],
-            bBack:cvs[4], bLeft:bot4[0], bRight:bot4[3], bFront:cvs[7]
-          };
-          var newEdges = [
-            'M'+rv.tLeft.x.toFixed(1)+','+rv.tLeft.y.toFixed(1)+' L'+rv.tBack.x.toFixed(1)+','+rv.tBack.y.toFixed(1)+' L'+rv.tRight.x.toFixed(1)+','+rv.tRight.y.toFixed(1)+' L'+rv.tFront.x.toFixed(1)+','+rv.tFront.y.toFixed(1)+' Z',
-            'M'+rv.bLeft.x.toFixed(1)+','+rv.bLeft.y.toFixed(1)+' L'+rv.bFront.x.toFixed(1)+','+rv.bFront.y.toFixed(1)+' L'+rv.bRight.x.toFixed(1)+','+rv.bRight.y.toFixed(1),
-            'M'+rv.tFront.x.toFixed(1)+','+rv.tFront.y.toFixed(1)+' L'+rv.bFront.x.toFixed(1)+','+rv.bFront.y.toFixed(1),
-            'M'+rv.bLeft.x.toFixed(1)+','+rv.bLeft.y.toFixed(1)+' L'+rv.tLeft.x.toFixed(1)+','+rv.tLeft.y.toFixed(1)+' L'+rv.tBack.x.toFixed(1)+','+rv.tBack.y.toFixed(1),
-            'M'+rv.bRight.x.toFixed(1)+','+rv.bRight.y.toFixed(1)+' L'+rv.tRight.x.toFixed(1)+','+rv.tRight.y.toFixed(1)+' L'+rv.tBack.x.toFixed(1)+','+rv.tBack.y.toFixed(1)
-          ];
-          var svgPaths = svg.querySelectorAll('path');
-          for (var si = 0; si < Math.min(svgPaths.length, newEdges.length); si++) {
-            svgPaths[si].setAttribute('d', newEdges[si]);
-          }
-          // Update viewBox to match actual canvas dimensions
-          var cW = document.querySelector('canvas');
-          if (cW) { svg.setAttribute('viewBox','0 0 '+cW.width/window.devicePixelRatio+' '+cW.height/window.devicePixelRatio); }
-        }
+    function check(){
+      if(!splash||!document.getElementById('splash')) return;
+      tryCorrect();
+      var elapsed=performance.now()-cycleStart;
+      var animDone=elapsed>=ANIM_DUR;
+      if(window._sceneReady && animDone){
         setTimeout(function(){
-          splash.style.opacity = '0';
-          setTimeout(function(){ splash.remove(); }, 1400);
+          splash.style.opacity='0';
+          setTimeout(function(){ splash.remove(); },1400);
         }, HOLD);
         return;
       }
-      if (!window._sceneReady && elapsed >= ANIM_DUR + HOLD) {
-        resetAnim();
-      }
+      if(!window._sceneReady && elapsed>=ANIM_DUR+HOLD){ resetAnim(); }
       requestAnimationFrame(check);
     }
     requestAnimationFrame(check);
@@ -3481,7 +3443,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=306';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=307';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
