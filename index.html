@@ -1671,7 +1671,7 @@ const revealObs=new IntersectionObserver((entries)=>{
 // Set _isRamadan early so countdowns use it from the first tick
 try{
   const _hFmt=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{month:'long'});
-  const _hMonth=_hFmt.formatToParts(new Date()).find(p=>p.type==='month')?.value||'';
+  const _hMonth=_hFmt.formatToParts(typeof _cityNow==='function'?_cityNow():new Date()).find(p=>p.type==='month')?.value||'';
   window._isRamadan=/ramadan/i.test(_hMonth);
 }catch(e){}
 
@@ -2050,7 +2050,7 @@ let _fsClockTimer = null;
 function fsUpdateDateTime() {
   const el = document.getElementById('fsDateTime');
   if(!el) return;
-  const now = new Date();
+  const now = typeof _cityNow==='function'?_cityNow():new Date();
   const date = now.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric', year:'numeric'});
   const time = now.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit', hour12:true});
   el.textContent = `${date} · ${time}`;
@@ -2060,13 +2060,14 @@ function getHijriDate() {
   // Use Intl.DateTimeFormat with islamic-umalqura calendar
   try {
     const fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {day:'numeric',month:'long',year:'numeric'});
-    const parts = fmt.formatToParts(new Date());
+    const _cn = typeof _cityNow==='function'?_cityNow():new Date();
+    const parts = fmt.formatToParts(_cn);
     const day = parts.find(p=>p.type==='day')?.value || '';
     const month = parts.find(p=>p.type==='month')?.value || '';
     const year = parts.find(p=>p.type==='year')?.value || '';
     // Also get Arabic month name
     const fmtAr = new Intl.DateTimeFormat('ar-u-ca-islamic-umalqura', {month:'long'});
-    const monthAr = fmtAr.format(new Date());
+    const monthAr = fmtAr.format(_cn);
     return { day, month, year, monthAr };
   } catch(e) { return null; }
 }
@@ -2088,7 +2089,7 @@ function fsStopClock() {
 function _computePrayerTimes(lat, lon) {
   const coords = new adhan.Coordinates(lat, lon);
   const params = adhan.CalculationMethod.NorthAmerica();
-  const date = new Date();
+  const date = typeof _cityNow==='function'?_cityNow():new Date();
   const pt = new adhan.PrayerTimes(coords, date, params);
   const sunnah = new adhan.SunnahTimes(pt);
   const fmt = d => {
@@ -3290,7 +3291,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=287';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=288';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

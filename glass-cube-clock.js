@@ -1480,7 +1480,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     var _fsecFloat = (_fminFloat - _fmi) * 60;
     var _fsec = Math.floor(_fsecFloat);
     var _fms = Math.floor((_fsecFloat - _fsec) * 1000);
-    now = new Date();
+    now = (typeof window._cityNow === 'function') ? window._cityNow() : new Date();
     now.setHours(_fh, _fmi, _fsec, _fms);
   } else if (typeof _swipeTimeOverride === 'number' && _swipeTimeOverride !== null) {
     // Lerp toward target for smooth hand travel between prayers
@@ -1493,7 +1493,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
       if (Math.abs(_swStep) < 0.3) _swipeTimeOverride = _swipeTimeTarget;
       else _swipeTimeOverride = (_swipeTimeOverride + _swStep + 1440) % 1440;
     }
-    now = new Date();
+    now = (typeof window._cityNow === 'function') ? window._cityNow() : new Date();
     var _swH = Math.floor(_swipeTimeOverride / 60);
     var _swM = Math.floor(_swipeTimeOverride % 60);
     now.setHours(_swH, _swM, 0, 0); // freeze seconds at 0 during preview
@@ -2935,7 +2935,7 @@ function _getDevNow() {
     d.setHours(hrs, mins, secs, ms);
     return d;
   }
-  return new Date();
+  return (typeof window._cityNow === 'function') ? window._cityNow() : new Date();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3157,7 +3157,7 @@ function _swipeGetCurrentIdx() {
   // Find which prayer is currently active (live)
   var T = window._prayerTimings;
   if (!T) return 0;
-  var now = new Date();
+  var now = (typeof window._cityNow === 'function') ? window._cityNow() : new Date();
   var nowMin = now.getHours() * 60 + now.getMinutes();
   for (var i = 0; i < prayerSectors.length; i++) {
     var s = prayerSectors[i].startMin, e = prayerSectors[i].endMin;
