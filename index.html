@@ -674,7 +674,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </style>
   <div id="splashBismillah" style="position:absolute;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;pointer-events:none;z-index:3;opacity:1;padding:0 clamp(14px,4vw,34px);">
     <div style="font-family:var(--font);font-size:clamp(.75rem,1.6vmin,1.5rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);text-align:center;line-height:1.35;animation:splashTextIn .55s cubic-bezier(.2,.7,.2,1) .20s both">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
-    <div style="font-family:var(--font);font-size:clamp(.65rem,1.3vmin,1.2rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.55);animation:splashTextIn .55s cubic-bezier(.2,.7,.2,1) .32s both">In the name of Allah, the Most Gracious, the Most Merciful</div>
+    <div style="font-family:var(--font);font-size:clamp(.65rem,1.3vmin,1.2rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.55);animation:splashTextIn .55s cubic-bezier(.2,.7,.2,1) .62s both">In the name of Allah, the Most Gracious, the Most Merciful</div>
     <div style="margin-top:6px;font-family:var(--font);font-size:clamp(.72rem,1.45vmin,1.2rem);font-weight:300;letter-spacing:.04em;color:rgba(232,228,220,.62);text-align:center;line-height:1.45;animation:splashTextIn .6s cubic-bezier(.2,.7,.2,1) .68s both">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًا مَّوْقُوتًا</div>
     <div style="font-family:var(--font);font-size:clamp(.58rem,1.15vmin,1rem);font-weight:300;letter-spacing:.05em;color:rgba(232,228,220,.5);text-align:center;line-height:1.5;animation:splashTextIn .6s cubic-bezier(.2,.7,.2,1) .84s both">“Indeed, prayer has been decreed upon the believers at specified times.”</div>
     <div style="font-family:var(--font);font-size:clamp(.56rem,1.05vmin,.92rem);font-weight:300;letter-spacing:.1em;color:rgba(232,228,220,.42);text-align:center;text-transform:uppercase;animation:splashTextIn .6s cubic-bezier(.2,.7,.2,1) .98s both">An-Nisa 4:103</div>
@@ -733,11 +733,15 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       (hands||[]).forEach(function(h,i){
         if(i===2) return;
         if(!h||!h.from||!h.to) return;
+        var x0=h.from[0], y0=h.from[1], x1=h.to[0], y1=h.to[1];
+        // Suppress off-screen artifacts while splash/ray telemetry is still stabilizing
+        var inView=function(x,y){ return x>=0&&x<=window.innerWidth&&y>=0&&y<=window.innerHeight; };
+        if(!inView(x0,y0) || !inView(x1,y1)) return;
         paths.push({
-          d:'M'+h.from[0].toFixed(1)+','+h.from[1].toFixed(1)+' L'+h.to[0].toFixed(1)+','+h.to[1].toFixed(1),
+          d:'M'+x0.toFixed(1)+','+y0.toFixed(1)+' L'+x1.toFixed(1)+','+y1.toFixed(1),
           stroke:h.color||'#ffffff',
           dash:'250',
-          delay:(1.18 + i*0.22).toFixed(2)+'s'
+          delay:(1.26 + i*0.24).toFixed(2)+'s'
         });
       });
       return paths;
@@ -3680,7 +3684,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=324';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=325';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
