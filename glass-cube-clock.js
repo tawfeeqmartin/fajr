@@ -1895,19 +1895,20 @@ document.addEventListener('visibilitychange', function() {
   if (!window._sceneReady) {
     window._sceneReady = true;
     window._sceneReadyAt = performance.now();
-    // Expose projected cube vertices for splash alignment
-    try {
-      var _cv = [];
-      var _cg = cubeMesh.geometry.attributes.position;
-      var _seen = {};
-      for (var _ci = 0; _ci < _cg.count; _ci++) {
-        var _v3 = new THREE.Vector3(_cg.getX(_ci), _cg.getY(_ci), _cg.getZ(_ci));
-        cubeMesh.localToWorld(_v3);
-        var _ck = _v3.x.toFixed(3)+','+_v3.y.toFixed(3)+','+_v3.z.toFixed(3);
-        if (!_seen[_ck]) { _seen[_ck] = true; _v3.project(camera); _cv.push({x:(_v3.x+1)/2*W, y:(1-_v3.y)/2*H}); }
-      }
-      window._cubeScreenVerts = _cv;
-    } catch(e) {}
+    // Expose projected cube corners (same math as splash — fixed camera preset)
+    var _cpx=0.2, _cpy=9.7, _cpz=15.0, _tanH=Math.tan(35*Math.PI/360), _asp=W/H;
+    var _dx=-0.2/17.8, _dy=-10.5/17.8, _dz=-14/17.8; // normalized(lookAt - camPos)
+    var _dl=Math.sqrt(_dx*_dx+_dy*_dy+_dz*_dz); _dx/=_dl;_dy/=_dl;_dz/=_dl;
+    var _rx=-_dz,_ry=0,_rz=_dx,_rl=Math.sqrt(_rx*_rx+_rz*_rz);_rx/=_rl;_rz/=_rl;
+    var _ux=_ry*_dz-_rz*_dy,_uy=_rz*_dx-_rx*_dz,_uz=_rx*_dy-_ry*_dx;
+    var _cv=[],_hf=0.6; scene.updateMatrixWorld(true);
+    for(var _xi=-1;_xi<=1;_xi+=2)for(var _yi=-1;_yi<=1;_yi+=2)for(var _zi=-1;_zi<=1;_zi+=2){
+      var _v=new THREE.Vector3(_xi*_hf,_yi*_hf,_zi*_hf);_v.applyMatrix4(cubeMesh.matrixWorld);
+      var _ex=_v.x-_cpx,_ey=_v.y-_cpy,_ez=_v.z-_cpz;
+      var _cz=_ex*_dx+_ey*_dy+_ez*_dz,_cx=_ex*_rx+_ey*_ry+_ez*_rz,_cy=_ex*_ux+_ey*_uy+_ez*_uz;
+      _cv.push({x:(_cx/(_cz*_tanH*_asp)+1)/2*W,y:(1-_cy/(_cz*_tanH))/2*H});
+    }
+    window._cubeScreenVerts = _cv;
   }
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
