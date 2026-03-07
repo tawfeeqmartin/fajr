@@ -1498,7 +1498,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     var _swM = Math.floor(_swipeTimeOverride % 60);
     now.setHours(_swH, _swM, 0, 0); // freeze seconds at 0 during preview
   } else {
-    now = new Date();
+    now = (typeof window._cityNow === 'function') ? window._cityNow() : new Date();
   }
 
   // Immediate UI sync while swiping: avoids one-tick header/countdown bounce at boundaries.

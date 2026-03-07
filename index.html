@@ -623,6 +623,16 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
   display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1;
   pointer-events:none;transition:opacity .5s ease;
 }
+.fs-city-time{
+  position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(.6rem,1.5vmin,1rem));
+  left:50%;transform:translateX(-50%);z-index:210;
+  font-family:var(--font);font-size:clamp(.8rem,2vw,1rem);font-weight:300;
+  letter-spacing:.06em;color:rgba(232,228,220,.65);
+  pointer-events:none;transition:opacity .5s ease;
+  font-variant-numeric:tabular-nums;
+}
+body.chrome-hidden .fs-city-time{opacity:0!important;pointer-events:none}
+body.mode-info .fs-city-time{opacity:0!important;pointer-events:none}
 .fs-countdown{
   position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(.6rem,1.5vmin,1rem));
   right:clamp(1rem,3vmin,1.5rem);z-index:210;
@@ -658,6 +668,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
   <span id="fsCityName" class="nav-city-name">—</span>
 </div>
+<div id="fsCityTime" class="fs-city-time"></div>
 <div id="fsCountdown" class="fs-countdown"></div>
 <div id="fsHeader" class="fs-header">
   <div class="fs-datetime" id="fsDateTime"></div>
@@ -1685,6 +1696,10 @@ function startNavClock(){
   _navClockTimer=setInterval(updateNavClock,1000);
 }
 function updateNavClock(){
+  // Update sticky city time
+  var _ctEl = document.getElementById('fsCityTime');
+  if (_ctEl) _ctEl.textContent = _cityTimeStr();
+
   const t=window._prayerTimings;
   if(!t)return;
   const now=new Date();
@@ -2212,24 +2227,65 @@ let _prayerLocationResolved = false;
 // ── Location Picker ──
 const LOC_CITIES = [
   // The Three Sacred Mosques
-  { name: 'Makkah, Saudi Arabia',    sub: 'Masjid al-Haram',      lat: 21.4225, lon: 39.8262 },
-  { name: 'Madinah, Saudi Arabia',   sub: 'Al-Masjid an-Nabawi',  lat: 24.4672, lon: 39.6024 },
-  { name: 'Jerusalem, Palestine',    sub: 'Al-Aqsa Mosque',       lat: 31.7781, lon: 35.2354 },
+  { name: 'Makkah, Saudi Arabia',    sub: 'Masjid al-Haram',      lat: 21.4225, lon: 39.8262, tz: 'Asia/Riyadh' },
+  { name: 'Madinah, Saudi Arabia',   sub: 'Al-Masjid an-Nabawi',  lat: 24.4672, lon: 39.6024, tz: 'Asia/Riyadh' },
+  { name: 'Jerusalem, Palestine',    sub: 'Al-Aqsa Mosque',       lat: 31.7781, lon: 35.2354, tz: 'Asia/Jerusalem' },
   // Major Muslim cities
-  { name: 'Istanbul, Turkey',        sub: null, lat: 41.0082, lon: 28.9784 },
-  { name: 'Cairo, Egypt',            sub: null, lat: 30.0444, lon: 31.2357 },
-  { name: 'Dubai, UAE',              sub: null, lat: 25.2048, lon: 55.2708 },
-  { name: 'Riyadh, Saudi Arabia',    sub: null, lat: 24.7136, lon: 46.6753 },
-  { name: 'Jakarta, Indonesia',      sub: null, lat: -6.2088, lon: 106.8456 },
-  { name: 'Kuala Lumpur, Malaysia',   sub: null, lat: 3.1390, lon: 101.6869 },
-  { name: 'Karachi, Pakistan',       sub: null, lat: 24.8607, lon: 67.0011 },
-  { name: 'Dhaka, Bangladesh',       sub: null, lat: 23.8103, lon: 90.4125 },
-  { name: 'London, UK',              sub: null, lat: 51.5074, lon: -0.1278 },
-  { name: 'Paris, France',           sub: null, lat: 48.8566, lon: 2.3522 },
-  { name: 'New York, USA',           sub: null, lat: 40.7128, lon: -74.0060 },
-  { name: 'Los Angeles, USA',        sub: null, lat: 34.0522, lon: -118.2437 },
-  { name: 'Toronto, Canada',         sub: null, lat: 43.6532, lon: -79.3832 },
+  { name: 'Istanbul, Turkey',        sub: null, lat: 41.0082, lon: 28.9784, tz: 'Europe/Istanbul' },
+  { name: 'Cairo, Egypt',            sub: null, lat: 30.0444, lon: 31.2357, tz: 'Africa/Cairo' },
+  { name: 'Dubai, UAE',              sub: null, lat: 25.2048, lon: 55.2708, tz: 'Asia/Dubai' },
+  { name: 'Riyadh, Saudi Arabia',    sub: null, lat: 24.7136, lon: 46.6753, tz: 'Asia/Riyadh' },
+  { name: 'Jakarta, Indonesia',      sub: null, lat: -6.2088, lon: 106.8456, tz: 'Asia/Jakarta' },
+  { name: 'Kuala Lumpur, Malaysia',   sub: null, lat: 3.1390, lon: 101.6869, tz: 'Asia/Kuala_Lumpur' },
+  { name: 'Karachi, Pakistan',       sub: null, lat: 24.8607, lon: 67.0011, tz: 'Asia/Karachi' },
+  { name: 'Dhaka, Bangladesh',       sub: null, lat: 23.8103, lon: 90.4125, tz: 'Asia/Dhaka' },
+  { name: 'London, UK',              sub: null, lat: 51.5074, lon: -0.1278, tz: 'Europe/London' },
+  { name: 'Paris, France',           sub: null, lat: 48.8566, lon: 2.3522, tz: 'Europe/Paris' },
+  { name: 'New York, USA',           sub: null, lat: 40.7128, lon: -74.0060, tz: 'America/New_York' },
+  { name: 'Los Angeles, USA',        sub: null, lat: 34.0522, lon: -118.2437, tz: 'America/Los_Angeles' },
+  { name: 'Toronto, Canada',         sub: null, lat: 43.6532, lon: -79.3832, tz: 'America/Toronto' },
 ];
+
+// ── City timezone & immersion clock ──
+// When a city is selected, _cityTz holds its IANA timezone string.
+// _cityNow() returns a Date adjusted to the selected city's local time.
+// If no city tz is set (or it matches device tz), returns normal Date.
+var _cityTz = null; // IANA timezone string e.g. 'Asia/Riyadh'
+
+function _cityNow() {
+  var d = new Date();
+  if (!_cityTz) return d;
+  // Use Intl to get the city's local time components
+  try {
+    var parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: _cityTz, hour12: false,
+      year:'numeric', month:'numeric', day:'numeric',
+      hour:'numeric', minute:'numeric', second:'numeric',
+      fractionalSecondDigits: 3
+    }).formatToParts(d);
+    var p = {};
+    parts.forEach(function(x){ p[x.type] = x.value; });
+    // Build a date in city's local time (use UTC setters to avoid device tz interference)
+    var cd = new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour === 24 ? 0 : +p.hour, +p.minute, +p.second, +(p.fractionalSecond || 0)));
+    return cd;
+  } catch(e) {
+    return d; // fallback to device time
+  }
+}
+
+window._cityNow = _cityNow; // expose to glass-cube-clock.js
+
+function _cityTimeStr() {
+  var d = new Date();
+  if (!_cityTz) {
+    return d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', hour12:true });
+  }
+  try {
+    return d.toLocaleTimeString('en-US', { timeZone: _cityTz, hour:'numeric', minute:'2-digit', hour12:true });
+  } catch(e) {
+    return d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', hour12:true });
+  }
+}
 
 let _locSelectedCity = null;
 
@@ -2276,7 +2332,8 @@ function _geocodeSearch(q) {
         name: r.name + (r.admin1 ? ', ' + r.admin1 : '') + (r.country ? ', ' + r.country : ''),
         sub: null,
         lat: r.latitude,
-        lon: r.longitude
+        lon: r.longitude,
+        tz: r.timezone || null
       }));
       // Re-render with new results
       const inp = document.getElementById('locSearchInput');
@@ -2322,6 +2379,7 @@ function closeLocationPicker() {
   // Apply selected city
   if (_locSelectedCity) {
     adhanQiblaAngle = null; // reset so it recomputes for new location
+    _cityTz = _locSelectedCity.tz || null;
     _setPrayerLocation(_locSelectedCity.lat, _locSelectedCity.lon, _locSelectedCity.name);
   }
 }
@@ -2329,8 +2387,9 @@ function closeLocationPicker() {
 function locUseGPS() {
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
-    _locSelectedCity = null; // clear selection so closeLocationPicker doesn't override GPS
+    _locSelectedCity = null;
     adhanQiblaAngle = null;
+    _cityTz = null; // device timezone = no offset needed
     _setPrayerLocation(pos.coords.latitude, pos.coords.longitude);
     closeLocationPicker();
   }, () => {}, { maximumAge: 0, timeout: 10000 });
@@ -2366,7 +2425,7 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
   _userLatDeg = lat; _userLonDeg = lon;
   // Persist preferred location
   if (!_skipSave) {
-    try { localStorage.setItem('agot_loc', JSON.stringify({lat:lat,lon:lon,name:locationName||''})); } catch(e){}
+    try { localStorage.setItem('agot_loc', JSON.stringify({lat:lat,lon:lon,name:locationName||'',tz:_cityTz||''})); } catch(e){}
   }
   _updateCompassDist(); // refresh distance when location changes
   // Compute times instantly via adhan-js
@@ -2411,6 +2470,7 @@ async function fsFetchPrayer() {
     if (_saved) {
       var _loc = JSON.parse(_saved);
       if (_loc.lat && _loc.lon) {
+        _cityTz = _loc.tz || null; // restore saved timezone
         _setPrayerLocation(_loc.lat, _loc.lon, _loc.name || '', true);
         return; // skip GPS/IP — user chose this city
       }
@@ -3216,7 +3276,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=276';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=277';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
