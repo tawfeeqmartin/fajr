@@ -79,8 +79,8 @@ const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 // FOV 35° on both — telephoto/rectilinear, minimal perspective distortion.
 // Elevation angle matched: both cameras sit ~33° above cube so top face reads properly.
 // Landing was too low (29°) making cube look flat — raised y to match fullscreen proportion.
-const CAM_LANDING    = { pos: [0.2, 9.7, 15.0], fov: 35, look: [0, -0.6, 1.0] };
-const CAM_FULLSCREEN = { pos: [0.2, 9.7, 15.0], fov: 35, look: [0, -0.6, 1.0] };
+const CAM_LANDING    = { pos: [0.2, 9.7, 15.0], fov: 35, look: [0, -0.8, 1.0] };
+const CAM_FULLSCREEN = { pos: [0.2, 9.7, 15.0], fov: 35, look: [0, -0.8, 1.0] };
 
 function applyCamera(preset) {
   camera.position.set(...preset.pos);
@@ -1780,13 +1780,13 @@ document.addEventListener('visibilitychange', function() {
   if (Math.abs(_swipeCamVel) < 0.00005 && Math.abs(_swipeCamAngle - _swipeCamTarget) < 0.0001) {
     _swipeCamAngle = _swipeCamTarget; _swipeCamVel = 0;
   }
-  // Orbit camera around lookAt pivot (0, -0.6, 1.0)
+  // Orbit camera around lookAt pivot (0, -0.8, 1.0)
   var _pivotX = 0, _pivotZ = 1.0;
   var _relX = 0.2 - _pivotX, _relZ = 15.0 - _pivotZ; // base camera relative to pivot
   var _cosA = Math.cos(_swipeCamAngle), _sinA = Math.sin(_swipeCamAngle);
   camera.position.x = _pivotX + _relX * _cosA - _relZ * _sinA;
   camera.position.z = _pivotZ + _relX * _sinA + _relZ * _cosA;
-  camera.lookAt(0, -0.6, 1.0);
+  camera.lookAt(0, -0.8, 1.0);
 
   cubeMat.uniforms.uCamWorldPos.value.copy(camera.position);
 
@@ -1897,7 +1897,7 @@ document.addEventListener('visibilitychange', function() {
     window._sceneReadyAt = performance.now();
     // Expose projected cube corners (same math as splash — fixed camera preset)
     var _cpx=0.2, _cpy=9.7, _cpz=15.0, _tanH=Math.tan(35*Math.PI/360), _asp=W/H;
-    var _dx=-0.2/17.8, _dy=-10.3/17.8, _dz=-14/17.8; // normalized(lookAt - camPos)
+    var _dx=-0.2/17.8, _dy=-10.5/17.8, _dz=-14/17.8; // normalized(lookAt - camPos)
     var _dl=Math.sqrt(_dx*_dx+_dy*_dy+_dz*_dz); _dx/=_dl;_dy/=_dl;_dz/=_dl;
     var _rx=-_dz,_ry=0,_rz=_dx,_rl=Math.sqrt(_rx*_rx+_rz*_rz);_rx/=_rl;_rz/=_rl;
     var _ux=_ry*_dz-_rz*_dy,_uy=_rz*_dx-_rx*_dz,_uz=_rx*_dy-_ry*_dx;
@@ -1906,9 +1906,17 @@ document.addEventListener('visibilitychange', function() {
       var _v=new THREE.Vector3(_xi*_hf,_yi*_hf,_zi*_hf);_v.applyMatrix4(cubeMesh.matrixWorld);
       var _ex=_v.x-_cpx,_ey=_v.y-_cpy,_ez=_v.z-_cpz;
       var _cz=_ex*_dx+_ey*_dy+_ez*_dz,_cx=_ex*_rx+_ey*_ry+_ez*_rz,_cy=_ex*_ux+_ey*_uy+_ez*_uz;
-      _cv.push({x:(_cx/(_cz*_tanH*_asp)+1)/2*W,y:(1-_cy/(_cz*_tanH))/2*H});
+      _cv.push({x:(_cx/(_cz*_tanH*_asp)+1)/2*W,y:(1-_cy/(_cz*_tanH))/2*H,ly:_yi});
     }
     window._cubeScreenVerts = _cv;
+    var _top=_cv.filter(function(v){return v.ly>0;}).sort(function(a,b){return a.y-b.y;});
+    var _bot=_cv.filter(function(v){return v.ly<0;}).sort(function(a,b){return a.y-b.y;});
+    if(_top.length===4&&_bot.length===4){
+      window._cubeScreenNamed={
+        tBack:[_top[0].x,_top[0].y], tLeft:[_top[1].x,_top[1].y], tRight:[_top[2].x,_top[2].y], tFront:[_top[3].x,_top[3].y],
+        bBack:[_bot[0].x,_bot[0].y], bLeft:[_bot[1].x,_bot[1].y], bRight:[_bot[2].x,_bot[2].y], bFront:[_bot[3].x,_bot[3].y]
+      };
+    }
   }
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────

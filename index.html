@@ -674,7 +674,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   <script>
   (function(){
     // Camera params (MUST match glass-cube-clock.js exactly)
-    var camPos=[0.2,9.7,15.0], fov=35, lookAt=[0,-0.6,1.0];
+    var camPos=[0.2,9.7,15.0], fov=35, lookAt=[0,-0.8,1.0];
     var CUBE_Y=0.57, half=0.6, rot=Math.PI/4;
     var cosR=Math.cos(rot), sinR=Math.sin(rot);
     var localV=[], worldV=[];
@@ -719,12 +719,12 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     var splash=document.getElementById('splash');
     var svg=null;
 
-    function buildSVG(w,h){
+    function buildSVG(w,h,overrideVerts){
       if(svg) svg.remove();
       // Size splash + SVG to exact pixel dimensions — no CSS viewport units
       splash.style.width=w+'px';
       splash.style.height=h+'px';
-      var v=getVerts(w,h);
+      var v=overrideVerts||getVerts(w,h);
       svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
       svg.setAttribute('style','position:absolute;top:0;left:0;width:'+w+'px;height:'+h+'px');
       svg.setAttribute('viewBox','0 0 '+w+' '+h);
@@ -752,20 +752,29 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 
     // Poll for canvas element — when it exists, measure its ACTUAL rendered size
     // This is the ground truth: whatever the canvas occupies, the SVG must match
-    var _corrected=false;
+    var _corrected=false, _usedRendererVerts=false;
     function tryCorrect(){
-      if(_corrected) return;
       var c=document.querySelector('canvas');
       if(!c) return;
       var r=c.getBoundingClientRect();
       if(r.width<1||r.height<1) return;
       var cw=Math.round(r.width), ch=Math.round(r.height);
-      _corrected=true;
       // Always align splash origin to actual canvas rect (even when size matches)
       splash.style.top=Math.round(r.top)+'px';
       splash.style.left=Math.round(r.left)+'px';
-      if(cw!==initW||ch!==initH){
+
+      // Prefer ground-truth projection from the renderer when available.
+      // This removes drift from duplicated camera math in HTML.
+      if(window._cubeScreenNamed && !_usedRendererVerts){
+        buildSVG(cw, ch, window._cubeScreenNamed);
+        _usedRendererVerts=true;
+        _corrected=true;
+        return;
+      }
+
+      if(!_corrected && (cw!==initW||ch!==initH)){
         buildSVG(cw, ch);
+        _corrected=true;
       }
     }
 
