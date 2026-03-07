@@ -323,8 +323,8 @@ scene.add(solarKey, solarKey.target);
 const plinthSun = new THREE.SpotLight(0xffffff, 0);
 plinthSun.position.set(0, 3.2, -2.8);
 plinthSun.target.position.set(0, -0.03, -2.8);
-plinthSun.angle = 0.28;
-plinthSun.penumbra = 0.65;
+plinthSun.angle = 0.38;
+plinthSun.penumbra = 0.60;
 plinthSun.decay = 1.0;
 plinthSun.distance = 8.0;
 window.plinthSun = plinthSun;
@@ -1736,8 +1736,9 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   var _orbitR = 1.08; // between cube edge (~0.85) and plinth edge (~1.32)
   var _ox = Math.sin(_hourAng) * _orbitR;
   var _oz = -Math.cos(_hourAng) * _orbitR;
-  plinthSun.position.set(_ox, 3.35 + _sunLift * 0.45, _oz);
-  plinthSun.target.position.set(_ox, -0.03, _oz);
+  // Position high and slightly outward so cone covers both cube top and plinth ring
+  plinthSun.position.set(_ox * 1.6, 4.5 + _sunLift * 1.0, _oz * 1.6);
+  plinthSun.target.position.set(_ox * 0.5, 0.3, _oz * 0.5);
   // Sunrise→Dhuha hue lock, then noon cool, then warm sunset.
   var _dhuhaSun = new THREE.Color(0xff9900);
   var _sunColor = _dayPhase < 0.25
