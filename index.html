@@ -761,11 +761,11 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       if(r.width<1||r.height<1) return;
       var cw=Math.round(r.width), ch=Math.round(r.height);
       _corrected=true;
+      // Always align splash origin to actual canvas rect (even when size matches)
+      splash.style.top=Math.round(r.top)+'px';
+      splash.style.left=Math.round(r.left)+'px';
       if(cw!==initW||ch!==initH){
         buildSVG(cw, ch);
-        // Also reposition splash to match canvas position
-        splash.style.top=Math.round(r.top)+'px';
-        splash.style.left=Math.round(r.left)+'px';
       }
     }
 
