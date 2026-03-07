@@ -1455,8 +1455,15 @@ const _themeBuf = new Uint8Array(4);
 const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
 var _targetFPS = 30;
+var _idleFPS = 15;
 var _frameInterval = 1000 / _targetFPS;
 var _lastFrameTime = 0;
+
+// Page Visibility: drop to 15fps when hidden, restore on visible
+document.addEventListener('visibilitychange', function() {
+  var fps = document.hidden ? _idleFPS : _targetFPS;
+  _frameInterval = 1000 / fps;
+});
 
 (function loop(timestamp) {
   requestAnimationFrame(loop);
