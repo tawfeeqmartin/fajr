@@ -644,6 +644,9 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 .fs-countdown{
   position:absolute;right:clamp(1rem,3vmin,1.5rem);bottom:0;
   text-align:right;line-height:1;font-family:var(--font);
+  pointer-events:auto;cursor:pointer;user-select:none;
+  padding:10px 12px; margin:-10px -12px; /* larger tap target */
+  min-width:120px;
 }
 .fs-countdown .nav-label{font-size:clamp(.5rem,1.2vw,.55rem);font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.4);line-height:1;margin-bottom:3px}
 .fs-countdown .nav-time{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);line-height:1;font-variant-numeric:tabular-nums}
@@ -2074,21 +2077,23 @@ try{
 // ── Nav bar live clock + next prayer ──
 let _navClockTimer=null;
 window._countdownPref = window._countdownPref || 'auto'; // 'auto' | 'iftar' | 'next'
+function _cycleCountdownPref(){
+  if (window._countdownPref === 'auto') window._countdownPref = 'iftar';
+  else if (window._countdownPref === 'iftar') window._countdownPref = 'next';
+  else window._countdownPref = 'auto';
+  updateNavClock();
+}
+if(!window._countdownToggleBound){
+  document.addEventListener('click', function(e){
+    var el = e.target && e.target.closest ? e.target.closest('#fsCountdown') : null;
+    if(!el) return;
+    e.stopPropagation();
+    _cycleCountdownPref();
+  });
+  window._countdownToggleBound = true;
+}
 function startNavClock(){
   if(_navClockTimer)return;
-  const fsC=document.getElementById('fsCountdown');
-  if(fsC && !fsC._toggleBound){
-    fsC.style.pointerEvents='auto';
-    fsC.addEventListener('click', function(e){
-      e.stopPropagation();
-      // cycle override: auto -> iftar -> next -> auto
-      if (window._countdownPref === 'auto') window._countdownPref = 'iftar';
-      else if (window._countdownPref === 'iftar') window._countdownPref = 'next';
-      else window._countdownPref = 'auto';
-      updateNavClock();
-    });
-    fsC._toggleBound = true;
-  }
   updateNavClock();
   _navClockTimer=setInterval(updateNavClock,1000);
 }
@@ -3687,7 +3692,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=330';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=331';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
