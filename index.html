@@ -1656,7 +1656,7 @@ const revealObs=new IntersectionObserver((entries)=>{
     clearInterval(_waitPT);
     const t=window._prayerTimings;
     const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
-    const now=new Date();const nowM=now.getHours()*60+now.getMinutes();
+    const now=typeof _cityNow==='function'?_cityNow():new Date();const nowM=now.getHours()*60+now.getMinutes();
     const toMin=s=>{const[h,m]=s.split(':').map(Number);return h*60+m;};
     let nextP='';t5.forEach(p=>{if(!nextP&&toMin(t[p])>nowM)nextP=p;});
     const pcEl=document.getElementById('pcTimes');
@@ -1703,11 +1703,11 @@ function updateNavClock(){
 
   const t=window._prayerTimings;
   if(!t)return;
-  const now=new Date();
+  const now=typeof _cityNow==='function'?_cityNow():new Date();
   const toSec=s=>{const[hh,mm]=String(s||'0:0').split(':').map(Number);return (hh||0)*3600+(mm||0)*60;};
   const _normMin=m=>((Math.floor(m)%1440)+1440)%1440;
 
-  // Actual current time (always used for countdown math).
+  // Actual current time in city timezone (used for countdown math).
   const actualNowS=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
   const actualNowM=Math.floor(actualNowS/60)%1440;
 
@@ -2116,7 +2116,7 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
     Maghrib:'#ff2200',
     Isha:'#1166ff'
   };
-  const now = new Date();
+  const now = typeof _cityNow==='function'?_cityNow():new Date();
   const nowM = (typeof _overrideNowM === 'number') ? _overrideNowM : (now.getHours()*60+now.getMinutes());
   const toM = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
   // Find current active prayer window — matches beam sectors exactly
@@ -3290,7 +3290,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=286';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=287';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
