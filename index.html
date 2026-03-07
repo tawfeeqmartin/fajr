@@ -1108,13 +1108,34 @@ function playDialSurah(){
 function setNightMode(on){ pageNight=true; }
 // Tap to toggle chrome visibility in fullscreen (click = tap without drag)
 var _chromeSwipeGuard = false;
+var _chromeAutoHideMs = 4000;
+var _chromeTimer = null;
+function _showChrome() {
+  document.body.classList.remove('chrome-hidden');
+  _resetChromeTimer();
+}
+function _hideChrome() {
+  if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
+  document.body.classList.add('chrome-hidden');
+}
+function _resetChromeTimer() {
+  clearTimeout(_chromeTimer);
+  if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
+  _chromeTimer = setTimeout(_hideChrome, _chromeAutoHideMs);
+}
+// Auto-hide on load after 4s
+document.addEventListener('DOMContentLoaded', function(){ _resetChromeTimer(); });
+
 document.addEventListener('click',function(e){
-  // Skip if a prayer swipe just happened
   if(_chromeSwipeGuard) return;
-  // Only toggle chrome in clock or compass modes
   if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
   if(e.target.closest('button,a,.fs-dial-bar,.fs-dial-picker,.mode-pill,.clock-onboard,.fs-countdown'))return;
-  document.body.classList.toggle('chrome-hidden');
+  if(document.body.classList.contains('chrome-hidden')) {
+    _showChrome();
+  } else {
+    _hideChrome();
+    clearTimeout(_chromeTimer);
+  }
 });
 
 // ══════════════════════════════════════════
@@ -2599,16 +2620,17 @@ function switchMode(mode) {
     closeClockFullscreen();
     openClockFullscreen();
     window.scrollTo(0, 0);
-    // Clock onboarding — show on first visit
+    _showChrome();
     if (typeof _showClockOnboarding === 'function') setTimeout(_showClockOnboarding, 4000);
   } else if(mode === 'compass') {
     openClockFullscreen();
     if(!fsCompassOn) _toggleCompassMode(true);
+    _showChrome();
   } else if(mode === 'info') {
     if(prev === 'compass' && fsCompassOn) _toggleCompassMode(false);
     closeClockFullscreen();
     document.body.classList.remove('chrome-hidden');
-    // Scroll position preserved — only resets on page refresh
+    clearTimeout(_chromeTimer); // info mode — chrome stays visible
   }
 }
 
@@ -3291,7 +3313,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=289';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=290';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
