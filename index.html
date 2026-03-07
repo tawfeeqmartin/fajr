@@ -733,23 +733,33 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
          stroke:'rgba(255,255,255,.20)',dash:'110',delay:'1.06s'}
       ];
       // Then true hand positions from live renderer (hour + minute only; omit seconds to avoid fade desync)
-      (hands||[]).forEach(function(h,i){
+      var handCount=0;
+      (hands||[]).forEach(function(ray,i){
         if(i===2) return;
-        if(!h||!h.from||!h.to) return;
-        var x0=h.from[0], y0=h.from[1], x1=h.to[0], y1=h.to[1];
+        if(!ray||!ray.from||!ray.to) return;
+        var x0=ray.from[0], y0=ray.from[1], x1=ray.to[0], y1=ray.to[1];
         var clamp=function(v,min,max){ return Math.max(min,Math.min(max,v)); };
         // Clamp to splash viewbox to avoid edge artifacts without dropping hand animation.
         x0=clamp(x0,0,w); y0=clamp(y0,0,h); x1=clamp(x1,0,w); y1=clamp(y1,0,h);
         var len=Math.hypot(x1-x0,y1-y0);
         if(!Number.isFinite(len) || len<20) return;
+        handCount++;
         paths.push({
           d:'M'+x0.toFixed(1)+','+y0.toFixed(1)+' L'+x1.toFixed(1)+','+y1.toFixed(1),
-          stroke:h.color||'#ffffff',
+          stroke:ray.color||'#ffffff',
           dash:'250',
           w:'1.6',
           delay:(0.98 + i*0.18).toFixed(2)+'s'
         });
       });
+      if(handCount===0){
+        // Fallback: ensure visible hand cues even if live ray telemetry arrives late.
+        var cx=(v.bFront[0]+v.bBack[0])*0.5, cy=(v.bFront[1]+v.bBack[1])*0.5;
+        var hx=Math.min(w, cx + (v.bRight[0]-cx)*2.1), hy=Math.min(h, cy + (v.bRight[1]-cy)*1.25);
+        var mx=Math.min(w, cx + (v.tRight[0]-cx)*2.8), my=Math.min(h, cy + (v.tRight[1]-cy)*2.4);
+        paths.push({d:'M'+cx.toFixed(1)+','+cy.toFixed(1)+' L'+hx.toFixed(1)+','+hy.toFixed(1),stroke:'#9900ff',dash:'250',w:'1.6',delay:'0.98s'});
+        paths.push({d:'M'+cx.toFixed(1)+','+cy.toFixed(1)+' L'+mx.toFixed(1)+','+my.toFixed(1),stroke:'#1133ff',dash:'250',w:'1.6',delay:'1.16s'});
+      }
       return paths;
     }
 
@@ -3692,7 +3702,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=331';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=332';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
