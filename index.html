@@ -640,9 +640,9 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
   position:absolute;right:clamp(1rem,3vmin,1.5rem);bottom:0;
   text-align:right;line-height:1;font-family:var(--font);
 }
-.fs-countdown .nav-label{font-size:clamp(.5rem,1.2vw,.65rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,228,220,.4);line-height:1}
-.fs-countdown .nav-time{font-size:clamp(1rem,3vw,1.3rem);font-weight:600;letter-spacing:.02em;color:rgba(232,228,220,.75);line-height:1.1;font-variant-numeric:tabular-nums}
-.fs-countdown .nav-time .nav-sec{opacity:1;font-weight:600}
+.fs-countdown .nav-label{font-size:clamp(.5rem,1.2vw,.55rem);font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.4);line-height:1}
+.fs-countdown .nav-time{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);line-height:1;font-variant-numeric:tabular-nums}
+.fs-countdown .nav-time .nav-sec{opacity:.8;font-weight:300}
 /* Hide in compass mode */
 /* Header stays visible in all modes including compass */
 /* Tap-to-hide: all UI hidden in clock/compass */
@@ -3290,7 +3290,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=284';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=285';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
