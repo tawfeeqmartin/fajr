@@ -667,7 +667,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 </head>
 <body>
 <!-- Splash screen — hides when scene is ready -->
-<div id="splash" style="position:fixed;inset:0;z-index:9999;background:#0d0d12;display:flex;align-items:center;justify-content:center;transition:opacity .6s ease">
+<div id="splash" style="position:fixed;inset:0;z-index:9999;background:#0d0d12;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s ease">
   <img src="apple-touch-icon.png?v=2" alt="" style="width:80px;height:80px;opacity:.7;border-radius:18px">
 </div>
 
@@ -3322,7 +3322,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=296';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=297';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
