@@ -145,100 +145,8 @@ scene.add(back, back.target);
 // Inspired by: Nasir al-Mulk, Tadao Ando, Lubezki, Deakins.
 
 // Procedural Islamic arch gobo texture
-function _makeArchTexture() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
-  const sz = 1024 * dpr; // v12: 512→1024 — double resolution, arch edges survive projection + bilinear filtering; scaled by DPR so blur looks consistent across devices
-  const c = document.createElement('canvas');
-  c.width = sz; c.height = sz;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, sz, sz);
-  const cx = sz / 2;
-  const archW = sz * 0.202;  // v16: 0.238→0.202 — 15% narrower lancet slit
-  const baseY = sz * 0.62;   // v9: legs clipped at 62% — bottom 38% of canvas is dark so arch feet never appear in frame
-  const springY = sz * 0.42;
-  const peakY = sz * 0.04;
-  // v12: sharper lancet/ogee — walls stay vertical longer, tip converges tighter.
-  // CP1 at wall-x with springY*0.55 (was 0.5) keeps sides straighter before the curve.
-  // CP2 at archW*0.06 (was 0.12) pulls tip control points closer to center → sharper point.
-  ctx.beginPath();
-  ctx.moveTo(cx - archW, baseY);
-  ctx.lineTo(cx - archW, springY);
-  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
-  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
-  ctx.lineTo(cx + archW, baseY);
-  ctx.closePath();
-  // v67: extreme blur — no visible edges, pure diffused glow
-  ctx.filter = `blur(${40 * dpr}px)`;
-  ctx.fillStyle = '#e8e0d8';
-  ctx.fill();
-  ctx.filter = 'none';
-  // second pass: re-blur the entire canvas for ultra-soft falloff
-  const imgData = ctx.getImageData(0, 0, sz, sz);
-  ctx.putImageData(imgData, 0, 0);
-  ctx.filter = `blur(${24 * dpr}px)`;
-  ctx.drawImage(c, 0, 0);
-  ctx.filter = 'none';
-  // v68: edge vignette — fade all 4 edges to black so PlaneGeometry boundary dissolves
-  const edgeFade = 0.18; // fraction of canvas that fades out
-  // left edge
-  let g = ctx.createLinearGradient(0, 0, sz * edgeFade, 0);
-  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, sz * edgeFade, sz);
-  // right edge
-  g = ctx.createLinearGradient(sz, 0, sz * (1 - edgeFade), 0);
-  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g; ctx.fillRect(sz * (1 - edgeFade), 0, sz * edgeFade, sz);
-  // top edge
-  g = ctx.createLinearGradient(0, 0, 0, sz * edgeFade);
-  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, sz, sz * edgeFade);
-  // bottom edge
-  g = ctx.createLinearGradient(0, sz, 0, sz * (1 - edgeFade));
-  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g; ctx.fillRect(0, sz * (1 - edgeFade), sz, sz * edgeFade);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.center.set(0.5, 0.5);
-  tex.rotation = 0; // v19: no texture rotation — plane mesh orientation handles diagonal
-  return tex;
-}
-
-// v21: edge-only arch outline — stroke with no fill, reads as silhouette boundary
-function _makeArchOutlineTexture() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
-  const sz = 1024 * dpr;
-  const c = document.createElement('canvas');
-  c.width = sz; c.height = sz;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, sz, sz);
-  const cx = sz / 2;
-  const archW = sz * 0.202;
-  const baseY = sz * 0.62;
-  const springY = sz * 0.42;
-  const peakY = sz * 0.04;
-  ctx.beginPath();
-  ctx.moveTo(cx - archW, baseY);
-  ctx.lineTo(cx - archW, springY);
-  ctx.bezierCurveTo(cx - archW, springY * 0.55, cx - archW * 0.06, peakY + sz * 0.06, cx, peakY);
-  ctx.bezierCurveTo(cx + archW * 0.06, peakY + sz * 0.06, cx + archW, springY * 0.55, cx + archW, springY);
-  ctx.lineTo(cx + archW, baseY);
-  ctx.closePath();
-  // stroke only — no fill
-  // v57: blur the outline — softens painted-edge read into diffused light boundary
-  ctx.filter = `blur(${6 * dpr}px)`;
-  ctx.lineWidth = 14 * dpr;  // v57: 6→14px — wider stroke + blur = soft atmospheric edge, not crisp paint; scaled by DPR
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-  ctx.filter = 'none';
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.center.set(0.5, 0.5);
-  tex.rotation = 0;
-  return tex;
-}
+// MASHRABIYA TEXTURES REMOVED v276 — _makeArchTexture + _makeArchOutlineTexture
+// All arch stamps (archBloomMesh, archFloorMesh) were disabled since v80
 
 // GOBO REMOVED v275 — was disabled (scene.add commented out) since v80, shadow map still allocated
 
@@ -469,50 +377,7 @@ godRayMesh.visible = false;
 //   canvas bottom (legs, y≈0.99*sz) → UV V≈0 → world +Z (toward camera) ✓
 //   canvas top   (tip,  y≈0.04*sz) → UV V≈1 → world -Z (away, behind cube) ✓
 // Result: legs open toward camera in lower frame, pointed tip visible above/behind cube. Sacred arch read.
-//
-// v20: stamps are PRIMARY arch shape. Gobo is fill only.
-// PlaneGeometry +Y = arch tip direction. rotation.x = -PI/2 lays flat on floor.
-// rotation.z = -PI*0.2 — less steep diagonal, tip in frame, base off-screen left (+X, -Z on screen).
-// Using map (not alphaMap) with transparent:true preserves edge stroke detail.
-const _archStampTex = _makeArchTexture();
-
-// BLOOM UNDERLAYER — wider, dimmer, atmospheric warmth corona
-const archBloomMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(15.4, 34),  // v56: 14→15.4 (10% wider per client)
-  new THREE.MeshBasicMaterial({
-    map: _archStampTex,
-    color: new THREE.Color(0xff7020),
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-    opacity: 0.12,  // v65: 0.08→0.12 — wider atmospheric bloom carries more of the shape
-  })
-);
-archBloomMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archBloomMesh.position.set(-3.5, 0.019, 0); // v56: -3→-3.5, pull arch tip into frame
-archBloomMesh.renderOrder = 1;
-// scene.add(archBloomMesh); // v80: arch disabled
-
-// BASE STAMP — primary arch silhouette, the hero shape
-const archFloorMesh = new THREE.Mesh(
-  new THREE.PlaneGeometry(12.1, 28),  // v56: 11→12.1 (10% wider per client)
-  new THREE.MeshBasicMaterial({
-    map: _archStampTex,
-    color: new THREE.Color(0xffaa40),
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-    opacity: 0.20,  // v65: 0.30→0.20 — softer fill, bloom carries more weight
-  })
-);
-archFloorMesh.rotation.set(-Math.PI / 2, 0, -Math.PI * 0.2); // v23: less steep diagonal — base exits left, tip stays in frame
-archFloorMesh.position.set(-3.5, 0.022, 0); // v56: -3→-3.5, pull arch tip into frame
-archFloorMesh.renderOrder = 2;
-// scene.add(archFloorMesh); // v80: arch disabled
-
-// v65: outline stamp REMOVED — blur on fill texture carries the shape, no hard edges
+// ARCH STAMPS REMOVED v276 — bloom + floor meshes disabled since v80, texture generator removed
 
 // ─── VOLUMETRIC LIGHT SHAFT ──────────────────────────────────────────────────
 // v66: visible beam through air — PlaneGeometry aligned from gobo source toward floor.
@@ -1713,7 +1578,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // Ramp: appear at sunrise (floor 0.15), peak at noon (1.0), fade at sunset
   var _sunRamp = (_dayT >= 0 && _dayT <= 1) ? Math.max(0.15, Math.sin(_dayPhase * Math.PI)) : 0;
   // In compass mode: constant warm glow regardless of TOD (qibla light)
-  var _plinthInt = _compassMode ? 140.0 : _sunRamp * 190.0;
+  var _plinthInt = _compassMode ? 100.0 : _sunRamp * 130.0;
   plinthSun.intensity = _plinthInt;
   plinthSun.castShadow = !_compassMode; // shadow flickers with rapid heading changes
   window._sunDebug = {
