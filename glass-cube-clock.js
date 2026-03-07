@@ -1726,15 +1726,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   );
 
   // Dedicated top-down moving spot for clear circular trace on plinth.
-  // Read actual beam world direction from worldMatrix column 2 (Z-axis after Euler YXZ + X tilt).
+  // Analytical beam direction from current-frame h (no 1-frame lag from worldMatrix).
+  // Derivation: PlaneGeometry +Y → R_X(π/2) → +Z → R_Y(3π/4 - hourAng) → R_Y(π/4 prismGroup)
+  // = [sin(hourAng), 0, -cos(hourAng)] in world space.
   var _orbitR = 1.08; // between cube edge (~0.85) and plinth edge (~1.32)
-  clockRays[0].mesh.updateWorldMatrix(true, false);
-  var _wm = clockRays[0].mesh.matrixWorld.elements;
-  var _beamX = _wm[8], _beamZ = _wm[10];
-  var _beamLen = Math.hypot(_beamX, _beamZ);
-  if (_beamLen > 0) { _beamX /= _beamLen; _beamZ /= _beamLen; }
-  var _ox = _beamX * _orbitR;
-  var _oz = _beamZ * _orbitR;
+  var _ox = Math.sin(_hourAng) * _orbitR;
+  var _oz = -Math.cos(_hourAng) * _orbitR;
   plinthSun.position.set(_ox, 3.35 + _sunLift * 0.45, _oz);
   plinthSun.target.position.set(_ox, -0.03, _oz);
   // Sunrise→Dhuha hue lock, then noon cool, then warm sunset.
@@ -1750,7 +1747,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   plinthSun.intensity = _sunRamp * 400.0; // high intensity needed for tight cone to read on plinth
   window._sunDebug = {
     hourAng: _hourAng,
-    beamDir: { x: _beamX.toFixed(3), z: _beamZ.toFixed(3) },
+    beamDir: { x: Math.sin(_hourAng).toFixed(3), z: (-Math.cos(_hourAng)).toFixed(3) },
     plinthSunPos: { x: _ox, z: _oz, y: plinthSun.position.y },
     orbitR: _orbitR,
     intensity: plinthSun.intensity,
