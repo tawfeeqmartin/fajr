@@ -684,6 +684,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
   <script>
   (function(){
+    window._splashActive = true;
     // Camera params (MUST match glass-cube-clock.js exactly)
     var camPos=[0.2,9.7,15.0], fov=35, lookAt=[0,-0.8,1.0];
     var CUBE_Y=0.57, half=0.6, rot=Math.PI/4;
@@ -1039,7 +1040,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         }
         setTimeout(function(){
           splash.style.opacity='0';
-          setTimeout(function(){ splash.remove(); },1400);
+          setTimeout(function(){ splash.remove(); window._splashActive = false; },1400);
         }, HOLD);
         return;
       }
@@ -2096,28 +2097,24 @@ function _cycleCountdownPref(){
   updateNavClock();
 }
 if(!window._countdownToggleBound){
-  var _lastCountdownPointerUpAt = 0;
   var _countdownTap = function(e){
     var el = e.target && e.target.closest ? e.target.closest('#fsCountdown') : null;
     if(!el) return;
+    if(e && e.preventDefault) e.preventDefault();
     if(e && e.stopPropagation) e.stopPropagation();
     // Keep chrome alive while user is actively toggling countdown.
     if(typeof _showChrome === 'function') _showChrome();
     else if(typeof _resetChromeTimer === 'function') _resetChromeTimer();
     _cycleCountdownPref();
   };
-  // Primary path: one pointer-up equals one toggle (simple and deterministic).
-  document.addEventListener('pointerup', function(e){
-    var el = e.target && e.target.closest ? e.target.closest('#fsCountdown') : null;
-    if(!el) return;
-    _lastCountdownPointerUpAt = Date.now();
-    _countdownTap(e);
-  });
-  // Fallback for environments without pointer events; suppress synthetic click after pointerup.
-  document.addEventListener('click', function(e){
-    if(Date.now() - _lastCountdownPointerUpAt < 500) return;
-    _countdownTap(e);
-  });
+  if (window.PointerEvent) {
+    // One physical tap => one pointerup. No click handler to avoid double-fires.
+    document.addEventListener('pointerup', _countdownTap);
+  } else {
+    // Legacy fallback
+    document.addEventListener('touchend', _countdownTap);
+    document.addEventListener('click', _countdownTap);
+  }
   window._countdownToggleBound = true;
 }
 function startNavClock(){
@@ -3720,7 +3717,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=337';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=338';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

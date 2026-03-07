@@ -1817,6 +1817,14 @@ document.addEventListener('visibilitychange', function() {
     sMat.uniforms.op.value += (secBase - sMat.uniforms.op.value) * 0.03;
   }
 
+  // During splash, suppress live hand beam visibility to avoid pre-splash artifacts.
+  if (window._splashActive) {
+    for (var _ri = 0; _ri < clockRays.length; _ri++) {
+      var _rm = clockRays[_ri].mesh.children[0].material;
+      _rm.uniforms.op.value = 0;
+    }
+  }
+
   // Specular highlight orbits cube at second-hand speed
   const secAngle = (s / 60) * TAU;
   const specRadius = 3.0;
