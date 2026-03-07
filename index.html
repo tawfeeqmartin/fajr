@@ -894,7 +894,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 
     // Poll for canvas element — when it exists, measure its ACTUAL rendered size
     // This is the ground truth: whatever the canvas occupies, the SVG must match
-    var _corrected=false, _usedRendererVerts=false;
+    var _corrected=false, _usedRendererVerts=false, _lastRendererSig='';
     function tryCorrect(){
       var c=document.querySelector('canvas');
       if(!c) return;
@@ -907,11 +907,27 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 
       // Prefer ground-truth projection from the renderer when available.
       // This removes drift from duplicated camera math in HTML.
-      if(window._cubeScreenNamed && !_usedRendererVerts){
-        buildSVG(cw, ch, window._cubeScreenNamed);
-        _usedRendererVerts=true;
-        _corrected=true;
-        return;
+      if(window._cubeScreenNamed){
+        var rv=window._cubeScreenNamed;
+        var keys=['tBack','tLeft','tRight','tFront','bBack','bLeft','bRight','bFront'];
+        var ok=keys.every(function(k){
+          return rv[k] && Number.isFinite(rv[k][0]) && Number.isFinite(rv[k][1]);
+        });
+        if(ok){
+          var sig=[
+            rv.tBack[0],rv.tBack[1],
+            rv.tFront[0],rv.tFront[1],
+            rv.bFront[0],rv.bFront[1],
+            cw,ch
+          ].map(function(v){return Number(v).toFixed(2);}).join('|');
+          if(sig!==_lastRendererSig){
+            buildSVG(cw, ch, rv);
+            _lastRendererSig=sig;
+          }
+          _usedRendererVerts=true;
+          _corrected=true;
+          return;
+        }
       }
 
       if(!_corrected && (cw!==initW||ch!==initH)){
