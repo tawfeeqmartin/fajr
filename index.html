@@ -743,7 +743,8 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           d:'M'+x0.toFixed(1)+','+y0.toFixed(1)+' L'+x1.toFixed(1)+','+y1.toFixed(1),
           stroke:h.color||'#ffffff',
           dash:'250',
-          delay:(1.26 + i*0.24).toFixed(2)+'s'
+          w:'1.6',
+          delay:(0.98 + i*0.18).toFixed(2)+'s'
         });
       });
       return paths;
@@ -914,7 +915,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         var p=document.createElementNS('http://www.w3.org/2000/svg','path');
         p.setAttribute('d',e.d);
         p.setAttribute('stroke',e.stroke);
-        p.setAttribute('stroke-width','1');
+        p.setAttribute('stroke-width',e.w||'1');
         p.setAttribute('stroke-linecap','round');
         p.setAttribute('stroke-linejoin','round');
         var d=parseFloat(e.delay)||0;
@@ -3686,7 +3687,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=329';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=330';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
