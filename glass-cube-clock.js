@@ -1730,12 +1730,17 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   );
 
   // Dedicated top-down moving spot for clear circular trace on plinth.
-  // Analytical beam direction from current-frame h (no 1-frame lag from worldMatrix).
-  // Derivation: PlaneGeometry +Y → R_X(π/2) → +Z → R_Y(3π/4 - hourAng) → R_Y(π/4 prismGroup)
-  // = [sin(hourAng), 0, -cos(hourAng)] in world space.
+  // Plinth sun orbit: follows hour hand in clock mode, compass needle in compass mode.
+  // Direction derived from beam worldMatrix Z-column (accounts for all parent transforms).
   var _orbitR = 1.08; // between cube edge (~0.85) and plinth edge (~1.32)
-  var _ox = Math.sin(_hourAng) * _orbitR;
-  var _oz = -Math.cos(_hourAng) * _orbitR;
+  var _sunSource = (_compassMode && clockRays[2]) ? clockRays[2].mesh : clockRays[0].mesh;
+  _sunSource.updateWorldMatrix(true, false);
+  var _swm = _sunSource.matrixWorld.elements;
+  var _sbx = _swm[8], _sbz = _swm[10];
+  var _sbl = Math.hypot(_sbx, _sbz);
+  if (_sbl > 0) { _sbx /= _sbl; _sbz /= _sbl; }
+  var _ox = _sbx * _orbitR;
+  var _oz = _sbz * _orbitR;
   // Position high and slightly outward so cone covers both cube top and plinth ring
   plinthSun.position.set(_ox * 1.6, 4.5 + _sunLift * 1.0, _oz * 1.6);
   plinthSun.target.position.set(_ox * 0.5, 0.3, _oz * 0.5);
@@ -1746,10 +1751,12 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
     : (_dayPhase < 0.5
       ? _dhuhaSun.clone().lerp(_noon, (_dayPhase - 0.25) / 0.25)
       : _noon.clone().lerp(_dusk, (_dayPhase - 0.5) / 0.5));
-  plinthSun.color.copy(_sunColor);
+  plinthSun.color.copy(_compassMode ? new THREE.Color(0xffe0a0) : _sunColor);
   // Ramp: appear at sunrise (floor 0.15), peak at noon (1.0), fade at sunset
   var _sunRamp = (_dayT >= 0 && _dayT <= 1) ? Math.max(0.15, Math.sin(_dayPhase * Math.PI)) : 0;
-  plinthSun.intensity = _sunRamp * 280.0; // wider cone = less intensity needed; subtle wash not obvious dot
+  // In compass mode: constant warm glow regardless of TOD (qibla light)
+  var _plinthInt = _compassMode ? 180.0 : _sunRamp * 280.0;
+  plinthSun.intensity = _plinthInt;
   window._sunDebug = {
     hourAng: _hourAng,
     beamDir: { x: Math.sin(_hourAng).toFixed(3), z: (-Math.cos(_hourAng)).toFixed(3) },
