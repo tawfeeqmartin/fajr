@@ -902,8 +902,9 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       if(r.width<1||r.height<1) return;
       var cw=Math.round(r.width), ch=Math.round(r.height);
       // Always align splash origin to actual canvas rect (even when size matches)
-      splash.style.top=Math.round(r.top)+'px';
-      splash.style.left=Math.round(r.left)+'px';
+      // Keep sub-pixel alignment (rounding causes visible drift on iOS)
+      splash.style.top=r.top+'px';
+      splash.style.left=r.left+'px';
 
       // Prefer ground-truth projection from the renderer when available.
       // This removes drift from duplicated camera math in HTML.
@@ -914,14 +915,23 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           return rv[k] && Number.isFinite(rv[k][0]) && Number.isFinite(rv[k][1]);
         });
         if(ok){
+          // Renderer verts are in renderer CSS size space (W/H). Convert to actual canvas rect space.
+          var rs=window._rendererSize||{};
+          var srcW=Number(rs.cssWidth)||Number(window._canvasW)||cw;
+          var srcH=Number(rs.cssHeight)||Number(window._canvasH)||ch;
+          var sx=(srcW>0)?(cw/srcW):1;
+          var sy=(srcH>0)?(ch/srcH):1;
+          var mapped={};
+          keys.forEach(function(k){ mapped[k]=[rv[k][0]*sx, rv[k][1]*sy]; });
+
           var sig=[
-            rv.tBack[0],rv.tBack[1],
-            rv.tFront[0],rv.tFront[1],
-            rv.bFront[0],rv.bFront[1],
-            cw,ch
-          ].map(function(v){return Number(v).toFixed(2);}).join('|');
+            mapped.tBack[0],mapped.tBack[1],
+            mapped.tFront[0],mapped.tFront[1],
+            mapped.bFront[0],mapped.bFront[1],
+            cw,ch,sx,sy
+          ].map(function(v){return Number(v).toFixed(3);}).join('|');
           if(sig!==_lastRendererSig){
-            buildSVG(cw, ch, rv);
+            buildSVG(cw, ch, mapped);
             _lastRendererSig=sig;
           }
           _usedRendererVerts=true;
@@ -3623,7 +3633,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=311';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=312';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
