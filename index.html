@@ -718,6 +718,147 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 
     var splash=document.getElementById('splash');
     var svg=null;
+    var isSplashDebug=/(?:\?|&)splashdebug(?:=1)?(?:&|$)/i.test(location.search);
+    var _splashVertsNamed=null;
+    var _debugPanel=null;
+    var _debugJsonPre=null;
+
+    function rectJSON(r){
+      if(!r) return null;
+      return {
+        top: +r.top.toFixed(3),
+        left: +r.left.toFixed(3),
+        width: +r.width.toFixed(3),
+        height: +r.height.toFixed(3),
+        right: +r.right.toFixed(3),
+        bottom: +r.bottom.toFixed(3)
+      };
+    }
+
+    function cloneNamedVerts(v){
+      if(!v) return null;
+      var out={};
+      Object.keys(v).forEach(function(k){
+        var p=v[k];
+        if(Array.isArray(p)&&p.length>=2) out[k]=[+p[0].toFixed(3),+p[1].toFixed(3)];
+      });
+      return out;
+    }
+
+    function computeVertDeltas(splashVerts, rendererVerts){
+      if(!splashVerts||!rendererVerts) return null;
+      var out={};
+      Object.keys(splashVerts).forEach(function(k){
+        if(!rendererVerts[k]) return;
+        var sv=splashVerts[k], rv=rendererVerts[k];
+        var dx=+(rv[0]-sv[0]).toFixed(3);
+        var dy=+(rv[1]-sv[1]).toFixed(3);
+        out[k]={dx:dx,dy:dy,dist:+Math.hypot(dx,dy).toFixed(3)};
+      });
+      return Object.keys(out).length?out:null;
+    }
+
+    function measure100lvh(){
+      var el=document.createElement('div');
+      el.style.cssText='position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+      document.body.appendChild(el);
+      var h=el.offsetHeight||window.innerHeight;
+      document.body.removeChild(el);
+      return h;
+    }
+
+    function buildDebugTelemetry(){
+      var c=document.querySelector('canvas');
+      var cr=c?c.getBoundingClientRect():null;
+      var sr=splash?splash.getBoundingClientRect():null;
+      var vv=window.visualViewport;
+      var rendererSize=(window._rendererSize&&typeof window._rendererSize==='object')?window._rendererSize:null;
+      var rendererVerts=cloneNamedVerts(window._cubeScreenNamed);
+      var splashVerts=cloneNamedVerts(_splashVertsNamed);
+      return {
+        timestamp:new Date().toISOString(),
+        userAgent:navigator.userAgent,
+        devicePixelRatio:window.devicePixelRatio||1,
+        window:{innerWidth:window.innerWidth,innerHeight:window.innerHeight},
+        visualViewport:vv?{
+          width:+vv.width.toFixed(3),
+          height:+vv.height.toFixed(3),
+          offsetTop:+vv.offsetTop.toFixed(3),
+          offsetLeft:+vv.offsetLeft.toFixed(3),
+          scale:+vv.scale.toFixed(5)
+        }:null,
+        measured100lvh:measure100lvh(),
+        rendererStable:{width:window._canvasW||null,height:window._canvasH||null},
+        canvasRect:rectJSON(cr),
+        splashRect:rectJSON(sr),
+        rendererSize:rendererSize,
+        splashVertsNamed:splashVerts,
+        rendererVertsNamed:rendererVerts,
+        vertDeltas:computeVertDeltas(splashVerts,rendererVerts),
+        corrected:_corrected,
+        usedRendererVerts:_usedRendererVerts
+      };
+    }
+
+    function ensureDebugPanel(){
+      if(!isSplashDebug||_debugPanel) return;
+      _debugPanel=document.createElement('div');
+      _debugPanel.style.cssText='position:fixed;right:10px;bottom:10px;z-index:100001;max-width:min(92vw,420px);max-height:58vh;overflow:auto;background:rgba(0,0,0,.84);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px;color:#d8ffd8;font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-shadow:0 8px 30px rgba(0,0,0,.45)';
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;gap:6px;position:sticky;top:0;background:rgba(0,0,0,.92);padding-bottom:6px;margin-bottom:4px;';
+      var mkBtn=function(label){
+        var b=document.createElement('button');
+        b.type='button';
+        b.textContent=label;
+        b.style.cssText='appearance:none;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font:600 10px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:5px 7px;border-radius:6px;cursor:pointer;';
+        return b;
+      };
+      var copyBtn=mkBtn('Copy debug JSON');
+      var dlBtn=mkBtn('Download debug JSON');
+      row.appendChild(copyBtn);
+      row.appendChild(dlBtn);
+      _debugJsonPre=document.createElement('pre');
+      _debugJsonPre.style.cssText='margin:0;white-space:pre-wrap;word-break:break-word;';
+      _debugPanel.appendChild(row);
+      _debugPanel.appendChild(_debugJsonPre);
+      document.body.appendChild(_debugPanel);
+
+      copyBtn.addEventListener('click',function(){
+        var txt=_debugJsonPre?_debugJsonPre.textContent:'';
+        if(!txt) return;
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt);
+        }else{
+          var ta=document.createElement('textarea');
+          ta.value=txt;
+          ta.style.position='fixed';
+          ta.style.opacity='0';
+          document.body.appendChild(ta);
+          ta.select();
+          try{document.execCommand('copy');}catch(e){}
+          ta.remove();
+        }
+      });
+
+      dlBtn.addEventListener('click',function(){
+        var txt=_debugJsonPre?_debugJsonPre.textContent:'';
+        if(!txt) return;
+        var blob=new Blob([txt],{type:'application/json'});
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download='splash-debug-'+Date.now()+'.json';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },0);
+      });
+    }
+
+    function updateDebugPanel(){
+      if(!isSplashDebug) return;
+      ensureDebugPanel();
+      if(!_debugJsonPre) return;
+      _debugJsonPre.textContent=JSON.stringify(buildDebugTelemetry(),null,2);
+    }
 
     function buildSVG(w,h,overrideVerts){
       if(svg) svg.remove();
@@ -725,6 +866,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       splash.style.width=w+'px';
       splash.style.height=h+'px';
       var v=overrideVerts||getVerts(w,h);
+      _splashVertsNamed=v;
       svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
       svg.setAttribute('style','position:absolute;top:0;left:0;width:'+w+'px;height:'+h+'px');
       svg.setAttribute('viewBox','0 0 '+w+' '+h);
@@ -793,25 +935,13 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       var elapsed=performance.now()-cycleStart;
       var animDone=elapsed>=ANIM_DUR;
       if(window._sceneReady && animDone){
-        // Debug mode: freeze splash as semi-transparent overlay to check alignment
-        if(location.search.indexOf('splashdebug')>-1){
+        // Debug mode: freeze splash as semi-transparent overlay and show live telemetry JSON
+        if(isSplashDebug){
           splash.style.opacity='0.5';
           splash.style.pointerEvents='none';
-          // Show diagnostic info
-          var diag=document.createElement('div');
-          diag.style.cssText='position:fixed;bottom:10px;left:10px;color:lime;font:11px monospace;z-index:99999;background:rgba(0,0,0,.8);padding:8px;border-radius:4px;';
-          var c=document.querySelector('canvas');
-          var cr=c?c.getBoundingClientRect():{};
-          var sr=splash.getBoundingClientRect();
-          diag.innerHTML='SPLASH: '+Math.round(sr.width)+'x'+Math.round(sr.height)+' top:'+Math.round(sr.top)+' left:'+Math.round(sr.left)
-            +'<br>CANVAS: '+Math.round(cr.width)+'x'+Math.round(cr.height)+' top:'+Math.round(cr.top)+' left:'+Math.round(cr.left)
-            +'<br>innerW/H: '+window.innerWidth+'x'+window.innerHeight
-            +'<br>initW/H: '+initW+'x'+initH
-            +'<br>canvasW/H: '+(window._canvasW||'?')+'x'+(window._canvasH||'?')
-            +'<br>corrected: '+_corrected
-            +'<br>DPR: '+window.devicePixelRatio;
-          document.body.appendChild(diag);
-          return; // don't fade — keep overlay visible
+          updateDebugPanel();
+          requestAnimationFrame(check);
+          return; // keep overlay visible in debug mode
         }
         setTimeout(function(){
           splash.style.opacity='0';

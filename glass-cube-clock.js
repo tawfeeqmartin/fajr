@@ -50,6 +50,20 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
 renderer.setSize(W, H, false);
 
+function publishRendererTelemetrySize() {
+  if (!renderer) return;
+  const target = new THREE.Vector2();
+  renderer.getSize(target);
+  window._rendererSize = {
+    cssWidth: Math.round(target.x),
+    cssHeight: Math.round(target.y),
+    drawingBufferWidth: renderer.domElement ? renderer.domElement.width : null,
+    drawingBufferHeight: renderer.domElement ? renderer.domElement.height : null,
+    pixelRatio: renderer.getPixelRatio()
+  };
+}
+publishRendererTelemetrySize();
+
 if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
@@ -98,6 +112,7 @@ function onResize() {
   dpr = calcDpr(W, H);
   renderer.setPixelRatio(dpr);
   renderer.setSize(W, H, false);
+  publishRendererTelemetrySize();
   camera.aspect = W / H;
   camera.updateProjectionMatrix();
   fboRT.setSize(W * dpr, H * dpr);
