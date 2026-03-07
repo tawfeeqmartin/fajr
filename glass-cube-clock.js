@@ -1454,8 +1454,14 @@ let _themeFrameCount = 3599; // triggers on first frame
 const _themeBuf = new Uint8Array(4);
 const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
-(function loop() {
+var _targetFPS = 30;
+var _frameInterval = 1000 / _targetFPS;
+var _lastFrameTime = 0;
+
+(function loop(timestamp) {
   requestAnimationFrame(loop);
+  if (timestamp - _lastFrameTime < _frameInterval) return;
+  _lastFrameTime = timestamp - ((timestamp - _lastFrameTime) % _frameInterval);
   let t = clock.getElapsedTime();
   // Loop-safe timelapse mode: bind shader time to forced day-phase (no seam on loop).
   if (window._forceTimeMin != null) {
