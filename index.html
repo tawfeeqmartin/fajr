@@ -703,23 +703,34 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       return{tBack:top[0].s,tLeft:top[1].s,tRight:top[2].s,tFront:top[3].s,
              bBack:bot[0].s,bLeft:bot[1].s,bRight:bot[2].s,bFront:bot[3].s};
     }
-    function mkPaths(v){return[
-      {d:'M'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1)+' L'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' Z',
-       stroke:'rgba(255,255,255,.9)',dash:'400',delay:'.3s'},
-      {d:'M'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1)+' L'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1),
-       stroke:'rgba(255,255,255,.25)',dash:'200',delay:'.7s'},
-      {d:'M'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1),
-       stroke:'rgba(255,255,255,.25)',dash:'90',delay:'1.0s'},
-      {d:'M'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1)+' L'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1),
-       stroke:'#8844ee',dash:'200',delay:'1.3s'},
-      {d:'M'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1)+' L'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1),
-       stroke:'#4488ff',dash:'200',delay:'1.7s'}
-    ];}
+    function mkPaths(v,hands){
+      var paths=[
+        // Cube first: all-white build
+        {d:'M'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1)+' L'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' Z',
+         stroke:'rgba(255,255,255,.9)',dash:'420',delay:'.2s'},
+        {d:'M'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1)+' L'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1),
+         stroke:'rgba(255,255,255,.45)',dash:'240',delay:'.55s'},
+        {d:'M'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1),
+         stroke:'rgba(255,255,255,.45)',dash:'110',delay:'.85s'}
+      ];
+      // Then true hand positions from live renderer
+      (hands||[]).forEach(function(h,i){
+        if(!h||!h.from||!h.to) return;
+        paths.push({
+          d:'M'+h.from[0].toFixed(1)+','+h.from[1].toFixed(1)+' L'+h.to[0].toFixed(1)+','+h.to[1].toFixed(1),
+          stroke:h.color||'#ffffff',
+          dash:(i===2?'320':'250'),
+          delay:(1.05 + i*0.22).toFixed(2)+'s'
+        });
+      });
+      return paths;
+    }
 
     var splash=document.getElementById('splash');
     var svg=null;
     var isSplashDebug=/(?:\?|&)splashdebug(?:=1)?(?:&|$)/i.test(location.search);
     var _splashVertsNamed=null;
+    var _splashHands=null;
     var _debugPanel=null;
     var _debugJsonPre=null;
 
@@ -794,6 +805,8 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         rendererSize:rendererSize,
         splashVertsNamed:splashVerts,
         rendererVertsNamed:rendererVerts,
+        splashHands:_splashHands,
+        rendererHands:Array.isArray(window._clockRayScreen)?window._clockRayScreen:null,
         vertDeltas:computeVertDeltas(splashVerts,rendererVerts),
         corrected:_corrected,
         usedRendererVerts:_usedRendererVerts
@@ -860,18 +873,19 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       _debugJsonPre.textContent=JSON.stringify(buildDebugTelemetry(),null,2);
     }
 
-    function buildSVG(w,h,overrideVerts){
+    function buildSVG(w,h,overrideVerts,overrideHands){
       if(svg) svg.remove();
       // Size splash + SVG to exact pixel dimensions — no CSS viewport units
       splash.style.width=w+'px';
       splash.style.height=h+'px';
       var v=overrideVerts||getVerts(w,h);
       _splashVertsNamed=v;
+      _splashHands=overrideHands||null;
       svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
       svg.setAttribute('style','position:absolute;top:0;left:0;width:'+w+'px;height:'+h+'px');
       svg.setAttribute('viewBox','0 0 '+w+' '+h);
       svg.setAttribute('fill','none');
-      mkPaths(v).forEach(function(e){
+      mkPaths(v,_splashHands).forEach(function(e){
         var p=document.createElementNS('http://www.w3.org/2000/svg','path');
         p.setAttribute('d',e.d);
         p.setAttribute('stroke',e.stroke);
@@ -924,14 +938,26 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           var mapped={};
           keys.forEach(function(k){ mapped[k]=[rv[k][0]*sx, rv[k][1]*sy]; });
 
+          var handsRaw = Array.isArray(window._clockRayScreen) ? window._clockRayScreen : [];
+          var handsMapped = handsRaw.map(function(h){
+            if(!h||!h.from||!h.to) return null;
+            return {
+              from:[h.from[0]*sx, h.from[1]*sy],
+              to:[h.to[0]*sx, h.to[1]*sy],
+              color:h.color||'#ffffff'
+            };
+          }).filter(Boolean);
+
           var sig=[
             mapped.tBack[0],mapped.tBack[1],
             mapped.tFront[0],mapped.tFront[1],
             mapped.bFront[0],mapped.bFront[1],
+            handsMapped[2]&&handsMapped[2].to[0],
+            handsMapped[2]&&handsMapped[2].to[1],
             cw,ch,sx,sy
-          ].map(function(v){return Number(v).toFixed(3);}).join('|');
+          ].map(function(v){return Number(v||0).toFixed(3);}).join('|');
           if(sig!==_lastRendererSig){
-            buildSVG(cw, ch, mapped);
+            buildSVG(cw, ch, mapped, handsMapped);
             _lastRendererSig=sig;
           }
           _usedRendererVerts=true;
@@ -3634,7 +3660,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=313';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=314';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

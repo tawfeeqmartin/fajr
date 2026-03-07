@@ -766,13 +766,14 @@ function mkMatSoft(c1,c2,op){ return new THREE.ShaderMaterial({ uniforms:{c1:{va
 function floorRay(az, c1, c2, w, len, op) {
   const g = new THREE.PlaneGeometry(w, len, 1, 16); g.translate(0, len/2, 0);
   const grp = new THREE.Group();
-  grp.add(new THREE.Mesh(g, mkMat(c1, c2, op)));
+  const mesh = new THREE.Mesh(g, mkMat(c1, c2, op));
+  grp.add(mesh);
   grp.position.y = 0.008;
   grp.rotation.order = 'YXZ';
   grp.rotation.y = THREE.MathUtils.degToRad(az);
   grp.rotation.x = Math.PI / 2;
   prismGroup.add(grp);
-  clockRays.push({ mesh: grp, initY: THREE.MathUtils.degToRad(az) });
+  clockRays.push({ mesh: grp, beam: mesh, len: len, c1: c1, initY: THREE.MathUtils.degToRad(az) });
 }
 
 window.clockRays = clockRays;
@@ -1961,6 +1962,20 @@ document.addEventListener('visibilitychange', function() {
       bBack:[_bot[0].x,_bot[0].y], bLeft:[_bot[1].x,_bot[1].y], bRight:[_bot[2].x,_bot[2].y], bFront:[_bot[3].x,_bot[3].y]
     };
   }
+
+  // Expose projected hand beams for splash continuity (same live positions as scene)
+  var _rayCols=['#9900ff','#1133ff','#ffffff'];
+  window._clockRayScreen = clockRays.map(function(ray, idx){
+    var b = ray.beam || (ray.mesh && ray.mesh.children && ray.mesh.children[0]);
+    if(!b) return null;
+    var p0 = b.localToWorld(new THREE.Vector3(0,0,0)).project(camera);
+    var p1 = b.localToWorld(new THREE.Vector3(0,ray.len||1,0)).project(camera);
+    return {
+      from:[(p0.x*0.5+0.5)*W, (-p0.y*0.5+0.5)*H],
+      to:[(p1.x*0.5+0.5)*W, (-p1.y*0.5+0.5)*H],
+      color:_rayCols[idx]||'#ffffff'
+    };
+  }).filter(Boolean);
 
   // Mark scene as ready — splash handles its own timing
   if (!window._sceneReady) {
