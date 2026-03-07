@@ -2094,12 +2094,17 @@ function _cycleCountdownPref(){
   updateNavClock();
 }
 if(!window._countdownToggleBound){
-  document.addEventListener('click', function(e){
+  var _countdownTap = function(e){
     var el = e.target && e.target.closest ? e.target.closest('#fsCountdown') : null;
     if(!el) return;
-    e.stopPropagation();
+    if(e && e.stopPropagation) e.stopPropagation();
+    // Keep chrome alive while user is actively toggling countdown.
+    if(typeof _showChrome === 'function') _showChrome();
+    else if(typeof _resetChromeTimer === 'function') _resetChromeTimer();
     _cycleCountdownPref();
-  });
+  };
+  document.addEventListener('click', _countdownTap);
+  document.addEventListener('touchstart', _countdownTap, {passive:true});
   window._countdownToggleBound = true;
 }
 function startNavClock(){
@@ -3702,7 +3707,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=332';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=333';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
