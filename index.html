@@ -666,8 +666,8 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 </style>
 </head>
 <body>
-<!-- Splash screen — cube wireframe computed from camera projection -->
-<div id="splash" style="position:fixed;top:0;left:0;width:100vw;height:100lvh;z-index:9999;background:#0d0d12;transition:opacity 1.2s ease">
+<!-- Splash screen — cube wireframe from camera projection, explicit pixel sizing -->
+<div id="splash" style="position:fixed;top:0;left:0;z-index:9999;background:#0d0d12;transition:opacity 1.2s ease">
   <style>
     @keyframes splashDraw { to { stroke-dashoffset: 0; } }
   </style>
@@ -677,14 +677,12 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     var camPos=[0.2,9.7,15.0], fov=35, lookAt=[0,-0.8,1.0];
     var CUBE_Y=0.57, half=0.6, rot=Math.PI/4;
     var cosR=Math.cos(rot), sinR=Math.sin(rot);
-    // 8 cube vertices: local -> rotated
     var localV=[], worldV=[];
     for(var x=-1;x<=1;x+=2)for(var y=-1;y<=1;y+=2)for(var z=-1;z<=1;z+=2){
       var lv=[x*half,y*half+CUBE_Y,z*half];
       localV.push(lv);
       worldV.push([lv[0]*cosR+lv[2]*sinR, lv[1], -lv[0]*sinR+lv[2]*cosR]);
     }
-    // View matrix
     function sub(a,b){return[a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
     function norm(v){var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);return[v[0]/l,v[1]/l,v[2]/l];}
     function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
@@ -693,7 +691,6 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     var right=norm(cross(fwd,[0,1,0]));
     var up=cross(right,fwd);
     var tanHalf=Math.tan(fov*Math.PI/360);
-
     function project(v,w,h){
       var rel=sub(v,camPos);
       var cz=dot(rel,fwd),cx=dot(rel,right),cy=dot(rel,up);
@@ -706,7 +703,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       return{tBack:top[0].s,tLeft:top[1].s,tRight:top[2].s,tFront:top[3].s,
              bBack:bot[0].s,bLeft:bot[1].s,bRight:bot[2].s,bFront:bot[3].s};
     }
-    function buildPaths(v){return[
+    function mkPaths(v){return[
       {d:'M'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1)+' L'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' Z',
        stroke:'rgba(255,255,255,.9)',dash:'400',delay:'.3s'},
       {d:'M'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1)+' L'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1),
@@ -720,16 +717,19 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     ];}
 
     var splash=document.getElementById('splash');
-    var svg, corrected=false;
+    var svg=null;
 
     function buildSVG(w,h){
       if(svg) svg.remove();
+      // Size splash + SVG to exact pixel dimensions — no CSS viewport units
+      splash.style.width=w+'px';
+      splash.style.height=h+'px';
       var v=getVerts(w,h);
       svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-      svg.setAttribute('style','position:absolute;top:0;left:0;width:100vw;height:100lvh');
+      svg.setAttribute('style','position:absolute;top:0;left:0;width:'+w+'px;height:'+h+'px');
       svg.setAttribute('viewBox','0 0 '+w+' '+h);
       svg.setAttribute('fill','none');
-      buildPaths(v).forEach(function(e){
+      mkPaths(v).forEach(function(e){
         var p=document.createElementNS('http://www.w3.org/2000/svg','path');
         p.setAttribute('d',e.d);
         p.setAttribute('stroke',e.stroke);
@@ -739,33 +739,38 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         p.setAttribute('style','stroke-dasharray:'+e.dash+';stroke-dashoffset:'+e.dash+';animation:splashDraw .8s ease-out '+e.delay+' forwards');
         svg.appendChild(p);
       });
-      splash.insertBefore(svg, splash.firstChild);
+      splash.appendChild(svg);
     }
 
-    // Initial build with best available measurement
-    var _splashLvh=document.createElement('div');
-    _splashLvh.style.cssText='position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
-    document.body.appendChild(_splashLvh);
-    var initW=window.innerWidth, initH=_splashLvh.offsetHeight||window.innerHeight;
-    document.body.removeChild(_splashLvh);
+    // Measure EXACTLY like Three.js: create 100lvh div, read offsetHeight
+    var _lvh=document.createElement('div');
+    _lvh.style.cssText='position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+    document.body.appendChild(_lvh);
+    var initW=window.innerWidth, initH=_lvh.offsetHeight||window.innerHeight;
+    document.body.removeChild(_lvh);
     buildSVG(initW, initH);
 
-    // When Three.js exposes its actual W/H, rebuild if different
+    // Poll for canvas element — when it exists, measure its ACTUAL rendered size
+    // This is the ground truth: whatever the canvas occupies, the SVG must match
+    var _corrected=false;
     function tryCorrect(){
-      if(corrected) return;
-      if(window._canvasW && window._canvasH){
-        if(window._canvasW !== initW || window._canvasH !== initH){
-          corrected=true;
-          buildSVG(window._canvasW, window._canvasH);
-        } else {
-          corrected=true; // same values, no rebuild needed
-        }
+      if(_corrected) return;
+      var c=document.querySelector('canvas');
+      if(!c) return;
+      var r=c.getBoundingClientRect();
+      if(r.width<1||r.height<1) return;
+      var cw=Math.round(r.width), ch=Math.round(r.height);
+      _corrected=true;
+      if(cw!==initW||ch!==initH){
+        buildSVG(cw, ch);
+        // Also reposition splash to match canvas position
+        splash.style.top=Math.round(r.top)+'px';
+        splash.style.left=Math.round(r.left)+'px';
       }
     }
 
-    // Animation loop controller
-    var ANIM_DUR=3400, HOLD=2000;
-    var cycleStart=performance.now();
+    // Animation + lifecycle
+    var ANIM_DUR=3400, HOLD=2000, cycleStart=performance.now();
     function resetAnim(){
       if(!svg) return;
       svg.querySelectorAll('path').forEach(function(p){
@@ -3443,7 +3448,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=308';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=309';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
