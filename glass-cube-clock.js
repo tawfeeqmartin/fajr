@@ -1648,14 +1648,19 @@ document.addEventListener('visibilitychange', function() {
       clockRays[2].mesh.rotation.y = clockRays[2].initY - qiblaRel;
       // Needle opacity: fade with calibration confidence
       var calibrated = !!window._compassCalibrated;
-      var needleTarget = calibrated ? 0.95 : 0.25;
+      var acc = (typeof window._compassAccuracy === 'number') ? window._compassAccuracy : -1;
+      var softCalibrated = !calibrated && acc > 0 && acc <= 35; // guidance-grade (not precise)
+      var needleTarget = calibrated ? 0.95 : (softCalibrated ? 0.7 : 0.25);
       var needleCur = clockRays[2].mesh.children[0].material.uniforms.op.value;
       clockRays[2].mesh.children[0].material.uniforms.op.value = needleCur + (needleTarget - needleCur) * 0.08;
 
       // Check alignment: 12 o'clock pointing at Qibla = qiblaRel near 0
       var alignDelta = Math.abs(((qiblaRel % TAU) + TAU) % TAU);
       if (alignDelta > Math.PI) alignDelta = TAU - alignDelta;
-      _compassAligned = calibrated && alignDelta < 0.15; // ~8.5° tolerance, only when calibrated
+      var aligned = alignDelta < 0.15; // ~8.5° tolerance
+      var fullPayoff = calibrated && aligned;
+      var softPayoff = softCalibrated && aligned;
+      _compassAligned = fullPayoff;
 
       // Prismatic refraction: polar disc shaders
       var breathe = 0.88 + 0.12 * Math.sin(t * 1.0);
@@ -1663,7 +1668,7 @@ document.addEventListener('visibilitychange', function() {
       if(_qiblaFanDisc) _qiblaFanDisc.material.uniforms.time.value = t;
       if(_qiblaBloomDisc) _qiblaBloomDisc.material.uniforms.time.value = t;
 
-      if (_compassAligned) {
+      if (fullPayoff) {
         // Shadow disc + caustic light
         if(window._qiblaCausticLight){
           window._qiblaCausticLight.intensity = Math.min(window._qiblaCausticLight.intensity + 0.03, 0.5 * breathe);
@@ -1702,6 +1707,39 @@ document.addEventListener('visibilitychange', function() {
         }
         // Internal glow on cube
         cubeMat.uniforms.uInternalGlow.value = Math.min(cubeMat.uniforms.uInternalGlow.value + 0.02, 0.3 * breathe);
+      } else if (softPayoff) {
+        // Guidance-grade fallback: show a dim payoff when accuracy is decent (<=35°)
+        if(window._qiblaCausticLight){
+          window._qiblaCausticLight.intensity = Math.min(window._qiblaCausticLight.intensity + 0.02, 0.2 * breathe);
+        }
+        if(_qiblaFanDisc){
+          _qiblaFanDisc.visible = true;
+          var sfop = _qiblaFanDisc.material.uniforms.op.value;
+          _qiblaFanDisc.material.uniforms.op.value = Math.min(sfop + 0.025, 0.22 * breathe);
+        }
+        if(_qiblaBloomDisc){
+          _qiblaBloomDisc.visible = true;
+          var sbop = _qiblaBloomDisc.material.uniforms.op.value;
+          _qiblaBloomDisc.material.uniforms.op.value = Math.min(sbop + 0.015, 0.09 * breathe);
+        }
+        if(_qiblaEntryDisc){
+          _qiblaEntryDisc.visible = true;
+          var seop = _qiblaEntryDisc.material.uniforms.op.value;
+          _qiblaEntryDisc.material.uniforms.op.value = Math.min(seop + 0.02, 0.08 * breathe);
+        }
+        if(_qiblaEntryBeam){
+          _qiblaEntryBeam.visible = true;
+          _qiblaEntryBeam.material.uniforms.time.value = t;
+          var sebop = _qiblaEntryBeam.material.uniforms.op.value;
+          _qiblaEntryBeam.material.uniforms.op.value = Math.min(sebop + 0.025, 0.14 * breathe);
+        }
+        if(_qiblaExitCaustic){
+          _qiblaExitCaustic.visible = true;
+          _qiblaExitCaustic.material.uniforms.time.value = t;
+          var secop = _qiblaExitCaustic.material.uniforms.op.value;
+          _qiblaExitCaustic.material.uniforms.op.value = Math.min(secop + 0.02, 0.2 * breathe);
+        }
+        cubeMat.uniforms.uInternalGlow.value = Math.min(cubeMat.uniforms.uInternalGlow.value + 0.015, 0.12 * breathe);
       } else if (!_compassDevMode) {
         // Fade out shadow + caustic
         if(window._qiblaCausticLight && window._qiblaCausticLight.intensity > 0.01){ window._qiblaCausticLight.intensity *= 0.9; } else if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
