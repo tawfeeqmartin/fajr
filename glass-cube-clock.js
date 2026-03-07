@@ -1731,16 +1731,19 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
   // Dedicated top-down moving spot for clear circular trace on plinth.
   // Plinth sun orbit: follows hour hand in clock mode, compass needle in compass mode.
-  // Direction derived from beam worldMatrix Z-column (accounts for all parent transforms).
+  // Analytical direction: same-frame, no 1-frame matrix lag.
   var _orbitR = 1.08; // between cube edge (~0.85) and plinth edge (~1.32)
-  var _sunSource = (_compassMode && clockRays[2]) ? clockRays[2].mesh : clockRays[0].mesh;
-  _sunSource.updateWorldMatrix(true, false);
-  var _swm = _sunSource.matrixWorld.elements;
-  var _sbx = _swm[8], _sbz = _swm[10];
-  var _sbl = Math.hypot(_sbx, _sbz);
-  if (_sbl > 0) { _sbx /= _sbl; _sbz /= _sbl; }
-  var _ox = _sbx * _orbitR;
-  var _oz = _sbz * _orbitR;
+  var _sunAng;
+  if (_compassMode && _compassQibla !== null) {
+    // Compass needle angle = qiblaRel, same transform chain as hour hand
+    var _qRel = _compassQibla - _compassHeading;
+    _sunAng = _qRel; // needle uses same Euler chain: initY offset cancels out
+  } else {
+    _sunAng = _hourAng;
+  }
+  // World beam direction = [sin(sunAng), 0, -cos(sunAng)]
+  var _ox = Math.sin(_sunAng) * _orbitR;
+  var _oz = -Math.cos(_sunAng) * _orbitR;
   // Position high and slightly outward so cone covers both cube top and plinth ring
   plinthSun.position.set(_ox * 1.6, 4.5 + _sunLift * 1.0, _oz * 1.6);
   plinthSun.target.position.set(_ox * 0.5, 0.3, _oz * 0.5);
@@ -1757,6 +1760,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // In compass mode: constant warm glow regardless of TOD (qibla light)
   var _plinthInt = _compassMode ? 180.0 : _sunRamp * 280.0;
   plinthSun.intensity = _plinthInt;
+  plinthSun.castShadow = !_compassMode; // shadow flickers with rapid heading changes
   window._sunDebug = {
     hourAng: _hourAng,
     beamDir: { x: Math.sin(_hourAng).toFixed(3), z: (-Math.cos(_hourAng)).toFixed(3) },
