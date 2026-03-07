@@ -667,7 +667,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 </head>
 <body>
 <!-- Splash screen — cube wireframe computed from camera projection -->
-<div id="splash" style="position:fixed;inset:0;z-index:9999;background:#0d0d12;transition:opacity 1.2s ease">
+<div id="splash" style="position:fixed;top:0;left:0;width:100vw;height:100lvh;z-index:9999;background:#0d0d12;transition:opacity 1.2s ease">
   <canvas id="splashCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
   <style>
     @keyframes splashDraw { to { stroke-dashoffset: 0; } }
@@ -732,7 +732,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     document.body.removeChild(_splashLvh);
     var v = getVerts(w, h);
     var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('style','position:absolute;inset:0;width:100%;height:100%');
+    svg.setAttribute('style','position:absolute;top:0;left:0;width:100vw;height:100lvh');
     svg.setAttribute('viewBox','0 0 '+w+' '+h);
     svg.setAttribute('fill','none');
 
@@ -3454,7 +3454,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=304';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=305';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
