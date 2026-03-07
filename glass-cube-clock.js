@@ -1976,6 +1976,7 @@ document.addEventListener('visibilitychange', function() {
       color:_rayCols[idx]||'#ffffff'
     };
   }).filter(Boolean);
+  window._clockRayScreenAt = performance.now();
 
   // Mark scene as ready — splash handles its own timing
   if (!window._sceneReady) {

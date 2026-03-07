@@ -938,6 +938,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     // Poll for canvas element — when it exists, measure its ACTUAL rendered size
     // This is the ground truth: whatever the canvas occupies, the SVG must match
     var _corrected=false, _usedRendererVerts=false, _lastRendererSig='';
+    var _handsStableFrames=0;
     function tryCorrect(){
       var c=document.querySelector('canvas');
       if(!c) return;
@@ -979,11 +980,14 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 
           // Race guard: only draw splash hands when rays are anchored near cube center.
           var cx=(mapped.bFront[0]+mapped.bBack[0])*0.5, cy=(mapped.bFront[1]+mapped.bBack[1])*0.5;
-          var handsStable = handsMapped.length>=2 && handsMapped.every(function(h,idx){
+          var handsStableNow = handsMapped.length>=2 && handsMapped.every(function(h,idx){
             if(idx>1) return true; // ignore second hand
             var dx=Math.abs(h.from[0]-cx), dy=Math.abs(h.from[1]-cy);
-            return Number.isFinite(dx)&&Number.isFinite(dy)&&dx<18&&dy<18;
+            return Number.isFinite(dx)&&Number.isFinite(dy)&&dx<14&&dy<14;
           });
+          var raysFresh = typeof window._clockRayScreenAt === 'number' && (performance.now() - window._clockRayScreenAt) < 220;
+          _handsStableFrames = (handsStableNow && raysFresh) ? (_handsStableFrames + 1) : 0;
+          var handsStable = _handsStableFrames >= 2;
           var handsForSplash = handsStable ? handsMapped : null;
 
           var sig=[
@@ -3711,7 +3715,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=335';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=336';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
