@@ -732,21 +732,21 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     svg.setAttribute('fill','none');
 
     var edges = [
-      // Left face (violet)
-      {d:'M'+v.bLeft[0]+','+v.bLeft[1]+' L'+v.tLeft[0]+','+v.tLeft[1]+' L'+v.tBack[0]+','+v.tBack[1],
-       stroke:'#8844ee', sw:'1.2', dash:'200', delay:'.3s'},
-      // Right face (blue)
-      {d:'M'+v.bRight[0]+','+v.bRight[1]+' L'+v.tRight[0]+','+v.tRight[1]+' L'+v.tBack[0]+','+v.tBack[1],
-       stroke:'#4488ff', sw:'1.2', dash:'200', delay:'.7s'},
-      // Top face (white)
+      // Top face (white) — draws first
       {d:'M'+v.tLeft[0]+','+v.tLeft[1]+' L'+v.tBack[0]+','+v.tBack[1]+' L'+v.tRight[0]+','+v.tRight[1]+' L'+v.tFront[0]+','+v.tFront[1]+' Z',
-       stroke:'rgba(255,255,255,.9)', sw:'1.2', dash:'400', delay:'1.1s'},
+       stroke:'rgba(255,255,255,.9)', sw:'1', dash:'400', delay:'.3s'},
       // Bottom V
       {d:'M'+v.bLeft[0]+','+v.bLeft[1]+' L'+v.bFront[0]+','+v.bFront[1]+' L'+v.bRight[0]+','+v.bRight[1],
-       stroke:'rgba(255,255,255,.25)', sw:'0.8', dash:'200', delay:'1.5s'},
+       stroke:'rgba(255,255,255,.25)', sw:'1', dash:'200', delay:'.7s'},
       // Front vertical
       {d:'M'+v.tFront[0]+','+v.tFront[1]+' L'+v.bFront[0]+','+v.bFront[1],
-       stroke:'rgba(255,255,255,.25)', sw:'0.8', dash:'90', delay:'1.7s'}
+       stroke:'rgba(255,255,255,.25)', sw:'1', dash:'90', delay:'1.0s'},
+      // Left face (violet) — colored, draws last
+      {d:'M'+v.bLeft[0]+','+v.bLeft[1]+' L'+v.tLeft[0]+','+v.tLeft[1]+' L'+v.tBack[0]+','+v.tBack[1],
+       stroke:'#8844ee', sw:'1', dash:'200', delay:'1.3s'},
+      // Right face (blue) — colored, draws last
+      {d:'M'+v.bRight[0]+','+v.bRight[1]+' L'+v.tRight[0]+','+v.tRight[1]+' L'+v.tBack[0]+','+v.tBack[1],
+       stroke:'#4488ff', sw:'1', dash:'200', delay:'1.7s'}
     ];
 
     edges.forEach(function(e) {
@@ -3449,7 +3449,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=302';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=303';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
