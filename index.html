@@ -2096,23 +2096,28 @@ function _cycleCountdownPref(){
   updateNavClock();
 }
 if(!window._countdownToggleBound){
-  var _lastCountdownToggleAt = 0;
+  var _lastCountdownPointerUpAt = 0;
   var _countdownTap = function(e){
     var el = e.target && e.target.closest ? e.target.closest('#fsCountdown') : null;
     if(!el) return;
     if(e && e.stopPropagation) e.stopPropagation();
-    var nowMs = Date.now();
-    // iOS/Android can emit touchstart + synthetic click for one tap.
-    // Debounce short duplicates to prevent accidental double-toggle.
-    if(nowMs - _lastCountdownToggleAt < 450) return;
-    _lastCountdownToggleAt = nowMs;
     // Keep chrome alive while user is actively toggling countdown.
     if(typeof _showChrome === 'function') _showChrome();
     else if(typeof _resetChromeTimer === 'function') _resetChromeTimer();
     _cycleCountdownPref();
   };
-  document.addEventListener('click', _countdownTap);
-  document.addEventListener('touchstart', _countdownTap, {passive:true});
+  // Primary path: one pointer-up equals one toggle (simple and deterministic).
+  document.addEventListener('pointerup', function(e){
+    var el = e.target && e.target.closest ? e.target.closest('#fsCountdown') : null;
+    if(!el) return;
+    _lastCountdownPointerUpAt = Date.now();
+    _countdownTap(e);
+  });
+  // Fallback for environments without pointer events; suppress synthetic click after pointerup.
+  document.addEventListener('click', function(e){
+    if(Date.now() - _lastCountdownPointerUpAt < 500) return;
+    _countdownTap(e);
+  });
   window._countdownToggleBound = true;
 }
 function startNavClock(){
@@ -3715,7 +3720,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=336';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=337';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
