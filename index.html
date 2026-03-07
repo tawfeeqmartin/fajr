@@ -784,6 +784,26 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       var elapsed=performance.now()-cycleStart;
       var animDone=elapsed>=ANIM_DUR;
       if(window._sceneReady && animDone){
+        // Debug mode: freeze splash as semi-transparent overlay to check alignment
+        if(location.search.indexOf('splashdebug')>-1){
+          splash.style.opacity='0.5';
+          splash.style.pointerEvents='none';
+          // Show diagnostic info
+          var diag=document.createElement('div');
+          diag.style.cssText='position:fixed;bottom:10px;left:10px;color:lime;font:11px monospace;z-index:99999;background:rgba(0,0,0,.8);padding:8px;border-radius:4px;';
+          var c=document.querySelector('canvas');
+          var cr=c?c.getBoundingClientRect():{};
+          var sr=splash.getBoundingClientRect();
+          diag.innerHTML='SPLASH: '+Math.round(sr.width)+'x'+Math.round(sr.height)+' top:'+Math.round(sr.top)+' left:'+Math.round(sr.left)
+            +'<br>CANVAS: '+Math.round(cr.width)+'x'+Math.round(cr.height)+' top:'+Math.round(cr.top)+' left:'+Math.round(cr.left)
+            +'<br>innerW/H: '+window.innerWidth+'x'+window.innerHeight
+            +'<br>initW/H: '+initW+'x'+initH
+            +'<br>canvasW/H: '+(window._canvasW||'?')+'x'+(window._canvasH||'?')
+            +'<br>corrected: '+_corrected
+            +'<br>DPR: '+window.devicePixelRatio;
+          document.body.appendChild(diag);
+          return; // don't fade — keep overlay visible
+        }
         setTimeout(function(){
           splash.style.opacity='0';
           setTimeout(function(){ splash.remove(); },1400);
@@ -3448,7 +3468,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=309';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=310';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
