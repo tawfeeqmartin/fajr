@@ -1888,11 +1888,10 @@ document.addEventListener('visibilitychange', function() {
 
   renderer.render(scene, camera);
 
-  // Dismiss splash screen — hold briefly, then fade gracefully
-  if (!window._splashDismissed) {
-    window._splashDismissed = true;
-    var _sp = document.getElementById('splash');
-    if (_sp) { setTimeout(function(){ _sp.style.opacity = '0'; setTimeout(function(){ _sp.remove(); }, 1400); }, 500); }
+  // Mark scene as ready — splash handles its own timing
+  if (!window._sceneReady) {
+    window._sceneReady = true;
+    window._sceneReadyAt = performance.now();
   }
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
