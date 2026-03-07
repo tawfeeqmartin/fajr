@@ -671,6 +671,10 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   <style>
     @keyframes splashDraw { to { stroke-dashoffset: 0; } }
   </style>
+  <div id="splashBismillah" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;z-index:2;opacity:1;transition:opacity .7s ease;">
+    <div style="font-family:'Amiri','Noto Naskh Arabic',serif;font-size:clamp(1.5rem,5.5vw,2.4rem);font-weight:400;letter-spacing:.01em;color:rgba(255,255,255,.93);text-align:center;line-height:1.5">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+    <div style="font-family:var(--font);font-size:clamp(.62rem,2.2vw,.78rem);font-weight:300;letter-spacing:.08em;color:rgba(255,255,255,.48);text-transform:uppercase">Bismillah ir-Rahman ir-Rahim</div>
+  </div>
   <script>
   (function(){
     // Block scene visibility until splash is done (prevents hand bleed on refresh)
@@ -738,7 +742,9 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     }
 
     var splash=document.getElementById('splash');
+    var bismillah=document.getElementById('splashBismillah');
     var svg=null;
+    var INTRO_MS=700;
     var isSplashDebug=/(?:\?|&)splashdebug(?:=1)?(?:&|$)/i.test(location.search);
     var _splashVertsNamed=null;
     var _splashHands=null;
@@ -903,7 +909,8 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         p.setAttribute('stroke-width','1');
         p.setAttribute('stroke-linecap','round');
         p.setAttribute('stroke-linejoin','round');
-        p.setAttribute('style','stroke-dasharray:'+e.dash+';stroke-dashoffset:'+e.dash+';animation:splashDraw .8s ease-out '+e.delay+' forwards');
+        var d=parseFloat(e.delay)||0;
+        p.setAttribute('style','stroke-dasharray:'+e.dash+';stroke-dashoffset:'+e.dash+';animation:splashDraw .8s ease-out '+(d + INTRO_MS/1000).toFixed(2)+'s forwards');
         svg.appendChild(p);
       });
       splash.appendChild(svg);
@@ -916,6 +923,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     var initW=window.innerWidth, initH=_lvh.offsetHeight||window.innerHeight;
     document.body.removeChild(_lvh);
     buildSVG(initW, initH);
+    setTimeout(function(){ if(bismillah) bismillah.style.opacity='0'; }, INTRO_MS);
 
     // Poll for canvas element — when it exists, measure its ACTUAL rendered size
     // This is the ground truth: whatever the canvas occupies, the SVG must match
@@ -984,7 +992,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     }
 
     // Animation + lifecycle
-    var ANIM_DUR=3400, HOLD=2000, cycleStart=performance.now();
+    var ANIM_DUR=3400+INTRO_MS, HOLD=2000, cycleStart=performance.now();
     function resetAnim(){
       if(!svg) return;
       svg.querySelectorAll('path').forEach(function(p){
@@ -3675,7 +3683,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=316';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=317';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
