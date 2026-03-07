@@ -1875,6 +1875,13 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
 
   renderer.render(scene, camera);
 
+  // Dismiss splash screen on first rendered frame
+  if (!window._splashDismissed) {
+    window._splashDismissed = true;
+    var _sp = document.getElementById('splash');
+    if (_sp) { _sp.style.opacity = '0'; setTimeout(function(){ _sp.remove(); }, 600); }
+  }
+
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
   // Disabled by default for now (can be re-enabled via window._grainEnabled = true).
   if (window._grainEnabled === undefined) window._grainEnabled = false;
@@ -3177,6 +3184,7 @@ function _swipeShowPreview(idx) {
   _swipePreviewIdx = idx;
   // Show chrome during prayer preview
   document.body.classList.remove('chrome-hidden');
+  if (typeof window._resetChromeTimer === 'function') window._resetChromeTimer();
   var ps = prayerSectors[idx];
   var def = ps.def;
   var T = window._prayerTimings;
@@ -3274,6 +3282,8 @@ function _swipeRevert(instant) {
   if (window._prayerTimings && typeof window._displayPrayerTimes === 'function') {
     window._displayPrayerTimes(window._prayerTimings, window._lastHijri || null);
   }
+  // Restart chrome auto-hide timer after swipe settles
+  if (typeof window._resetChromeTimer === 'function') window._resetChromeTimer();
 }
 
 // Touch handlers — bound to document, filtered to clock mode only
