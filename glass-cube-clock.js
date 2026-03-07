@@ -323,14 +323,18 @@ scene.add(solarKey, solarKey.target);
 const plinthSun = new THREE.SpotLight(0xffffff, 0);
 plinthSun.position.set(0, 3.2, -2.8);
 plinthSun.target.position.set(0, -0.03, -2.8);
-plinthSun.angle = 0.10;
-plinthSun.penumbra = 0.35;
+plinthSun.angle = 0.28;
+plinthSun.penumbra = 0.65;
 plinthSun.decay = 1.0;
 plinthSun.distance = 8.0;
 window.plinthSun = plinthSun;
 window.cubeSun = cubeSun;
 window.solarKey = solarKey;
-plinthSun.castShadow = false;
+plinthSun.castShadow = true;
+plinthSun.shadow.mapSize.width = 512;
+plinthSun.shadow.mapSize.height = 512;
+plinthSun.shadow.camera.near = 0.5;
+plinthSun.shadow.camera.far = 8;
 scene.add(plinthSun, plinthSun.target);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.07)); // v57: 0.16→0.07 — deeper darkness outside arch, shadow is absolute
@@ -1744,7 +1748,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   plinthSun.color.copy(_sunColor);
   // Ramp: appear at sunrise (floor 0.15), peak at noon (1.0), fade at sunset
   var _sunRamp = (_dayT >= 0 && _dayT <= 1) ? Math.max(0.15, Math.sin(_dayPhase * Math.PI)) : 0;
-  plinthSun.intensity = _sunRamp * 400.0; // high intensity needed for tight cone to read on plinth
+  plinthSun.intensity = _sunRamp * 280.0; // wider cone = less intensity needed; subtle wash not obvious dot
   window._sunDebug = {
     hourAng: _hourAng,
     beamDir: { x: Math.sin(_hourAng).toFixed(3), z: (-Math.cos(_hourAng)).toFixed(3) },
