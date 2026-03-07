@@ -177,7 +177,7 @@ body::after{display:none;
 
 /* ── Nav (removed — global header replaces it) ── */
 .nav-city-icon{width:clamp(10px,1.8vmin,14px);height:clamp(10px,1.8vmin,14px);color:rgba(232,228,220,.35);margin-bottom:1px}
-.nav-city-name{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65)}
+.nav-city-name{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Buttons ── */
 .btn{
@@ -2211,12 +2211,19 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
   }
 }
 
+var _cityAbbrev = {
+  'Los Angeles':'LA','San Francisco':'SF','New York':'NYC',
+  'Kuala Lumpur':'KL','Buenos Aires':'BA','Rio de Janeiro':'Rio',
+  'Mexico City':'CDMX','Washington':'DC','Salt Lake City':'SLC',
+  'San Diego':'SD','San Antonio':'SA','Las Vegas':'LV'
+};
 function fsSetLocation(text) {
   const el = document.getElementById('fsLocation');
   if(el && text) el.textContent = text;
-  // Short city name (just city, no state) — nav + fullscreen
   if(text) {
-    const short = text.split(',')[0].trim();
+    var short = text.split(',')[0].trim();
+    // Abbreviate long city names for header
+    if(_cityAbbrev[short]) short = _cityAbbrev[short];
     const navCity = document.getElementById('navCityName');
     if(navCity) navCity.textContent = short;
     const fsCity = document.getElementById('fsCityName');
@@ -3283,7 +3290,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=283';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=284';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
