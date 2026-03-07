@@ -1758,7 +1758,7 @@ const _themeMeta = document.querySelector('meta[name="theme-color"]');
   // Ramp: appear at sunrise (floor 0.15), peak at noon (1.0), fade at sunset
   var _sunRamp = (_dayT >= 0 && _dayT <= 1) ? Math.max(0.15, Math.sin(_dayPhase * Math.PI)) : 0;
   // In compass mode: constant warm glow regardless of TOD (qibla light)
-  var _plinthInt = _compassMode ? 180.0 : _sunRamp * 280.0;
+  var _plinthInt = _compassMode ? 140.0 : _sunRamp * 190.0;
   plinthSun.intensity = _plinthInt;
   plinthSun.castShadow = !_compassMode; // shadow flickers with rapid heading changes
   window._sunDebug = {
