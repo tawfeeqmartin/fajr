@@ -673,6 +673,8 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </style>
   <script>
   (function(){
+    // Block scene visibility until splash is done (prevents hand bleed on refresh)
+    window._splashActive = true;
     // Camera params (MUST match glass-cube-clock.js exactly)
     var camPos=[0.2,9.7,15.0], fov=35, lookAt=[0,-0.8,1.0];
     var CUBE_Y=0.57, half=0.6, rot=Math.PI/4;
@@ -1006,7 +1008,11 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         }
         setTimeout(function(){
           splash.style.opacity='0';
-          setTimeout(function(){ splash.remove(); },1400);
+          setTimeout(function(){
+            splash.remove();
+            window._splashActive = false;
+            window.dispatchEvent(new Event('agot:splashdone'));
+          },1400);
         }, HOLD);
         return;
       }
@@ -3669,7 +3675,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=315';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=316';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

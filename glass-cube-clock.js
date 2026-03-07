@@ -68,9 +68,15 @@ if (CONTAINED) {
   CONTAINER.appendChild(renderer.domElement);
 } else {
   const c = renderer.domElement;
-  c.style.cssText = 'position:fixed;top:0;left:0;z-index:0;width:100vw;height:100lvh;';
+  c.style.cssText = 'position:fixed;top:0;left:0;z-index:0;width:100vw;height:100lvh;opacity:0;transition:opacity .25s ease;';
   document.body.appendChild(c);
   _canvasEl = c;
+  var _showCanvasIfReady = function(){
+    if (!window._splashActive && _canvasEl) _canvasEl.style.opacity = '1';
+  };
+  window.addEventListener('agot:splashdone', _showCanvasIfReady, { once:true });
+  // Safety: if splash is absent/disabled, reveal quickly
+  setTimeout(_showCanvasIfReady, 1200);
 }
 
 // FBO render target
