@@ -2433,6 +2433,8 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
   // Store for glass-cube-clock beams
   window._prayerTimings = t;
   window._prayerTimingsReady = true;
+  // Rebuild prayer window arcs for new location (no page refresh needed)
+  if (typeof window.buildPrayerSectors === 'function') window.buildPrayerSectors();
   // Pre-compute Qibla bearing from this location
   if (adhanQiblaAngle === null) {
     var rLat = lat * Math.PI / 180, rLng = lon * Math.PI / 180;
@@ -3276,7 +3278,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=277';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=278';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
