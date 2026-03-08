@@ -2792,12 +2792,12 @@ function _buildCityList(filter) {
       div.textContent = c.name;
     }
     div.onclick = () => _selectCity(c);
-    div.ondblclick = () => { _selectCity(c); closeLocationPicker(); };
+    div.ondblclick = () => _applySelectedCityAndClose(c);
     // Mobile double-tap fallback (iOS Safari may not emit dblclick reliably)
     let _lastTap = 0;
     div.addEventListener('touchend', () => {
       const now = Date.now();
-      if (now - _lastTap < 320) { _selectCity(c); closeLocationPicker(); }
+      if (now - _lastTap < 320) _applySelectedCityAndClose(c);
       _lastTap = now;
     }, { passive: true });
     list.appendChild(div);
@@ -2847,6 +2847,14 @@ function _selectCity(city) {
   }
 }
 
+function _applySelectedCityAndClose(city){
+  _selectCity(city);
+  closeLocationPicker();
+  // Bring chrome back so updated times are immediately visible in context.
+  if (typeof _showChrome === 'function') _showChrome();
+  else document.body.classList.remove('chrome-hidden');
+}
+
 function openLocationPicker() {
   const picker = document.getElementById('locationPicker');
   if (!picker) return;
@@ -2870,6 +2878,9 @@ function closeLocationPicker() {
     _cityTz = _locSelectedCity.tz || null;
     _setPrayerLocation(_locSelectedCity.lat, _locSelectedCity.lon, _locSelectedCity.name);
   }
+  // Make updated times immediately visible in-context.
+  if (typeof _showChrome === 'function') _showChrome();
+  else document.body.classList.remove('chrome-hidden');
 }
 
 function locUseGPS() {
@@ -3769,7 +3780,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=348';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=349';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
