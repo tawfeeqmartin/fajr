@@ -2239,9 +2239,18 @@ function updateNavClock(){
     if(!swipeActive && _pref !== 'auto'){
       // User override must work regardless of city/ramadan state.
       if(_pref === 'iftar'){
-        navLabel='until iftar';
-        navDiff=((maghribS-actualNowS)+86400)%86400;
-        _labelPrayer='Maghrib';
+        // If a prayer is in the urgent red zone, auto-switch back to "next"
+        // so urgency UX still behaves as expected.
+        if (_nextDiff <= 600) {
+          window._countdownPref = 'next';
+          navLabel='until '+_labelName(next.name);
+          navDiff=_nextDiff;
+          _labelPrayer=next.name;
+        } else {
+          navLabel='until iftar';
+          navDiff=((maghribS-actualNowS)+86400)%86400;
+          _labelPrayer='Maghrib';
+        }
       } else {
         navLabel='until '+_labelName(next.name);
         navDiff=_nextDiff;
