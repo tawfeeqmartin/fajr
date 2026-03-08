@@ -142,8 +142,6 @@
 {"imports":{"three":"https://esm.sh/three@0.170.0","three/addons/":"https://esm.sh/three@0.170.0/examples/jsm/"}}
 </script>
 <script>
-// Boot lock: keep canvas hidden until splash exits (prevents premature cube draw)
-document.documentElement.classList.add('booting');
 // Instant dark screen if opening in clock mode — prevents landing page flash
 if(location.hash==='#clock'){document.documentElement.classList.add('clock-direct');document.documentElement.style.cssText='background:var(--bg,#0d0d12);overflow:hidden';}
 </script>
@@ -168,9 +166,6 @@ a,button,input,select,[role="button"]{touch-action:manipulation}
 body.clock-ready{transition:color 1s ease}
 body::after{display:none;
 }
-/* Boot lock: no scene peeking under splash */
-html.booting body > canvas{opacity:0!important}
-html:not(.booting) body > canvas{opacity:1;transition:opacity .25s ease}
 
 /* ── Sticky clock ── */
 /* Clock is a fixed full-viewport background (z-index:0).
@@ -1073,7 +1068,6 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           setTimeout(function(){
             splash.remove();
             window._splashActive = false;
-            document.documentElement.classList.remove('booting');
           },1400);
         }, HOLD);
         return;

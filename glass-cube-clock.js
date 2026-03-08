@@ -1989,10 +1989,7 @@ document.addEventListener('visibilitychange', function() {
   if (!window._sceneReady) {
     window._sceneReady = true;
     window._sceneReadyAt = performance.now();
-    // Failsafe: if splash lifecycle stalls, reveal canvas anyway.
-    setTimeout(function(){
-      try { document.documentElement.classList.remove('booting'); } catch(e) {}
-    }, 7000);
+
   }
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
