@@ -152,7 +152,7 @@ window.addEventListener('orientationchange', function() {
 
 // BACKLIGHT — from behind-right. Illuminates the scene behind the cube so the
 // FBO captures bright content → glass refracts light and looks transparent/glowing.
-const back = new THREE.SpotLight(0x4040a0, 10);
+const back = new THREE.SpotLight(0x4040a0, 50);
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
