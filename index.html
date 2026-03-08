@@ -1520,17 +1520,20 @@ function setNightMode(on){ pageNight=true; }
 var _chromeSwipeGuard = false;
 var _chromeAutoHideMs = 4000;
 var _chromeTimer = null;
+window._countdownUrgent = false; // true while countdown is in red zone
 function _showChrome() {
   document.body.classList.remove('chrome-hidden');
   _resetChromeTimer();
 }
 function _hideChrome() {
   if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
+  if (window._countdownUrgent) return; // keep chrome pinned during urgent countdown
   document.body.classList.add('chrome-hidden');
 }
 function _resetChromeTimer() {
   clearTimeout(_chromeTimer);
   if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
+  if (window._countdownUrgent) return; // no auto-hide while urgent
   _chromeTimer = setTimeout(_hideChrome, _chromeAutoHideMs);
 }
 window._resetChromeTimer = _resetChromeTimer;
@@ -2272,6 +2275,18 @@ function updateNavClock(){
   if (navDiff <= 120) _timeStyle=' style="color:#ff3b30;"';
   else if (navDiff <= 600) _timeStyle=' style="color:#ff453a;"';
   else if (navDiff <= 1200) _timeStyle=' style="color:#ff9f0a;"';
+
+  const _wasUrgent = !!window._countdownUrgent;
+  const _isUrgent = navDiff <= 600; // red zone
+  window._countdownUrgent = _isUrgent;
+  if (_isUrgent) {
+    if (typeof _showChrome === 'function') _showChrome();
+    else document.body.classList.remove('chrome-hidden');
+  } else if (_wasUrgent && typeof _resetChromeTimer === 'function') {
+    // Leaving urgent zone: resume normal chrome auto-hide behavior.
+    _resetChromeTimer();
+  }
+
   const countdownHtml='<div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
   // Update row-1 "until" label
   const fsUntilLabel=document.getElementById('fsCountdownLabel');
