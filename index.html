@@ -659,7 +659,7 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
   padding:10px 12px; margin:-10px -12px; /* larger tap target */
   min-width:120px;
 }
-.fs-countdown .nav-label{font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.10em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;margin-bottom:2px}
+.fs-countdown .nav-label{font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.10em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;margin-top:2px}
 .fs-countdown .nav-time{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);line-height:1;font-variant-numeric:tabular-nums}
 .fs-countdown .nav-time .nav-sec{opacity:.8;font-weight:300}
 /* Hide in compass mode */
@@ -2269,7 +2269,7 @@ function updateNavClock(){
   if (navDiff <= 120) _timeStyle=' style="color:#ff3b30;"';
   else if (navDiff <= 600) _timeStyle=' style="color:#ff453a;"';
   else if (navDiff <= 1200) _timeStyle=' style="color:#ff9f0a;"';
-  const countdownHtml='<div class="nav-label"'+style+'>'+navLabel+'</div><div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
+  const countdownHtml='<div class="nav-time"'+_timeStyle+'>'+timeStr+'</div><div class="nav-label"'+style+'>'+navLabel+'</div>';
   const fsC=document.getElementById('fsCountdown');
   if(fsC){
     fsC.innerHTML = countdownHtml;
@@ -3843,7 +3843,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=374';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=375';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
