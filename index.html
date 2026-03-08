@@ -2773,6 +2773,7 @@ function _cityTimeStr() {
 let _locSelectedCity = null;
 let _locLastClickCity = null;
 let _locLastClickAt = 0;
+let _locPinnedCurrent = null;
 
 var _locSearchResults = [];  // geocoded results appended to filtered list
 var _locSearchTimer = null;
@@ -2786,7 +2787,16 @@ function _buildCityList(filter) {
   // Merge geocoded results (de-dup by name)
   const localNames = new Set(local.map(c => c.name.toLowerCase()));
   const extra = _locSearchResults.filter(c => !localNames.has(c.name.toLowerCase()));
-  const cities = local.concat(extra);
+  let cities = local.concat(extra);
+  // Keep GPS-picked current location pinned in list while picker is open.
+  if (_locPinnedCurrent) {
+    const exists = cities.some(c => c.name === _locPinnedCurrent.name);
+    if (!exists) cities = [_locPinnedCurrent].concat(cities);
+    if (q && !_locPinnedCurrent.name.toLowerCase().includes(q)) {
+      // If query doesn't match pinned row, still keep it visible at top for context.
+      cities = [_locPinnedCurrent].concat(cities.filter(c => c.name !== _locPinnedCurrent.name));
+    }
+  }
   list.innerHTML = '';
   cities.forEach(c => {
     const div = document.createElement('div');
@@ -2913,7 +2923,9 @@ function _applyGpsSelection(lat, lon) {
     tz: _cityTz
   };
   _locSelectedCity = currentCity;
-  _locSearchResults = [currentCity];
+  _locPinnedCurrent = currentCity;
+  _locSearchResults = []; // avoid async geocoder replacing pinned GPS row
+  clearTimeout(_locSearchTimer);
   const inp = document.getElementById('locSearchInput');
   if (inp) inp.value = 'Current Location';
   _buildCityList('Current Location');
@@ -3816,7 +3828,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=356';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=357';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
