@@ -44,7 +44,7 @@ let dpr = calcDpr(W, H);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.toneMapping = THREE.AgXToneMapping;
-renderer.toneMappingExposure = 1.1; // v57: 1.25→0.95 — darken outside arch, dramatic contrast with bright interior
+renderer.toneMappingExposure = 0.95; // v57: 1.25→0.95 — darken outside arch, dramatic contrast with bright interior
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(dpr);
@@ -152,7 +152,7 @@ window.addEventListener('orientationchange', function() {
 
 // BACKLIGHT — from behind-right. Illuminates the scene behind the cube so the
 // FBO captures bright content → glass refracts light and looks transparent/glowing.
-const back = new THREE.SpotLight(0x4040a0, 74);
+const back = new THREE.SpotLight(0x4040a0, 50);
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
@@ -169,7 +169,7 @@ scene.add(back, back.target);
 // GOBO REMOVED v275 — was disabled (scene.add commented out) since v80, shadow map still allocated
 
 // CUBE BACKLIGHT — glass transmission (Swarovski technique)
-const cubeBack = new THREE.SpotLight(0xffeedd, 12.5);
+const cubeBack = new THREE.SpotLight(0xffeedd, 7);
 cubeBack.position.set(0.5, 10, -5);
 cubeBack.target.position.set(0, 0.6, 0);
 cubeBack.angle = 0.18;
@@ -182,7 +182,7 @@ scene.add(cubeBack, cubeBack.target);
 // COLD COUNTER REMOVED v275 — merged into back spot
 
 // VIOLET RIM — Swarovski edge catch — sharpened to actually separate cube from dark bg
-const violetRim = new THREE.SpotLight(0x8055f0, 11);
+const violetRim = new THREE.SpotLight(0x8055f0, 6);
 violetRim.position.set(-4, 9, -2);
 violetRim.target.position.set(0, 0.6, 0);
 violetRim.angle = 0.18; // tighter cone — cleaner rim, no floor spill
@@ -198,7 +198,7 @@ scene.add(violetRim, violetRim.target);
 // PRAYER AMBIENT REMOVED v275 — AmbientLight 0.07 already provides fill
 
 // COOL RIM — catches back edges of cube, separates silhouette from bg
-const rim = new THREE.SpotLight(0x8060c0, 9.8);
+const rim = new THREE.SpotLight(0x8060c0, 5);
 rim.position.set(-1.5, 5.5, -3.5);
 rim.target.position.set(0, 0.6, 0);
 rim.angle = 0.45; rim.penumbra = 0.85;
@@ -208,7 +208,7 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 88, 14); // v170: 35→50 — luminous glass, boosted transmission compensates
+const cubeSun = new THREE.PointLight(0xe8f2ff, 50, 14); // v170: 35→50 — luminous glass, boosted transmission compensates
 cubeSun.position.set(0, 0.2, -2.8);
 scene.add(cubeSun);
 
@@ -296,16 +296,16 @@ const _prayerSlashColor = new THREE.Color(0x111122);
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
 let _prayerSlashIntensity = 0;
-const PRAYER_WASH_MAX = 0.8;   // v8d: DISABLED — slash is hero, wash was flooding blue/green
-const PRAYER_RIM_MAX = 8.2;    // v8d: Fresnel edge catch on glass cube
-const PRAYER_SLASH_MAX = 34; // v9: boosted intensity
+const PRAYER_WASH_MAX = 0.0;   // v8d: DISABLED — slash is hero, wash was flooding blue/green
+const PRAYER_RIM_MAX = 5.0;    // v8d: Fresnel edge catch on glass cube
+const PRAYER_SLASH_MAX = 25.0; // v9: boosted intensity
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
 // ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
 const fogLayerMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
-    uOpacity: { value: 0.17 }, // deeper pool — feels like the floor breathes
+    uOpacity: { value: 0.27 }, // deeper pool — feels like the floor breathes
     uColor:   { value: new THREE.Color(0x1a2888) }, // richer indigo, less cyan
   },
   vertexShader: `
@@ -336,7 +336,7 @@ scene.add(fogLayerMesh);
 const warmFogMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime:    { value: 0 },
-    uOpacity: { value: 0.11 },  // v56: 0.07→0.09 — lower frame breathes, not dead
+    uOpacity: { value: 0.09 },  // v56: 0.07→0.09 — lower frame breathes, not dead
     uColor:   { value: new THREE.Color(0x9e4200) }, // deep amber, not blown out
   },
   vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
@@ -362,7 +362,7 @@ scene.add(warmFogMesh);
 // Gives the shaft air-mass: light you feel, not just see.
 // Positioned along beam from (-2, 16, 5) → (0.5, 0, 1.5), mid-column at y≈6.
 const godRayMat = new THREE.ShaderMaterial({
-  uniforms: { uTime: { value: 0 }, uOpacity: { value: 0.12 } },
+  uniforms: { uTime: { value: 0 }, uOpacity: { value: 0.14 } },
   vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
   fragmentShader: `
     uniform float uTime, uOpacity;
@@ -410,7 +410,7 @@ const _shaftMat = new THREE.ShaderMaterial({
   uniforms: {
     time: { value: 0 },
     color: { value: new THREE.Color(0xffc870) },
-    op: { value: 0.045 }
+    op: { value: 0.07 }
   },
   vertexShader: `
     varying vec2 vUv;
@@ -579,7 +579,7 @@ const dichroicFrag = `
     // Bottom-face attenuation: reduce transmission where normal faces down (cubeSun direct hit)
     // Bottom-face attenuation: strong clamp preserves prismatic color in the hotspot
     float bottomAtten = 1.0 - 0.55 * smoothstep(-0.3, -0.95, Nw.y);
-    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 4.3 * bottomAtten;
+    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 2.8 * bottomAtten;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
     col = mix(col, col * irid * 1.4, diagF * 0.22);
@@ -653,17 +653,17 @@ const cubeMat = new THREE.ShaderMaterial({
   uniforms: {
     uScene:   { value: null },
     uRes:     { value: new THREE.Vector2(W * dpr, H * dpr) },
-    uIorR:    { value: 1.39 },
+    uIorR:    { value: 1.50 },
     uIorG:    { value: 1.56 },
-    uIorB:    { value: 1.9 },
-    uAb:      { value: 0.18 },
-    uDich:    { value: 1.2 },
-    uFresnel: { value: 2.35 },
+    uIorB:    { value: 1.63 },
+    uAb:      { value: 0.09 },
+    uDich:    { value: 0.70 },
+    uFresnel: { value: 4.0 },
     uTime:    { value: 0 },
     uAspect:  { value: W / H },
     uSpecLightPos: { value: new THREE.Vector3(2.5, 4.0, 2.5) },
     uCamWorldPos:  { value: new THREE.Vector3() },
-    uSpecIntensity: { value: 4.9 },
+    uSpecIntensity: { value: 2.8 },
     uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
     // CubeEnvMap uniforms removed — no probes
   },
@@ -691,7 +691,7 @@ const PODIUM_H = 20; // tall enough to extend past any visible floor
 // High clearcoat + low roughness = glass-like specular reflections on column faces.
 // Podium materials reverted to pre-reactive state — static emissive, no envMap reactivity
 // Podium materials: polished obsidian. Top face = high clearcoat for light pools.
-const podiumBase = { roughness: 0.2, metalness: 0.13, clearcoat: 0.82, clearcoatRoughness: 0.05, color: 0x1a1a28, fog: false }; // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
+const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoatRoughness: 0.12, color: 0x1a1a28, fog: false }; // v7: 0x12121c→0x2a2a3a — lift from near-black so colored SpotLights can paint it (PBR: diffuse = light×surface)
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
@@ -713,7 +713,7 @@ scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotate
 // ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
 // Just two scene lights to illuminate the podium surface. No material changes.
 // Warm SpotLight: hits the front face (camera-visible) from above-forward
-const podiumFrontWash = new THREE.SpotLight(0xc0a880, 9.5);
+const podiumFrontWash = new THREE.SpotLight(0xc0a880, 12);
 podiumFrontWash.position.set(0, 4.0, 6.0);
 podiumFrontWash.target.position.set(0, -2.5, 0);
 podiumFrontWash.angle = 0.50; podiumFrontWash.penumbra = 0.75;
@@ -732,7 +732,7 @@ prayerGlow.castShadow = false;
 scene.add(prayerGlow);
 const _prayerGlowColor = new THREE.Color(0x111122);
 let _prayerGlowIntensity = 0;
-const PRAYER_GLOW_MAX = 1.8; // v8d: barely-there inner glow — cube tint only
+const PRAYER_GLOW_MAX = 0.8; // v8d: barely-there inner glow — cube tint only
 
 // ─── SPECTRAL CLOCK HANDS ─────────────────────────────────────────────────────
 // Three floor rays as H / M / S clock hands, synced to real time.
@@ -745,7 +745,7 @@ const FRAG = `
   uniform vec3 c1,c2; uniform float op; varying vec2 vUv;
   void main(){
     vec3 col=mix(c1,c2,pow(clamp(vUv.y,0.,1.),0.6));
-    float sx=exp(-pow((vUv.x-0.5)*1.45,2.0));  // 4.8→5.6 — tighter beam, precision optics feel
+    float sx=exp(-pow((vUv.x-0.5)*5.6,2.0));  // 4.8→5.6 — tighter beam, precision optics feel
     float sy=smoothstep(0.0,0.08,vUv.y)*smoothstep(1.0,0.36,vUv.y);
     gl_FragColor=vec4(col,sx*sy*op);
   }
@@ -757,7 +757,7 @@ const FRAG_SOFT = `
   uniform vec3 c1,c2; uniform float op; varying vec2 vUv;
   void main(){
     vec3 col=mix(c1,c2,pow(clamp(vUv.y,0.,1.),0.6));
-    float sx=exp(-pow((vUv.x-0.5)*1.6,2.0));
+    float sx=exp(-pow((vUv.x-0.5)*2.2,2.0));
     float sy=smoothstep(0.0,0.08,vUv.y)*smoothstep(1.0,0.36,vUv.y);
     gl_FragColor=vec4(col,sx*sy*op);
   }
@@ -847,7 +847,7 @@ const FRAG_PRISM_FAN = `
       col = mix(vec3(1.0, 0.5, 0.0), vec3(1.0, 0.15, 0.1), (t2-0.8) / 0.2);
     }
     // Caustic shimmer
-    float shimmer = 0.9 + 0.1 * sin(r * 72 + time * 0.5 + theta * 3.0);
+    float shimmer = 0.9 + 0.1 * sin(r * 40.0 + time * 0.5 + theta * 3.0);
     float bandIntensity = 1.0 - 0.3 * pow(abs(fanPos), 2.0);
     gl_FragColor = vec4(col * shimmer, radial * fanMask * bandIntensity * cubeIntensity * op);
   }
@@ -1191,7 +1191,7 @@ function makeSectorGeom(radius, thetaHalf, segments) {
 }
 
 const SECTOR_RADIUS = 9.12;  // matches second-hand length
-const OP_ACTIVE = 1.85;
+const OP_ACTIVE = 1.2;
 
 
 var prayerSectors = [];
@@ -1335,7 +1335,7 @@ prismGroup.add(_thirdDisc);
 
 
 
-const OP_STEP = 0.16; // intensity drop per consecutive prayer
+const OP_STEP = 0.22; // intensity drop per consecutive prayer
 const PRAYER_BLEND_MIN = 10; // minutes before boundary to crossfade active→next
 
 function updatePrayerWindows(now) {
@@ -3279,7 +3279,7 @@ function _ensurePrayerDotsEl() {
   if (_prayerDotsEl) return;
   _prayerDotsEl = document.createElement('div');
   _prayerDotsEl.id = '_prayerDots';
-  _prayerDotsEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 76px);left:50%;transform:translateX(-50%);z-index:951;display:flex;gap:6px;align-items:center;justify-content:center;pointer-events:none;transition:opacity .4s ease;opacity:0';
+  _prayerDotsEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 90px);left:50%;transform:translateX(-50%);z-index:951;display:flex;gap:6px;align-items:center;justify-content:center;pointer-events:none;transition:opacity .4s ease;opacity:0';
   document.body.appendChild(_prayerDotsEl);
 }
 
@@ -3287,7 +3287,7 @@ function _ensureCurrentPrayerLabel() {
   if (_currentPrayerLabelEl) return;
   _currentPrayerLabelEl = document.createElement('div');
   _currentPrayerLabelEl.id = '_currentPrayerLabel';
-  _currentPrayerLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 92px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .4s ease;opacity:0;font-family:var(--font)';
+  _currentPrayerLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 106px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .4s ease;opacity:0;font-family:var(--font)';
   document.body.appendChild(_currentPrayerLabelEl);
 }
 
@@ -3337,10 +3337,6 @@ function _showCurrentPrayerLabel() {
   _updatePrayerDots(idx);
   _prayerDotsEl.style.opacity = '1';
   _prayerDotsEl.style.display = 'flex';
-
-  // Hide mode label while prayer label is showing (avoids overlap)
-  var _ml = document.getElementById('modeLabel');
-  if (_ml) _ml.style.opacity = '0';
 
   // Fade out after 4s (matches chrome timing)
   clearTimeout(_currentPrayerLabelTimer);
@@ -3395,7 +3391,7 @@ function _swipeShowPreview(idx) {
   if (!_swipeLabelEl) {
     _swipeLabelEl = document.createElement('div');
     _swipeLabelEl.id = '_swipeLabel';
-    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 92px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
+    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 106px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
     document.body.appendChild(_swipeLabelEl);
   }
   var c = new THREE.Color(def.color);
