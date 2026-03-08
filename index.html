@@ -643,6 +643,11 @@ body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
 .header-row1,.header-row2{display:flex;justify-content:space-between;align-items:flex-end;line-height:1;position:relative}
 .header-until-label{font-family:var(--font);font-size:clamp(.6rem,1.35vw,.7rem);font-weight:300;letter-spacing:.08em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;text-align:right}
 body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
+/* Urgent countdown mode: keep only countdown numerals visible while chrome is hidden */
+body.chrome-hidden.countdown-urgent #headerBar{opacity:1!important;pointer-events:none}
+body.chrome-hidden.countdown-urgent #headerBar .header-row1,
+body.chrome-hidden.countdown-urgent #headerBar #fsLocation{opacity:0!important}
+body.chrome-hidden.countdown-urgent #headerBar #fsCountdown{opacity:1!important}
 body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 .fs-city-block{display:none}
 .fs-city-time{
@@ -1527,13 +1532,11 @@ function _showChrome() {
 }
 function _hideChrome() {
   if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
-  if (window._countdownUrgent) return; // keep chrome pinned during urgent countdown
   document.body.classList.add('chrome-hidden');
 }
 function _resetChromeTimer() {
   clearTimeout(_chromeTimer);
   if(_currentMode !== 'clock' && _currentMode !== 'compass') return;
-  if (window._countdownUrgent) return; // no auto-hide while urgent
   _chromeTimer = setTimeout(_hideChrome, _chromeAutoHideMs);
 }
 window._resetChromeTimer = _resetChromeTimer;
@@ -2276,16 +2279,9 @@ function updateNavClock(){
   else if (navDiff <= 600) _timeStyle=' style="color:#ff453a;"';
   else if (navDiff <= 1200) _timeStyle=' style="color:#ff9f0a;"';
 
-  const _wasUrgent = !!window._countdownUrgent;
   const _isUrgent = navDiff <= 600; // red zone
   window._countdownUrgent = _isUrgent;
-  if (_isUrgent) {
-    if (typeof _showChrome === 'function') _showChrome();
-    else document.body.classList.remove('chrome-hidden');
-  } else if (_wasUrgent && typeof _resetChromeTimer === 'function') {
-    // Leaving urgent zone: resume normal chrome auto-hide behavior.
-    _resetChromeTimer();
-  }
+  document.body.classList.toggle('countdown-urgent', _isUrgent);
 
   const countdownHtml='<div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
   // Update row-1 "until" label
