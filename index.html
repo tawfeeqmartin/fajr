@@ -675,7 +675,10 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     @keyframes splashDraw { to { stroke-dashoffset: 0; } }
     @keyframes splashTextIn { from { opacity:0; } to { opacity:1; } }
   </style>
-  <div id="splashBismillah" style="position:absolute;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;pointer-events:none;z-index:3;opacity:1;padding:0 clamp(14px,4vw,34px);">
+  <div id="splashTitle" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + clamp(12px,2.5vmin,26px));left:0;right:0;pointer-events:none;z-index:3;text-align:center;opacity:1;">
+    <div style="font-family:var(--font);font-size:clamp(2.2rem,6vw,3.8rem);font-weight:200;letter-spacing:-.02em;color:rgba(232,228,220,.9);line-height:1;animation:splashTextIn 1.05s ease .02s both">A Gift of Time.</div>
+  </div>
+  <div id="splashBismillah" style="position:absolute;top:calc(env(safe-area-inset-top,12px) + clamp(88px,15vmin,182px));left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;pointer-events:none;z-index:3;opacity:1;padding:0 clamp(14px,4vw,34px);">
     <div style="font-family:var(--font);font-size:clamp(.75rem,1.6vmin,1.5rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);text-align:center;line-height:1.35;animation:splashTextIn 1.05s ease .08s both">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <div style="font-family:var(--font);font-size:clamp(.65rem,1.3vmin,1.2rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.55);animation:splashTextIn 1.05s ease .58s both">In the name of Allah, the Most Gracious, the Most Merciful</div>
     <div style="margin-top:6px;font-family:var(--font);font-size:clamp(.72rem,1.45vmin,1.2rem);font-weight:300;letter-spacing:.04em;color:rgba(232,228,220,.62);text-align:center;line-height:1.45;animation:splashTextIn 1.15s ease 1.10s both">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًا مَّوْقُوتًا</div>
@@ -3758,7 +3761,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=345';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=346';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
