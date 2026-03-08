@@ -624,7 +624,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;padding:clamp(6px,1vmin,10px) clamp(6px,1.5vmin,12px) 0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .4s ease;border-top:1px solid rgba(232,228,220,.08);display:none}
 .fs-header .fs-datetime{font-size:clamp(.75rem,1.6vmin,1.5rem);font-weight:300;letter-spacing:.06em}
 /* Hijri date — top center, standalone */
-.hijri-top{text-align:center;pointer-events:none;font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.5);line-height:1;transition:opacity .4s ease;opacity:1;white-space:nowrap}
+.hijri-top{position:absolute;left:50%;transform:translateX(-50%);bottom:0;text-align:center;pointer-events:none;font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.5);line-height:1;transition:opacity .4s ease;opacity:1;white-space:nowrap}
 body.chrome-hidden .hijri-top{opacity:0!important;pointer-events:none}
 body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
 .fs-header .fs-location{display:none}
@@ -640,12 +640,13 @@ body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
   padding:0 clamp(1rem,3vmin,1.5rem);
   pointer-events:none;transition:opacity .4s ease;
 }
-.header-row1,.header-row2{display:flex;justify-content:space-between;align-items:flex-end;line-height:1}
+.header-row1,.header-row2{display:flex;justify-content:space-between;align-items:flex-end;line-height:1;position:relative}
 .header-until-label{font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.10em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;text-align:right}
 body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
 body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 .fs-city-block{display:none}
 .fs-city-time{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:0;
   font-family:var(--font);font-size:clamp(.8rem,2vw,1rem);font-weight:300;
   letter-spacing:.06em;color:rgba(232,228,220,.65);
   font-variant-numeric:tabular-nums;
@@ -3845,7 +3846,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=376';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=377';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
