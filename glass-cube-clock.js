@@ -228,8 +228,9 @@ window.plinthSun = plinthSun;
 window.cubeSun = cubeSun;
 // window.solarKey removed v275
 plinthSun.castShadow = true;
-plinthSun.shadow.mapSize.width = 512;
-plinthSun.shadow.mapSize.height = 512;
+plinthSun.shadow.mapSize.width = 384;
+plinthSun.shadow.mapSize.height = 384;
+plinthSun.shadow.radius = 5;
 plinthSun.shadow.camera.near = 0.5;
 plinthSun.shadow.camera.far = 8;
 scene.add(plinthSun, plinthSun.target);
