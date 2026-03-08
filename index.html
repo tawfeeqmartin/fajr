@@ -183,7 +183,7 @@ body::after{display:none;
 /* landing-prayer-bar removed — replaced by .header-prayer-bar */
 
 /* ── Nav (removed — global header replaces it) ── */
-.nav-city-icon{width:clamp(10px,1.8vmin,14px);height:clamp(10px,1.8vmin,14px);color:rgba(232,228,220,.35);margin-bottom:1px}
+.nav-city-icon{width:clamp(12px,2vmin,16px);height:clamp(12px,2vmin,16px);color:rgba(232,228,220,.45);margin-bottom:1px}
 .nav-city-name{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Buttons ── */
@@ -659,7 +659,7 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
   padding:10px 12px; margin:-10px -12px; /* larger tap target */
   min-width:120px;
 }
-.fs-countdown .nav-label{font-size:clamp(.5rem,1.2vw,.55rem);font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.4);line-height:1;margin-bottom:3px}
+.fs-countdown .nav-label{font-size:clamp(.55rem,1.3vw,.65rem);font-weight:300;letter-spacing:.10em;text-transform:uppercase;color:rgba(232,228,220,.45);line-height:1;margin-bottom:2px}
 .fs-countdown .nav-time{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);line-height:1;font-variant-numeric:tabular-nums}
 .fs-countdown .nav-time .nav-sec{opacity:.8;font-weight:300}
 /* Hide in compass mode */
@@ -3843,7 +3843,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=371';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=372';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
