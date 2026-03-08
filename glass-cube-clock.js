@@ -3322,7 +3322,7 @@ function _showCurrentPrayerLabel() {
   var _cpTimeStr = (_cpH < 10 ? '0' : '') + _cpH + ':' + (_cpMn < 10 ? '0' : '') + _cpMn;
   var _cpInfo = def.isForbidden ? 'Avoid prayer'
     : (def.name === 'Dhuha' || def.name === 'Qiyam') ? 'Sunnah Mu\'akkadah'
-    : (def.name === 'Fajr' || def.name === 'Dhuhr' || def.name === 'Asr' || def.name === 'Maghrib' || def.name === 'Isha') ? 'Obligatory' : '';
+    : (def.name === 'Fajr' || def.name === 'Dhuhr' || def.name === 'Asr' || def.name === 'Maghrib' || def.name === 'Isha') ? 'Obligatory Prayer' : '';
   var _cpInfoColor = def.isForbidden ? '#888' : 'rgba(232,228,220,.45)';
   var _cpInfoDiv = _cpInfo ? '<div style="font-size:clamp(.5rem,.9vw,.6rem);font-weight:300;letter-spacing:.08em;color:' + _cpInfoColor + ';margin-top:3px">' + _cpInfo + '</div>' : '';
 
@@ -3400,15 +3400,15 @@ function _swipeShowPreview(idx) {
   }
   var c = new THREE.Color(def.color);
   var hex = '#' + c.getHexString();
-  var _subtitleText = def.isForbidden
-    ? '<div style="font-size:clamp(.55rem,1vw,.65rem);font-weight:400;letter-spacing:.1em;color:#888;opacity:.7;margin-top:2px">Avoid prayer</div>'
-    : (def.name === 'Dhuha' || def.name === 'Qiyam')
-      ? '<div style="font-size:clamp(.5rem,.9vw,.6rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.45);margin-top:3px">Sunnah Mu\'akkadah</div>'
-      : '';
+  var _infoText = def.isForbidden ? 'Avoid prayer'
+    : (def.name === 'Dhuha' || def.name === 'Qiyam') ? 'Sunnah Mu\'akkadah'
+    : (def.name === 'Fajr' || def.name === 'Dhuhr' || def.name === 'Asr' || def.name === 'Maghrib' || def.name === 'Isha') ? 'Obligatory Prayer' : '';
+  var _infoColor = def.isForbidden ? '#888' : 'rgba(232,228,220,.45)';
+  var _infoDiv = _infoText ? '<div style="font-size:clamp(.5rem,.9vw,.6rem);font-weight:300;letter-spacing:.08em;color:' + _infoColor + ';margin-top:3px">' + _infoText + '</div>' : '';
   _swipeLabelEl.innerHTML =
     '<div style="font-size:clamp(.6rem,1.2vw,.75rem);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:' + hex + ';opacity:.7;margin-bottom:2px">' + def.name + '</div>' +
     '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>' +
-    _subtitleText;
+    _infoDiv;
   _swipeLabelEl.style.display = 'block';
   _swipeLabelEl.style.opacity = '1';
 
