@@ -2900,14 +2900,33 @@ function closeLocationPicker() {
   else document.body.classList.remove('chrome-hidden');
 }
 
+function _applyGpsSelection(lat, lon) {
+  adhanQiblaAngle = null;
+  _cityTz = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+
+  // Build/select a "current location" row in the picker list and keep picker open.
+  const currentCity = {
+    name: 'Current Location',
+    sub: null,
+    lat: lat,
+    lon: lon,
+    tz: _cityTz
+  };
+  _locSelectedCity = currentCity;
+  _locSearchResults = [currentCity];
+  const inp = document.getElementById('locSearchInput');
+  if (inp) inp.value = 'Current Location';
+  _buildCityList('Current Location');
+
+  // Apply times immediately while keeping dialog open so user sees context.
+  _setPrayerLocation(lat, lon, 'Current Location');
+  if (typeof _showChrome === 'function') _showChrome();
+}
+
 function locUseGPS() {
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
-    _locSelectedCity = null;
-    adhanQiblaAngle = null;
-    _cityTz = null; // device timezone = no offset needed
-    _setPrayerLocation(pos.coords.latitude, pos.coords.longitude);
-    closeLocationPicker();
+    _applyGpsSelection(pos.coords.latitude, pos.coords.longitude);
   }, () => {}, { maximumAge: 0, timeout: 10000 });
 }
 
@@ -3797,7 +3816,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=355';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=356';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
