@@ -2549,6 +2549,14 @@ function _computePrayerTimes(lat, lon) {
   const pt = new adhan.PrayerTimes(coords, date, params);
   const sunnah = new adhan.SunnahTimes(pt);
   const fmt = d => {
+    try {
+      if (_cityTz) {
+        return d.toLocaleTimeString('en-GB', {
+          timeZone: _cityTz,
+          hour: '2-digit', minute: '2-digit', hour12: false
+        });
+      }
+    } catch(e) {}
     const h = d.getHours(), m = d.getMinutes();
     return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
   };
@@ -3750,7 +3758,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=344';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=345';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
