@@ -183,7 +183,7 @@ body::after{display:none;
 /* landing-prayer-bar removed — replaced by .header-prayer-bar */
 
 /* ── Nav (removed — global header replaces it) ── */
-.nav-city-icon{width:clamp(12px,2vmin,16px);height:clamp(12px,2vmin,16px);color:rgba(232,228,220,.45);margin-bottom:0;flex-shrink:0}
+.nav-city-icon{width:clamp(10px,1.8vmin,14px);height:clamp(10px,1.8vmin,14px);color:rgba(232,228,220,.45);flex-shrink:0;pointer-events:auto;cursor:pointer}
 .nav-city-name{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Buttons ── */
@@ -624,7 +624,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;padding:clamp(6px,1vmin,10px) clamp(6px,1.5vmin,12px) 0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .4s ease;border-top:1px solid rgba(232,228,220,.08);display:none}
 .fs-header .fs-datetime{font-size:clamp(.75rem,1.6vmin,1.5rem);font-weight:300;letter-spacing:.06em}
 /* Hijri date — top center, standalone */
-.hijri-top{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;font-family:var(--font);font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);line-height:1;transition:opacity .4s ease;opacity:1;white-space:nowrap}
+.hijri-top{text-align:center;pointer-events:none;font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.5);line-height:1;transition:opacity .4s ease;opacity:1;white-space:nowrap}
 body.chrome-hidden .hijri-top{opacity:0!important;pointer-events:none}
 body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
 .fs-header .fs-location{display:none}
@@ -636,30 +636,26 @@ body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
 #headerBar{
   position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(.6rem,1.5vmin,1rem));
   left:0;right:0;z-index:210;
-  height:2.5rem;
+  display:flex;flex-direction:column;gap:3px;
+  padding:0 clamp(1rem,3vmin,1.5rem);
   pointer-events:none;transition:opacity .4s ease;
 }
+.header-row1,.header-row2{display:flex;justify-content:space-between;align-items:flex-end;line-height:1}
+.header-until-label{font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.10em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;text-align:right}
 body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
 body.mode-info #headerBar{opacity:0!important;pointer-events:none}
-.fs-city-block{
-  position:absolute;left:clamp(1rem,3vmin,1.5rem);bottom:0;
-  display:flex;flex-direction:row;align-items:flex-end;gap:4px;line-height:1;
-}
+.fs-city-block{display:none}
 .fs-city-time{
-  position:absolute;left:50%;bottom:0;transform:translateX(-50%);
   font-family:var(--font);font-size:clamp(.8rem,2vw,1rem);font-weight:300;
   letter-spacing:.06em;color:rgba(232,228,220,.65);
   font-variant-numeric:tabular-nums;
   white-space:nowrap;line-height:1;
 }
 .fs-countdown{
-  position:absolute;right:clamp(1rem,3vmin,1.5rem);bottom:0;
   text-align:right;line-height:1;font-family:var(--font);
   pointer-events:auto;cursor:pointer;user-select:none;
-  padding:10px 12px; margin:-10px -12px; /* larger tap target */
-  min-width:120px;
 }
-.fs-countdown .nav-label{font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.10em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;margin-top:2px}
+/* nav-label now in header-row1 via .header-until-label */
 .fs-countdown .nav-time{font-size:clamp(.8rem,2vw,1rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);line-height:1;font-variant-numeric:tabular-nums}
 .fs-countdown .nav-time .nav-sec{opacity:.8;font-weight:300}
 /* Hide in compass mode */
@@ -1073,13 +1069,16 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 </div>
 <!-- Global Header Bar (shared across all modes) -->
 <div id="headerBar">
-  <div id="fsCityBlock" class="fs-city-block" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto">
-    <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-    <span id="fsCityName" class="nav-city-name">—</span>
+  <div class="header-row1">
+    <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    <div id="hijriTop" class="hijri-top"></div>
+    <div id="fsCountdownLabel" class="header-until-label"></div>
   </div>
-  <div id="fsCityTime" class="fs-city-time"></div>
-  <div id="fsCountdown" class="fs-countdown"></div>
-  <div id="hijriTop" class="hijri-top"></div>
+  <div class="header-row2">
+    <span id="fsCityName" class="nav-city-name" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto">—</span>
+    <div id="fsCityTime" class="fs-city-time"></div>
+    <div id="fsCountdown" class="fs-countdown"></div>
+  </div>
 </div>
 <div id="fsHeader" class="fs-header">
   <div class="fs-datetime" id="fsDateTime"></div>
@@ -2132,7 +2131,7 @@ function _handleCountdownToggle(e){
 
   // Intuitive toggle: if currently showing iftar, go to next; if showing next, go to iftar.
   // 'auto' is startup behavior only; once user taps, we switch to explicit mode.
-  var labelEl = fsC.querySelector('.nav-label');
+  var labelEl = document.getElementById('fsCountdownLabel');
   var label = (labelEl && labelEl.textContent || '').toLowerCase();
   if (window._countdownPref === 'auto') {
     window._countdownPref = label.indexOf('iftar') !== -1 ? 'next' : 'iftar';
@@ -2269,7 +2268,10 @@ function updateNavClock(){
   if (navDiff <= 120) _timeStyle=' style="color:#ff3b30;"';
   else if (navDiff <= 600) _timeStyle=' style="color:#ff453a;"';
   else if (navDiff <= 1200) _timeStyle=' style="color:#ff9f0a;"';
-  const countdownHtml='<div class="nav-time"'+_timeStyle+'>'+timeStr+'</div><div class="nav-label"'+style+'>'+navLabel+'</div>';
+  const countdownHtml='<div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
+  // Update row-1 "until" label
+  const fsUntilLabel=document.getElementById('fsCountdownLabel');
+  if(fsUntilLabel) fsUntilLabel.innerHTML=navLabel;
   const fsC=document.getElementById('fsCountdown');
   if(fsC){
     fsC.innerHTML = countdownHtml;
@@ -3843,7 +3845,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=375';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=376';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
