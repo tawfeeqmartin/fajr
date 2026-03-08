@@ -623,7 +623,7 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-header .fs-datetime{font-size:clamp(.75rem,1.6vmin,1.5rem);font-weight:300;letter-spacing:.06em}
 /* Hijri date — top center, standalone */
 .hijri-top{position:fixed;top:calc(env(safe-area-inset-top,12px) + 20px);left:0;right:0;text-align:center;z-index:210;pointer-events:none;font-family:var(--font);font-size:clamp(.7rem,1.4vmin,.9rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.5);transition:opacity .4s ease;opacity:1}
-body.chrome-hidden .hijri-top{opacity:0;transition:opacity .4s ease 4s}
+body.chrome-hidden .hijri-top{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
 .fs-header .fs-location{display:none}
 /* Hidden — replaced by bottom prayer dots + swipe label (v361). Keep markup for future use. */
@@ -3836,7 +3836,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=363';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=364';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
