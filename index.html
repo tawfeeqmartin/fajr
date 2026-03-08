@@ -3010,7 +3010,13 @@ function _updateCompassDist() {
   var mi = km * 0.621371;
   el.textContent = Math.round(km).toLocaleString() + ' km · ' + Math.round(mi).toLocaleString() + ' mi to Makkah';
 }
+function _isFiniteCoord(lat, lon) {
+  return Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+}
+
 function _setPrayerLocation(lat, lon, locationName, _skipSave) {
+  lat = Number(lat); lon = Number(lon);
+  if (!_isFiniteCoord(lat, lon)) return;
   _userLatDeg = lat; _userLonDeg = lon;
   // Reset preview/simulated time state on city switch so windows reflect current city time.
   window._swipeTimeOverride = null;
@@ -3045,8 +3051,13 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
       }
     }).catch(()=>{});
 
-  // Skip reverse geocoding in startup path (third-party 400s were spamming console).
-  if (!locationName) fsSetLocation('Current Location');
+  // Reverse geocode for nice location name
+  fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
+    .then(r=>r.json()).then(g=>{
+      const city = g.city || g.locality || '';
+      const region = g.principalSubdivisionCode ? g.principalSubdivisionCode.split('-').pop() : '';
+      if(city) fsSetLocation(region ? `${city}, ${region}` : city);
+    }).catch(()=>{});
 }
 
 // Alias for fullscreen code that calls fsSetPrayerTimes
