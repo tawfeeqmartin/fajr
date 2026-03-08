@@ -2272,7 +2272,7 @@ function updateNavClock(){
   const countdownHtml='<div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
   // Update row-1 "until" label
   const fsUntilLabel=document.getElementById('fsCountdownLabel');
-  if(fsUntilLabel) fsUntilLabel.innerHTML=navLabel;
+  if(fsUntilLabel) fsUntilLabel.innerHTML = '<span'+style+'>'+navLabel+'</span>';
   const fsC=document.getElementById('fsCountdown');
   if(fsC){
     fsC.innerHTML = countdownHtml;
