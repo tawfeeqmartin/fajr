@@ -3268,6 +3268,86 @@ Object.defineProperty(window, '_swipeRevertTimer', {
 });
 var _swipeLabelEl = null;
 var _swipeFadeTimer = null;
+var _prayerDotsEl = null;
+var _currentPrayerLabelEl = null;
+var _currentPrayerLabelTimer = null;
+
+// ── Current Prayer Label + 7 Dots ──
+// Shows the active prayer name + dot indicators at rest (not swiping).
+// During swipe, _swipeShowPreview takes over the label; dots update to match.
+function _ensurePrayerDotsEl() {
+  if (_prayerDotsEl) return;
+  _prayerDotsEl = document.createElement('div');
+  _prayerDotsEl.id = '_prayerDots';
+  _prayerDotsEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 62px);left:50%;transform:translateX(-50%);z-index:951;display:flex;gap:6px;align-items:center;justify-content:center;pointer-events:none;transition:opacity .4s ease;opacity:0';
+  document.body.appendChild(_prayerDotsEl);
+}
+
+function _ensureCurrentPrayerLabel() {
+  if (_currentPrayerLabelEl) return;
+  _currentPrayerLabelEl = document.createElement('div');
+  _currentPrayerLabelEl.id = '_currentPrayerLabel';
+  _currentPrayerLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 78px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .4s ease;opacity:0;font-family:var(--font)';
+  document.body.appendChild(_currentPrayerLabelEl);
+}
+
+function _updatePrayerDots(activeIdx) {
+  _ensurePrayerDotsEl();
+  if (!prayerSectors.length) return;
+  var html = '';
+  for (var i = 0; i < prayerSectors.length; i++) {
+    var isActive = (i === activeIdx);
+    var c = new THREE.Color(prayerSectors[i].def.color);
+    var hex = '#' + c.getHexString();
+    var size = isActive ? '7px' : '5px';
+    var opacity = isActive ? '1' : '0.35';
+    var bg = isActive ? hex : 'rgba(232,228,220,.5)';
+    html += '<span style="width:' + size + ';height:' + size + ';border-radius:50%;background:' + bg + ';opacity:' + opacity + ';display:inline-block;transition:all .3s ease"></span>';
+  }
+  _prayerDotsEl.innerHTML = html;
+}
+
+function _showCurrentPrayerLabel() {
+  if (!prayerSectors.length) return;
+  // Don't show during swipe preview
+  if (_swipePreviewIdx >= 0) return;
+  var idx = _swipeGetCurrentIdx();
+  var ps = prayerSectors[idx];
+  if (!ps) return;
+  var def = ps.def;
+  var c = new THREE.Color(def.color);
+  var hex = '#' + c.getHexString();
+
+  _ensureCurrentPrayerLabel();
+  _currentPrayerLabelEl.innerHTML =
+    '<div style="font-size:clamp(.55rem,1vw,.65rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:' + hex + ';opacity:.65">' + def.name + '</div>';
+  _currentPrayerLabelEl.style.opacity = '1';
+  _currentPrayerLabelEl.style.display = 'block';
+
+  _updatePrayerDots(idx);
+  _prayerDotsEl.style.opacity = '1';
+  _prayerDotsEl.style.display = 'flex';
+
+  // Hide mode label while prayer label is showing (avoids overlap)
+  var _ml = document.getElementById('modeLabel');
+  if (_ml) _ml.style.opacity = '0';
+
+  // Fade out after 4s (matches chrome timing)
+  clearTimeout(_currentPrayerLabelTimer);
+  _currentPrayerLabelTimer = setTimeout(function() {
+    if (_currentPrayerLabelEl) _currentPrayerLabelEl.style.opacity = '0';
+    if (_prayerDotsEl) _prayerDotsEl.style.opacity = '0';
+  }, 4000);
+}
+
+// Hook into chrome show — when chrome appears, show current prayer label too
+var _origShowChrome = window._showChrome;
+if (typeof _origShowChrome === 'function') {
+  window._showChrome = function() {
+    _origShowChrome();
+    if (!_compassMode && _swipePreviewIdx < 0) _showCurrentPrayerLabel();
+  };
+}
 
 function _swipeGetCurrentIdx() {
   // Find which prayer is currently active (live)
@@ -3322,6 +3402,14 @@ function _swipeShowPreview(idx) {
   _swipeLabelEl.style.display = 'block';
   _swipeLabelEl.style.opacity = '1';
 
+  // Hide current-prayer label during swipe (swipe label takes over)
+  if (_currentPrayerLabelEl) { _currentPrayerLabelEl.style.opacity = '0'; }
+  clearTimeout(_currentPrayerLabelTimer);
+
+  // Update dots to match swipe position
+  _updatePrayerDots(idx);
+  if (_prayerDotsEl) { _prayerDotsEl.style.opacity = '1'; _prayerDotsEl.style.display = 'flex'; }
+
   // Fill the nav pill circle with prayer color
   // Update glow bar to prayer color during swipe
   var _pillSlider = document.getElementById('modePillSlider');
@@ -3375,11 +3463,13 @@ function _swipeRevert(instant) {
   clearTimeout(_swipeRevertTimer);
   _swipeCamTarget = 0; // release camera — will orbit back in sync with tawaf
   if (!instant) _swipeTawafPhase = 1.0; // CCW sweep only on natural revert, not mode switch
-  // Kill label immediately
+  // Kill swipe label immediately
   if (_swipeLabelEl) {
     _swipeLabelEl.style.display = 'none';
     _swipeLabelEl.style.opacity = '0';
   }
+  // Restore current prayer label + dots
+  _showCurrentPrayerLabel();
   // Remove pill fill + tint
   // Glow bar reverts to current prayer color via _displayPrayerTimes re-render
   // Reset prayer bar highlights immediately
