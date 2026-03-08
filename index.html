@@ -3010,7 +3010,13 @@ function _updateCompassDist() {
   var mi = km * 0.621371;
   el.textContent = Math.round(km).toLocaleString() + ' km · ' + Math.round(mi).toLocaleString() + ' mi to Makkah';
 }
+function _isFiniteCoord(lat, lon) {
+  return Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+}
+
 function _setPrayerLocation(lat, lon, locationName, _skipSave) {
+  lat = Number(lat); lon = Number(lon);
+  if (!_isFiniteCoord(lat, lon)) return;
   _userLatDeg = lat; _userLonDeg = lon;
   // Reset preview/simulated time state on city switch so windows reflect current city time.
   window._swipeTimeOverride = null;
@@ -3045,13 +3051,22 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
       }
     }).catch(()=>{});
 
-  // Reverse geocode for nice location name
-  fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
-    .then(r=>r.json()).then(g=>{
-      const city = g.city || g.locality || '';
-      const region = g.principalSubdivisionCode ? g.principalSubdivisionCode.split('-').pop() : '';
-      if(city) fsSetLocation(region ? `${city}, ${region}` : city);
-    }).catch(()=>{});
+  // Reverse geocode for nice location name (silent best-effort)
+  if (_isFiniteCoord(lat, lon)) {
+    const geocodeUrl = new URL('https://api.bigdatacloud.net/data/reverse-geocode-client');
+    geocodeUrl.searchParams.set('latitude', String(lat));
+    geocodeUrl.searchParams.set('longitude', String(lon));
+    geocodeUrl.searchParams.set('localityLanguage', 'en');
+
+    fetch(geocodeUrl.toString(), { signal: AbortSignal.timeout(3500) })
+      .then(r => r.ok ? r.json() : null)
+      .then(g => {
+        if (!g) return;
+        const city = g.city || g.locality || '';
+        const region = g.principalSubdivisionCode ? g.principalSubdivisionCode.split('-').pop() : '';
+        if (city) fsSetLocation(region ? `${city}, ${region}` : city);
+      }).catch(()=>{});
+  }
 }
 
 // Alias for fullscreen code that calls fsSetPrayerTimes
@@ -3080,26 +3095,30 @@ async function fsFetchPrayer() {
     );
   }
 
-  // IP geolocation — try multiple services in parallel for speed
+  // IP geolocation — CORS-safe providers only, silent fallback
   const ipServices = [
-    { url: 'https://ipapi.co/json/', extract: d => d.latitude && d.longitude ? {lat:d.latitude, lon:d.longitude, loc: d.city?(d.region_code?`${d.city}, ${d.region_code}`:d.city):''} : null },
-    { url: 'https://api.ipbase.com/v1/json/', extract: d => d.latitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city||''} : null },
-    { url: 'https://get.geojs.io/v1/ip/geo.json', extract: d => d.latitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city||''} : null },
+    { url: 'https://get.geojs.io/v1/ip/geo.json', extract: d => d && d.latitude && d.longitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city || ''} : null },
+    { url: 'https://ipwho.is/', extract: d => d && d.success !== false && d.latitude && d.longitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city ? (d.region_code ? `${d.city}, ${d.region_code}` : d.city) : ''} : null },
   ];
+
   const racePromises = ipServices.map(async svc => {
     try {
-      const r = await fetch(svc.url, {signal: AbortSignal.timeout(4000)});
+      const r = await fetch(svc.url, { signal: AbortSignal.timeout(4000) });
+      if (!r.ok) return Promise.reject(new Error('ip lookup failed'));
       const d = await r.json();
-      return svc.extract(d);
-    } catch(e) { return null; }
-  });
-  // Use first successful result
-  for (const p of racePromises) {
-    const result = await p;
-    if(result && !_prayerLocationResolved) {
-      _setPrayerLocation(result.lat, result.lon, result.loc);
-      break;
+      const result = svc.extract(d);
+      if (!result || !_isFiniteCoord(result.lat, result.lon)) return Promise.reject(new Error('invalid coords'));
+      return result;
+    } catch(e) {
+      return Promise.reject(e);
     }
+  });
+
+  try {
+    const result = await Promise.any(racePromises);
+    if (!_prayerLocationResolved) _setPrayerLocation(result.lat, result.lon, result.loc);
+  } catch(_) {
+    // Stay silent: UI already has default fallback city/time
   }
 }
 // Fetch prayer times on page load
