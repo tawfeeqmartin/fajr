@@ -2792,6 +2792,14 @@ function _buildCityList(filter) {
       div.textContent = c.name;
     }
     div.onclick = () => _selectCity(c);
+    div.ondblclick = () => { _selectCity(c); closeLocationPicker(); };
+    // Mobile double-tap fallback (iOS Safari may not emit dblclick reliably)
+    let _lastTap = 0;
+    div.addEventListener('touchend', () => {
+      const now = Date.now();
+      if (now - _lastTap < 320) { _selectCity(c); closeLocationPicker(); }
+      _lastTap = now;
+    }, { passive: true });
     list.appendChild(div);
   });
   // Trigger geocode search for 3+ characters
@@ -3761,7 +3769,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=347';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=348';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
