@@ -3442,7 +3442,7 @@ function _swipeShowPreview(idx) {
 
   // Auto-revert after 8 seconds
   clearTimeout(_swipeRevertTimer);
-  _swipeRevertTimer = setTimeout(_swipeRevert, 8000);
+  _swipeRevertTimer = setTimeout(_swipeRevert, 4000);
 }
 
 var _swipeTimeOverride = null; // minutes from midnight (current), or null for live
