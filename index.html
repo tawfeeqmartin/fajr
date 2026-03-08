@@ -643,10 +643,13 @@ body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
 .header-row1,.header-row2{display:flex;justify-content:space-between;align-items:flex-end;line-height:1;position:relative}
 .header-until-label{font-family:var(--font);font-size:clamp(.6rem,1.35vw,.7rem);font-weight:300;letter-spacing:.08em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;text-align:right}
 body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
-/* Urgent countdown mode: keep only countdown numerals visible while chrome is hidden */
+/* Urgent countdown mode: keep only "until xxx" + countdown visible while chrome is hidden */
 body.chrome-hidden.countdown-urgent #headerBar{opacity:1!important;pointer-events:none}
-body.chrome-hidden.countdown-urgent #headerBar .header-row1,
-body.chrome-hidden.countdown-urgent #headerBar #fsLocation{opacity:0!important}
+body.chrome-hidden.countdown-urgent #headerBar .nav-city-icon,
+body.chrome-hidden.countdown-urgent #headerBar #hijriTop,
+body.chrome-hidden.countdown-urgent #headerBar #fsCityName,
+body.chrome-hidden.countdown-urgent #headerBar #fsCityTime{opacity:0!important}
+body.chrome-hidden.countdown-urgent #headerBar #fsCountdownLabel,
 body.chrome-hidden.countdown-urgent #headerBar #fsCountdown{opacity:1!important}
 body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 .fs-city-block{display:none}
