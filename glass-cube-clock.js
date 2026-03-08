@@ -1985,10 +1985,14 @@ document.addEventListener('visibilitychange', function() {
   }).filter(Boolean);
   window._clockRayScreenAt = performance.now();
 
-  // Mark scene as ready — splash lifecycle controls boot lock release.
+  // Mark scene as ready — splash handles its own timing
   if (!window._sceneReady) {
     window._sceneReady = true;
     window._sceneReadyAt = performance.now();
+    // Failsafe: if splash lifecycle stalls, reveal canvas anyway.
+    setTimeout(function(){
+      try { document.documentElement.classList.remove('booting'); } catch(e) {}
+    }, 7000);
   }
 
   // ── Grainy gradient overlay (SVG feTurbulence + soft-light) ─────────────────
