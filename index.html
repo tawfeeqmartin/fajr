@@ -2263,8 +2263,11 @@ function updateNavClock(){
   window._activePrayerName=active;
   window._activePrayerColor=activeColor;
   const _isIftarLabel = navLabel.toLowerCase() === 'until iftar';
-  const _labelColor = prayerColors[_labelPrayer] || activeColor;
-  const style=(_labelColor && !_isIftarLabel)?' style="color:'+_labelColor+'"':'';
+  const _isSunriseLabel = navLabel.toLowerCase() === 'until sunrise';
+  const _labelColor = _isIftarLabel
+    ? (prayerColors.Maghrib || '#ff2200')
+    : (_isSunriseLabel ? '#888888' : (prayerColors[_labelPrayer] || activeColor));
+  const style=_labelColor ? ' style="color:'+_labelColor+'"' : '';
   let _timeStyle='';
   if (navDiff <= 120) _timeStyle=' style="color:#ff3b30;"';
   else if (navDiff <= 600) _timeStyle=' style="color:#ff453a;"';
