@@ -457,7 +457,7 @@ body.mode-compass .clock-sticky{display:none!important}
 
 body.mode-info .clock-sticky{display:none}
 body.mode-info #headerBar,body.mode-info .fs-header{opacity:0!important;pointer-events:none;transition:none}
-body.mode-info .mode-label{opacity:0!important;pointer-events:none}
+body.mode-info .mode-label{opacity:0!important;pointer-events:none;transition-delay:4s!important}
 body.mode-info .scroll-section,
 body.mode-info footer{display:block}
 body.mode-info{overflow:hidden}
@@ -3829,7 +3829,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=359';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=360';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
