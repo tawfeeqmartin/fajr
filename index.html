@@ -619,8 +619,12 @@ html.clock-direct nav,.clock-direct .scroll-section,.clock-direct .clock-sticky,
 .fs-chrome-hidden .clock-fs-close,.fs-chrome-hidden .fs-header,.fs-chrome-hidden .fs-mode-toggle,.fs-chrome-hidden .fs-dial-picker,.fs-chrome-hidden #fsTapHint{opacity:0!important;pointer-events:none}
 /* Compass mode: strip chrome except close button + mode toggle */
 .compass-active .fs-dial-picker,.compass-active #fsTapHint{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
-.fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;padding:clamp(6px,1vmin,10px) clamp(6px,1.5vmin,12px) 0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .4s ease;border-top:1px solid rgba(232,228,220,.08)}
+.fs-header{position:fixed;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;padding:clamp(6px,1vmin,10px) clamp(6px,1.5vmin,12px) 0;font-family:var(--font);text-align:center;z-index:210;pointer-events:none;color:rgba(232,228,220,.65);transition:opacity .4s ease;border-top:1px solid rgba(232,228,220,.08);display:none}
 .fs-header .fs-datetime{font-size:clamp(.75rem,1.6vmin,1.5rem);font-weight:300;letter-spacing:.06em}
+/* Hijri date — top center, standalone */
+.hijri-top{position:fixed;top:calc(env(safe-area-inset-top,12px) + 20px);left:0;right:0;text-align:center;z-index:210;pointer-events:none;font-family:var(--font);font-size:clamp(.7rem,1.4vmin,.9rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.5);transition:opacity .4s ease;opacity:1}
+body.chrome-hidden .hijri-top{opacity:0;transition:opacity .4s ease 4s}
+body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
 .fs-header .fs-location{display:none}
 /* Hidden — replaced by bottom prayer dots + swipe label (v361). Keep markup for future use. */
 .fs-prayer-bar{display:none!important}
@@ -1074,6 +1078,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   <div id="fsCityTime" class="fs-city-time"></div>
   <div id="fsCountdown" class="fs-countdown"></div>
 </div>
+<div id="hijriTop" class="hijri-top"></div>
 <div id="fsHeader" class="fs-header">
   <div class="fs-datetime" id="fsDateTime"></div>
   <div class="fs-location" id="fsLocation"></div>
@@ -2681,6 +2686,7 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
     window._isRamadan = /rama[dḍ]/i.test(hijri.month.en);
     const hijriStr = `<span style="color:#e0e0e0">${hijri.day} ${hijri.month.en} ${hijri.year} AH  ·  ${hijri.month.ar}</span>`;
     const fsdt = document.getElementById('fsDateTime'); if(fsdt) fsdt.innerHTML = hijriStr;
+    const hijriTop = document.getElementById('hijriTop'); if(hijriTop) hijriTop.innerHTML = hijriStr;
   }
 }
 
@@ -3830,7 +3836,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=362';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=363';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
