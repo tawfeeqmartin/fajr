@@ -2203,15 +2203,28 @@ function updateNavClock(){
     navDiff=((targetMin-actualNowM+1440)%1440)*60 - (actualNowS%60);
   } else {
     const fajrS=toSec(t.Fajr), maghribS=toSec(t.Maghrib), isFasting=actualNowS>=fajrS&&actualNowS<maghribS;
-    if(!swipeActive && isFasting && window._isRamadan){
-      const _pref = (window._countdownPref || 'auto');
-      const _nextDiff = ((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
+    const _pref = (window._countdownPref || 'auto');
+    const _nextDiff = ((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
+
+    if(!swipeActive && _pref !== 'auto'){
+      // User override must work regardless of city/ramadan state.
+      if(_pref === 'iftar'){
+        navLabel='until iftar';
+        navDiff=((maghribS-actualNowS)+86400)%86400;
+        _labelPrayer='Maghrib';
+      } else {
+        navLabel='until '+_labelName(next.name);
+        navDiff=_nextDiff;
+        _labelPrayer=next.name;
+      }
+    } else if(!swipeActive && isFasting && window._isRamadan){
+      // Auto mode behavior during Ramadan fasting hours.
       const _headsupSec = 20*60;
-      const _useNext = (_pref==='next') || (_pref==='auto' && _nextDiff<=_headsupSec);
-      const _useIftar = (_pref==='iftar') || (_pref==='auto' && !_useNext);
+      const _useNext = (_nextDiff<=_headsupSec);
+      const _useIftar = !_useNext;
       if (_useIftar) {
         navLabel='until iftar';
-        navDiff=maghribS-actualNowS;
+        navDiff=((maghribS-actualNowS)+86400)%86400;
         _labelPrayer='Maghrib';
       } else {
         navLabel='until '+_labelName(next.name);
@@ -3728,7 +3741,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=339';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=340';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
