@@ -114,6 +114,7 @@ h1{
 .subtitle{
   font-size:.95rem;color:var(--text-muted);
   margin-bottom:2.5rem;font-weight:300;line-height:1.7;
+  text-align:center;
 }
 
 /* ── Section label ── */
@@ -290,7 +291,7 @@ footer a:hover{color:var(--text)}
 
 <!-- ── Stripe donate CTA ── -->
 <div class="card donate-card">
-  <a href="https://buy.stripe.com/4gM5kCfK00AB1YN91L0sU00" class="btn btn-support" target="_blank" rel="noopener"><span class="support-heart">♥</span> Support this project</a>
+  <a href="https://buy.stripe.com/4gM5kCfK00AB1YN91L0sU00" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none" target="_blank" rel="noopener"><span class="support-heart">♥</span> Support this project</a>
   <p style="font-size:.7rem;color:var(--text-muted);margin-top:.85rem;font-weight:300">Secure payment via Stripe. No account needed.</p>
 </div>
 
@@ -315,27 +316,10 @@ footer a:hover{color:var(--text)}
   </div>
 </div>
 
-<!-- ── Email signup ── -->
+<!-- ── Feedback + iOS launch notify (consolidated) ── -->
 <div class="card">
-  <span class="section-label">Stay updated</span>
-  <p style="font-size:.9rem;font-weight:300;color:var(--text-muted);margin-bottom:1.25rem">Be the first to know when the iPhone app launches.</p>
-  <form id="emailForm">
-    <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-      <input type="text" id="signupName" placeholder="Your name" style="flex:1;min-width:140px" required>
-      <input type="email" id="signupEmail" placeholder="Email address" style="flex:1.5;min-width:200px" required>
-    </div>
-    <button type="submit" class="btn btn-primary" style="margin-top:1rem;width:100%;justify-content:center"><i class="ph-thin ph-envelope"></i> Keep me posted</button>
-  </form>
-  <div class="form-success" id="emailSuccess">
-    <i class="ph-thin ph-check-circle"></i>
-    <p>You're on the list. We'll be in touch, insha'Allah.</p>
-  </div>
-</div>
-
-<!-- ── Feedback ── -->
-<div class="card">
-  <span class="section-label">Feedback</span>
-  <p style="font-size:.9rem;font-weight:300;color:var(--text-muted);margin-bottom:1.25rem">What would make this better for your family?</p>
+  <span class="section-label">Feedback & iOS launch notify</span>
+  <p style="font-size:.9rem;font-weight:300;color:var(--text-muted);margin-bottom:1.25rem">Share ideas, duas, or bugs. Leave your email and we’ll notify you when the iPhone app launches.</p>
   <form id="feedbackForm">
     <div class="form-group">
       <input type="text" id="fbName" placeholder="Your name (optional)">
@@ -423,10 +407,6 @@ function formHandler(form, fn){
     }
   });
 }
-
-formHandler(document.getElementById('emailForm'),()=>
-  sbInsert('signups',{name:document.getElementById('signupName').value,email:document.getElementById('signupEmail').value,source:'website'})
-);
 
 formHandler(document.getElementById('feedbackForm'),()=>
   sbInsert('feedback',{name:document.getElementById('fbName').value||null,email:document.getElementById('fbEmail').value||null,message:document.getElementById('fbMessage').value,type:'feedback'})
