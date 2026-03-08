@@ -2771,6 +2771,8 @@ function _cityTimeStr() {
 }
 
 let _locSelectedCity = null;
+let _locLastClickCity = null;
+let _locLastClickAt = 0;
 
 var _locSearchResults = [];  // geocoded results appended to filtered list
 var _locSearchTimer = null;
@@ -2794,7 +2796,19 @@ function _buildCityList(filter) {
     } else {
       div.textContent = c.name;
     }
-    div.onclick = () => _selectCity(c);
+    div.onclick = () => {
+      const now = Date.now();
+      if (_locLastClickCity === c.name && (now - _locLastClickAt) < 380) {
+        _applySelectedCityAndClose(c);
+        _locLastClickCity = null;
+        _locLastClickAt = 0;
+        return;
+      }
+      _locLastClickCity = c.name;
+      _locLastClickAt = now;
+      _selectCity(c);
+    };
+    // Keep native dblclick support too
     div.ondblclick = () => _applySelectedCityAndClose(c);
     // Mobile double-tap fallback (iOS Safari may not emit dblclick reliably)
     let _lastTap = 0;
@@ -3783,7 +3797,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=351';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=352';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
