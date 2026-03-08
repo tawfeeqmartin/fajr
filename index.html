@@ -35,7 +35,7 @@
 <meta name="twitter:image:alt" content="A Gift of Time prayer clock with Arabic numerals and Qibla compass">
 
 <!-- Additional SEO -->
-<meta name="author" content="Kauthar Martin &amp; Tawfeeq Martin">
+<meta name="author" content="Tawfeeq Martin">
 <meta name="theme-color" content="#0d0d12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -63,7 +63,7 @@
   },
   "author": {
     "@type": "Person",
-    "name": "Kauthar Martin & Tawfeeq Martin",
+    "name": "Tawfeeq Martin",
     "url": "https://tawfeeqmartin.com"
   },
   "featureList": [
@@ -1082,12 +1082,12 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 <!-- Global Header Bar (shared across all modes) -->
 <div id="headerBar">
   <div class="header-row1">
-    <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" onclick="openLocationPicker()" role="button" tabindex="0" aria-label="Choose location" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLocationPicker();}" style="cursor:pointer;pointer-events:auto"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
     <div id="hijriTop" class="hijri-top"></div>
     <div id="fsCountdownLabel" class="header-until-label"></div>
   </div>
   <div class="header-row2">
-    <span id="fsCityName" class="nav-city-name" onclick="openLocationPicker()" style="cursor:pointer;pointer-events:auto">—</span>
+    <span id="fsCityName" class="nav-city-name" onclick="openLocationPicker()" role="button" tabindex="0" aria-label="Choose location" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLocationPicker();}" style="cursor:pointer;pointer-events:auto">—</span>
     <div id="fsCityTime" class="fs-city-time"></div>
     <div id="fsCountdown" class="fs-countdown"></div>
   </div>
@@ -1111,7 +1111,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       <button onclick="fsNextDial()" aria-label="Next" style="background:none;border:none;cursor:pointer;padding:.5rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(26,26,26,.4)" stroke-width="1"><polyline points="9,6 15,12 9,18"/></svg></button>
     </div>
     <div id="fsDialBar" class="fs-dial-bar" style="margin-top:8px"></div>
-    <button id="fsListenBtn" onclick="fsPlaySurah()" style="background:none;border:1px solid rgba(26,26,26,.2);border-radius:24px;color:rgba(26,26,26,.5);font-family:var(--font);font-size:.85rem;font-weight:300;letter-spacing:.08em;padding:.5rem 1.3rem;margin-top:10px;cursor:pointer;transition:opacity .2s"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:-1px;margin-right:4px"><polygon points="5,3 19,12 5,21"/></svg>Listen to this Surah</button>
+    <button id="fsListenBtn" onclick="fsPlaySurah()" aria-label="Listen to this Surah" style="background:none;border:1px solid rgba(26,26,26,.2);border-radius:24px;color:rgba(26,26,26,.5);font-family:var(--font);font-size:.85rem;font-weight:300;letter-spacing:.08em;padding:.5rem 1.3rem;margin-top:10px;cursor:pointer;transition:opacity .2s"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:-1px;margin-right:4px"><polygon points="5,3 19,12 5,21"/></svg>Listen to this Surah</button>
   </div>
 </div>
 
@@ -1160,7 +1160,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   <div class="reveal">
     <div class="section-header"><p class="section-label">Toward Makkah</p>
     <h2 class="section-title">Of all the directions, turn towards what's best for you.</h2></div>
-    <p class="section-body">A compass points to Makkah. Put on headphones — the adhan arrives from that same direction, so you hear the call the way it was always meant to be heard.</p>
+    <p class="section-body">A compass points to Makkah. Put on headphones — the adhan arrives from that same direction, so you can experience the call with a clearer sense of orientation.</p>
     <button id="adhanBtn" onclick="playAdhan(this)" class="btn btn-outline adhan-btn" style="margin-top:1.25rem"><i class="ph-thin ph-play"></i> Play Spatial Adhan</button>
     <div class="verse" style="margin-top:1.25rem">
       <p class="verse-ar">فَوَلِّ وَجْهَكَ شَطْرَ ٱلْمَسْجِدِ ٱلْحَرَامِ</p>
@@ -1217,7 +1217,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 
 <!-- Footer -->
 <footer>
-  <p style="margin-bottom:.5rem">&copy; 2025–2026 Kauthar Martin &amp; <a href="https://tawfeeqmartin.com" target="_blank" rel="noopener">Tawfeeq Martin</a></p>
+  <p style="margin-bottom:.5rem">&copy; 2025–2026 <a href="https://tawfeeqmartin.com" target="_blank" rel="noopener">Tawfeeq Martin</a></p>
   <p><a href="support.html">Support</a><span class="footer-sep">·</span><a href="mailto:feedback@agiftoftime.app">Feedback</a><span class="footer-sep">·</span><a href="privacy.html">Privacy & Terms</a></p>
 </footer>
 </div><!-- /infoScroller -->
@@ -3010,7 +3010,13 @@ function _updateCompassDist() {
   var mi = km * 0.621371;
   el.textContent = Math.round(km).toLocaleString() + ' km · ' + Math.round(mi).toLocaleString() + ' mi to Makkah';
 }
+function _isFiniteCoord(lat, lon) {
+  return Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+}
+
 function _setPrayerLocation(lat, lon, locationName, _skipSave) {
+  lat = Number(lat); lon = Number(lon);
+  if (!_isFiniteCoord(lat, lon)) return;
   _userLatDeg = lat; _userLonDeg = lon;
   // Reset preview/simulated time state on city switch so windows reflect current city time.
   window._swipeTimeOverride = null;
@@ -3045,13 +3051,22 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
       }
     }).catch(()=>{});
 
-  // Reverse geocode for nice location name
-  fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
-    .then(r=>r.json()).then(g=>{
-      const city = g.city || g.locality || '';
-      const region = g.principalSubdivisionCode ? g.principalSubdivisionCode.split('-').pop() : '';
-      if(city) fsSetLocation(region ? `${city}, ${region}` : city);
-    }).catch(()=>{});
+  // Reverse geocode for nice location name (silent best-effort)
+  if (_isFiniteCoord(lat, lon)) {
+    const geocodeUrl = new URL('https://api.bigdatacloud.net/data/reverse-geocode-client');
+    geocodeUrl.searchParams.set('latitude', String(lat));
+    geocodeUrl.searchParams.set('longitude', String(lon));
+    geocodeUrl.searchParams.set('localityLanguage', 'en');
+
+    fetch(geocodeUrl.toString(), { signal: AbortSignal.timeout(3500) })
+      .then(r => r.ok ? r.json() : null)
+      .then(g => {
+        if (!g) return;
+        const city = g.city || g.locality || '';
+        const region = g.principalSubdivisionCode ? g.principalSubdivisionCode.split('-').pop() : '';
+        if (city) fsSetLocation(region ? `${city}, ${region}` : city);
+      }).catch(()=>{});
+  }
 }
 
 // Alias for fullscreen code that calls fsSetPrayerTimes
@@ -3080,26 +3095,30 @@ async function fsFetchPrayer() {
     );
   }
 
-  // IP geolocation — try multiple services in parallel for speed
+  // IP geolocation — CORS-safe providers only, silent fallback
   const ipServices = [
-    { url: 'https://ipapi.co/json/', extract: d => d.latitude && d.longitude ? {lat:d.latitude, lon:d.longitude, loc: d.city?(d.region_code?`${d.city}, ${d.region_code}`:d.city):''} : null },
-    { url: 'https://api.ipbase.com/v1/json/', extract: d => d.latitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city||''} : null },
-    { url: 'https://get.geojs.io/v1/ip/geo.json', extract: d => d.latitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city||''} : null },
+    { url: 'https://get.geojs.io/v1/ip/geo.json', extract: d => d && d.latitude && d.longitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city || ''} : null },
+    { url: 'https://ipwho.is/', extract: d => d && d.success !== false && d.latitude && d.longitude ? {lat:+d.latitude, lon:+d.longitude, loc: d.city ? (d.region_code ? `${d.city}, ${d.region_code}` : d.city) : ''} : null },
   ];
+
   const racePromises = ipServices.map(async svc => {
     try {
-      const r = await fetch(svc.url, {signal: AbortSignal.timeout(4000)});
+      const r = await fetch(svc.url, { signal: AbortSignal.timeout(4000) });
+      if (!r.ok) return Promise.reject(new Error('ip lookup failed'));
       const d = await r.json();
-      return svc.extract(d);
-    } catch(e) { return null; }
-  });
-  // Use first successful result
-  for (const p of racePromises) {
-    const result = await p;
-    if(result && !_prayerLocationResolved) {
-      _setPrayerLocation(result.lat, result.lon, result.loc);
-      break;
+      const result = svc.extract(d);
+      if (!result || !_isFiniteCoord(result.lat, result.lon)) return Promise.reject(new Error('invalid coords'));
+      return result;
+    } catch(e) {
+      return Promise.reject(e);
     }
+  });
+
+  try {
+    const result = await Promise.any(racePromises);
+    if (!_prayerLocationResolved) _setPrayerLocation(result.lat, result.lon, result.loc);
+  } catch(_) {
+    // Stay silent: UI already has default fallback city/time
   }
 }
 // Fetch prayer times on page load
@@ -4086,10 +4105,10 @@ setTimeout(setupScrollObservers,500);
 
 <!-- Info Page Dot Nav -->
 <div class="info-dots" id="infoDots">
-  <button class="info-dot active" data-section="sec-hook" onclick="_infoGoTo(0)"></button>
-  <button class="info-dot" data-section="sec-dials" onclick="_infoGoTo(1)"></button>
-  <button class="info-dot" data-section="sec-qibla" onclick="_infoGoTo(2)"></button>
-  <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(3)"></button>
+  <button class="info-dot active" data-section="sec-hook" onclick="_infoGoTo(0)" aria-label="Go to Introducing section"></button>
+  <button class="info-dot" data-section="sec-dials" onclick="_infoGoTo(1)" aria-label="Go to The Clock section"></button>
+  <button class="info-dot" data-section="sec-qibla" onclick="_infoGoTo(2)" aria-label="Go to Qibla section"></button>
+  <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(3)" aria-label="Go to Install section"></button>
 </div>
 
 <!-- Location Picker -->
@@ -4100,13 +4119,13 @@ setTimeout(setupScrollObservers,500);
         <div class="loc-picker-handle"></div>
         <button class="loc-picker-close" onclick="closeLocationPicker()" aria-label="Close">&times;</button>
         <span class="loc-picker-title">Location</span>
-        <button class="loc-picker-done" onclick="closeLocationPicker()">Done</button>
+        <button class="loc-picker-done" onclick="closeLocationPicker()" aria-label="Done selecting location">Done</button>
       </div>
       <div class="loc-picker-search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,220,.4)" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
         <input id="locSearchInput" type="text" placeholder="Search city or country..." autocomplete="off">
       </div>
-      <button class="loc-gps-btn" onclick="locUseGPS()">
+      <button class="loc-gps-btn" onclick="locUseGPS()" aria-label="Use current GPS location">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
         <span>Use Current Location</span>
         <span class="loc-gps-tag">GPS</span>
