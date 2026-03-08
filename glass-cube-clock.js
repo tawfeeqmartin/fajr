@@ -601,7 +601,7 @@ const dichroicFrag = `
     // ── Edge catch: crisp rim light at silhouette — "you could cut yourself" ──
     float NdotV = max(dot(Nw, Vw), 0.0);
     float edgeCatch = pow(1.0 - NdotV, 4.5);
-    col += vec3(0.70, 0.85, 1.00) * edgeCatch * 3;
+    col += vec3(0.70, 0.85, 1.00) * edgeCatch * 1.80;
 
     // ── Shadow-side glass fill: subtle reflected skylight on faces facing away from key ──
     // Without this, faces in shadow read as dark solid rather than dark glass.
