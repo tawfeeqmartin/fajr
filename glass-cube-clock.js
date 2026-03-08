@@ -1822,26 +1822,6 @@ document.addEventListener('visibilitychange', function() {
     sMat.uniforms.op.value += (secBase - sMat.uniforms.op.value) * 0.03;
   }
 
-  // During splash, suppress live hand beam visibility to avoid pre-splash artifacts.
-  // Safety: if splash DOM is gone, auto-clear flag so hands return in scene.
-  var _splashEl = document.getElementById('splash');
-  if (window._splashActive && _splashEl) {
-    for (var _ri = 0; _ri < clockRays.length; _ri++) {
-      var _rm = clockRays[_ri].mesh.children[0].material;
-      _rm.uniforms.op.value = 0;
-    }
-  } else if (window._splashActive && !_splashEl) {
-    window._splashActive = false;
-  }
-
-  // Recover hand opacity after splash clamp (hour/min are not continuously reset elsewhere).
-  if (!window._splashActive && window._currentMode !== 'compass') {
-    var _targets = [1.45, 1.50, (_prayerDisc && _prayerDisc.visible) ? 0.40 : 0.62];
-    for (var _ri2 = 0; _ri2 < clockRays.length; _ri2++) {
-      var _m2 = clockRays[_ri2].mesh.children[0].material;
-      _m2.uniforms.op.value += (_targets[_ri2] - _m2.uniforms.op.value) * 0.18;
-    }
-  }
 
   // Specular highlight orbits cube at second-hand speed
   const secAngle = (s / 60) * TAU;
