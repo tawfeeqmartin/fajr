@@ -2892,6 +2892,11 @@ function _updateCompassDist() {
 }
 function _setPrayerLocation(lat, lon, locationName, _skipSave) {
   _userLatDeg = lat; _userLonDeg = lon;
+  // Reset preview/simulated time state on city switch so windows reflect current city time.
+  window._swipeTimeOverride = null;
+  window._swipeTimeTarget = null;
+  window._swipePreviewPrayer = null;
+  window._forceTimeMin = null;
   // Persist preferred location
   if (!_skipSave) {
     try { localStorage.setItem('agot_loc', JSON.stringify({lat:lat,lon:lon,name:locationName||'',tz:_cityTz||''})); } catch(e){}
@@ -2904,12 +2909,10 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
   window._prayerTimingsReady = true;
   // Rebuild prayer window arcs for new location (no page refresh needed)
   if (typeof window.buildPrayerSectors === 'function') window.buildPrayerSectors();
-  // Pre-compute Qibla bearing from this location
-  if (adhanQiblaAngle === null) {
-    var rLat = lat * Math.PI / 180, rLng = lon * Math.PI / 180;
-    var mLat = 21.4225 * Math.PI / 180, mLng = 39.8262 * Math.PI / 180;
-    adhanQiblaAngle = Math.atan2(Math.sin(mLng - rLng), Math.cos(rLat) * Math.tan(mLat) - Math.sin(rLat) * Math.cos(mLng - rLng));
-  }
+  // Pre-compute Qibla bearing from this location (always recompute on city switch)
+  var rLat = lat * Math.PI / 180, rLng = lon * Math.PI / 180;
+  var mLat = 21.4225 * Math.PI / 180, mLng = 39.8262 * Math.PI / 180;
+  adhanQiblaAngle = Math.atan2(Math.sin(mLng - rLng), Math.cos(rLat) * Math.tan(mLat) - Math.sin(rLat) * Math.cos(mLng - rLng));
   _displayPrayerTimes(t, null);
   if(locationName) fsSetLocation(locationName);
   _prayerLocationResolved = true;
@@ -3747,7 +3750,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background — no container needed
 // window._clockContainer removed — canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=343';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=344';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
