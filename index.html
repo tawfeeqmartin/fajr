@@ -3251,6 +3251,8 @@ function switchMode(mode) {
     closeClockFullscreen();
     document.body.classList.remove('chrome-hidden');
     clearTimeout(_chromeTimer); // info mode - chrome stays visible
+    // Re-observe reveals that may have been hidden during init
+    setTimeout(function(){ document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){ revealObs.observe(el); }); },100);
   }
 }
 
@@ -3933,7 +3935,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=391';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=392';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
