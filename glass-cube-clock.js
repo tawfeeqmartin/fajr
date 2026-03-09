@@ -126,7 +126,12 @@ window.addEventListener('resize', function() {
   if (_resizeTimer) clearTimeout(_resizeTimer);
   _resizeTimer = setTimeout(function() {
     _stableW = window.innerWidth;
-    _stableH = window.innerHeight;
+    // Always re-measure lvh — canvas CSS uses 100lvh, buffer must match
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+    document.body.appendChild(el);
+    _stableH = el.offsetHeight || window.innerHeight;
+    document.body.removeChild(el);
     onResize();
   }, 100);
 });
@@ -1483,6 +1488,19 @@ var _lastFrameTime = 0;
 document.addEventListener('visibilitychange', function() {
   var fps = document.hidden ? _idleFPS : _targetFPS;
   _frameInterval = 1000 / fps;
+  // Re-measure canvas on return from background (Safari toolbar state may have changed)
+  if (!document.hidden) {
+    setTimeout(function() {
+      _stableW = window.innerWidth;
+      // Re-measure lvh in case orientation changed while backgrounded
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+      document.body.appendChild(el);
+      _stableH = el.offsetHeight || window.innerHeight;
+      document.body.removeChild(el);
+      onResize();
+    }, 150);
+  }
 });
 
 (function loop(timestamp) {
