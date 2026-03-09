@@ -1213,17 +1213,79 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         <p>Opens full-screen, like a native app.</p>
       </div>
     </div>
-    <a href="support.html" class="btn btn-outline" style="margin-top:1.25rem;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none">
-      <span class="support-heart">♥</span> Support this project
-    </a>
+  </div>
+</section>
+
+<!-- 6. SUPPORT -->
+<section class="scroll-section" id="sec-support">
+  <div class="reveal">
+    <div class="section-header"><p class="section-label">Support</p>
+    <h2 class="section-title">Many hands make light work.</h2></div>
+    <p class="section-body">Your support keeps this free for every Muslim family. Always free. No ads. No tracking. That's a promise.</p>
+    <div style="margin-top:1.25rem">
+      <a href="https://buy.stripe.com/4gM5kCfK00AB1YN51L0sU00" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none" target="_blank" rel="noopener"><span class="support-heart">♥</span> Support this project</a>
+      <p style="font-size:.7rem;color:rgba(232,228,220,.4);margin-top:.6rem;font-weight:300">Secure payment via Stripe</p>
+    </div>
+    <div class="verse" style="margin-top:1.5rem">
+      <p class="verse-ar">مَا مِنْ مُسْلِمٍ يَغْرِسُ غَرْسًا أَوْ يَزْرَعُ زَرْعًا فَيَأْكُلُ مِنْهُ طَيْرٌ أَوْ إِنْسَانٌ أَوْ بَهِيمَةٌ إِلَّا كَانَ لَهُ بِهِ صَدَقَةٌ</p>
+      <p class="verse-en">"There is none amongst the Muslims who plants a tree or sows seeds, and then a bird, or a person or an animal eats from it, but is regarded as a charitable gift for him."</p>
+      <p class="verse-ref">Bukhari 2320 · Muslim 1553</p>
+    </div>
+    <div style="margin-top:2rem">
+      <p class="section-label" style="margin-bottom:.75rem">What's next</p>
+      <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.9rem;font-weight:300;color:rgba(232,228,220,.7)">
+        <span><i class="ph-thin ph-device-mobile" style="margin-right:.5rem"></i> Native iPhone app</span>
+        <span><i class="ph-thin ph-watch" style="margin-right:.5rem"></i> Apple Watch complication</span>
+        <span><i class="ph-thin ph-device-mobile-camera" style="margin-right:.5rem"></i> Native Android app</span>
+      </div>
+    </div>
+    <div style="margin-top:2rem">
+      <p class="section-label" style="margin-bottom:.75rem">Feedback & iOS launch notify</p>
+      <p style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.45);margin-bottom:1rem">Share ideas, duas, or bugs. Leave your email to get notified when the iPhone app launches.</p>
+      <form id="feedbackForm" style="display:flex;flex-direction:column;gap:.75rem;max-width:400px">
+        <input type="text" id="fbName" placeholder="Your name (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
+        <input type="email" id="fbEmail" placeholder="Email (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
+        <textarea id="fbMessage" placeholder="Ideas, suggestions, duas..." required style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none;min-height:80px;resize:vertical"></textarea>
+        <button type="submit" class="btn btn-outline" style="justify-content:center"><i class="ph-thin ph-paper-plane-tilt"></i> Send feedback</button>
+      </form>
+      <div id="feedbackSuccess" style="display:none;text-align:center;padding:1.5rem 0">
+        <i class="ph-thin ph-check-circle" style="font-size:2rem;color:rgba(120,160,255,.7)"></i>
+        <p style="margin-top:.5rem;font-weight:300;color:rgba(232,228,220,.7)">JazakAllahu khairan. Your feedback means a lot.</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- Footer -->
 <footer>
   <p style="margin-bottom:.5rem">&copy; 2025-2026 Kauthar Martin &amp; <a href="https://tawfeeqmartin.com" target="_blank" rel="noopener">Tawfeeq Martin</a></p>
-  <p><a href="support.html">Support</a><span class="footer-sep">·</span><a href="mailto:feedback@agiftoftime.app">Feedback</a><span class="footer-sep">·</span><a href="privacy.html">Privacy & Terms</a></p>
+  <p><a href="mailto:feedback@agiftoftime.app">Feedback</a><span class="footer-sep">·</span><a href="privacy.html">Privacy & Terms</a></p>
 </footer>
+<script>
+(function(){
+  var SB_URL='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
+  var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
+  var form=document.getElementById('feedbackForm');
+  if(!form) return;
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var btn=form.querySelector('button[type="submit"]');
+    var orig=btn.innerHTML;
+    btn.innerHTML='<i class="ph-thin ph-circle-notch"></i> Sending...';
+    btn.disabled=true;
+    fetch(SB_URL+'/feedback',{
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name:document.getElementById('fbName').value||null,email:document.getElementById('fbEmail').value||null,message:document.getElementById('fbMessage').value,type:'feedback'})
+    }).then(function(r){
+      if(r.ok){form.style.display='none';document.getElementById('feedbackSuccess').style.display='block';}
+      else{btn.innerHTML='Something went wrong';setTimeout(function(){btn.innerHTML=orig;btn.disabled=false;},2000);}
+    }).catch(function(){
+      btn.innerHTML='Network error';setTimeout(function(){btn.innerHTML=orig;btn.disabled=false;},2000);
+    });
+  });
+})();
+</script>
 </div><!-- /infoScroller -->
 
 <script>
@@ -3871,7 +3933,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=390';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=391';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4074,7 +4136,7 @@ setTimeout(setupScrollObservers,500);
 
 // Heart is always filled red + pulsing via CSS animation
 </script>
-<a href="support.html" class="sticky-cta">
+<a href="#sec-support" class="sticky-cta" onclick="if(typeof switchMode==='function')switchMode('info');">
   <i class="ph-fill ph-heart cta-heart"></i>
   <span>Keep this free</span>
   <span class="cta-count"></span>
