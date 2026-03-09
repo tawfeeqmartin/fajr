@@ -504,6 +504,8 @@ body.mode-info .scroll-section .reveal{
   border:none;max-width:420px;
   opacity:1!important;transform:none!important;transition:none!important;
 }
+/* Support section: taller than one viewport — allow overflow + auto height */
+#sec-support{height:auto;min-height:100svh;overflow:visible}
 /* Frosted glass behind tile content - matches compass onboarding blur */
 .scroll-section .reveal{
   background:rgba(13,13,18,.4);
@@ -3935,7 +3937,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=393';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=394';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
