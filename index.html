@@ -487,6 +487,8 @@ body.mode-info{overflow:hidden}
   overflow-y:scroll;scroll-snap-type:y mandatory;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;overscroll-behavior:contain;
+  background:rgba(13,13,18,.55);
+  backdrop-filter:blur(20px) saturate(130%);-webkit-backdrop-filter:blur(20px) saturate(130%);
 }
 #infoScroller::-webkit-scrollbar{display:none}
 body.mode-info #infoScroller{display:block}
@@ -510,11 +512,7 @@ a{color:inherit;text-decoration:none}
   justify-content:flex-start;
   padding-top:calc(env(safe-area-inset-top,0px) + clamp(48px,8vmin,72px));
   padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px);
-  background:rgba(13,13,18,.55);
-  backdrop-filter:blur(20px) saturate(130%);-webkit-backdrop-filter:blur(20px) saturate(130%);
-  /* Prevent sub-pixel gap flash between sections during snap scroll */
-  margin-top:-1px;padding-top:calc(env(safe-area-inset-top,0px) + clamp(48px,8vmin,72px) + 1px);
-  border-top:1px solid rgba(13,13,18,1);
+  background:transparent;
 }
 body.mode-info .scroll-section .reveal{
   background:none;backdrop-filter:none;-webkit-backdrop-filter:none;
@@ -4009,7 +4007,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=415';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=416';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
