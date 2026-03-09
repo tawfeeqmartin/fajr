@@ -2837,13 +2837,12 @@ function _buildCityList(filter) {
   const extra = _locSearchResults.filter(c => !localNames.has(c.name.toLowerCase()));
   let cities = local.concat(extra);
   // Keep GPS-picked current location pinned in list while picker is open.
+  // Place it 4th in the list (right below the Three Sacred Mosques).
   if (_locPinnedCurrent) {
-    const exists = cities.some(c => c.name === _locPinnedCurrent.name);
-    if (!exists) cities = [_locPinnedCurrent].concat(cities);
-    if (q && !_locPinnedCurrent.name.toLowerCase().includes(q)) {
-      // If query doesn't match pinned row, still keep it visible at top for context.
-      cities = [_locPinnedCurrent].concat(cities.filter(c => c.name !== _locPinnedCurrent.name));
-    }
+    const base = cities.filter(c => c.name !== _locPinnedCurrent.name);
+    const insertAt = Math.min(3, base.length);
+    base.splice(insertAt, 0, _locPinnedCurrent);
+    cities = base;
   }
   list.innerHTML = '';
   cities.forEach(c => {
