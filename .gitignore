@@ -18,3 +18,16 @@ NEXT-BRIEF.md
 CLOCK-SWAP.md
 RESEARCH-FEED.md
 scripts/research-note.sh
+
+# Dead pages
+about.html
+support.html
+support-redirect.html
+seven-heavens.html
+lab.html
+glass-test.html
+experiment/
+
+# Old clock versions
+clock.js
+tawaf-gl.js
