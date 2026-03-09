@@ -470,7 +470,7 @@ body.mode-info footer{display:block}
 body.mode-info{overflow:hidden}
 #infoScroller{
   display:none;position:fixed;inset:0;z-index:5;
-  overflow-y:scroll;scroll-snap-type:y proximity;
+  overflow-y:scroll;scroll-snap-type:y mandatory;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;overscroll-behavior:contain;
 }
@@ -504,8 +504,7 @@ body.mode-info .scroll-section .reveal{
   border:none;max-width:420px;
   opacity:1!important;transform:none!important;transition:none!important;
 }
-/* Support section: taller than one viewport — allow overflow, kill snap */
-#infoScroller #sec-support{height:auto;min-height:auto;overflow:visible;scroll-snap-align:none;scroll-snap-stop:normal;padding-top:3rem;padding-bottom:2rem}
+/* Footer doesn't snap */
 #infoScroller footer{scroll-snap-align:none}
 /* Frosted glass behind tile content - matches compass onboarding blur */
 .scroll-section .reveal{
@@ -1242,19 +1241,24 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         <span><i class="ph-thin ph-device-mobile-camera" style="margin-right:.5rem"></i> Native Android app</span>
       </div>
     </div>
-    <div style="margin-top:2rem">
-      <p class="section-label" style="margin-bottom:.75rem">Feedback & iOS launch notify</p>
-      <p style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.45);margin-bottom:1rem">Share ideas, duas, or bugs. Leave your email to get notified when the iPhone app launches.</p>
-      <form id="feedbackForm" style="display:flex;flex-direction:column;gap:.75rem;max-width:400px">
-        <input type="text" id="fbName" placeholder="Your name (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
-        <input type="email" id="fbEmail" placeholder="Email (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
-        <textarea id="fbMessage" placeholder="Ideas, suggestions, duas..." required style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none;min-height:80px;resize:vertical"></textarea>
-        <button type="submit" class="btn btn-outline" style="justify-content:center"><i class="ph-thin ph-paper-plane-tilt"></i> Send feedback</button>
-      </form>
-      <div id="feedbackSuccess" style="display:none;text-align:center;padding:1.5rem 0">
-        <i class="ph-thin ph-check-circle" style="font-size:2rem;color:rgba(120,160,255,.7)"></i>
-        <p style="margin-top:.5rem;font-weight:300;color:rgba(232,228,220,.7)">JazakAllahu khairan. Your feedback means a lot.</p>
-      </div>
+  </div>
+</section>
+
+<!-- 7. FEEDBACK -->
+<section class="scroll-section" id="sec-feedback">
+  <div class="reveal">
+    <div class="section-header"><p class="section-label">Feedback</p>
+    <h2 class="section-title">We'd love to hear from you.</h2></div>
+    <p class="section-body" style="margin-bottom:1.5rem">Share ideas, duas, or bugs. Leave your email to get notified when the iPhone app launches.</p>
+    <form id="feedbackForm" style="display:flex;flex-direction:column;gap:.75rem;max-width:400px;width:100%">
+      <input type="text" id="fbName" placeholder="Your name (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
+      <input type="email" id="fbEmail" placeholder="Email (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
+      <textarea id="fbMessage" placeholder="Ideas, suggestions, duas..." required style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none;min-height:100px;resize:vertical"></textarea>
+      <button type="submit" class="btn btn-outline" style="justify-content:center"><i class="ph-thin ph-paper-plane-tilt"></i> Send feedback</button>
+    </form>
+    <div id="feedbackSuccess" style="display:none;text-align:center;padding:1.5rem 0">
+      <i class="ph-thin ph-check-circle" style="font-size:2rem;color:rgba(120,160,255,.7)"></i>
+      <p style="margin-top:.5rem;font-weight:300;color:rgba(232,228,220,.7)">JazakAllahu khairan. Your feedback means a lot.</p>
     </div>
   </div>
 </section>
@@ -3170,7 +3174,7 @@ fsFetchPrayer();
 // They naturally scroll over the fixed canvas.
 
 /* ── Info Dot Nav ── */
-const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-how','sec-install','sec-support'];
+const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-how','sec-install','sec-support','sec-feedback'];
 const _infoScroller = document.getElementById('infoScroller');
 function _infoGoTo(idx) {
   const el = document.getElementById(_infoSections[idx]);
@@ -3938,7 +3942,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=398';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=399';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4155,6 +4159,7 @@ setTimeout(setupScrollObservers,500);
   <button class="info-dot" data-section="sec-how" onclick="_infoGoTo(3)" aria-label="Go to How It Works section"></button>
   <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(4)" aria-label="Go to Install section"></button>
   <button class="info-dot" data-section="sec-support" onclick="_infoGoTo(5)" aria-label="Go to Support section"></button>
+  <button class="info-dot" data-section="sec-feedback" onclick="_infoGoTo(6)" aria-label="Go to Feedback section"></button>
 </div>
 
 <!-- Location Picker -->
