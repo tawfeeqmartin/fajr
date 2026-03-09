@@ -4012,7 +4012,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=420';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=421';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4050,10 +4050,13 @@ setTimeout(setupScrollObservers,500);
 // ══════════════════════════════════════════
 (function(){
   const TOUR_SECTIONS = [
-    { id:'sec-hook',    dwell:6000 },
-    { id:'sec-dials',   dwell:8000 },
-    { id:'sec-qibla',   dwell:8000 },
-    { id:'sec-install', dwell:6000 },
+    { id:'sec-hook',     dwell:6000 },
+    { id:'sec-dials',    dwell:8000 },
+    { id:'sec-qibla',    dwell:8000 },
+    { id:'sec-support',  dwell:6000 },
+    { id:'sec-how',      dwell:6000 },
+    { id:'sec-install',  dwell:6000 },
+    { id:'sec-feedback', dwell:5000 },
   ];
 
   let tourIdx=0, tourTimer=null, tourActive=false, tourScrolling=false;
@@ -4066,13 +4069,12 @@ setTimeout(setupScrollObservers,500);
     // Start from user's current scroll position, not the top
     tourIdx=0;
     const _sc=document.getElementById('infoScroller');
-    const _scrollEl = _sc || document.documentElement;
-    const _vh = window.innerHeight;
-    for(let i=TOUR_SECTIONS.length-1; i>=0; i--){
-      const _el=document.getElementById(TOUR_SECTIONS[i].id);
-      if(_el){
-        const _r=_el.getBoundingClientRect();
-        if(_r.top < _vh * 0.5){ tourIdx=i; break; }
+    if(_sc){
+      const _st=_sc.scrollTop;
+      const _vh=_sc.clientHeight;
+      for(let i=TOUR_SECTIONS.length-1; i>=0; i--){
+        const _el=document.getElementById(TOUR_SECTIONS[i].id);
+        if(_el && _el.offsetTop <= _st + _vh * 0.5){ tourIdx=i; break; }
       }
     }
     // Scroll snap already removed - natural scroll
@@ -4124,7 +4126,9 @@ setTimeout(setupScrollObservers,500);
     const el=document.getElementById(sec.id);
     if(el){
       tourScrolling=true;
-      el.scrollIntoView({behavior:'smooth',block:'start'});
+      const _sc2=document.getElementById('infoScroller');
+      if(_sc2) _sc2.scrollTo({top:el.offsetTop,behavior:'smooth'});
+      else el.scrollIntoView({behavior:'smooth',block:'start'});
       setTimeout(()=>{tourScrolling=false;},1500);
     }
     // Trigger section-specific actions
