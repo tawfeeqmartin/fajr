@@ -1157,7 +1157,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       <p class="verse-ar">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًا مَّوْقُوتًا</p>
       <p class="verse-en">"Indeed, prayer has been decreed upon the believers at specified times."</p>
       <p class="verse-ref">An-Nisa 4:103</p>
-      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/574.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
+      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/574.mp3')" class="btn btn-outline"><i class="ph-thin ph-play"></i> Listen</button>
     </div>
   </div>
 </section>
@@ -1172,7 +1172,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       <p class="verse-ar">وَطَهِّرْ بَيْتِىَ لِلطَّآئِفِينَ وَٱلْقَآئِمِينَ وَٱلرُّكَّعِ ٱلسُّجُودِ</p>
       <p class="verse-en">"Purify My House for those who circle it, and those who stand in prayer, and those who bow and prostrate."</p>
       <p class="verse-ref">Al-Hajj 22:26</p>
-      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/2621.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
+      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/2621.mp3')" class="btn btn-outline"><i class="ph-thin ph-play"></i> Listen</button>
     </div>
   </div>
 </section>
@@ -1188,7 +1188,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       <p class="verse-ar">فَوَلِّ وَجْهَكَ شَطْرَ ٱلْمَسْجِدِ ٱلْحَرَامِ</p>
       <p class="verse-en">"So turn your face toward al-Masjid al-Haram."</p>
       <p class="verse-ref">Al-Baqarah 2:144</p>
-      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/151.mp3')" class="btn btn-outline" style="font-size:.85rem;padding:.6rem 1.25rem"><i class="ph-thin ph-play"></i> Listen</button>
+      <button onclick="playVerse(this,'https://cdn.islamic.network/quran/audio/128/ar.alafasy/151.mp3')" class="btn btn-outline"><i class="ph-thin ph-play"></i> Listen</button>
     </div>
   </div>
 </section>
@@ -1200,7 +1200,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     <h2 class="section-title">Many hands make light work.</h2></div>
     <p class="section-body">Your support helps us stay online and grow!</p>
     <div style="margin-top:1.25rem">
-      <a href="https://buy.stripe.com/4gM5kCfK00AB1YN51L0sU00" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none" target="_blank" rel="noopener"><span class="support-heart">♥</span> Support this project</a>
+      <a href="https://buy.stripe.com/4gM5kCfK00AB1YN51L0sU00" class="btn btn-outline" style="text-decoration:none" target="_blank" rel="noopener"><span class="support-heart">♥</span> Support this project</a>
       <p style="font-size:.7rem;color:rgba(232,228,220,.4);margin-top:.6rem;font-weight:300">Secure payment via Stripe</p>
     </div>
     <div class="verse" style="margin-top:1.5rem">
@@ -1218,7 +1218,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     <div class="section-header"><p class="section-label">How It Works</p>
     <h2 class="section-title">A quick guide.</h2></div>
     <p class="section-body" style="margin-bottom:1.5rem">Tap to replay the walkthrough.</p>
-    <button onclick="if(typeof switchMode==='function')switchMode('clock');setTimeout(function(){_clockOnboardEl=null;if(typeof _showClockOnboarding==='function')_showClockOnboarding(true);},600);" class="btn btn-outline" style="font-size:.9rem;padding:.7rem 1.5rem;display:inline-flex;align-items:center;gap:.5rem">
+    <button onclick="if(typeof switchMode==='function')switchMode('clock');setTimeout(function(){_clockOnboardEl=null;if(typeof _showClockOnboarding==='function')_showClockOnboarding(true);},600);" class="btn btn-outline">
       <i class="ph-thin ph-question"></i> Show me how
     </button>
   </div>
@@ -1242,7 +1242,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     <div style="text-align:center">
       <p class="section-label">Share</p>
       <h2 class="section-title" style="font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:.75rem">Give someone<br>A Gift of Time.</h2>
-      <button id="shareBtn" onclick="_shareApp()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.95rem;padding:.75rem 1.5rem">
+      <button id="shareBtn" onclick="_shareApp()" class="btn btn-outline">
         <i class="ph-thin ph-share-fat"></i> Share
       </button>
       <p id="shareCount" style="font-size:.7rem;color:rgba(232,228,220,.35);margin-top:.75rem;font-weight:300"></p>
@@ -4007,7 +4007,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=416';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=417';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
