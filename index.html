@@ -1231,29 +1231,32 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 
 <!-- 6. SAVE & SHARE -->
 <section class="scroll-section" id="sec-install">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">Keep It Close</p>
-    <h2 class="section-title" style="font-size:clamp(1.6rem,4.5vw,2.4rem)">Save to your Home Screen.</h2></div>
-    <!-- Animated Safari instruction -->
-    <div id="installGuide" style="margin-top:1.25rem;display:flex;flex-direction:column;align-items:center;gap:.6rem">
-      <div style="display:flex;align-items:center;gap:.75rem">
-        <div class="safari-share-icon" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,.5);border-radius:8px;animation:safariPulse 2s ease-in-out infinite">
+  <div class="reveal" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:100%">
+    <!-- SAVE -->
+    <div style="text-align:center">
+      <p class="section-label">Save</p>
+      <h2 class="section-title" style="font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:.75rem">Keep it close.</h2>
+      <div id="installGuide" style="display:inline-flex;align-items:center;gap:.75rem;background:rgba(232,228,220,.04);border:1px solid rgba(232,228,220,.08);border-radius:12px;padding:.75rem 1.25rem">
+        <div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,.5);border-radius:8px;animation:safariPulse 2s ease-in-out infinite;flex-shrink:0">
           <svg width="18" height="20" viewBox="0 0 18 20" fill="none"><path d="M9 1v12M9 1l4 4M9 1L5 5" stroke="rgba(120,160,255,.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10v7a2 2 0 002 2h12a2 2 0 002-2v-7" stroke="rgba(120,160,255,.5)" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
         <div style="text-align:left">
-          <p style="font-size:.85rem;color:rgba(232,228,220,.8);font-weight:400">Tap <span style="color:rgba(120,160,255,.9)">↑</span> in Safari</p>
-          <p style="font-size:.75rem;color:rgba(232,228,220,.4);font-weight:300">then "Add to Home Screen"</p>
+          <p style="font-size:.85rem;color:rgba(232,228,220,.8);font-weight:400;margin:0">Tap <span style="color:rgba(120,160,255,.9)">↑</span> in Safari</p>
+          <p style="font-size:.75rem;color:rgba(232,228,220,.4);font-weight:300;margin:0">then "Add to Home Screen"</p>
         </div>
       </div>
     </div>
     <!-- Divider -->
-    <div style="margin:1.75rem 0;width:60px;height:1px;background:rgba(232,228,220,.1)"></div>
-    <!-- Share -->
-    <p class="section-body" style="margin-bottom:1.25rem">Or give someone<br>A Gift of Time.</p>
-    <button id="shareBtn" onclick="_shareApp()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.95rem;padding:.75rem 1.5rem">
-      <i class="ph-thin ph-share-fat"></i> Share
-    </button>
-    <p id="shareCount" style="font-size:.7rem;color:rgba(232,228,220,.35);margin-top:.75rem;font-weight:300"></p>
+    <div style="margin:2rem 0;width:40px;height:1px;background:rgba(232,228,220,.12)"></div>
+    <!-- SHARE -->
+    <div style="text-align:center">
+      <p class="section-label">Share</p>
+      <h2 class="section-title" style="font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:.75rem">Give someone<br>A Gift of Time.</h2>
+      <button id="shareBtn" onclick="_shareApp()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.95rem;padding:.75rem 1.5rem">
+        <i class="ph-thin ph-share-fat"></i> Share
+      </button>
+      <p id="shareCount" style="font-size:.7rem;color:rgba(232,228,220,.35);margin-top:.75rem;font-weight:300"></p>
+    </div>
   </div>
 </section>
 
@@ -4017,7 +4020,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=407';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=408';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
