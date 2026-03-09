@@ -518,6 +518,11 @@ body.mode-info .scroll-section .reveal{
   background:none;backdrop-filter:none;-webkit-backdrop-filter:none;
   border:none;max-width:420px;
   opacity:1!important;transform:none!important;transition:none!important;
+  position:relative;z-index:3;
+}
+body.mode-info .scroll-section a,
+body.mode-info .scroll-section button{
+  position:relative;z-index:4;
 }
 /* Footer doesn't snap */
 #infoScroller footer{scroll-snap-align:none}
@@ -4012,7 +4017,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=423';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=424';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4219,7 +4224,7 @@ setTimeout(setupScrollObservers,500);
 
 // Heart is always filled red + pulsing via CSS animation
 </script>
-<a href="#sec-support" class="sticky-cta" onclick="event.preventDefault();if(typeof switchMode==='function'){switchMode('info');setTimeout(function(){var s=document.getElementById('infoScroller'),el=document.getElementById('sec-support');if(s&&el)s.scrollTo({top:el.offsetTop,behavior:'smooth'});},100);}">
+<a href="#sec-support" class="sticky-cta" onclick="event.preventDefault();if(typeof switchMode==='function')switchMode('info');">
   <i class="ph-fill ph-heart cta-heart"></i>
   <span>Keep this free</span>
   <span class="cta-count"></span>
