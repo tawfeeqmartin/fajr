@@ -470,7 +470,7 @@ body.mode-info footer{display:block}
 body.mode-info{overflow:hidden}
 #infoScroller{
   display:none;position:fixed;inset:0;z-index:5;
-  overflow-y:scroll;scroll-snap-type:y mandatory;
+  overflow-y:scroll;scroll-snap-type:y proximity;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;overscroll-behavior:contain;
 }
@@ -504,8 +504,9 @@ body.mode-info .scroll-section .reveal{
   border:none;max-width:420px;
   opacity:1!important;transform:none!important;transition:none!important;
 }
-/* Support section: taller than one viewport — allow overflow + auto height */
-#sec-support{height:auto;min-height:100svh;overflow:visible}
+/* Support section: taller than one viewport — allow overflow, kill snap */
+#infoScroller #sec-support{height:auto;min-height:auto;overflow:visible;scroll-snap-align:none;scroll-snap-stop:normal;padding-top:3rem;padding-bottom:2rem}
+#infoScroller footer{scroll-snap-align:none}
 /* Frosted glass behind tile content - matches compass onboarding blur */
 .scroll-section .reveal{
   background:rgba(13,13,18,.4);
@@ -3937,7 +3938,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=394';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=398';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
