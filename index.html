@@ -973,9 +973,10 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     document.body.appendChild(_lvh);
     var initW=window.innerWidth, initH=_lvh.offsetHeight||window.innerHeight;
     document.body.removeChild(_lvh);
-    buildSVG(initW, initH);
-    // Splash is built — safe to reveal body (head style holds opacity:0 until now)
-    document.body.style.opacity='1';
+    try { buildSVG(initW, initH); } finally {
+      // Reveal body even if buildSVG fails — never leave a blank screen
+      document.body.style.opacity='1';
+    }
 
     // Poll for canvas element - when it exists, measure its ACTUAL rendered size
     // This is the ground truth: whatever the canvas occupies, the SVG must match
@@ -1264,7 +1265,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     <form id="feedbackForm" style="display:flex;flex-direction:column;gap:.75rem;max-width:400px;width:100%">
       <input type="text" id="fbName" placeholder="Your name (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
       <input type="email" id="fbEmail" placeholder="Email (optional)" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none">
-      <textarea id="fbMessage" placeholder="Ideas, suggestions, duas..." required style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none;min-height:100px;resize:vertical"></textarea>
+      <textarea id="fbMessage" placeholder="Ideas, suggestions, duas..." required maxlength="2000" style="background:rgba(232,228,220,.06);border:1px solid rgba(232,228,220,.1);border-radius:8px;padding:.6rem .9rem;color:rgba(232,228,220,.85);font-family:var(--font);font-size:.85rem;font-weight:300;outline:none;min-height:100px;resize:vertical"></textarea>
       <button type="submit" class="btn btn-outline" style="justify-content:center"><i class="ph-thin ph-paper-plane-tilt"></i> Send feedback</button>
     </form>
     <div id="feedbackSuccess" style="display:none;text-align:center;padding:1.5rem 0">
@@ -1281,8 +1282,6 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 </footer>
 <script>
 (function(){
-  var SB_URL='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
-  var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
   var form=document.getElementById('feedbackForm');
   if(!form) return;
   form.addEventListener('submit',function(e){
@@ -1291,9 +1290,9 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     var orig=btn.innerHTML;
     btn.innerHTML='<i class="ph-thin ph-circle-notch"></i> Sending...';
     btn.disabled=true;
-    fetch(SB_URL+'/feedback',{
+    fetch(_SB_URL+'/feedback',{
       method:'POST',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({name:document.getElementById('fbName').value||null,email:document.getElementById('fbEmail').value||null,message:document.getElementById('fbMessage').value,type:'feedback'})
     }).then(function(r){
       if(r.ok){form.style.display='none';document.getElementById('feedbackSuccess').style.display='block';}
@@ -3213,21 +3212,20 @@ function _shareApp() {
       _showThanks();
     }).catch(function(){
       window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(shareData.text+' '+shareData.url),'_blank');
-      _showThanks();
+      // Don't log share — can't confirm user actually tweeted
     });
   }
 }
+// Supabase config (single source of truth)
+var _SB_URL='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
+var _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
 // Log share to Supabase + update counter
 function _logShare(){
-  var SB='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
-  var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
-  fetch(SB+'/analytics',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({event:'share',source:'info_page'})}).catch(function(){});
+  fetch(_SB_URL+'/analytics',{method:'POST',headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({event:'share',source:'info_page'})}).catch(function(){});
 }
 // Fetch share count from Supabase
 function _loadShareCount(){
-  var SB='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
-  var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
-  fetch(SB+'/analytics?event=eq.share&select=id',{headers:{'apikey':KEY,'Prefer':'count=exact'}}).then(function(r){
+  fetch(_SB_URL+'/analytics?event=eq.share&select=id',{headers:{'apikey':_SB_KEY,'Prefer':'count=exact'}}).then(function(r){
     var count=parseInt(r.headers.get('content-range')?.split('/')[1]||'0');
     var el=document.getElementById('shareCount');
     if(el && count>0) el.textContent='Shared '+count+' times';
@@ -3332,7 +3330,7 @@ function switchMode(mode) {
     document.body.classList.remove('chrome-hidden');
     clearTimeout(_chromeTimer); // info mode - chrome stays visible
     // Re-observe reveals that may have been hidden during init
-    setTimeout(function(){ document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){ revealObs.observe(el); }); },100);
+    setTimeout(function(){ if(typeof revealObs!=='undefined') document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){ revealObs.observe(el); }); },100);
   }
 }
 
@@ -4015,7 +4013,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=413';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=414';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4218,7 +4216,7 @@ setTimeout(setupScrollObservers,500);
 
 // Heart is always filled red + pulsing via CSS animation
 </script>
-<a href="#sec-support" class="sticky-cta" onclick="if(typeof switchMode==='function')switchMode('info');">
+<a href="#sec-support" class="sticky-cta" onclick="event.preventDefault();if(typeof switchMode==='function')switchMode('info');">
   <i class="ph-fill ph-heart cta-heart"></i>
   <span>Keep this free</span>
   <span class="cta-count"></span>
