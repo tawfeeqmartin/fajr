@@ -160,8 +160,8 @@ body{
   font-family:var(--font);background:#0d0d12;color:var(--text);
   font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;
   overflow-x:clip;width:100%;
-  transition:color 1s ease;
-  opacity:1;
+  transition:color 1s ease, opacity .3s ease;
+  /* opacity controlled by head style (0) until splash is built — see buildSVG() */
   touch-action:pan-x pan-y;
   overscroll-behavior-y:none;
 }
@@ -958,6 +958,8 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     var initW=window.innerWidth, initH=_lvh.offsetHeight||window.innerHeight;
     document.body.removeChild(_lvh);
     buildSVG(initW, initH);
+    // Splash is built — safe to reveal body (head style holds opacity:0 until now)
+    document.body.style.opacity='1';
 
     // Poll for canvas element - when it exists, measure its ACTUAL rendered size
     // This is the ground truth: whatever the canvas occupies, the SVG must match
@@ -3869,7 +3871,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=389';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=390';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
