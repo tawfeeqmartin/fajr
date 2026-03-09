@@ -512,6 +512,9 @@ a{color:inherit;text-decoration:none}
   padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px);
   background:rgba(13,13,18,.55);
   backdrop-filter:blur(20px) saturate(130%);-webkit-backdrop-filter:blur(20px) saturate(130%);
+  /* Prevent sub-pixel gap flash between sections during snap scroll */
+  margin-top:-1px;padding-top:calc(env(safe-area-inset-top,0px) + clamp(48px,8vmin,72px) + 1px);
+  border-top:1px solid rgba(13,13,18,1);
 }
 body.mode-info .scroll-section .reveal{
   background:none;backdrop-filter:none;-webkit-backdrop-filter:none;
@@ -1207,14 +1210,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       <p class="verse-en">"There is none amongst the Muslims who plants a tree or sows seeds, and then a bird, or a person or an animal eats from it, but is regarded as a charitable gift for him."</p>
       <p class="verse-ref">Bukhari 2320 · Muslim 1553</p>
     </div>
-    <div style="margin-top:2rem">
-      <p class="section-label" style="margin-bottom:.75rem">What's next</p>
-      <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.9rem;font-weight:300;color:rgba(232,228,220,.7)">
-        <span><i class="ph-thin ph-device-mobile" style="margin-right:.5rem"></i> Native iPhone app</span>
-        <span><i class="ph-thin ph-watch" style="margin-right:.5rem"></i> Apple Watch complication</span>
-        <span><i class="ph-thin ph-device-mobile-camera" style="margin-right:.5rem"></i> Native Android app</span>
-      </div>
-    </div>
+
   </div>
 </section>
 
@@ -4013,7 +4009,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=414';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=415';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
