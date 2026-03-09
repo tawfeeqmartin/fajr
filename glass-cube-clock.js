@@ -2061,7 +2061,10 @@ document.addEventListener('visibilitychange', function() {
 document.body.classList.add('clock-ready');
 
 // ─── DEV PANEL ────────────────────────────────────────────────────────────────
-// Activate with ?dev in URL or press D key
+// Production mode — no dev panel, no version display on agiftoftime.app
+var _isProduction = (location.hostname === 'agiftoftime.app');
+
+// Activate with ?dev in URL or press D key (disabled in production)
 
 // ── Core state (referenced by animation loop + updatePrayerWindows) ───────────
 var _devActive      = false;
@@ -3235,13 +3238,13 @@ window._recordWebM = function(opts) {
   });
 };
 
-if (location.search.includes('dev')) {
+if (location.search.includes('dev') && !_isProduction) {
   _devActive = true;
   setTimeout(_devBuildPanel, 100);
   setTimeout(_devUpdateBoundaries, 200);
 }
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'D' || e.key === 'd') _devToggle();
+  if ((e.key === 'D' || e.key === 'd') && !_isProduction) _devToggle();
   // G key — quick grain A/B toggle (desktop)
   if (e.key === 'G' || e.key === 'g') {
     if (window._grainOverlay) {
