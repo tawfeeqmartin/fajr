@@ -207,6 +207,13 @@ body::after{display:none;
 }
 .btn-outline:hover,.btn-outline:active{background:rgba(232,228,220,.08);border-color:rgba(232,228,220,.12);color:rgba(232,228,220,.75)}
 .support-heart{display:inline-block;color:#e74c4c;font-size:1.1em;animation:heartpulse .833s ease-in-out infinite}
+/* Share button pulse glow */
+@keyframes sharePulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(120,160,255,.4)}
+  50%{box-shadow:0 0 20px 6px rgba(120,160,255,.25)}
+}
+#shareBtn.pulsing{animation:sharePulse 2s ease-in-out infinite}
+#shareBtn.shared{background:rgba(120,160,255,.15);border-color:rgba(120,160,255,.4);transition:all .4s ease}
 @keyframes heartpulse{0%,100%{transform:scale(1)}15%{transform:scale(1.325)}30%{transform:scale(1)}45%{transform:scale(1.195)}60%{transform:scale(1)}}
 .sticky-cta{
   position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
@@ -1215,37 +1222,16 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
 </section>
 
-<!-- 6. INSTALL & SHARE -->
+<!-- 6. SHARE -->
 <section class="scroll-section" id="sec-install">
   <div class="reveal">
-    <div class="section-header"><p class="section-label">Install & Share</p>
+    <div class="section-header"><p class="section-label">Share</p>
     <h2 class="section-title">Keep it close.</h2></div>
-    <p class="section-body" style="margin-bottom:1.25rem">Save to your home screen. Opens instantly.</p>
-    <div class="steps">
-      <div class="step">
-        <i class="ph-thin ph-globe step-icon"></i>
-        <p class="step-num">Step 1</p>
-        <h3>Open in Safari</h3>
-        <p>Visit the clock in your mobile browser.</p>
-      </div>
-      <div class="step">
-        <i class="ph-thin ph-share-network step-icon"></i>
-        <p class="step-num">Step 2</p>
-        <h3>Tap Share</h3>
-        <p>Select "Add to Home Screen."</p>
-      </div>
-      <div class="step">
-        <i class="ph-thin ph-house step-icon"></i>
-        <p class="step-num">Step 3</p>
-        <h3>Launch anytime</h3>
-        <p>Opens full-screen, like a native app.</p>
-      </div>
-    </div>
-    <div style="margin-top:1.5rem;display:flex;flex-direction:column;align-items:center;gap:.75rem">
-      <button id="shareBtn" onclick="_shareApp()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem">
-        <i class="ph-thin ph-share-fat"></i> Share with someone
-      </button>
-    </div>
+    <p class="section-body" style="margin-bottom:1.5rem">Save to your Home Screen or share with someone you care about.</p>
+    <button id="shareBtn" onclick="_shareApp()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.95rem;padding:.75rem 1.5rem">
+      <i class="ph-thin ph-share-fat"></i> Share
+    </button>
+    <p id="shareCount" style="font-size:.7rem;color:rgba(232,228,220,.35);margin-top:.75rem;font-weight:300"></p>
   </div>
 </section>
 
@@ -3181,22 +3167,65 @@ fsFetchPrayer();
 /* ── Info Dot Nav ── */
 const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-support','sec-how','sec-install','sec-feedback'];
 const _infoScroller = document.getElementById('infoScroller');
+var _shareOrigHTML='';
 function _shareApp() {
+  var btn = document.getElementById('shareBtn');
   var shareData = {
     title: 'A Gift of Time',
     text: 'A beautiful Islamic prayer clock — prayer times, Qibla compass, and spatial adhan. Free, no ads.',
     url: 'https://agiftoftime.app'
   };
+  if(!_shareOrigHTML && btn) _shareOrigHTML = btn.innerHTML;
+  function _showThanks(){
+    if(!btn) return;
+    btn.classList.remove('pulsing');
+    btn.classList.add('shared');
+    btn.innerHTML='<i class="ph-thin ph-heart"></i> JazakAllahu khairan ♥';
+    // Log share event to Supabase
+    _logShare();
+    setTimeout(function(){ btn.innerHTML=_shareOrigHTML; btn.classList.remove('shared'); }, 4000);
+  }
   if (navigator.share) {
-    navigator.share(shareData).catch(function(){});
+    navigator.share(shareData).then(_showThanks).catch(function(){});
   } else {
-    // Fallback: copy link
     navigator.clipboard.writeText(shareData.url).then(function(){
-      var btn = document.getElementById('shareBtn');
-      if(btn){ var orig=btn.innerHTML; btn.innerHTML='<i class="ph-thin ph-check"></i> Link copied!'; setTimeout(function(){btn.innerHTML=orig;},2000); }
+      if(btn){ btn.innerHTML='<i class="ph-thin ph-check"></i> Link copied!'; }
+      _showThanks();
     }).catch(function(){
       window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(shareData.text+' '+shareData.url),'_blank');
+      _showThanks();
     });
+  }
+}
+// Log share to Supabase + update counter
+function _logShare(){
+  var SB='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
+  var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
+  fetch(SB+'/analytics',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({event:'share',source:'info_page'})}).catch(function(){});
+}
+// Fetch share count from Supabase
+function _loadShareCount(){
+  var SB='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
+  var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
+  fetch(SB+'/analytics?event=eq.share&select=id',{headers:{'apikey':KEY,'Prefer':'count=exact'}}).then(function(r){
+    var count=parseInt(r.headers.get('content-range')?.split('/')[1]||'0');
+    var el=document.getElementById('shareCount');
+    if(el && count>0) el.textContent='Shared '+count+' times';
+  }).catch(function(){});
+}
+// Start pulse when share section scrolls into view
+var _sharePulseStarted=false;
+function _checkSharePulse(){
+  if(_sharePulseStarted) return;
+  var sec=document.getElementById('sec-install');
+  if(!sec) return;
+  var r=sec.getBoundingClientRect();
+  if(r.top>=0 && r.top<window.innerHeight){
+    _sharePulseStarted=true;
+    var btn=document.getElementById('shareBtn');
+    if(btn) btn.classList.add('pulsing');
+    // Stop pulsing after 10s if not tapped
+    setTimeout(function(){ if(btn) btn.classList.remove('pulsing'); },10000);
   }
 }
 function _infoGoTo(idx) {
@@ -3217,7 +3246,8 @@ function _infoUpdateDots() {
   });
   dots.forEach((d, i) => d.classList.toggle('active', i === activeIdx));
 }
-if (_infoScroller) _infoScroller.addEventListener('scroll', _infoUpdateDots, { passive: true });
+if (_infoScroller) _infoScroller.addEventListener('scroll', function(){ _infoUpdateDots(); _checkSharePulse(); }, { passive: true });
+_loadShareCount();
 
 /* ── Mode Switching ── */
 var _currentMode = 'clock'; // default: clock mode
@@ -3965,7 +3995,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=400';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=402';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
