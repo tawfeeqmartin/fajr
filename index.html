@@ -1177,48 +1177,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
 </section>
 
-<!-- 4. HOW IT WORKS -->
-<section class="scroll-section" id="sec-how">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">How It Works</p>
-    <h2 class="section-title">A quick guide.</h2></div>
-    <p class="section-body" style="margin-bottom:1.5rem">Tap to replay the walkthrough.</p>
-    <button onclick="if(typeof switchMode==='function')switchMode('clock');setTimeout(function(){_clockOnboardEl=null;if(typeof _showClockOnboarding==='function')_showClockOnboarding(true);},600);" class="btn btn-outline" style="font-size:.9rem;padding:.7rem 1.5rem;display:inline-flex;align-items:center;gap:.5rem">
-      <i class="ph-thin ph-question"></i> Show me how
-    </button>
-  </div>
-</section>
-
-<!-- 5. INSTALL -->
-<section class="scroll-section" id="sec-install">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">Install</p>
-    <h2 class="section-title">Keep it close.</h2></div>
-    <p class="section-body" style="margin-bottom:1.5rem">Save to your home screen. Opens instantly.</p>
-    <div class="steps">
-      <div class="step">
-        <i class="ph-thin ph-globe step-icon"></i>
-        <p class="step-num">Step 1</p>
-        <h3>Open in Safari</h3>
-        <p>Visit the clock in your mobile browser.</p>
-      </div>
-      <div class="step">
-        <i class="ph-thin ph-share-network step-icon"></i>
-        <p class="step-num">Step 2</p>
-        <h3>Tap Share</h3>
-        <p>Select "Add to Home Screen."</p>
-      </div>
-      <div class="step">
-        <i class="ph-thin ph-house step-icon"></i>
-        <p class="step-num">Step 3</p>
-        <h3>Launch anytime</h3>
-        <p>Opens full-screen, like a native app.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 6. SUPPORT -->
+<!-- 4. SUPPORT -->
 <section class="scroll-section" id="sec-support">
   <div class="reveal">
     <div class="section-header"><p class="section-label">Support</p>
@@ -1240,6 +1199,52 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         <span><i class="ph-thin ph-watch" style="margin-right:.5rem"></i> Apple Watch complication</span>
         <span><i class="ph-thin ph-device-mobile-camera" style="margin-right:.5rem"></i> Native Android app</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. HOW IT WORKS -->
+<section class="scroll-section" id="sec-how">
+  <div class="reveal">
+    <div class="section-header"><p class="section-label">How It Works</p>
+    <h2 class="section-title">A quick guide.</h2></div>
+    <p class="section-body" style="margin-bottom:1.5rem">Tap to replay the walkthrough.</p>
+    <button onclick="if(typeof switchMode==='function')switchMode('clock');setTimeout(function(){_clockOnboardEl=null;if(typeof _showClockOnboarding==='function')_showClockOnboarding(true);},600);" class="btn btn-outline" style="font-size:.9rem;padding:.7rem 1.5rem;display:inline-flex;align-items:center;gap:.5rem">
+      <i class="ph-thin ph-question"></i> Show me how
+    </button>
+  </div>
+</section>
+
+<!-- 6. INSTALL & SHARE -->
+<section class="scroll-section" id="sec-install">
+  <div class="reveal">
+    <div class="section-header"><p class="section-label">Install & Share</p>
+    <h2 class="section-title">Keep it close.</h2></div>
+    <p class="section-body" style="margin-bottom:1.25rem">Save to your home screen. Opens instantly.</p>
+    <div class="steps">
+      <div class="step">
+        <i class="ph-thin ph-globe step-icon"></i>
+        <p class="step-num">Step 1</p>
+        <h3>Open in Safari</h3>
+        <p>Visit the clock in your mobile browser.</p>
+      </div>
+      <div class="step">
+        <i class="ph-thin ph-share-network step-icon"></i>
+        <p class="step-num">Step 2</p>
+        <h3>Tap Share</h3>
+        <p>Select "Add to Home Screen."</p>
+      </div>
+      <div class="step">
+        <i class="ph-thin ph-house step-icon"></i>
+        <p class="step-num">Step 3</p>
+        <h3>Launch anytime</h3>
+        <p>Opens full-screen, like a native app.</p>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;display:flex;flex-direction:column;align-items:center;gap:.75rem">
+      <button id="shareBtn" onclick="_shareApp()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem">
+        <i class="ph-thin ph-share-fat"></i> Share with someone
+      </button>
     </div>
   </div>
 </section>
@@ -3174,8 +3179,26 @@ fsFetchPrayer();
 // They naturally scroll over the fixed canvas.
 
 /* ── Info Dot Nav ── */
-const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-how','sec-install','sec-support','sec-feedback'];
+const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-support','sec-how','sec-install','sec-feedback'];
 const _infoScroller = document.getElementById('infoScroller');
+function _shareApp() {
+  var shareData = {
+    title: 'A Gift of Time',
+    text: 'A beautiful Islamic prayer clock — prayer times, Qibla compass, and spatial adhan. Free, no ads.',
+    url: 'https://agiftoftime.app'
+  };
+  if (navigator.share) {
+    navigator.share(shareData).catch(function(){});
+  } else {
+    // Fallback: copy link
+    navigator.clipboard.writeText(shareData.url).then(function(){
+      var btn = document.getElementById('shareBtn');
+      if(btn){ var orig=btn.innerHTML; btn.innerHTML='<i class="ph-thin ph-check"></i> Link copied!'; setTimeout(function(){btn.innerHTML=orig;},2000); }
+    }).catch(function(){
+      window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(shareData.text+' '+shareData.url),'_blank');
+    });
+  }
+}
 function _infoGoTo(idx) {
   const el = document.getElementById(_infoSections[idx]);
   if (el && _infoScroller) _infoScroller.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
@@ -3942,7 +3965,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=399';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=400';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4156,9 +4179,9 @@ setTimeout(setupScrollObservers,500);
   <button class="info-dot active" data-section="sec-hook" onclick="_infoGoTo(0)" aria-label="Go to Introducing section"></button>
   <button class="info-dot" data-section="sec-dials" onclick="_infoGoTo(1)" aria-label="Go to The Clock section"></button>
   <button class="info-dot" data-section="sec-qibla" onclick="_infoGoTo(2)" aria-label="Go to Qibla section"></button>
-  <button class="info-dot" data-section="sec-how" onclick="_infoGoTo(3)" aria-label="Go to How It Works section"></button>
-  <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(4)" aria-label="Go to Install section"></button>
-  <button class="info-dot" data-section="sec-support" onclick="_infoGoTo(5)" aria-label="Go to Support section"></button>
+  <button class="info-dot" data-section="sec-support" onclick="_infoGoTo(3)" aria-label="Go to Support section"></button>
+  <button class="info-dot" data-section="sec-how" onclick="_infoGoTo(4)" aria-label="Go to How It Works section"></button>
+  <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(5)" aria-label="Go to Install section"></button>
   <button class="info-dot" data-section="sec-feedback" onclick="_infoGoTo(6)" aria-label="Go to Feedback section"></button>
 </div>
 
