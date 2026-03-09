@@ -4012,7 +4012,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=422';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=423';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4219,7 +4219,7 @@ setTimeout(setupScrollObservers,500);
 
 // Heart is always filled red + pulsing via CSS animation
 </script>
-<a href="#sec-support" class="sticky-cta" onclick="event.preventDefault();if(typeof switchMode==='function')switchMode('info');">
+<a href="#sec-support" class="sticky-cta" onclick="event.preventDefault();if(typeof switchMode==='function'){switchMode('info');setTimeout(function(){var s=document.getElementById('infoScroller'),el=document.getElementById('sec-support');if(s&&el)s.scrollTo({top:el.offsetTop,behavior:'smooth'});},100);}">
   <i class="ph-fill ph-heart cta-heart"></i>
   <span>Keep this free</span>
   <span class="cta-count"></span>
