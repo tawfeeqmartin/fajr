@@ -3244,19 +3244,22 @@ function _infoGoTo(idx) {
   const el = document.getElementById(_infoSections[idx]);
   if (el && _infoScroller) _infoScroller.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
 }
+var _dotRaf=null;
 function _infoUpdateDots() {
   if (_currentMode !== 'info' || !_infoScroller) return;
-  const dots = document.querySelectorAll('.info-dot');
-  const vh = window.innerHeight;
-  let activeIdx = 0;
-  _infoSections.forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < vh * 0.5) activeIdx = i;
-    }
+  if(_dotRaf) return; // throttle to one per frame
+  _dotRaf=requestAnimationFrame(function(){
+    _dotRaf=null;
+    const dots = document.querySelectorAll('.info-dot');
+    const st = _infoScroller.scrollTop;
+    const vh = _infoScroller.clientHeight;
+    let activeIdx = 0;
+    _infoSections.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && el.offsetTop <= st + vh * 0.5) activeIdx = i;
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === activeIdx));
   });
-  dots.forEach((d, i) => d.classList.toggle('active', i === activeIdx));
 }
 if (_infoScroller) _infoScroller.addEventListener('scroll', function(){ _infoUpdateDots(); _checkSharePulse(); }, { passive: true });
 _loadShareCount();
@@ -3323,6 +3326,8 @@ function switchMode(mode) {
     closeClockFullscreen();
     document.body.classList.remove('chrome-hidden');
     clearTimeout(_chromeTimer); // info mode - chrome stays visible
+    // Reset scroll to top when entering info mode
+    if(_infoScroller) _infoScroller.scrollTo(0,0);
     // Re-observe reveals that may have been hidden during init
     setTimeout(function(){ if(typeof revealObs!=='undefined') document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){ revealObs.observe(el); }); },100);
   }
@@ -4007,7 +4012,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=419';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=420';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
