@@ -1115,7 +1115,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
             splash.style.pointerEvents='none';
             splash.style.transition='opacity 0.8s ease';
             if(svg) svg.querySelectorAll('path').forEach(function(p,i){ if(i>=5) p.remove(); });
-            splash.style.opacity='0.18';
+            splash.style.opacity='1.0';
             window._splashActive = false;
             _svgDrawStarted=false;
           },1900);
@@ -4043,7 +4043,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=447';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=448';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
