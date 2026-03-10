@@ -3,6 +3,7 @@
 // Three.js FBO dichroic shader, per-channel IOR, real-time H:M:S hands
 
 import * as THREE from 'three';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 // LightProbeGenerator removed — no irradiance probes
 
 
@@ -714,6 +715,40 @@ podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
+// ── CONCRETE TEXTURE (Look 01 — Gallery Diagonal) ──────────────────────────
+{
+  const _tl = new THREE.TextureLoader();
+  _tl.load('concrete-plinth.jpg', function(cm) {
+    cm.wrapS = cm.wrapT = THREE.RepeatWrapping;
+    cm.repeat.set(2, 4);
+    cm.colorSpace = THREE.SRGBColorSpace;
+    _tl.load('concrete-plinth-normal.jpg', function(nm) {
+      nm.wrapS = nm.wrapT = THREE.RepeatWrapping;
+      nm.repeat.set(2, 4);
+      _tl.load('concrete-plinth-rough.jpg', function(rm) {
+        rm.wrapS = rm.wrapT = THREE.RepeatWrapping;
+        rm.repeat.set(2, 4);
+        // Apply to all visible faces
+        podiumMats.forEach(function(mat) {
+          mat.map = cm;
+          mat.normalMap = nm;
+          mat.normalScale.set(0.5, 0.5);
+          mat.roughnessMap = rm;
+          mat.needsUpdate = true;
+        });
+      });
+    });
+  });
+}
+
+// ── RECT AREA UPLIGHT (Look 01 — Gallery Diagonal) ─────────────────────────
+RectAreaLightUniformsLib.init();
+{
+  const ral = new THREE.RectAreaLight(0xddddf8, 12, 6, 3);
+  ral.position.set(-2, -8, 4);
+  ral.lookAt(1, 0, 1.32);
+  scene.add(ral);
+}
 
 // ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
 // Just two scene lights to illuminate the podium surface. No material changes.
