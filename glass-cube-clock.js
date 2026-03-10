@@ -1680,7 +1680,10 @@ document.addEventListener('visibilitychange', function() {
       var aligned = alignDelta < 0.15; // ~8.5° tolerance
       var fullPayoff = calibrated && aligned;
       var softPayoff = softCalibrated && aligned;
+      var _wasAligned = _compassAligned;
       _compassAligned = fullPayoff;
+      // Edge pulse when hitting qibla alignment
+      if(fullPayoff && !_wasAligned && typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
 
       // Prismatic refraction: polar disc shaders
       var breathe = 0.88 + 0.12 * Math.sin(t * 1.0);
