@@ -3623,6 +3623,9 @@ function _clockOnboardHighlight(target) {
       pill.style.cssText = 'position:fixed;overflow:visible;z-index:960';
       pill.classList.add('onboard-spotlight');
       var mode = target === 'clock-icon' ? 'clock' : 'compass';
+      var posMap = {clock:'0',compass:'1',info:'2'};
+      var slider = document.getElementById('modePillSlider');
+      if(slider) slider.setAttribute('data-pos', posMap[mode] || '0');
       pill.querySelectorAll('.mode-pill-btn').forEach(function(b){
         b.style.opacity = b.dataset.mode === mode ? '1' : '.15';
       });
@@ -4161,7 +4164,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=478';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=479';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
