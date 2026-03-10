@@ -3528,6 +3528,8 @@ document.addEventListener('touchstart', function(e) {
   _swipeStartY = touch.clientY;
   _swipeDragging = false;
   _swipeSwiping = false;
+  // Trigger edge redraw pulse on swipe start
+  if (typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
 }, { passive: true });
 
 document.addEventListener('touchmove', function(e) {
