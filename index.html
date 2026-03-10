@@ -447,12 +447,15 @@ body.mode-info .info-dots{opacity:1;pointer-events:auto}
 body.mode-info .info-help-btn{display:flex}
 .info-help-btn:active{opacity:.5}
 .clock-onboard{
-  position:fixed;top:24%;left:0;right:0;z-index:900;
-  padding:0 1.5rem;
+  position:fixed;inset:0;z-index:900;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   opacity:0;pointer-events:none;transition:opacity .5s ease;
 }
+.clock-onboard-body{
+  position:absolute;top:24%;left:0;right:0;padding:0 1.5rem;
+  text-align:center;color:rgba(232,228,220,.85);font-family:var(--font);
+}
 .clock-onboard.active{opacity:1;pointer-events:auto}
-.clock-onboard-body{text-align:center;color:rgba(232,228,220,.85);font-family:var(--font)}
 .clock-onboard-visual{display:none}
 .clock-onboard-text{font-size:1.05rem;font-weight:400;letter-spacing:.02em;margin-bottom:.3rem}
 .clock-onboard-sub{font-size:.8rem;font-weight:300;color:rgba(232,228,220,.45);letter-spacing:.02em;margin-bottom:1rem}
@@ -4151,7 +4154,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=471';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=472';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
