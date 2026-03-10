@@ -439,7 +439,7 @@ body.mode-info .info-dots{opacity:1;pointer-events:auto}
 .compass-converge{animation:arrowPulse 1.5s ease-in-out infinite}
 
 /* ── Clock onboarding ── */
-.info-help-btn{position:fixed;bottom:90px;right:20px;width:44px;height:44px;border-radius:50%;
+.info-help-btn{position:fixed;top:calc(env(safe-area-inset-top,12px) + 12px);right:16px;width:44px;height:44px;border-radius:50%;
   background:rgba(13,13,18,.55);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
   border:none;color:rgba(232,228,220,.65);font-family:var(--font);font-size:1.1rem;font-weight:300;
   cursor:pointer;z-index:900;display:none;align-items:center;justify-content:center;
@@ -4133,7 +4133,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=485';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=486';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
