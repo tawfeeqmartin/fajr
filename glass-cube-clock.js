@@ -1805,7 +1805,10 @@ document.addEventListener('visibilitychange', function() {
       clockRays[1].mesh.rotation.y -= tawafOffset * 0.6;  // minute: medium
       clockRays[2].mesh.rotation.y -= tawafOffset;         // second: full sweep
       _swipeTawafPhase *= 0.955; // decay ~1.5 seconds at 60fps
-      if (_swipeTawafPhase < 0.001) _swipeTawafPhase = 0;
+      if (_swipeTawafPhase < 0.001) {
+        _swipeTawafPhase = 0;
+        if (typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
+      }
     }
 
     // Expose hand proximity to 6 o'clock (bottom) for nav pill dichroic effect
@@ -3528,7 +3531,6 @@ document.addEventListener('touchstart', function(e) {
   _swipeStartY = touch.clientY;
   _swipeDragging = false;
   _swipeSwiping = false;
-  // Trigger edge redraw pulse on swipe start
   if (typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
 }, { passive: true });
 
