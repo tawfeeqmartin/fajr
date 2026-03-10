@@ -3601,11 +3601,14 @@ function _clockOnboardRender() {
 }
 
 function _clockOnboardHighlight(target) {
+  // Clear previous spotlights
+  document.querySelectorAll('.onboard-spotlight').forEach(function(el){ el.classList.remove('onboard-spotlight'); el.style.zIndex = ''; });
   // Always start with everything hidden
   document.body.classList.add('chrome-hidden');
   var pill = document.getElementById('modePill');
   if(pill) pill.style.cssText = 'display:none!important';
   var headerBar = document.getElementById('headerBar');
+  if(headerBar) headerBar.style.cssText = '';
   var pDots = document.getElementById('_prayerDots');
   var pLabel = document.getElementById('_currentPrayerLabel');
   if(pDots) pDots.style.opacity = '0';
@@ -3647,7 +3650,9 @@ function _showClockOnboarding(force) {
   _buildClockOnboarding();
   _clockOnboardStep = 0;
   _clockOnboardRender();
-  // Chrome hiding handled by _clockOnboardHighlight via _clockOnboardRender
+  // Hide wireframe edges during onboarding
+  var splash = document.getElementById('splash');
+  if(splash) splash.style.display = 'none';
   // Small delay so transition fires
   requestAnimationFrame(function() {
     _clockOnboardEl.classList.add('active');
@@ -3660,6 +3665,8 @@ function _dismissClockOnboarding() {
   _clockOnboardEl.classList.remove('active');
   // Restore everything
   _clockOnboardClearHighlight();
+  var splash = document.getElementById('splash');
+  if(splash) splash.style.display = '';
   if(typeof _showChrome === 'function') _showChrome();
   // Clean up after transition
   setTimeout(function() {
@@ -4154,7 +4161,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=477';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=478';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
