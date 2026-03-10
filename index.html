@@ -1131,10 +1131,13 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
                 });
                 splash.style.opacity='1';
                 requestAnimationFrame(function(){
+                  // Pulse uses faster draw: 0.3s anims, compressed delays
                   svg.querySelectorAll('path').forEach(function(p,i){
-                    if(_savedStyles[i]) p.setAttribute('style', _savedStyles[i]);
+                    var da = p.getAttribute('data-dash')||'420';
+                    var d = (i * 0.08).toFixed(2);
+                    p.setAttribute('style','stroke-dasharray:'+da+';stroke-dashoffset:'+da+';animation:splashDraw .3s ease-out '+d+'s forwards');
                   });
-                  setTimeout(function(){ splash.style.opacity='0'; }, 2500);
+                  setTimeout(function(){ splash.style.opacity='0'; }, 1000);
                 });
             };
             // Minute pulse — fire at :00 each minute
@@ -4077,7 +4080,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=459';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=460';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
