@@ -3621,6 +3621,10 @@ function _showClockOnboarding(force) {
   _buildClockOnboarding();
   _clockOnboardStep = 0;
   _clockOnboardRender();
+  // Hide all chrome — onboarding owns the screen
+  document.body.classList.add('chrome-hidden');
+  var pill = document.getElementById('navPill');
+  if(pill) pill.style.display = 'none';
   // Small delay so transition fires
   requestAnimationFrame(function() {
     _clockOnboardEl.classList.add('active');
@@ -3631,6 +3635,11 @@ function _dismissClockOnboarding() {
   if (!_clockOnboardEl) return;
   localStorage.setItem('agot_clock_onboarded', '1');
   _clockOnboardEl.classList.remove('active');
+  // Restore chrome + nav pill
+  document.body.classList.remove('chrome-hidden');
+  var pill = document.getElementById('navPill');
+  if(pill) pill.style.display = '';
+  if(typeof _showChrome === 'function') _showChrome();
   // Clean up after transition
   setTimeout(function() {
     if (_clockOnboardEl && _clockOnboardEl.parentNode) {
@@ -4124,7 +4133,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=466';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=467';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
