@@ -3312,6 +3312,10 @@ function switchMode(mode) {
   document.querySelectorAll('#fsPrayerTimes span[data-prayer]').forEach(function(sp) { sp.style.opacity=''; sp.style.color=''; });
   if (window._prayerTimings && typeof window._displayPrayerTimes === 'function') window._displayPrayerTimes(window._prayerTimings, window._lastHijri||null);
 
+  // Hide/show SVG edge overlay
+  var _splashEl = document.getElementById('splash');
+  if(_splashEl) _splashEl.style.display = (mode === 'clock' || mode === 'compass') ? '' : 'none';
+
   // Update body class
   document.body.classList.remove('mode-clock','mode-compass','mode-info');
   document.body.classList.add('mode-' + mode);
@@ -4042,7 +4046,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=450';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=451';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
