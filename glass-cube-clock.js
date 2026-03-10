@@ -1490,16 +1490,18 @@ document.addEventListener('visibilitychange', function() {
   _frameInterval = 1000 / fps;
   // Re-measure canvas on return from background (Safari toolbar state may have changed)
   if (!document.hidden) {
-    setTimeout(function() {
-      _stableW = window.innerWidth;
-      // Re-measure lvh in case orientation changed while backgrounded
-      var el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
-      document.body.appendChild(el);
-      _stableH = el.offsetHeight || window.innerHeight;
-      document.body.removeChild(el);
-      onResize();
-    }, 150);
+    // Multiple resize passes — iOS standalone viewport settles slowly
+    [150, 500, 1000].forEach(function(delay) {
+      setTimeout(function() {
+        _stableW = window.innerWidth;
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;pointer-events:none;';
+        document.body.appendChild(el);
+        _stableH = el.offsetHeight || window.innerHeight;
+        document.body.removeChild(el);
+        onResize();
+      }, delay);
+    });
   }
 });
 
