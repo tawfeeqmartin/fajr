@@ -3625,6 +3625,10 @@ function _showClockOnboarding(force) {
   document.body.classList.add('chrome-hidden');
   var pill = document.getElementById('navPill');
   if(pill) pill.style.display = 'none';
+  var pDots = document.getElementById('_prayerDots');
+  if(pDots) pDots.style.opacity = '0';
+  var pLabel = document.getElementById('_currentPrayerLabel');
+  if(pLabel) pLabel.style.opacity = '0';
   // Small delay so transition fires
   requestAnimationFrame(function() {
     _clockOnboardEl.classList.add('active');
@@ -3635,10 +3639,14 @@ function _dismissClockOnboarding() {
   if (!_clockOnboardEl) return;
   localStorage.setItem('agot_clock_onboarded', '1');
   _clockOnboardEl.classList.remove('active');
-  // Restore chrome + nav pill
+  // Restore chrome + nav pill + prayer dots
   document.body.classList.remove('chrome-hidden');
   var pill = document.getElementById('navPill');
   if(pill) pill.style.display = '';
+  var pDots = document.getElementById('_prayerDots');
+  if(pDots) pDots.style.opacity = '';
+  var pLabel = document.getElementById('_currentPrayerLabel');
+  if(pLabel) pLabel.style.opacity = '';
   if(typeof _showChrome === 'function') _showChrome();
   // Clean up after transition
   setTimeout(function() {
@@ -4133,7 +4141,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=467';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=468';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
