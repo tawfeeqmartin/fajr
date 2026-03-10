@@ -1105,11 +1105,15 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           return; // keep overlay visible in debug mode
         }
         setTimeout(function(){
-          splash.style.opacity='0';
-          setTimeout(function(){
-            splash.remove();
-            window._splashActive = false;
-          },1900);
+          // Remove text, keep SVG edges as hairline overlay
+          var tw=document.getElementById('splashTextWrap');
+          if(tw) tw.remove();
+          splash.style.background='none';
+          splash.style.pointerEvents='none';
+          splash.style.opacity='0.18';
+          window._splashActive = false;
+          // Re-enable tryCorrect so edges track the cube
+          _svgDrawStarted=false;
         }, HOLD);
         return;
       }
@@ -4034,7 +4038,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=444';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=445';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
