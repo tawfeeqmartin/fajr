@@ -1123,6 +1123,43 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
             splash.style.transition='opacity 0.6s ease';
             var _savedStyles = [];
             svg.querySelectorAll('path').forEach(function(p){ _savedStyles.push(p.getAttribute('style')); });
+            // Resize SVG edges to match current canvas
+            window._resizeEdgeOverlay = function(){
+              var c = document.querySelector('canvas');
+              if(!c || !svg) return;
+              var r = c.getBoundingClientRect();
+              var cw = Math.round(r.width), ch = Math.round(r.height);
+              splash.style.top = r.top+'px';
+              splash.style.left = r.left+'px';
+              splash.style.width = cw+'px';
+              splash.style.height = ch+'px';
+              // Rebuild SVG paths at new size
+              var v = getVerts(cw, ch);
+              var hands = null;
+              var paths = mkPaths(v, hands, cw, ch);
+              while(svg.firstChild) svg.removeChild(svg.firstChild);
+              svg.setAttribute('style','position:absolute;top:0;left:0;width:'+cw+'px;height:'+ch+'px');
+              svg.setAttribute('viewBox','0 0 '+cw+' '+ch);
+              // Only cube edges (first 5)
+              for(var i=0;i<Math.min(5,paths.length);i++){
+                var e=paths[i];
+                var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+                p.setAttribute('d',e.d);
+                p.setAttribute('stroke',e.stroke||'rgba(255,255,255,.92)');
+                p.setAttribute('stroke-width',e.w||'1');
+                p.setAttribute('stroke-linecap','round');
+                p.setAttribute('stroke-linejoin','round');
+                p.setAttribute('data-dash',e.dash);
+                p.setAttribute('style','stroke-dasharray:'+e.dash+';stroke-dashoffset:0');
+                svg.appendChild(p);
+              }
+              _savedStyles = [];
+              svg.querySelectorAll('path').forEach(function(p){ _savedStyles.push(p.getAttribute('style')); });
+            };
+            // Rebuild on visibility change (minimize/return)
+            document.addEventListener('visibilitychange', function(){
+              if(!document.hidden && window._resizeEdgeOverlay) window._resizeEdgeOverlay();
+            });
             window._triggerEdgePulse = function(){
                 svg.querySelectorAll('path').forEach(function(p){
                   var da = p.getAttribute('data-dash')||p.style.strokeDasharray;
@@ -4081,7 +4118,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=462';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=463';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
