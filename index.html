@@ -439,6 +439,13 @@ body.mode-info .info-dots{opacity:1;pointer-events:auto}
 .compass-converge{animation:arrowPulse 1.5s ease-in-out infinite}
 
 /* ── Clock onboarding ── */
+.info-help-btn{position:fixed;bottom:90px;right:20px;width:44px;height:44px;border-radius:50%;
+  background:rgba(13,13,18,.55);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
+  border:none;color:rgba(232,228,220,.65);font-family:var(--font);font-size:1.1rem;font-weight:300;
+  cursor:pointer;z-index:900;display:none;align-items:center;justify-content:center;
+  transition:opacity .3s ease}
+body.mode-info .info-help-btn{display:flex}
+.info-help-btn:active{opacity:.5}
 .clock-onboard{
   position:fixed;inset:0;z-index:900;
   display:flex;align-items:center;justify-content:center;flex-direction:column;
@@ -1395,6 +1402,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 })();
 </script>
 </div><!-- /infoScroller -->
+<button class="info-help-btn" onclick="if(typeof switchMode==='function')switchMode('clock');setTimeout(function(){_clockOnboardEl=null;if(typeof _showClockOnboarding==='function')_showClockOnboarding(true);},600);" aria-label="How it works">?</button>
 
 <script>
 // ══════════════════════════════════════════
@@ -3419,7 +3427,6 @@ function switchMode(mode) {
     openClockFullscreen();
     window.scrollTo(0, 0);
     _showChrome();
-    if (typeof _showClockOnboarding === 'function') setTimeout(_showClockOnboarding, 4000);
   } else if(mode === 'compass') {
     openClockFullscreen();
     if(!fsCompassOn) _toggleCompassMode(true);
@@ -3442,7 +3449,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auto-open fullscreen clock on load
   if(typeof openClockFullscreen === 'function') openClockFullscreen();
   // Clock onboarding on first load
-  setTimeout(function(){ if(typeof _showClockOnboarding==='function') _showClockOnboarding(); }, 4000);
+  // Clock onboarding moved to info page ? button
   // Fade page label after initial show
   var _ml = document.getElementById('modeLabel');
   if(_ml){ _ml.style.opacity = '1'; }
@@ -4118,7 +4125,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=480';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=481';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
