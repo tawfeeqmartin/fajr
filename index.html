@@ -1128,7 +1128,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
               if(!document.getElementById('splash')){ return; }
               var s = new Date().getSeconds();
               // Trigger at :00 — redraw edges
-              if(s === 0 && _lastPulseSec !== 0){
+              if(s % 15 === 0 && _lastPulseSec % 15 !== 0){
                 // Reset paths to full dashoffset (hidden)
                 svg.querySelectorAll('path').forEach(function(p){
                   var da = p.getAttribute('data-dash')||p.style.strokeDasharray;
@@ -4079,7 +4079,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=454';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=455';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
