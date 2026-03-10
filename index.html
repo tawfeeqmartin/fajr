@@ -765,15 +765,15 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       var paths=[
         // Cube first: all-white build with full visible side structure
         {d:'M'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.tBack[0].toFixed(1)+','+v.tBack[1].toFixed(1)+' L'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' Z',
-         stroke:'rgba(255,255,255,.92)',dash:'420',delay:'.2s'},
+         stroke:'rgba(255,255,255,.92)',dash:'420',delay:'.12s'},
         {d:'M'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1)+' L'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1),
-         stroke:'rgba(255,255,255,.50)',dash:'240',delay:'.5s'},
+         stroke:'rgba(255,255,255,.50)',dash:'240',delay:'.30s'},
         {d:'M'+v.tFront[0].toFixed(1)+','+v.tFront[1].toFixed(1)+' L'+v.bFront[0].toFixed(1)+','+v.bFront[1].toFixed(1),
-         stroke:'rgba(255,255,255,.55)',dash:'110',delay:'.65s'},
+         stroke:'rgba(255,255,255,.55)',dash:'110',delay:'.39s'},
         {d:'M'+v.tLeft[0].toFixed(1)+','+v.tLeft[1].toFixed(1)+' L'+v.bLeft[0].toFixed(1)+','+v.bLeft[1].toFixed(1),
-         stroke:'rgba(255,255,255,.30)',dash:'110',delay:'.75s'},
+         stroke:'rgba(255,255,255,.30)',dash:'110',delay:'.45s'},
         {d:'M'+v.tRight[0].toFixed(1)+','+v.tRight[1].toFixed(1)+' L'+v.bRight[0].toFixed(1)+','+v.bRight[1].toFixed(1),
-         stroke:'rgba(255,255,255,.30)',dash:'110',delay:'.85s'}
+         stroke:'rgba(255,255,255,.30)',dash:'110',delay:'.51s'}
       ];
       // Then true hand positions from live renderer (hour + minute only; omit seconds to avoid fade desync)
       (hands||[]).forEach(function(ray,i){
@@ -791,7 +791,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           stroke:ray.color||'#ffffff',
           dash:'250',
           w:'1.6',
-          delay:(1.02 + i*0.2).toFixed(2)+'s'
+          delay:(0.61 + i*0.12).toFixed(2)+'s'
         });
       });
       return paths;
@@ -966,7 +966,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         p.setAttribute('stroke-linecap','round');
         p.setAttribute('stroke-linejoin','round');
         var d=parseFloat(e.delay)||0;
-        p.setAttribute('data-anim','splashDraw .8s ease-out '+d.toFixed(2)+'s forwards');
+        p.setAttribute('data-anim','splashDraw .5s ease-out '+d.toFixed(2)+'s forwards');
         p.setAttribute('style','stroke-dasharray:'+e.dash+';stroke-dashoffset:'+e.dash);
         svg.appendChild(p);
       });
@@ -1068,7 +1068,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     }
 
     // Animation + lifecycle
-    var ANIM_DUR=7900, HOLD=2000, cycleStart=performance.now();
+    var ANIM_DUR=6500, HOLD=1000, cycleStart=performance.now();
     function resetAnim(){
       if(!svg) return;
       _svgDrawStarted=false;
@@ -4034,7 +4034,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=437';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=438';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
