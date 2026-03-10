@@ -3613,11 +3613,13 @@ function _clockOnboardHighlight(target) {
     document.body.classList.remove('chrome-hidden');
     if(city) city.style.cssText = 'opacity:1!important;animation:onboard-pulse 1.5s ease-in-out infinite';
   } else if(target === 'clock-icon' || target === 'compass-icon') {
-    if(pill) { pill.style.display = ''; pill.style.zIndex = '960'; }
-    var mode = target === 'clock-icon' ? 'clock' : 'compass';
-    pill.querySelectorAll('.mode-pill-btn').forEach(function(b){
-      b.style.opacity = b.dataset.mode === mode ? '1' : '.2';
-    });
+    if(pill) {
+      pill.style.display = ''; pill.style.zIndex = '960';
+      var mode = target === 'clock-icon' ? 'clock' : 'compass';
+      pill.querySelectorAll('.mode-pill-btn').forEach(function(b){
+        b.style.opacity = b.dataset.mode === mode ? '1' : '.2';
+      });
+    }
   } else if(target === 'countdown') {
     document.body.classList.remove('chrome-hidden');
     if(countdown) countdown.style.cssText = 'opacity:1!important';
@@ -4154,7 +4156,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=472';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=473';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
