@@ -1124,29 +1124,26 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
             var _lastPulseSec = -1;
             var _savedStyles = [];
             svg.querySelectorAll('path').forEach(function(p){ _savedStyles.push(p.getAttribute('style')); });
-            (function minutePulse(){
-              if(!document.getElementById('splash')){ return; }
-              var s = new Date().getSeconds();
-              // Trigger at :00 — redraw edges
-              if(s % 15 === 0 && _lastPulseSec % 15 !== 0){
-                // Reset paths to full dashoffset (hidden)
+            function doPulse(){
                 svg.querySelectorAll('path').forEach(function(p){
                   var da = p.getAttribute('data-dash')||p.style.strokeDasharray;
                   p.style.animation='none';
                   p.style.strokeDashoffset=da;
                 });
                 splash.style.opacity='1';
-                // Force reflow then restart draw animation
                 requestAnimationFrame(function(){
                   svg.querySelectorAll('path').forEach(function(p,i){
                     if(_savedStyles[i]) p.setAttribute('style', _savedStyles[i]);
                   });
-                  // Fade out after draw completes + hold
-                  setTimeout(function(){
-                    splash.style.opacity='0';
-                  }, 2500);
+                  setTimeout(function(){ splash.style.opacity='0'; }, 2500);
                 });
-              }
+            }
+            window._triggerEdgePulse = doPulse;
+            (function minutePulse(){
+              if(!document.getElementById('splash')){ return; }
+              var s = new Date().getSeconds();
+              // Trigger at :00 — redraw edges
+              if(s % 15 === 0 && _lastPulseSec % 15 !== 0) doPulse();
               _lastPulseSec = s;
               requestAnimationFrame(minutePulse);
             })();
@@ -2837,8 +2834,11 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
   const fsEl = document.getElementById('fsPrayerTimes'); if(fsEl) fsEl.innerHTML = html;
   // Cache active prayer + color for countdown/headline tint
   var _activeColor = (activeP === 'Sunrise' && _sunriseForbidden) ? '#888888' : (prayerColors[activeP] || '');
+  var _prevPrayer = window._activePrayerName || '';
   window._activePrayerName = activeP || '';
   window._activePrayerColor = _activeColor;
+  // Trigger redraw pulse on prayer change
+  if(_prevPrayer && activeP && _prevPrayer !== activeP && window._triggerEdgePulse) window._triggerEdgePulse();
 
   // Update nav pill glow to current prayer color
   var _pillSlider = document.getElementById('modePillSlider');
@@ -4079,7 +4079,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=455';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=456';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
