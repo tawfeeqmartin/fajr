@@ -3219,7 +3219,7 @@ var _SB_URL='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
 var _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
 // Log share to Supabase + update counter
 function _logShare(){
-  fetch(_SB_URL+'/analytics',{method:'POST',headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({event:'share'})}).catch(function(){});
+  fetch(_SB_URL+'/analytics',{method:'POST',headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({event:'share'})}).then(function(){ _loadShareCount(); }).catch(function(){});
 }
 // Fetch share count from Supabase
 function _loadShareCount(){
@@ -4019,7 +4019,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=435';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=436';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
