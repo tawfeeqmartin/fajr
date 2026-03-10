@@ -716,7 +716,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     @keyframes splashTextIn { from { opacity:0; } to { opacity:1; } }
     @keyframes splashTextOut { to { opacity:0; } }
   </style>
-  <div id="splashTextWrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,3vmin,32px);height:100%;width:100%;position:absolute;inset:0;z-index:3;pointer-events:none;background:#0d0d12;animation:splashTextOut 1s ease 3.5s forwards">
+  <div id="splashTextWrap" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:clamp(14px,3vmin,32px);height:100%;width:100%;position:absolute;inset:0;z-index:3;padding-top:28vh;pointer-events:none;background:#0d0d12;animation:splashTextOut 1s ease 3.5s forwards">
   <div id="splashTitle" style="pointer-events:none;text-align:center;opacity:1;">
     <div style="font-family:var(--font);font-size:clamp(2.2rem,6vw,3.8rem);font-weight:200;letter-spacing:-.02em;color:rgba(232,228,220,.9);line-height:1;animation:splashTextIn 1.15s ease .08s both">A Gift of Time.</div>
   </div>
@@ -4034,7 +4034,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=440';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=441';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
