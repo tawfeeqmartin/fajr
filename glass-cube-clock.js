@@ -744,15 +744,15 @@ scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotate
 // ── RECT AREA UPLIGHT (Look 01 — Gallery Diagonal) ─────────────────────────
 RectAreaLightUniformsLib.init();
 {
-  const ral = new THREE.RectAreaLight(0xddddf8, 10, 6, 3);
+  const ral = new THREE.RectAreaLight(0xddddf8, 8, 6, 3);
   ral.position.set(-2, -8, 4);
   ral.lookAt(1, 0, 1.32);
   scene.add(ral);
 }
 {
-  const ral2 = new THREE.RectAreaLight(0xddddf8, 12, 6, 3);
-  ral2.position.set(4, 6, -3);
-  ral2.lookAt(-1, -1, 1.32);
+  const ral2 = new THREE.RectAreaLight(0xddddf8, 24, 6, 3);
+  ral2.position.set(3, 3, -1.5);
+  ral2.lookAt(-1, -0.5, 1.5);
   scene.add(ral2);
 }
 
