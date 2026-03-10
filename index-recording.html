@@ -217,7 +217,7 @@ body::after{display:none;
 }
 /* Hide install guide when running as PWA */
 @media(display-mode:standalone){#installGuide{display:none!important}}
-@keyframes heartpulse{0%,100%{transform:scale(1)}15%{transform:scale(1.5)}30%{transform:scale(1)}45%{transform:scale(1.35)}60%{transform:scale(1)}}
+@keyframes heartpulse{0%,100%{transform:scale(1)}15%{transform:scale(1.325)}30%{transform:scale(1)}45%{transform:scale(1.195)}60%{transform:scale(1)}}
 .sticky-cta{
   position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
   z-index:900;display:flex;align-items:center;gap:.6rem;
@@ -715,10 +715,10 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     @keyframes splashDraw { to { stroke-dashoffset: 0; } }
     @keyframes splashTextIn { from { opacity:0; } to { opacity:1; } }
   </style>
-  <div id="splashTitle" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + clamp(6px,1.4vmin,14px));left:0;right:0;pointer-events:none;z-index:3;text-align:center;opacity:1;">
+  <div id="splashTitle" data-hidden="1" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + clamp(6px,1.4vmin,14px));left:0;right:0;pointer-events:none;z-index:3;text-align:center;opacity:1;">
     <div style="font-family:var(--font);font-size:clamp(2.2rem,6vw,3.8rem);font-weight:200;letter-spacing:-.02em;color:rgba(232,228,220,.9);line-height:1;animation:splashTextIn 1.15s ease .02s both">A Gift of Time.</div>
   </div>
-  <div id="splashBismillah" style="position:absolute;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;pointer-events:none;z-index:3;opacity:1;padding:0 clamp(14px,4vw,34px);">
+  <div id="splashBismillah" data-hidden="1" style="position:absolute;top:calc(env(safe-area-inset-top,12px) + clamp(60px,12vmin,140px));left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;pointer-events:none;z-index:3;opacity:1;padding:0 clamp(14px,4vw,34px);">
     <div style="font-family:var(--font);font-size:clamp(.75rem,1.6vmin,1.5rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);text-align:center;line-height:1.35;animation:splashTextIn 1.15s ease .08s both">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <div style="font-family:var(--font);font-size:clamp(.65rem,1.3vmin,1.2rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.55);animation:splashTextIn 1.15s ease .08s both">In the name of God, the Most Gracious, the Most Merciful</div>
     <div style="margin-top:6px;font-family:var(--font);font-size:clamp(.72rem,1.45vmin,1.2rem);font-weight:300;letter-spacing:.04em;color:rgba(232,228,220,.62);text-align:center;line-height:1.45;animation:splashTextIn 1.15s ease 1.73s both">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًا مَّوْقُوتًا</div>
@@ -3216,7 +3216,7 @@ var _SB_URL='https://ypniokxbftuebagppxzj.supabase.co/rest/v1';
 var _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwbmlva3hiZnR1ZWJhZ3BweHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTQ2MjcsImV4cCI6MjA4Njc3MDYyN30.u63gpVUX7bOm5WQZkgt1elVWwwSBx_UGektwDTnllhw';
 // Log share to Supabase + update counter
 function _logShare(){
-  fetch(_SB_URL+'/analytics',{method:'POST',headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({event:'share'})}).catch(function(){});
+  fetch(_SB_URL+'/analytics',{method:'POST',headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({event:'share',source:'info_page'})}).catch(function(){});
 }
 // Fetch share count from Supabase
 function _loadShareCount(){
@@ -4016,7 +4016,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=433';
+_cs.type='module';_cs.src='glass-cube-clock-recording.js';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4286,3 +4286,9 @@ setTimeout(setupScrollObservers,500);
 
 </body>
 </html>
+<script>
+document.querySelectorAll('[data-hidden="1"]').forEach(el => el.style.opacity = '0');
+// Also hide the verse text below SVG if exists
+var sv = document.getElementById('splashVerse');
+if(sv) sv.style.opacity = '0';
+</script>
