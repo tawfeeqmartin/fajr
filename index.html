@@ -208,11 +208,7 @@ body::after{display:none;
 .btn-outline:hover,.btn-outline:active{background:rgba(232,228,220,.08);border-color:rgba(232,228,220,.12);color:rgba(232,228,220,.75)}
 .support-heart{display:inline-block;color:#e74c4c;font-size:1.1em;animation:heartpulse .833s ease-in-out infinite}
 /* Share button pulse glow */
-@keyframes sharePulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(120,160,255,.4)}
-  50%{box-shadow:0 0 20px 6px rgba(120,160,255,.25)}
-}
-#shareBtn.pulsing{animation:sharePulse 2s ease-in-out infinite}
+#shareBtn.pulsing{}
 #shareBtn.shared{background:rgba(120,160,255,.15);border-color:rgba(120,160,255,.4);transition:all .4s ease}
 /* Safari share icon bounce */
 @keyframes safariPulse{
@@ -4020,7 +4016,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=428';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=429';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
