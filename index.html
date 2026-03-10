@@ -1117,6 +1117,36 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           setTimeout(function(){
             window._splashActive = false;
             _svgDrawStarted=false;
+            // Minute pulse: edges hidden, redraw at :00 each minute
+            splash.style.opacity='0';
+            splash.style.transition='opacity 0.6s ease';
+            var _lastPulseSec = -1;
+            var _savedStyles = [];
+            svg.querySelectorAll('path').forEach(function(p){ _savedStyles.push(p.getAttribute('style')); });
+            (function minutePulse(){
+              if(!document.getElementById('splash')){ return; }
+              var s = new Date().getSeconds();
+              // Trigger at :00 — redraw edges
+              if(s === 0 && _lastPulseSec !== 0){
+                // Reset paths to undraw state
+                svg.querySelectorAll('path').forEach(function(p){
+                  var st = p.getAttribute('style')||'';
+                  p.setAttribute('style', st.replace(/animation:[^;]+;?/,''));
+                });
+                splash.style.opacity='0.8';
+                void svg.offsetWidth;
+                // Restart draw animation
+                svg.querySelectorAll('path').forEach(function(p,i){
+                  if(_savedStyles[i]) p.setAttribute('style', _savedStyles[i]);
+                });
+                // Fade out after draw completes + hold
+                setTimeout(function(){
+                  splash.style.opacity='0';
+                }, 2500);
+              }
+              _lastPulseSec = s;
+              requestAnimationFrame(minutePulse);
+            })();
           },1900);
         }, HOLD);
         return;
@@ -4046,7 +4076,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=452';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=453';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
