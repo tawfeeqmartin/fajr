@@ -3423,7 +3423,7 @@ function _ensurePrayerDotsEl() {
   if (_prayerDotsEl) return;
   _prayerDotsEl = document.createElement('div');
   _prayerDotsEl.id = '_prayerDots';
-  _prayerDotsEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 68px);left:50%;transform:translateX(-50%);z-index:951;display:flex;gap:6px;align-items:center;justify-content:center;pointer-events:none;transition:opacity .4s ease;opacity:0';
+  _prayerDotsEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 82px);left:50%;transform:translateX(-50%);z-index:951;display:flex;gap:6px;align-items:center;justify-content:center;pointer-events:none;transition:opacity .4s ease;opacity:0';
   document.body.appendChild(_prayerDotsEl);
 }
 
@@ -3431,7 +3431,7 @@ function _ensureCurrentPrayerLabel() {
   if (_currentPrayerLabelEl) return;
   _currentPrayerLabelEl = document.createElement('div');
   _currentPrayerLabelEl.id = '_currentPrayerLabel';
-  _currentPrayerLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 84px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .4s ease;opacity:0;font-family:var(--font)';
+  _currentPrayerLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 96px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .4s ease;opacity:0;font-family:var(--font)';
   document.body.appendChild(_currentPrayerLabelEl);
 }
 
@@ -3602,7 +3602,7 @@ function _swipeShowPreview(idx) {
   if (!_swipeLabelEl) {
     _swipeLabelEl = document.createElement('div');
     _swipeLabelEl.id = '_swipeLabel';
-    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 84px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
+    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 96px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
     document.body.appendChild(_swipeLabelEl);
   }
   var c = new THREE.Color(def.color);
