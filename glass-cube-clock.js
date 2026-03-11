@@ -1982,20 +1982,10 @@ document.addEventListener('visibilitychange', function() {
     -Math.cos(secAngle) * specRadius
   );
   // Damped spring camera orbit — elastic overshoot + boundary bounce
-  var _camStiffness = _swipeDragging ? 0.30 : 0.006; // instant during drag, gentle pull home
-  var _camDamping = _swipeDragging ? 0.58 : 0.85; // tight during drag, no tail wag on settle
-  var _camAccel = (_swipeCamTarget - _swipeCamAngle) * _camStiffness;
-  _swipeCamVel = (_swipeCamVel + _camAccel) * _camDamping;
-  _swipeCamAngle += _swipeCamVel;
-  if (Math.abs(_swipeCamVel) < 0.00005 && Math.abs(_swipeCamAngle - _swipeCamTarget) < 0.0001) {
-    _swipeCamAngle = _swipeCamTarget; _swipeCamVel = 0;
-  }
-  // Orbit camera around lookAt pivot (0, -0.8, 1.0)
-  var _pivotX = 0, _pivotZ = 1.0;
-  var _relX = 0.2 - _pivotX, _relZ = 15.0 - _pivotZ; // base camera relative to pivot
-  var _cosA = Math.cos(_swipeCamAngle), _sinA = Math.sin(_swipeCamAngle);
-  camera.position.x = _pivotX + _relX * _cosA - _relZ * _sinA;
-  camera.position.z = _pivotZ + _relX * _sinA + _relZ * _cosA;
+  // Camera swipe orbit DISABLED — camera stays locked at base position
+  // Spring physics kept but zeroed so no movement occurs
+  _swipeCamAngle = 0; _swipeCamVel = 0; _swipeCamTarget = 0;
+  camera.position.set(0.2, 9.7, 15.0);
   camera.lookAt(0, -0.8, 1.0);
 
   cubeMat.uniforms.uCamWorldPos.value.copy(camera.position);
