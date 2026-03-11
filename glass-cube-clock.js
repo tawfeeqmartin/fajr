@@ -3741,7 +3741,7 @@ var _swipeDragging = false;    // true = finger is down and dragging horizontall
 document.addEventListener('touchstart', function(e) {
   if (_compassMode || document.body.classList.contains('mode-info')) return;
   if (_devActive) return;
-  if (e.target.closest('button,a,input,select,textarea,.mode-pill,.loc-picker,.fs-dial-picker,.clock-onboard')) return;
+  if (e.target.closest('button,a,input,select,textarea,.mode-pill,.loc-picker,.fs-dial-picker,.clock-onboard,#_swipeContentPill')) return;
   var touch = e.touches[0];
   _swipeStartX = touch.clientX;
   _swipeStartY = touch.clientY;
@@ -3832,7 +3832,7 @@ document.addEventListener('keydown', function(e) {
     if (_compassMode || document.body.classList.contains('mode-info')) return;
     if (_devActive) return;
     if (e.button !== 0) return;
-    if (e.target.closest('button,a,input,select,textarea,.mode-pill,.loc-picker,.fs-dial-picker,.clock-onboard')) return;
+    if (e.target.closest('button,a,input,select,textarea,.mode-pill,.loc-picker,.fs-dial-picker,.clock-onboard,#_swipeContentPill')) return;
     _mouseStartX = e.clientX;
     _mouseStartY = e.clientY;
     _mouseDragging = false;
