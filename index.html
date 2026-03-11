@@ -2603,9 +2603,11 @@ function _hideAdhanBanner(){
 
 function startAdhanCheck(){
   if(_adhanCheckTimer)return;
-  _adhanCheckTimer=setInterval(function(){ checkPrayerAdhan(); _checkQiyamNotif(); },5000);
+  _adhanCheckTimer=setInterval(function(){ checkPrayerAdhan(); _checkQiyamNotif(); _checkMaghribHadith(); _updateQadrBtn(); },5000);
   checkPrayerAdhan();
   _checkQiyamNotif();
+  _checkMaghribHadith();
+  _updateQadrBtn();
 }
 function checkPrayerAdhan(){
   const t=window._prayerTimings;
@@ -2674,6 +2676,84 @@ function checkPrayerAdhan(){
   }
 }
 // Start checking once prayer times are loaded
+// ── Last 10 Nights Maghrib Hadith ──
+var _lastTenHadiths = [
+  { text: 'When the last ten nights began, the Messenger of Allah \uFDFA would tighten his waist-belt, pray all night, and wake his family.', ref: 'Bukhari 2024' },
+  { text: 'Seek Laylatul Qadr in the odd nights of the last ten nights of Ramadan.', ref: 'Bukhari 2017' },
+  { text: 'Whoever stands in prayer on Laylatul Qadr out of faith and seeking reward, his previous sins will be forgiven.', ref: 'Bukhari 1901' },
+  { text: 'There has come to you Ramadan, a blessed month, in which Allah has made it obligatory to fast. In it the gates of heaven are opened and the gates of Hell are closed, and the devils are chained up.', ref: 'Nasa\'i 2106' },
+  { text: 'In it there is a night that is better than a thousand months. Whoever is deprived of its goodness is truly deprived.', ref: 'Nasa\'i 2106' },
+  { text: 'Look for Laylatul Qadr on the twenty-seventh night of Ramadan.', ref: 'Muslim 1170' },
+  { text: 'Whoever fasts Ramadan out of faith and seeking reward, his previous sins will be forgiven.', ref: 'Bukhari 38' },
+  { text: 'When Ramadan begins, the gates of Paradise are opened, the gates of Hell are closed, and the devils are chained.', ref: 'Bukhari 1899' },
+  { text: 'The best prayer after the obligatory prayers is the night prayer.', ref: 'Muslim 1163' },
+  { text: 'Our Lord descends every night to the lowest heaven in the last third and says: Who is calling upon Me that I may answer? Who is asking of Me that I may give?', ref: 'Bukhari 1145' }
+];
+var _lastMaghribHadithDate = '';
+function _checkMaghribHadith(){
+  if(!_isLastTenNights) return;
+  if(!window._prayerTimings || !window._prayerTimings.Maghrib) return;
+  var now = typeof _cityNow === 'function' ? _cityNow() : new Date();
+  var nowMin = now.getHours()*60 + now.getMinutes();
+  var mRaw = String(window._prayerTimings.Maghrib).split(':').map(Number);
+  var mMin = (mRaw[0]||0)*60 + (mRaw[1]||0);
+  var diff = nowMin - mMin;
+  if(diff < 0 || diff > 2) return; // within 0-2 min of Maghrib
+  var dateKey = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+  if(_lastMaghribHadithDate === dateKey) return;
+  _lastMaghribHadithDate = dateKey;
+  var nightNum = window._islamicNight || 21;
+  var idx = (nightNum - 21) % _lastTenHadiths.length;
+  var h = _lastTenHadiths[idx];
+  console.log('[last10] 🌙 Maghrib hadith for night '+nightNum);
+  // Show banner
+  _showAdhanBanner(nightNum + (_nightOrdinal(nightNum)) + ' Night');
+  // Notification
+  try{
+    if('Notification' in window && Notification.permission==='granted'){
+      var body = '\u201C' + h.text + '\u201D\n\u2014 ' + h.ref;
+      if(swReg){
+        swReg.showNotification(nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan',{
+          body: body, tag:'last10-'+dateKey, renotify:true, icon:'/icon-192.png'
+        });
+      } else {
+        new Notification(nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan',{body:body,tag:'last10-'+dateKey});
+      }
+    }
+  }catch(e){}
+}
+function _nightOrdinal(n){ return n===1?'st':n===2?'nd':n===3?'rd':n%10===1&&n!==11?'st':n%10===2&&n!==12?'nd':n%10===3&&n!==13?'rd':'th'; }
+
+// ── Odd Night Surah Al-Qadr Button ──
+var _qadrBtnEl = null;
+function _updateQadrBtn(){
+  var nightNum = window._islamicNight || 0;
+  var isOddNight = _isLastTenNights && (nightNum % 2 === 1);
+  var afterMaghrib = false;
+  if(window._prayerTimings && window._prayerTimings.Maghrib){
+    var now = typeof _cityNow === 'function' ? _cityNow() : new Date();
+    var nowS = now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds();
+    var mParts = String(window._prayerTimings.Maghrib).split(':').map(Number);
+    afterMaghrib = nowS >= ((mParts[0]||0)*3600 + (mParts[1]||0)*60);
+  }
+  var show = isOddNight && afterMaghrib;
+  if(show && !_qadrBtnEl){
+    _qadrBtnEl = document.createElement('button');
+    _qadrBtnEl.id = 'qadrFloatBtn';
+    _qadrBtnEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 140px);left:50%;transform:translateX(-50%);z-index:951;background:none;border:1px solid rgba(232,228,220,.12);border-radius:100px;padding:6px 14px;color:rgba(232,228,220,.55);font-family:var(--font);font-size:.72rem;font-weight:300;cursor:pointer;letter-spacing:.04em;display:flex;align-items:center;gap:5px;transition:opacity .4s ease;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)';
+    _qadrBtnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Surah Al-Qadr';
+    _qadrBtnEl.onclick = function(){ _playQadr(this); };
+    document.body.appendChild(_qadrBtnEl);
+  } else if(!show && _qadrBtnEl){
+    _qadrBtnEl.remove(); _qadrBtnEl = null;
+  }
+  // Hide in non-clock modes
+  if(_qadrBtnEl){
+    var mode = document.body.classList.contains('mode-clock') ? 'clock' : 'other';
+    _qadrBtnEl.style.display = mode === 'clock' ? '' : 'none';
+  }
+}
+
 // ── Qiyam (last third) notification ──
 var _lastQiyamNotifDate = '';
 function _checkQiyamNotif(){
@@ -2730,14 +2810,37 @@ function _showQiyamDua(){
       '<p style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.55);letter-spacing:.01em">' +
         '\u201CO Allah, You are Most Forgiving<br>and You love forgiveness,<br>so forgive me\u201D' +
       '</p>' +
-      '<button id="qadrPlayBtn" onclick="event.stopPropagation();_playQadr(this)" style="margin-top:1.5rem;background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:.5rem 1.25rem;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.8rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:.4rem">' +
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.5)"/></svg> Surah Al-Qadr' +
-      '</button>' +
+      '<div style="display:flex;gap:12px;justify-content:center;margin-top:1.5rem">' +
+        (window._inLastThird ?
+          '<button id="duaPlayBtn" onclick="event.stopPropagation();_playDuaBtn(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua' +
+          '</button>' : '') +
+        '<button id="qadrPlayBtn" onclick="event.stopPropagation();_playQadr(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Surah Al-Qadr' +
+        '</button>' +
+      '</div>' +
     '</div>';
   _qiyamDuaEl.onclick = function(){ _hideQiyamDua(); };
   document.body.appendChild(_qiyamDuaEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _qiyamDuaEl.style.opacity='1'; }); });
   _qiyamDuaTimer = setTimeout(_hideQiyamDua, 45000); // ~41s audio + buffer
+}
+function _playDuaBtn(btn){
+  if(_qiyamDuaAudio && !_qiyamDuaAudio.paused){
+    _qiyamDuaAudio.pause(); _qiyamDuaAudio.currentTime=0; _qiyamDuaAudio=null;
+    if(btn) btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua';
+    return;
+  }
+  if(_qadrAudio){ try{_qadrAudio.pause();_qadrAudio=null;}catch(e){} }
+  _qiyamDuaAudio = new Audio('audio/dua-laylatul-qadr.mp3');
+  _qiyamDuaAudio.volume = 0.6;
+  _qiyamDuaAudio.play().catch(function(){});
+  if(btn) btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="4" height="16" rx="1" fill="rgba(232,228,220,.45)"/><rect x="15" y="4" width="4" height="16" rx="1" fill="rgba(232,228,220,.45)"/></svg> Playing...';
+  _qiyamDuaAudio.onended=function(){
+    _qiyamDuaAudio=null;
+    if(btn) btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua';
+  };
+  if(_qiyamDuaTimer){ clearTimeout(_qiyamDuaTimer); _qiyamDuaTimer=null; }
 }
 var _qadrAudio = null;
 function _playQadr(btn){
@@ -4331,7 +4434,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=507';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=508';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
