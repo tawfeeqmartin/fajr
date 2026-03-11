@@ -2707,18 +2707,20 @@ var _qiyamDuaTimer = null;
 var _qiyamDuaAudio = null;
 function _showQiyamDua(){
   if(_qiyamDuaEl) return;
-  // Play Mishary dua audio
-  try{
-    _qiyamDuaAudio = new Audio('audio/dua-laylatul-qadr.mp3');
-    _qiyamDuaAudio.volume = 0.6;
-    _qiyamDuaAudio.play().catch(function(){});
-  }catch(e){}
+  // Play dua audio only during actual last third
+  if(window._inLastThird){
+    try{
+      _qiyamDuaAudio = new Audio('audio/dua-laylatul-qadr.mp3');
+      _qiyamDuaAudio.volume = 0.6;
+      _qiyamDuaAudio.play().catch(function(){});
+    }catch(e){}
+  }
   _qiyamDuaEl = document.createElement('div');
   _qiyamDuaEl.id = 'qiyamDua';
   _qiyamDuaEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
   _qiyamDuaEl.innerHTML =
     '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem">' +
-      '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">The Last Third</p>' +
+      '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + (window._inLastThird ? 'The Last Third' : 'The Last Ten Nights') + '</p>' +
       '<p style="font-size:1.6rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1.25rem">' +
         '\u0627\u0644\u0644\u0651\u064E\u0647\u064F\u0645\u0651\u064E \u0625\u0650\u0646\u0651\u064E\u0643\u064E \u0639\u064E\u0641\u064F\u0648\u0651\u064C \u062A\u064F\u062D\u0650\u0628\u0651\u064F \u0627\u0644\u0639\u064E\u0641\u0652\u0648\u064E \u0641\u064E\u0627\u0639\u0652\u0641\u064F \u0639\u064E\u0646\u0651\u0650\u064A' +
       '</p>' +
@@ -2728,15 +2730,39 @@ function _showQiyamDua(){
       '<p style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.55);letter-spacing:.01em">' +
         '\u201CO Allah, You are Most Forgiving<br>and You love forgiveness,<br>so forgive me\u201D' +
       '</p>' +
+      '<button id="qadrPlayBtn" onclick="event.stopPropagation();_playQadr(this)" style="margin-top:1.5rem;background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:.5rem 1.25rem;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.8rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:.4rem">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.5)"/></svg> Surah Al-Qadr' +
+      '</button>' +
     '</div>';
   _qiyamDuaEl.onclick = function(){ _hideQiyamDua(); };
   document.body.appendChild(_qiyamDuaEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _qiyamDuaEl.style.opacity='1'; }); });
   _qiyamDuaTimer = setTimeout(_hideQiyamDua, 45000); // ~41s audio + buffer
 }
+var _qadrAudio = null;
+function _playQadr(btn){
+  if(_qadrAudio && !_qadrAudio.paused){
+    _qadrAudio.pause(); _qadrAudio.currentTime=0; _qadrAudio=null;
+    if(btn) btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.5)"/></svg> Surah Al-Qadr';
+    return;
+  }
+  // Stop dua audio if playing
+  if(_qiyamDuaAudio){ try{_qiyamDuaAudio.pause();_qiyamDuaAudio=null;}catch(e){} }
+  _qadrAudio = new Audio('audio/surah-alqadr-mishary.mp3');
+  _qadrAudio.volume = 0.6;
+  _qadrAudio.play().catch(function(){});
+  if(btn) btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="4" height="16" rx="1" fill="rgba(232,228,220,.5)"/><rect x="15" y="4" width="4" height="16" rx="1" fill="rgba(232,228,220,.5)"/></svg> Playing...';
+  _qadrAudio.onended=function(){
+    _qadrAudio=null;
+    if(btn) btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.5)"/></svg> Surah Al-Qadr';
+  };
+  // Cancel auto-dismiss while surah is playing
+  if(_qiyamDuaTimer){ clearTimeout(_qiyamDuaTimer); _qiyamDuaTimer=null; }
+}
 function _hideQiyamDua(){
   if(_qiyamDuaTimer){ clearTimeout(_qiyamDuaTimer); _qiyamDuaTimer=null; }
   if(_qiyamDuaAudio){ try{ _qiyamDuaAudio.pause(); _qiyamDuaAudio=null; }catch(e){} }
+  if(_qadrAudio){ try{ _qadrAudio.pause(); _qadrAudio=null; }catch(e){} }
   if(_qiyamDuaEl){
     _qiyamDuaEl.style.opacity='0';
     setTimeout(function(){ if(_qiyamDuaEl){ _qiyamDuaEl.remove(); _qiyamDuaEl=null; } }, 600);
@@ -4305,7 +4331,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=506';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=507';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
