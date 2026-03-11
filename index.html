@@ -2696,7 +2696,16 @@ var _lastTenHadiths = [
   { text: 'Whoever fasts Ramadan out of faith and seeking reward, his previous sins will be forgiven.', ref: 'Bukhari 38' },
   { text: 'When Ramadan begins, the gates of Paradise are opened, the gates of Hell are closed, and the devils are chained.', ref: 'Bukhari 1899' },
   { text: 'The best prayer after the obligatory prayers is the night prayer.', ref: 'Muslim 1163' },
-  { text: 'Our Lord descends every night to the lowest heaven in the last third and says: Who is calling upon Me that I may answer? Who is asking of Me that I may give?', ref: 'Bukhari 1145' }
+  { text: 'Our Lord descends every night to the lowest heaven in the last third and says: Who is calling upon Me that I may answer? Who is asking of Me that I may give?', ref: 'Bukhari 1145' },
+  { text: 'Whoever prays during the nights of Ramadan with faith and seeking reward, all his previous sins will be forgiven.', ref: 'Bukhari 37' },
+  { text: 'Fasting is a shield. When any one of you is fasting, let him not speak in an obscene or ignorant manner.', ref: 'Bukhari 1894' },
+  { text: 'Every deed of the son of Adam is for him except fasting; it is for Me and I shall reward it.', ref: 'Bukhari 1904' },
+  { text: 'There is a gate in Paradise called al-Rayyan, through which those who fast will enter and no one else.', ref: 'Bukhari 1896' },
+  { text: 'The one who looks after a widow or a poor person is like a warrior who fights for the cause of Allah, or like one who prays all night and fasts all day.', ref: 'Bukhari 5353' },
+  { text: 'Allah said: The most beloved things with which My servant comes nearer to Me are what I have enjoined upon him.', ref: 'Bukhari 6502' },
+  { text: 'Make use of five before five: your youth before your old age, your health before your sickness, your wealth before your poverty, your free time before your busyness, and your life before your death.', ref: 'Hakim 7846' },
+  { text: 'The supplication of a fasting person is not turned away.', ref: 'Ibn Majah 1753' },
+  { text: 'Whoever feeds a fasting person will have a reward like that of the fasting person, without any reduction in his reward.', ref: 'Tirmidhi 807' }
 ];
 var _lastMaghribHadithDate = '';
 function _checkMaghribHadith(){
@@ -2737,11 +2746,12 @@ function _nightOrdinal(n){ return n===1?'st':n===2?'nd':n===3?'rd':n%10===1&&n!=
 // ── Maghrib Hadith Overlay ──
 var _maghribHadithEl = null;
 var _maghribHadithTimer = null;
+var _maghribHadithIdx = Math.floor(Math.random() * 10); // start random, cycle from there
 function _showMaghribHadith(){
   if(_maghribHadithEl) return;
   var nightNum = window._islamicNight || 21;
-  var idx = (nightNum - 21) % _lastTenHadiths.length;
-  var h = _lastTenHadiths[idx];
+  var h = _lastTenHadiths[_maghribHadithIdx % _lastTenHadiths.length];
+  _maghribHadithIdx++; // next swipe = next hadith
   _maghribHadithEl = document.createElement('div');
   _maghribHadithEl.id = 'maghribHadith';
   _maghribHadithEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
@@ -4479,7 +4489,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=510';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=511';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
