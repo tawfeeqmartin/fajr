@@ -3537,8 +3537,17 @@ var _clockOnboardSteps = [
   {
     visual: function() {
       // Subtle cube wireframe — echoes the app's identity
-      return '<svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="opacity:.4">' +
-        '<polygon points="24,8 40,18 40,34 24,44 8,34 8,18" stroke="rgba(232,228,220,.5)" stroke-width="1" fill="none"/>' +
+      // Cube wireframe matching our logo — 7 visible edges
+      // Scaled from brand vertices to fit 48×48 viewBox
+      return '<svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="opacity:.45">' +
+        // Top face quad (tLeft→tBack→tRight→tFront)
+        '<path d="M12,16 L24,10 L36,16 L24,22 Z" stroke="rgba(232,228,220,.55)" stroke-width="1" fill="none" stroke-linejoin="round"/>' +
+        // Bottom front V (bLeft→bFront→bRight)
+        '<path d="M13,30 L24,36 L35,30" stroke="rgba(232,228,220,.55)" stroke-width="1" fill="none" stroke-linejoin="round"/>' +
+        // 3 front verticals
+        '<line x1="24" y1="22" x2="24" y2="36" stroke="rgba(232,228,220,.55)" stroke-width="1"/>' +
+        '<line x1="12" y1="16" x2="13" y2="30" stroke="rgba(232,228,220,.55)" stroke-width="1"/>' +
+        '<line x1="36" y1="16" x2="35" y2="30" stroke="rgba(232,228,220,.55)" stroke-width="1"/>' +
       '</svg>';
     },
     text: 'The clock is yours',
@@ -4168,7 +4177,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=496';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=497';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
