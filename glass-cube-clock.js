@@ -3437,8 +3437,11 @@ function _ensureCurrentPrayerLabel() {
 function _updatePrayerDots(activeIdx) {
   _ensurePrayerDotsEl();
   if (!prayerSectors.length) return;
+  var n = prayerSectors.length;
+  var curIdx = _swipeGetCurrentIdx();
   var html = '';
-  for (var i = 0; i < prayerSectors.length; i++) {
+  for (var step = 0; step < n; step++) {
+    var i = (curIdx + step) % n; // rotate: current prayer is first dot
     var isActive = (i === activeIdx);
     var c = new THREE.Color(prayerSectors[i].def.color);
     var hex = '#' + c.getHexString();
