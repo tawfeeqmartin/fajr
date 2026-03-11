@@ -3570,9 +3570,32 @@ function _swipeShowPreview(idx) {
   var ps = prayerSectors[idx];
   var def = ps.def;
   var T = window._prayerTimings;
-  // Use sector's computed startMin for display (handles offsets like Sunrise+20 for Dhuha)
-  var _swH = Math.floor(ps.startMin / 60), _swMn = ps.startMin % 60;
-  var timeStr = (_swH < 10 ? '0' : '') + _swH + ':' + (_swMn < 10 ? '0' : '') + _swMn;
+  // Determine if this preview prayer needs tomorrow's times
+  // Today's prayers: everything up to and including Isha
+  // Tomorrow's prayers: Qiyam, Fajr, Sunrise, Dhuha, Dhuhr, Asr that wrap past midnight
+  var _ishaIdx = -1;
+  for (var ii = 0; ii < _sectorCount; ii++) {
+    if (prayerSectors[ii].def.name === 'Isha') { _ishaIdx = ii; break; }
+  }
+  var _stepsToIsha = _ishaIdx >= 0 ? ((_ishaIdx - _curIdx) % _sectorCount + _sectorCount) % _sectorCount : 999;
+  // Prayer is "tomorrow" if it's beyond Isha in the forward sequence AND we're currently before Maghrib
+  var _isTomorrow = (_nowSec < _mSec && _stepsForward > _stepsToIsha && _stepsToIsha >= 0);
+  var _tT = window._tomorrowPrayerTimings;
+  if (_isTomorrow && _tT) {
+    var _tKey = def.startKey; // Use the same key as today's sector def
+    if (_tT[_tKey]) {
+      var _tp = _tT[_tKey].split(':').map(Number);
+      var _tStartMin = (_tp[0]||0)*60 + (_tp[1]||0) + (def.startOffset||0);
+      var _swH = Math.floor(_tStartMin / 60), _swMn = _tStartMin % 60;
+      var timeStr = (_swH < 10 ? '0' : '') + _swH + ':' + (_swMn < 10 ? '0' : '') + _swMn;
+    } else {
+      var _swH = Math.floor(ps.startMin / 60), _swMn = ps.startMin % 60;
+      var timeStr = (_swH < 10 ? '0' : '') + _swH + ':' + (_swMn < 10 ? '0' : '') + _swMn;
+    }
+  } else {
+    var _swH = Math.floor(ps.startMin / 60), _swMn = ps.startMin % 60;
+    var timeStr = (_swH < 10 ? '0' : '') + _swH + ':' + (_swMn < 10 ? '0' : '') + _swMn;
+  }
 
   // Create/update the preview label above nav pill
   if (!_swipeLabelEl) {

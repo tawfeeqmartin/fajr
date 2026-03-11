@@ -3236,10 +3236,10 @@ function fsStopClock() {
 }
 
 // ── Prayer times via adhan-js (local calculation, zero network latency) ──
-function _computePrayerTimes(lat, lon) {
+function _computePrayerTimes(lat, lon, dateOverride) {
   const coords = new adhan.Coordinates(lat, lon);
   const params = adhan.CalculationMethod.NorthAmerica();
-  const date = typeof _cityNow==='function'?_cityNow():new Date();
+  const date = dateOverride || (typeof _cityNow==='function'?_cityNow():new Date());
   const pt = new adhan.PrayerTimes(coords, date, params);
   const sunnah = new adhan.SunnahTimes(pt);
   const fmt = d => {
@@ -3700,6 +3700,9 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
   _updateCompassDist(); // refresh distance when location changes
   // Compute times instantly via adhan-js
   const t = _computePrayerTimes(lat, lon);
+  // Compute TOMORROW's times for swipe look-ahead
+  const _tomorrow = new Date((typeof _cityNow==='function'?_cityNow():new Date()).getTime() + 86400000);
+  window._tomorrowPrayerTimings = _computePrayerTimes(lat, lon, _tomorrow);
   // Store for glass-cube-clock beams
   window._prayerTimings = t;
   window._prayerTimingsReady = true;
@@ -4661,7 +4664,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=530';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=531';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
