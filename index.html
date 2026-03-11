@@ -2686,6 +2686,133 @@ function checkPrayerAdhan(){
 }
 // Start checking once prayer times are loaded
 // ── Last 10 Nights Maghrib Hadith ──
+// ── Islamic Calendar Content System ──
+// Data-driven: each entry has trigger condition, content pool, and display config
+// Trigger types: hijriDate (month,day), weekday (0=Sun..6=Sat), hijriDayRange, ramadanNight, season
+var _islamicContent = {
+  // ── Weekly ──
+  friday: {
+    trigger: function(){ return (typeof _cityNow==='function'?_cityNow():new Date()).getDay()===5; },
+    label: 'Jumu\u2019ah',
+    pool: [
+      { ar:'\u0625\u0650\u0646\u0651\u064E \u0627\u0644\u0644\u0651\u064E\u0647\u064E \u0648\u064E\u0645\u064E\u0644\u064E\u0627\u0626\u0650\u0643\u064E\u062A\u064E\u0647\u064F \u064A\u064F\u0635\u064E\u0644\u0651\u064F\u0648\u0646\u064E \u0639\u064E\u0644\u064E\u0649 \u0627\u0644\u0646\u0651\u064E\u0628\u0650\u064A\u0651\u0650', en:'Indeed, Allah and His angels send blessings upon the Prophet.', ref:'Al-Ahzab 33:56', type:'verse' },
+      { text:'The best day on which the sun rises is Friday. On it Adam was created, on it he was admitted to Paradise, and on it he was expelled from it.', ref:'Muslim 854', type:'hadith' },
+      { text:'Whoever reads Surah Al-Kahf on Friday, a light will shine for him between the two Fridays.', ref:'Nasai, Sahih per al-Albani', type:'hadith' },
+      { text:'There is an hour on Friday during which a Muslim does not ask Allah for anything but He gives it to him.', ref:'Bukhari 935', type:'hadith' },
+      { text:'Send abundant blessings upon me on Friday, for the blessings of my Ummah are presented to me on every Friday.', ref:'Abu Dawud 1047, Hasan', type:'hadith' },
+      { text:'Whoever performs ghusl on Friday, goes early to the mosque, walks and does not ride, sits close to the imam, and listens without speaking — for every step he takes, he has the reward of a year of fasting and praying.', ref:'Abu Dawud 345, Sahih', type:'hadith' }
+    ]
+  },
+  // ── Monday & Thursday (sunnah fasting) ──
+  monThu: {
+    trigger: function(){ var d=(typeof _cityNow==='function'?_cityNow():new Date()).getDay(); return d===1||d===4; },
+    label: 'Sunnah Fasting Day',
+    pool: [
+      { text:'The Prophet \uFDFA used to fast on Mondays and Thursdays. He said: Deeds are presented on Monday and Thursday, and I love that my deeds be presented while I am fasting.', ref:'Tirmidhi 747, Hasan', type:'hadith' },
+      { text:'The gates of Paradise are opened on Mondays and Thursdays, and every servant who does not associate anything with Allah is forgiven.', ref:'Muslim 2565', type:'hadith' },
+      { text:'Fasting three days of every month is like fasting the whole year.', ref:'Bukhari 1975', type:'hadith' }
+    ]
+  },
+  // ── White Days (13th, 14th, 15th of each Hijri month) ──
+  whiteDays: {
+    trigger: function(){ var h=window._hijriDay||0; return h>=13 && h<=15; },
+    label: 'The White Days',
+    pool: [
+      { text:'The Messenger of Allah \uFDFA used to command us to fast the White Days: the thirteenth, fourteenth and fifteenth.', ref:'Nasai 2432, Sahih', type:'hadith' },
+      { text:'If you fast three days of each month, then fast the thirteenth, fourteenth and fifteenth.', ref:'Tirmidhi 761, Sahih', type:'hadith' },
+      { text:'Fasting three days of every month is like fasting the whole year.', ref:'Bukhari 1975', type:'hadith' }
+    ]
+  },
+  // ── Shab-e-Meraj (27 Rajab) ──
+  meraj: {
+    trigger: function(){ return (window._hijriMonthNum||0)===7 && (window._hijriDay||0)===27; },
+    label: 'Al-Isra\u2019 wal-Mi\u2019raj',
+    pool: [
+      { ar:'\u0633\u064F\u0628\u0652\u062D\u064E\u0627\u0646\u064E \u0627\u0644\u0651\u064E\u0630\u0650\u064A \u0623\u064E\u0633\u0652\u0631\u064E\u0649\u0670 \u0628\u0650\u0639\u064E\u0628\u0652\u062F\u0650\u0647\u0650 \u0644\u064E\u064A\u0652\u0644\u064B\u0627 \u0645\u0650\u0646\u064E \u0627\u0644\u0652\u0645\u064E\u0633\u0652\u062C\u0650\u062F\u0650 \u0627\u0644\u0652\u062D\u064E\u0631\u064E\u0627\u0645\u0650 \u0625\u0650\u0644\u064E\u0649 \u0627\u0644\u0652\u0645\u064E\u0633\u0652\u062C\u0650\u062F\u0650 \u0627\u0644\u0652\u0623\u064E\u0642\u0652\u0635\u064E\u0627', en:'Glory be to the One Who took His servant by night from the Sacred Mosque to the Farthest Mosque.', ref:'Al-Isra 17:1', type:'verse' },
+      { text:'Then fifty prayers were enjoined upon me. I kept going back and forth between my Lord and Musa until He said: They are five prayers each day, and for each prayer there is a reward of ten.', ref:'Bukhari 3887', type:'hadith' }
+    ]
+  },
+  // ── Shab-e-Barat (15 Sha\u2019ban) ──
+  barat: {
+    trigger: function(){ return (window._hijriMonthNum||0)===8 && (window._hijriDay||0)===15; },
+    label: 'The Middle of Sha\u2019ban',
+    pool: [
+      { text:'Allah looks at His creation on the night of the middle of Sha\u2019ban, and He forgives all of His creation except one who associates partners with Him or one who harbors hatred.', ref:'Ibn Majah 1390, Hasan per al-Albani', type:'hadith' }
+    ]
+  },
+  // ── Day of Arafah (9 Dhul Hijjah) ──
+  arafah: {
+    trigger: function(){ return (window._hijriMonthNum||0)===12 && (window._hijriDay||0)===9; },
+    label: 'The Day of \u2018Arafah',
+    pool: [
+      { text:'Fasting the Day of Arafah expiates the sins of the previous year and the coming year.', ref:'Muslim 1162', type:'hadith' },
+      { text:'The best supplication is the supplication on the Day of Arafah.', ref:'Tirmidhi 3585, Hasan', type:'hadith' },
+      { ar:'\u0627\u0644\u0652\u064A\u064E\u0648\u0652\u0645\u064E \u0623\u064E\u0643\u0652\u0645\u064E\u0644\u0652\u062A\u064F \u0644\u064E\u0643\u064F\u0645\u0652 \u062F\u0650\u064A\u0646\u064E\u0643\u064F\u0645\u0652 \u0648\u064E\u0623\u064E\u062A\u0652\u0645\u064E\u0645\u0652\u062A\u064F \u0639\u064E\u0644\u064E\u064A\u0652\u0643\u064F\u0645\u0652 \u0646\u0650\u0639\u0652\u0645\u064E\u062A\u0650\u064A', en:'Today I have perfected your religion for you, completed My favor upon you, and have chosen Islam as your religion.', ref:'Al-Ma\u2019idah 5:3', type:'verse' },
+      { ar:'\u0644\u064E\u0627 \u0625\u0650\u0644\u064E\u0647\u064E \u0625\u0650\u0644\u0651\u064E\u0627 \u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0648\u064E\u062D\u0652\u062F\u064E\u0647\u064F \u0644\u064E\u0627 \u0634\u064E\u0631\u0650\u064A\u0643\u064E \u0644\u064E\u0647\u064F \u0644\u064E\u0647\u064F \u0627\u0644\u0652\u0645\u064F\u0644\u0652\u0643\u064F \u0648\u064E\u0644\u064E\u0647\u064F \u0627\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F \u0648\u064E\u0647\u064F\u0648\u064E \u0639\u064E\u0644\u064E\u0649\u0670 \u0643\u064F\u0644\u0651\u0650 \u0634\u064E\u064A\u0652\u0621\u064D \u0642\u064E\u062F\u0650\u064A\u0631\u064C', en:'There is no god but Allah alone with no partner. His is the dominion and His is the praise, and He is able to do all things.', ref:'Dua of \u2018Arafah — Tirmidhi 3585', type:'dua' }
+    ]
+  },
+  // ── Ashura (10 Muharram) ──
+  ashura: {
+    trigger: function(){ return (window._hijriMonthNum||0)===1 && (window._hijriDay||0)>=9 && (window._hijriDay||0)<=10; },
+    label: '\u2018Ashura',
+    pool: [
+      { text:'Fasting the Day of Ashura, I hope that Allah will accept it as expiation for the previous year.', ref:'Muslim 1162', type:'hadith' },
+      { text:'The Prophet \uFDFA came to Madinah and found the Jews fasting on the Day of Ashura. He said: This is a day on which Allah saved Musa and drowned Pharaoh. We have more right to Musa than you.', ref:'Bukhari 2004', type:'hadith' }
+    ]
+  },
+  // ── First 10 Days of Dhul Hijjah ──
+  dhulHijjah10: {
+    trigger: function(){ return (window._hijriMonthNum||0)===12 && (window._hijriDay||0)>=1 && (window._hijriDay||0)<=10; },
+    label: 'The Best Ten Days',
+    pool: [
+      { text:'There are no days in which righteous deeds are more beloved to Allah than these ten days.', ref:'Bukhari 969', type:'hadith' },
+      { ar:'\u0648\u064E\u0627\u0644\u0652\u0641\u064E\u062C\u0652\u0631\u0650 \u0648\u064E\u0644\u064E\u064A\u064E\u0627\u0644\u064D \u0639\u064E\u0634\u0652\u0631\u064D', en:'By the dawn, and by ten nights.', ref:'Al-Fajr 89:1-2', type:'verse' },
+      { text:'The Prophet \uFDFA said: There are no days that are greater before Allah or in which good deeds are more beloved to Him than these ten days, so increase in them your declaration of the oneness of Allah, your exaltation of Him, and your praise of Him.', ref:'Ahmad 5446, Sahih', type:'hadith' }
+    ]
+  },
+  // ── Eid al-Fitr (1 Shawwal) ──
+  eidFitr: {
+    trigger: function(){ return (window._hijriMonthNum||0)===10 && (window._hijriDay||0)===1; },
+    label: 'Eid al-Fitr',
+    pool: [
+      { ar:'\u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0623\u064E\u0643\u0652\u0628\u064E\u0631\u064F \u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0623\u064E\u0643\u0652\u0628\u064E\u0631\u064F \u0644\u064E\u0627 \u0625\u0650\u0644\u064E\u0647\u064E \u0625\u0650\u0644\u0651\u064E\u0627 \u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0648\u064E\u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0623\u064E\u0643\u0652\u0628\u064E\u0631\u064F \u0648\u064E\u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0627\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F', en:'Allahu Akbar, Allahu Akbar, La ilaha illallah, wallahu Akbar, wa lillahil hamd.', ref:'Eid Takbeer', type:'dua' },
+      { text:'The Prophet \uFDFA would not go out on the day of Eid al-Fitr until he had eaten some dates, and he would eat them in odd numbers.', ref:'Bukhari 953', type:'hadith' }
+    ]
+  },
+  // ── Eid al-Adha (10 Dhul Hijjah) ──
+  eidAdha: {
+    trigger: function(){ return (window._hijriMonthNum||0)===12 && (window._hijriDay||0)>=10 && (window._hijriDay||0)<=13; },
+    label: 'Eid al-Adha',
+    pool: [
+      { ar:'\u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0623\u064E\u0643\u0652\u0628\u064E\u0631\u064F \u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0623\u064E\u0643\u0652\u0628\u064E\u0631\u064F \u0644\u064E\u0627 \u0625\u0650\u0644\u064E\u0647\u064E \u0625\u0650\u0644\u0651\u064E\u0627 \u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0648\u064E\u0627\u0644\u0644\u0651\u064E\u0647\u064F \u0623\u064E\u0643\u0652\u0628\u064E\u0631\u064F \u0648\u064E\u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0627\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F', en:'Allahu Akbar, Allahu Akbar, La ilaha illallah, wallahu Akbar, wa lillahil hamd.', ref:'Eid Takbeer', type:'dua' },
+      { ar:'\u0625\u0650\u0646\u0651\u064E \u0635\u064E\u0644\u064E\u0627\u062A\u0650\u064A \u0648\u064E\u0646\u064F\u0633\u064F\u0643\u0650\u064A \u0648\u064E\u0645\u064E\u062D\u0652\u064A\u064E\u0627\u064A\u064E \u0648\u064E\u0645\u064E\u0645\u064E\u0627\u062A\u0650\u064A \u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0631\u064E\u0628\u0651\u0650 \u0627\u0644\u0652\u0639\u064E\u0627\u0644\u064E\u0645\u0650\u064A\u0646\u064E', en:'Indeed, my prayer, my sacrifice, my living and my dying are for Allah, Lord of the worlds.', ref:'Al-An\u2019am 6:162', type:'verse' },
+      { text:'The greatest day in the sight of Allah is the Day of Sacrifice.', ref:'Abu Dawud 1765, Sahih', type:'hadith' }
+    ]
+  },
+  // ── Six Days of Shawwal ──
+  shawwal6: {
+    trigger: function(){ return (window._hijriMonthNum||0)===10 && (window._hijriDay||0)>=2 && (window._hijriDay||0)<=30; },
+    label: 'Six Days of Shawwal',
+    pool: [
+      { text:'Whoever fasts Ramadan then follows it with six days of Shawwal, it will be as if he fasted the whole year.', ref:'Muslim 1164', type:'hadith' }
+    ]
+  }
+};
+
+// Get contextual content for current date (returns array of matching pools)
+function _getIslamicContext(){
+  var results = [];
+  for(var key in _islamicContent){
+    var entry = _islamicContent[key];
+    try{ if(entry.trigger()) results.push(entry); }catch(e){}
+  }
+  return results;
+}
+
+// Expose Hijri data for trigger functions
+window._hijriDay = 0;
+window._hijriMonth = '';
+
 var _lastTenHadiths = [
   { text: 'When the last ten nights began, the Messenger of Allah \uFDFA would tighten his waist-belt, pray all night, and wake his family.', ref: 'Bukhari 2024' },
   { text: 'Seek Laylatul Qadr in the odd nights of the last ten nights of Ramadan.', ref: 'Bukhari 2017' },
@@ -2747,24 +2874,50 @@ function _nightOrdinal(n){ return n===1?'st':n===2?'nd':n===3?'rd':n%10===1&&n!=
 var _maghribHadithEl = null;
 var _maghribHadithTimer = null;
 var _maghribHadithIdx = Math.floor(Math.random() * 10); // start random, cycle from there
+var _contextContentIdx = 0;
 function _showMaghribHadith(){
   if(_maghribHadithEl) return;
-  var nightNum = window._islamicNight || 21;
-  var h = _lastTenHadiths[_maghribHadithIdx % _lastTenHadiths.length];
-  _maghribHadithIdx++; // next swipe = next hadith
+  var nightNum = window._islamicNight || 0;
+  // Check Islamic calendar for contextual content first
+  var contexts = _getIslamicContext();
+  var h = null;
+  var contextLabel = '';
+  if(contexts.length > 0){
+    // Pick from the most specific context (last match = most specific)
+    var ctx = contexts[contexts.length - 1];
+    contextLabel = ctx.label;
+    h = ctx.pool[_contextContentIdx % ctx.pool.length];
+    _contextContentIdx++;
+  }
+  // Fall back to general Ramadan hadiths during last 10, or general pool
+  if(!h && _isLastTenNights){
+    h = _lastTenHadiths[_maghribHadithIdx % _lastTenHadiths.length];
+    _maghribHadithIdx++;
+  }
+  if(!h){
+    // General content outside Ramadan — use Islamic calendar or fallback
+    h = { text:'Verily, with hardship comes ease.', ref:'Ash-Sharh 94:6', type:'verse' };
+  }
   _maghribHadithEl = document.createElement('div');
   _maghribHadithEl.id = 'maghribHadith';
   _maghribHadithEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
   _maghribHadithEl.onclick = function(){ _hideMaghribHadith(); };
+  var _overlayTitle = contextLabel ? contextLabel : (nightNum ? nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan' : '');
+  var _contentHtml = '';
+  if(h.ar){
+    _contentHtml += '<p style="font-size:1.3rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1rem">' + h.ar + '</p>';
+  }
+  if(h.en){
+    _contentHtml += '<p style="font-size:.88rem;font-weight:300;line-height:1.6;color:rgba(232,228,220,.55);letter-spacing:.01em;font-style:italic;margin-bottom:.5rem">' + h.en + '</p>';
+  }
+  if(h.text){
+    _contentHtml += '<p style="font-size:.92rem;font-weight:300;line-height:1.7;color:rgba(232,228,220,.7);letter-spacing:.01em;font-style:italic">\u201C' + h.text + '\u201D</p>';
+  }
+  _contentHtml += '<p style="font-size:.72rem;font-weight:300;color:rgba(232,228,220,.3);margin-top:1rem;letter-spacing:.04em">\u2014 ' + h.ref + '</p>';
   _maghribHadithEl.innerHTML =
     '<div style="text-align:center;max-width:340px;padding:0 24px">' +
-      '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan</p>' +
-      '<p style="font-size:.95rem;font-weight:300;line-height:1.7;color:rgba(232,228,220,.7);letter-spacing:.01em;font-style:italic">' +
-        '\u201C' + h.text + '\u201D' +
-      '</p>' +
-      '<p style="font-size:.72rem;font-weight:300;color:rgba(232,228,220,.3);margin-top:1rem;letter-spacing:.04em">' +
-        '\u2014 ' + h.ref +
-      '</p>' +
+      '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + _overlayTitle + '</p>' +
+      _contentHtml +
     '</div>';
   document.body.appendChild(_maghribHadithEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _maghribHadithEl.style.opacity='1'; }); });
@@ -3210,6 +3363,8 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
     window._isRamadan = /rama[dḍ]/i.test(hijri.month.en);
     var _hijriDay = parseInt(hijri.day, 10) || 0;
     window._hijriDay = _hijriDay;
+    window._hijriMonth = hijri.month.en || '';
+    window._hijriMonthNum = parseInt(hijri.month.number, 10) || 0;
     // Islamic night = hijriDay + 1 after Maghrib (night precedes day)
     // Before Maghrib: current night was hijriDay
     var _mTime = window._prayerTimings && window._prayerTimings.Maghrib;
@@ -4493,7 +4648,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=514';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=515';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
