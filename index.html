@@ -1319,19 +1319,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
 </section>
 
-<!-- 5. HOW IT WORKS -->
-<section class="scroll-section" id="sec-how">
-  <div class="reveal">
-    <div class="section-header"><p class="section-label">How It Works</p>
-    <h2 class="section-title">A quick guide.</h2></div>
-    <p class="section-body" style="margin-bottom:1.5rem">Tap to replay the walkthrough.</p>
-    <button onclick="if(typeof switchMode==='function')switchMode('clock');setTimeout(function(){_clockOnboardEl=null;if(typeof _showClockOnboarding==='function')_showClockOnboarding(true);},600);" class="btn btn-outline">
-      <i class="ph-thin ph-question"></i> Show me how
-    </button>
-  </div>
-</section>
-
-<!-- 6. SAVE & SHARE -->
+<!-- 5. SAVE & SHARE -->
 <section class="scroll-section" id="sec-install">
   <div class="reveal" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:100%">
     <!-- SAVE -->
@@ -3306,7 +3294,7 @@ fsFetchPrayer();
 // They naturally scroll over the fixed canvas.
 
 /* ── Info Dot Nav ── */
-const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-support','sec-how','sec-install','sec-feedback'];
+const _infoSections = ['sec-hook','sec-dials','sec-qibla','sec-support','sec-install','sec-feedback'];
 const _infoScroller = document.getElementById('infoScroller');
 var _shareOrigHTML='';
 function _shareApp() {
@@ -4195,7 +4183,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=498';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=499';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
@@ -4237,7 +4225,6 @@ setTimeout(setupScrollObservers,500);
     { id:'sec-dials',    dwell:8000 },
     { id:'sec-qibla',    dwell:8000 },
     { id:'sec-support',  dwell:6000 },
-    { id:'sec-how',      dwell:6000 },
     { id:'sec-install',  dwell:6000 },
     { id:'sec-feedback', dwell:5000 },
   ];
@@ -4414,9 +4401,8 @@ setTimeout(setupScrollObservers,500);
   <button class="info-dot" data-section="sec-dials" onclick="_infoGoTo(1)" aria-label="Go to The Clock section"></button>
   <button class="info-dot" data-section="sec-qibla" onclick="_infoGoTo(2)" aria-label="Go to Qibla section"></button>
   <button class="info-dot" data-section="sec-support" onclick="_infoGoTo(3)" aria-label="Go to Support section"></button>
-  <button class="info-dot" data-section="sec-how" onclick="_infoGoTo(4)" aria-label="Go to How It Works section"></button>
-  <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(5)" aria-label="Go to Install section"></button>
-  <button class="info-dot" data-section="sec-feedback" onclick="_infoGoTo(6)" aria-label="Go to Feedback section"></button>
+  <button class="info-dot" data-section="sec-install" onclick="_infoGoTo(4)" aria-label="Go to Install section"></button>
+  <button class="info-dot" data-section="sec-feedback" onclick="_infoGoTo(5)" aria-label="Go to Feedback section"></button>
 </div>
 
 <!-- Location Picker -->
