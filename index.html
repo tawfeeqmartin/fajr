@@ -2866,10 +2866,9 @@ function _showQiyamDua(){
         '\u201CO Allah, You are Most Forgiving<br>and You love forgiveness,<br>so forgive me\u201D' +
       '</p>' +
       '<div style="display:flex;gap:12px;justify-content:center;margin-top:1.5rem">' +
-        (window._inLastThird ?
-          '<button id="duaPlayBtn" onclick="event.stopPropagation();_playDuaBtn(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
-            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua' +
-          '</button>' : '') +
+        '<button id="duaPlayBtn" onclick="event.stopPropagation();_playDuaBtn(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua' +
+        '</button>' +
         '<button id="qadrPlayBtn" onclick="event.stopPropagation();_playQadr(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Surah Al-Qadr' +
         '</button>' +
@@ -4489,7 +4488,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=512';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=513';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
