@@ -1,5 +1,5 @@
 // A Gift of Time — Service Worker
-const CACHE_NAME = 'rc-v249';
+const CACHE_NAME = 'rc-v498';
 const ASSETS = [
   '/',
   '/index.html',
@@ -37,15 +37,18 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// Handle notification click — focus or open the app
+// Handle notification click — focus the app AND trigger adhan playback
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const c of list) {
-        if (c.url.includes('/') && 'focus' in c) return c.focus();
+        if (c.url.includes('/') && 'focus' in c) {
+          c.postMessage({ type: 'play-adhan', prayer: e.notification.tag || '' });
+          return c.focus();
+        }
       }
-      return clients.openWindow('/');
+      return clients.openWindow('/?adhan=1');
     })
   );
 });

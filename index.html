@@ -2507,7 +2507,25 @@ window.updateNavClock = updateNavClock;
 let swReg=null;
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(r=>{swReg=r;}).catch(()=>{});
+  // Listen for notification click → play adhan
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if(e.data && e.data.type === 'play-adhan'){
+      console.log('[adhan] 🔔 Notification clicked, triggering adhan');
+      var btn = document.getElementById('adhanBtn');
+      if(btn && typeof playAdhan === 'function') playAdhan(btn);
+    }
+  });
 }
+// Handle ?adhan=1 URL param (opened from notification when no existing window)
+if(location.search.includes('adhan=1')){
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      var btn = document.getElementById('adhanBtn');
+      if(btn && typeof playAdhan === 'function') playAdhan(btn);
+      history.replaceState(null,'','/');
+    }, 2000); // wait for prayer times to load
+  });
+
 function requestNotifPermission(){
   if('Notification' in window&&Notification.permission==='default'){
     Notification.requestPermission();
@@ -4177,7 +4195,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=497';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=498';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
