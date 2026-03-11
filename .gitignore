@@ -31,3 +31,9 @@ experiment/
 # Old clock versions
 clock.js
 tawaf-gl.js
+
+# Lookdev/dev files
+lookdev/
+glass-cube-clock-recording.js
+index-recording.html
+render-timelapse.js
