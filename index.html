@@ -2715,7 +2715,8 @@ function _checkMaghribHadith(){
   var idx = (nightNum - 21) % _lastTenHadiths.length;
   var h = _lastTenHadiths[idx];
   console.log('[last10] 🌙 Maghrib hadith for night '+nightNum);
-  // Show banner
+  // Show overlay + banner
+  if(typeof _showMaghribHadith === 'function') _showMaghribHadith();
   _showAdhanBanner(nightNum + (_nightOrdinal(nightNum)) + ' Night');
   // Notification
   try{
@@ -4478,7 +4479,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=509';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=510';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
