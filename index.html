@@ -2876,6 +2876,7 @@ window._openSwipeContent = function() {
   if (!hint) return;
   // Pause swipe revert — user is engaging with content
   clearTimeout(window._swipeRevertTimer);
+  window._swipeRevertTimer = null;
   // Track which prayer overlay is showing for
   window._lastSwipeOverlayPrayer = window._swipePreviewPrayer;
   window._overlayOpenFromPill = true;
@@ -2888,6 +2889,7 @@ window._openSwipeContent = function() {
   }
 };
 
+window._showMaghribHadith = _showMaghribHadith;
 function _showMaghribHadith(){
   if(_maghribHadithEl) return;
   // Use swipe-computed night number if available (handles Maghrib boundary crossing)
@@ -2948,18 +2950,20 @@ function _showMaghribHadith(){
 }
 function _hideMaghribHadith(){
   if(_maghribHadithTimer){ clearTimeout(_maghribHadithTimer); _maghribHadithTimer=null; }
+  var _hadOverlay = !!_maghribHadithEl;
   if(_maghribHadithEl){
     _maghribHadithEl.style.opacity='0';
     var el=_maghribHadithEl; _maghribHadithEl=null;
     setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },700);
   }
   window._lastSwipeOverlayPrayer = null;
-  // Resume swipe revert after overlay closes
-  if(typeof window._swipeRevert === 'function' && window._swipePreviewIdx >= 0) {
+  // Resume swipe revert ONLY if we actually closed an overlay
+  if(_hadOverlay && typeof window._swipeRevert === 'function' && window._swipePreviewIdx >= 0) {
     clearTimeout(window._swipeRevertTimer);
     window._swipeRevertTimer = setTimeout(window._swipeRevert, 3000);
   }
 }
+window._hideMaghribHadith = _hideMaghribHadith;
 
 // ── Odd Night Surah Al-Qadr Button ──
 var _qadrBtnEl = null;
@@ -3022,6 +3026,7 @@ function _checkQiyamNotif(){
 var _qiyamDuaEl = null;
 var _qiyamDuaTimer = null;
 var _qiyamDuaAudio = null;
+window._showQiyamDua = _showQiyamDua;
 function _showQiyamDua(){
   if(_qiyamDuaEl) return;
   // Play dua audio only during actual last third
@@ -3116,17 +3121,19 @@ function _hideQiyamDua(){
   if(_qiyamDuaTimer){ clearTimeout(_qiyamDuaTimer); _qiyamDuaTimer=null; }
   if(_qiyamDuaAudio){ try{ _qiyamDuaAudio.pause(); _qiyamDuaAudio=null; }catch(e){} }
   if(_qadrAudio){ try{ _qadrAudio.pause(); _qadrAudio=null; }catch(e){} }
+  var _hadOverlay = !!_qiyamDuaEl;
   if(_qiyamDuaEl){
     _qiyamDuaEl.style.opacity='0';
     setTimeout(function(){ if(_qiyamDuaEl){ _qiyamDuaEl.remove(); _qiyamDuaEl=null; } }, 600);
   }
   window._lastSwipeOverlayPrayer = null;
-  // Resume swipe revert after overlay closes
-  if(typeof window._swipeRevert === 'function' && window._swipePreviewIdx >= 0) {
+  // Resume swipe revert ONLY if we actually closed an overlay
+  if(_hadOverlay && typeof window._swipeRevert === 'function' && window._swipePreviewIdx >= 0) {
     clearTimeout(window._swipeRevertTimer);
     window._swipeRevertTimer = setTimeout(window._swipeRevert, 3000);
   }
 }
+window._hideQiyamDua = _hideQiyamDua;
 
 const _origStartNav=startNavClock;
 startNavClock=function(){_origStartNav();startAdhanCheck();};
@@ -4702,7 +4709,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=539';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=540';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

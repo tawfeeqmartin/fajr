@@ -3524,7 +3524,14 @@ function _swipeShowPreview(idx) {
   if (!prayerSectors.length) return;
   var _sectorCount = prayerSectors.length || 8;
   idx = ((idx % _sectorCount) + _sectorCount) % _sectorCount;
+  var _prevPreviewIdx = _swipePreviewIdx;
   _swipePreviewIdx = idx;
+
+  // Dismiss overlays when swiping away from the prayer that opened them
+  if (idx !== _prevPreviewIdx && window._lastSwipeOverlayPrayer) {
+    if (typeof window._hideQiyamDua === 'function') window._hideQiyamDua();
+    if (typeof window._hideMaghribHadith === 'function') window._hideMaghribHadith();
+  }
 
   // Compute Hijri night for this preview prayer
   // If preview prayer starts at or after Maghrib (and we're currently before Maghrib),
