@@ -3613,10 +3613,35 @@ function _swipeShowPreview(idx) {
     : (def.name === 'Fajr' || def.name === 'Dhuhr' || def.name === 'Asr' || def.name === 'Maghrib' || def.name === 'Isha') ? 'Obligatory Prayer' : '';
   var _infoColor = def.isForbidden ? '#888' : 'rgba(232,228,220,.45)';
   var _infoDiv = _infoText ? '<div style="font-size:clamp(.5rem,.9vw,.6rem);font-weight:300;letter-spacing:.08em;color:' + _infoColor + ';margin-top:3px">' + _infoText + '</div>' : '';
+
+  // Contextual content pill — compute inline based on prayer + state
+  var _hint = null;
+  var _lastTen = window._isRamadan && (window._islamicNight >= 21 || (window._swipeNightNum && window._swipeNightNum >= 21));
+  if ((def.name === 'Qiyam' || def.name === 'Last Third') && _lastTen) {
+    _hint = { label: 'Tonight\'s dua', action: 'qiyam' };
+  } else if (def.name === 'Maghrib' && _lastTen) {
+    _hint = { label: 'Hadith of the day', action: 'maghrib' };
+  } else {
+    var _ctx = (typeof window._getIslamicContext === 'function') ? window._getIslamicContext() : [];
+    if (_ctx.length > 0) _hint = { label: _ctx[0].label || 'View content', action: 'context' };
+  }
+  window._swipeContentHint = _hint;
+  var _pillDiv = '';
+  if (_hint) {
+    _pillDiv = '<div id="_swipeContentPill" onclick="window._openSwipeContent&&window._openSwipeContent()" style="' +
+      'display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 14px;' +
+      'border-radius:20px;background:rgba(232,228,220,.08);backdrop-filter:blur(8px);' +
+      'cursor:pointer;transition:transform .35s cubic-bezier(.23,1,.32,1),opacity .3s ease;' +
+      'animation:_pillIn .4s cubic-bezier(.23,1,.32,1) both">' +
+      '<span style="font-size:.65rem;color:' + hex + '">✦</span>' +
+      '<span style="font-size:clamp(.55rem,1vw,.65rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.6)">' + _hint.label + '</span>' +
+      '</div>';
+  }
+
   _swipeLabelEl.innerHTML =
     '<div style="font-size:clamp(.6rem,1.2vw,.75rem);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:' + hex + ';opacity:.7;margin-bottom:2px">' + def.name + '</div>' +
     '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>' +
-    _infoDiv;
+    _infoDiv + _pillDiv;
   _swipeLabelEl.style.display = 'block';
   _swipeLabelEl.style.opacity = '1';
 
