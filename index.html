@@ -2401,9 +2401,11 @@ function updateNavClock(){
   if (preview) {
     window._swipePreviewPrayer = preview;
     window._lastSwipePreviewPrayer = preview;
-    // Hide any auto-shown overlays (pill tap opens them instead)
-    if (typeof _hideQiyamDua === 'function') _hideQiyamDua();
-    if (typeof _hideMaghribHadith === 'function') _hideMaghribHadith();
+    // Only hide overlays when prayer changes, not on every preview refresh
+    if (preview !== window._lastSwipeOverlayPrayer) {
+      if (typeof _hideQiyamDua === 'function') _hideQiyamDua();
+      if (typeof _hideMaghribHadith === 'function') _hideMaghribHadith();
+    }
   }
 
   // keep prayer bars in lockstep with countdown color + boundary timing
@@ -2872,12 +2874,16 @@ var _contextContentIdx = 0;
 window._openSwipeContent = function() {
   var hint = window._swipeContentHint;
   if (!hint) return;
+  // Pause swipe revert — user is engaging with content
+  clearTimeout(window._swipeRevertTimer);
+  // Track which prayer overlay is showing for
+  window._lastSwipeOverlayPrayer = window._swipePreviewPrayer;
+  window._overlayOpenFromPill = true;
   if (hint.action === 'qiyam') {
     if (typeof _showQiyamDua === 'function') _showQiyamDua();
   } else if (hint.action === 'maghrib') {
     if (typeof _showMaghribHadith === 'function') _showMaghribHadith();
   } else if (hint.action === 'context') {
-    // Generic Islamic calendar content — show as maghrib hadith overlay (reuses same UI)
     if (typeof _showMaghribHadith === 'function') _showMaghribHadith();
   }
 };
@@ -2910,7 +2916,10 @@ function _showMaghribHadith(){
   _maghribHadithEl = document.createElement('div');
   _maghribHadithEl.id = 'maghribHadith';
   _maghribHadithEl.style.cssText = 'position:fixed;inset:0;z-index:950;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
-  _maghribHadithEl.onclick = function(){ _hideMaghribHadith(); };
+  _maghribHadithEl.onclick = function(e){
+    if(e.target.closest('button')) return;
+    _hideMaghribHadith();
+  };
   var _overlayTitle = contextLabel ? contextLabel : (nightNum ? nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan' : '');
   var _contentHtml = '';
   if(h.ar){
@@ -2931,7 +2940,11 @@ function _showMaghribHadith(){
     '</div></div>';
   document.body.appendChild(_maghribHadithEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _maghribHadithEl.style.opacity='1'; }); });
-  _maghribHadithTimer = setTimeout(_hideMaghribHadith, 15000);
+  // Only auto-dismiss if NOT opened from pill
+  if(!window._overlayOpenFromPill) {
+    _maghribHadithTimer = setTimeout(_hideMaghribHadith, 15000);
+  }
+  window._overlayOpenFromPill = false;
 }
 function _hideMaghribHadith(){
   if(_maghribHadithTimer){ clearTimeout(_maghribHadithTimer); _maghribHadithTimer=null; }
@@ -2939,6 +2952,12 @@ function _hideMaghribHadith(){
     _maghribHadithEl.style.opacity='0';
     var el=_maghribHadithEl; _maghribHadithEl=null;
     setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },700);
+  }
+  window._lastSwipeOverlayPrayer = null;
+  // Resume swipe revert after overlay closes
+  if(typeof window._swipeRevert === 'function' && window._swipePreviewIdx >= 0) {
+    clearTimeout(window._swipeRevertTimer);
+    window._swipeRevertTimer = setTimeout(window._swipeRevert, 3000);
   }
 }
 
@@ -3043,10 +3062,18 @@ function _showQiyamDua(){
         '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua' +
       '</button>' +
     '</div></div>';
-  _qiyamDuaEl.onclick = function(){ _hideQiyamDua(); };
+  _qiyamDuaEl.onclick = function(e){
+    // Don't dismiss if tapping play buttons
+    if(e.target.closest('button')) return;
+    _hideQiyamDua();
+  };
   document.body.appendChild(_qiyamDuaEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _qiyamDuaEl.style.opacity='1'; }); });
-  _qiyamDuaTimer = setTimeout(_hideQiyamDua, 45000); // ~41s audio + buffer
+  // Only auto-dismiss if NOT opened from pill (e.g. notification-triggered)
+  if(!window._overlayOpenFromPill) {
+    _qiyamDuaTimer = setTimeout(_hideQiyamDua, 45000);
+  }
+  window._overlayOpenFromPill = false;
 }
 function _playDuaBtn(btn){
   if(_qiyamDuaAudio && !_qiyamDuaAudio.paused){
@@ -3092,6 +3119,12 @@ function _hideQiyamDua(){
   if(_qiyamDuaEl){
     _qiyamDuaEl.style.opacity='0';
     setTimeout(function(){ if(_qiyamDuaEl){ _qiyamDuaEl.remove(); _qiyamDuaEl=null; } }, 600);
+  }
+  window._lastSwipeOverlayPrayer = null;
+  // Resume swipe revert after overlay closes
+  if(typeof window._swipeRevert === 'function' && window._swipePreviewIdx >= 0) {
+    clearTimeout(window._swipeRevertTimer);
+    window._swipeRevertTimer = setTimeout(window._swipeRevert, 3000);
   }
 }
 
@@ -4669,7 +4702,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=538';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=539';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
