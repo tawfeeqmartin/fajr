@@ -2704,8 +2704,15 @@ function _checkQiyamNotif(){
 // ── Qiyam Dua Overlay ──
 var _qiyamDuaEl = null;
 var _qiyamDuaTimer = null;
+var _qiyamDuaAudio = null;
 function _showQiyamDua(){
   if(_qiyamDuaEl) return;
+  // Play Mishary dua audio
+  try{
+    _qiyamDuaAudio = new Audio('audio/dua-laylatul-qadr.mp3');
+    _qiyamDuaAudio.volume = 0.6;
+    _qiyamDuaAudio.play().catch(function(){});
+  }catch(e){}
   _qiyamDuaEl = document.createElement('div');
   _qiyamDuaEl.id = 'qiyamDua';
   _qiyamDuaEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
@@ -2725,10 +2732,11 @@ function _showQiyamDua(){
   _qiyamDuaEl.onclick = function(){ _hideQiyamDua(); };
   document.body.appendChild(_qiyamDuaEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _qiyamDuaEl.style.opacity='1'; }); });
-  _qiyamDuaTimer = setTimeout(_hideQiyamDua, 12000);
+  _qiyamDuaTimer = setTimeout(_hideQiyamDua, 45000); // ~41s audio + buffer
 }
 function _hideQiyamDua(){
   if(_qiyamDuaTimer){ clearTimeout(_qiyamDuaTimer); _qiyamDuaTimer=null; }
+  if(_qiyamDuaAudio){ try{ _qiyamDuaAudio.pause(); _qiyamDuaAudio=null; }catch(e){} }
   if(_qiyamDuaEl){
     _qiyamDuaEl.style.opacity='0';
     setTimeout(function(){ if(_qiyamDuaEl){ _qiyamDuaEl.remove(); _qiyamDuaEl=null; } }, 600);
@@ -4297,7 +4305,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=505';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=506';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
