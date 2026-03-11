@@ -2900,7 +2900,7 @@ function _showMaghribHadith(){
   }
   _maghribHadithEl = document.createElement('div');
   _maghribHadithEl.id = 'maghribHadith';
-  _maghribHadithEl.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,8px) + 170px);z-index:950;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,12px) + 80px) 2rem 2rem 2rem;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  _maghribHadithEl.style.cssText = 'position:fixed;inset:0;z-index:950;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
   _maghribHadithEl.onclick = function(){ _hideMaghribHadith(); };
   var _overlayTitle = contextLabel ? contextLabel : (nightNum ? nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan' : '');
   var _contentHtml = '';
@@ -2915,10 +2915,11 @@ function _showMaghribHadith(){
   }
   _contentHtml += '<p style="font-size:.72rem;font-weight:300;color:rgba(232,228,220,.3);margin-top:1rem;letter-spacing:.04em">\u2014 ' + h.ref + '</p>';
   _maghribHadithEl.innerHTML =
+    '<div style="position:absolute;top:0;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,8px) + 210px);overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,12px) + 80px) 2rem 2rem 2rem">' +
     '<div style="text-align:center;max-width:340px;padding:0 24px">' +
       '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + _overlayTitle + '</p>' +
       _contentHtml +
-    '</div>';
+    '</div></div>';
   document.body.appendChild(_maghribHadithEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _maghribHadithEl.style.opacity='1'; }); });
   _maghribHadithTimer = setTimeout(_hideMaghribHadith, 15000);
@@ -3005,7 +3006,9 @@ function _showQiyamDua(){
   }
   _qiyamDuaEl = document.createElement('div');
   _qiyamDuaEl.id = 'qiyamDua';
-  _qiyamDuaEl.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,8px) + 170px);z-index:950;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,12px) + 80px) 2rem 2rem 2rem;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  _qiyamDuaEl.style.cssText = 'position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
+  _qiyamDuaEl.innerHTML =
+    '<div style="position:absolute;top:0;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,8px) + 210px);overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,12px) + 80px) 2rem 2rem 2rem">' +
   _qiyamDuaEl.innerHTML =
     '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem">' +
       '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + (window._inLastThird ? 'The Last Third' : 'The Last Ten Nights') + '</p>' +
@@ -3031,7 +3034,7 @@ function _showQiyamDua(){
       '<button id="duaPlayBtn" onclick="event.stopPropagation();_playDuaBtn(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
         '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua' +
       '</button>' +
-    '</div>';
+    '</div></div>';
   _qiyamDuaEl.onclick = function(){ _hideQiyamDua(); };
   document.body.appendChild(_qiyamDuaEl);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ _qiyamDuaEl.style.opacity='1'; }); });
@@ -4648,7 +4651,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=519';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=520';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
