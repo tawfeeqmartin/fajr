@@ -2900,7 +2900,7 @@ function _showMaghribHadith(){
   }
   _maghribHadithEl = document.createElement('div');
   _maghribHadithEl.id = 'maghribHadith';
-  _maghribHadithEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:2rem 2rem calc(env(safe-area-inset-bottom,8px) + 180px) 2rem;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
+  _maghribHadithEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,12px) + 80px) 2rem calc(env(safe-area-inset-bottom,8px) + 180px) 2rem;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer;overflow-y:auto;-webkit-overflow-scrolling:touch';
   _maghribHadithEl.onclick = function(){ _hideMaghribHadith(); };
   var _overlayTitle = contextLabel ? contextLabel : (nightNum ? nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan' : '');
   var _contentHtml = '';
@@ -3005,7 +3005,7 @@ function _showQiyamDua(){
   }
   _qiyamDuaEl = document.createElement('div');
   _qiyamDuaEl.id = 'qiyamDua';
-  _qiyamDuaEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:2rem 2rem calc(env(safe-area-inset-bottom,8px) + 180px) 2rem;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
+  _qiyamDuaEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,12px) + 80px) 2rem calc(env(safe-area-inset-bottom,8px) + 180px) 2rem;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer;overflow-y:auto;-webkit-overflow-scrolling:touch';
   _qiyamDuaEl.innerHTML =
     '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem">' +
       '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + (window._inLastThird ? 'The Last Third' : 'The Last Ten Nights') + '</p>' +
@@ -4648,7 +4648,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=517';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=518';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
