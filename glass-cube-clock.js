@@ -158,7 +158,7 @@ window.addEventListener('orientationchange', function() {
 
 // BACKLIGHT — from behind-right. Illuminates the scene behind the cube so the
 // FBO captures bright content → glass refracts light and looks transparent/glowing.
-const back = new THREE.SpotLight(0x4040a0, 50);
+const back = new THREE.SpotLight(0x4040a0, 30); // v543: 50→30, let prayer colors breathe
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
@@ -2166,7 +2166,7 @@ document.addEventListener('visibilitychange', function() {
     _prayerSlashColor.lerp(_prSlash, _prLerp);
     _prayerSlashIntensity += (PRAYER_SLASH_MAX - _prayerSlashIntensity) * _prLerp;
     // v542: back light shifts to prayer color — desaturated 50% toward base blue for atmosphere
-    const _prBack = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(0x4040a0), 0.5);
+    const _prBack = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(0x4040a0), 0.3); // v543: 70% prayer color, 30% base blue
     _backLightColor.lerp(_prBack, _prLerp);
   } else {
     // No active prayer or compass mode: fade to zero
