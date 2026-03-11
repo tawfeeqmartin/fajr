@@ -3520,6 +3520,28 @@ function _swipeShowPreview(idx) {
   var _sectorCount = prayerSectors.length || 8;
   idx = ((idx % _sectorCount) + _sectorCount) % _sectorCount;
   _swipePreviewIdx = idx;
+
+  // Compute Hijri night for this preview prayer
+  // If preview prayer starts at or after Maghrib (and we're currently before Maghrib),
+  // the Islamic night is hijriDay + 1
+  var _curIdx = _swipeGetCurrentIdx();
+  var _maghribIdx = -1;
+  for (var mi = 0; mi < _sectorCount; mi++) {
+    if (prayerSectors[mi].def.name === 'Maghrib') { _maghribIdx = mi; break; }
+  }
+  // Count how many steps forward from current to preview
+  var _stepsForward = ((idx - _curIdx) % _sectorCount + _sectorCount) % _sectorCount;
+  var _stepsToMaghrib = _maghribIdx >= 0 ? ((_maghribIdx - _curIdx) % _sectorCount + _sectorCount) % _sectorCount : 999;
+  var _mSec = window._maghribSec || 0;
+  var _nw = (typeof window._cityNow === 'function') ? window._cityNow() : new Date();
+  var _nowSec = _nw.getHours() * 3600 + _nw.getMinutes() * 60 + _nw.getSeconds();
+  // If currently before Maghrib AND preview is at or past Maghrib boundary → next night
+  if (_nowSec < _mSec && _stepsForward >= _stepsToMaghrib && _stepsToMaghrib > 0) {
+    window._swipeNightNum = (window._hijriDay || 0) + 1;
+  } else {
+    window._swipeNightNum = window._islamicNight || 0;
+  }
+
   // Show chrome during prayer preview
   document.body.classList.remove('chrome-hidden');
   if (typeof window._resetChromeTimer === 'function') window._resetChromeTimer();
@@ -3609,6 +3631,7 @@ function _swipeRevert(instant) {
   _swipePreviewIdx = -1;
   _swipeTimeOverride = null;
   _swipeTimeTarget = null;
+  window._swipeNightNum = 0;
   clearTimeout(_swipeRevertTimer);
   _swipeCamTarget = 0; // release camera — will orbit back in sync with tawaf
   if (!instant) _swipeTawafPhase = 1.0; // CCW sweep only on natural revert, not mode switch
@@ -3686,8 +3709,8 @@ document.addEventListener('touchmove', function(e) {
     _swipeCamVel = (_swipeCamVel + _dragSpring) * 0.55; // underdamped = slight wiggle on pull
     _swipeCamAngle += _swipeCamVel;
 
-    // One drag = one prayer step in the swipe direction
-    var prayerDir = totalDx > 30 ? -1 : totalDx < -30 ? 1 : 0; // swipe left = next, swipe right = previous
+    // One drag = one prayer step FORWARD only (rolling look-ahead)
+    var prayerDir = totalDx < -30 ? 1 : 0; // swipe left = next prayer, swipe right = no-op (stay)
     var _scnt = prayerSectors.length || 8;
     var targetIdx = ((_swipeDragBaseIdx + prayerDir) % _scnt + _scnt) % _scnt;
     if (targetIdx !== _swipeLastTriggeredIdx) {
@@ -3720,7 +3743,8 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
     e.preventDefault();
     var baseIdx = _swipePreviewIdx >= 0 ? _swipePreviewIdx : _swipeGetCurrentIdx();
-    _swipeShowPreview(baseIdx + (e.key === 'ArrowRight' ? 1 : -1));
+    if (e.key === 'ArrowLeft') return; // forward only — no backward
+    _swipeShowPreview(baseIdx + 1);
   }
 });
 

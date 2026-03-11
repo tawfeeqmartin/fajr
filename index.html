@@ -2879,11 +2879,9 @@ var _maghribHadithIdx = Math.floor(Math.random() * 10); // start random, cycle f
 var _contextContentIdx = 0;
 function _showMaghribHadith(){
   if(_maghribHadithEl) return;
-  // If current time is before Maghrib but we're showing post-Maghrib content
-  // (e.g. swipe preview), the night is the NEXT Islamic night
-  var _mSec = window._maghribSec || 0;
-  var _nowS = (new Date().getHours()*3600 + new Date().getMinutes()*60 + new Date().getSeconds());
-  var nightNum = (_nowS >= _mSec) ? (window._islamicNight || 0) : ((window._hijriDay || 0) + 1);
+  // Use swipe-computed night number if available (handles Maghrib boundary crossing)
+  var nightNum = (typeof window._swipeNightNum === 'number' && window._swipeNightNum > 0)
+    ? window._swipeNightNum : (window._islamicNight || 0);
   // Check Islamic calendar for contextual content first
   var contexts = _getIslamicContext();
   var h = null;
@@ -4657,7 +4655,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=525';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=526';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
