@@ -3539,9 +3539,6 @@ var _clockOnboardSteps = [
       // Subtle cube wireframe — echoes the app's identity
       return '<svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="opacity:.4">' +
         '<polygon points="24,8 40,18 40,34 24,44 8,34 8,18" stroke="rgba(232,228,220,.5)" stroke-width="1" fill="none"/>' +
-        '<line x1="24" y1="8" x2="24" y2="44" stroke="rgba(232,228,220,.25)" stroke-width="1"/>' +
-        '<line x1="8" y1="18" x2="40" y2="34" stroke="rgba(232,228,220,.15)" stroke-width="1"/>' +
-        '<line x1="40" y1="18" x2="8" y2="34" stroke="rgba(232,228,220,.15)" stroke-width="1"/>' +
       '</svg>';
     },
     text: 'The clock is yours',
@@ -4171,7 +4168,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=495';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=496';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
