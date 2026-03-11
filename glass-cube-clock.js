@@ -3602,7 +3602,7 @@ function _swipeShowPreview(idx) {
   if (!_swipeLabelEl) {
     _swipeLabelEl = document.createElement('div');
     _swipeLabelEl.id = '_swipeLabel';
-    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 130px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
+    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 106px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
     document.body.appendChild(_swipeLabelEl);
   }
   var c = new THREE.Color(def.color);
@@ -3638,10 +3638,13 @@ function _swipeShowPreview(idx) {
       '</div>';
   }
 
+  // Fixed-height pill slot (34px) — always reserved so label doesn't jump
+  var _pillSlot = '<div style="height:34px;display:flex;align-items:center;justify-content:center">' + _pillDiv + '</div>';
+
   _swipeLabelEl.innerHTML =
     '<div style="font-size:clamp(.6rem,1.2vw,.75rem);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:' + hex + ';opacity:.7;margin-bottom:2px">' + def.name + '</div>' +
     '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + timeStr + '</div>' +
-    _infoDiv + _pillDiv;
+    _infoDiv + _pillSlot;
   _swipeLabelEl.style.display = 'block';
   _swipeLabelEl.style.opacity = '1';
 
