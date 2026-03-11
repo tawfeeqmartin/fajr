@@ -3602,7 +3602,7 @@ function _swipeShowPreview(idx) {
   if (!_swipeLabelEl) {
     _swipeLabelEl = document.createElement('div');
     _swipeLabelEl.id = '_swipeLabel';
-    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 106px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
+    _swipeLabelEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 130px);left:50%;transform:translateX(-50%);z-index:951;text-align:center;pointer-events:none;transition:opacity .3s ease;font-family:var(--font)';
     document.body.appendChild(_swipeLabelEl);
   }
   var c = new THREE.Color(def.color);
@@ -3629,7 +3629,7 @@ function _swipeShowPreview(idx) {
   var _pillDiv = '';
   if (_hint) {
     _pillDiv = '<div id="_swipeContentPill" onclick="window._openSwipeContent&&window._openSwipeContent()" style="' +
-      'display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 14px;' +
+      'display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 14px;pointer-events:auto;' +
       'border-radius:20px;background:rgba(232,228,220,.08);backdrop-filter:blur(8px);' +
       'cursor:pointer;transition:transform .35s cubic-bezier(.23,1,.32,1),opacity .3s ease;' +
       'animation:_pillIn .4s cubic-bezier(.23,1,.32,1) both">' +
