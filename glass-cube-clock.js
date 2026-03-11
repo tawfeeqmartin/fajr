@@ -2659,6 +2659,9 @@ function _devBuildPanel() {
       '<span id="_devTahajjudStatus" style="color:#555">inactive</span>' +
     '</div>' +
 
+    sec('Scene Lights') +
+    '<div id="_devLights" style="display:flex;flex-direction:column;gap:5px"></div>' +
+
     sec('Film Grain') +
     '<div style="display:flex;flex-direction:column;gap:6px">' +
       '<label style="display:flex;align-items:center;gap:5px;cursor:pointer">' +
@@ -3007,6 +3010,65 @@ function _devBuildPanel() {
     document.getElementById('_devGrainStrengthV').textContent = v.toFixed(2);
     if (window._grainOverlay) window._grainOverlay.style.opacity = v * 0.70;
   });
+
+  // ── Scene Lights sliders ──────────────────────────────────────────────────
+  (function() {
+    var lightsDev = document.getElementById('_devLights');
+    if (!lightsDev) return;
+    var lights = [
+      { name: 'back', ref: back, maxI: 80 },
+      { name: 'cubeBack', ref: cubeBack, maxI: 30 },
+      { name: 'violetRim', ref: violetRim, maxI: 20 },
+      { name: 'rim', ref: rim, maxI: 20 },
+      { name: 'cubeSun', ref: cubeSun, maxI: 100 },
+      { name: 'prayerWash', ref: prayerWash, maxI: 20 },
+      { name: 'prayerRim', ref: prayerRim, maxI: 20 },
+      { name: 'prayerSlash', ref: prayerSlash, maxI: 60 },
+      { name: 'plinthRect', ref: _plinthRect, maxI: 30 },
+      { name: 'plinthSpot', ref: _plinthSpot, maxI: 60 },
+      { name: 'podiumFrontWash', ref: podiumFrontWash, maxI: 40 },
+      { name: 'prayerGlow', ref: prayerGlow, maxI: 10 }
+    ];
+    var html = '';
+    lights.forEach(function(l, idx) {
+      var c = '#' + l.ref.color.getHexString();
+      var iv = Math.round((l.ref.intensity / l.maxI) * 1000);
+      html += '<div style="display:flex;gap:4px;align-items:center">' +
+        '<input type="color" class="_dlCol" data-li="' + idx + '" value="' + c + '" style="width:20px;height:18px;padding:0;border:none;cursor:pointer">' +
+        '<span style="color:#888;font-size:9px;white-space:nowrap;min-width:65px">' + l.name + '</span>' +
+        '<input type="range" class="_dlInt" data-li="' + idx + '" min="0" max="1000" value="' + iv + '" style="flex:1;min-width:0">' +
+        '<span class="_dlIntV" data-li="' + idx + '" style="color:#fff;font-size:10px;width:32px;text-align:right">' + l.ref.intensity.toFixed(1) + '</span>' +
+      '</div>';
+    });
+    lightsDev.innerHTML = html;
+    lightsDev.addEventListener('input', function(e) {
+      var li = parseInt(e.target.getAttribute('data-li'));
+      if (isNaN(li)) return;
+      var l = lights[li];
+      if (e.target.classList.contains('_dlInt')) {
+        var v = parseFloat(e.target.value) / 1000 * l.maxI;
+        l.ref.intensity = v;
+        lightsDev.querySelector('._dlIntV[data-li="' + li + '"]').textContent = v.toFixed(1);
+      } else if (e.target.classList.contains('_dlCol')) {
+        l.ref.color.set(e.target.value);
+      }
+    });
+    // Sync sliders every 2s (prayer lerps change values)
+    setInterval(function() {
+      lights.forEach(function(l, idx) {
+        var intSlider = lightsDev.querySelector('._dlInt[data-li="' + idx + '"]');
+        var intLabel = lightsDev.querySelector('._dlIntV[data-li="' + idx + '"]');
+        var colPicker = lightsDev.querySelector('._dlCol[data-li="' + idx + '"]');
+        if (intSlider && document.activeElement !== intSlider) {
+          intSlider.value = Math.round((l.ref.intensity / l.maxI) * 1000);
+          intLabel.textContent = l.ref.intensity.toFixed(1);
+        }
+        if (colPicker && document.activeElement !== colPicker) {
+          colPicker.value = '#' + l.ref.color.getHexString();
+        }
+      });
+    }, 2000);
+  })();
 
   // ── Dev panel button wiring (reads from UI dropdowns) ──────────────────────
   function _devExportGetSize() {
