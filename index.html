@@ -3013,7 +3013,10 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
     var _islamicNight = _nowSec >= _mSec ? _hijriDay + 1 : _hijriDay;
     window._islamicNight = _islamicNight;
     _isLastTenNights = window._isRamadan && _islamicNight >= 21;
-    const hijriStr = `<span style="color:#e0e0e0">${hijri.day} ${hijri.month.en} ${hijri.year} AH  ·  ${hijri.month.ar}</span>`;
+    var _hijriLabel = _nowSec >= _mSec && window._isRamadan
+      ? _islamicNight + (_islamicNight===1?'st':_islamicNight===2?'nd':_islamicNight===3?'rd':'th') + ' Night of ' + hijri.month.en
+      : hijri.day + ' ' + hijri.month.en + ' ' + hijri.year + ' AH';
+    const hijriStr = `<span style="color:#e0e0e0">${_hijriLabel}  ·  ${hijri.month.ar}</span>`;
     const fsdt = document.getElementById('fsDateTime'); if(fsdt) fsdt.innerHTML = hijriStr;
     const hijriTop = document.getElementById('hijriTop'); if(hijriTop) hijriTop.innerHTML = hijriStr;
   }
@@ -4285,7 +4288,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=502';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=503';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
