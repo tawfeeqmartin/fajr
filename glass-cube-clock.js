@@ -891,34 +891,48 @@ scene.add(_plinthSpot);
 scene.add(_plinthSpot.target);
 
 // Prayer → lighting look presets (raised to hit cube + upper plinth)
+// bc/bi = back SpotLight color/intensity (FBO background wash — controls glass opacity feel)
+// cc/ci = cubeBack SpotLight color/intensity (glass transmission key)
+// ui    = cubeSun PointLight intensity (dichroic dispersion driver)
+// GLASS RULE: lower back intensity → less blue wash → more transparent. Keep bc dark for warm prayers.
 var _plinthLooks = {
-  // Look 01 — Gallery Diagonal (Dhuhr + Asr)
+  // Look 01 — Gallery Diagonal (Dhuhr + Asr) — crisp noon/afternoon, cool-white glass
   gallery:   { rc: 0xddddf8, ri: 8,    rp: [-2,-8,4],       rt: [1,0,1.32],
-               sc: 0xddddf8, si: 24,   sp: [3,3,-1.5],      st: [-1,-0.5,1.5] },
-  // Look 03 — Ando Chapel (Tahajjud + Isha)
+               sc: 0xddddf8, si: 24,   sp: [3,3,-1.5],      st: [-1,-0.5,1.5],
+               bc: 0x3038c8, bi: 18,   cc: 0xeef2ff, ci: 7,  ui: 30 },
+  // Look 03 — Ando Chapel (Qiyam + Isha) — night monolith, deep navy glass
   ando:      { rc: 0xd7e2ff, ri: 11.6, rp: [-2.7,-1.5,0.8], rt: [0.15,0.5,1.0],
-               sc: 0xd7e2ff, si: 12,   sp: [2.7,3,0.8],     st: [-0.15,-0.5,1.0] },
-  // Look 06 — Deakins Ember (Fajr)
+               sc: 0xd7e2ff, si: 12,   sp: [2.7,3,0.8],     st: [-0.15,-0.5,1.0],
+               bc: 0x1a1a80, bi: 12,   cc: 0x9096e8, ci: 4,  ui: 22 },
+  // Look 07 — Void Before Dawn (Last Third) — deepest pre-fajr darkness, barely-lit glass
+  lasthird:  { rc: 0xb8c8ff, ri: 10.2, rp: [-2.8,-1.8,0.6], rt: [0.12,0.4,1.0],
+               sc: 0xc0caff, si: 9,    sp: [2.8,3,0.6],     st: [-0.12,-0.5,1.0],
+               bc: 0x160a58, bi: 8,    cc: 0x6060b8, ci: 3,  ui: 18 },
+  // Look 06 — Deakins Ember (Fajr + Sunrise) — pre-dawn indigo, warm transmission
   deakins:   { rc: 0xFFC188, ri: 11.3, rp: [-3.5,-4,3.2],   rt: [0.65,1.0,1.35],
-               sc: 0x9AB8E8, si: 14,   sp: [2.8,3,-2.4],    st: [-0.15,-0.5,0.95] },
-  // Look 02 — Turrell Void (Dhuha)
+               sc: 0x9AB8E8, si: 14,   sp: [2.8,3,-2.4],    st: [-0.15,-0.5,0.95],
+               bc: 0x2c1840, bi: 10,   cc: 0xffd0a0, ci: 6,  ui: 25 },
+  // Look 02 — Turrell Void (Dhuha) — golden morning, cool-violet back contrasts amber plinth
   turrell:   { rc: 0x9eb8ff, ri: 10.5, rp: [-3.2,-2,5.6],   rt: [0.2,1.0,1.0],
-               sc: 0xffb46e, si: 12,   sp: [2.6,3,2.7],     st: [-0.4,-0.5,1.2] },
-  // Look 04 — Mihrab Moonbeam (Maghrib)
+               sc: 0xffb46e, si: 12,   sp: [2.6,3,2.7],     st: [-0.4,-0.5,1.2],
+               bc: 0x302878, bi: 14,   cc: 0xffc070, ci: 8,  ui: 28 },
+  // Look 04 — Mihrab Moonbeam (Maghrib) — sunset, dark back so warm plinth breathes
   mihrab:    { rc: 0xBFD4FF, ri: 12.9, rp: [-3.1,-1,1.6],   rt: [0.25,0.6,1.1],
-               sc: 0xFFB978, si: 10,   sp: [2.0,3,2.5],     st: [-0.2,-0.5,1.0] },
+               sc: 0xFFB978, si: 10,   sp: [2.0,3,2.5],     st: [-0.2,-0.5,1.0],
+               bc: 0x180a30, bi: 7,    cc: 0xff9860, ci: 5,  ui: 22 },
 };
 
 // Prayer name → look mapping
 var _prayerLookMap = {
-  'Qiyam':   'ando',
-  'Fajr':    'deakins',
-  'Sunrise': 'deakins',
-  'Dhuha':   'turrell',
-  'Dhuhr':   'gallery',
-  'Asr':     'gallery',
-  'Maghrib': 'mihrab',
-  'Isha':    'ando',
+  'Qiyam':      'ando',
+  'Last Third': 'lasthird',
+  'Fajr':       'deakins',
+  'Sunrise':    'deakins',
+  'Dhuha':      'turrell',
+  'Dhuhr':      'gallery',
+  'Asr':        'gallery',
+  'Maghrib':    'mihrab',
+  'Isha':       'ando',
 };
 
 var _plinthLerpRate = 0.02; // smooth ~2s transition
@@ -936,6 +950,12 @@ var _plinthSpotPos = new THREE.Vector3(3, 3, -1.5);
 var _plinthSpotTarget = new THREE.Vector3(-1, -0.5, 1.5);
 var _plinthRectIntensity = 8;
 var _plinthSpotIntensity = 24;
+// Lerp state for back/cubeBack/cubeSun — prayer-driven glass opacity control
+var _backLerpColor = new THREE.Color(0x4040a0);
+var _backLerpIntensity = 50;
+var _cubeBackLerpColor = new THREE.Color(0xffeedd);
+var _cubeBackLerpIntensity = 7;
+var _cubeSunLerpIntensity = 50;
 
 var _lastPlinthPrayer = 'gallery'; // remember last active prayer's look
 function _updatePlinthLighting() {
@@ -966,6 +986,30 @@ function _updatePlinthLighting() {
   _plinthSpot.position.copy(_plinthSpotPos);
   _plinthSpotTarget.lerp(new THREE.Vector3(...target.st), lr);
   _plinthSpot.target.position.copy(_plinthSpotTarget);
+
+  // ── Back fill + glass transmission lights — prayer-driven glass opacity control ──
+  // back SpotLight: dominates FBO background color → directly sets cube's glass tint.
+  // Reducing intensity prevents the blue-block artifact on warm prayers.
+  // cubeBack SpotLight: grazes cube from above-rear, adds transmission color.
+  // cubeSun PointLight: powers dichroic dispersion — lower = less rainbow visible.
+  if (target.bc !== undefined) {
+    var tBc = _hexC(target.bc);
+    _backLerpColor.lerp(tBc, lr);
+    back.color.copy(_backLerpColor);
+    _backLerpIntensity += (target.bi - _backLerpIntensity) * lr;
+    back.intensity = _backLerpIntensity;
+  }
+  if (target.cc !== undefined) {
+    var tCc = _hexC(target.cc);
+    _cubeBackLerpColor.lerp(tCc, lr);
+    cubeBack.color.copy(_cubeBackLerpColor);
+    _cubeBackLerpIntensity += (target.ci - _cubeBackLerpIntensity) * lr;
+    cubeBack.intensity = _cubeBackLerpIntensity;
+  }
+  if (target.ui !== undefined) {
+    _cubeSunLerpIntensity += (target.ui - _cubeSunLerpIntensity) * lr;
+    cubeSun.intensity = _cubeSunLerpIntensity;
+  }
 }
 
 // ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
