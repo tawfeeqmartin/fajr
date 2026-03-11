@@ -2295,10 +2295,12 @@ try{
 
 // ── Nav bar live clock + next prayer ──
 let _navClockTimer=null;
-window._countdownPref = window._countdownPref || 'auto'; // 'auto' | 'iftar' | 'next'
+window._countdownPref = window._countdownPref || 'auto'; // 'auto' | 'iftar' | 'next' | 'qiyam'
+var _isLastTenNights = false; // set in _displayPrayerTimes from hijri date
 function _cycleCountdownPref(){
   if (window._countdownPref === 'auto') window._countdownPref = 'iftar';
   else if (window._countdownPref === 'iftar') window._countdownPref = 'next';
+  else if (window._countdownPref === 'next' && _isLastTenNights) window._countdownPref = 'qiyam';
   else window._countdownPref = 'auto';
   updateNavClock();
 }
@@ -2322,7 +2324,9 @@ function _handleCountdownToggle(e){
   if (window._countdownPref === 'auto') {
     window._countdownPref = label.indexOf('iftar') !== -1 ? 'next' : 'iftar';
   } else {
-    window._countdownPref = (window._countdownPref === 'iftar') ? 'next' : 'iftar';
+    if (window._countdownPref === 'iftar') window._countdownPref = 'next';
+    else if (window._countdownPref === 'next' && _isLastTenNights) window._countdownPref = 'qiyam';
+    else window._countdownPref = 'iftar';
   }
   updateNavClock();
 }
@@ -2412,9 +2416,34 @@ function updateNavClock(){
     const _pref = (window._countdownPref || 'auto');
     const _nextDiff = ((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
 
+    // ── Qiyam (last third) calculation ──
+    var _nightLen = fajrS > maghribS ? (fajrS - maghribS) : (fajrS + 86400 - maghribS);
+    var _lastThirdStart = (maghribS + Math.floor(_nightLen * 2 / 3)) % 86400;
+    var _inLastThird = fajrS > _lastThirdStart
+      ? (actualNowS >= _lastThirdStart && actualNowS < fajrS)
+      : (actualNowS >= _lastThirdStart || actualNowS < fajrS);
+    window._inLastThird = _inLastThird;
+    window._lastThirdStartS = _lastThirdStart;
+
     if(!swipeActive && _pref !== 'auto'){
       // User override must work regardless of city/ramadan state.
-      if(_pref === 'iftar'){
+      if(_pref === 'qiyam' && _isLastTenNights){
+        if(_inLastThird){
+          navLabel='until Fajr';
+          navDiff=((fajrS - actualNowS)+86400)%86400;
+          _labelPrayer='Fajr';
+        } else {
+          navLabel='last third in';
+          navDiff=((_lastThirdStart - actualNowS)+86400)%86400;
+          _labelPrayer='Qiyam';
+        }
+      } else if(_pref === 'qiyam'){
+        // Not last 10 nights — fall through to next
+        window._countdownPref = 'auto';
+        navLabel='until '+_labelName(next.name);
+        navDiff=_nextDiff;
+        _labelPrayer=next.name;
+      } else if(_pref === 'iftar'){
         // If a prayer is in the urgent red zone, auto-switch back to "next"
         // so urgency UX still behaves as expected.
         if (_nextDiff <= 600) {
@@ -2513,6 +2542,7 @@ if(location.search.includes('adhan=1')){
       history.replaceState(null,'','/');
     }, 2000); // wait for prayer times to load
   });
+}
 
 function requestNotifPermission(){
   if('Notification' in window&&Notification.permission==='default'){
@@ -2564,8 +2594,9 @@ function _hideAdhanBanner(){
 
 function startAdhanCheck(){
   if(_adhanCheckTimer)return;
-  _adhanCheckTimer=setInterval(checkPrayerAdhan,5000); // check every 5s - don't miss the minute
-  checkPrayerAdhan(); // run immediately too
+  _adhanCheckTimer=setInterval(function(){ checkPrayerAdhan(); _checkQiyamNotif(); },5000);
+  checkPrayerAdhan();
+  _checkQiyamNotif();
 }
 function checkPrayerAdhan(){
   const t=window._prayerTimings;
@@ -2634,6 +2665,67 @@ function checkPrayerAdhan(){
   }
 }
 // Start checking once prayer times are loaded
+// ── Qiyam (last third) notification ──
+var _lastQiyamNotifDate = '';
+function _checkQiyamNotif(){
+  if(!_isLastTenNights) return;
+  if(!window._inLastThird) return;
+  var now = typeof _cityNow === 'function' ? _cityNow() : new Date();
+  var dateKey = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+  if(_lastQiyamNotifDate === dateKey) return;
+  _lastQiyamNotifDate = dateKey;
+  console.log('[qiyam] 🌙 Last third notification');
+  // Show dua overlay
+  _showQiyamDua();
+  // Browser notification
+  try{
+    if('Notification' in window && Notification.permission==='granted'){
+      if(swReg){
+        swReg.showNotification('Qiyam · Last Third',{
+          body:'The last third of the night has begun\n\nاللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي',
+          tag:'qiyam-'+dateKey, renotify:true, icon:'/icon-192.png'
+        });
+      } else {
+        new Notification('Qiyam · Last Third',{body:'The last third of the night has begun',tag:'qiyam-'+dateKey});
+      }
+    }
+  }catch(e){}
+}
+
+// ── Qiyam Dua Overlay ──
+var _qiyamDuaEl = null;
+var _qiyamDuaTimer = null;
+function _showQiyamDua(){
+  if(_qiyamDuaEl) return;
+  _qiyamDuaEl = document.createElement('div');
+  _qiyamDuaEl.id = 'qiyamDua';
+  _qiyamDuaEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
+  _qiyamDuaEl.innerHTML =
+    '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem;background:rgba(13,13,18,.75);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border-radius:20px;border:1px solid rgba(232,228,220,.06)">' +
+      '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">The Last Third</p>' +
+      '<p style="font-size:1.6rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1.25rem">' +
+        '\u0627\u0644\u0644\u0651\u064E\u0647\u064F\u0645\u0651\u064E \u0625\u0650\u0646\u0651\u064E\u0643\u064E \u0639\u064E\u0641\u064F\u0648\u0651\u064C \u062A\u064F\u062D\u0650\u0628\u0651\u064F \u0627\u0644\u0639\u064E\u0641\u0652\u0648\u064E \u0641\u064E\u0627\u0639\u0652\u0641\u064F \u0639\u064E\u0646\u0651\u0650\u064A' +
+      '</p>' +
+      '<p style="font-size:.85rem;font-weight:300;font-style:italic;color:rgba(232,228,220,.4);margin-bottom:.75rem;letter-spacing:.02em">' +
+        'Allahumma innaka \u2018afuwwun tu\u1E25ibbul \u2018afwa fa\u2019fu \u2018anni' +
+      '</p>' +
+      '<p style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.55);letter-spacing:.01em">' +
+        '\u201CO Allah, You are Most Forgiving<br>and You love forgiveness,<br>so forgive me\u201D' +
+      '</p>' +
+    '</div>';
+  _qiyamDuaEl.onclick = function(){ _hideQiyamDua(); };
+  document.body.appendChild(_qiyamDuaEl);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ _qiyamDuaEl.style.opacity='1'; }); });
+  _qiyamDuaTimer = setTimeout(_hideQiyamDua, 12000);
+}
+function _hideQiyamDua(){
+  if(_qiyamDuaTimer){ clearTimeout(_qiyamDuaTimer); _qiyamDuaTimer=null; }
+  if(_qiyamDuaEl){
+    _qiyamDuaEl.style.opacity='0';
+    setTimeout(function(){ if(_qiyamDuaEl){ _qiyamDuaEl.remove(); _qiyamDuaEl=null; } }, 600);
+  }
+}
+
 const _origStartNav=startNavClock;
 startNavClock=function(){_origStartNav();startAdhanCheck();};
 
@@ -2911,6 +3003,9 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
   // Hijri date
   if(hijri) {
     window._isRamadan = /rama[dḍ]/i.test(hijri.month.en);
+    var _hijriDay = parseInt(hijri.day, 10) || 0;
+    _isLastTenNights = window._isRamadan && _hijriDay >= 21;
+    window._hijriDay = _hijriDay;
     const hijriStr = `<span style="color:#e0e0e0">${hijri.day} ${hijri.month.en} ${hijri.year} AH  ·  ${hijri.month.ar}</span>`;
     const fsdt = document.getElementById('fsDateTime'); if(fsdt) fsdt.innerHTML = hijriStr;
     const hijriTop = document.getElementById('hijriTop'); if(hijriTop) hijriTop.innerHTML = hijriStr;
@@ -4183,7 +4278,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=499';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=500';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
