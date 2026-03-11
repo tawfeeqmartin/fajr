@@ -749,11 +749,19 @@ RectAreaLightUniformsLib.init();
   ral.lookAt(1, 0, 1.32);
   scene.add(ral);
 }
+// RectAreaLight disabled — cube shader can't see it, replaced with SpotLight
+// {
+//   const ral2 = new THREE.RectAreaLight(0xddddf8, 24, 6, 3);
+//   ral2.position.set(3, 3, -1.5);
+//   ral2.lookAt(-1, -0.5, 1.5);
+//   scene.add(ral2);
+// }
 {
-  const ral2 = new THREE.RectAreaLight(0xddddf8, 24, 6, 3);
-  ral2.position.set(3, 3, -1.5);
-  ral2.lookAt(-1, -0.5, 1.5);
-  scene.add(ral2);
+  const backSpot = new THREE.SpotLight(0xddddf8, 24, 20, 0.5, 0.6, 1);
+  backSpot.position.set(3, 3, -1.5);
+  backSpot.target.position.set(-1, -0.5, 1.5);
+  scene.add(backSpot);
+  scene.add(backSpot.target);
 }
 
 // ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
