@@ -3546,19 +3546,21 @@ function _swipeShowPreview(idx) {
     window._swipeNightNum = window._islamicNight || 0;
   }
 
-  // Update header Hijri display for swipe preview
+  // Update header Hijri display for swipe preview — lock so live timer can't overwrite
+  window._swipeHijriLock = true;
   var _hijriEl = document.getElementById('hijriTop');
   if (_hijriEl && window._isRamadan && window._swipeNightNum > 0) {
     var _sn = window._swipeNightNum;
     var _ord = _sn===1?'st':_sn===2?'nd':_sn===3?'rd':_sn%10===1&&_sn!==11?'st':_sn%10===2&&_sn!==12?'nd':_sn%10===3&&_sn!==13?'rd':'th';
-    // If preview is at or past Maghrib → show night format, otherwise day format
-    if (_stepsForward >= _stepsToMaghrib && _stepsToMaghrib > 0 && _nowSec < _mSec) {
-      _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _sn + _ord + ' Night of Ramadan  ·  رمضان</span>';
-    } else if (_nowSec >= _mSec) {
+    // Determine if preview prayer is a "night" prayer (Maghrib→Fajr) or "day" prayer (Sunrise→Asr)
+    var _previewName = prayerSectors[idx].def.name;
+    var _isNightPrayer = (_previewName==='Maghrib'||_previewName==='Isha'||_previewName==='Qiyam'||_previewName==='Fajr');
+    if (_isNightPrayer) {
       _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _sn + _ord + ' Night of Ramadan  ·  رمضان</span>';
     } else {
-      var _dayNum = window._hijriDay || 0;
-      _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _dayNum + ' Ramadan 1447 AH  ·  رمضان</span>';
+      // Day prayer in the rolled-forward sequence — show the Hijri day number
+      var _dayForPreview = (_sn > (window._hijriDay||0)) ? _sn : (window._hijriDay||0);
+      _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _dayForPreview + ' Ramadan 1447 AH  ·  رمضان</span>';
     }
   }
 
@@ -3652,6 +3654,7 @@ function _swipeRevert(instant) {
   _swipeTimeOverride = null;
   _swipeTimeTarget = null;
   window._swipeNightNum = 0;
+  window._swipeHijriLock = false;
   // Restore header Hijri to live value
   if (typeof window._restoreHijriHeader === 'function') window._restoreHijriHeader();
   clearTimeout(_swipeRevertTimer);

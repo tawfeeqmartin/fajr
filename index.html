@@ -3390,7 +3390,8 @@ function _displayPrayerTimes(t, hijri, _overrideNowM) {
       if (el && window._liveHijriStr) el.innerHTML = window._liveHijriStr;
     };
     const fsdt = document.getElementById('fsDateTime'); if(fsdt) fsdt.innerHTML = hijriStr;
-    const hijriTop = document.getElementById('hijriTop'); if(hijriTop) hijriTop.innerHTML = hijriStr;
+    const hijriTop = document.getElementById('hijriTop');
+    if(hijriTop && !window._swipeHijriLock) hijriTop.innerHTML = hijriStr;
   }
 }
 
@@ -4660,7 +4661,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=529';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=530';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
