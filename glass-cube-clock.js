@@ -1214,7 +1214,8 @@ function _isLastThird(now) {
 // Active: 0.18 max opacity, upcoming: 0.08, Fajr dim: 0.05.
 
 const PRAYER_WINDOWS_DEF = [
-  { name: 'Qiyam',   startKey: 'Midnight', endKey: 'Fajr',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
+  { name: 'Qiyam',      startKey: 'Midnight', endKey: 'Qiyam',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
+  { name: 'Last Third',  startKey: 'Qiyam',   endKey: 'Fajr',     color: 0xaa44ff, color2: 0xee99ff, isFajr: false },
   { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x6633ee, color2: 0xbb88ff, isFajr: true  },
   { name: 'Sunrise', startKey: 'Sunrise',  endKey: 'Sunrise', endOffset: 20, color: 0x888888, color2: 0x888888, isFajr: false, isForbidden: true },
   { name: 'Dhuha',   startKey: 'Sunrise', startOffset: 20, endKey: 'Dhuhr', color: 0xff9900, color2: 0xffee44, isFajr: false },
@@ -3554,7 +3555,7 @@ function _swipeShowPreview(idx) {
     var _ord = _sn===1?'st':_sn===2?'nd':_sn===3?'rd':_sn%10===1&&_sn!==11?'st':_sn%10===2&&_sn!==12?'nd':_sn%10===3&&_sn!==13?'rd':'th';
     // Determine if preview prayer is a "night" prayer (Maghrib→Fajr) or "day" prayer (Sunrise→Asr)
     var _previewName = prayerSectors[idx].def.name;
-    var _isNightPrayer = (_previewName==='Maghrib'||_previewName==='Isha'||_previewName==='Qiyam'||_previewName==='Fajr');
+    var _isNightPrayer = (_previewName==='Maghrib'||_previewName==='Isha'||_previewName==='Qiyam'||_previewName==='Last Third'||_previewName==='Fajr');
     if (_isNightPrayer) {
       _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _sn + _ord + ' Night of Ramadan  ·  رمضان</span>';
     } else {
@@ -3607,6 +3608,7 @@ function _swipeShowPreview(idx) {
   var c = new THREE.Color(def.color);
   var hex = '#' + c.getHexString();
   var _infoText = def.isForbidden ? 'Avoid prayer'
+    : def.name === 'Last Third' ? 'Best time for Tahajjud'
     : (def.name === 'Dhuha' || def.name === 'Qiyam') ? 'Sunnah Mu\'akkadah'
     : (def.name === 'Fajr' || def.name === 'Dhuhr' || def.name === 'Asr' || def.name === 'Maghrib' || def.name === 'Isha') ? 'Obligatory Prayer' : '';
   var _infoColor = def.isForbidden ? '#888' : 'rgba(232,228,220,.45)';

@@ -2358,16 +2358,18 @@ function updateNavClock(){
   else if (typeof window._forceTimeMin === 'number' && window._forceTimeMin !== null) nowS = Math.floor(window._forceTimeMin * 60);
   const nowM=Math.floor(nowS/60)%1440;
 
-  const prayerColors={Tahajjud:'#8811ff',Qiyam:'#8811ff',Fajr:'#6633ee',Sunrise:'#ff9900',Dhuha:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff'};
+  const prayerColors={Tahajjud:'#aa44ff','Last Third':'#aa44ff',Qiyam:'#8811ff',Fajr:'#6633ee',Sunrise:'#ff9900',Dhuha:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff'};
   const sunriseM=_normMin(toSec(t.Sunrise)/60), dhuhaM=_normMin(sunriseM+20);
-  const qiyamM=_normMin(toSec(t.Midnight||'00:00')/60);
+  const midnightM=_normMin(toSec(t.Midnight||'00:00')/60);
+  const lastThirdM=_normMin(toSec(t.Qiyam||'02:00')/60);
   const marks={
-    Qiyam:qiyamM, Tahajjud:qiyamM, Fajr:_normMin(toSec(t.Fajr)/60), Sunrise:sunriseM,
+    Qiyam:midnightM, 'Last Third':lastThirdM, Tahajjud:midnightM, Fajr:_normMin(toSec(t.Fajr)/60), Sunrise:sunriseM,
     Dhuha:dhuhaM, Dhuhr:_normMin(toSec(t.Dhuhr)/60), Asr:_normMin(toSec(t.Asr)/60),
     Maghrib:_normMin(toSec(t.Maghrib)/60), Isha:_normMin(toSec(t.Isha)/60)
   };
   const sectors=[
-    {name:'Qiyam',start:marks.Qiyam,end:marks.Fajr},
+    {name:'Qiyam',start:marks.Qiyam,end:marks['Last Third']},
+    {name:'Last Third',start:marks['Last Third'],end:marks.Fajr},
     {name:'Fajr',start:marks.Fajr,end:marks.Sunrise},
     {name:'Sunrise',start:marks.Sunrise,end:marks.Dhuha},
     {name:'Dhuha',start:marks.Dhuha,end:marks.Dhuhr},
@@ -2393,11 +2395,12 @@ function updateNavClock(){
     : ((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null) ? _normMin(window._swipeTimeOverride) : null);
   let preview = (swipeActive && _swipeMin!==null) ? prayerAtMinute(_swipeMin) : '';
   if (preview === 'Tahajjud') preview = 'Qiyam';
+  if (preview === 'Last Third') preview = 'Last Third';
   if (preview) {
     window._swipePreviewPrayer = preview;
     window._lastSwipePreviewPrayer = preview;
-    // Show dua overlay when swiping to Qiyam during last 10 nights
-    if (preview === 'Qiyam' && _isLastTenNights && !window._qiyamSwipeDuaShown) {
+    // Show dua overlay when swiping to Qiyam or Last Third during last 10 nights
+    if ((preview === 'Qiyam' || preview === 'Last Third') && _isLastTenNights && !window._qiyamSwipeDuaShown) {
       window._qiyamSwipeDuaShown = true;
       if (typeof _showQiyamDua === 'function') _showQiyamDua();
     }
@@ -2406,7 +2409,7 @@ function updateNavClock(){
       window._maghribHadithShown = true;
       if (typeof _showMaghribHadith === 'function') _showMaghribHadith();
     }
-    if (preview !== 'Qiyam') {
+    if (preview !== 'Qiyam' && preview !== 'Last Third') {
       window._qiyamSwipeDuaShown = false;
       if (typeof _hideQiyamDua === 'function') _hideQiyamDua();
     }
@@ -2419,7 +2422,7 @@ function updateNavClock(){
   // keep prayer bars in lockstep with countdown color + boundary timing
   if (typeof window._displayPrayerTimes==='function') window._displayPrayerTimes(t, window._lastHijri||null, nowM);
 
-  const _labelName = n => n==='Tahajjud' ? 'Qiyam' : n;
+  const _labelName = n => n==='Tahajjud' ? 'Qiyam' : n==='Last Third' ? 'Last Third' : n;
   let navLabel='until '+_labelName(next.name);
   let _labelPrayer = next.name;
   let navDiff=((next.m-actualNowM+1440)%1440)*60 - (actualNowS%60);
@@ -4664,7 +4667,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=531';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=532';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
