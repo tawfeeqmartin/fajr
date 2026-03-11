@@ -741,27 +741,98 @@ scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotate
   });
 }
 
-// ── RECT AREA UPLIGHT (Look 01 — Gallery Diagonal) ─────────────────────────
+// ── PRAYER-DRIVEN PLINTH LIGHTING ───────────────────────────────────────────
+// Front RectAreaLight + rear SpotLight interpolate between looks per prayer.
+// Only these two lights change — everything else in the rig is untouched.
 RectAreaLightUniformsLib.init();
-{
-  const ral = new THREE.RectAreaLight(0xddddf8, 8, 6, 3);
-  ral.position.set(-2, -8, 4);
-  ral.lookAt(1, 0, 1.32);
-  scene.add(ral);
-}
-// RectAreaLight disabled — cube shader can't see it, replaced with SpotLight
-// {
-//   const ral2 = new THREE.RectAreaLight(0xddddf8, 24, 6, 3);
-//   ral2.position.set(3, 3, -1.5);
-//   ral2.lookAt(-1, -0.5, 1.5);
-//   scene.add(ral2);
-// }
-{
-  const backSpot = new THREE.SpotLight(0xddddf8, 24, 20, 0.5, 0.6, 1);
-  backSpot.position.set(3, 3, -1.5);
-  backSpot.target.position.set(-1, -0.5, 1.5);
-  scene.add(backSpot);
-  scene.add(backSpot.target);
+
+var _plinthRect = new THREE.RectAreaLight(0xddddf8, 8, 6, 3);
+_plinthRect.position.set(-2, -8, 4);
+_plinthRect.lookAt(1, 0, 1.32);
+scene.add(_plinthRect);
+
+var _plinthSpot = new THREE.SpotLight(0xddddf8, 24, 20, 0.5, 0.6, 1);
+_plinthSpot.position.set(3, 3, -1.5);
+_plinthSpot.target.position.set(-1, -0.5, 1.5);
+scene.add(_plinthSpot);
+scene.add(_plinthSpot.target);
+
+// Prayer → lighting look presets (raised to hit cube + upper plinth)
+var _plinthLooks = {
+  // Look 01 — Gallery Diagonal (Dhuhr + Asr)
+  gallery:   { rc: 0xddddf8, ri: 8,    rp: [-2,-8,4],       rt: [1,0,1.32],
+               sc: 0xddddf8, si: 24,   sp: [3,3,-1.5],      st: [-1,-0.5,1.5] },
+  // Look 03 — Ando Chapel (Tahajjud + Isha)
+  ando:      { rc: 0xd7e2ff, ri: 11.6, rp: [-2.7,-1.5,0.8], rt: [0.15,0.5,1.0],
+               sc: 0xd7e2ff, si: 12,   sp: [2.7,3,0.8],     st: [-0.15,-0.5,1.0] },
+  // Look 06 — Deakins Ember (Fajr)
+  deakins:   { rc: 0xFFC188, ri: 11.3, rp: [-3.5,-4,3.2],   rt: [0.65,1.0,1.35],
+               sc: 0x9AB8E8, si: 14,   sp: [2.8,3,-2.4],    st: [-0.15,-0.5,0.95] },
+  // Look 02 — Turrell Void (Dhuha)
+  turrell:   { rc: 0x9eb8ff, ri: 10.5, rp: [-3.2,-2,5.6],   rt: [0.2,1.0,1.0],
+               sc: 0xffb46e, si: 12,   sp: [2.6,3,2.7],     st: [-0.4,-0.5,1.2] },
+  // Look 04 — Mihrab Moonbeam (Maghrib)
+  mihrab:    { rc: 0xBFD4FF, ri: 12.9, rp: [-3.1,-1,1.6],   rt: [0.25,0.6,1.1],
+               sc: 0xFFB978, si: 10,   sp: [2.0,3,2.5],     st: [-0.2,-0.5,1.0] },
+};
+
+// Prayer name → look mapping
+var _prayerLookMap = {
+  'Qiyam':   'ando',
+  'Fajr':    'deakins',
+  'Sunrise': 'deakins',
+  'Dhuha':   'turrell',
+  'Dhuhr':   'gallery',
+  'Asr':     'gallery',
+  'Maghrib': 'mihrab',
+  'Isha':    'ando',
+};
+
+var _plinthLerpRate = 0.02; // smooth ~2s transition
+var _curPlinthLook = _plinthLooks.gallery; // start with gallery
+
+// Helper: hex to THREE.Color
+function _hexC(h) { return new THREE.Color(h); }
+
+// Called each frame in render loop to interpolate plinth lights
+var _plinthRectColor = new THREE.Color(0xddddf8);
+var _plinthSpotColor = new THREE.Color(0xddddf8);
+var _plinthRectPos = new THREE.Vector3(-2, -8, 4);
+var _plinthRectTarget = new THREE.Vector3(1, 0, 1.32);
+var _plinthSpotPos = new THREE.Vector3(3, 3, -1.5);
+var _plinthSpotTarget = new THREE.Vector3(-1, -0.5, 1.5);
+var _plinthRectIntensity = 8;
+var _plinthSpotIntensity = 24;
+
+var _lastPlinthPrayer = 'gallery'; // remember last active prayer's look
+function _updatePlinthLighting() {
+  var pName = window._swipePreviewPrayer || null;
+  if (pName && _prayerLookMap[pName]) _lastPlinthPrayer = _prayerLookMap[pName];
+  var lookKey = pName ? (_prayerLookMap[pName] || _lastPlinthPrayer) : _lastPlinthPrayer;
+  var target = _plinthLooks[lookKey] || _plinthLooks.gallery;
+  var lr = _plinthLerpRate;
+
+  // Lerp rect light
+  var tc = _hexC(target.rc);
+  _plinthRectColor.lerp(tc, lr);
+  _plinthRect.color.copy(_plinthRectColor);
+  _plinthRectIntensity += (target.ri - _plinthRectIntensity) * lr;
+  _plinthRect.intensity = _plinthRectIntensity;
+  _plinthRectPos.lerp(new THREE.Vector3(...target.rp), lr);
+  _plinthRect.position.copy(_plinthRectPos);
+  _plinthRectTarget.lerp(new THREE.Vector3(...target.rt), lr);
+  _plinthRect.lookAt(_plinthRectTarget);
+
+  // Lerp spot light
+  var tsc = _hexC(target.sc);
+  _plinthSpotColor.lerp(tsc, lr);
+  _plinthSpot.color.copy(_plinthSpotColor);
+  _plinthSpotIntensity += (target.si - _plinthSpotIntensity) * lr;
+  _plinthSpot.intensity = _plinthSpotIntensity;
+  _plinthSpotPos.lerp(new THREE.Vector3(...target.sp), lr);
+  _plinthSpot.position.copy(_plinthSpotPos);
+  _plinthSpotTarget.lerp(new THREE.Vector3(...target.st), lr);
+  _plinthSpot.target.position.copy(_plinthSpotTarget);
 }
 
 // ── PODIUM SCENE LIGHTS (no probes, no envMap, no reactive emissive) ──────────
@@ -1475,6 +1546,9 @@ function updatePrayerWindows(now) {
     window._swipePreviewPrayer = null;
   }
   if (u.uIntensity.value < 0.001 || _compassMode) _prayerDisc.visible = false;
+
+  // ── Plinth lighting interpolation (prayer-driven) ──
+  _updatePlinthLighting();
 
   // ── Next upcoming prayer disc (dim — anticipation) ──
   const nu = _nextDiscMat.uniforms;
