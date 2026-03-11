@@ -3518,6 +3518,7 @@ function _swipeGetCurrentIdx() {
   return 0;
 }
 
+window._swipeShowPreview = _swipeShowPreview;
 function _swipeShowPreview(idx) {
   if (!prayerSectors.length) return;
   var _sectorCount = prayerSectors.length || 8;
