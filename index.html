@@ -1116,8 +1116,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           return; // keep overlay visible in debug mode
         }
         setTimeout(function(){
-          // Strip hands, keep cube edges
-          if(svg) svg.querySelectorAll('path').forEach(function(p,i){ if(i>=5) p.remove(); });
+          // Keep all paths (edges + hands) — fade together
           // Remove text
           var tw=document.getElementById('splashTextWrap');
           if(tw) tw.remove();
@@ -4655,7 +4654,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=522';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=523';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
