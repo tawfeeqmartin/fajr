@@ -741,7 +741,23 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
   <script>
   (function(){
-    window._splashActive = true;
+    // Skip full splash on repeat visits — edge pulse only
+    var _splashSeen = false;
+    try { _splashSeen = localStorage.getItem('agot_splash_seen') === '1'; } catch(e){}
+    window._skipSplash = _splashSeen;
+    if (_splashSeen) {
+      // Hide text + background immediately but keep splash div for SVG edge overlay
+      var _sp = document.getElementById('splash');
+      if (_sp) {
+        _sp.style.background = 'transparent';
+        _sp.style.pointerEvents = 'none';
+      }
+      var _tw = document.getElementById('splashTextWrap');
+      if (_tw) _tw.style.display = 'none';
+      window._splashActive = false;
+    } else {
+      window._splashActive = true;
+    }
     try{var _ba=new Audio('audio/bismillah.mp3');_ba.volume=0.6;var _bp=_ba.play();if(_bp&&_bp.catch)_bp.catch(function(){});}catch(e){}
     // Camera params (MUST match glass-cube-clock.js exactly)
     var camPos=[0.2,9.7,15.0], fov=35, lookAt=[0,-0.8,1.0];
@@ -1108,6 +1124,37 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       var elapsed=performance.now()-cycleStart;
       if(!_svgDrawStarted && elapsed>=5000) startSvgDraw();
       var animDone=elapsed>=ANIM_DUR;
+      // Repeat visit: skip splash animation, jump straight to edge overlay setup
+      if(window._skipSplash && window._sceneReady){
+        splash.style.opacity='0';
+        splash.style.transition='none';
+        window._splashActive = false;
+        // Jump to edge overlay setup (after the setTimeout/HOLD block below)
+        // Set up SVG edges for pulse
+        setTimeout(function(){
+          var _savedStyles = [];
+          if(svg) svg.querySelectorAll('path').forEach(function(p){ _savedStyles.push(p.getAttribute('style')); });
+          window._resizeEdgeOverlay = function(){
+            var c = document.querySelector('canvas');
+            if(!c || !svg) return;
+            var r = c.getBoundingClientRect();
+            var cw = Math.round(r.width), ch = Math.round(r.height);
+            splash.style.width=cw+'px'; splash.style.height=ch+'px';
+            splash.style.top=Math.round(r.top)+'px'; splash.style.left=Math.round(r.left)+'px';
+            svg.setAttribute('viewBox','0 0 '+cw+' '+ch);
+            svg.setAttribute('width',cw); svg.setAttribute('height',ch);
+          };
+          if(window._resizeEdgeOverlay) window._resizeEdgeOverlay();
+          document.addEventListener('visibilitychange', function(){
+            if(!document.hidden && window._resizeEdgeOverlay) window._resizeEdgeOverlay();
+          });
+          // Fire edge pulse
+          setTimeout(function(){
+            if(typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
+          }, 300);
+        }, 100);
+        return;
+      }
       if(window._sceneReady && animDone){
         // Debug mode: freeze splash as semi-transparent overlay and show live telemetry JSON
         if(isSplashDebug){
@@ -1132,6 +1179,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           setTimeout(function(){
             window._splashActive = false;
             _svgDrawStarted=false;
+            try { localStorage.setItem('agot_splash_seen', '1'); } catch(e){}
             // Minute pulse: edges hidden, redraw at :00 each minute
             splash.style.opacity='0';
             splash.style.transition='opacity 0.6s ease';
@@ -1174,7 +1222,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
             document.addEventListener('visibilitychange', function(){
               if(!document.hidden && window._resizeEdgeOverlay) window._resizeEdgeOverlay();
             });
-            window._triggerEdgePulse = function(){ return; // disabled
+            window._triggerEdgePulse = function(){ // v548: re-enabled for repeat visits
                 svg.querySelectorAll('path').forEach(function(p){
                   var da = p.getAttribute('data-dash')||p.style.strokeDasharray;
                   p.style.animation='none';
@@ -4709,7 +4757,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=547';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=548';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
