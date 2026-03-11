@@ -2399,9 +2399,18 @@ function updateNavClock(){
       window._qiyamSwipeDuaShown = true;
       if (typeof _showQiyamDua === 'function') _showQiyamDua();
     }
+    // Show hadith overlay when swiping to Maghrib during last 10 nights
+    if (preview === 'Maghrib' && _isLastTenNights && !window._maghribHadithShown) {
+      window._maghribHadithShown = true;
+      if (typeof _showMaghribHadith === 'function') _showMaghribHadith();
+    }
     if (preview !== 'Qiyam') {
       window._qiyamSwipeDuaShown = false;
       if (typeof _hideQiyamDua === 'function') _hideQiyamDua();
+    }
+    if (preview !== 'Maghrib') {
+      window._maghribHadithShown = false;
+      if (typeof _hideMaghribHadith === 'function') _hideMaghribHadith();
     }
   }
 
@@ -2723,6 +2732,41 @@ function _checkMaghribHadith(){
   }catch(e){}
 }
 function _nightOrdinal(n){ return n===1?'st':n===2?'nd':n===3?'rd':n%10===1&&n!==11?'st':n%10===2&&n!==12?'nd':n%10===3&&n!==13?'rd':'th'; }
+
+// ── Maghrib Hadith Overlay ──
+var _maghribHadithEl = null;
+var _maghribHadithTimer = null;
+function _showMaghribHadith(){
+  if(_maghribHadithEl) return;
+  var nightNum = window._islamicNight || 21;
+  var idx = (nightNum - 21) % _lastTenHadiths.length;
+  var h = _lastTenHadiths[idx];
+  _maghribHadithEl = document.createElement('div');
+  _maghribHadithEl.id = 'maghribHadith';
+  _maghribHadithEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;background:rgba(13,13,18,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
+  _maghribHadithEl.onclick = function(){ _hideMaghribHadith(); };
+  _maghribHadithEl.innerHTML =
+    '<div style="text-align:center;max-width:340px;padding:0 24px">' +
+      '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan</p>' +
+      '<p style="font-size:.95rem;font-weight:300;line-height:1.7;color:rgba(232,228,220,.7);letter-spacing:.01em;font-style:italic">' +
+        '\u201C' + h.text + '\u201D' +
+      '</p>' +
+      '<p style="font-size:.72rem;font-weight:300;color:rgba(232,228,220,.3);margin-top:1rem;letter-spacing:.04em">' +
+        '\u2014 ' + h.ref +
+      '</p>' +
+    '</div>';
+  document.body.appendChild(_maghribHadithEl);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ _maghribHadithEl.style.opacity='1'; }); });
+  _maghribHadithTimer = setTimeout(_hideMaghribHadith, 15000);
+}
+function _hideMaghribHadith(){
+  if(_maghribHadithTimer){ clearTimeout(_maghribHadithTimer); _maghribHadithTimer=null; }
+  if(_maghribHadithEl){
+    _maghribHadithEl.style.opacity='0';
+    var el=_maghribHadithEl; _maghribHadithEl=null;
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },700);
+  }
+}
 
 // ── Odd Night Surah Al-Qadr Button ──
 var _qadrBtnEl = null;
@@ -4434,7 +4478,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=508';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=509';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
