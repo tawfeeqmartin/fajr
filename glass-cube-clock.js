@@ -299,6 +299,7 @@ scene.add(prayerSlash, prayerSlash.target);
 const _prayerWashColor = new THREE.Color(0x111122);
 const _prayerRimColor = new THREE.Color(0x111122);
 const _prayerSlashColor = new THREE.Color(0x111122);
+const _backLightColor = new THREE.Color(0x4040a0); // v542: prayer-reactive back light
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
 let _prayerSlashIntensity = 0;
@@ -2164,6 +2165,9 @@ document.addEventListener('visibilitychange', function() {
     const _prSlash = new THREE.Color(_activePrayer.color);
     _prayerSlashColor.lerp(_prSlash, _prLerp);
     _prayerSlashIntensity += (PRAYER_SLASH_MAX - _prayerSlashIntensity) * _prLerp;
+    // v542: back light shifts to prayer color — desaturated 50% toward base blue for atmosphere
+    const _prBack = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(0x4040a0), 0.5);
+    _backLightColor.lerp(_prBack, _prLerp);
   } else {
     // No active prayer or compass mode: fade to zero
     _prayerWashColor.lerp(new THREE.Color(0x111122), _prLerp);
@@ -2172,6 +2176,8 @@ document.addEventListener('visibilitychange', function() {
     _prayerWashIntensity += (0 - _prayerWashIntensity) * _prLerp;
     _prayerRimIntensity += (0 - _prayerRimIntensity) * _prLerp;
     _prayerSlashIntensity += (0 - _prayerSlashIntensity) * _prLerp;
+    // v542: back light returns to default blue
+    _backLightColor.lerp(new THREE.Color(0x4040a0), _prLerp);
   }
   prayerWash.color.copy(_prayerWashColor);
   prayerWash.intensity = _prayerWashIntensity;
@@ -2179,6 +2185,7 @@ document.addEventListener('visibilitychange', function() {
   prayerRim.intensity = _prayerRimIntensity;
   prayerSlash.color.copy(_prayerSlashColor);
   prayerSlash.intensity = _prayerSlashIntensity;
+  back.color.copy(_backLightColor); // v542: prayer-reactive back light
 
   // ── Prayer PointLight glow at podium base (Approach B, Chris v7) ──────────
   if (_activePrayer && !_compassMode) {
