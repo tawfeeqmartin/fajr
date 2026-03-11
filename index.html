@@ -2701,7 +2701,7 @@ function _showQiyamDua(){
   _qiyamDuaEl.id = 'qiyamDua';
   _qiyamDuaEl.style.cssText = 'position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .6s ease;cursor:pointer';
   _qiyamDuaEl.innerHTML =
-    '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem;background:rgba(13,13,18,.75);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border-radius:20px;border:1px solid rgba(232,228,220,.06)">' +
+    '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem">' +
       '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">The Last Third</p>' +
       '<p style="font-size:1.6rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1.25rem">' +
         '\u0627\u0644\u0644\u0651\u064E\u0647\u064F\u0645\u0651\u064E \u0625\u0650\u0646\u0651\u064E\u0643\u064E \u0639\u064E\u0641\u064F\u0648\u0651\u064C \u062A\u064F\u062D\u0650\u0628\u0651\u064F \u0627\u0644\u0639\u064E\u0641\u0652\u0648\u064E \u0641\u064E\u0627\u0639\u0652\u0641\u064F \u0639\u064E\u0646\u0651\u0650\u064A' +
@@ -4278,7 +4278,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=500';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=501';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
