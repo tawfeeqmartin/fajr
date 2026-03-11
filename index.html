@@ -1079,7 +1079,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
     }
 
     // Animation + lifecycle
-    var ANIM_DUR=7000, HOLD=200, cycleStart=performance.now();
+    var ANIM_DUR=7000, HOLD=0, cycleStart=performance.now();
     function resetAnim(){
       if(!svg) return;
       _svgDrawStarted=false;
@@ -4657,7 +4657,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=524';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=525';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
