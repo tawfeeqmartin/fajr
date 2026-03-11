@@ -158,7 +158,7 @@ window.addEventListener('orientationchange', function() {
 
 // BACKLIGHT — from behind-right. Illuminates the scene behind the cube so the
 // FBO captures bright content → glass refracts light and looks transparent/glowing.
-const back = new THREE.SpotLight(0x4040a0, 30); // v543: 50→30, let prayer colors breathe
+const back = new THREE.SpotLight(0x4040a0, 50);
 back.position.set(3.0, 3.0, -5.5);
 back.target.position.set(0, 0.5, 0);
 back.angle = 0.70; back.penumbra = 0.85; back.decay = 1.1;
@@ -299,7 +299,6 @@ scene.add(prayerSlash, prayerSlash.target);
 const _prayerWashColor = new THREE.Color(0x111122);
 const _prayerRimColor = new THREE.Color(0x111122);
 const _prayerSlashColor = new THREE.Color(0x111122);
-const _backLightColor = new THREE.Color(0x4040a0); // v542: prayer-reactive back light
 let _prayerWashIntensity = 0;
 let _prayerRimIntensity = 0;
 let _prayerSlashIntensity = 0;
@@ -505,14 +504,6 @@ const dichroicFrag = `
   uniform float     uInternalGlow;
   // CubeEnvMap removed — no irradiance probes
 
-  // ── LTC RectAreaLight uniforms ────────────────────────────────────────────
-  uniform sampler2D ltc_1;     // LTC matrix LUT (64×64 RGBA half-float)
-  uniform sampler2D ltc_2;     // Fresnel/energy LUT (64×64 RGBA half-float)
-  uniform vec3      uRect0Pos;
-  uniform vec3      uRect0HW;
-  uniform vec3      uRect0HH;
-  uniform vec3      uRect0Color;
-
   varying vec3 vViewNormal;
   varying vec3 vViewDir;
   varying vec3 vLocalPos;
@@ -522,87 +513,6 @@ const dichroicFrag = `
   vec3 thinFilm(float cosT, float t) {
     float p = 6.28318 * 5.0 * cosT + t * 0.25;
     return vec3(0.5+0.5*cos(p), 0.5+0.5*cos(p-2.094), 0.5+0.5*cos(p+2.094));
-  }
-
-  // ── LTC Math — Linearly Transformed Cosines (Heitz et al. 2016) ──────────
-  // Self-contained — no Three.js chunk dependencies.
-
-  vec2 ltcUv(vec3 N, vec3 V, float roughness) {
-    const float LUT_SIZE  = 64.0;
-    const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;
-    const float LUT_BIAS  = 0.5 / LUT_SIZE;
-    float dotNV = clamp(dot(N, V), 0.0, 1.0);
-    vec2 uv = vec2(roughness, sqrt(1.0 - dotNV));
-    return uv * LUT_SCALE + LUT_BIAS;
-  }
-
-  float ltcClippedSphere(vec3 f) {
-    float l = length(f);
-    return max((l * l + f.z) / (l + 1.0), 0.0);
-  }
-
-  vec3 ltcEdgeVector(vec3 v1, vec3 v2) {
-    float x = dot(v1, v2);
-    float y = abs(x);
-    float a = 0.8543985 + (0.4965155 + 0.0145206 * y) * y;
-    float b = 3.4175940 + (4.1616724 + y) * y;
-    float v = a / b;
-    float theta_sintheta = (x > 0.0)
-        ? v
-        : 0.5 * inversesqrt(max(1.0 - x * x, 1e-7)) - v;
-    return cross(v1, v2) * theta_sintheta;
-  }
-
-  float ltcEvaluate(vec3 N, vec3 V, vec3 P, mat3 mInv, vec3 rectCoords[4]) {
-    // Back-face cull
-    vec3 bv1 = rectCoords[1] - rectCoords[0];
-    vec3 bv2 = rectCoords[3] - rectCoords[0];
-    if (dot(cross(bv1, bv2), P - rectCoords[0]) < 0.0) return 0.0;
-
-    // Build ONB around N, transform rect corners into LTC space
-    vec3 T1 = normalize(V - N * dot(V, N));
-    vec3 T2 = -cross(N, T1);
-    mat3 mat = mInv * transpose(mat3(T1, T2, N));
-
-    vec3 c0 = normalize(mat * (rectCoords[0] - P));
-    vec3 c1 = normalize(mat * (rectCoords[1] - P));
-    vec3 c2 = normalize(mat * (rectCoords[2] - P));
-    vec3 c3 = normalize(mat * (rectCoords[3] - P));
-
-    vec3 vff = ltcEdgeVector(c0, c1)
-             + ltcEdgeVector(c1, c2)
-             + ltcEdgeVector(c2, c3)
-             + ltcEdgeVector(c3, c0);
-    return ltcClippedSphere(vff);
-  }
-
-  // Evaluate one RectAreaLight's LTC specular contribution on glass.
-  // Takes flat vec3 args (avoids GLSL struct uniform limitations).
-  vec3 rectLtcContrib(vec3 lpos, vec3 lhw, vec3 lhh, vec3 lcol,
-                      vec3 worldPos, vec3 N, vec3 V, float roughness) {
-    // Build the four rect corners in world space
-    vec3 rectCoords[4];
-    rectCoords[0] = lpos + lhw - lhh;
-    rectCoords[1] = lpos - lhw - lhh;
-    rectCoords[2] = lpos - lhw + lhh;
-    rectCoords[3] = lpos + lhw + lhh;
-
-    vec2 uv  = ltcUv(N, V, roughness);
-    vec4 t1  = texture2D(ltc_1, uv);
-    vec4 t2  = texture2D(ltc_2, uv);
-
-    mat3 mInv = mat3(
-      vec3(t1.x, 0.0, t1.y),
-      vec3(0.0,  1.0, 0.0),
-      vec3(t1.z, 0.0, t1.w)
-    );
-
-    // Glass F0 ≈ 0.04 (dielectric at normal incidence)
-    vec3 F0      = vec3(0.04);
-    vec3 fresnel = F0 * t2.x + (1.0 - F0) * t2.y;
-
-    float spec = ltcEvaluate(N, V, worldPos, mInv, rectCoords);
-    return lcol * fresnel * spec;
   }
 
   void main() {
@@ -715,19 +625,6 @@ const dichroicFrag = `
     float spec = pow(max(dot(Nw, Hw), 0.0), 256.0);
     col += vec3(1.00, 0.97, 0.95) * uSpecIntensity * spec * fresnelW;
 
-    // ── LTC RectAreaLight specular contribution ───────────────────────────
-    // Physically correct soft rectangular highlight via Linearly Transformed
-    // Cosines. Roughness 0.08 = smooth glass (sharp but area-shaped).
-    // Takes on dichroic iridescence at band intersections.
-    float glassRoughness = 0.08;
-    vec3 rectSpec = rectLtcContrib(uRect0Pos, uRect0HW, uRect0HH, uRect0Color,
-                                   vWorldPos, Nw, Vw, glassRoughness);
-    // Fresnel-weight: area light highlight strongest at grazing angles
-    rectSpec *= (0.3 + 0.7 * fresnelW);
-    // Subtle dichroic color bleed into the rect highlight
-    rectSpec  = mix(rectSpec, rectSpec * irid, diagF * 0.35);
-    col += rectSpec;
-
     // ── Internal glow (prayer-time animation only, off by default) ──
     float glowFresnel = pow(1.0 - cosT, 2.5);
     vec3 glowCol = mix(vec3(0.85, 0.92, 1.00), vec3(0.70, 0.85, 1.00), glowFresnel);
@@ -775,13 +672,6 @@ const cubeMat = new THREE.ShaderMaterial({
     uSpecIntensity: { value: 2.8 },
     uInternalGlow:  { value: 0.0 }, // crystal-fix: 0.24→0.0 — warm amber emission = jello/subsurface. Crystal is cold.
     // CubeEnvMap uniforms removed — no probes
-    // ── LTC RectAreaLight (wired after RectAreaLightUniformsLib.init()) ──
-    ltc_1:       { value: null },
-    ltc_2:       { value: null },
-    uRect0Pos:   { value: new THREE.Vector3() },
-    uRect0HW:    { value: new THREE.Vector3() },
-    uRect0HH:    { value: new THREE.Vector3() },
-    uRect0Color: { value: new THREE.Color() },
   },
   vertexShader: dichroicVert,
   fragmentShader: dichroicFrag,
@@ -855,30 +745,6 @@ scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotate
 // Front RectAreaLight + rear SpotLight interpolate between looks per prayer.
 // Only these two lights change — everything else in the rig is untouched.
 RectAreaLightUniformsLib.init();
-
-// Wire LTC lookup textures into cubeMat — uses half-float for max mobile compat.
-// LTC_HALF_1/2 work on iOS 15+ WebGL 2 (A12+ with LinearFilter support).
-cubeMat.uniforms.ltc_1.value = THREE.UniformsLib.LTC_HALF_1;
-cubeMat.uniforms.ltc_2.value = THREE.UniformsLib.LTC_HALF_2;
-
-// ── Per-frame rect light → cubeMat uniform updater ────────────────────────
-// halfWidth/halfHeight are world-space vectors: local axis * half-dimension,
-// rotated by the light's matrixWorld. Must be recomputed each frame because
-// the plinth lights interpolate position and lookAt target continuously.
-var _rlu_pos = new THREE.Vector3();
-var _rlu_hw  = new THREE.Vector3();
-var _rlu_hh  = new THREE.Vector3();
-function _updateRectLightUniform(light) {
-  _rlu_pos.setFromMatrixPosition(light.matrixWorld);
-  // local X * width/2, rotated to world — sub position to get direction vector
-  _rlu_hw.set(light.width / 2, 0, 0).applyMatrix4(light.matrixWorld).sub(_rlu_pos);
-  // local Y * height/2, rotated to world
-  _rlu_hh.set(0, light.height / 2, 0).applyMatrix4(light.matrixWorld).sub(_rlu_pos);
-  cubeMat.uniforms.uRect0Pos.value.copy(_rlu_pos);
-  cubeMat.uniforms.uRect0HW.value.copy(_rlu_hw);
-  cubeMat.uniforms.uRect0HH.value.copy(_rlu_hh);
-  cubeMat.uniforms.uRect0Color.value.copy(light.color).multiplyScalar(light.intensity);
-}
 
 var _plinthRect = new THREE.RectAreaLight(0xddddf8, 8, 6, 3);
 _plinthRect.position.set(-2, -8, 4);
@@ -2165,9 +2031,6 @@ document.addEventListener('visibilitychange', function() {
     const _prSlash = new THREE.Color(_activePrayer.color);
     _prayerSlashColor.lerp(_prSlash, _prLerp);
     _prayerSlashIntensity += (PRAYER_SLASH_MAX - _prayerSlashIntensity) * _prLerp;
-    // v542: back light shifts to prayer color — desaturated 50% toward base blue for atmosphere
-    const _prBack = new THREE.Color(_activePrayer.color).lerp(new THREE.Color(0x4040a0), 0.3); // v543: 70% prayer color, 30% base blue
-    _backLightColor.lerp(_prBack, _prLerp);
   } else {
     // No active prayer or compass mode: fade to zero
     _prayerWashColor.lerp(new THREE.Color(0x111122), _prLerp);
@@ -2176,8 +2039,6 @@ document.addEventListener('visibilitychange', function() {
     _prayerWashIntensity += (0 - _prayerWashIntensity) * _prLerp;
     _prayerRimIntensity += (0 - _prayerRimIntensity) * _prLerp;
     _prayerSlashIntensity += (0 - _prayerSlashIntensity) * _prLerp;
-    // v542: back light returns to default blue
-    _backLightColor.lerp(new THREE.Color(0x4040a0), _prLerp);
   }
   prayerWash.color.copy(_prayerWashColor);
   prayerWash.intensity = _prayerWashIntensity;
@@ -2185,7 +2046,6 @@ document.addEventListener('visibilitychange', function() {
   prayerRim.intensity = _prayerRimIntensity;
   prayerSlash.color.copy(_prayerSlashColor);
   prayerSlash.intensity = _prayerSlashIntensity;
-  back.color.copy(_backLightColor); // v542: prayer-reactive back light
 
   // ── Prayer PointLight glow at podium base (Approach B, Chris v7) ──────────
   if (_activePrayer && !_compassMode) {
@@ -2229,9 +2089,6 @@ document.addEventListener('visibilitychange', function() {
   prayerSlash.visible = true;
   prayerGlow.visible = true;
   cubeMat.uniforms.uScene.value = fboRT.texture;
-
-  // Update LTC rect light uniforms — matrixWorld is current after FBO render pass
-  _updateRectLightUniform(_plinthRect);
 
   renderer.render(scene, camera);
 
