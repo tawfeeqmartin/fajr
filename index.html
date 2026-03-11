@@ -2394,6 +2394,12 @@ function updateNavClock(){
   if (preview) {
     window._swipePreviewPrayer = preview;
     window._lastSwipePreviewPrayer = preview;
+    // Show dua overlay when swiping to Qiyam during last 10 nights
+    if (preview === 'Qiyam' && _isLastTenNights && !window._qiyamSwipeDuaShown) {
+      window._qiyamSwipeDuaShown = true;
+      if (typeof _showQiyamDua === 'function') _showQiyamDua();
+    }
+    if (preview !== 'Qiyam') window._qiyamSwipeDuaShown = false;
   }
 
   // keep prayer bars in lockstep with countdown color + boundary timing
@@ -4288,7 +4294,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=503';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=504';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
