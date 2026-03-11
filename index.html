@@ -2856,23 +2856,28 @@ function _showQiyamDua(){
   _qiyamDuaEl.innerHTML =
     '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem">' +
       '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + (window._inLastThird ? 'The Last Third' : 'The Last Ten Nights') + '</p>' +
-      '<p style="font-size:1.6rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1.25rem">' +
-        '\u0627\u0644\u0644\u0651\u064E\u0647\u064F\u0645\u0651\u064E \u0625\u0650\u0646\u0651\u064E\u0643\u064E \u0639\u064E\u0641\u064F\u0648\u0651\u064C \u062A\u064F\u062D\u0650\u0628\u0651\u064F \u0627\u0644\u0639\u064E\u0641\u0652\u0648\u064E \u0641\u064E\u0627\u0639\u0652\u0641\u064F \u0639\u064E\u0646\u0651\u0650\u064A' +
+      '<p style="font-size:1.1rem;font-weight:400;line-height:1.6;color:rgba(232,228,220,.7);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:.75rem">' +
+        '\u0625\u0650\u0646\u0651\u064E\u0627 \u0623\u064E\u0646\u0632\u064E\u0644\u0652\u0646\u064E\u0627\u0647\u064F \u0641\u0650\u064A \u0644\u064E\u064A\u0652\u0644\u064E\u0629\u0650 \u0627\u0644\u0652\u0642\u064E\u062F\u0652\u0631\u0650' +
       '</p>' +
-      '<p style="font-size:.85rem;font-weight:300;font-style:italic;color:rgba(232,228,220,.4);margin-bottom:.75rem;letter-spacing:.02em">' +
-        'Allahumma innaka \u2018afuwwun tu\u1E25ibbul \u2018afwa fa\u2019fu \u2018anni' +
+      '<p style="font-size:.78rem;font-weight:300;color:rgba(232,228,220,.4);margin-bottom:.5rem;font-style:italic">' +
+        'Indeed, We sent it down on the Night of Decree' +
       '</p>' +
-      '<p style="font-size:.85rem;font-weight:300;color:rgba(232,228,220,.55);letter-spacing:.01em">' +
-        '\u201CO Allah, You are Most Forgiving<br>and You love forgiveness,<br>so forgive me\u201D' +
+      '<button id="qadrPlayBtn" onclick="event.stopPropagation();_playQadr(this)" style="margin-bottom:2rem;background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Surah Al-Qadr' +
+      '</button>' +
+      '<div style="width:60px;height:1px;background:rgba(232,228,220,.1);margin:0 auto 2rem"></div>' +
+      '<p style="font-size:1.4rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1rem">' +
+        '\u0627\u0644\u0644\u0651\u064E\u0647\u064F\u0645\u0651\u064E \u0625\u0650\u0646\u0651\u064E\u0643\u064E \u0639\u064E\u0641\u064F\u0648\u0651\u064C \u0643\u064E\u0631\u0650\u064A\u0645\u064C \u062A\u064F\u062D\u0650\u0628\u0651\u064F \u0627\u0644\u0639\u064E\u0641\u0652\u0648\u064E \u0641\u064E\u0627\u0639\u0652\u0641\u064F \u0639\u064E\u0646\u0651\u064E\u0627 \u0628\u0650\u0631\u064E\u062D\u0652\u0645\u064E\u062A\u0650\u0643\u064E \u064A\u064E\u0627 \u0623\u064E\u0631\u0652\u062D\u064E\u0645\u064E \u0627\u0644\u0631\u0651\u064E\u0627\u062D\u0650\u0645\u0650\u064A\u0646\u064E' +
       '</p>' +
-      '<div style="display:flex;gap:12px;justify-content:center;margin-top:1.5rem">' +
-        '<button id="duaPlayBtn" onclick="event.stopPropagation();_playDuaBtn(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua' +
-        '</button>' +
-        '<button id="qadrPlayBtn" onclick="event.stopPropagation();_playQadr(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Surah Al-Qadr' +
-        '</button>' +
-      '</div>' +
+      '<p style="font-size:.78rem;font-weight:300;font-style:italic;color:rgba(232,228,220,.4);margin-bottom:.6rem;letter-spacing:.02em">' +
+        'Allahumma innaka \u2018afuwwun karim, tu\u1E25ibbul \u2018afwa, fa\u2019fu \u2018anna bi ra\u1E25matika ya ar\u1E25am ar-ra\u1E25imeen' +
+      '</p>' +
+      '<p style="font-size:.82rem;font-weight:300;color:rgba(232,228,220,.5);letter-spacing:.01em;margin-bottom:1rem">' +
+        '\u201CO Allah, You are Most Forgiving, Most Generous,<br>You love forgiveness, so forgive us<br>by Your mercy, O Most Merciful\u201D' +
+      '</p>' +
+      '<button id="duaPlayBtn" onclick="event.stopPropagation();_playDuaBtn(this)" style="background:none;border:1px solid rgba(232,228,220,.15);border-radius:100px;padding:6px 16px;color:rgba(232,228,220,.6);font-family:var(--font);font-size:.78rem;font-weight:300;cursor:pointer;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px">' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Dua' +
+      '</button>' +
     '</div>';
   _qiyamDuaEl.onclick = function(){ _hideQiyamDua(); };
   document.body.appendChild(_qiyamDuaEl);
@@ -4488,7 +4493,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=513';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=514';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
