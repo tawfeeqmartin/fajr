@@ -3542,6 +3542,22 @@ function _swipeShowPreview(idx) {
     window._swipeNightNum = window._islamicNight || 0;
   }
 
+  // Update header Hijri display for swipe preview
+  var _hijriEl = document.getElementById('hijriTop');
+  if (_hijriEl && window._isRamadan && window._swipeNightNum > 0) {
+    var _sn = window._swipeNightNum;
+    var _ord = _sn===1?'st':_sn===2?'nd':_sn===3?'rd':_sn%10===1&&_sn!==11?'st':_sn%10===2&&_sn!==12?'nd':_sn%10===3&&_sn!==13?'rd':'th';
+    // If preview is at or past Maghrib → show night format, otherwise day format
+    if (_stepsForward >= _stepsToMaghrib && _stepsToMaghrib > 0 && _nowSec < _mSec) {
+      _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _sn + _ord + ' Night of Ramadan  ·  رمضان</span>';
+    } else if (_nowSec >= _mSec) {
+      _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _sn + _ord + ' Night of Ramadan  ·  رمضان</span>';
+    } else {
+      var _dayNum = window._hijriDay || 0;
+      _hijriEl.innerHTML = '<span style="color:#e0e0e0">' + _dayNum + ' Ramadan 1447 AH  ·  رمضان</span>';
+    }
+  }
+
   // Show chrome during prayer preview
   document.body.classList.remove('chrome-hidden');
   if (typeof window._resetChromeTimer === 'function') window._resetChromeTimer();
@@ -3632,6 +3648,8 @@ function _swipeRevert(instant) {
   _swipeTimeOverride = null;
   _swipeTimeTarget = null;
   window._swipeNightNum = 0;
+  // Restore header Hijri to live value
+  if (typeof window._restoreHijriHeader === 'function') window._restoreHijriHeader();
   clearTimeout(_swipeRevertTimer);
   _swipeCamTarget = 0; // release camera — will orbit back in sync with tawaf
   if (!instant) _swipeTawafPhase = 1.0; // CCW sweep only on natural revert, not mode switch
