@@ -3902,6 +3902,9 @@ function _swipeShowPreview(idx) {
   // Hide current-prayer label during swipe (swipe label takes over)
   if (_currentPrayerLabelEl) { _currentPrayerLabelEl.style.opacity = '0'; }
   clearTimeout(_currentPrayerLabelTimer);
+  // Hide qadr button during swipe to avoid overlap
+  var _qadrBtn = document.getElementById('qadrFloatBtn');
+  if (_qadrBtn) _qadrBtn.style.opacity = '0';
 
   // Update dots to match swipe position
   _updatePrayerDots(idx);
@@ -3969,8 +3972,10 @@ function _swipeRevert(instant) {
     _swipeLabelEl.style.display = 'none';
     _swipeLabelEl.style.opacity = '0';
   }
-  // Restore current prayer label + dots
+  // Restore current prayer label + dots + qadr button
   _showCurrentPrayerLabel();
+  var _qadrBtn = document.getElementById('qadrFloatBtn');
+  if (_qadrBtn) _qadrBtn.style.opacity = '';
   // Remove pill fill + tint
   // Glow bar reverts to current prayer color via _displayPrayerTimes re-render
   // Reset prayer bar highlights immediately
