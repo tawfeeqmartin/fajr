@@ -1338,6 +1338,11 @@ window._clockToggleCompass = function(on) {
     if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0.5; }
     // Hide prayer window discs
     _prayerDisc.visible = false; _nextDisc.visible = false; _thirdDisc.visible = false;
+    // Zero out prayer accent lights for clean compass look
+    prayerWash.intensity = 0;
+    prayerRim.intensity = 0;
+    prayerSlash.intensity = 0;
+    prayerGlow.intensity = 0;
   } else {
     // Restore clock hands
     clockRays[0].mesh.children[0].material.uniforms.op.value = 0.88;
@@ -2229,12 +2234,14 @@ document.addEventListener('visibilitychange', function() {
     _prayerRimIntensity += (0 - _prayerRimIntensity) * _prLerp;
     _prayerSlashIntensity += (0 - _prayerSlashIntensity) * _prLerp;
   }
-  prayerWash.color.copy(_prayerWashColor);
-  prayerWash.intensity = _prayerWashIntensity;
-  prayerRim.color.copy(_prayerRimColor);
-  prayerRim.intensity = _prayerRimIntensity;
-  prayerSlash.color.copy(_prayerSlashColor);
-  prayerSlash.intensity = _prayerSlashIntensity;
+  if (!_compassMode) {
+    prayerWash.color.copy(_prayerWashColor);
+    prayerWash.intensity = _prayerWashIntensity;
+    prayerRim.color.copy(_prayerRimColor);
+    prayerRim.intensity = _prayerRimIntensity;
+    prayerSlash.color.copy(_prayerSlashColor);
+    prayerSlash.intensity = _prayerSlashIntensity;
+  }
 
   // ── Prayer PointLight glow at podium base (Approach B, Chris v7) ──────────
   if (_activePrayer && !_compassMode) {
