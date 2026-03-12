@@ -822,6 +822,7 @@ const podiumMesh = new THREE.Mesh(
 podiumMesh.position.y = -PODIUM_H / 2 - 0.03; // top face just below hand beams (y≈0.008) — whisper gap
 podiumMesh.receiveShadow = true;
 podiumMesh.castShadow = true;
+podiumMesh.visible = false; // hidden until textures load
 scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotates 45°
 
 // ── CONCRETE TEXTURE (Look 01 — Gallery Diagonal) ──────────────────────────
@@ -845,6 +846,7 @@ scene.add(podiumMesh); // axis-aligned (0°) — sides visible while cube rotate
           mat.roughnessMap = rm;
           mat.needsUpdate = true;
         });
+        podiumMesh.visible = true; // show once all textures applied
       });
     });
   });
