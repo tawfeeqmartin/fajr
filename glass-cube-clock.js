@@ -214,7 +214,7 @@ scene.add(rim, rim.target);
 // The FBO shader samples the scene behind the glass — without a bright source
 // there, the refracted RGB is dark and no rainbow is visible. This gives it
 // bright content to bend, producing visible chromatic dispersion.
-const cubeSun = new THREE.PointLight(0xe8f2ff, 30, 14); // v577: 50→30 — kill podium hotspot, dichroic compensates via FBO
+const cubeSun = new THREE.PointLight(0xe8f2ff, 10, 14); // v580: 30→10 — aggressive hotspot kill
 cubeSun.position.set(0, 0.2, -2.8);
 scene.add(cubeSun);
 
@@ -954,7 +954,7 @@ var _backLerpColor = new THREE.Color(0x4040a0);
 var _backLerpIntensity = 50;
 var _cubeBackLerpColor = new THREE.Color(0xffeedd);
 var _cubeBackLerpIntensity = 7;
-var _cubeSunLerpIntensity = 30;
+var _cubeSunLerpIntensity = 10;
 
 var _lastPlinthPrayer = 'gallery'; // remember last active prayer's look
 function _updatePlinthLighting() {
