@@ -1087,13 +1087,7 @@ window._fboRT = fboRT;
 window._cubeMesh = cubeMesh;
 window._cubeMat = cubeMat;
 window._prayerLights = { wash: prayerWash, rim: prayerRim, slash: prayerSlash, glow: prayerGlow };
-window._qiblaFanDisc = null;
-window._qiblaBloomDisc = null;
-window._qiblaEntryDisc = null;
-window._shaftMat = null;
-window._fboRT = null;
-window._cubeMesh = null;
-window._cubeMat = null;
+// FBO/cube/shaft exposed after creation (lines above)
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
