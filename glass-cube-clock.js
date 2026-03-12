@@ -807,7 +807,7 @@ const podiumBase = { roughness: 0.35, metalness: 0.06, clearcoat: 0.5, clearcoat
 const podiumMats = [
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x606098, emissiveIntensity: 3.5 }), // +x right — KEY face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141424, emissiveIntensity: 0.7 }), // -x left — edge hint
-  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x141428, emissiveIntensity: 0.8, roughness: 0.55, clearcoat: 0.15, clearcoatRoughness: 0.20 }), // +y top — roughened for sun spot diffuse read
+  new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x080810, emissiveIntensity: 0.3, roughness: 0.75, clearcoat: 0.08, clearcoatRoughness: 0.30 }), // +y top — v578: reduce hotspot (lower emissive, higher roughness)
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x020204, emissiveIntensity: 0.1 }), // -y bottom — invisible
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x161630, emissiveIntensity: 0.9 }), // +z front — FILL face
   new THREE.MeshPhysicalMaterial({ ...podiumBase, emissive: 0x030306, emissiveIntensity: 0.1 }), // -z back — hidden
