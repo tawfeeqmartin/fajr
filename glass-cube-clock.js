@@ -883,7 +883,7 @@ _plinthRect.position.set(-2, -8, 4);
 _plinthRect.lookAt(1, 0, 1.32);
 scene.add(_plinthRect);
 
-var _plinthSpot = new THREE.SpotLight(0xddddf8, 24, 20, 0.5, 0.6, 1);
+var _plinthSpot = new THREE.SpotLight(0xddddf8, 12, 20, 0.5, 0.6, 1);
 _plinthSpot.position.set(3, 3, -1.5);
 _plinthSpot.target.position.set(-1, -0.5, 1.5);
 scene.add(_plinthSpot);
@@ -948,7 +948,7 @@ var _plinthRectTarget = new THREE.Vector3(1, 0, 1.32);
 var _plinthSpotPos = new THREE.Vector3(3, 3, -1.5);
 var _plinthSpotTarget = new THREE.Vector3(-1, -0.5, 1.5);
 var _plinthRectIntensity = 8;
-var _plinthSpotIntensity = 24;
+var _plinthSpotIntensity = 12;
 // Lerp state for back/cubeBack/cubeSun — prayer-driven glass opacity control
 var _backLerpColor = new THREE.Color(0x4040a0);
 var _backLerpIntensity = 50;
