@@ -3708,16 +3708,41 @@ function _showCurrentPrayerLabel() {
   var _cpH = Math.floor(ps.startMin / 60), _cpMn = ps.startMin % 60;
   var _cpTimeStr = (_cpH < 10 ? '0' : '') + _cpH + ':' + (_cpMn < 10 ? '0' : '') + _cpMn;
   var _cpInfo = def.isForbidden ? 'Avoid prayer'
+    : def.name === 'Last Third' ? 'Best time for Tahajjud'
     : (def.name === 'Dhuha' || def.name === 'Qiyam') ? 'Sunnah Mu\'akkadah'
     : (def.name === 'Fajr' || def.name === 'Dhuhr' || def.name === 'Asr' || def.name === 'Maghrib' || def.name === 'Isha') ? 'Obligatory Prayer' : '';
   var _cpInfoColor = def.isForbidden ? '#888' : 'rgba(232,228,220,.45)';
   var _cpInfoDiv = _cpInfo ? '<div style="font-size:clamp(.5rem,.9vw,.6rem);font-weight:300;letter-spacing:.08em;color:' + _cpInfoColor + ';margin-top:3px">' + _cpInfo + '</div>' : '';
 
+  // Contextual content pill — same as swipe preview
+  var _cpHint = null;
+  var _cpLastTen = window._isRamadan && (window._islamicNight >= 21);
+  if ((def.name === 'Qiyam' || def.name === 'Last Third') && _cpLastTen) {
+    _cpHint = { label: 'Tonight\'s dua', action: 'qiyam' };
+  } else if (def.name === 'Maghrib' && _cpLastTen) {
+    _cpHint = { label: 'Hadith of the day', action: 'maghrib' };
+  } else {
+    var _cpCtx = (typeof window._getIslamicContext === 'function') ? window._getIslamicContext() : [];
+    if (_cpCtx.length > 0) _cpHint = { label: _cpCtx[0].label || 'View content', action: 'context' };
+  }
+  var _cpPillDiv = '';
+  if (_cpHint) {
+    _cpPillDiv = '<div id="_swipeContentPill" onclick="window._openSwipeContent&&window._openSwipeContent()" style="' +
+      'display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 14px;pointer-events:auto;' +
+      'border-radius:20px;background:rgba(232,228,220,.08);backdrop-filter:blur(8px);' +
+      'cursor:pointer;transition:transform .35s cubic-bezier(.23,1,.32,1),opacity .3s ease;' +
+      'animation:_pillIn .4s cubic-bezier(.23,1,.32,1) both">' +
+      '<span style="font-size:.65rem;color:' + hex + '">✦</span>' +
+      '<span style="font-size:clamp(.55rem,1vw,.65rem);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.6)">' + _cpHint.label + '</span>' +
+      '</div>';
+  }
+  var _cpPillSlot = '<div style="height:34px;display:flex;align-items:center;justify-content:center">' + _cpPillDiv + '</div>';
+
   _ensureCurrentPrayerLabel();
   _currentPrayerLabelEl.innerHTML =
-    '<div style="font-size:clamp(.55rem,1vw,.65rem);font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:' + hex + ';opacity:.65">' + def.name + '</div>' +
-    '<div style="font-size:clamp(.85rem,2vw,1.1rem);font-weight:300;color:rgba(232,228,220,.75);letter-spacing:.04em;font-variant-numeric:tabular-nums;margin-top:1px">' + _cpTimeStr + '</div>' +
-    _cpInfoDiv;
+    '<div style="font-size:clamp(.6rem,1.2vw,.75rem);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:' + hex + ';opacity:.7;margin-bottom:2px">' + def.name + '</div>' +
+    '<div style="font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(232,228,220,.85);letter-spacing:.04em;font-variant-numeric:tabular-nums">' + _cpTimeStr + '</div>' +
+    _cpInfoDiv + _cpPillSlot;
   _currentPrayerLabelEl.style.opacity = '1';
   _currentPrayerLabelEl.style.display = 'block';
 
