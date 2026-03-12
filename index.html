@@ -3034,7 +3034,7 @@ function _updateQadrBtn(){
   if(show && !_qadrBtnEl){
     _qadrBtnEl = document.createElement('button');
     _qadrBtnEl.id = 'qadrFloatBtn';
-    _qadrBtnEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 140px);left:50%;transform:translateX(-50%);z-index:951;background:none;border:1px solid rgba(232,228,220,.12);border-radius:100px;padding:6px 14px;color:rgba(232,228,220,.55);font-family:var(--font);font-size:.72rem;font-weight:300;cursor:pointer;letter-spacing:.04em;display:flex;align-items:center;gap:5px;transition:opacity .4s ease;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)';
+    _qadrBtnEl.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 200px);left:50%;transform:translateX(-50%);z-index:951;background:none;border:1px solid rgba(232,228,220,.12);border-radius:100px;padding:6px 14px;color:rgba(232,228,220,.55);font-family:var(--font);font-size:.72rem;font-weight:300;cursor:pointer;letter-spacing:.04em;display:flex;align-items:center;gap:5px;transition:opacity .4s ease;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)';
     _qadrBtnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Surah Al-Qadr';
     _qadrBtnEl.onclick = function(){ _playQadr(this); };
     document.body.appendChild(_qadrBtnEl);
@@ -4762,7 +4762,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=561';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=562';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
