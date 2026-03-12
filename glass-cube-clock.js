@@ -961,6 +961,7 @@ var _cubeSunLerpIntensity = 50;
 
 var _lastPlinthPrayer = 'gallery'; // remember last active prayer's look
 function _updatePlinthLighting() {
+  if (window._lookPreviewActive) return; // look preview mode — don't fight manual values
   var pName = window._swipePreviewPrayer || null;
   if (pName && _prayerLookMap[pName]) _lastPlinthPrayer = _prayerLookMap[pName];
   var lookKey = pName ? (_prayerLookMap[pName] || _lastPlinthPrayer) : _lastPlinthPrayer;
@@ -4131,4 +4132,98 @@ document.addEventListener('keydown', function(e) {
     _mouseStartX = 0;
     _mouseStartY = 0;
   });
+
+// ── Look Preview Mode (?looks) ──────────────────────────────────────────────
+// Swipe up/down to cycle through looks. Name displayed on screen.
+// For Tawfeeq to preview on mobile and pick favorites for prayer mapping.
+if (/[?&]looks/.test(location.search)) {
+  var _lookKeys = Object.keys(_plinthLooks);
+  var _lookIdx = 0;
+  var _lookLabel = null;
+  var _lookTouchY = 0;
+  var _lookSwiping = false;
+
+  // Create label overlay
+  _lookLabel = document.createElement('div');
+  _lookLabel.style.cssText = 'position:fixed;top:env(safe-area-inset-top,12px);left:50%;transform:translateX(-50%);z-index:9999;font-family:var(--font);font-size:1rem;font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.7);text-transform:uppercase;pointer-events:none;transition:opacity .3s ease;text-align:center;padding:8px 16px;background:rgba(13,13,18,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:100px;white-space:nowrap';
+  document.body.appendChild(_lookLabel);
+
+  // Counter below label
+  var _lookCounter = document.createElement('div');
+  _lookCounter.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,12px) + 36px);left:50%;transform:translateX(-50%);z-index:9999;font-family:var(--font);font-size:.65rem;font-weight:300;letter-spacing:.12em;color:rgba(232,228,220,.35);pointer-events:none;text-align:center';
+  document.body.appendChild(_lookCounter);
+
+  function _applyLookPreview(idx) {
+    var key = _lookKeys[idx];
+    var look = _plinthLooks[key];
+    if (!look) return;
+
+    // Apply lights instantly (bypass lerp)
+    _plinthRect.color.setHex(look.rc);
+    _plinthRect.intensity = look.ri;
+    _plinthRect.position.set(look.rp[0], look.rp[1], look.rp[2]);
+    _plinthRect.lookAt(look.rt[0], look.rt[1], look.rt[2]);
+
+    _plinthSpot.color.setHex(look.sc);
+    _plinthSpot.intensity = look.si;
+    _plinthSpot.position.set(look.sp[0], look.sp[1], look.sp[2]);
+    _plinthSpot.target.position.set(look.st[0], look.st[1], look.st[2]);
+    _plinthSpot.target.updateMatrixWorld();
+
+    back.color.setHex(look.bc);
+    back.intensity = look.bi;
+    _backLerpColor.setHex(look.bc);
+    _backLerpIntensity = look.bi;
+
+    cubeBack.color.setHex(look.cc);
+    cubeBack.intensity = look.ci;
+    _cubeBackLerpColor.setHex(look.cc);
+    _cubeBackLerpIntensity = look.ci;
+
+    cubeSun.intensity = look.ui;
+    _cubeSunLerpIntensity = look.ui;
+
+    // Also set plinth lerp targets so the system doesn't fight us
+    _plinthRectColor.setHex(look.rc);
+    _plinthRectIntensity = look.ri;
+    _plinthSpotColor.setHex(look.sc);
+    _plinthSpotIntensity = look.si;
+
+    // Update label
+    var prayerNames = [];
+    for (var p in _prayerLookMap) {
+      if (_prayerLookMap[p] === key) prayerNames.push(p);
+    }
+    _lookLabel.textContent = key;
+    _lookCounter.textContent = (idx + 1) + ' / ' + _lookKeys.length + (prayerNames.length ? '  ·  ' + prayerNames.join(', ') : '');
+  }
+
+  // Apply first look
+  setTimeout(function() { _applyLookPreview(0); }, 2000);
+
+  // Swipe handling
+  document.addEventListener('touchstart', function(e) {
+    _lookTouchY = e.touches[0].clientY;
+    _lookSwiping = true;
+  }, { passive: true, capture: true });
+
+  document.addEventListener('touchend', function(e) {
+    if (!_lookSwiping) return;
+    _lookSwiping = false;
+    var dy = e.changedTouches[0].clientY - _lookTouchY;
+    if (Math.abs(dy) < 40) return; // too short
+    if (dy < 0) {
+      // Swipe up = next look
+      _lookIdx = (_lookIdx + 1) % _lookKeys.length;
+    } else {
+      // Swipe down = previous look
+      _lookIdx = (_lookIdx - 1 + _lookKeys.length) % _lookKeys.length;
+    }
+    _applyLookPreview(_lookIdx);
+  }, { passive: true, capture: true });
+
+  // Prevent normal swipe behavior in look mode
+  window._lookPreviewActive = true;
+}
+
 })();
