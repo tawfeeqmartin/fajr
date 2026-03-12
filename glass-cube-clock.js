@@ -901,7 +901,7 @@ var _plinthLooks = {
   // Look 01 — Gallery Diagonal (Dhuhr + Asr) — crisp noon/afternoon, cool-white glass
   gallery:   { rc: 0xddddf8, ri: 8,    rp: [-2,-8,4],       rt: [1,0,1.32],
                sc: 0xddddf8, si: 24,   sp: [3,3,-1.5],      st: [-1,-0.5,1.5],
-               bc: 0x3038c8, bi: 18,   cc: 0xeef2ff, ci: 7,  ui: 30 },
+               bc: 0x3038c8, bi: 18,   cc: 0xeef2ff, ci: 10, ui: 42 },
   // Look 03 — Ando Chapel (Qiyam + Isha) — night monolith, deep navy glass
   ando:      { rc: 0xd7e2ff, ri: 11.6, rp: [-2.7,-1.5,0.8], rt: [0.15,0.5,1.0],
                sc: 0xd7e2ff, si: 12,   sp: [2.7,3,0.8],     st: [-0.15,-0.5,1.0],
@@ -913,7 +913,7 @@ var _plinthLooks = {
   // Look 06 — Deakins Ember (Fajr + Sunrise) — pre-dawn indigo, warm transmission
   deakins:   { rc: 0xFFC188, ri: 11.3, rp: [-3.5,-4,3.2],   rt: [0.65,1.0,1.35],
                sc: 0x9AB8E8, si: 14,   sp: [2.8,3,-2.4],    st: [-0.15,-0.5,0.95],
-               bc: 0x2c1840, bi: 10,   cc: 0xffd0a0, ci: 6,  ui: 25 },
+               bc: 0x2c1840, bi: 10,   cc: 0xffd0a0, ci: 9,  ui: 38 },
   // Look 02 — Turrell Void (Dhuha) — golden morning, cool-violet back contrasts amber plinth
   turrell:   { rc: 0x9eb8ff, ri: 10.5, rp: [-3.2,-2,5.6],   rt: [0.2,1.0,1.0],
                sc: 0xffb46e, si: 12,   sp: [2.6,3,2.7],     st: [-0.4,-0.5,1.2],
