@@ -751,7 +751,7 @@ const dichroicFrag = `
     col += vec3(0.35, 0.45, 0.7) * bottomFace * 0.03;
     // ── Bottom-edge rim: catch light at cube base perimeter ──
     float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
-    col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.25;
+    col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.0;
 
     gl_FragColor = vec4(col, 1.0);
   }
