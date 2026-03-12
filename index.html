@@ -706,6 +706,7 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 body.chrome-hidden .fs-header,
 body.chrome-hidden .mode-label,
 body.chrome-hidden .mode-pill,
+body.chrome-hidden #qadrFloatBtn,
 /* body.chrome-hidden #fsVersionTag - kept visible during dev */
 body.chrome-hidden #fsTapHint,
 body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
@@ -4765,7 +4766,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=572';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=573';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
