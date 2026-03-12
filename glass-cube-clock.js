@@ -458,6 +458,7 @@ const _shaftMat = new THREE.ShaderMaterial({
 // Plane oriented to match the gobo→floor diagonal
 const shaftGeo = new THREE.PlaneGeometry(5, 16);
 const shaftMesh = new THREE.Mesh(shaftGeo, _shaftMat);
+window._shaftMat = _shaftMat;
 // Position: midpoint between gobo (-6,16,3) and floor target (~-1.5,0,-0.5)
 shaftMesh.position.set(-3.8, 8, 1.2);
 // Rotate to align with beam angle — tilt back and diagonal
@@ -1085,6 +1086,7 @@ window._threeCamera = camera;
 window._qiblaFanDisc = null;
 window._qiblaBloomDisc = null;
 window._qiblaEntryDisc = null;
+window._shaftMat = null;
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
@@ -1317,6 +1319,8 @@ var _qiblaExitCaustic = null;
   _qiblaExitCaustic.position.set(0, 0.01, 1.0);
   _qiblaExitCaustic.visible = false;
   scene.add(_qiblaExitCaustic);
+  window._qiblaEntryBeam = _qiblaEntryBeam;
+  window._qiblaExitCaustic = _qiblaExitCaustic;
 })();
 
 window._clockToggleCompass = function(on) {
