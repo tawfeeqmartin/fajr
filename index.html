@@ -2753,7 +2753,7 @@ var _islamicContent = {
   },
   // ── Monday & Thursday (sunnah fasting) ──
   monThu: {
-    trigger: function(){ var d=(typeof _cityNow==='function'?_cityNow():new Date()).getDay(); return d===1||d===4; },
+    trigger: function(){ if(window._isRamadan) return false; var d=(typeof _cityNow==='function'?_cityNow():new Date()).getDay(); return d===1||d===4; },
     label: 'Sunnah Fasting Day',
     pool: [
       { text:'The Prophet \uFDFA used to fast on Mondays and Thursdays. He said: Deeds are presented on Monday and Thursday, and I love that my deeds be presented while I am fasting.', ref:'Tirmidhi 747, Hasan', type:'hadith' },
