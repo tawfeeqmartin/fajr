@@ -1251,15 +1251,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
                   setTimeout(function(){ splash.style.opacity='0'; }, 1000);
                 });
             };
-            // Minute pulse — fire at :00 each minute
-            var _lastPulseSec = -1;
-            (function minutePulse(){
-              if(!document.getElementById('splash')) return;
-              var s = new Date().getSeconds();
-              if(s === 0 && _lastPulseSec !== 0) window._triggerEdgePulse();
-              _lastPulseSec = s;
-              requestAnimationFrame(minutePulse);
-            })();
+            // Minute pulse removed — edge pulse only fires on page load
           },1900);
         }, HOLD);
         return;
@@ -4768,7 +4760,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=553';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=554';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════

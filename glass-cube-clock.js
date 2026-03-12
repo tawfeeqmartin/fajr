@@ -1987,8 +1987,7 @@ document.addEventListener('visibilitychange', function() {
       var softPayoff = softCalibrated && aligned;
       var _wasAligned = _compassAligned;
       _compassAligned = fullPayoff;
-      // Edge pulse when hitting qibla alignment
-      if(fullPayoff && !_wasAligned && typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
+      // Edge pulse removed — only fires on page load
 
       // Prismatic refraction: polar disc shaders
       var breathe = 0.88 + 0.12 * Math.sin(t * 1.0);
@@ -2115,7 +2114,7 @@ document.addEventListener('visibilitychange', function() {
       _swipeTawafPhase *= 0.955; // decay ~1.5 seconds at 60fps
       if (_swipeTawafPhase < 0.001) {
         _swipeTawafPhase = 0;
-        if (typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
+        // Edge pulse removed — only fires on page load
       }
     }
 
@@ -4001,7 +4000,7 @@ document.addEventListener('touchstart', function(e) {
   _swipeStartY = touch.clientY;
   _swipeDragging = false;
   _swipeSwiping = false;
-  if (typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
+  // Edge pulse removed from swipe — only fires on page load
 }, { passive: true });
 
 document.addEventListener('touchmove', function(e) {
