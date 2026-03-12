@@ -748,7 +748,7 @@ const dichroicFrag = `
 
     // ── Bottom-face glow: cool emission separates cube from dark podium ──
     float bottomFace = smoothstep(-0.5, -0.92, Nw.y);
-    col += vec3(0.35, 0.45, 0.7) * bottomFace * 0.03;
+    col += vec3(0.35, 0.45, 0.7) * bottomFace * 0.0;
     // ── Bottom-edge rim: catch light at cube base perimeter ──
     float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
     col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.0;
