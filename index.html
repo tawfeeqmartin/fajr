@@ -2978,7 +2978,7 @@ function _showMaghribHadith(){
   var _overlayTitle = contextLabel ? contextLabel : (nightNum ? nightNum + _nightOrdinal(nightNum) + ' Night of Ramadan' : '');
   var _contentHtml = '';
   if(h.ar){
-    _contentHtml += '<p style="font-size:1.3rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1rem">' + h.ar + '</p>';
+    _contentHtml += '<p style="font-size:clamp(.95rem,2.2vmin,1.2rem);font-weight:300;line-height:1.8;color:rgba(232,228,220,.8);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1rem">' + h.ar + '</p>';
   }
   if(h.en){
     _contentHtml += '<p style="font-size:.88rem;font-weight:300;line-height:1.6;color:rgba(232,228,220,.55);letter-spacing:.01em;font-style:italic;margin-bottom:.5rem">' + h.en + '</p>';
@@ -3097,7 +3097,7 @@ function _showQiyamDua(){
     '<div style="position:absolute;top:0;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,8px) + 210px);overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,12px) + 80px) 2rem 2rem 2rem">' +
     '<div style="max-width:360px;text-align:center;padding:2.5rem 2rem">' +
       '<p style="font-size:.7rem;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:1.5rem">' + (window._inLastThird ? 'The Last Third' : 'The Last Ten Nights') + '</p>' +
-      '<p style="font-size:1.1rem;font-weight:400;line-height:1.6;color:rgba(232,228,220,.7);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:.75rem">' +
+      '<p style="font-size:clamp(.85rem,2vmin,1.1rem);font-weight:300;line-height:1.7;color:rgba(232,228,220,.65);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:.75rem">' +
         '\u0625\u0650\u0646\u0651\u064E\u0627 \u0623\u064E\u0646\u0632\u064E\u0644\u0652\u0646\u064E\u0627\u0647\u064F \u0641\u0650\u064A \u0644\u064E\u064A\u0652\u0644\u064E\u0629\u0650 \u0627\u0644\u0652\u0642\u064E\u062F\u0652\u0631\u0650' +
       '</p>' +
       '<p style="font-size:.78rem;font-weight:300;color:rgba(232,228,220,.4);margin-bottom:.5rem;font-style:italic">' +
@@ -3107,7 +3107,7 @@ function _showQiyamDua(){
         '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="6,3 20,12 6,21" fill="rgba(232,228,220,.45)"/></svg> Surah Al-Qadr' +
       '</button>' +
       '<div style="width:60px;height:1px;background:rgba(232,228,220,.1);margin:0 auto 2rem"></div>' +
-      '<p style="font-size:1.4rem;font-weight:400;line-height:1.8;color:rgba(232,228,220,.85);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1rem">' +
+      '<p style="font-size:clamp(1rem,2.5vmin,1.25rem);font-weight:300;line-height:1.8;color:rgba(232,228,220,.8);font-family:\'Noto Naskh Arabic\',serif;direction:rtl;margin-bottom:1rem">' +
         '\u0627\u0644\u0644\u0651\u064E\u0647\u064F\u0645\u0651\u064E \u0625\u0650\u0646\u0651\u064E\u0643\u064E \u0639\u064E\u0641\u064F\u0648\u0651\u064C \u0643\u064E\u0631\u0650\u064A\u0645\u064C \u062A\u064F\u062D\u0650\u0628\u0651\u064F \u0627\u0644\u0639\u064E\u0641\u0652\u0648\u064E \u0641\u064E\u0627\u0639\u0652\u0641\u064F \u0639\u064E\u0646\u0651\u064E\u0627 \u0628\u0650\u0631\u064E\u062D\u0652\u0645\u064E\u062A\u0650\u0643\u064E \u064A\u064E\u0627 \u0623\u064E\u0631\u0652\u062D\u064E\u0645\u064E \u0627\u0644\u0631\u0651\u064E\u0627\u062D\u0650\u0645\u0650\u064A\u0646\u064E' +
       '</p>' +
       '<p style="font-size:.78rem;font-weight:300;font-style:italic;color:rgba(232,228,220,.4);margin-bottom:.6rem;letter-spacing:.02em">' +
@@ -4762,7 +4762,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=557';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=558';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
