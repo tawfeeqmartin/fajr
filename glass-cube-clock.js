@@ -1079,6 +1079,9 @@ function floorRay(az, c1, c2, w, len, op) {
 }
 
 window.clockRays = clockRays;
+window._threeRenderer = renderer;
+window._threeScene = scene;
+window._threeCamera = camera;
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
