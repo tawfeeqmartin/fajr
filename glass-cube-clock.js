@@ -4038,8 +4038,8 @@ document.addEventListener('touchmove', function(e) {
     _swipeCamVel = (_swipeCamVel + _dragSpring) * 0.55; // underdamped = slight wiggle on pull
     _swipeCamAngle += _swipeCamVel;
 
-    // One drag = one prayer step FORWARD only (rolling look-ahead)
-    var prayerDir = totalDx < -30 ? 1 : 0; // swipe left = next prayer, swipe right = no-op (stay)
+    // One drag = one prayer step (left = forward, right = backward)
+    var prayerDir = totalDx < -30 ? 1 : totalDx > 30 ? -1 : 0;
     var _scnt = prayerSectors.length || 8;
     var targetIdx = ((_swipeDragBaseIdx + prayerDir) % _scnt + _scnt) % _scnt;
     if (targetIdx !== _swipeLastTriggeredIdx) {
