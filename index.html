@@ -3988,6 +3988,9 @@ function switchMode(mode) {
   document.body.classList.remove('mode-clock','mode-compass','mode-info');
   document.body.classList.add('mode-' + mode);
 
+  // Hide qadr button in non-clock modes
+  if (typeof _updateQadrBtn === 'function') _updateQadrBtn();
+
   // Update pill buttons
   document.querySelectorAll('.mode-pill-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === mode);
@@ -4762,7 +4765,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=564';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=565';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
