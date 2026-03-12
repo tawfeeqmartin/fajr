@@ -4137,28 +4137,41 @@ document.addEventListener('keydown', function(e) {
 // Swipe up/down to cycle through looks. Name displayed on screen.
 // For Tawfeeq to preview on mobile and pick favorites for prayer mapping.
 if (/[?&]looks/.test(location.search)) {
+  window._lookPreviewActive = true;
   var _lookKeys = Object.keys(_plinthLooks);
   var _lookIdx = 0;
-  var _lookLabel = null;
   var _lookTouchY = 0;
-  var _lookSwiping = false;
+
+  // Kill all overlays and chrome — clean preview surface
+  setTimeout(function() {
+    // Dismiss any overlays
+    if (typeof _hideQiyamDua === 'function') _hideQiyamDua();
+    if (typeof _hideMaghribHadith === 'function') _hideMaghribHadith();
+    document.querySelectorAll('#splash, #qiyamDua, #maghribHadith').forEach(function(el) { el.style.display = 'none'; });
+    // Hide all chrome except look label
+    document.querySelectorAll('.global-header, #modePill, .sticky-cta, #qadrFloatBtn, .compass-onboard, .clock-onboard').forEach(function(el) { el.style.display = 'none'; });
+  }, 3000);
 
   // Create label overlay
-  _lookLabel = document.createElement('div');
-  _lookLabel.style.cssText = 'position:fixed;top:env(safe-area-inset-top,12px);left:50%;transform:translateX(-50%);z-index:9999;font-family:var(--font);font-size:1rem;font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.7);text-transform:uppercase;pointer-events:none;transition:opacity .3s ease;text-align:center;padding:8px 16px;background:rgba(13,13,18,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:100px;white-space:nowrap';
+  var _lookLabel = document.createElement('div');
+  _lookLabel.style.cssText = 'position:fixed;top:env(safe-area-inset-top,12px);left:50%;transform:translateX(-50%);z-index:10000;font-family:var(--font);font-size:1.1rem;font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.85);text-transform:uppercase;pointer-events:none;transition:opacity .3s ease;text-align:center;padding:10px 20px;background:rgba(13,13,18,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:100px;white-space:nowrap';
   document.body.appendChild(_lookLabel);
 
-  // Counter below label
   var _lookCounter = document.createElement('div');
-  _lookCounter.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,12px) + 36px);left:50%;transform:translateX(-50%);z-index:9999;font-family:var(--font);font-size:.65rem;font-weight:300;letter-spacing:.12em;color:rgba(232,228,220,.35);pointer-events:none;text-align:center';
+  _lookCounter.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,12px) + 44px);left:50%;transform:translateX(-50%);z-index:10000;font-family:var(--font);font-size:.7rem;font-weight:300;letter-spacing:.1em;color:rgba(232,228,220,.4);pointer-events:none;text-align:center';
   document.body.appendChild(_lookCounter);
+
+  // Swipe hint
+  var _lookHint = document.createElement('div');
+  _lookHint.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,8px) + 30px);left:50%;transform:translateX(-50%);z-index:10000;font-family:var(--font);font-size:.7rem;font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.3);pointer-events:none;text-align:center';
+  _lookHint.textContent = '↑ swipe up/down to change looks ↓';
+  document.body.appendChild(_lookHint);
 
   function _applyLookPreview(idx) {
     var key = _lookKeys[idx];
     var look = _plinthLooks[key];
     if (!look) return;
 
-    // Apply lights instantly (bypass lerp)
     _plinthRect.color.setHex(look.rc);
     _plinthRect.intensity = look.ri;
     _plinthRect.position.set(look.rp[0], look.rp[1], look.rp[2]);
@@ -4183,13 +4196,11 @@ if (/[?&]looks/.test(location.search)) {
     cubeSun.intensity = look.ui;
     _cubeSunLerpIntensity = look.ui;
 
-    // Also set plinth lerp targets so the system doesn't fight us
     _plinthRectColor.setHex(look.rc);
     _plinthRectIntensity = look.ri;
     _plinthSpotColor.setHex(look.sc);
     _plinthSpotIntensity = look.si;
 
-    // Update label
     var prayerNames = [];
     for (var p in _prayerLookMap) {
       if (_prayerLookMap[p] === key) prayerNames.push(p);
@@ -4198,32 +4209,26 @@ if (/[?&]looks/.test(location.search)) {
     _lookCounter.textContent = (idx + 1) + ' / ' + _lookKeys.length + (prayerNames.length ? '  ·  ' + prayerNames.join(', ') : '');
   }
 
-  // Apply first look
-  setTimeout(function() { _applyLookPreview(0); }, 2000);
+  // Apply first look after scene settles
+  setTimeout(function() { _applyLookPreview(0); }, 4000);
 
-  // Swipe handling
+  // Touch swipe — use touchmove to track, touchend to commit
   document.addEventListener('touchstart', function(e) {
     _lookTouchY = e.touches[0].clientY;
-    _lookSwiping = true;
-  }, { passive: true, capture: true });
+  }, { passive: true });
 
   document.addEventListener('touchend', function(e) {
-    if (!_lookSwiping) return;
-    _lookSwiping = false;
     var dy = e.changedTouches[0].clientY - _lookTouchY;
-    if (Math.abs(dy) < 40) return; // too short
+    if (Math.abs(dy) < 50) return;
     if (dy < 0) {
-      // Swipe up = next look
       _lookIdx = (_lookIdx + 1) % _lookKeys.length;
     } else {
-      // Swipe down = previous look
       _lookIdx = (_lookIdx - 1 + _lookKeys.length) % _lookKeys.length;
     }
     _applyLookPreview(_lookIdx);
-  }, { passive: true, capture: true });
-
-  // Prevent normal swipe behavior in look mode
-  window._lookPreviewActive = true;
+    // Hide hint after first successful swipe
+    if (_lookHint) { _lookHint.style.opacity = '0'; setTimeout(function() { _lookHint.remove(); _lookHint = null; }, 500); }
+  }, { passive: true });
 }
 
 })();
