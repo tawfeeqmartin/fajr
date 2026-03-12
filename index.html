@@ -1120,54 +1120,50 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
       var elapsed=performance.now()-cycleStart;
       if(!_svgDrawStarted && elapsed>=5000) startSvgDraw();
       var animDone=elapsed>=ANIM_DUR;
-      // Repeat visit: scene ready (textures loaded) — fade out dark cover, fire edge pulse
+      // Repeat visit: black → SVG edge draw → fade to 3D scene
       if(window._skipSplash && window._sceneReady){
-        splash.style.transition='opacity 0.5s ease';
-        splash.style.opacity='0';
-        splash.style.pointerEvents='none';
         window._splashActive = false;
-        setTimeout(function(){
-          // Resize SVG to match canvas
-          window._resizeEdgeOverlay = function(){
-            var c = document.querySelector('canvas');
-            if(!c || !svg) return;
-            var r = c.getBoundingClientRect();
-            var cw = Math.round(r.width), ch = Math.round(r.height);
-            splash.style.width=cw+'px'; splash.style.height=ch+'px';
-            splash.style.top=Math.round(r.top)+'px'; splash.style.left=Math.round(r.left)+'px';
-            svg.setAttribute('viewBox','0 0 '+cw+' '+ch);
-            svg.setAttribute('width',cw); svg.setAttribute('height',ch);
-          };
-          if(window._resizeEdgeOverlay) window._resizeEdgeOverlay();
-          document.addEventListener('visibilitychange', function(){
-            if(!document.hidden && window._resizeEdgeOverlay) window._resizeEdgeOverlay();
+        splash.style.pointerEvents='none';
+        // Resize SVG to match canvas
+        var c = document.querySelector('canvas');
+        if(c && svg){
+          var r = c.getBoundingClientRect();
+          var cw = Math.round(r.width), ch = Math.round(r.height);
+          svg.setAttribute('viewBox','0 0 '+cw+' '+ch);
+          svg.setAttribute('width',cw); svg.setAttribute('height',ch);
+        }
+        // Hide hand paths, reset cube edges to hidden (dashoffset = full)
+        var paths = svg ? svg.querySelectorAll('path') : [];
+        paths.forEach(function(p,i){
+          if(i >= 5) { p.style.display='none'; return; }
+          var da = p.getAttribute('data-dash')||p.style.strokeDasharray||'420';
+          p.style.animation='none';
+          p.style.strokeDashoffset=da;
+        });
+        // Step 1: Draw SVG edges on black background (splash stays opaque)
+        requestAnimationFrame(function(){
+          var _pulseDelays = [.12,.30,.39,.45,.51];
+          paths.forEach(function(p,i){
+            if(i >= 5) return;
+            var da = p.getAttribute('data-dash')||'420';
+            var d = (_pulseDelays[i]||0).toFixed(2);
+            p.setAttribute('style','stroke-dasharray:'+da+';stroke-dashoffset:'+da+';animation:splashDraw .3s ease-out '+d+'s forwards');
           });
-          // Define the edge pulse function — cube edges only (first 5 paths), no hands
-          window._triggerEdgePulse = function(){
-            if(!svg) return;
-            var paths = svg.querySelectorAll('path');
-            // Only pulse cube edges (first 5), hide hands (5+)
-            paths.forEach(function(p,i){
-              if(i >= 5) { p.style.opacity='0'; return; }
-              var da = p.getAttribute('data-dash')||p.style.strokeDasharray;
-              p.style.animation='none';
-              p.style.strokeDashoffset=da;
-            });
-            splash.style.opacity='1';
-            requestAnimationFrame(function(){
-              var _pulseDelays = [.12,.30,.39,.45,.51];
-              paths.forEach(function(p,i){
-                if(i >= 5) return; // skip hands
-                var da = p.getAttribute('data-dash')||'420';
-                var d = (_pulseDelays[i]||0).toFixed(2);
-                p.setAttribute('style','stroke-dasharray:'+da+';stroke-dashoffset:'+da+';animation:splashDraw .3s ease-out '+d+'s forwards');
-              });
-              setTimeout(function(){ splash.style.opacity='0'; }, 1000);
-            });
-          };
-          // Fire it
-          setTimeout(function(){ window._triggerEdgePulse(); }, 300);
-        }, 100);
+          // Step 2: After edges drawn + brief hold, fade splash to reveal 3D
+          setTimeout(function(){
+            splash.style.transition='opacity 0.6s ease';
+            splash.style.opacity='0';
+          }, 1200); // 0.51s max delay + 0.3s draw + ~0.4s hold
+        });
+        // Define for future use (currently no triggers, but keep API)
+        window._triggerEdgePulse = function(){};
+        window._resizeEdgeOverlay = function(){
+          var c2 = document.querySelector('canvas');
+          if(!c2 || !svg) return;
+          var r2 = c2.getBoundingClientRect();
+          svg.setAttribute('viewBox','0 0 '+Math.round(r2.width)+' '+Math.round(r2.height));
+          svg.setAttribute('width',Math.round(r2.width)); svg.setAttribute('height',Math.round(r2.height));
+        };
         return;
       }
       if(window._sceneReady && animDone){
@@ -4766,7 +4762,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=556';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=557';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
