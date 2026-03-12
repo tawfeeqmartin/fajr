@@ -747,11 +747,11 @@ const dichroicFrag = `
     // Top-face iridescence applied above
 
     // ── Bottom-face glow: cool emission separates cube from dark podium ──
-    // ── Uniform silhouette rim: thin consistent glow around ALL cube edges ──
-    // Softer falloff than edgeCatch (pow 2.5 vs 4.5) = wider, gentler halo
-    // Makes bottom edge look intentional rather than anomalous
-    float silhouetteRim = pow(1.0 - NdotV, 2.5) * smoothstep(0.0, 0.15, 1.0 - NdotV);
-    col += vec3(0.75, 0.82, 1.00) * silhouetteRim * 0.12;
+    float bottomFace = smoothstep(-0.5, -0.92, Nw.y);
+    col += vec3(0.35, 0.45, 0.7) * bottomFace * 0.0;
+    // ── Bottom-edge rim: catch light at cube base perimeter ──
+    float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
+    col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.0;
 
     gl_FragColor = vec4(col, 1.0);
   }
