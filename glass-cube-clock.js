@@ -1335,7 +1335,7 @@ window._clockToggleCompass = function(on) {
     // Ensure 3D beam/caustic are fully reset on entry — no residual hairline
     if(_qiblaEntryBeam){ _qiblaEntryBeam.visible = false; _qiblaEntryBeam.material.uniforms.op.value = 0; }
     if(_qiblaExitCaustic){ _qiblaExitCaustic.visible = false; _qiblaExitCaustic.material.uniforms.op.value = 0; }
-    if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0.5; }
+    if(window._qiblaCausticLight){ window._qiblaCausticLight.intensity = 0; }
     // Hide prayer window discs
     _prayerDisc.visible = false; _nextDisc.visible = false; _thirdDisc.visible = false;
     // Zero out prayer accent lights for clean compass look
