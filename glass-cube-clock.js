@@ -747,11 +747,7 @@ const dichroicFrag = `
     // Top-face iridescence applied above
 
     // ── Bottom-face glow: cool emission separates cube from dark podium ──
-    // ── Uniform edge rim: consistent glow on ALL faces (replaces bottom-only hacks) ──
-    // pow(3.5) — tighter than 2.0 (face flood) but wider than edgeCatch 4.5
-    // Visible thin band at silhouette edges on all faces
-    float uniformRim = pow(1.0 - NdotV, 3.5);
-    col += vec3(0.75, 0.85, 1.00) * uniformRim * 0.18;
+    // ── Bottom-face effects removed (v568) — uniform rim reverted (v574) ──
 
     gl_FragColor = vec4(col, 1.0);
   }
