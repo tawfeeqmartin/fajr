@@ -1129,11 +1129,8 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
         splash.style.opacity='0';
         splash.style.transition='none';
         window._splashActive = false;
-        // Jump to edge overlay setup (after the setTimeout/HOLD block below)
-        // Set up SVG edges for pulse
         setTimeout(function(){
-          var _savedStyles = [];
-          if(svg) svg.querySelectorAll('path').forEach(function(p){ _savedStyles.push(p.getAttribute('style')); });
+          // Resize SVG to match canvas
           window._resizeEdgeOverlay = function(){
             var c = document.querySelector('canvas');
             if(!c || !svg) return;
@@ -1148,10 +1145,27 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
           document.addEventListener('visibilitychange', function(){
             if(!document.hidden && window._resizeEdgeOverlay) window._resizeEdgeOverlay();
           });
-          // Fire edge pulse
-          setTimeout(function(){
-            if(typeof window._triggerEdgePulse === 'function') window._triggerEdgePulse();
-          }, 300);
+          // Define the edge pulse function (normally created in full splash completion)
+          window._triggerEdgePulse = function(){
+            if(!svg) return;
+            svg.querySelectorAll('path').forEach(function(p){
+              var da = p.getAttribute('data-dash')||p.style.strokeDasharray;
+              p.style.animation='none';
+              p.style.strokeDashoffset=da;
+            });
+            splash.style.opacity='1';
+            requestAnimationFrame(function(){
+              var _pulseDelays = [.12,.30,.39,.45,.51];
+              svg.querySelectorAll('path').forEach(function(p,i){
+                var da = p.getAttribute('data-dash')||'420';
+                var d = (_pulseDelays[i]||0).toFixed(2);
+                p.setAttribute('style','stroke-dasharray:'+da+';stroke-dashoffset:'+da+';animation:splashDraw .3s ease-out '+d+'s forwards');
+              });
+              setTimeout(function(){ splash.style.opacity='0'; }, 1000);
+            });
+          };
+          // Fire it
+          setTimeout(function(){ window._triggerEdgePulse(); }, 300);
         }, 100);
         return;
       }
@@ -4757,7 +4771,7 @@ function fsPlaySurah() {
 // Clock is now a full-viewport background - no container needed
 // window._clockContainer removed - canvas appends to body directly
 const _cs=document.createElement('script');
-_cs.type='module';_cs.src='glass-cube-clock.js?v=548';
+_cs.type='module';_cs.src='glass-cube-clock.js?v=549';
 document.head.appendChild(_cs);
 
 // ══════════════════════════════════════════
