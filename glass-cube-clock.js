@@ -674,38 +674,38 @@ const dichroicFrag = `
     // Bottom-face attenuation: reduce transmission where normal faces down (cubeSun direct hit)
     // Bottom-face attenuation: strong clamp preserves prismatic color in the hotspot
     float bottomAtten = 1.0 - 0.55 * smoothstep(-0.3, -0.95, Nw.y);
-    vec3 col = refracted * vec3(0.94, 0.97, 1.06) * 2.8 * bottomAtten;
+    vec3 col = refracted * vec3(1.00, 1.00, 1.00) * 2.8 * bottomAtten;
 
     // ── Dichroic iridescence: surface-only, tight diagonal band ──
     col = mix(col, col * irid * 1.4, diagF * 0.22);
     col += irid * diagF * fresnel * 0.12;
 
     // ── Fresnel edge: cool blue-white, sharp (glass = cold at edges) ──
-    col += vec3(0.80, 0.92, 1.00) * fresnel * 0.35;
+    col += vec3(0.80, 0.92, 1.00) * fresnel * 0.40;
 
     // ── Side-face ambient: subtle fill so faces read as glass even without strong light ──
     // Boosted to prevent the right face reading as a dark void during orbit
     float sideFacing = 1.0 - abs(Nw.y); // peaks on vertical faces
-    col += vec3(0.22, 0.28, 0.45) * sideFacing * 0.30;
+    col += vec3(0.22, 0.28, 0.45) * sideFacing * 0.00;
 
     // ── Sky/environment reflection: top face catches overhead light ──
     // v155 scored 8.9 at 0.45 but top was slightly hot. Dial back to 0.38.
     float skyFacing = max(Nw.y, 0.0);
-    col += pow(skyFacing, 1.8) * vec3(0.90, 0.94, 1.00) * 0.38;
+    col += pow(skyFacing, 1.8) * vec3(0.90, 0.94, 1.00) * 0.06;
 
     // ── Edge catch: crisp rim light at silhouette — "you could cut yourself" ──
     float NdotV = max(dot(Nw, Vw), 0.0);
     float edgeCatch = pow(1.0 - NdotV, 4.5);
-    col += vec3(0.70, 0.85, 1.00) * edgeCatch * 1.80;
+    col += vec3(0.70, 0.85, 1.00) * edgeCatch * 1.30;
 
     // ── Shadow-side glass fill: subtle reflected skylight on faces facing away from key ──
     // Without this, faces in shadow read as dark solid rather than dark glass.
     // Key light comes from camera-left/behind (cubeSun at 0,0.2,-2.8 + cubeBack at 0.5,10,-5).
     // Shadow side = faces with positive Nw.x (facing right).
     float shadowSide = smoothstep(0.1, 0.7, Nw.x) * sideFacing; // right-facing vertical faces
-    col += vec3(0.15, 0.18, 0.30) * shadowSide * 0.35; // cool blue fill, subtle
+    col += vec3(0.15, 0.18, 0.30) * shadowSide * 0.00; // cool blue fill, subtle
     // Also boost Fresnel on shadow side — glass edge reads even without direct light
-    col += vec3(0.50, 0.60, 0.80) * edgeCatch * shadowSide * 0.45;
+    col += vec3(0.50, 0.60, 0.80) * edgeCatch * shadowSide * 0.05;
 
     // ── Specular: razor-sharp needle, only at grazing (no 0.4 ambient) ──
     vec3 Lw = normalize(uSpecLightPos - vWorldPos);
@@ -743,15 +743,15 @@ const dichroicFrag = `
     col = mix(col, col * topIrid * 1.6 + topIrid * 0.18, topFace * 0.40);
     // Fresnel color shift at grazing angles
     float topFresnel = pow(1.0 - NdotV, 3.0) * topFace;
-    col += vec3(0.25, 0.15, 0.55) * topFresnel * 0.30;
+    col += vec3(0.25, 0.15, 0.55) * topFresnel * 0.15;
     // Top-face iridescence applied above
 
     // ── Bottom-face glow: cool emission separates cube from dark podium ──
     float bottomFace = smoothstep(-0.5, -0.92, Nw.y);
-    col += vec3(0.35, 0.45, 0.7) * bottomFace * 0.25;
+    col += vec3(0.35, 0.45, 0.7) * bottomFace * 0.03;
     // ── Bottom-edge rim: catch light at cube base perimeter ──
     float bottomRim = smoothstep(-0.7, -0.98, Nw.y) * (1.0 - smoothstep(-0.98, -1.0, Nw.y));
-    col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.45;
+    col += vec3(0.6, 0.7, 1.0) * bottomRim * 0.25;
 
     gl_FragColor = vec4(col, 1.0);
   }
