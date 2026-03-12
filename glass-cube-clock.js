@@ -4218,22 +4218,44 @@ if (/[?&]looks/.test(location.search)) {
   setTimeout(function() { _applyLookPreview(0); }, 4000);
 
   // Touch swipe — use touchmove to track, touchend to commit
-  document.addEventListener('touchstart', function(e) {
-    _lookTouchY = e.touches[0].clientY;
-  }, { passive: true });
+  // Use two simple tap zones instead of swipe — more reliable on mobile
+  // Top third of screen = previous look, bottom third = next look
+  // Middle third = no action (avoids accidental triggers)
+  var _lookTapEl = document.createElement('div');
+  _lookTapEl.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column';
+  _lookTapEl.innerHTML = '<div data-look="prev" style="flex:1;cursor:pointer"></div><div style="flex:1"></div><div data-look="next" style="flex:1;cursor:pointer"></div>';
+  document.body.appendChild(_lookTapEl);
 
+  _lookTapEl.addEventListener('click', function(e) {
+    var dir = e.target.getAttribute('data-look');
+    if (dir === 'next') {
+      _lookIdx = (_lookIdx + 1) % _lookKeys.length;
+      _applyLookPreview(_lookIdx);
+    } else if (dir === 'prev') {
+      _lookIdx = (_lookIdx - 1 + _lookKeys.length) % _lookKeys.length;
+      _applyLookPreview(_lookIdx);
+    }
+    if (_lookHint && dir) { _lookHint.style.opacity = '0'; setTimeout(function() { if(_lookHint) { _lookHint.remove(); _lookHint = null; } }, 500); }
+  });
+
+  // Also keep swipe as backup
+  var _lookTY = 0;
+  document.addEventListener('touchstart', function(e) {
+    _lookTY = e.touches[0].clientY;
+  }, { passive: true });
   document.addEventListener('touchend', function(e) {
-    var dy = e.changedTouches[0].clientY - _lookTouchY;
-    if (Math.abs(dy) < 50) return;
+    var dy = e.changedTouches[0].clientY - _lookTY;
+    if (Math.abs(dy) < 60) return;
     if (dy < 0) {
       _lookIdx = (_lookIdx + 1) % _lookKeys.length;
     } else {
       _lookIdx = (_lookIdx - 1 + _lookKeys.length) % _lookKeys.length;
     }
     _applyLookPreview(_lookIdx);
-    // Hide hint after first successful swipe
-    if (_lookHint) { _lookHint.style.opacity = '0'; setTimeout(function() { _lookHint.remove(); _lookHint = null; }, 500); }
   }, { passive: true });
+
+  // Update hint text
+  _lookHint.textContent = 'tap top / bottom to change looks';
 }
 
 })();
