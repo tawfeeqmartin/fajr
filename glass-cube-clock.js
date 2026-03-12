@@ -1082,6 +1082,9 @@ window.clockRays = clockRays;
 window._threeRenderer = renderer;
 window._threeScene = scene;
 window._threeCamera = camera;
+window._qiblaFanDisc = null;
+window._qiblaBloomDisc = null;
+window._qiblaEntryDisc = null;
 // clockRays[0] = hour, clockRays[1] = minute, clockRays[2] = second
 // initY = 135° (3π/4): compensates for prismGroup.rotation.y = π/4 so that
 // at midnight/noon all hands point at visual 12 o'clock (-Z world direction).
@@ -1215,6 +1218,9 @@ function mkPrismDisc(radius, fragShader, fanCenter, fanWidth, opVal) {
   if(_qiblaFanDisc) _qiblaFanDisc.renderOrder = 1;
   if(_qiblaBloomDisc) _qiblaBloomDisc.renderOrder = 1;
   if(_qiblaEntryDisc) _qiblaEntryDisc.renderOrder = 1;
+  window._qiblaFanDisc = _qiblaFanDisc;
+  window._qiblaBloomDisc = _qiblaBloomDisc;
+  window._qiblaEntryDisc = _qiblaEntryDisc;
 
   // Dev mode: auto-enable compass in aligned state for lookdev
   if (_compassDevMode) {
