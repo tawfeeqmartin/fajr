@@ -151,6 +151,41 @@ window.addEventListener('orientationchange', function() {
 
 // ─── FLOOR — removed (podium replaces ground plane) ──────────────────────────
 
+// ─── CYCLORAMA BACKDROP ──────────────────────────────────────────────────────
+// Option A: minimal silent gradient wall — adds subtle depth perception behind cube.
+// Half-cylinder, 140° arc, radius 12, unlit MeshBasicMaterial with vertical gradient.
+// Hidden during FBO pass so glass refraction doesn't see it.
+const _cycGeo = new THREE.CylinderGeometry(12, 12, 24, 32, 1, true,
+  Math.PI / 2 + (Math.PI - 140 * Math.PI / 180) / 2,   // thetaStart: center the 140° arc facing +Z
+  140 * Math.PI / 180                                     // thetaLength: 140°
+);
+// Vertical gradient via vertex colors: slightly lighter at horizon (y=0), fading to bg at top/bottom
+const _cycColors = new Float32Array(_cycGeo.attributes.position.count * 3);
+const _cycBg = new THREE.Color(0x0d0d12);       // scene background — top & bottom fade target
+const _cycMid = new THREE.Color(0x0e0e14);       // horizon — just barely lighter than bg
+for (let i = 0; i < _cycGeo.attributes.position.count; i++) {
+  const y = _cycGeo.attributes.position.getY(i); // ranges from -12 to +12
+  // Normalized: 0 at bottom (-12), 1 at top (+12). Horizon at ~0.46 (y≈-1 local = y≈4 world)
+  const t = (y + 12) / 24;
+  // Bell curve peaking at t≈0.46 (horizon line, roughly y=0 world with center at y=5)
+  const horizon = Math.exp(-Math.pow((t - 0.46) / 0.10, 2));
+  const c = _cycBg.clone().lerp(_cycMid, horizon);
+  _cycColors[i * 3]     = c.r;
+  _cycColors[i * 3 + 1] = c.g;
+  _cycColors[i * 3 + 2] = c.b;
+}
+_cycGeo.setAttribute('color', new THREE.BufferAttribute(_cycColors, 3));
+const _cycMat = new THREE.MeshBasicMaterial({
+  vertexColors: true,
+  side: THREE.BackSide,
+  depthWrite: false,
+  fog: false,           // cyc IS the background — fog would darken it further than intended
+});
+const _cycMesh = new THREE.Mesh(_cycGeo, _cycMat);
+_cycMesh.position.set(0, 5, 0);  // center at origin, shifted up so y range = -7 to 17
+_cycMesh.renderOrder = -1;        // render first (behind everything)
+scene.add(_cycMesh);
+
 // ─── LIGHTING ─────────────────────────────────────────────────────────────────
 // Working with the FBO shader: the cube body brightness comes from what the FBO
 // captures BEHIND the glass. The backlight is the most critical fixture — it
@@ -2276,6 +2311,7 @@ document.addEventListener('visibilitychange', function() {
   prayerRim.visible = false;
   prayerSlash.visible = false; // v8: hide slash during FBO
   prayerGlow.visible = false; // v7: hide PointLight during FBO too
+  _cycMesh.visible = false;   // cyc hidden during FBO — glass refraction shouldn't see backdrop
   renderer.setRenderTarget(fboRT);
   renderer.render(scene, camera);
   renderer.setRenderTarget(null);
@@ -2284,6 +2320,7 @@ document.addEventListener('visibilitychange', function() {
   prayerRim.visible = true;
   prayerSlash.visible = true;
   prayerGlow.visible = true;
+  _cycMesh.visible = true;
   cubeMat.uniforms.uScene.value = fboRT.texture;
 
   // Update LTC rect light uniforms — matrixWorld is current after FBO render pass
