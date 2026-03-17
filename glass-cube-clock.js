@@ -168,8 +168,10 @@ const _cycMat = new THREE.ShaderMaterial({
   },
   vertexShader: /* glsl */ `
     varying float vY;
+    varying float vX;
     void main() {
       vY = position.y;
+      vX = position.x;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `,
@@ -179,6 +181,7 @@ const _cycMat = new THREE.ShaderMaterial({
     uniform vec3 uPrayerColor;
     uniform float uPrayerIntensity;
     varying float vY;
+    varying float vX;
     void main() {
       float t = (vY + 12.0) / 24.0;  // 0 at bottom, 1 at top
       // Base gradient: bell curve at horizon (t≈0.46)
@@ -187,6 +190,12 @@ const _cycMat = new THREE.ShaderMaterial({
       // Prayer color band: wider bell at horizon, max ~7% opacity
       float prayerBand = exp(-pow((t - 0.46) / 0.15, 2.0));
       vec3 color = mix(base, uPrayerColor, prayerBand * uPrayerIntensity * 0.07);
+      // Diagonal wash: bright bottom-left → dark top-right (simulates RectAreaLight on cyc)
+      // vX range ≈ -12..12 (cylinder radius), vY range ≈ -12..12
+      float nx = (vX + 12.0) / 24.0;  // 0=left, 1=right
+      float diag = (1.0 - nx) * (1.0 - t);  // 1 at bottom-left, 0 at top-right
+      float wash = smoothstep(0.0, 1.0, diag) * 0.02;  // subtle — max 2% additive
+      color += vec3(1.0, 1.0, 1.0) * wash;  // warm white tint
       gl_FragColor = vec4(color, 1.0);
     }
   `,
@@ -933,6 +942,13 @@ var _plinthRect = new THREE.RectAreaLight(0xddddf8, 8, 6, 3);
 _plinthRect.position.set(-2, -8, 4);
 _plinthRect.lookAt(1, 0, 1.32);
 scene.add(_plinthRect);
+
+// CYC WASH — large RectAreaLight, bottom-left aimed diagonally toward top-right.
+// Creates soft diagonal gradient across the cyclorama backdrop.
+var _cycWash = new THREE.RectAreaLight(0xfff5e6, 0.12, 8, 6); // warm white, 8×6 panel — very subtle
+_cycWash.position.set(-8, -6, -10);  // bottom-left, well behind scene
+_cycWash.lookAt(4, 8, 0);            // aim diagonally toward top-right
+scene.add(_cycWash);
 
 var _plinthSpot = new THREE.SpotLight(0xddddf8, 12, 20, 0.5, 0.6, 1);
 _plinthSpot.position.set(3, 3, -1.5);
