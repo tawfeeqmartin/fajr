@@ -152,39 +152,55 @@ window.addEventListener('orientationchange', function() {
 // ─── FLOOR — removed (podium replaces ground plane) ──────────────────────────
 
 // ─── CYCLORAMA BACKDROP ──────────────────────────────────────────────────────
-// Option A: minimal silent gradient wall — adds subtle depth perception behind cube.
-// Half-cylinder, 140° arc, radius 12, unlit MeshBasicMaterial with vertical gradient.
-// Hidden during FBO pass so glass refraction doesn't see it.
+// Option B: prayer-reactive cyc — subtle horizon band tinted by active prayer color.
+// Half-cylinder, 140° arc, radius 12, ShaderMaterial with vertical gradient + prayer color.
+// Visible during FBO pass so glass cube refracts the cyc — dichroic + backdrop interplay.
 const _cycGeo = new THREE.CylinderGeometry(12, 12, 24, 32, 1, true,
   Math.PI / 2 + (Math.PI - 140 * Math.PI / 180) / 2,   // thetaStart: center the 140° arc facing +Z
   140 * Math.PI / 180                                     // thetaLength: 140°
 );
-// Vertical gradient via vertex colors: slightly lighter at horizon (y=0), fading to bg at top/bottom
-const _cycColors = new Float32Array(_cycGeo.attributes.position.count * 3);
-const _cycBg = new THREE.Color(0x0d0d12);       // scene background — top & bottom fade target
-const _cycMid = new THREE.Color(0x0e0e14);       // horizon — just barely lighter than bg
-for (let i = 0; i < _cycGeo.attributes.position.count; i++) {
-  const y = _cycGeo.attributes.position.getY(i); // ranges from -12 to +12
-  // Normalized: 0 at bottom (-12), 1 at top (+12). Horizon at ~0.46 (y≈-1 local = y≈4 world)
-  const t = (y + 12) / 24;
-  // Bell curve peaking at t≈0.46 (horizon line, roughly y=0 world with center at y=5)
-  const horizon = Math.exp(-Math.pow((t - 0.46) / 0.10, 2));
-  const c = _cycBg.clone().lerp(_cycMid, horizon);
-  _cycColors[i * 3]     = c.r;
-  _cycColors[i * 3 + 1] = c.g;
-  _cycColors[i * 3 + 2] = c.b;
-}
-_cycGeo.setAttribute('color', new THREE.BufferAttribute(_cycColors, 3));
-const _cycMat = new THREE.MeshBasicMaterial({
-  vertexColors: true,
+const _cycMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uBgColor:        { value: new THREE.Color(0x0d0d12) },  // scene background
+    uMidColor:       { value: new THREE.Color(0x0e0e14) },  // horizon — barely lighter
+    uPrayerColor:    { value: new THREE.Color(0x0d0d12) },  // current prayer cyc tint (lerped)
+    uPrayerIntensity:{ value: 0.0 },                        // 0 = no prayer, 1 = full band
+  },
+  vertexShader: /* glsl */ `
+    varying float vY;
+    void main() {
+      vY = position.y;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform vec3 uBgColor;
+    uniform vec3 uMidColor;
+    uniform vec3 uPrayerColor;
+    uniform float uPrayerIntensity;
+    varying float vY;
+    void main() {
+      float t = (vY + 12.0) / 24.0;  // 0 at bottom, 1 at top
+      // Base gradient: bell curve at horizon (t≈0.46)
+      float horizon = exp(-pow((t - 0.46) / 0.10, 2.0));
+      vec3 base = mix(uBgColor, uMidColor, horizon);
+      // Prayer color band: wider bell at horizon, max ~7% opacity
+      float prayerBand = exp(-pow((t - 0.46) / 0.15, 2.0));
+      vec3 color = mix(base, uPrayerColor, prayerBand * uPrayerIntensity * 0.07);
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `,
   side: THREE.BackSide,
   depthWrite: false,
-  fog: false,           // cyc IS the background — fog would darken it further than intended
 });
 const _cycMesh = new THREE.Mesh(_cycGeo, _cycMat);
 _cycMesh.position.set(0, 5, 0);  // center at origin, shifted up so y range = -7 to 17
 _cycMesh.renderOrder = -1;        // render first (behind everything)
 scene.add(_cycMesh);
+// Cyc prayer color lerp state
+const _cycPrayerColor = new THREE.Color(0x0d0d12);
+let _cycPrayerIntensity = 0;
+const CYC_PRAYER_LERP = 0.0009;  // ~30s transition at 60fps — very slow, barely perceptible
 
 // ─── LIGHTING ─────────────────────────────────────────────────────────────────
 // Working with the FBO shader: the cube body brightness comes from what the FBO
@@ -1444,15 +1460,15 @@ function _isLastThird(now) {
 // Active: 0.18 max opacity, upcoming: 0.08, Fajr dim: 0.05.
 
 const PRAYER_WINDOWS_DEF = [
-  { name: 'Qiyam',      startKey: 'Midnight', endKey: 'Qiyam',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false },
-  { name: 'Last Third',  startKey: 'Qiyam',   endKey: 'Fajr',     color: 0xaa44ff, color2: 0xee99ff, isFajr: false },
-  { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x6633ee, color2: 0xbb88ff, isFajr: true  },
-  { name: 'Sunrise', startKey: 'Sunrise',  endKey: 'Sunrise', endOffset: 20, color: 0x888888, color2: 0x888888, isFajr: false, isForbidden: true },
-  { name: 'Dhuha',   startKey: 'Sunrise', startOffset: 20, endKey: 'Dhuhr', color: 0xff9900, color2: 0xffee44, isFajr: false },
-  { name: 'Dhuhr',   startKey: 'Dhuhr',    endKey: 'Asr',      color: 0x00bb44, color2: 0x66ff99, isFajr: false },
-  { name: 'Asr',     startKey: 'Asr',      endKey: 'Maghrib',  color: 0xff8800, color2: 0xffcc44, isFajr: false },
-  { name: 'Maghrib', startKey: 'Maghrib',  endKey: 'Isha',     color: 0xff2200, color2: 0xff8866, isFajr: false },
-  { name: 'Isha',    startKey: 'Isha',     endKey: 'Midnight', color: 0x1166ff, color2: 0x55ccff, isFajr: false },
+  { name: 'Qiyam',      startKey: 'Midnight', endKey: 'Qiyam',    color: 0x8811ff, color2: 0xdd77ff, isFajr: false, cycColor: 0x3311aa },
+  { name: 'Last Third',  startKey: 'Qiyam',   endKey: 'Fajr',     color: 0xaa44ff, color2: 0xee99ff, isFajr: false, cycColor: 0x3311aa },
+  { name: 'Fajr',    startKey: 'Fajr',     endKey: 'Sunrise',  color: 0x6633ee, color2: 0xbb88ff, isFajr: true,  cycColor: 0x1133cc },
+  { name: 'Sunrise', startKey: 'Sunrise',  endKey: 'Sunrise', endOffset: 20, color: 0x888888, color2: 0x888888, isFajr: false, isForbidden: true, cycColor: 0xcc7700 },
+  { name: 'Dhuha',   startKey: 'Sunrise', startOffset: 20, endKey: 'Dhuhr', color: 0xff9900, color2: 0xffee44, isFajr: false, cycColor: 0xbb8800 },
+  { name: 'Dhuhr',   startKey: 'Dhuhr',    endKey: 'Asr',      color: 0x00bb44, color2: 0x66ff99, isFajr: false, cycColor: 0x22aa44 },
+  { name: 'Asr',     startKey: 'Asr',      endKey: 'Maghrib',  color: 0xff8800, color2: 0xffcc44, isFajr: false, cycColor: 0xcc8800 },
+  { name: 'Maghrib', startKey: 'Maghrib',  endKey: 'Isha',     color: 0xff2200, color2: 0xff8866, isFajr: false, cycColor: 0xcc3300 },
+  { name: 'Isha',    startKey: 'Isha',     endKey: 'Midnight', color: 0x1166ff, color2: 0x55ccff, isFajr: false, cycColor: 0x4411aa },
 ];
 
 // ── Hour hand contrast colors per prayer (complementary hue + boosted intensity) ──
@@ -1768,7 +1784,7 @@ function updatePrayerWindows(now) {
     u.uColor1.value.lerp(new THREE.Color(ps.def.color), _angLerp);
     u.uColor2.value.lerp(new THREE.Color(ps.def.color2), _angLerp);
     if (!_compassMode) _prayerDisc.visible = true;
-    _activePrayer = { startAng: ps.startAng, endAng: ps.endAng, color: ps.def.color, color2: ps.def.color2, intensity: u.uIntensity.value };
+    _activePrayer = { startAng: ps.startAng, endAng: ps.endAng, color: ps.def.color, color2: ps.def.color2, cycColor: ps.def.cycColor, intensity: u.uIntensity.value };
     // Expose highlighted prayer for UI countdown behavior during swipe preview.
     window._swipePreviewPrayer = ps.def && ps.def.name ? ps.def.name : null;
 
@@ -2289,6 +2305,19 @@ document.addEventListener('visibilitychange', function() {
   }
   prayerGlow.color.copy(_prayerGlowColor);
   prayerGlow.intensity = _prayerGlowIntensity;
+
+  // ── Cyc prayer-reactive horizon band (Option B) ────────────────────────────
+  const _cycLerp = (window._forceTimeMin != null) ? 1.0 : CYC_PRAYER_LERP;
+  if (_activePrayer && _activePrayer.cycColor != null && !_compassMode) {
+    _cycPrayerColor.lerp(new THREE.Color(_activePrayer.cycColor), _cycLerp);
+    _cycPrayerIntensity += (1.0 - _cycPrayerIntensity) * _cycLerp;
+  } else {
+    _cycPrayerColor.lerp(new THREE.Color(0x0d0d12), _cycLerp);
+    _cycPrayerIntensity += (0.0 - _cycPrayerIntensity) * _cycLerp;
+  }
+  _cycMat.uniforms.uPrayerColor.value.copy(_cycPrayerColor);
+  _cycMat.uniforms.uPrayerIntensity.value = _cycPrayerIntensity;
+
   // v7: expose debug state for render pipeline
   window._prayerDebug = {
     active: !!_activePrayer,
@@ -2311,7 +2340,7 @@ document.addEventListener('visibilitychange', function() {
   prayerRim.visible = false;
   prayerSlash.visible = false; // v8: hide slash during FBO
   prayerGlow.visible = false; // v7: hide PointLight during FBO too
-  _cycMesh.visible = false;   // cyc hidden during FBO — glass refraction shouldn't see backdrop
+  // cyc stays visible during FBO — glass refracts the backdrop for dichroic color interplay
   renderer.setRenderTarget(fboRT);
   renderer.render(scene, camera);
   renderer.setRenderTarget(null);
@@ -2320,7 +2349,6 @@ document.addEventListener('visibilitychange', function() {
   prayerRim.visible = true;
   prayerSlash.visible = true;
   prayerGlow.visible = true;
-  _cycMesh.visible = true;
   cubeMat.uniforms.uScene.value = fboRT.texture;
 
   // Update LTC rect light uniforms — matrixWorld is current after FBO render pass
