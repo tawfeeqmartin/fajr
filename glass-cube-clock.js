@@ -424,13 +424,17 @@ warmFogMesh.rotation.x = -Math.PI / 2;
 warmFogMesh.position.set(1.2, 0.017, 7.0); // far foreground — past the arch zone, doesn't fill the dark frame
 scene.add(warmFogMesh);
 
-// ── GROUND FOG — low-lying dry-ice fog at floor level ──────────────────────
-// Hides floor-to-cyc seam, softens plinth base / floor disc / mashrabiya stamp edges.
-// Multiple layers at different heights for depth. Noise-based alpha for slow drift.
+// ── GROUND FOG — vertical billboard planes facing camera ────────────────────
+// Camera at (0.2, 9.7, 15.0) looking down ~37°. Horizontal planes are invisible
+// because (a) podium occludes, (b) additive on near-black = nothing.
+// Solution: vertical planes perpendicular to camera view, positioned at ground level.
+// Shader fades to transparent above a height threshold, noise for organic edges.
 const _groundFogVert = `
   varying vec2 vUv;
+  varying vec3 vWorldPos;
   void main() {
     vUv = uv;
+    vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
@@ -438,11 +442,11 @@ const _groundFogFrag = `
   uniform float uTime;
   uniform float uOpacity;
   uniform vec3 uColor;
-  uniform float uEdgeFade;   // how quickly it fades toward center
-  uniform float uNoiseScale; // scale of noise drift
+  uniform float uNoiseScale;
+  uniform float uMaxHeight; // world-space Y above which fog fades out
   varying vec2 vUv;
+  varying vec3 vWorldPos;
 
-  // Simple 2D noise (hash-based, no texture needed)
   float hash(vec2 p) {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
   }
@@ -465,81 +469,59 @@ const _groundFogFrag = `
   }
 
   void main() {
-    vec2 c = vUv - 0.5;
-    float dist = length(c) * 2.0; // 0 at center, 1 at edge
+    // Height-based fade: dense at bottom, transparent above uMaxHeight
+    float heightFade = 1.0 - smoothstep(-1.0, uMaxHeight, vWorldPos.y);
 
-    // Thick at edges, thin toward center (plinth area)
-    float radial = smoothstep(0.25, 0.85, dist);
+    // Horizontal distance from center — fade at edges
+    float hDist = abs(vUv.x - 0.5) * 2.0;
+    float edgeFade = 1.0 - smoothstep(0.7, 1.0, hDist);
 
-    // Animated noise drift
-    vec2 noiseCoord = vUv * uNoiseScale + vec2(uTime * 0.015, uTime * 0.008);
+    // Animated noise for organic drifting edges
+    vec2 noiseCoord = vec2(vUv.x * uNoiseScale, vWorldPos.y * 0.8) + vec2(uTime * 0.02, uTime * 0.008);
     float n = fbm(noiseCoord);
-    // Second octave for more organic feel
-    float n2 = fbm(noiseCoord * 1.5 + vec2(uTime * -0.01, uTime * 0.012));
-    float noiseMask = smoothstep(0.2, 0.7, n * 0.6 + n2 * 0.4);
+    float n2 = fbm(noiseCoord * 1.4 + vec2(uTime * -0.015, uTime * 0.01));
+    float noiseMask = smoothstep(0.18, 0.62, n * 0.55 + n2 * 0.45);
 
-    // Edge softness — fade at very outer rim so it doesn't hard-clip
-    float edgeSoft = 1.0 - smoothstep(0.88, 1.0, dist);
-
-    float alpha = radial * noiseMask * edgeSoft * uOpacity;
+    float alpha = heightFade * edgeFade * noiseMask * uOpacity;
     if (alpha < 0.002) discard;
     gl_FragColor = vec4(uColor, alpha);
   }
 `;
 
-// Layer 1: Low ground fog (y = -1.2) — main seam hider, largest spread
-const _gfMat1 = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime:       { value: 0 },
-    uOpacity:    { value: 0.30 },
-    uColor:      { value: new THREE.Color(0x161620) }, // slightly lighter than bg 0x0d0d12
-    uEdgeFade:   { value: 0.85 },
-    uNoiseScale: { value: 3.0 },
-  },
-  vertexShader: _groundFogVert,
-  fragmentShader: _groundFogFrag,
-  transparent: true, depthWrite: false, blending: THREE.NormalBlending, side: THREE.DoubleSide,
+// Multiple vertical fog planes at different Z depths and angles for volume.
+// Each is a tall-but-short vertical plane spanning the scene width.
+const _gfLayers = [
+  // z, rotY, width, height, opacity, color, noise, maxH
+  { z: -4.0, rotY: 0,    w: 32, h: 6, opacity: 0.22, color: 0x1e1e38, noise: 3.0, maxH: 2.5 },
+  { z: -2.0, rotY: 0.18, w: 30, h: 6, opacity: 0.18, color: 0x1c1c34, noise: 3.5, maxH: 2.2 },
+  { z:  0.0, rotY:-0.12, w: 28, h: 5, opacity: 0.16, color: 0x202040, noise: 4.0, maxH: 2.0 },
+  { z:  2.0, rotY: 0.10, w: 26, h: 5, opacity: 0.14, color: 0x1e1e3c, noise: 4.5, maxH: 1.8 },
+  { z:  4.0, rotY:-0.15, w: 28, h: 5, opacity: 0.11, color: 0x222244, noise: 5.0, maxH: 1.5 },
+  { z:  6.0, rotY: 0.08, w: 30, h: 4, opacity: 0.09, color: 0x242448, noise: 5.5, maxH: 1.2 },
+  { z:  8.0, rotY:-0.06, w: 32, h: 4, opacity: 0.07, color: 0x262650, noise: 6.0, maxH: 1.0 },
+];
+const _gfMats = [];
+_gfLayers.forEach((cfg, i) => {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime:       { value: 0 },
+      uOpacity:    { value: cfg.opacity },
+      uColor:      { value: new THREE.Color(cfg.color) },
+      uNoiseScale: { value: cfg.noise },
+      uMaxHeight:  { value: cfg.maxH },
+    },
+    vertexShader: _groundFogVert,
+    fragmentShader: _groundFogFrag,
+    transparent: true, depthWrite: false, blending: THREE.NormalBlending, side: THREE.DoubleSide,
+  });
+  _gfMats.push(mat);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(cfg.w, cfg.h), mat);
+  // Position: centered X, bottom edge near floor, at various Z depths
+  mesh.position.set(0, cfg.h / 2 - 1.5, cfg.z);
+  mesh.rotation.y = cfg.rotY;
+  mesh.renderOrder = -10 + i;
+  scene.add(mesh);
 });
-const _gfMesh1 = new THREE.Mesh(new THREE.PlaneGeometry(28, 28), _gfMat1);
-_gfMesh1.rotation.x = -Math.PI / 2;
-_gfMesh1.position.y = -1.2;
-scene.add(_gfMesh1);
-
-// Layer 2: Mid fog (y = -0.7) — thinner, different noise phase
-const _gfMat2 = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime:       { value: 0 },
-    uOpacity:    { value: 0.20 },
-    uColor:      { value: new THREE.Color(0x141420) },
-    uEdgeFade:   { value: 0.80 },
-    uNoiseScale: { value: 4.5 },
-  },
-  vertexShader: _groundFogVert,
-  fragmentShader: _groundFogFrag,
-  transparent: true, depthWrite: false, blending: THREE.NormalBlending, side: THREE.DoubleSide,
-});
-const _gfMesh2 = new THREE.Mesh(new THREE.PlaneGeometry(22, 22), _gfMat2);
-_gfMesh2.rotation.x = -Math.PI / 2;
-_gfMesh2.position.y = -0.7;
-scene.add(_gfMesh2);
-
-// Layer 3: Upper wisps (y = -0.3) — lightest, smallest, most transparent
-const _gfMat3 = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime:       { value: 0 },
-    uOpacity:    { value: 0.12 },
-    uColor:      { value: new THREE.Color(0x181826) },
-    uEdgeFade:   { value: 0.75 },
-    uNoiseScale: { value: 6.0 },
-  },
-  vertexShader: _groundFogVert,
-  fragmentShader: _groundFogFrag,
-  transparent: true, depthWrite: false, blending: THREE.NormalBlending, side: THREE.DoubleSide,
-});
-const _gfMesh3 = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), _gfMat3);
-_gfMesh3.rotation.x = -Math.PI / 2;
-_gfMesh3.position.y = -0.3;
-scene.add(_gfMesh3);
 
 // SACRED SHAFT COLUMN — god ray in the gobo beam path.
 // Gives the shaft air-mass: light you feel, not just see.
@@ -2021,9 +2003,7 @@ document.addEventListener('visibilitychange', function() {
   fogLayerMat.uniforms.uTime.value = t;
   warmFogMat.uniforms.uTime.value = t;
   godRayMat.uniforms.uTime.value = t;
-  _gfMat1.uniforms.uTime.value = t;
-  _gfMat2.uniforms.uTime.value = t + 17.0; // phase offset for variety
-  _gfMat3.uniforms.uTime.value = t + 31.0; // different phase
+  _gfMats.forEach((m, i) => { m.uniforms.uTime.value = t + i * 13.0; });
   _shaftMat.uniforms.time.value = t;
 
   // Sync hands to clock time (real, dev override, or swipe preview)
