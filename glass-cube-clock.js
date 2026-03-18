@@ -194,7 +194,7 @@ const _cycMat = new THREE.ShaderMaterial({
       // vX range ≈ -12..12 (cylinder radius), vY range ≈ -12..12
       float nx = (vX + 12.0) / 24.0;  // 0=left, 1=right
       float diag = (1.0 - nx) * (1.0 - t);  // 1 at bottom-left, 0 at top-right
-      float wash = smoothstep(0.0, 1.0, diag) * 0.12;  // subtle — max 2% additive
+      float wash = smoothstep(0.0, 1.0, diag) * 0.28;  // subtle — max 2% additive
       color += uPrayerColor * wash * uPrayerIntensity * 3.0;  // prayer-colored diagonal wash
       gl_FragColor = vec4(color, 1.0);
     }
