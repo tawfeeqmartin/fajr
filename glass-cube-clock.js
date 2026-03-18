@@ -84,7 +84,7 @@ const fboRT = new THREE.WebGLRenderTarget(W * dpr, H * dpr, {
 const scene = new THREE.Scene();
 // Dark scene — glass refraction and dichroic dispersion pop against near-black
 scene.background = new THREE.Color(0x0d0d12);
-scene.fog = new THREE.FogExp2(0x0d0d12, 0.035);
+// scene.fog removed — fog experiment didn't work
 
 const camera = new THREE.PerspectiveCamera(78, W / H, 0.01, 1000);
 
@@ -161,7 +161,7 @@ const _cycGeo = new THREE.CylinderGeometry(12, 12, 24, 32, 1, true,
 );
 const _cycMat = new THREE.ShaderMaterial({
   uniforms: {
-    uBgColor:        { value: new THREE.Color(0x0d0d12) },  // scene background
+    uBgColor:        { value: new THREE.Color(0x2e2e2e) },  // 18% grey (#2E2E2E)
     uMidColor:       { value: new THREE.Color(0x0e0e14) },  // horizon — barely lighter
     uPrayerColor:    { value: new THREE.Color(0x0d0d12) },  // current prayer cyc tint (lerped)
     uPrayerIntensity:{ value: 0.0 },                        // 0 = no prayer, 1 = full band
@@ -195,7 +195,7 @@ const _cycMat = new THREE.ShaderMaterial({
       float nx = (vX + 12.0) / 24.0;  // 0=left, 1=right
       float diag = (1.0 - nx) * (1.0 - t);  // 1 at bottom-left, 0 at top-right
       float wash = smoothstep(0.0, 1.0, diag) * 0.28;  // subtle — max 2% additive
-      color += uPrayerColor * wash * uPrayerIntensity * 3.0;  // prayer-colored diagonal wash
+      color += vec3(1.0, 1.0, 1.0) * wash * uPrayerIntensity * 3.0;  // white diagonal wash
       gl_FragColor = vec4(color, 1.0);
     }
   `,
@@ -367,161 +367,7 @@ const PRAYER_RIM_MAX = 5.0;    // v8d: Fresnel edge catch on glass cube
 const PRAYER_SLASH_MAX = 25.0; // v9: boosted intensity
 const PRAYER_LIGHT_LERP = 0.022; // ~3s transition at 60fps — slower = more sacred
 
-// ─── GROUND FOG LAYER ─────────────────────────────────────────────────────────
-const fogLayerMat = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime:    { value: 0 },
-    uOpacity: { value: 0.27 }, // deeper pool — feels like the floor breathes
-    uColor:   { value: new THREE.Color(0x1a2888) }, // richer indigo, less cyan
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
-  `,
-  fragmentShader: `
-    uniform float uTime; uniform float uOpacity; uniform vec3 uColor;
-    varying vec2 vUv;
-    void main() {
-      vec2 c = vUv - 0.5;
-      float dist = length(c) * 2.0;
-      float fog = (1.0 - smoothstep(0.15, 1.0, dist));
-      float breath = 0.88 + 0.12 * sin(uTime * 0.6);
-      gl_FragColor = vec4(uColor, fog * uOpacity * breath);
-    }
-  `,
-  transparent: true, depthWrite: false, blending: THREE.NormalBlending, side: THREE.DoubleSide,
-});
-const fogLayerMesh = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), fogLayerMat);
-fogLayerMesh.rotation.x = -Math.PI / 2;
-fogLayerMesh.position.y = 0.018;
-scene.add(fogLayerMesh);
-
-// WARM FLOOR GLOW — sacred amber pool in the foreground floor zone.
-// Additive: only adds warmth, never darkens. Fills the dead lower frame area.
-// Counterbalances the cold indigo fog — sacred warmth vs night cold.
-const warmFogMat = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime:    { value: 0 },
-    uOpacity: { value: 0.09 },  // v56: 0.07→0.09 — lower frame breathes, not dead
-    uColor:   { value: new THREE.Color(0x9e4200) }, // deep amber, not blown out
-  },
-  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-  fragmentShader: `
-    uniform float uTime, uOpacity; uniform vec3 uColor;
-    varying vec2 vUv;
-    void main() {
-      vec2 c = vUv - 0.5;
-      float dist = length(c) * 2.5;
-      float fog = 1.0 - smoothstep(0.05, 1.0, dist);
-      float breath = 0.88 + 0.12 * sin(uTime * 0.52 + 0.9);
-      gl_FragColor = vec4(uColor, fog * uOpacity * breath);
-    }
-  `,
-  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
-});
-const warmFogMesh = new THREE.Mesh(new THREE.PlaneGeometry(55, 55), warmFogMat);
-warmFogMesh.rotation.x = -Math.PI / 2;
-warmFogMesh.position.set(1.2, 0.017, 7.0); // far foreground — past the arch zone, doesn't fill the dark frame
-scene.add(warmFogMesh);
-
-// ── GROUND FOG — vertical billboard planes facing camera ────────────────────
-// Camera at (0.2, 9.7, 15.0) looking down ~37°. Horizontal planes are invisible
-// because (a) podium occludes, (b) additive on near-black = nothing.
-// Solution: vertical planes perpendicular to camera view, positioned at ground level.
-// Shader fades to transparent above a height threshold, noise for organic edges.
-const _groundFogVert = `
-  varying vec2 vUv;
-  varying vec3 vWorldPos;
-  void main() {
-    vUv = uv;
-    vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-const _groundFogFrag = `
-  uniform float uTime;
-  uniform float uOpacity;
-  uniform vec3 uColor;
-  uniform float uNoiseScale;
-  uniform float uMaxHeight; // world-space Y above which fog fades out
-  varying vec2 vUv;
-  varying vec3 vWorldPos;
-
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-  }
-  float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-  }
-  float fbm(vec2 p) {
-    float v = 0.0;
-    v += 0.5 * noise(p); p *= 2.01;
-    v += 0.25 * noise(p); p *= 2.02;
-    v += 0.125 * noise(p);
-    return v;
-  }
-
-  void main() {
-    // Height-based fade: dense at bottom, transparent above uMaxHeight
-    float heightFade = 1.0 - smoothstep(-1.0, uMaxHeight, vWorldPos.y);
-
-    // Horizontal distance from center — fade at edges
-    float hDist = abs(vUv.x - 0.5) * 2.0;
-    float edgeFade = 1.0 - smoothstep(0.7, 1.0, hDist);
-
-    // Animated noise for organic drifting edges
-    vec2 noiseCoord = vec2(vUv.x * uNoiseScale, vWorldPos.y * 0.8) + vec2(uTime * 0.02, uTime * 0.008);
-    float n = fbm(noiseCoord);
-    float n2 = fbm(noiseCoord * 1.4 + vec2(uTime * -0.015, uTime * 0.01));
-    float noiseMask = smoothstep(0.18, 0.62, n * 0.55 + n2 * 0.45);
-
-    float alpha = heightFade * edgeFade * noiseMask * uOpacity;
-    if (alpha < 0.002) discard;
-    gl_FragColor = vec4(uColor, alpha);
-  }
-`;
-
-// Multiple vertical fog planes at different Z depths and angles for volume.
-// Each is a tall-but-short vertical plane spanning the scene width.
-const _gfLayers = [
-  // z, rotY, width, height, opacity, color, noise, maxH
-  { z: -4.0, rotY: 0,    w: 32, h: 6, opacity: 0.22, color: 0x1e1e38, noise: 3.0, maxH: 2.5 },
-  { z: -2.0, rotY: 0.18, w: 30, h: 6, opacity: 0.18, color: 0x1c1c34, noise: 3.5, maxH: 2.2 },
-  { z:  0.0, rotY:-0.12, w: 28, h: 5, opacity: 0.16, color: 0x202040, noise: 4.0, maxH: 2.0 },
-  { z:  2.0, rotY: 0.10, w: 26, h: 5, opacity: 0.14, color: 0x1e1e3c, noise: 4.5, maxH: 1.8 },
-  { z:  4.0, rotY:-0.15, w: 28, h: 5, opacity: 0.11, color: 0x222244, noise: 5.0, maxH: 1.5 },
-  { z:  6.0, rotY: 0.08, w: 30, h: 4, opacity: 0.09, color: 0x242448, noise: 5.5, maxH: 1.2 },
-  { z:  8.0, rotY:-0.06, w: 32, h: 4, opacity: 0.07, color: 0x262650, noise: 6.0, maxH: 1.0 },
-];
-const _gfMats = [];
-_gfLayers.forEach((cfg, i) => {
-  const mat = new THREE.ShaderMaterial({
-    uniforms: {
-      uTime:       { value: 0 },
-      uOpacity:    { value: cfg.opacity },
-      uColor:      { value: new THREE.Color(cfg.color) },
-      uNoiseScale: { value: cfg.noise },
-      uMaxHeight:  { value: cfg.maxH },
-    },
-    vertexShader: _groundFogVert,
-    fragmentShader: _groundFogFrag,
-    transparent: true, depthWrite: false, blending: THREE.NormalBlending, side: THREE.DoubleSide,
-  });
-  _gfMats.push(mat);
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(cfg.w, cfg.h), mat);
-  // Position: centered X, bottom edge near floor, at various Z depths
-  mesh.position.set(0, cfg.h / 2 - 1.5, cfg.z);
-  mesh.rotation.y = cfg.rotY;
-  mesh.renderOrder = -10 + i;
-  scene.add(mesh);
-});
+// ─── GROUND FOG removed — experiment didn't work ─────────────────────────────
 
 // SACRED SHAFT COLUMN — god ray in the gobo beam path.
 // Gives the shaft air-mass: light you feel, not just see.
@@ -2000,10 +1846,7 @@ document.addEventListener('visibilitychange', function() {
     t = (window._forceTimeMin / 1440) * 60.0;
   }
   cubeMat.uniforms.uTime.value = t;
-  fogLayerMat.uniforms.uTime.value = t;
-  warmFogMat.uniforms.uTime.value = t;
   godRayMat.uniforms.uTime.value = t;
-  _gfMats.forEach((m, i) => { m.uniforms.uTime.value = t + i * 13.0; });
   _shaftMat.uniforms.time.value = t;
 
   // Sync hands to clock time (real, dev override, or swipe preview)
