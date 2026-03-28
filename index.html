@@ -2445,24 +2445,16 @@ function _initPrayerTimeline(){
 }
 
 function _ptlRenderDots(marks, activeName, nowMin){
-  // Find the min and max minute values to map to 0-100%
-  // We use a 24h proportional layout — the leftmost prayer to rightmost prayer
-  // Use a fixed day window: Fajr is always early, Qiyam/Midnight is always late
-  // Map each prayer's minute position proportionally across the timeline width
   var names=_ptlNames;
-  var minArr=names.map(function(n){ return marks[n]||0; });
-  // Sort marks to determine spread. Use a logical day start: 240 min (4am) as start
-  // Anything before 4am wraps to "next day" conceptually (Qiyam is midnight-ish)
-  var DAY_ANCHOR=240; // 4:00am — anything < this is treated as after-midnight (add 1440)
-  var adjArr=minArr.map(function(m){ return m < DAY_ANCHOR ? m+1440 : m; });
-  var aMin=Math.min.apply(null,adjArr);
-  var aMax=Math.max.apply(null,adjArr);
-  var span=aMax-aMin||1;
+  // Rolling order: start from active prayer, wrap around
+  var activeIdx=0;
+  for(var i=0;i<names.length;i++){if(names[i]===activeName){activeIdx=i;break;}}
+  var ordered=[];
+  for(var i=0;i<names.length;i++){ordered.push(names[(activeIdx+i)%names.length]);}
   var html='';
-  for(var i=0;i<names.length;i++){
-    var n=names[i];
-    var adj=adjArr[i];
-    var pct=(i/(names.length-1))*86+7; // equal spacing: 7%-93%
+  for(var i=0;i<ordered.length;i++){
+    var n=ordered[i];
+    var pct=(i/(ordered.length-1))*86+7; // equal spacing: 7%-93%
     var isActive=(n===activeName);
     var col=_ptlPrayerColors[n]||'rgba(232,228,220,.38)';
     var colorStyle=isActive?(' style="color:'+col+'"'):'';
@@ -2471,6 +2463,8 @@ function _ptlRenderDots(marks, activeName, nowMin){
     html+='<div class="ptl-dot-label">'+n+'</div>';
     html+='</div>';
   }
+  // Store ordered names for progress dot calculation
+  window._ptlOrdered=ordered;
   return html;
 }
 
@@ -2528,10 +2522,11 @@ function _updatePrayerTimeline(){
 
   // Re-render dots if marks changed (first time or after city change)
   var dotsEl=document.getElementById('ptlDots');
-  if(dotsEl && dotsEl.querySelectorAll('.ptl-dot').length!==names.length){
+  var _curActive=dotsEl?dotsEl.getAttribute('data-active'):''; if(dotsEl && (_curActive!==activeName || dotsEl.querySelectorAll('.ptl-dot').length!==names.length)){
     // Replace inner content preserving progress dot
     var prog=document.getElementById('ptlProgress');
     dotsEl.innerHTML=_ptlRenderDots(marks,activeName,nowMin);
+    dotsEl.setAttribute('data-active',activeName);
     if(prog){ dotsEl.appendChild(prog); }
     else {
       var np=document.createElement('div');
@@ -2561,12 +2556,17 @@ function _updatePrayerTimeline(){
   if(progInWindow<0) progInWindow=0;
   if(progInWindow>1) progInWindow=1;
 
-  // Map prevIdx/nextIdx to EQUAL-SPACED visual positions
-  // Labels are at equal intervals, but dot speed is proportional to real time
-  var prevPct=(prevIdx/(names.length-1))*86+7;
-  var nextPct=(nextIdx/(names.length-1))*86+7;
-  // Handle wrap (Qiyam→Fajr)
-  if(nextIdx<=prevIdx) nextPct=93;
+  // Map to rolling visual positions (active=leftmost=7%)
+  // In rolling layout, active is always position 0, next is position 1, etc.
+  var ordered=window._ptlOrdered||names;
+  var prevVisIdx=0,nextVisIdx=1;
+  for(var vi=0;vi<ordered.length;vi++){
+    if(ordered[vi]===names[prevIdx]) prevVisIdx=vi;
+    if(ordered[vi]===names[nextIdx]) nextVisIdx=vi;
+  }
+  var prevPct=(prevVisIdx/(ordered.length-1))*86+7;
+  var nextPct=(nextVisIdx/(ordered.length-1))*86+7;
+  if(nextVisIdx<=prevVisIdx) nextPct=93;
   var progPct=prevPct+(nextPct-prevPct)*progInWindow;
 
   // Color = active prayer color
