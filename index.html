@@ -2504,11 +2504,25 @@ function _updatePrayerTimeline(){
     var pn=d.getAttribute('data-prayer');
     var isActive=(pn===activeName);
     d.classList.toggle('active',isActive);
+    // Rolling visibility: active=full, next 2 progressively dimmer, rest faint
+    var pIdx=-1;
+    for(var ii=0;ii<names.length;ii++){if(names[ii]===pn){pIdx=ii;break;}}
+    var aIdx=-1;
+    for(var ii=0;ii<names.length;ii++){if(names[ii]===activeName){aIdx=ii;break;}}
+    var dist=(pIdx-aIdx+names.length)%names.length; // 0=active, 1=next, 2=after
     if(isActive){
-      var col=_ptlPrayerColors[pn]||'rgba(232,228,220,.38)';
+      var col=_ptlPrayerColors[pn]||'rgba(232,228,220,.65)';
       d.style.color=col;
+      d.style.opacity='1';
+    } else if(dist===1){
+      d.style.color='rgba(232,228,220,.55)';
+      d.style.opacity='1';
+    } else if(dist===2){
+      d.style.color='rgba(232,228,220,.35)';
+      d.style.opacity='1';
     } else {
-      d.style.color='';
+      d.style.color='rgba(232,228,220,.15)';
+      d.style.opacity='1';
     }
   });
 
