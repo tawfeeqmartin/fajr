@@ -2462,7 +2462,7 @@ function _ptlRenderDots(marks, activeName, nowMin){
   for(var i=0;i<names.length;i++){
     var n=names[i];
     var adj=adjArr[i];
-    var pct=((adj-aMin)/span*86+7); // 7%-93% range to keep labels inside container
+    var pct=(i/(names.length-1))*86+7; // equal spacing: 7%-93%
     var isActive=(n===activeName);
     var col=_ptlPrayerColors[n]||'rgba(232,228,220,.38)';
     var colorStyle=isActive?(' style="color:'+col+'"'):'';
@@ -2547,9 +2547,12 @@ function _updatePrayerTimeline(){
   if(progInWindow<0) progInWindow=0;
   if(progInWindow>1) progInWindow=1;
 
-  // Map prevIdx and nextIdx dot positions to pct
-  var prevPct=((prevAdj-aMin)/span*86+7);
-  var nextPct=((nextAdj<=aMax?(nextAdj-aMin)/span*86+7:93));
+  // Map prevIdx/nextIdx to EQUAL-SPACED visual positions
+  // Labels are at equal intervals, but dot speed is proportional to real time
+  var prevPct=(prevIdx/(names.length-1))*86+7;
+  var nextPct=(nextIdx/(names.length-1))*86+7;
+  // Handle wrap (Qiyam→Fajr)
+  if(nextIdx<=prevIdx) nextPct=93;
   var progPct=prevPct+(nextPct-prevPct)*progInWindow;
 
   // Color = active prayer color
