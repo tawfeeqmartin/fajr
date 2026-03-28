@@ -298,6 +298,59 @@ body::after{display:none;
   opacity:1;transition:opacity .4s ease;
   pointer-events:none;
 }
+#prayerTimeline{
+  position:fixed;
+  bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 62px + 24px);
+  left:50%;transform:translateX(-50%);z-index:950;
+  opacity:1;transition:opacity .4s ease;
+  pointer-events:none;
+}
+
+/* ── Prayer Timeline Bar ── */
+.prayer-timeline{
+  position:relative;width:88vw;max-width:380px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;user-select:none;
+}
+.prayer-timeline-track{
+  position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  height:1px;background:rgba(255,255,255,.13);
+}
+.prayer-timeline-dots{
+  position:relative;width:100%;height:28px;
+  display:flex;align-items:center;
+}
+.ptl-dot{
+  position:absolute;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:color .4s ease;
+}
+.ptl-dot-circle{
+  width:4px;height:4px;border-radius:50%;
+  background:rgba(232,228,220,.25);
+  transition:background .4s ease, transform .3s ease;
+  flex-shrink:0;
+}
+.ptl-dot.active .ptl-dot-circle{
+  background:currentColor;transform:scale(1.4);
+}
+.ptl-dot-label{
+  font-family:var(--font);font-size:9px;font-weight:300;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(232,228,220,.3);margin-top:1px;
+  transition:color .4s ease, font-weight .3s ease, opacity .3s ease;
+  white-space:nowrap;
+}
+.ptl-dot.active .ptl-dot-label{
+  color:currentColor;font-weight:500;opacity:1;
+}
+.ptl-progress{
+  position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(232,228,220,.55);
+  transition:left .8s linear, background .4s ease;
+  flex-shrink:0;
+}
 
 /* header-prayer-bar removed - prayer times in global .fs-header now */
 
@@ -481,7 +534,8 @@ body.mode-compass .clock-sticky{display:none!important}
 
 body.mode-info .clock-sticky{display:none}
 body.mode-info #headerBar,body.mode-info .fs-header{opacity:0!important;pointer-events:none;transition:none}
-body.mode-info .mode-label{opacity:0!important;pointer-events:none;transition-delay:4s!important}
+body.mode-info .mode-label,
+body.mode-info #prayerTimeline{opacity:0!important;pointer-events:none;transition-delay:4s!important}
 body.mode-compass #_currentPrayerLabel,body.mode-compass #_prayerDots,
 body.mode-info #_currentPrayerLabel,body.mode-info #_prayerDots{opacity:0!important;pointer-events:none}
 body.mode-info .scroll-section,
@@ -706,6 +760,7 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 /* Tap-to-hide: all UI hidden in clock/compass */
 body.chrome-hidden .fs-header,
 body.chrome-hidden .mode-label,
+body.chrome-hidden #prayerTimeline,
 body.chrome-hidden .mode-pill,
 body.chrome-hidden #qadrFloatBtn,
 /* body.chrome-hidden #fsVersionTag - kept visible during dev */
@@ -2352,6 +2407,157 @@ try{
   window._isRamadan=/ramadan/i.test(_hMonth);
 }catch(e){}
 
+// ── Prayer Timeline Bar ──
+var _ptlPrayerColors={Fajr:'#6633ee',Sunrise:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff',Qiyam:'#8811ff'};
+var _ptlNames=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam'];
+
+function _ptlGetMarks(){
+  var t=window._prayerTimings;
+  if(!t) return null;
+  var toMin=function(s){ var parts=String(s||'0:0').split(':').map(Number); return ((parts[0]||0)*60+(parts[1]||0))%1440; };
+  return {
+    Fajr:    toMin(t.Fajr),
+    Sunrise: toMin(t.Sunrise),
+    Dhuhr:   toMin(t.Dhuhr),
+    Asr:     toMin(t.Asr),
+    Maghrib: toMin(t.Maghrib),
+    Isha:    toMin(t.Isha),
+    Qiyam:   toMin(t.Midnight||t.Qiyam||'00:00')
+  };
+}
+
+function _initPrayerTimeline(){
+  // Populate the static #prayerTimeline div (already in DOM) with inner skeleton
+  var tlEl=document.getElementById('prayerTimeline');
+  if(!tlEl) return;
+  var html='<div class="prayer-timeline">';
+  html+='<div class="prayer-timeline-track"></div>';
+  html+='<div class="prayer-timeline-dots" id="ptlDots">';
+  var marks=_ptlGetMarks();
+  if(marks){ html+=_ptlRenderDots(marks, null, 0); }
+  html+='<div class="ptl-progress" id="ptlProgress" style="left:0%"></div>';
+  html+='</div></div>';
+  tlEl.innerHTML=html;
+}
+
+function _ptlRenderDots(marks, activeName, nowMin){
+  // Find the min and max minute values to map to 0-100%
+  // We use a 24h proportional layout — the leftmost prayer to rightmost prayer
+  // Use a fixed day window: Fajr is always early, Qiyam/Midnight is always late
+  // Map each prayer's minute position proportionally across the timeline width
+  var names=_ptlNames;
+  var minArr=names.map(function(n){ return marks[n]||0; });
+  // Sort marks to determine spread. Use a logical day start: 240 min (4am) as start
+  // Anything before 4am wraps to "next day" conceptually (Qiyam is midnight-ish)
+  var DAY_ANCHOR=240; // 4:00am — anything < this is treated as after-midnight (add 1440)
+  var adjArr=minArr.map(function(m){ return m < DAY_ANCHOR ? m+1440 : m; });
+  var aMin=Math.min.apply(null,adjArr);
+  var aMax=Math.max.apply(null,adjArr);
+  var span=aMax-aMin||1;
+  var html='';
+  for(var i=0;i<names.length;i++){
+    var n=names[i];
+    var adj=adjArr[i];
+    var pct=((adj-aMin)/span*86+7); // 7%-93% range to keep labels inside container
+    var isActive=(n===activeName);
+    var col=_ptlPrayerColors[n]||'rgba(232,228,220,.38)';
+    var colorStyle=isActive?(' style="color:'+col+'"'):'';
+    html+='<div class="ptl-dot'+(isActive?' active':'')+'" data-prayer="'+n+'" style="left:'+pct.toFixed(1)+'%"'+colorStyle+'>';
+    html+='<div class="ptl-dot-circle"></div>';
+    html+='<div class="ptl-dot-label">'+n+'</div>';
+    html+='</div>';
+  }
+  return html;
+}
+
+function _updatePrayerTimeline(){
+  var tlEl=document.getElementById('prayerTimeline');
+  if(!tlEl) return;
+  var marks=_ptlGetMarks();
+  if(!marks) return;
+
+  var t=window._prayerTimings;
+  var now=typeof _cityNow==='function'?_cityNow():new Date();
+  var nowMin=(now.getHours()*60+now.getMinutes()+(now.getSeconds()/60))%1440;
+
+  // Determine active prayer (current window)
+  var names=_ptlNames;
+  var DAY_ANCHOR=240;
+  var adjArr=names.map(function(n){ var m=marks[n]||0; return m<DAY_ANCHOR?m+1440:m; });
+  var adjNow=nowMin<DAY_ANCHOR?nowMin+1440:nowMin;
+
+  // active = the prayer whose window we're in (last passed prayer)
+  var activeName=names[names.length-1];
+  for(var i=0;i<names.length-1;i++){
+    if(adjNow>=adjArr[i] && adjNow<adjArr[i+1]){ activeName=names[i]; break; }
+  }
+  // If before first prayer of the day (Fajr), active = last (Qiyam)
+  if(adjNow<adjArr[0]) activeName=names[names.length-1];
+
+  // Update dot states
+  var dots=tlEl.querySelectorAll('.ptl-dot');
+  dots.forEach(function(d){
+    var pn=d.getAttribute('data-prayer');
+    var isActive=(pn===activeName);
+    d.classList.toggle('active',isActive);
+    if(isActive){
+      var col=_ptlPrayerColors[pn]||'rgba(232,228,220,.38)';
+      d.style.color=col;
+    } else {
+      d.style.color='';
+    }
+  });
+
+  // Re-render dots if marks changed (first time or after city change)
+  var dotsEl=document.getElementById('ptlDots');
+  if(dotsEl && dotsEl.querySelectorAll('.ptl-dot').length!==names.length){
+    // Replace inner content preserving progress dot
+    var prog=document.getElementById('ptlProgress');
+    dotsEl.innerHTML=_ptlRenderDots(marks,activeName,nowMin);
+    if(prog){ dotsEl.appendChild(prog); }
+    else {
+      var np=document.createElement('div');
+      np.className='ptl-progress';np.id='ptlProgress';
+      dotsEl.appendChild(np);
+    }
+  }
+
+  // Progress dot position: interpolate between prev and next prayer
+  var aMin=Math.min.apply(null,adjArr);
+  var aMax=Math.max.apply(null,adjArr);
+  var span=aMax-aMin||1;
+
+  // Find prev/next prayer for interpolation
+  var prevIdx=0,nextIdx=1;
+  for(var j=0;j<names.length-1;j++){
+    if(adjNow>=adjArr[j]&&adjNow<adjArr[j+1]){ prevIdx=j; nextIdx=j+1; break; }
+  }
+  if(adjNow<adjArr[0]){ prevIdx=names.length-1; nextIdx=0; }
+
+  var prevAdj=adjArr[prevIdx];
+  var nextAdj=adjArr[nextIdx];
+  // Handle wrap: if next is less than prev in adj space (shouldn't happen with our setup, but be safe)
+  if(nextAdj<=prevAdj) nextAdj+=1440;
+  var windowSpan=nextAdj-prevAdj||1;
+  var progInWindow=(adjNow-prevAdj)/windowSpan;
+  if(progInWindow<0) progInWindow=0;
+  if(progInWindow>1) progInWindow=1;
+
+  // Map prevIdx and nextIdx dot positions to pct
+  var prevPct=((prevAdj-aMin)/span*86+7);
+  var nextPct=((nextAdj<=aMax?(nextAdj-aMin)/span*86+7:93));
+  var progPct=prevPct+(nextPct-prevPct)*progInWindow;
+
+  // Color = active prayer color
+  var progColor=_ptlPrayerColors[activeName]||'rgba(232,228,220,.55)';
+
+  var progEl=document.getElementById('ptlProgress');
+  if(progEl){
+    progEl.style.left=progPct.toFixed(2)+'%';
+    progEl.style.background=progColor;
+  }
+}
+
 // ── Nav bar live clock + next prayer ──
 let _navClockTimer=null;
 window._countdownPref = window._countdownPref || 'auto'; // 'auto' | 'iftar' | 'next' | 'qiyam'
@@ -2584,6 +2790,9 @@ function updateNavClock(){
   const t5=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
   const elTimes=document.getElementById('navTimes');
   if(elTimes&&!elTimes._set){ elTimes.textContent=t5.map(p=>p+' '+((t[p]||'').split(' ')[0])).join(' · '); elTimes._set=true; }
+
+  // Update prayer timeline bar if in clock mode
+  _updatePrayerTimeline();
 }
 window.updateNavClock = updateNavClock;
 
@@ -3808,6 +4017,8 @@ function _setPrayerLocation(lat, lon, locationName, _skipSave) {
   window._prayerTimingsReady = true;
   // Rebuild prayer window arcs for new location (no page refresh needed)
   if (typeof window.buildPrayerSectors === 'function') window.buildPrayerSectors();
+  // Rebuild prayer timeline bar for new prayer times
+  _initPrayerTimeline();
   // Pre-compute Qibla bearing from this location (always recompute on city switch)
   var rLat = lat * Math.PI / 180, rLng = lon * Math.PI / 180;
   var mLat = 21.4225 * Math.PI / 180, mLng = 39.8262 * Math.PI / 180;
@@ -4012,6 +4223,8 @@ function switchMode(mode) {
     _ml.style.opacity = '1';
     clearTimeout(_ml._fadeTimer);
   }
+  // Prayer timeline: visible in clock mode only, trigger update
+  if(mode === 'clock' && typeof updateNavClock === 'function') setTimeout(updateNavClock, 0);
 
   // Mode-specific logic
   if(mode === 'clock') {
@@ -4046,6 +4259,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fade page label after initial show
   var _ml = document.getElementById('modeLabel');
   if(_ml){ _ml.style.opacity = '1'; }
+  // Initialize prayer timeline skeleton
+  _initPrayerTimeline();
 });
 
 // ── Clock onboarding ──
@@ -5018,6 +5233,7 @@ setTimeout(setupScrollObservers,500);
 </div>
 
 <!-- Mode Pill -->
+<div id="prayerTimeline"></div>
 <div class="mode-label" id="modeLabel">CLOCK</div>
 <div class="mode-pill" id="modePill" style="position:fixed;overflow:visible">
   <div class="mode-pill-slider" id="modePillSlider" data-pos="0"></div>
