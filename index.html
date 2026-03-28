@@ -325,19 +325,19 @@ body::after{display:none;
   display:flex;flex-direction:column;align-items:center;gap:2px;
   transition:color .4s ease;
 }
-.ptl-dot-circle{
+.ptl-dot-circle{display:none;
   width:4px;height:4px;border-radius:50%;
   background:rgba(232,228,220,.25);
   transition:background .4s ease, transform .3s ease;
   flex-shrink:0;
 }
-.ptl-dot.active .ptl-dot-circle{
+.ptl-dot.active .ptl-dot-circle{display:none;
   background:currentColor;transform:scale(1.4);
 }
 .ptl-dot-label{
   font-family:var(--font);font-size:9px;font-weight:300;
   letter-spacing:.06em;text-transform:uppercase;
-  color:rgba(232,228,220,.3);margin-top:1px;
+  color:rgba(232,228,220,.3);margin-top:7px;
   transition:color .4s ease, font-weight .3s ease, opacity .3s ease;
   white-space:nowrap;
 }
