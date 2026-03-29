@@ -812,10 +812,9 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   </div>
   <script>
   (function(){
-    // Skip full splash on repeat visits — edge pulse only
-    var _splashSeen = false;
-    try { _splashSeen = localStorage.getItem('agot_splash_seen') === '1'; } catch(e){}
-    window._skipSplash = _splashSeen;
+    // Always use edge-draw splash (text intro disabled for now)
+    var _splashSeen = true;
+    window._skipSplash = true;
     if (_splashSeen) {
       // Keep splash as solid dark cover — hides scene until textures ready
       var _sp = document.getElementById('splash');
