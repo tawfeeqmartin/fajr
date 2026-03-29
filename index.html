@@ -2462,8 +2462,12 @@ function _ptlRenderDots(marks, activeName, nowMin){
   var fard=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
   var nonFard=['Sunrise','Dhuha','Qiyam','Last Third'];
   // Find which non-fard is active or next upcoming
+  // Swipe override: if swiping to a non-fard, show it as the 6th slot
+  var _swPrev=window._swipePreviewPrayer||'';
   var sixthSlot='';
-  if(nonFard.indexOf(activeName)!==-1){
+  if(_swPrev && nonFard.indexOf(_swPrev)!==-1){
+    sixthSlot=_swPrev;
+  } else if(nonFard.indexOf(activeName)!==-1){
     sixthSlot=activeName;
   } else {
     var DAY_ANCHOR=240;
