@@ -2430,14 +2430,21 @@ function _ptlGetMarks(){
   var t=window._prayerTimings;
   if(!t) return null;
   var toMin=function(s){ var parts=String(s||'0:0').split(':').map(Number); return ((parts[0]||0)*60+(parts[1]||0))%1440; };
+  var ishaMin=toMin(t.Isha);
+  var fajrMin=toMin(t.Fajr);
+  var midnightMin=toMin(t.Midnight||t.Qiyam||'00:00');
+  // Last third: Isha + 2/3 of night duration
+  var nightLen=fajrMin>ishaMin?fajrMin-ishaMin:fajrMin+1440-ishaMin;
+  var lastThirdMin=(ishaMin+Math.floor(nightLen*2/3))%1440;
   return {
-    Fajr:    toMin(t.Fajr),
+    Fajr:    fajrMin,
     Sunrise: toMin(t.Sunrise),
     Dhuhr:   toMin(t.Dhuhr),
     Asr:     toMin(t.Asr),
     Maghrib: toMin(t.Maghrib),
-    Isha:    toMin(t.Isha),
-    Qiyam:   toMin(t.Midnight||t.Qiyam||'00:00')
+    Isha:    ishaMin,
+    Qiyam:   midnightMin,
+    'Last Third': lastThirdMin
   };
 }
 
