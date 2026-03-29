@@ -2487,9 +2487,12 @@ function _ptlRenderDots(marks, activeName, nowMin){
   } else if(sixthSlot==='Qiyam'||sixthSlot==='Last Third'){
     display.push(sixthSlot);
   }
-  // Rolling: active prayer first
+  // Rolling anchor: use REAL active prayer (not swipe preview) to prevent jumping
+  var realActive=window._activePrayerName||activeName;
+  var _swipeOn=!!window._swipePreviewPrayer;
+  var anchorName=_swipeOn?realActive:activeName;
   var activeIdx=0;
-  for(var i=0;i<display.length;i++){if(display[i]===activeName){activeIdx=i;break;}}
+  for(var i=0;i<display.length;i++){if(display[i]===anchorName){activeIdx=i;break;}}
   var ordered=[];
   for(var i=0;i<display.length;i++){ordered.push(display[(activeIdx+i)%display.length]);}
   window._ptlOrdered=ordered;
@@ -2574,7 +2577,7 @@ function _updatePrayerTimeline(){
 
   // Re-render dots if marks changed (first time or after city change)
   var dotsEl=document.getElementById('ptlDots');
-  var _curActive=dotsEl?dotsEl.getAttribute('data-active'):''; var _isSwipe=!!window._swipePreviewPrayer; if(dotsEl && !_isSwipe && (_curActive!==activeName || dotsEl.querySelectorAll('.ptl-dot').length!==names.length)){
+  var _curActive=dotsEl?dotsEl.getAttribute('data-active'):''; var _expLen=(window._ptlOrdered||_ptlNames).length; if(dotsEl && (_curActive!==activeName || dotsEl.querySelectorAll('.ptl-dot').length!==_expLen)){
     // Replace inner content preserving progress dot
     var prog=document.getElementById('ptlProgress');
     dotsEl.innerHTML=_ptlRenderDots(marks,activeName,nowMin);
