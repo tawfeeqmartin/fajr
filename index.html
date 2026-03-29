@@ -278,11 +278,11 @@ body::after{display:none;
   content:'';position:absolute;
   bottom:6px;left:50%;transform:translateX(-50%);
   width:36%;height:2px;
-  background:var(--pill-glow-bar,#e89830);
+  background:rgba(232,228,220,.45);
   border-radius:2px;
-  box-shadow:0 0 8px 2px var(--pill-glow-bar-shadow,rgba(232,150,48,.45)),
-             0 0 20px 6px var(--pill-glow-bar-soft,rgba(232,150,48,.15)),
-             0 -6px 16px 3px var(--pill-glow-bar-soft,rgba(232,150,48,.1));
+  box-shadow:0 0 8px 2px rgba(232,228,220,.2),
+             0 0 20px 6px rgba(232,228,220,.08),
+             0 -6px 16px 3px rgba(232,228,220,.05);
 }
 /* Slider positions */
 .mode-pill-slider[data-pos="0"]{transform:translateX(0)}
