@@ -187,7 +187,7 @@ body::after{display:none;
 
 /* ── Nav (removed - global header replaces it) ── */
 .nav-city-icon{width:clamp(10px,1.8vmin,14px);height:clamp(10px,1.8vmin,14px);color:rgba(232,228,220,.45);flex-shrink:0;pointer-events:auto;cursor:pointer}
-.nav-city-name{font-size:var(--ui-value-size);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
+.nav-city-name{font-size:var(--ui-value-size);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.5);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Buttons ── */
 .btn{
@@ -741,8 +741,8 @@ body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
   pointer-events:none;transition:opacity .4s ease;
   contain:layout paint;
 }
-.header-row1,.header-row2{display:flex;justify-content:space-between;align-items:baseline;line-height:1;position:relative}
-.header-until-label{font-family:var(--font);font-size:var(--ui-label-size);font-weight:300;letter-spacing:.08em;text-transform:uppercase;color:rgba(232,228,220,.5);line-height:1;text-align:right}
+.header-row1,.header-row2{display:flex;justify-content:space-between;align-items:baseline;line-height:1;position:relative;padding:0 2px}
+.header-until-label{font-family:var(--font);font-size:var(--ui-label-size);font-weight:300;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,228,220,.35)!important;line-height:1;text-align:right}
 body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
 /* Urgent countdown mode: keep only "until xxx" + countdown visible while chrome is hidden */
 body.chrome-hidden.countdown-urgent #headerBar{opacity:1!important;pointer-events:none}
@@ -752,6 +752,7 @@ body.chrome-hidden.countdown-urgent #headerBar #fsCityName,
 body.chrome-hidden.countdown-urgent #headerBar #fsCityTime{opacity:0!important}
 body.chrome-hidden.countdown-urgent #headerBar #fsCountdownLabel,
 body.chrome-hidden.countdown-urgent #headerBar #fsCountdown{opacity:1!important}
+.countdown-urgent .fs-countdown .nav-time{color:rgba(255,255,255,.9)!important}
 body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 .fs-city-block{display:none}
 .fs-city-time{
@@ -767,7 +768,7 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
   pointer-events:auto;cursor:pointer;user-select:none;
 }
 /* nav-label now in header-row1 via .header-until-label */
-.fs-countdown .nav-time{font-size:var(--ui-value-size);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.65);line-height:1;font-variant-numeric:tabular-nums}
+.fs-countdown .nav-time{font-size:var(--ui-value-size);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.55)!important;line-height:1;font-variant-numeric:tabular-nums}
 .fs-countdown .nav-time .nav-sec{opacity:.8;font-weight:300}
 /* Hide in compass mode */
 /* Header stays visible in all modes including compass */
@@ -1338,7 +1339,7 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 <!-- Global Header Bar (shared across all modes) -->
 <div id="headerBar">
   <div class="header-row1">
-    <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" onclick="openLocationPicker()" role="button" tabindex="0" aria-label="Choose location" style="cursor:pointer;pointer-events:auto"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    <svg class="nav-city-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:.4" onclick="openLocationPicker()" role="button" tabindex="0" aria-label="Choose location" style="cursor:pointer;pointer-events:auto"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
     <div id="fsCityTime" class="fs-city-time"></div>
     <div id="fsCountdownLabel" class="header-until-label"></div>
   </div>
