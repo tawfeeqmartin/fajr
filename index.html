@@ -2435,7 +2435,7 @@ function _ptlGetMarks(){
   for(var i=0;i<names.length;i++){
     var n=names[i];
     if(n==='Qiyam') marks[n]=toMin(t.Midnight||t.Qiyam||'0:00');
-    else if(n==='Last Third') marks[n]=window._tahajjudStartMin||toMin(t.Lastthird||'0:00');
+    else if(n==='Last Third') marks[n]=toMin(t.Qiyam||'0:00');
     else if(t[n]) marks[n]=toMin(t[n]);
     else marks[n]=0;
   }
@@ -2475,7 +2475,7 @@ function _ptlRenderDots(marks, activeName, nowMin){
     var timeStr='';
     var _t=window._prayerTimings||{};
     if(n==='Qiyam') timeStr=(_t.Midnight||_t.Qiyam||'').split(' ')[0]||'';
-    else if(n==='Last Third'){ var _ltm=marks[n]||0;var _lth=Math.floor(_ltm/60);var _ltmn=_ltm%60;timeStr=(_lth<10?'0':'')+_lth+':'+(_ltmn<10?'0':'')+_ltmn;}
+    else if(n==='Last Third') timeStr=(_t.Qiyam||'').split(' ')[0]||'';
     else timeStr=(_t[n]||'').split(' ')[0]||'';
     html+='<div class="ptl-dot-label">'+n+'</div>';
     html+='<div class="ptl-dot-time">'+timeStr+'</div>';
