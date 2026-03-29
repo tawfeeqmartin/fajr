@@ -2463,7 +2463,8 @@ function _ptlRenderDots(marks, activeName, nowMin){
   var allNames=['Fajr','Sunrise','Dhuha','Dhuhr','Asr','Maghrib','Isha','Qiyam','Last Third'];
   
   // Find active index — use swipe preview if swiping, else real active
-  var _swPrev=window._swipePreviewPrayer||'';
+  var _isSwiping=((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null)||(typeof window._swipeTimeTarget==='number'&&window._swipeTimeTarget!==null));
+  var _swPrev=(_isSwiping&&window._swipePreviewPrayer)||'';
   var anchor=_swPrev||activeName||allNames[0];
   var anchorIdx=0;
   for(var i=0;i<allNames.length;i++){if(allNames[i]===anchor){anchorIdx=i;break;}}
@@ -2537,7 +2538,8 @@ function _updatePrayerTimeline(){
   if(adjNow<adjArr[0]) activeName=names[names.length-1];
 
   // Swipe override: when user is swiping, timeline follows the preview prayer
-  if(window._swipePreviewPrayer) activeName=window._swipePreviewPrayer;
+  var _isSwipingNow=((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null)||(typeof window._swipeTimeTarget==='number'&&window._swipeTimeTarget!==null));
+  if(_isSwipingNow && window._swipePreviewPrayer) activeName=window._swipePreviewPrayer;
 
   // Update dot states
   var dots=tlEl.querySelectorAll('.ptl-dot');
@@ -2587,7 +2589,8 @@ function _updatePrayerTimeline(){
   var progPct=7; // default to leftmost
   var progColor=_ptlPrayerColors[activeName]||'rgba(232,228,220,.55)';
   
-  if(window._swipePreviewPrayer){
+  var _isCurrentlySwipingNow=((typeof window._swipeTimeOverride==='number'&&window._swipeTimeOverride!==null)||(typeof window._swipeTimeTarget==='number'&&window._swipeTimeTarget!==null));
+  if(_isCurrentlySwipingNow && window._swipePreviewPrayer){
     // During swipe: dot at the swiped prayer's visual position
     var _swDot=document.querySelector('.ptl-dot[data-prayer="'+window._swipePreviewPrayer+'"]');
     if(_swDot) progPct=parseFloat(_swDot.style.left)||7;
