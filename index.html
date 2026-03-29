@@ -2472,7 +2472,7 @@ function _ptlRenderDots(marks, activeName, nowMin){
     html+='<div class="ptl-dot'+(isActive?' active':'')+'" data-prayer="'+n+'" style="left:'+pct.toFixed(1)+'%"'+colorStyle+'>';
     html+='<div class="ptl-dot-circle"></div>';
     var timeStr='';
-    if(marks[n]){var ts=marks[n].toString();var tp=ts.split(':');if(tp.length>=2){var th=parseInt(tp[0]),tm=tp[1];var ampm=th>=12?'p':'a';th=th%12||12;timeStr=th+':'+tm+ampm;}}
+    if(typeof marks[n]==='number'){var mm=marks[n]%1440;var hh=Math.floor(mm/60);var mn=mm%60;timeStr=(hh<10?'0':'')+hh+':'+(mn<10?'0':'')+mn;}
     html+='<div class="ptl-dot-label">'+n+'</div>';
     html+='<div class="ptl-dot-time">'+timeStr+'</div>';
     html+='</div>';
