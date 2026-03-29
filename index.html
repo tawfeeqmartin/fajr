@@ -2424,8 +2424,8 @@ try{
 }catch(e){}
 
 // ── Prayer Timeline Bar ──
-var _ptlPrayerColors={Fajr:'#6633ee',Sunrise:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff',Qiyam:'#8811ff','Last Third':'#aa44ff'};
-var _ptlNames=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha','Qiyam','Last Third'];
+var _ptlPrayerColors={Fajr:'#6633ee',Sunrise:'#ff9900',Dhuha:'#ff9900',Dhuhr:'#00bb44',Asr:'#ff8800',Maghrib:'#ff2200',Isha:'#1166ff',Qiyam:'#8811ff','Last Third':'#aa44ff'};
+var _ptlNames=['Fajr','Sunrise','Dhuha','Dhuhr','Asr','Maghrib','Isha','Qiyam','Last Third'];
 
 function _ptlGetMarks(){
   var t=window._prayerTimings;
@@ -2436,6 +2436,7 @@ function _ptlGetMarks(){
   for(var i=0;i<names.length;i++){
     var n=names[i];
     if(n==='Qiyam') marks[n]=toMin(t.Midnight||t.Qiyam||'0:00');
+    else if(n==='Dhuha') marks[n]=(toMin(t.Sunrise||'0:00')+20)%1440;
     else if(n==='Last Third') marks[n]=toMin(t.Qiyam||'0:00');
     else if(t[n]) marks[n]=toMin(t[n]);
     else marks[n]=0;
@@ -2476,6 +2477,7 @@ function _ptlRenderDots(marks, activeName, nowMin){
     var timeStr='';
     var _t=window._prayerTimings||{};
     if(n==='Qiyam') timeStr=(_t.Midnight||_t.Qiyam||'').split(' ')[0]||'';
+    else if(n==='Dhuha'){ var _dm=(toMin(_t.Sunrise||'0:00')+20)%1440;var _dh=Math.floor(_dm/60);var _dmn=_dm%60;timeStr=(_dh<10?'0':'')+_dh+':'+(_dmn<10?'0':'')+_dmn;}
     else if(n==='Last Third') timeStr=(_t.Qiyam||'').split(' ')[0]||'';
     else timeStr=(_t[n]||'').split(' ')[0]||'';
     html+='<div class="ptl-dot-label">'+n+'</div>';
