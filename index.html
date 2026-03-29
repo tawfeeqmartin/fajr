@@ -2544,7 +2544,7 @@ function _updatePrayerTimeline(){
 
   // Re-render dots if marks changed (first time or after city change)
   var dotsEl=document.getElementById('ptlDots');
-  var _curActive=dotsEl?dotsEl.getAttribute('data-active'):''; if(dotsEl && (_curActive!==activeName || dotsEl.querySelectorAll('.ptl-dot').length!==names.length)){
+  var _curActive=dotsEl?dotsEl.getAttribute('data-active'):''; var _isSwipe=!!window._swipePreviewPrayer; if(dotsEl && !_isSwipe && (_curActive!==activeName || dotsEl.querySelectorAll('.ptl-dot').length!==names.length)){
     // Replace inner content preserving progress dot
     var prog=document.getElementById('ptlProgress');
     dotsEl.innerHTML=_ptlRenderDots(marks,activeName,nowMin);
