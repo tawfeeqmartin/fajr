@@ -2596,9 +2596,11 @@ function _updatePrayerTimeline(){
   // Color = active prayer color
   var progColor=_ptlPrayerColors[activeName]||'rgba(232,228,220,.55)';
 
-  // Swipe override: dot snaps to the swiped prayer position (leftmost = 7%)
+  // Swipe override: dot follows the swiped prayer's visual position
   if(window._swipePreviewPrayer){
-    progPct=7; // active prayer is always leftmost in rolling layout
+    // Find the swiped prayer's dot element and read its left position
+    var _swDot=document.querySelector('.ptl-dot[data-prayer="'+window._swipePreviewPrayer+'"]');
+    if(_swDot) progPct=parseFloat(_swDot.style.left)||progPct;
     progColor=_ptlPrayerColors[window._swipePreviewPrayer]||progColor;
   }
 
