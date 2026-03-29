@@ -1854,7 +1854,7 @@ window._resetChromeTimer = _resetChromeTimer;
     if(!_chromeStarted && document.body.classList.contains('clock-ready')){
       _chromeStarted=true;
       _obs.disconnect();
-      _resetChromeTimer();
+      setTimeout(_resetChromeTimer, 2000); // wait for splash fade before starting 4s timer
     }
   });
   _obs.observe(document.body, {attributes:true, attributeFilter:['class']});
