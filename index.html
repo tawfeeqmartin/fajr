@@ -2459,33 +2459,57 @@ function _initPrayerTimeline(){
 }
 
 function _ptlRenderDots(marks, activeName, nowMin){
-  var names=_ptlNames;
-  // Rolling order: start from active prayer, wrap around
+  var fard=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+  var nonFard=['Sunrise','Dhuha','Qiyam','Last Third'];
+  // Find which non-fard is active or next upcoming
+  var sixthSlot='';
+  if(nonFard.indexOf(activeName)!==-1){
+    sixthSlot=activeName;
+  } else {
+    var DAY_ANCHOR=240;
+    var adjNow=(nowMin||0)<DAY_ANCHOR?(nowMin||0)+1440:(nowMin||0);
+    var bestDist=99999;
+    for(var i=0;i<nonFard.length;i++){
+      var m=marks[nonFard[i]]||0;
+      var adj=m<DAY_ANCHOR?m+1440:m;
+      var dist=((adj-adjNow)+1440)%1440;
+      if(dist<bestDist){bestDist=dist;sixthSlot=nonFard[i];}
+    }
+  }
+  // Build display: 5 fard + 6th inserted at correct position
+  var display=fard.slice();
+  if(sixthSlot==='Sunrise'||sixthSlot==='Dhuha'){
+    display.splice(1,0,sixthSlot);
+  } else if(sixthSlot==='Qiyam'||sixthSlot==='Last Third'){
+    display.push(sixthSlot);
+  }
+  // Rolling: active prayer first
   var activeIdx=0;
-  for(var i=0;i<names.length;i++){if(names[i]===activeName){activeIdx=i;break;}}
+  for(var i=0;i<display.length;i++){if(display[i]===activeName){activeIdx=i;break;}}
   var ordered=[];
-  for(var i=0;i<names.length;i++){ordered.push(names[(activeIdx+i)%names.length]);}
+  for(var i=0;i<display.length;i++){ordered.push(display[(activeIdx+i)%display.length]);}
+  window._ptlOrdered=ordered;
+  window._ptlSixthSlot=sixthSlot;
   var html='';
+  var _t=window._prayerTimings||{};
   for(var i=0;i<ordered.length;i++){
     var n=ordered[i];
-    var pct=(i/(ordered.length-1))*86+7; // equal spacing: 7%-93%
+    var pct=(i/(ordered.length-1))*86+7;
     var isActive=(n===activeName);
     var col=_ptlPrayerColors[n]||'rgba(232,228,220,.38)';
     var colorStyle=isActive?(' style="color:'+col+'"'):'';
-    html+='<div class="ptl-dot'+(isActive?' active':'')+'" data-prayer="'+n+'" style="left:'+pct.toFixed(1)+'%"'+colorStyle+'>';
-    html+='<div class="ptl-dot-circle"></div>';
+    // Time string
     var timeStr='';
-    var _t=window._prayerTimings||{};
     if(n==='Qiyam') timeStr=(_t.Midnight||_t.Qiyam||'').split(' ')[0]||'';
     else if(n==='Dhuha'){ var _sp=String(_t.Sunrise||'0:0').split(':').map(Number);var _dm=((_sp[0]||0)*60+(_sp[1]||0)+20)%1440;var _dh=Math.floor(_dm/60);var _dmn=_dm%60;timeStr=(_dh<10?'0':'')+_dh+':'+(_dmn<10?'0':'')+_dmn;}
     else if(n==='Last Third') timeStr=(_t.Qiyam||'').split(' ')[0]||'';
     else timeStr=(_t[n]||'').split(' ')[0]||'';
+    html+='<div class="ptl-dot'+(isActive?' active':'')+'" data-prayer="'+n+'" style="left:'+pct.toFixed(1)+'%"'+colorStyle+'>';
+    html+='<div class="ptl-dot-circle"></div>';
     html+='<div class="ptl-dot-label">'+n+'</div>';
     html+='<div class="ptl-dot-time">'+timeStr+'</div>';
     html+='</div>';
   }
-  // Store ordered names for progress dot calculation
-  window._ptlOrdered=ordered;
   return html;
 }
 
