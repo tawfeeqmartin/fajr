@@ -1847,8 +1847,20 @@ function _resetChromeTimer() {
   _chromeTimer = setTimeout(_hideChrome, _chromeAutoHideMs);
 }
 window._resetChromeTimer = _resetChromeTimer;
-// Auto-hide on load after 4s
-document.addEventListener('DOMContentLoaded', function(){ _resetChromeTimer(); });
+// Auto-hide chrome: wait for clock to be fully visible, then start 4s timer
+(function(){
+  var _chromeStarted=false;
+  var _obs=new MutationObserver(function(){
+    if(!_chromeStarted && document.body.classList.contains('clock-ready')){
+      _chromeStarted=true;
+      _obs.disconnect();
+      _resetChromeTimer();
+    }
+  });
+  _obs.observe(document.body, {attributes:true, attributeFilter:['class']});
+  // Fallback: if clock-ready already set or takes too long
+  setTimeout(function(){ if(!_chromeStarted){_chromeStarted=true;_resetChromeTimer();} }, 12000);
+})();
 
 document.addEventListener('click',function(e){
   if(_chromeSwipeGuard) return;
