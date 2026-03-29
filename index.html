@@ -2459,59 +2459,51 @@ function _initPrayerTimeline(){
 }
 
 function _ptlRenderDots(marks, activeName, nowMin){
-  var fard=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
-  var nonFard=['Sunrise','Dhuha','Qiyam','Last Third'];
-  // Find which non-fard is active or next upcoming
-  // Swipe override: if swiping to a non-fard, show it as the 6th slot
+  // All 9 windows in day order
+  var allNames=['Fajr','Sunrise','Dhuha','Dhuhr','Asr','Maghrib','Isha','Qiyam','Last Third'];
+  
+  // Find active index — use swipe preview if swiping, else real active
   var _swPrev=window._swipePreviewPrayer||'';
-  var sixthSlot='';
-  if(_swPrev && nonFard.indexOf(_swPrev)!==-1){
-    sixthSlot=_swPrev;
-  } else if(nonFard.indexOf(activeName)!==-1){
-    sixthSlot=activeName;
-  } else {
-    var DAY_ANCHOR=240;
-    var adjNow=(nowMin||0)<DAY_ANCHOR?(nowMin||0)+1440:(nowMin||0);
-    var bestDist=99999;
-    for(var i=0;i<nonFard.length;i++){
-      var m=marks[nonFard[i]]||0;
-      var adj=m<DAY_ANCHOR?m+1440:m;
-      var dist=((adj-adjNow)+1440)%1440;
-      if(dist<bestDist){bestDist=dist;sixthSlot=nonFard[i];}
-    }
-  }
-  // Build display: 5 fard + 6th inserted at correct position
-  var display=fard.slice();
-  if(sixthSlot==='Sunrise'||sixthSlot==='Dhuha'){
-    display.splice(1,0,sixthSlot);
-  } else if(sixthSlot==='Qiyam'||sixthSlot==='Last Third'){
-    display.push(sixthSlot);
-  }
-  // Rolling anchor: use REAL active prayer (not swipe preview) to prevent jumping
-  var realActive=window._activePrayerName||activeName;
-  var _swipeOn=!!window._swipePreviewPrayer;
-  var anchorName=_swipeOn?realActive:activeName;
-  var activeIdx=0;
-  for(var i=0;i<display.length;i++){if(display[i]===anchorName){activeIdx=i;break;}}
-  var ordered=[];
-  for(var i=0;i<display.length;i++){ordered.push(display[(activeIdx+i)%display.length]);}
-  window._ptlOrdered=ordered;
-  window._ptlSixthSlot=sixthSlot;
+  var anchor=_swPrev||activeName||allNames[0];
+  var anchorIdx=0;
+  for(var i=0;i<allNames.length;i++){if(allNames[i]===anchor){anchorIdx=i;break;}}
+  
+  // Sliding window: current + next 5 (6 total, always forward)
+  var display=[];
+  for(var i=0;i<6;i++){display.push(allNames[(anchorIdx+i)%allNames.length]);}
+  
+  // Store for progress dot
+  window._ptlOrdered=display;
+  
   var html='';
   var _t=window._prayerTimings||{};
-  for(var i=0;i<ordered.length;i++){
-    var n=ordered[i];
-    var pct=(i/(ordered.length-1))*86+7;
+  var toMin=function(s){var p=String(s||'0:0').split(':').map(Number);return((p[0]||0)*60+(p[1]||0))%1440;};
+  
+  for(var i=0;i<display.length;i++){
+    var n=display[i];
+    var pct=(i/(display.length-1))*86+7; // equal spacing 7%-93%
     var isActive=(n===activeName);
+    var isSwipeTarget=(_swPrev&&n===_swPrev);
+    var highlight=isActive||isSwipeTarget;
     var col=_ptlPrayerColors[n]||'rgba(232,228,220,.38)';
-    var colorStyle=isActive?(' style="color:'+col+'"'):'';
-    // Time string
+    var colorStyle=highlight?(' style="color:'+col+'"'):'';
+    
+    // Time string — read from existing sources, no new calculations
     var timeStr='';
     if(n==='Qiyam') timeStr=(_t.Midnight||_t.Qiyam||'').split(' ')[0]||'';
-    else if(n==='Dhuha'){ var _sp=String(_t.Sunrise||'0:0').split(':').map(Number);var _dm=((_sp[0]||0)*60+(_sp[1]||0)+20)%1440;var _dh=Math.floor(_dm/60);var _dmn=_dm%60;timeStr=(_dh<10?'0':'')+_dh+':'+(_dmn<10?'0':'')+_dmn;}
+    else if(n==='Dhuha'){
+      var _sp=String(_t.Sunrise||'0:0').split(':').map(Number);
+      var _dm=((_sp[0]||0)*60+(_sp[1]||0)+20)%1440;
+      var _dh=Math.floor(_dm/60);var _dmn=_dm%60;
+      timeStr=(_dh<10?'0':'')+_dh+':'+(_dmn<10?'0':'')+_dmn;
+    }
     else if(n==='Last Third') timeStr=(_t.Qiyam||'').split(' ')[0]||'';
     else timeStr=(_t[n]||'').split(' ')[0]||'';
-    html+='<div class="ptl-dot'+(isActive?' active':'')+'" data-prayer="'+n+'" style="left:'+pct.toFixed(1)+'%"'+colorStyle+'>';
+    
+    // Rolling visibility: position 0=bright, fades toward end
+    var opacity=highlight?'1':(i<=2?'0.7':(i<=4?'0.45':'0.3'));
+    
+    html+='<div class="ptl-dot'+(highlight?' active':'')+'" data-prayer="'+n+'" style="left:'+pct.toFixed(1)+'%;opacity:'+opacity+'"'+colorStyle+'>';
     html+='<div class="ptl-dot-circle"></div>';
     html+='<div class="ptl-dot-label">'+n+'</div>';
     html+='<div class="ptl-dot-time">'+timeStr+'</div>';
@@ -2577,7 +2569,7 @@ function _updatePrayerTimeline(){
 
   // Re-render dots if marks changed (first time or after city change)
   var dotsEl=document.getElementById('ptlDots');
-  var _curActive=dotsEl?dotsEl.getAttribute('data-active'):''; var _expLen=(window._ptlOrdered||_ptlNames).length; if(dotsEl && (_curActive!==activeName || dotsEl.querySelectorAll('.ptl-dot').length!==_expLen)){
+  var _curActive=dotsEl?dotsEl.getAttribute('data-active'):''; if(dotsEl && (_curActive!==activeName || dotsEl.querySelectorAll('.ptl-dot').length!==6)){
     // Replace inner content preserving progress dot
     var prog=document.getElementById('ptlProgress');
     dotsEl.innerHTML=_ptlRenderDots(marks,activeName,nowMin);
@@ -2590,51 +2582,32 @@ function _updatePrayerTimeline(){
     }
   }
 
-  // Progress dot position: interpolate between prev and next prayer
-  var aMin=Math.min.apply(null,adjArr);
-  var aMax=Math.max.apply(null,adjArr);
-  var span=aMax-aMin||1;
-
-  // Find prev/next prayer for interpolation
-  var prevIdx=0,nextIdx=1;
-  for(var j=0;j<names.length-1;j++){
-    if(adjNow>=adjArr[j]&&adjNow<adjArr[j+1]){ prevIdx=j; nextIdx=j+1; break; }
-  }
-  if(adjNow<adjArr[0]){ prevIdx=names.length-1; nextIdx=0; }
-
-  var prevAdj=adjArr[prevIdx];
-  var nextAdj=adjArr[nextIdx];
-  // Handle wrap: if next is less than prev in adj space (shouldn't happen with our setup, but be safe)
-  if(nextAdj<=prevAdj) nextAdj+=1440;
-  var windowSpan=nextAdj-prevAdj||1;
-  var progInWindow=(adjNow-prevAdj)/windowSpan;
-  if(progInWindow<0) progInWindow=0;
-  if(progInWindow>1) progInWindow=1;
-
-  // Map to rolling visual positions (active=leftmost=7%)
-  // In rolling layout, active is always position 0, next is position 1, etc.
-  var ordered=window._ptlOrdered||names;
-  var prevVisIdx=0,nextVisIdx=1;
-  for(var vi=0;vi<ordered.length;vi++){
-    if(ordered[vi]===names[prevIdx]) prevVisIdx=vi;
-    if(ordered[vi]===names[nextIdx]) nextVisIdx=vi;
-  }
-  var prevPct=(prevVisIdx/(ordered.length-1))*86+7;
-  var nextPct=(nextVisIdx/(ordered.length-1))*86+7;
-  if(nextVisIdx<=prevVisIdx) nextPct=93;
-  var progPct=prevPct+(nextPct-prevPct)*progInWindow;
-
-  // Color = active prayer color
+  // Progress dot position
+  var ordered=window._ptlOrdered||[];
+  var progPct=7; // default to leftmost
   var progColor=_ptlPrayerColors[activeName]||'rgba(232,228,220,.55)';
-
-  // Swipe override: dot follows the swiped prayer's visual position
+  
   if(window._swipePreviewPrayer){
-    // Find the swiped prayer's dot element and read its left position
+    // During swipe: dot at the swiped prayer's visual position
     var _swDot=document.querySelector('.ptl-dot[data-prayer="'+window._swipePreviewPrayer+'"]');
-    if(_swDot) progPct=parseFloat(_swDot.style.left)||progPct;
+    if(_swDot) progPct=parseFloat(_swDot.style.left)||7;
     progColor=_ptlPrayerColors[window._swipePreviewPrayer]||progColor;
+  } else if(ordered.length>=2){
+    // Normal: interpolate between position 0 (active) and position 1 (next)
+    var pos0=7, pos1=(1/(ordered.length-1))*86+7;
+    // Time fraction through current prayer window
+    var curMin=marks[ordered[0]]||0, nextMin=marks[ordered[1]]||0;
+    var DAY_ANCHOR=240;
+    var adjCur=curMin<DAY_ANCHOR?curMin+1440:curMin;
+    var adjNext=nextMin<DAY_ANCHOR?nextMin+1440:nextMin;
+    if(adjNext<=adjCur) adjNext+=1440;
+    var adjNow=(nowMin||0)<DAY_ANCHOR?(nowMin||0)+1440:(nowMin||0);
+    var frac=(adjNow-adjCur)/(adjNext-adjCur||1);
+    if(frac<0)frac=0;if(frac>1)frac=1;
+    progPct=pos0+(pos1-pos0)*frac;
+    progColor=_ptlPrayerColors[activeName]||progColor;
   }
-
+  
   var progEl=document.getElementById('ptlProgress');
   if(progEl){
     progEl.style.left=progPct.toFixed(2)+'%';
