@@ -295,14 +295,14 @@ body::after{display:none;
   font-family:var(--font);font-size:var(--ui-label-size);font-weight:300;
   letter-spacing:.18em;text-transform:uppercase;
   color:rgba(232,228,220,.38);
-  opacity:1;transition:opacity .4s ease;
+  opacity:1;transition:none;
   pointer-events:none;
 }
 #prayerTimeline{
   position:fixed;
   bottom:calc(env(safe-area-inset-bottom,8px) + clamp(20px,4vmin,32px) + 62px + 30px);
   left:50%;transform:translateX(-50%);z-index:950;
-  opacity:1;transition:opacity .4s ease;
+  opacity:1;transition:none;
   pointer-events:none;
 }
 
@@ -5003,7 +5003,7 @@ function _toggleCompassMode(forceState) {
     history.back();
     // Clear timeout UI
     _clearCompassTimeout();
-    if(window._compassDbgEl) window._compassDbgEl.style.display = 'none';
+    if(window._compassDbgEl){ window._compassDbgEl.remove(); window._compassDbgEl=null; }
     // Keep distance updated for next open
     if(window._compassCalibEl) window._compassCalibEl.style.opacity = '0';
     _hideCompassOnboarding();
