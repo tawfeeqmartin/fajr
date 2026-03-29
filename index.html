@@ -543,7 +543,7 @@ body.mode-compass .clock-sticky{display:none!important}
 body.mode-info .clock-sticky{display:none}
 body.mode-info #headerBar,body.mode-info .fs-header{opacity:0!important;pointer-events:none;transition:none}
 body.mode-info .mode-label{opacity:0;pointer-events:none;transition:opacity .4s ease 4s}
-body.mode-info #prayerTimeline,body.mode-compass #prayerTimeline{opacity:0!important;pointer-events:none;transition:none!important}
+body.mode-info #prayerTimeline,body.mode-compass #prayerTimeline,body.chrome-hidden #prayerTimeline{opacity:0;pointer-events:none;transition:none}
 /* Hide old prayer labels + dots — replaced by prayer timeline bar */
 #_currentPrayerLabel{display:none!important}
 #_prayerDots{display:none!important}
@@ -768,7 +768,6 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 /* Tap-to-hide: all UI hidden in clock/compass */
 body.chrome-hidden .fs-header,
 body.chrome-hidden .mode-label,
-body.chrome-hidden #prayerTimeline,
 body.chrome-hidden .mode-pill,
 body.chrome-hidden #qadrFloatBtn,
 /* body.chrome-hidden #fsVersionTag - kept visible during dev */
@@ -776,7 +775,6 @@ body.chrome-hidden #fsTapHint,
 body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
 #_compassHeadingLine{font:300 clamp(.65rem,1.5vw,.75rem)/1.3 var(--font)!important;letter-spacing:.08em!important;color:rgba(232,228,220,.45)!important}
 #_compassDistLine{font:300 clamp(.65rem,1.5vw,.75rem)/1.3 var(--font)!important;letter-spacing:.08em!important}
-#prayerTimeline{transition:none!important}
 .fs-mode-toggle{display:none}
 /* Dial picker - hidden for single-clock mode, kept for future multi-dial */
 .fs-dial-picker{display:none}
