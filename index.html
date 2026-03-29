@@ -335,15 +335,13 @@ body::after{display:none;
   background:currentColor;transform:scale(1.4);
 }
 .ptl-dot-label{
-  font-family:var(--font);font-size:9px;font-weight:300;
-  letter-spacing:.06em;text-transform:uppercase;
+  font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;text-transform:uppercase;
   color:rgba(232,228,220,.3);
   white-space:nowrap;
   transition:color .4s ease, font-weight .3s ease, opacity .3s ease;
 }
 .ptl-dot-time{
-  font-family:var(--font);font-size:10px;font-weight:300;
-  letter-spacing:.03em;
+  font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;
   color:rgba(232,228,220,.28);
   white-space:nowrap;
   transition:color .3s ease;
