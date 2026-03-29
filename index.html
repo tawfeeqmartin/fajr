@@ -740,7 +740,7 @@ body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
   pointer-events:none;transition:opacity .4s ease;
   contain:layout paint;
 }
-.header-row1,.header-row2{display:flex;justify-content:space-between;align-items:baseline;line-height:1;position:relative;padding:0 2px}
+.header-row1,.header-row2{display:flex;justify-content:space-between;align-items:baseline;line-height:1.3;position:relative;padding:0 2px}
 .header-until-label{font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;text-transform:uppercase;color:rgba(232,228,220,.35)!important;line-height:1;text-align:right}
 body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
 /* Urgent countdown mode: keep only "until xxx" + countdown visible while chrome is hidden */
@@ -768,14 +768,14 @@ body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 /* Tap-to-hide: all UI hidden in clock/compass */
 body.chrome-hidden .fs-header,
 body.chrome-hidden .mode-label,
-#_compassHeadingLine{font:300 clamp(.65rem,1.5vw,.75rem)/1.3 var(--font)!important;letter-spacing:.08em!important;color:rgba(232,228,220,.45)!important}
-#_compassDistLine{font:300 clamp(.65rem,1.5vw,.75rem)/1.3 var(--font)!important;letter-spacing:.08em!important}
 body.chrome-hidden #prayerTimeline,
 body.chrome-hidden .mode-pill,
 body.chrome-hidden #qadrFloatBtn,
 /* body.chrome-hidden #fsVersionTag - kept visible during dev */
 body.chrome-hidden #fsTapHint,
 body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;transition:opacity .4s ease}
+#_compassHeadingLine{font:300 clamp(.65rem,1.5vw,.75rem)/1.3 var(--font)!important;letter-spacing:.08em!important;color:rgba(232,228,220,.45)!important}
+#_compassDistLine{font:300 clamp(.65rem,1.5vw,.75rem)/1.3 var(--font)!important;letter-spacing:.08em!important}
 .fs-mode-toggle{display:none}
 /* Dial picker - hidden for single-clock mode, kept for future multi-dial */
 .fs-dial-picker{display:none}
