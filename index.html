@@ -2510,6 +2510,9 @@ function _updatePrayerTimeline(){
   // If before first prayer of the day (Fajr), active = last (Qiyam)
   if(adjNow<adjArr[0]) activeName=names[names.length-1];
 
+  // Swipe override: when user is swiping, timeline follows the preview prayer
+  if(window._swipePreviewPrayer) activeName=window._swipePreviewPrayer;
+
   // Update dot states
   var dots=tlEl.querySelectorAll('.ptl-dot');
   dots.forEach(function(d){
