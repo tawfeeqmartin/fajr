@@ -2834,10 +2834,10 @@ function updateNavClock(){
   window._countdownUrgent = _isUrgent;
   document.body.classList.toggle('countdown-urgent', _isUrgent);
 
-  const countdownHtml='<div class="nav-time"'+_timeStyle+'>'+timeStr+'</div>';
+  const countdownHtml='<div class="nav-time">'+timeStr+'</div>';
   // Update row-1 "until" label
   const fsUntilLabel=document.getElementById('fsCountdownLabel');
-  if(fsUntilLabel) fsUntilLabel.innerHTML = '<span'+style+'>'+navLabel+'</span>';
+  if(fsUntilLabel) fsUntilLabel.innerHTML = navLabel;
   const fsC=document.getElementById('fsCountdown');
   if(fsC){
     fsC.innerHTML = countdownHtml;
