@@ -187,7 +187,7 @@ body::after{display:none;
 
 /* ── Nav (removed - global header replaces it) ── */
 .nav-city-icon{width:clamp(10px,1.8vmin,14px);height:clamp(10px,1.8vmin,14px);color:rgba(232,228,220,.45);flex-shrink:0;pointer-events:auto;cursor:pointer}
-.nav-city-name{font-size:var(--ui-value-size);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.5);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
+.nav-city-name{font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.5);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Buttons ── */
 .btn{
@@ -742,7 +742,7 @@ body.mode-info .hijri-top{opacity:0!important;pointer-events:none}
   contain:layout paint;
 }
 .header-row1,.header-row2{display:flex;justify-content:space-between;align-items:baseline;line-height:1;position:relative;padding:0 2px}
-.header-until-label{font-family:var(--font);font-size:var(--ui-label-size);font-weight:300;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,228,220,.35)!important;line-height:1;text-align:right}
+.header-until-label{font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;text-transform:uppercase;color:rgba(232,228,220,.35)!important;line-height:1;text-align:right}
 body.chrome-hidden #headerBar{opacity:0!important;pointer-events:none}
 /* Urgent countdown mode: keep only "until xxx" + countdown visible while chrome is hidden */
 body.chrome-hidden.countdown-urgent #headerBar{opacity:1!important;pointer-events:none}
@@ -755,20 +755,14 @@ body.chrome-hidden.countdown-urgent #headerBar #fsCountdown{opacity:1!important}
 .countdown-urgent .fs-countdown .nav-time{color:rgba(255,255,255,.9)!important}
 body.mode-info #headerBar{opacity:0!important;pointer-events:none}
 .fs-city-block{display:none}
-.fs-city-time{
-  position:absolute;left:50%;transform:translateX(-50%);bottom:0;
-  font-family:var(--font);font-size:var(--ui-value-size);font-weight:300;
-  letter-spacing:.06em;color:rgba(232,228,220,.65);
-  font-variant-numeric:tabular-nums;
-  white-space:nowrap;line-height:1;
-}
+.fs-city-time{font-family:var(--font);font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.5);line-height:1}
 .fs-countdown{
   position:absolute;right:0;bottom:0;
   text-align:right;line-height:1;font-family:var(--font);
   pointer-events:auto;cursor:pointer;user-select:none;
 }
 /* nav-label now in header-row1 via .header-until-label */
-.fs-countdown .nav-time{font-size:var(--ui-value-size);font-weight:300;letter-spacing:.06em;color:rgba(232,228,220,.55)!important;line-height:1;font-variant-numeric:tabular-nums}
+.fs-countdown .nav-time{font-size:clamp(.65rem,1.5vw,.75rem);font-weight:300;letter-spacing:.08em;color:rgba(232,228,220,.55)!important;line-height:1;font-variant-numeric:tabular-nums}
 .fs-countdown .nav-time .nav-sec{opacity:.8;font-weight:300}
 /* Hide in compass mode */
 /* Header stays visible in all modes including compass */
