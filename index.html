@@ -2430,22 +2430,16 @@ function _ptlGetMarks(){
   var t=window._prayerTimings;
   if(!t) return null;
   var toMin=function(s){ var parts=String(s||'0:0').split(':').map(Number); return ((parts[0]||0)*60+(parts[1]||0))%1440; };
-  var ishaMin=toMin(t.Isha);
-  var fajrMin=toMin(t.Fajr);
-  var midnightMin=toMin(t.Midnight||t.Qiyam||'00:00');
-  // Last third: Isha + 2/3 of night duration
-  var nightLen=fajrMin>ishaMin?fajrMin-ishaMin:fajrMin+1440-ishaMin;
-  var lastThirdMin=(ishaMin+Math.floor(nightLen*2/3))%1440;
-  return {
-    Fajr:    fajrMin,
-    Sunrise: toMin(t.Sunrise),
-    Dhuhr:   toMin(t.Dhuhr),
-    Asr:     toMin(t.Asr),
-    Maghrib: toMin(t.Maghrib),
-    Isha:    ishaMin,
-    Qiyam:   midnightMin,
-    'Last Third': lastThirdMin
-  };
+  var marks={};
+  var names=_ptlNames;
+  for(var i=0;i<names.length;i++){
+    var n=names[i];
+    if(n==='Qiyam') marks[n]=toMin(t.Midnight||t.Qiyam||'0:00');
+    else if(n==='Last Third') marks[n]=window._tahajjudStartMin||toMin(t.Lastthird||'0:00');
+    else if(t[n]) marks[n]=toMin(t[n]);
+    else marks[n]=0;
+  }
+  return marks;
 }
 
 function _initPrayerTimeline(){
@@ -2479,7 +2473,10 @@ function _ptlRenderDots(marks, activeName, nowMin){
     html+='<div class="ptl-dot'+(isActive?' active':'')+'" data-prayer="'+n+'" style="left:'+pct.toFixed(1)+'%"'+colorStyle+'>';
     html+='<div class="ptl-dot-circle"></div>';
     var timeStr='';
-    if(typeof marks[n]==='number'){var mm=marks[n]%1440;var hh=Math.floor(mm/60);var mn=mm%60;timeStr=(hh<10?'0':'')+hh+':'+(mn<10?'0':'')+mn;}
+    var _t=window._prayerTimings||{};
+    if(n==='Qiyam') timeStr=(_t.Midnight||_t.Qiyam||'').split(' ')[0]||'';
+    else if(n==='Last Third'){ var _ltm=marks[n]||0;var _lth=Math.floor(_ltm/60);var _ltmn=_ltm%60;timeStr=(_lth<10?'0':'')+_lth+':'+(_ltmn<10?'0':'')+_ltmn;}
+    else timeStr=(_t[n]||'').split(' ')[0]||'';
     html+='<div class="ptl-dot-label">'+n+'</div>';
     html+='<div class="ptl-dot-time">'+timeStr+'</div>';
     html+='</div>';
