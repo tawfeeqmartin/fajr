@@ -349,10 +349,8 @@ body::after{display:none;
   transition:color .3s ease;
   margin-top:3px;
 }
-.ptl-dot.active .ptl-dot-time{font-size:9px;color:currentColor;font-weight:400}
-.ptl-dot.active .ptl-dot-label{
-  color:currentColor;font-weight:500;opacity:1;
-}
+.ptl-dot.active .ptl-dot-time{color:rgba(232,228,220,.65);font-weight:400}
+.ptl-dot.active .ptl-dot-label{color:rgba(232,228,220,.85);font-weight:500}
 .ptl-progress{
   position:absolute;bottom:-3px;
   width:7px;height:7px;border-radius:50%;
@@ -2486,8 +2484,7 @@ function _ptlRenderDots(marks, activeName, nowMin){
     var isActive=(n===activeName);
     var isSwipeTarget=(_swPrev&&n===_swPrev);
     var highlight=isActive||isSwipeTarget;
-    var col=_ptlPrayerColors[n]||'rgba(232,228,220,.38)';
-    var colorStyle=highlight?(' style="color:'+col+'"'):'';
+    var colorStyle=highlight?' style="color:rgba(232,228,220,.85)"':'';
     
     // Time string — read from existing sources, no new calculations
     var timeStr='';
