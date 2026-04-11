@@ -212,6 +212,48 @@ ACCEPTED / REJECTED — [reason]
 
 ---
 
+## Code Review Pipeline
+
+Every change that passes the ratchet goes through three review layers. Layers 1 and 2 are automated; layer 3 is a lightweight human gate.
+
+### Layer 1 — Automated Lint (every ratchet commit)
+
+Run automatically after each successful autoresearch commit. A commit is rejected if any check fails.
+
+| Check | Rule |
+|-------|------|
+| **Bismillah headers** | All `.js` and `.sh` files must start with the two Bismillah lines |
+| **No hardcoded angles** | Twilight angles and method parameters must live in `src/methods.js`, not scattered in engine logic |
+| **No per-prayer regression** | Redundant with the ratchet, but verified again — no individual prayer gets worse at any test location |
+| **Scholarly classification present** | Every new correction block must carry a `// Classification: 🟢/🟡/🔴` comment |
+| **Wiki citation present** | Every new correction block must cite the supporting wiki page: `// see knowledge/wiki/...` |
+| **Public API contract** | All exports in `src/index.js` must still resolve — no silent breakage of the public interface |
+
+### Layer 2 — AI Code Review (after each overnight batch)
+
+After a full autoresearch run completes, a separate review agent reads the cumulative diff (all commits since the last human review) and produces a structured report covering:
+
+- **Security** — no injection risks, no unsafe eval, no external network calls added
+- **Correctness** — are the formulas mathematically sound? Do the units work out? Edge cases handled?
+- **Maintainability** — is the code readable? Are variable names clear? Is complexity growing unnecessarily?
+- **Islamic principle compliance** — is ihtiyat (precaution) respected? Are multiple valid methods preserved? Is ikhtilaf acknowledged rather than flattened?
+- **Plain-English summary** — one paragraph a non-astronomer can read
+- **Flags for human judgment** — anything the review agent cannot resolve with confidence
+
+The review agent writes its report to `autoresearch/logs/review-YYYY-MM-DD.md`.
+
+### Layer 3 — Human Review (intent, not implementation)
+
+The human reads the Layer 2 plain-English summary and makes yes/no calls on:
+
+- Any correction flagged 🟡 (limited precedent) or 🔴 (novel) — approve or reject
+- Strategic direction changes — e.g., "start using official timetable data as the primary source rather than calculated values"
+- Method additions or removals
+
+The human does **not** need to review code quality, mathematical correctness, or test results — those are covered by layers 1 and 2. The human's job is judgment on Islamic principle and product direction, not implementation review.
+
+---
+
 ## Bismillah Convention
 
 Every source code file in this repository must begin with:

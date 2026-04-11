@@ -51,4 +51,20 @@ export const config = {
 
   // Secondary targets — may be modified if primary change requires it
   secondaryTargets: ['src/methods.js', 'src/elevation.js'],
+
+  // Code review pipeline configuration
+  review: {
+    // Layer 1: run lint checks after every successful ratchet commit
+    lintAfterEveryCommit: true,
+
+    // Layer 2: run AI batch review after each full autoresearch run
+    batchReviewAfterRun: true,
+
+    // Layer 3: scholarly oversight levels that require human approval before merging
+    // 'yellow' = 🟡 Limited precedent, 'red' = 🔴 Novel
+    requireHumanApprovalFor: ['yellow', 'red'],
+
+    // 🟢 Established corrections may be auto-merged without human review
+    autoMergeGreen: true,
+  },
 }

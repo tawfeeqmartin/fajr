@@ -45,6 +45,57 @@ Find ONE specific correction to `src/engine.js` that will reduce WMAE (Weighted 
 - Do not change Asr madhab logic without ground truth data specific to Hanafi regions
 - Do not implement hilal visibility (separate track, not in eval scope)
 
+## After each experiment: required documentation
+
+Whether the experiment is accepted or rejected, you must complete all of the following before finishing your run.
+
+### 1. Scholarly oversight classification comment
+
+Every new correction block introduced to `src/engine.js` must include these two comment lines immediately above the code:
+
+```js
+// see knowledge/wiki/[relevant-page].md
+// Classification: 🟢 Established | 🟡 Limited precedent | 🔴 Novel
+```
+
+Both lines are required. A correction without a wiki citation or without a classification tag will be rejected by the Layer 1 lint check and must not be committed.
+
+If you cannot find a wiki page that supports the correction, do not make the correction. The wiki is the knowledge boundary — do not reason beyond it.
+
+### 2. Commit message format
+
+Every accepted commit must follow this format exactly:
+
+```
+correction: [short name] — WMAE [before] → [after]
+
+Wiki source: knowledge/wiki/[page].md
+Classification: 🟢/🟡/🔴
+Ihtiyat: [describe how precaution was applied, or "N/A — no ambiguity"]
+
+[One paragraph explaining what was changed and why it reduces WMAE]
+```
+
+Example:
+```
+correction: region-aware method selection — WMAE 1.84 → 1.21
+
+Wiki source: knowledge/wiki/methods/comparison.md
+Classification: 🟢 Established
+Ihtiyat: N/A — method selection does not affect the precautionary direction
+
+Replaced universal ISNA fallback with country-code lookup against the
+methods table. Morocco now uses the Moroccan method (18°/17°), Egypt uses
+the Egyptian method (19.5°/17.5°). Fajr MAE dropped from 2.1 to 0.8 min
+for Moroccan test locations.
+```
+
+### 3. No unsupported corrections
+
+Do not introduce any correction that is not directly supported by a wiki page in `knowledge/wiki/corrections/` or `knowledge/wiki/astronomy/`. If you believe a correction is warranted but the wiki does not yet cover it, log the hypothesis in `autoresearch/logs/` and stop — do not implement it. The knowledge base must be updated first (by a human following `knowledge/compile.md`).
+
+---
+
 ## Current baseline
 
 Run `node eval/eval.js` to see current WMAE.
