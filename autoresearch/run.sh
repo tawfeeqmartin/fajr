@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+# Bismillah ir-Rahman ir-Rahim
 # fajr autoresearch runner
 #
 # Launches the autoresearch agent for one session.

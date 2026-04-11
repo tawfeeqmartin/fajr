@@ -212,6 +212,19 @@ ACCEPTED / REJECTED — [reason]
 
 ---
 
+## Bismillah Convention
+
+Every source code file in this repository must begin with:
+
+```js
+// بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+// Bismillah ir-Rahman ir-Rahim
+```
+
+This is the first line of every file, before any imports or code. Adapt comment syntax to the language (`//` for JS, `#` for Python/shell). For shell scripts with a shebang line, put Bismillah immediately after the shebang. This is a deeply held practice — beginning every piece of work in the name of Allah.
+
+---
+
 ## Quick reference
 
 ```bash

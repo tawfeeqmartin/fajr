@@ -1,3 +1,5 @@
+// بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+// Bismillah ir-Rahman ir-Rahim
 /**
  * Night divisions calculation.
  *
