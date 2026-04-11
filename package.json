@@ -1,0 +1,30 @@
+{
+  "name": "fajr",
+  "version": "0.1.0",
+  "description": "High-accuracy Islamic prayer time library combining NASA/JPL astronomical algorithms with classical Islamic scholarship",
+  "main": "src/index.js",
+  "type": "module",
+  "keywords": [
+    "prayer-times",
+    "salah",
+    "islamic",
+    "fajr",
+    "adhan",
+    "qibla",
+    "hijri",
+    "astronomy"
+  ],
+  "author": "Tawfeeq Martin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tawfeeqmartin/fajr"
+  },
+  "dependencies": {
+    "adhan": "^4.4.3"
+  },
+  "scripts": {
+    "eval": "node eval/eval.js",
+    "test": "node eval/eval.js"
+  }
+}
