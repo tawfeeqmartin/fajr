@@ -5,6 +5,8 @@
 [![npm version](https://img.shields.io/npm/v/fajr.svg)](https://www.npmjs.com/package/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+> ⚠️ **Fajr is in active development.** The autoresearch loop is running and the library is not yet validated against ground truth data. Do not use in production. Follow along with development or contribute — but wait for v1.0 before depending on this in your app.
+
 ---
 
 ## Why "Fajr"?
