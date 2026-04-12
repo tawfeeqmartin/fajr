@@ -3608,9 +3608,56 @@ function fsStopClock() {
 }
 
 // ── Prayer times via adhan-js (local calculation, zero network latency) ──
+
+// بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+// Bismillah ir-Rahman ir-Rahim
+// Regional calculation method auto-selection — powered by Fajr (github.com/tawfeeqmartin/fajr)
+function getCalculationMethod(latitude, longitude) {
+  const countryMethods = [
+    { name: 'Morocco', bounds: { latMin: 27, latMax: 36, lonMin: -13, lonMax: -1 },
+      method: () => { const p = adhan.CalculationMethod.Other(); p.fajrAngle = 19; p.ishaAngle = 17; return p; }},
+    { name: 'Saudi Arabia', bounds: { latMin: 16, latMax: 33, lonMin: 34, lonMax: 56 },
+      method: () => adhan.CalculationMethod.UmmAlQura() },
+    { name: 'Turkey', bounds: { latMin: 36, latMax: 42, lonMin: 26, lonMax: 45 },
+      method: () => adhan.CalculationMethod.Turkey() },
+    { name: 'Egypt', bounds: { latMin: 22, latMax: 32, lonMin: 24, lonMax: 37 },
+      method: () => adhan.CalculationMethod.Egyptian() },
+    { name: 'UK', bounds: { latMin: 49, latMax: 61, lonMin: -9, lonMax: 2 },
+      method: () => adhan.CalculationMethod.MuslimWorldLeague() },
+    { name: 'Malaysia', bounds: { latMin: 0, latMax: 8, lonMin: 99, lonMax: 120 },
+      method: () => { const p = adhan.CalculationMethod.Other(); p.fajrAngle = 20; p.ishaAngle = 18; return p; }},
+    { name: 'Indonesia', bounds: { latMin: -11, latMax: 6, lonMin: 95, lonMax: 141 },
+      method: () => { const p = adhan.CalculationMethod.Other(); p.fajrAngle = 20; p.ishaAngle = 18; return p; }},
+    { name: 'Pakistan', bounds: { latMin: 23, latMax: 37, lonMin: 60, lonMax: 77 },
+      method: () => adhan.CalculationMethod.Karachi() },
+    { name: 'France', bounds: { latMin: 41, latMax: 51, lonMin: -5, lonMax: 10 },
+      method: () => { const p = adhan.CalculationMethod.Other(); p.fajrAngle = 12; p.ishaAngle = 12; return p; }},
+    { name: 'Canada', bounds: { latMin: 41, latMax: 84, lonMin: -141, lonMax: -52 },
+      method: () => adhan.CalculationMethod.NorthAmerica() },
+  ];
+
+  for (const entry of countryMethods) {
+    const b = entry.bounds;
+    if (latitude >= b.latMin && latitude <= b.latMax && longitude >= b.lonMin && longitude <= b.lonMax) {
+      return { params: entry.method(), name: entry.name };
+    }
+  }
+
+  // Default: ISNA for Americas, MWL elsewhere
+  if (longitude >= -170 && longitude <= -30) {
+    return { params: adhan.CalculationMethod.NorthAmerica(), name: 'North America (ISNA)' };
+  }
+  return { params: adhan.CalculationMethod.MuslimWorldLeague(), name: 'MWL (default)' };
+}
+
 function _computePrayerTimes(lat, lon, dateOverride) {
   const coords = new adhan.Coordinates(lat, lon);
-  const params = adhan.CalculationMethod.NorthAmerica();
+  const { params } = getCalculationMethod(lat, lon);
+  if (lat > 60) {
+    params.highLatitudeRule = adhan.HighLatitudeRule.MiddleOfTheNight;
+  } else if (lat > 48) {
+    params.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle;
+  }
   const date = dateOverride || (typeof _cityNow==='function'?_cityNow():new Date());
   const pt = new adhan.PrayerTimes(coords, date, params);
   const sunnah = new adhan.SunnahTimes(pt);
