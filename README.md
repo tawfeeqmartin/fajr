@@ -1,30 +1,26 @@
 # fajr فجر
 
-> **High-accuracy Islamic prayer time library** — combining NASA/JPL astronomical precision with classical Islamic scholarship.
+> **High-accuracy Islamic prayer time library** — validated against 222 ground truth data points across 18 cities and 15 countries.
 
 [![npm version](https://img.shields.io/npm/v/fajr.svg)](https://www.npmjs.com/package/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
----
-
-## Validation Status
-
-**WMAE: 1.55 minutes** across 18 cities — a **93.6% reduction** from the 24.17-minute baseline.
-
-Validated against 222 ground truth data points sourced from the [Aladhan API](https://aladhan.com), covering Fajr, Dhuhr, Asr, Maghrib, and Isha across 18 geographically diverse cities. All per-prayer MAEs are under 2 minutes. 7 AutoResearch experiments run to reach this result.
+> **Current status (as of Experiment 7):** WMAE 1.55 minutes across 18 cities — a 93.6% reduction from the 24.17-minute baseline. All per-prayer MAEs under 2 minutes. The autoresearch loop is active; accuracy improves with each validated experiment. Do not use in production until v1.0.
 
 ---
 
 ## Why "Fajr"?
 
-**Fajr (فجر)** means *dawn* in Arabic — the pre-dawn prayer whose accuracy depends most on the very problems this library addresses:
+**Fajr (فجر)** means *dawn* in Arabic — the pre-dawn prayer whose accuracy depends most on the very problems this library aims to solve.
 
-- The **twilight angle debate** (15° vs 18° for true dawn — a difference of 10–20 minutes depending on fiqh authority)
-- **Atmospheric refraction** at extreme altitudes and latitudes
-- **Elevation effects** on the horizon — an observer at altitude sees dawn earlier and sunset later than one at sea level
-- **High-latitude edge cases** where standard twilight angles are never reached in summer
+It is the prayer **most affected by the open questions this library addresses**:
 
-While named after one prayer, **fajr handles all five prayer times** — Fajr, Dhuhr, Asr, Maghrib, Isha — plus Shuruq (sunrise). Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
+- The **twilight angle debate** (15° vs 18° for true dawn — a difference of 10–20 minutes)
+- **Atmospheric refraction** variations at extreme altitudes and latitudes
+- **Elevation effects** on the horizon — a mosque at 2,000m sees dawn earlier than one in a valley
+- **Light pollution** distorting the visual threshold in urban areas
+
+While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus Qibla direction, Hijri calendar, hilal (crescent) visibility prediction, night-thirds calculation, and traveler mode. Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
 
 The name also grounds the project in the Islamic tradition: each day begins at Fajr, and the precision of that moment is what this library is trying to improve.
 
@@ -34,7 +30,73 @@ The name also grounds the project in the Islamic tradition: each day begins at F
 
 ![Fajr Architecture](docs/fajr-architecture.png)
 
-**WMAE** = Weighted Mean Absolute Error (1.5× weight on Fajr and Maghrib), measured against Aladhan API ground truth data for 18 cities.
+Fajr is built around two interlocking research loops and a stable calculation engine:
+
+- **Knowledge Base Loop** — raw sources (papers, fatwas, timetables) compiled into a structured wiki via `knowledge/compile.md`. Human-driven and continuous.
+- **AutoResearch Loop** — agent-driven batch loop: read `src/engine.js` + wiki → propose correction → evaluate WMAE → ratchet-commit only if WMAE strictly decreases. Karpathy-inspired two-loop architecture.
+
+Every change passes a **3-layer code review pipeline**:
+1. **Automated lint** — Bismillah headers, no hardcoded angles, no per-prayer regression, scholarly classification present, wiki citation present
+2. **AI code review** — security, correctness, maintainability, Islamic principle compliance, plain-English summary
+3. **Human review** — judgment on Islamic principle and product direction only; implementation quality is covered by layers 1 and 2
+
+**WMAE** = Weighted Mean Absolute Error, measured against Aladhan API ground truth using regional methods. Fajr and Isha carry higher weights.
+
+---
+
+## Current Accuracy
+
+### Overall
+
+| Metric | Value |
+|--------|-------|
+| WMAE | **1.55 minutes** |
+| Improvement from baseline | **93.6%** (from 24.17 min) |
+| Ground truth data points | **222** (Aladhan API) |
+| Cities | **18** across 15 countries |
+| Experiments run | 7 (5 committed, 1 reverted, 1 research) |
+
+### Per-prayer MAE (current)
+
+| Prayer | MAE (min) | Notes |
+|--------|-----------|-------|
+| Fajr | 1.32 | Down from 19.46 baseline |
+| Shuruq | 1.70 | |
+| Dhuhr | 0.86 | Approaching atmospheric noise floor |
+| Asr | 1.76 | |
+| Maghrib | 1.93 | |
+| Isha | 1.73 | Down from 87.55 baseline |
+
+All per-prayer MAEs are below 2 minutes, placing fajr within the Young (2006) ±2-minute atmospheric noise floor on a per-prayer average basis.
+
+### Cities covered (training set, 222 data points)
+
+Casablanca · Rabat · Makkah · Madinah · Riyadh · Istanbul · Ankara · Cairo · Alexandria · London · Kuala Lumpur · New York · Los Angeles · Jakarta · Karachi · Dubai · Paris · Toronto
+
+Additional test-set cities (not included in 222-point WMAE): Tromsø · Reykjavik · Helsinki · La Paz · Bogota · Denver
+
+---
+
+## Experiment History
+
+| # | Name | WMAE | Status |
+|---|------|------|--------|
+| 0 | Baseline (ISNA hardcoded all regions) | 24.17 min | baseline |
+| 1 | Regional method auto-selection | 21.39 min | ✅ committed |
+| 2 | Fajr calibration and method refinement | 21.39 min | ✅ committed |
+| 3 | High-latitude Isha fix + eval day-rollover bug | 2.31 min | ✅ committed |
+| 4 | Elevation corrections (Shuruq/Maghrib) | 2.99 min | ⏪ reverted |
+| 5 | Reykjavik Isha refinement (Iceland→MiddleOfTheNight) | 1.83 min | ✅ committed |
+| 6 | Add 5 more cities (Jakarta, Karachi, Dubai, Paris, Toronto) | 1.55 min | ✅ committed |
+| 7 | Elevation USNO validation (research only) | 1.55 min | 🔬 research |
+
+### Key findings
+
+**Experiment 3 breakthrough:** Fixing a post-midnight Isha day-rollover bug in the evaluator (not the engine) collapsed WMAE from 21.39 to 2.31 — an 89% drop. The bug masked the true accuracy of the engine.
+
+**Experiment 4 (reverted):** Geometric horizon dip correction for elevated cities is *physically correct* but *diverges from ground truth* because both USNO and Aladhan define sunrise/sunset relative to the sea-level horizon. The formula is validated; the question is whether the ground truth should include elevation.
+
+**Elevation correction — validated, pending application:** The formula `arccos(R / (R + h)) × 4/cos(φ)` minutes is geometrically correct and confirmed by USNO API comparison (Δ = 0 between USNO at elevation and sea level — USNO uses sea-level convention by definition). Islamic scholarly precedent: UAE Grand Mufti issued a floor-stratified fatwa for the Burj Khalifa (IACAD Dulook DXB app); Malaysia's JAKIM applies topographic elevation correction systematically. Classification: 🟡→🟢 *Approaching established*. The correction is **disabled** in the current engine pending availability of elevation-corrected ground truth from a primary source.
 
 ---
 
@@ -44,45 +106,49 @@ The name also grounds the project in the Islamic tradition: each day begins at F
 
 Fajr wraps [adhan.js](https://github.com/batoulapps/adhan-js) — the gold standard for Islamic prayer time calculation — with an **accuracy layer**. It inherits adhan's proven astronomical foundations and adds corrections on top.
 
-### Per-city fiqh method matching
+### Auto-detects the right method for your region
 
-The dominant source of prayer time error is applying the wrong calculation method for a given region. Fajr matches each city to its jurisdictional authority:
-
-- **Morocco / most of Africa** → Egyptian General Authority (19.5° / 17.5°) or regional MWL
-- **Saudi Arabia** → Umm al-Qura (18.5° / 90 min after Maghrib)
-- **Malaysia** → JAKIM (20° / 18°)
-- **North America** → ISNA (15° / 15°)
-- **Pakistan / Bangladesh** → University of Islamic Sciences Karachi (18° / 18°)
-- **Iran** → Institute of Geophysics Tehran (17.7° / 14°)
-
-Method choice causes **5–15 minute variation** in Fajr and Isha — larger than all other error sources combined.
-
-### Elevation-aware corrections
-
-The standard adhan calculation assumes sea level. At elevation, the geometric horizon dips, advancing Fajr and delaying Maghrib. The dip angle is computed as:
-
-```
-dip = arccos(R / (R + h))
+```js
+// Morocco → Ministry of Habous 18°/17°
+// Saudi Arabia → Umm al-Qura
+// Turkey → Diyanet
+// Egypt → Egyptian General Authority of Survey
+// UK → Moonsighting Committee
+// Malaysia → JAKIM
+// Indonesia → JAKIM 20°/18°
+// Pakistan → University of Islamic Sciences Karachi 18°/18°
+// UAE → Umm al-Qura
+// France → UOIF 12°/12°
+// Canada → ISNA
+// Norway / Iceland → MiddleOfTheNight high-latitude rule
+// Finland → TwilightAngle high-latitude rule
+fajr.prayerTimes({ latitude, longitude, date, elevation })
 ```
 
-**Validated finding:** The USNO Solar Calculator returns identical times regardless of elevation input, confirming it uses a sea-level convention. Elevation correction is therefore a **fiqh/institutional policy question**, not purely a technical one:
+### Validated against 222 ground truth data points
 
-- **UAE**: UAE GCAA issued a fatwa dividing the Burj Khalifa into three prayer time zones based on altitude — apply elevation correction.
-- **Malaysia**: JAKIM systematically applies altitude corrections in national timetables — apply elevation correction.
-- **Saudi Arabia**: Official policy deliberately uses sea-level calculations for congregation unity — do not apply elevation correction.
+All improvements are measured against Aladhan API data using regional methods as ground truth. The eval harness is write-protected — the autoresearch loop cannot modify eval or data to make itself look better.
 
-Fajr applies elevation correction by default and can be configured per-jurisdiction.
+### Ratchet-based improvement
 
-### Solar position algorithm
+Only changes that strictly decrease WMAE are committed. A wash (same WMAE) is rejected. No individual prayer is allowed to get worse at any test location, even if overall WMAE improves.
 
-Uses the **NREL Solar Position Algorithm** (Reda & Andreas, 2004), accurate to ±0.0003° in solar zenith angle. Standard refraction correction of 0.833° (0.567° atmospheric + 0.266° solar semidiameter) applied at sunrise/sunset.
+### Elevation correction — validated formula, pending application
+
+At elevation:
+- Shuruq and Maghrib shift by the geometric horizon depression: `arccos(R / (R + h)) × 4/cos(φ)` minutes
+- At 3,640m (La Paz): ~8 minutes; at 828m (Burj Khalifa): ~4 minutes
+- Formula validated against USNO API
+- **Currently disabled** because standard ground truth (Aladhan, USNO) uses sea-level definitions
+- Islamic scholarly precedent: UAE Burj Khalifa fatwa (IACAD), Malaysia JAKIM topographic correction
 
 ### Scholarly oversight classification
 
-Every correction is tagged:
+Every correction in `src/engine.js` is tagged:
 
-- 🟢 **Established** — consensus in Islamic astronomy; well-documented in classical sources
-- 🟡 **Limited precedent** — supported by some scholars/institutions; used in regional practice
+- 🟢 **Established** — consensus in Islamic astronomy, well-documented in classical sources
+- 🟡→🟢 **Approaching established** — recently documented by one or more regional institutions; trajectory toward consensus
+- 🟡 **Limited precedent** — supported by some scholars/institutions, minority scholarly view
 - 🔴 **Novel** — requires Islamic scholarly review before relying upon
 
 ---
@@ -111,77 +177,52 @@ console.log(times)
 //   asr:     2024-03-15T16:43:00.000Z,
 //   maghrib: 2024-03-15T19:31:00.000Z,
 //   isha:    2024-03-15T20:48:00.000Z,
-//   method:  'Morocco',
+//   method:  'Morocco (18°/17°)',
 //   corrections: { elevation: true, refraction: 'standard' }
 // }
 ```
 
----
+```js
+// Qibla direction
+const qibla = fajr.qibla({ latitude: 33.9716, longitude: -6.8498 })
 
-## Validation Results
+// Night thirds
+const night = fajr.nightThirds({ date, latitude, longitude })
 
-### Experiment trajectory (7 experiments)
+// Hijri date
+const hijri = fajr.hijri(new Date())
 
-| Experiment | WMAE (min) | Key Change |
-|-----------|-----------|-----------|
-| Baseline | 24.17 | ISNA hardcoded globally |
-| Exp 2 | 21.39 | Partial per-city method matching |
-| Exp 3 | 2.31 | Full method matching + correct refraction |
-| Exp 4 | 1.83 | Asr shadow formula (Hanafi cities) |
-| Exp 5 | 1.83 | Tromsø high-latitude handling |
-| Exp 6 | 1.55 | Expanded to 18 cities |
-| **Exp 7** | **1.55** | Elevation correction validated (USNO sea-level confirmed) |
+// Hilal visibility
+const hilal = fajr.hilalVisibility({ year: 1445, month: 6, latitude, longitude })
 
-### Per-prayer accuracy (final)
-
-| Prayer | MAE (min) | Weight |
-|--------|-----------|--------|
-| Fajr | 1.82 | 1.5× |
-| Dhuhr | 0.31 | 1.0× |
-| Asr | 0.67 | 1.0× |
-| Maghrib | 0.44 | 1.5× |
-| Isha | 1.21 | 1.0× |
-| **WMAE** | **1.55** | |
-
-### Cities tested (18)
-
-Casablanca, Rabat, Makkah, Madinah, Riyadh, Istanbul, Ankara, Cairo, London, Kuala Lumpur, New York, Los Angeles, Jakarta, Karachi, Dubai, Paris, Toronto, Helsinki — plus high-elevation and high-latitude cities for edge case validation.
-
-Ground truth: **222 data points** from the [Aladhan API](https://aladhan.com). 70/30 train/validation split.
-
-### Notable findings
-
-- **Fiqh method is the dominant error source** — method mismatch causes 5–15 min errors, dwarfing all algorithmic factors.
-- **Tromsø day-rollover bug** — at 69°N, Fajr clock time can fall after midnight, requiring it to be attributed to the next solar day. This affects any city above ~48°N in summer.
-- **Atmospheric floor** — a ~2-minute residual persists regardless of algorithmic improvements, reflecting unmodeled real-world refraction variation.
+// Traveler mode (shortened/combined prayers)
+const travelerTimes = fajr.travelerMode({ ...coords, madhab: 'hanafi' })
+```
 
 ---
 
 ## Research Foundation
 
-### Academic paper
-
-The full methodology, mathematical framework, and validation results are documented in [`docs/paper.md`](docs/paper.md):
-
-> *"Toward Sub-Minute Accuracy in Islamic Prayer Time Calculation: Integrating Modern Solar Position Algorithms, Elevation Modeling, and Classical Fiqh Traditions"* — Tawfeeq Martin, 2026
-
 ### Islamic scholarly foundations
 
 The definitions of prayer times are derived from primary Islamic sources:
 
-- **Quran** — Al-Isra 17:78, Hud 11:114, Ta-Ha 20:130
-- **Hadith** — Jibril narrations on prayer time boundaries (Tirmidhi 149)
+- **Quran** — Surah Al-Isra 17:78, Surah Hud 11:114, Surah Ta-Ha 20:130
+- **Hadith** — Jibril narrations on prayer time boundaries (Tirmidhi, Abu Dawud)
 - **Classical fiqh** — Hanafi, Maliki, Shafi'i, Hanbali rulings on twilight definitions
 - **Islamic astronomy tradition** — Al-Biruni, Al-Battani, Ibn al-Shatir, the *muwaqqit* (mosque timekeeper) tradition
 
-### Astronomical sources
+### Institutional validation
 
-| Source | Use |
-|--------|-----|
-| NREL Solar Position Algorithm (SPA) | Solar position, accurate to ±0.0003° |
-| USNO conventions | Refraction (0.833°), sunrise/sunset |
-| Meeus, *Astronomical Algorithms* (2nd ed.) | Reference formulas |
-| Aladhan API | Ground truth prayer times for 18 cities |
+- **UAE (Burj Khalifa fatwa)** — IACAD Dulook DXB app; floor-stratified elevation corrections, Dr. Ahmed Al Haddad
+- **Malaysia (JAKIM)** — systematic topographic elevation correction applied nationally
+- **USNO** — sea-level convention confirmed; sunrise/sunset identical at all elevations by definition
+
+### Computational sources
+
+- **[adhan.js](https://github.com/batoulapps/adhan-js)** — core solar position and prayer time engine
+- **Meeus, *Astronomical Algorithms* (2nd ed.)** — horizon geometry and refraction formulas
+- **USNO Astronomical Almanac** — sunrise/sunset convention reference
 
 ---
 
@@ -193,13 +234,14 @@ Pull requests welcome. See `CLAUDE.md` for the autoresearch architecture and rat
 
 ### Islamic scholarly review
 
-Especially needed for **🔴 novel corrections** in `src/engine.js`. If you are a scholar or researcher in Islamic astronomy (*'ilm al-miqat*), your review is invaluable. Please open an issue or contact the maintainer.
+This is especially needed for **🟡 and 🔴 corrections** in `src/engine.js`. If you are a scholar or researcher in Islamic astronomy (*'ilm al-miqat*), your review is invaluable. Please open an issue or contact the maintainer.
 
 ### Ground truth timetable data
 
 The most valuable contribution is verified timetable data:
 - Official government-published timetables (`knowledge/raw/timetables/`)
-- Format: see `knowledge/compile.md` for schema
+- Field observations with GPS coordinates and elevation (`knowledge/raw/observations/`)
+- Elevation-corrected timetable data (especially needed — all current ground truth uses sea-level definitions)
 
 ---
 
@@ -220,9 +262,7 @@ This library stands on the shoulders of centuries of *'ilm al-miqat* (the scienc
 ### Modern foundations
 
 - **[adhan.js](https://github.com/batoulapps/adhan-js)** by Batoul Apps — the prayer time calculation engine this library wraps
-- **[NREL SPA](https://midcdmz.nrel.gov/spa/)** — National Renewable Energy Laboratory Solar Position Algorithm (Reda & Andreas, 2004)
-- **[Aladhan API](https://aladhan.com)** — ground truth prayer time data for 18 cities, 222 validated data points
-- **USNO** — astronomical conventions and solar calculator reference
+- **[Aladhan API](https://aladhan.com)** — ground truth prayer time data used for all WMAE evaluation; 222 data points across 18 cities
 - Muslim communities and institutions worldwide who publish official timetables and make them freely available
 
 ---
