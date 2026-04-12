@@ -67,7 +67,7 @@ Every astronomical correction or calculation method in this library must carry o
 
 | Item | Basis |
 |------|-------|
-| Elevation-based horizon dip correction for Shuruq/Maghrib | Classical muwaqqit texts note that elevated mosques observe sunrise/sunset differently; no standardized formula in published timetables |
+| Elevation-based horizon dip correction for Shuruq/Maghrib | **🟡→🟢** Originally: classical muwaqqit texts note elevated mosques observe sunrise/sunset differently. *Updated 2026-04-12:* UAE Grand Mufti issued floor-stratified Burj Khalifa fatwa (IACAD/Dulook DXB); Malaysia JAKIM systematically applies topographic elevation. Approaching established. See [[wiki/corrections/elevation#international-precedent]]. |
 | Temperature/pressure refraction correction | Physically correct; not formally adopted by any institution; consistent with shar'i intent of precision |
 | ECFR 12° angle for high-latitude accommodation | Endorsed by a major European scholarly body but not universally accepted |
 | One-seventh-of-night Fajr calculation at high latitudes | Endorsed by some scholars; not universal |

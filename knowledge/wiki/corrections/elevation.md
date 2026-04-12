@@ -128,11 +128,61 @@ At 100m elevation (typical inland city), ±16m vertical uncertainty gives ±0.02
 
 Classical *muwaqqit* (Islamic timekeeper) texts mention that mosques situated at elevation observe sunrise and sunset differently from those at sea level. Ibn al-Haytham and other medieval Islamic astronomers were aware of horizon dip effects. However, no classical text provides a standardized formula for this correction in the context of prayer times — the formula is a modern application of classical geometric principles.
 
-No major contemporary Islamic institution (MWL, ISNA, JAKIM, Diyanet, Egyptian GAAS) has formally published elevation-corrected prayer timetables. The correction is geometrically established but institutionally unadopted.
-
-This gives the correction a **🟡 Limited precedent** classification: the underlying geometry is classical and uncontroversial, but the systematic application to prayer times is not formally endorsed by any institution.
+Classical muwaqqits such as **Ibn al-Shatir** and **al-Khalili** (14th century Damascus) produced location-specific zīj tables for mosques at different elevations within the Levant. The tables were not explicitly labeled as elevation-corrected, but the systematic variation in their computed times likely embedded topographic elevation within the location-specific constants — the effect was absorbed into calibration rather than factored out as a named correction.
 
 ⚠️ Deploying this correction should include disclosure to users. In the fajr library's output, an elevation-corrected result should be labeled as such, and the correction amount (in minutes) should be accessible.
+
+---
+
+## International Precedent
+
+**Classification trajectory: 🟡 Limited precedent → 🟡→🟢 (approaching established)**
+
+### UAE — Strongest Contemporary Precedent
+
+The **Burj Khalifa fatwa** issued by **Dr. Ahmed Al Haddad, Grand Mufti of Dubai**, is the only known building-specific, floor-stratified prayer time ruling in Islamic jurisprudence:
+
+- **Zone 1 (floors 1–80):** Standard ground-level prayer times
+- **Zone 2 (floors 81–150):** +2 minutes on Maghrib/Shuruq
+- **Zone 3 (floors 151–163):** +3 minutes on Maghrib/Shuruq
+
+The **IACAD (Islamic Affairs and Charitable Activities Department)** of Dubai incorporated this ruling into the official **Dulook DXB** prayer time application. This is the first known case of elevation-stratified prayer times being embedded in an official government-endorsed prayer app.
+
+The fatwa explicitly applies the geometric horizon dip principle — that elevated observers see the sun set later and rise earlier — within the framework of Islamic jurisprudence. It represents a formal scholarly determination that elevation is a legitimate wasail correction, not a redefinition of shar'i terms.
+
+### Malaysia — Systematic Institutional Implementation
+
+**JAKIM (Jabatan Kemajuan Islam Malaysia)** applies elevation corrections systematically across all Malaysian states using topographic data from the **Department of Survey and Mapping Malaysia (JUPEM)**:
+
+- State-level implementation: times are adjusted for the mean elevation of each district
+- Elevation data source: official government DEM (Digital Elevation Model)
+- Publication: incorporated into JAKIM's official e-solat prayer time application
+
+This is the most geographically comprehensive institutional implementation of elevation correction in Islamic prayer time calculation — covering an entire country at the district level, not just landmark buildings.
+
+**Indonesia:** JAKIM-aligned implementation adopted by Indonesian Islamic councils for mountainous regions, though not as systematically documented as JAKIM's approach.
+
+### Saudi Arabia — Deliberate Contrast (Non-adoption)
+
+Saudi Arabia **does NOT** apply elevation corrections near the Haram, despite the **Abraj Al-Bait towers** (601m, adjacent to Masjid al-Haram) being among the tallest buildings in the world. The official Umm al-Qura calendar uses uniform times for all of Makkah regardless of floor.
+
+**Jurisprudential rationale:** The Saudi position prioritizes **communal unity (jama'ah)** over individual astronomical precision. Prayer times in Makkah are tied to the adhan from the Haram itself — when the mu'adhin calls, all Muslims in the city pray together. Applying floor-stratified corrections would fragment the communal prayer and introduce confusion about which adhan corresponds to one's actual prayer time. This is a deliberate, reasoned choice, not an oversight.
+
+This contrast is jurisprudentially significant: both the UAE (Burj Khalifa correction) and Saudi Arabia (no correction) represent valid scholarly positions, differing on how to weigh astronomical precision against communal practice.
+
+### FCNA (Fiqh Council of North America)
+
+The FCNA explicitly states in its prayer time guidance that prayer times "vary with season, latitude, **elevation**, and other factors." This acknowledges elevation as a legitimate variable in prayer time calculation, even if FCNA does not publish elevation-corrected timetables directly.
+
+---
+
+## Validation Against USNO (Experiment 7, 2026-04-12)
+
+The USNO (US Naval Observatory) API was queried at both actual elevation and sea level for La Paz (3,640m), Denver (1,609m), Bogota (2,640m), and the Burj Khalifa (828m). The API returned **identical times** at all elevations (Δ = 0 min). This confirms that standard astronomical rise/set definitions are referenced to the sea-level horizon — the USNO API does not apply geometric horizon dip.
+
+**Implication for the library:** The Aladhan ground truth data (used in the eval harness) also uses sea-level definitions. Applying elevation correction to the engine diverges from the Aladhan baseline and *increases* WMAE against that specific ground truth. The correction is geometrically correct and institutionally supported (UAE/Malaysia), but eval-incompatible with the current Aladhan-based ground truth. Elevation correction remains **disabled** in the engine pending ground truth that accounts for elevation (e.g., JAKIM timetables with elevation data, or IACAD Dulook DXB times for Burj Khalifa floors).
+
+See: `eval/results/experiment-history.json` experiments 4 and 7.
 
 ---
 

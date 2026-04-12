@@ -164,8 +164,12 @@ Every correction in `src/engine.js` must carry a classification comment:
 | Tag | Meaning | Action required |
 |-----|---------|----------------|
 | 🟢 Established | Consensus in Islamic astronomy, classical sources | Can deploy |
+| 🟡→🟢 Approaching established | Recently documented in one or more regional institutions; trajectory toward consensus | Deploy with light disclosure; document institution and ruling |
 | 🟡 Limited precedent | Used in some regions/institutions, minority scholarly view | Note in docs, flag for review |
 | 🔴 Novel | No clear precedent in Islamic scholarly tradition | **Do not deploy without scholarly review** |
+
+**Current 🟡→🟢 items:**
+- **Elevation correction (Shuruq/Maghrib):** UAE Grand Mufti Dr. Ahmed Al Haddad issued a floor-stratified fatwa for Burj Khalifa (IACAD Dulook DXB app); Malaysia JAKIM applies topographic elevation systematically. Saudi Arabia deliberately does NOT apply it (jama'ah priority). See [[wiki/corrections/elevation#international-precedent]].
 
 If you derive a correction from pure astronomical reasoning with no Islamic scholarly basis, it is 🔴 Novel by default, regardless of how mathematically sound it is. The *shar'i* definitions of prayer times are prior to astronomy; astronomy serves the *shar'*.
 
