@@ -75,8 +75,9 @@ function selectMethod(country, lat, coords) {
       // Egyptian General Authority of Survey: Fajr 19.5°, Isha 17.5°
       return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (19.5°/17.5°)' }
     case 'UK':
-      // Muslim World League: Fajr 18°, Isha 17°
-      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (UK)' }
+      // Moonsighting Committee: Fajr 18°, Isha 18° with seasonal (Shafaq) adjustment
+      // 🟢 Established — UK Muslim community predominantly follows Moonsighting Committee
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (UK)' }
     case 'Malaysia': {
       // JAKIM: Fajr 20°, Isha 18° — equatorial standard; use Singapore (same angles)
       return { params: adhan.CalculationMethod.Singapore(), methodName: 'JAKIM/Singapore (20°/18°)' }
@@ -92,17 +93,20 @@ function selectMethod(country, lat, coords) {
     case 'Norway':
     case 'Iceland':
     case 'Finland': {
-      // High-latitude: MWL + recommended high-latitude rule
+      // High-latitude: MWL + TwilightAngle (AngleBased) high-latitude rule
+      // 🟢 Established — Aladhan API uses latitudeAdjustmentMethod=1 (AngleBased)
+      //   for these regions; TwilightAngle computes actual 18° twilight while it
+      //   remains astronomically reachable in early spring.
       const p = adhan.CalculationMethod.MuslimWorldLeague()
-      p.highLatitudeRule = adhan.HighLatitudeRule.recommended(coords)
-      return { params: p, methodName: 'MWL + HighLatRule (high latitude)' }
+      p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
+      return { params: p, methodName: 'MWL + TwilightAngle (high latitude)' }
     }
     default: {
       // Fallback: high-latitude auto-detect (lat > 55°)
       if (lat > 55) {
         const p = adhan.CalculationMethod.MuslimWorldLeague()
-        p.highLatitudeRule = adhan.HighLatitudeRule.recommended(coords)
-        return { params: p, methodName: 'MWL + HighLatRule (fallback)' }
+        p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
+        return { params: p, methodName: 'MWL + TwilightAngle (fallback)' }
       }
       return { params: adhan.CalculationMethod.NorthAmerica(), methodName: 'ISNA (default)' }
     }
