@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fajr Accuracy Dashboard</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 1rem 2rem;
+      color: #1a1a1a;
+      background: #fafaf8;
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    p.subtitle { color: #666; margin-top: 0; }
+    .metric { font-size: 2.5rem; font-weight: 700; color: #1a6e3e; }
+    .note {
+      background: #f0f4ff;
+      border-left: 4px solid #3b6de0;
+      padding: 0.75rem 1rem;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fajr Accuracy Dashboard</h1>
+  <p class="subtitle">AutoResearch experiment trajectory — placeholder</p>
+
+  <p class="metric">1.55 min</p>
+  <p>Current WMAE across 18 cities (Experiment 7) — 93.6% reduction from baseline 24.17 min.</p>
+
+  <div class="note">
+    The interactive dashboard is in <code>fajr-dashboard.html</code> at the project root.
+    This file is a documentation placeholder. See <code>docs/paper.md</code> for full methodology
+    and results, and <code>docs/DASHBOARD.md</code> for dashboard feature documentation.
+  </div>
+
+  <h2>Experiment Trajectory</h2>
+  <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%; font-size:0.9rem;">
+    <thead style="background:#f0f0f0;">
+      <tr><th>Experiment</th><th>WMAE (min)</th><th>Key Change</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Baseline</td><td>24.17</td><td>ISNA hardcoded globally</td></tr>
+      <tr><td>Exp 2</td><td>21.39</td><td>Partial per-city method matching</td></tr>
+      <tr><td>Exp 3</td><td>2.31</td><td>Full method matching + refraction</td></tr>
+      <tr><td>Exp 4</td><td>1.83</td><td>Asr shadow formula (Hanafi)</td></tr>
+      <tr><td>Exp 5</td><td>1.83</td><td>Tromsø high-lat handling</td></tr>
+      <tr><td>Exp 6</td><td>1.55</td><td>Expanded to 18 cities</td></tr>
+      <tr><td>Exp 7</td><td><strong>1.55</strong></td><td>Elevation validation (USNO)</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
