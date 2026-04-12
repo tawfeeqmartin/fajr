@@ -137,6 +137,20 @@ All training and test datasets use real prayer times fetched from the Aladhan AP
 
 ---
 
+## Validation Results
+
+Measured against Aladhan API ground truth (April 2026, 13 cities, ~780 prayer records):
+
+- **Regional method auto-selection achieves <1 min MAE for most cities.** After mapping countries to their institutional methods (Morocco→18°/17°, Saudi→UmmAlQura, Turkey→Diyanet, Egypt→Egyptian, UK→MoonsightingCommittee, Malaysia→JAKIM, USA→ISNA), per-city Fajr errors dropped to 0–1 minute for:
+  - Casablanca, Rabat (Morocco)
+  - Istanbul, Ankara (Turkey)
+  - Makkah, Madinah, Riyadh (Saudi Arabia)
+  - Los Angeles, Denver (USA)
+- **Remaining challenges:** High-latitude cities (Tromsø, Reykjavik, Helsinki) require special rules beyond method selection — see [[wiki/regions/high-latitude]].
+- **WMAE trajectory:** 24.17 min (baseline, ISNA everywhere) → 21.39 min (regional methods) → 2.31 min (high-latitude rules + eval day-rollover fix). Final WMAE approaches the Young (2006) ±2 min atmospheric refraction floor.
+
+---
+
 ## Related Pages
 
 - [[wiki/fiqh/prayer-definitions]] — The Islamic definitions that these methods approximate

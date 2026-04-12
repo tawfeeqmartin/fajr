@@ -14,7 +14,7 @@
  *   node eval/eval.js --prayer fajr    (focus on one prayer)
  */
 
-import { readFileSync, readdirSync, existsSync } from 'fs'
+import { readFileSync, readdirSync, existsSync, appendFileSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { prayerTimes } from '../src/index.js'
@@ -242,6 +242,23 @@ function run() {
   console.log(`WMAE     |           |        | ${wmae.toFixed(2).padStart(8)} |`)
   console.log()
   console.log(`WMAE: ${wmae.toFixed(4)}`)
+
+  // Auto-log every run to eval/results/runs.jsonl
+  const perPrayer = {}
+  for (const p of PRAYERS) {
+    if (counts[p] > 0) perPrayer[p] = totals[p] / counts[p]
+  }
+  const result = {
+    timestamp: new Date().toISOString(),
+    wmae,
+    perPrayer,
+    totalEntries: allData.length,
+    trainEntries: trainData.length,
+    testEntries: testData.length,
+  }
+  const resultsDir = join(__dirname, 'results')
+  mkdirSync(resultsDir, { recursive: true })
+  appendFileSync(join(resultsDir, 'runs.jsonl'), JSON.stringify(result) + '\n')
 }
 
 run()

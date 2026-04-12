@@ -136,6 +136,16 @@ This gives the correction a **🟡 Limited precedent** classification: the under
 
 ---
 
+## Current Implementation Status
+
+**Elevation corrections are not yet applied in the fajr library.** All WMAE measurements in the experiment log (`eval/results/experiment-history.json`) reflect accuracy from method selection and high-latitude rules alone — no elevation correction has been applied to any result.
+
+The ground truth data includes elevation metadata (La Paz: 3,640m, Bogota: 2,625m, Denver: 1,609m, Makkah: 277m, Madinah: 608m, Ankara: 938m) but the library currently ignores the `elevation` parameter for Shuruq and Maghrib calculations. This means the current Shuruq/Maghrib errors at high-elevation cities (La Paz, Bogota, Denver) include an uncorrected systematic offset of up to ~7.8 min (La Paz).
+
+Implementing elevation correction is expected to reduce Shuruq and Maghrib MAE at high-elevation test cities by up to 7–8 minutes, with minimal effect on sea-level cities.
+
+---
+
 ## Related Pages
 
 - [[wiki/astronomy/elevation]] — The physics and geometry of horizon dip

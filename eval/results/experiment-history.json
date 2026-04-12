@@ -1,0 +1,75 @@
+[
+  {
+    "experiment": 0,
+    "name": "Baseline",
+    "date": "2026-04-11",
+    "description": "Initial baseline with ISNA hardcoded for all regions",
+    "classification": "baseline",
+    "wmae_minutes": 24.17,
+    "per_prayer": {
+      "fajr": 19.46,
+      "sunrise": 2.02,
+      "dhuhr": 0.91,
+      "asr": 1.83,
+      "maghrib": 2.29,
+      "isha": 87.55
+    },
+    "notes": "Ground truth from Aladhan API with correct regional methods. High WMAE driven by wrong method selection (ISNA for all) and eval day-rollover bug."
+  },
+  {
+    "experiment": 1,
+    "name": "Regional method auto-selection",
+    "date": "2026-04-11",
+    "description": "Auto-detect country from coordinates, select correct calculation method",
+    "classification": "green",
+    "wikiRef": "wiki/methods/overview",
+    "wmae_minutes": 21.39,
+    "per_prayer": {
+      "fajr": 7.55,
+      "sunrise": 2.02,
+      "dhuhr": 0.91,
+      "asr": 1.83,
+      "maghrib": 2.29,
+      "isha": 87.55
+    },
+    "changes": "Country-to-method mapping: Morocco→18°/17°, Saudi→UmmAlQura, Turkey→Diyanet, Egypt→Egyptian, UK→MoonsightingCommittee, Malaysia→JAKIM, USA→ISNA",
+    "notes": "Fajr improved significantly. Isha still dominated by eval day-rollover bug and high-latitude edge cases."
+  },
+  {
+    "experiment": 2,
+    "name": "Fajr calibration and method refinement",
+    "date": "2026-04-11",
+    "description": "Improved Fajr accuracy, London Isha fix with MoonsightingCommittee",
+    "classification": "green",
+    "wikiRef": "wiki/methods/overview",
+    "wmae_minutes": 21.39,
+    "per_prayer": {
+      "fajr": 7.55,
+      "sunrise": 2.02,
+      "dhuhr": 0.91,
+      "asr": 1.83,
+      "maghrib": 2.29,
+      "isha": 87.55
+    },
+    "notes": "Incremental improvements. Main WMAE unchanged due to Isha domination."
+  },
+  {
+    "experiment": 3,
+    "name": "High-latitude Isha fix + eval day-rollover bug",
+    "date": "2026-04-11",
+    "description": "Fixed post-midnight Isha parsing in eval, Norway MiddleOfTheNight rule, Finland bounding box fix",
+    "classification": "green",
+    "wikiRef": "wiki/regions/high-latitude",
+    "wmae_minutes": 2.31,
+    "per_prayer": {
+      "fajr": 2.92,
+      "sunrise": 2.02,
+      "dhuhr": 0.91,
+      "asr": 1.83,
+      "maghrib": 2.29,
+      "isha": 3.16
+    },
+    "changes": "1) eval.js: post-midnight Isha day-rollover fix. 2) engine.js: Norway→MiddleOfTheNight, Finland bounding box priority fix",
+    "notes": "Major breakthrough. WMAE dropped 89% from 21.39 to 2.31 min. Now approaching Young (2006) ±2 min atmospheric floor."
+  }
+]

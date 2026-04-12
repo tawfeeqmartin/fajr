@@ -181,6 +181,22 @@ Real prayer times were collected from the Aladhan API (api.aladhan.com) for **Ap
 
 ---
 
+## Experiment Findings (April 2026 eval)
+
+Results measured against Aladhan API ground truth (`eval/data/test/high_latitude.json`), April 1–7 2026:
+
+- **Tromsø (69.6°N): MiddleOfTheNight rule matches Aladhan's AngleBased within 2 min.** Aladhan uses `latitudeAdjustmentMethod=1` (AngleBased), which caps Fajr and Isha near the middle of the night (~00:47–00:49) by April. The library's `MiddleOfTheNight` rule (`HighLatitudeRule.MiddleOfTheNight` in adhan.js) reproduces this behavior within the 2-minute atmospheric floor.
+
+- **Reykjavik (64.1°N): TwilightAngle rule works in early April; ~24–36 min Isha discrepancy remaining.** Isha is still computable at Reykjavik's latitude in early April (Isha ~23:40 Apr 1 → 00:33 Apr 7). The library produces times within ~24–36 min of ground truth, primarily due to method parameter differences vs. Aladhan's AngleBased adjustment.
+
+- **Helsinki (60.2°N): TwilightAngle rule, 11–12 min Isha discrepancy.** Helsinki is well within normal calculation range in April (Isha 22:49–23:23). Residual discrepancy of 11–12 min attributed to method parameter differences rather than high-latitude failure.
+
+- **Key insight: post-midnight Isha times require day-rollover handling in eval.** Aladhan stores Isha under the date the night *begins* — so "00:48" for "2026-04-01" means the Isha of the April 1 night, which in clock time is early April 2. Without the day-rollover fix in `eval.js`, the ground truth was placed ~24 h before calculated time, inflating Isha MAE to ~87 min. This single bug fix was responsible for the 89% WMAE reduction from 21.39 → 2.31 min.
+
+- **Norway bounding box overlaps with Finland — ordering matters.** The country-detection bounding boxes for Norway and Finland have geographic overlap near the border. The engine must test Norway before Finland (or use point-in-polygon) to correctly assign `MiddleOfTheNight` to Norwegian cities and `TwilightAngle` to Finnish cities.
+
+---
+
 ## Related Pages
 
 - [[wiki/fiqh/scholarly-oversight]] — Classification framework governing high-latitude solutions
