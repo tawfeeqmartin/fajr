@@ -259,6 +259,20 @@ The AutoResearch system supports three tiers of hypothesis generation:
 
 ## 7. Validation Results
 
+The following figures visualize the experiment trajectory and results.
+
+![WMAE Trajectory](charts/chart-wmae-trajectory.png)
+*Figure 1: WMAE trajectory across experiments, showing 93.6% reduction.*
+
+![Per-Prayer Comparison](charts/chart-prayer-comparison.png)
+*Figure 2: Per-prayer MAE comparison between baseline and current implementation.*
+
+![City Accuracy](charts/chart-city-accuracy.png)
+*Figure 3: Per-city accuracy — 15 of 18 cities under 2 minutes MAE.*
+
+![Elevation Correction](charts/chart-elevation.png)
+*Figure 4: Elevation correction predictions vs USNO and Burj Khalifa fatwa.*
+
 ### 7.1 Experiment Trajectory
 
 | Experiment | WMAE (min) | Key Change | Δ |

@@ -28,7 +28,22 @@ The name also grounds the project in the Islamic tradition: each day begins at F
 
 ## Architecture
 
-![Fajr Architecture](docs/fajr-architecture.png)
+```
+┌─────────────────────────────────────────────────────────┐
+│                    FAJR ARCHITECTURE                     │
+│                                                          │
+│  ┌───────────────────┐     ┌──────────────────────────┐ │
+│  │  KNOWLEDGE BASE   │◄───►│    AUTORESEARCH LOOP     │ │
+│  │                   │     │                           │ │
+│  │  raw/ → wiki/     │     │  engine.js ──► eval.js   │ │
+│  │  (continuous)     │     │      ▲            │      │ │
+│  │                   │     │      └── ratchet ◄─┘      │ │
+│  └───────────────────┘     └──────────────────────────┘ │
+│                                                          │
+│  Ground Truth: Aladhan API data from 18 cities           │
+│  Metric: Weighted Mean Absolute Error (1.55 min)         │
+└─────────────────────────────────────────────────────────┘
+```
 
 Fajr is built around two interlocking research loops and a stable calculation engine:
 
@@ -150,6 +165,22 @@ Every correction in `src/engine.js` is tagged:
 - 🟡→🟢 **Approaching established** — recently documented by one or more regional institutions; trajectory toward consensus
 - 🟡 **Limited precedent** — supported by some scholars/institutions, minority scholarly view
 - 🔴 **Novel** — requires Islamic scholarly review before relying upon
+
+---
+
+## Results
+
+### Accuracy Trajectory
+![WMAE Trajectory](docs/charts/chart-wmae-trajectory.png)
+
+### Per-Prayer Accuracy
+![Per-Prayer Comparison](docs/charts/chart-prayer-comparison.png)
+
+### Per-City Accuracy
+![City Accuracy](docs/charts/chart-city-accuracy.png)
+
+### Elevation Correction Validation
+![Elevation Correction](docs/charts/chart-elevation.png)
 
 ---
 
