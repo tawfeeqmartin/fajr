@@ -39,6 +39,11 @@ function detectCountry(lat, lon) {
   if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
   if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
   if (lat >= -6   && lat <= 2    && lon >= -82  && lon <= -74)  return 'Ecuador'
+  if (lat >= -11  && lat <= 6    && lon >= 95   && lon <= 141)  return 'Indonesia'
+  if (lat >= 23   && lat <= 37   && lon >= 60   && lon <= 75)   return 'Pakistan'
+  if (lat >= 22   && lat <= 26.5 && lon >= 51   && lon <= 56.5) return 'UAE'
+  if (lat >= 42   && lat <= 51.5 && lon >= -5   && lon <= 8.5)  return 'France'
+  if (lat >= 41.5 && lat <= 60   && lon >= -95  && lon <= -52)  return 'Canada'
   // Finland and Iceland must be checked before Norway: their bounding boxes
   // are subsets of Norway's broader (4-32°E) box.
   if (lat >= 59   && lat <= 71   && lon >= 19   && lon <= 32)   return 'Finland'
@@ -92,6 +97,28 @@ function selectMethod(country, lat, coords) {
     case 'Ecuador':
       // South America: Muslim World League is the reference method
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South America)' }
+    case 'Indonesia': {
+      // JAKIM-style: Fajr 20°, Isha 18° (equatorial standard — same as Singapore/Malaysia)
+      return { params: adhan.CalculationMethod.Singapore(), methodName: 'JAKIM/Singapore (20°/18°)' }
+    }
+    case 'Pakistan': {
+      // University of Islamic Sciences, Karachi: Fajr 18°, Isha 18°, Hanafi Asr
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (18°/18°)' }
+    }
+    case 'UAE': {
+      // Dubai / UAE: Umm al-Qura (Gulf region uses this or Kuwait; Aladhan method 4)
+      return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura (UAE)' }
+    }
+    case 'France': {
+      // UOIF: Fajr 12°, Isha 12° — high-latitude accommodation for Europe
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 12
+      p.ishaAngle = 12
+      return { params: p, methodName: 'UOIF (12°/12°)' }
+    }
+    case 'Canada':
+      // ISNA: Fajr 15°, Isha 15° (same as USA)
+      return { params: adhan.CalculationMethod.NorthAmerica(), methodName: 'ISNA (Canada)' }
     case 'Norway': {
       // Extreme high-latitude (Tromsø 69.6°N): 18° astronomical twilight never
       // occurs in April — geometric Isha is unreachable and the TwilightAngle

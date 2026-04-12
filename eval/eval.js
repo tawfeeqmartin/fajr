@@ -60,6 +60,11 @@ const UTC_OFFSETS = {
   'Europe/Oslo':          2,   // Norway CEST in April
   'Atlantic/Reykjavik':   0,   // Iceland UTC+0 (no DST)
   'Europe/Helsinki':      3,   // Finland EEST in April
+  'Asia/Jakarta':         7,   // Indonesia UTC+7 (no DST)
+  'Asia/Karachi':         5,   // Pakistan UTC+5 (no DST)
+  'Asia/Dubai':           4,   // UAE UTC+4 (no DST)
+  'Europe/Paris':         2,   // France CEST in April (UTC+2)
+  'America/Toronto':     -4,   // Canada EDT in April (UTC-4)
 }
 
 // Supported flat-entry format:

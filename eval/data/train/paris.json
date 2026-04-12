@@ -1,0 +1,104 @@
+[
+  {
+    "city": "Paris",
+    "country": "France",
+    "latitude": 48.8566,
+    "longitude": 2.3522,
+    "elevation": 35,
+    "timezone": "Europe/Paris",
+    "method": "uoif",
+    "source": "Aladhan API (api.aladhan.com) - UOIF (12°/12°) method 99 methodSettings=12,null,12",
+    "dates": [
+      {
+        "date": "2026-04-01",
+        "fajr": "06:18",
+        "sunrise": "07:28",
+        "dhuhr": "13:54",
+        "asr": "17:27",
+        "maghrib": "20:21",
+        "isha": "21:32"
+      },
+      {
+        "date": "2026-04-02",
+        "fajr": "06:16",
+        "sunrise": "07:26",
+        "dhuhr": "13:54",
+        "asr": "17:28",
+        "maghrib": "20:23",
+        "isha": "21:33"
+      },
+      {
+        "date": "2026-04-03",
+        "fajr": "06:14",
+        "sunrise": "07:24",
+        "dhuhr": "13:54",
+        "asr": "17:28",
+        "maghrib": "20:24",
+        "isha": "21:35"
+      },
+      {
+        "date": "2026-04-04",
+        "fajr": "06:11",
+        "sunrise": "07:22",
+        "dhuhr": "13:54",
+        "asr": "17:29",
+        "maghrib": "20:26",
+        "isha": "21:37"
+      },
+      {
+        "date": "2026-04-05",
+        "fajr": "06:09",
+        "sunrise": "07:20",
+        "dhuhr": "13:53",
+        "asr": "17:30",
+        "maghrib": "20:27",
+        "isha": "21:39"
+      },
+      {
+        "date": "2026-04-06",
+        "fajr": "06:07",
+        "sunrise": "07:18",
+        "dhuhr": "13:53",
+        "asr": "17:31",
+        "maghrib": "20:29",
+        "isha": "21:40"
+      },
+      {
+        "date": "2026-04-07",
+        "fajr": "06:04",
+        "sunrise": "07:16",
+        "dhuhr": "13:53",
+        "asr": "17:31",
+        "maghrib": "20:30",
+        "isha": "21:42"
+      },
+      {
+        "date": "2026-04-08",
+        "fajr": "06:02",
+        "sunrise": "07:14",
+        "dhuhr": "13:52",
+        "asr": "17:32",
+        "maghrib": "20:32",
+        "isha": "21:44"
+      },
+      {
+        "date": "2026-04-09",
+        "fajr": "06:00",
+        "sunrise": "07:12",
+        "dhuhr": "13:52",
+        "asr": "17:33",
+        "maghrib": "20:33",
+        "isha": "21:46"
+      },
+      {
+        "date": "2026-04-10",
+        "fajr": "05:58",
+        "sunrise": "07:10",
+        "dhuhr": "13:52",
+        "asr": "17:33",
+        "maghrib": "20:35",
+        "isha": "21:47"
+      }
+    ]
+  }
+]
