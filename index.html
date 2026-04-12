@@ -784,139 +784,104 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 @keyframes _pillIn{from{opacity:0;transform:scale(.85) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
 #_swipeContentPill:active{transform:scale(.94)!important}
 
-/* ── Onboarding Flow ── */
-#onboarding{position:fixed;inset:0;z-index:10000;background:#0d0d12;display:flex;align-items:center;justify-content:center;font-family:var(--font);padding:clamp(16px,4vw,40px);transition:opacity .8s ease}
-.ob-card{width:100%;max-width:400px;background:rgba(255,255,255,.03);border:1px solid rgba(232,228,220,.08);border-radius:20px;padding:clamp(28px,5vw,44px) clamp(22px,4vw,36px);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;flex-direction:column;gap:20px}
-.ob-screen{display:none;flex-direction:column;gap:16px;animation:ob-fadein .35s ease both}
-.ob-screen.ob-active{display:flex}
-@keyframes ob-fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.ob-arabic{font-family:'Noto Naskh Arabic','Lateef',serif;font-size:clamp(1.1rem,3vw,1.5rem);color:rgba(232,228,220,.65);text-align:center;line-height:1.5;direction:rtl}
-.ob-title{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(1.5rem,4.5vw,2.1rem);font-weight:400;color:rgba(232,228,220,.95);text-align:center;line-height:1.15}
-.ob-sub{font-size:clamp(.78rem,2vw,.88rem);font-weight:300;color:rgba(232,228,220,.5);text-align:center;line-height:1.6}
-.ob-city-name{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(1.05rem,3vw,1.35rem);font-weight:400;color:rgba(232,228,220,.9);text-align:center}
-.ob-method-name{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(.95rem,2.5vw,1.2rem);font-weight:400;color:rgba(232,228,220,.9);text-align:center}
-.ob-method-desc{font-size:.78rem;font-weight:300;color:rgba(232,228,220,.4);text-align:center;letter-spacing:.02em}
-.ob-divider{height:1px;background:rgba(232,228,220,.07);margin:2px 0}
-.ob-btn{display:flex;align-items:center;justify-content:center;width:100%;padding:.65rem 1.5rem;border-radius:100px;font-family:var(--font);font-size:.83rem;font-weight:400;letter-spacing:.04em;cursor:pointer;border:1px solid rgba(120,160,255,.25);background:rgba(120,160,255,.1);color:rgba(180,200,255,.9);transition:all .2s ease}
-.ob-btn:hover,.ob-btn:active{background:rgba(120,160,255,.22);border-color:rgba(120,160,255,.45)}
-.ob-btn-ghost{background:transparent;border-color:rgba(232,228,220,.1);color:rgba(232,228,220,.35);font-size:.78rem}
-.ob-btn-ghost:hover,.ob-btn-ghost:active{background:rgba(232,228,220,.04);color:rgba(232,228,220,.6)}
-.ob-link{display:inline-block;background:none;border:none;cursor:pointer;font-family:var(--font);font-size:.78rem;font-weight:300;color:rgba(232,228,220,.35);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(232,228,220,.18);padding:0;margin:0 auto;transition:color .2s}
-.ob-link:hover{color:rgba(232,228,220,.65)}
-.ob-spinner{width:22px;height:22px;border:2px solid rgba(232,228,220,.1);border-top-color:rgba(232,228,220,.45);border-radius:50%;animation:ob-spin .75s linear infinite;margin:8px auto}
-@keyframes ob-spin{to{transform:rotate(360deg)}}
-.ob-search-wrap{display:none;flex-direction:column;gap:6px}
-.ob-search-wrap.ob-visible{display:flex}
-.ob-search-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(232,228,220,.12);border-radius:10px;padding:.55rem .9rem;color:rgba(232,228,220,.9);font-family:var(--font);font-size:.83rem;font-weight:300;outline:none;transition:border-color .2s}
-.ob-search-input:focus{border-color:rgba(120,160,255,.35)}
-.ob-search-input::placeholder{color:rgba(232,228,220,.28)}
-.ob-results{display:flex;flex-direction:column;gap:2px;max-height:148px;overflow-y:auto}
-.ob-result-item{padding:.45rem .75rem;border-radius:8px;font-size:.8rem;font-weight:300;color:rgba(232,228,220,.75);cursor:pointer;transition:background .12s;text-align:left;border:none;background:transparent;width:100%;font-family:var(--font)}
-.ob-result-item:hover,.ob-result-item:active{background:rgba(255,255,255,.06)}
-.ob-dots{display:flex;gap:5px;justify-content:center}
-.ob-dot{width:5px;height:5px;border-radius:50%;background:rgba(232,228,220,.15);transition:background .35s}
-.ob-dot.ob-dot-active{background:rgba(232,228,220,.7)}
-.ob-madhab-option{display:flex;flex-direction:column;gap:4px;padding:.85rem 1rem;border-radius:12px;border:1px solid rgba(232,228,220,.1);background:transparent;cursor:pointer;text-align:left;transition:all .18s ease;width:100%}
-.ob-madhab-option:hover{background:rgba(255,255,255,.04)}
-.ob-madhab-option.ob-selected{border-color:rgba(120,160,255,.4);background:rgba(120,160,255,.08)}
-.ob-madhab-option-title{font-family:'Instrument Serif',Georgia,serif;font-size:.95rem;font-weight:400;color:rgba(232,228,220,.9)}
-.ob-madhab-option-desc{font-size:.74rem;font-weight:300;color:rgba(232,228,220,.4);line-height:1.45}
-.ob-elevation-row{display:none;align-items:center;justify-content:space-between;gap:12px;padding:.75rem .9rem;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(232,228,220,.07)}
-.ob-elevation-row.ob-visible{display:flex}
-.ob-elevation-label{display:flex;flex-direction:column;gap:3px;flex:1}
-.ob-elevation-label-main{font-size:.82rem;font-weight:300;color:rgba(232,228,220,.75)}
-.ob-elevation-label-note{font-size:.71rem;font-weight:300;color:rgba(232,228,220,.35);line-height:1.4}
-.ob-toggle{position:relative;width:38px;height:22px;flex-shrink:0}
-.ob-toggle input{opacity:0;width:0;height:0;position:absolute}
-.ob-toggle-track{position:absolute;inset:0;border-radius:22px;background:rgba(232,228,220,.12);border:1px solid rgba(232,228,220,.15);cursor:pointer;transition:background .2s}
-.ob-toggle input:checked~.ob-toggle-track{background:rgba(120,160,255,.4);border-color:rgba(120,160,255,.5)}
-.ob-toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:rgba(232,228,220,.6);cursor:pointer;transition:transform .2s,background .2s;pointer-events:none}
-.ob-toggle input:checked~.ob-toggle-thumb{transform:translateX(16px);background:rgba(180,200,255,.9)}
+/* ── Onboarding (single screen) ── */
+#fajr-onboarding{position:fixed;inset:0;z-index:10000;background:#0d0d12;display:flex;align-items:center;justify-content:center;font-family:var(--font);padding:clamp(16px,4vw,32px);transition:opacity .75s ease}
+.fo-card{width:100%;max-width:380px;background:rgba(255,255,255,.03);border:1px solid rgba(232,228,220,.08);border-radius:20px;padding:clamp(22px,5vw,34px) clamp(20px,4vw,30px);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;flex-direction:column;gap:16px}
+.fo-bismillah{font-family:'Noto Naskh Arabic','Lateef',serif;font-size:clamp(.95rem,2.6vw,1.25rem);color:rgba(232,228,220,.55);text-align:center;direction:rtl;line-height:1.5}
+.fo-loc-row{display:flex;align-items:center;gap:8px;min-height:26px}
+.fo-loc-city{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(.95rem,2.8vw,1.15rem);font-weight:400;color:rgba(232,228,220,.9);flex:1}
+.fo-loc-spinner{width:14px;height:14px;border:1.5px solid rgba(232,228,220,.1);border-top-color:rgba(232,228,220,.4);border-radius:50%;animation:fo-spin .7s linear infinite;flex-shrink:0}
+@keyframes fo-spin{to{transform:rotate(360deg)}}
+.fo-change-btn{background:none;border:none;cursor:pointer;font-family:var(--font);font-size:.7rem;font-weight:300;color:rgba(232,228,220,.28);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(232,228,220,.14);padding:0;flex-shrink:0;transition:color .15s}
+.fo-change-btn:hover{color:rgba(232,228,220,.6)}
+.fo-method{font-size:.72rem;font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.01em;padding-left:22px}
+.fo-search-wrap{display:none;flex-direction:column;gap:4px}
+.fo-search-wrap.fo-open{display:flex}
+.fo-search-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(232,228,220,.11);border-radius:9px;padding:.48rem .75rem;color:rgba(232,228,220,.9);font-family:var(--font);font-size:.8rem;font-weight:300;outline:none;transition:border-color .15s}
+.fo-search-input:focus{border-color:rgba(120,160,255,.32)}
+.fo-search-input::placeholder{color:rgba(232,228,220,.25)}
+.fo-results{display:flex;flex-direction:column;gap:1px;max-height:120px;overflow-y:auto}
+.fo-result-item{padding:.38rem .6rem;border-radius:6px;font-size:.76rem;font-weight:300;color:rgba(232,228,220,.65);cursor:pointer;transition:background .1s;text-align:left;border:none;background:transparent;width:100%;font-family:var(--font)}
+.fo-result-item:hover{background:rgba(255,255,255,.06)}
+.fo-divider{height:1px;background:rgba(232,228,220,.06)}
+.fo-label{font-size:.65rem;font-weight:400;letter-spacing:.09em;color:rgba(232,228,220,.28);text-transform:uppercase}
+.fo-madhab-pills{display:flex;gap:5px}
+.fo-madhab-pill{flex:1;padding:.45rem .4rem;border-radius:8px;border:1px solid rgba(232,228,220,.09);background:transparent;cursor:pointer;font-family:var(--font);font-size:.76rem;font-weight:300;color:rgba(232,228,220,.42);transition:all .14s ease;text-align:center}
+.fo-madhab-pill:hover{background:rgba(255,255,255,.04)}
+.fo-madhab-pill.fo-active{border-color:rgba(120,160,255,.35);background:rgba(120,160,255,.07);color:rgba(180,200,255,.85)}
+.fo-elevation-row{display:none;align-items:center;gap:10px}
+.fo-elevation-row.fo-open{display:flex}
+.fo-elevation-text{flex:1;display:flex;flex-direction:column;gap:2px}
+.fo-elevation-main{font-size:.77rem;font-weight:300;color:rgba(232,228,220,.6)}
+.fo-elevation-note{font-size:.65rem;font-weight:300;color:rgba(232,228,220,.28);line-height:1.4}
+.fo-toggle{position:relative;width:34px;height:19px;flex-shrink:0}
+.fo-toggle input{opacity:0;width:0;height:0;position:absolute}
+.fo-toggle-track{position:absolute;inset:0;border-radius:19px;background:rgba(232,228,220,.09);border:1px solid rgba(232,228,220,.13);cursor:pointer;transition:background .16s}
+.fo-toggle input:checked~.fo-toggle-track{background:rgba(120,160,255,.35);border-color:rgba(120,160,255,.42)}
+.fo-toggle-thumb{position:absolute;top:3px;left:3px;width:11px;height:11px;border-radius:50%;background:rgba(232,228,220,.5);cursor:pointer;transition:transform .16s,background .16s;pointer-events:none}
+.fo-toggle input:checked~.fo-toggle-thumb{transform:translateX(15px);background:rgba(180,200,255,.82)}
+.fo-sensor-row{display:none;flex-direction:column;gap:3px}
+.fo-sensor-row.fo-open{display:flex}
+.fo-sensor-btn{width:100%;padding:.5rem .9rem;border-radius:9px;border:1px solid rgba(232,228,220,.1);background:rgba(255,255,255,.025);cursor:pointer;font-family:var(--font);font-size:.77rem;font-weight:300;color:rgba(232,228,220,.55);transition:all .15s ease;text-align:center}
+.fo-sensor-btn:hover{background:rgba(255,255,255,.055);border-color:rgba(232,228,220,.18)}
+.fo-sensor-btn:disabled{opacity:.5;cursor:default}
+.fo-sensor-note{font-size:.65rem;font-weight:300;color:rgba(232,228,220,.27);text-align:center}
+.fo-enter-btn{display:flex;align-items:center;justify-content:center;width:100%;padding:.6rem 1.4rem;border-radius:100px;font-family:var(--font);font-size:.8rem;font-weight:400;letter-spacing:.05em;cursor:pointer;border:1px solid rgba(120,160,255,.2);background:rgba(120,160,255,.08);color:rgba(180,200,255,.8);transition:all .18s ease}
+.fo-enter-btn:hover,.fo-enter-btn:active{background:rgba(120,160,255,.18);border-color:rgba(120,160,255,.38)}
 </style>
 </head>
 <body style="background:#0d0d12">
 
-<!-- ── First-time Onboarding Flow ── -->
-<div id="onboarding">
-  <div class="ob-card">
-    <div class="ob-dots">
-      <div class="ob-dot ob-dot-active" id="obDot0"></div>
-      <div class="ob-dot" id="obDot1"></div>
-      <div class="ob-dot" id="obDot2"></div>
-      <div class="ob-dot" id="obDot3"></div>
-      <div class="ob-dot" id="obDot4"></div>
-    </div>
+<!-- ── First-time Onboarding ── -->
+<div id="fajr-onboarding">
+  <div class="fo-card">
+    <div class="fo-bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>
 
-    <!-- Screen 1: Location -->
-    <div class="ob-screen ob-active" id="obS1">
-      <div class="ob-arabic">بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>
-      <div class="ob-title">A Gift of Time.</div>
-      <div class="ob-sub" id="obLocHint">Finding your location…</div>
-      <div class="ob-spinner" id="obSpinner"></div>
-      <div id="obCityConfirm" style="display:none;flex-direction:column;align-items:center;gap:10px">
-        <div class="ob-sub">It looks like you're in</div>
-        <div class="ob-city-name" id="obCityName"></div>
-        <!-- Elevation opt-in (shown only when GPS altitude is available) -->
-        <div class="ob-elevation-row" id="obElevationRow">
-          <div class="ob-elevation-label">
-            <div class="ob-elevation-label-main" id="obElevationLabel">Adjust for elevation</div>
-            <div class="ob-elevation-label-note">Accounts for how altitude affects the horizon. Scholarly precedent in UAE &amp; Malaysia — not universally adopted.</div>
-          </div>
-          <label class="ob-toggle">
-            <input type="checkbox" id="obElevationToggle">
-            <div class="ob-toggle-track"></div>
-            <div class="ob-toggle-thumb"></div>
-          </label>
-        </div>
-        <button class="ob-btn" onclick="_obConfirmCity()">✓ That's right</button>
-        <button class="ob-link" onclick="_obShowSearch()">Not quite right?</button>
+    <!-- Location -->
+    <div>
+      <div class="fo-loc-row">
+        <div class="fo-loc-spinner" id="foSpinner"></div>
+        <span class="fo-loc-city" id="foCityName" style="display:none"></span>
+        <button class="fo-change-btn" id="foChangeBtn" style="display:none" onclick="_foOpenSearch()">Change</button>
       </div>
-      <div class="ob-search-wrap" id="obSearchWrap">
-        <input class="ob-search-input" id="obSearchInput" type="text" placeholder="Search for your city…" autocomplete="off" spellcheck="false">
-        <div class="ob-results" id="obSearchResults"></div>
+      <div class="fo-method" id="foMethod" style="display:none"></div>
+      <div class="fo-search-wrap" id="foSearchWrap">
+        <input class="fo-search-input" id="foSearchInput" type="text" placeholder="Search for your city…" autocomplete="off" spellcheck="false">
+        <div class="fo-results" id="foResults"></div>
       </div>
     </div>
 
-    <!-- Screen 2: Madhab -->
-    <div class="ob-screen" id="obS2">
-      <div class="ob-sub">How do you calculate Asr?</div>
-      <button class="ob-madhab-option ob-selected" id="obMadhabShafii" onclick="_obSelectMadhab('shafii')">
-        <div class="ob-madhab-option-title">Standard</div>
-        <div class="ob-madhab-option-desc">Shafi'i, Maliki &amp; Hanbali — Asr begins when the shadow of an object equals its height</div>
-      </button>
-      <button class="ob-madhab-option" id="obMadhabHanafi" onclick="_obSelectMadhab('hanafi')">
-        <div class="ob-madhab-option-title">Hanafi</div>
-        <div class="ob-madhab-option-desc">Asr begins when the shadow of an object equals twice its height</div>
-      </button>
-      <button class="ob-btn" onclick="_obNext(3)">Continue</button>
+    <div class="fo-divider"></div>
+
+    <!-- Madhab -->
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div class="fo-label">Asr prayer</div>
+      <div class="fo-madhab-pills">
+        <button class="fo-madhab-pill fo-active" id="foMadhabStd" onclick="_foSetMadhab('shafii')">Standard</button>
+        <button class="fo-madhab-pill" id="foMadhabHanafi" onclick="_foSetMadhab('hanafi')">Hanafi</button>
+      </div>
     </div>
 
-    <!-- Screen 3: Calculation Method -->
-    <div class="ob-screen" id="obS3">
-      <div class="ob-sub">Prayer times for</div>
-      <div class="ob-city-name" id="obS3City"></div>
-      <div class="ob-divider"></div>
-      <div class="ob-sub">Calculation method</div>
-      <div class="ob-method-name" id="obS3Method"></div>
-      <div class="ob-method-desc" id="obS3Desc"></div>
-      <button class="ob-btn" onclick="_obNext(4)">Continue</button>
+    <!-- Elevation (shown only if GPS altitude available) -->
+    <div class="fo-elevation-row" id="foElevRow">
+      <div class="fo-elevation-text">
+        <div class="fo-elevation-main" id="foElevLabel">Adjust for elevation</div>
+        <div class="fo-elevation-note">Accounts for how altitude affects the horizon. Scholarly precedent in UAE &amp; Malaysia — not universally adopted.</div>
+      </div>
+      <label class="fo-toggle">
+        <input type="checkbox" id="foElevToggle">
+        <div class="fo-toggle-track"></div>
+        <div class="fo-toggle-thumb"></div>
+      </label>
     </div>
 
-    <!-- Screen 4: Sensor Permissions (iOS only) -->
-    <div class="ob-screen" id="obS4">
-      <div class="ob-title">Qibla Compass</div>
-      <div class="ob-sub">The live compass needs access to your device's motion sensors.</div>
-      <button class="ob-btn" onclick="_obRequestSensors()">Allow Motion Sensors</button>
-      <button class="ob-btn ob-btn-ghost" onclick="_obNext(5)">Skip — I don't need the compass</button>
+    <!-- Sensor permission (iOS only) -->
+    <div class="fo-sensor-row" id="foSensorRow">
+      <button class="fo-sensor-btn" id="foSensorBtn" onclick="_foRequestSensors(this)">Enable compass</button>
+      <div class="fo-sensor-note">Required for Qibla direction</div>
     </div>
 
-    <!-- Screen 5: All Set -->
-    <div class="ob-screen" id="obS5">
-      <div class="ob-arabic" style="font-size:clamp(1.3rem,3.5vw,1.8rem)">ٱلْحَمْدُ لِلَّٰهِ</div>
-      <div class="ob-title">You're all set.</div>
-      <div class="ob-sub" id="obS5Summary"></div>
-      <button class="ob-btn" onclick="_obFinish()">Enter</button>
-    </div>
+    <button class="fo-enter-btn" onclick="_foEnter()">Enter</button>
   </div>
 </div>
 
@@ -5514,85 +5479,41 @@ setTimeout(setupScrollObservers,500);
 <script>
 // بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
 // Bismillah ir-Rahman ir-Rahim
-// ── First-time Onboarding Flow ──
+// ── First-time Onboarding (single screen) ──
 (function () {
   'use strict';
 
-  var TOTAL_SCREENS = 5; // 1:location 2:madhab 3:method 4:sensors 5:allset
-  var _needsSensors = typeof DeviceOrientationEvent !== 'undefined' &&
-    typeof DeviceOrientationEvent.requestPermission === 'function';
-
-  // State
-  var _lat = null, _lon = null, _alt = null, _city = '', _tz = '';
-  var _method = '', _methodDesc = '';
-  var _madhab = 'shafii';
-  var _searchTimer = null, _searchCache = {};
-
-  var _methodDescs = {
-    'Morocco': 'Fajr at 19°, Isha at 17°',
-    'Saudi Arabia': 'Umm al-Qura — official Saudi calendar',
-    'Turkey': 'Diyanet İşleri Başkanlığı',
-    'Egypt': 'Egyptian General Authority of Survey',
-    'UK': 'Muslim World League',
-    'Malaysia': 'Fajr at 20°, Isha at 18°',
-    'Indonesia': 'Fajr at 20°, Isha at 18°',
-    'Pakistan': 'University of Islamic Sciences, Karachi',
-    'France': 'Fajr at 12°, Isha at 12° (UOIF)',
-    'Canada': 'Islamic Society of North America (ISNA)',
-    'North America (ISNA)': 'Islamic Society of North America',
-    'MWL (default)': 'Muslim World League — global default'
-  };
-
-  // ── Skip if already onboarded ──
+  // Skip if already onboarded
   if (localStorage.getItem('fajr_onboarded')) {
-    var el = document.getElementById('onboarding');
-    if (el) { el.style.display = 'none'; el.remove(); }
+    var el = document.getElementById('fajr-onboarding');
+    if (el) el.remove();
     return;
   }
 
-  // ── Dots ──
-  function _setDots(screenNum) {
-    for (var i = 0; i < TOTAL_SCREENS; i++) {
-      var d = document.getElementById('obDot' + i);
-      if (d) d.classList.toggle('ob-dot-active', i < screenNum);
-    }
+  // Show sensor row on iOS (requestPermission requires user gesture — the button tap satisfies this)
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    var sr = document.getElementById('foSensorRow');
+    if (sr) sr.classList.add('fo-open');
   }
 
-  // ── Screen transitions ──
-  function _showScreen(n) {
-    for (var i = 1; i <= TOTAL_SCREENS; i++) {
-      var s = document.getElementById('obS' + i);
-      if (!s) continue;
-      s.classList.remove('ob-active');
-    }
-    var target = document.getElementById('obS' + n);
-    if (target) {
-      void target.offsetWidth; // force reflow for animation replay
-      target.classList.add('ob-active');
-    }
-    _setDots(n);
-  }
+  // State
+  var _lat = null, _lon = null, _alt = null, _city = '', _tz = '';
+  var _madhab = 'shafii';
+  var _searchTimer = null, _searchCache = {};
 
-  window._obNext = function (n) {
-    // Skip sensor screen on non-iOS
-    if (n === 4 && !_needsSensors) n = 5;
-    if (n === 3) _prepareMethod();
-    if (n === 5) _prepareAllSet();
-    _showScreen(n);
-  };
-
-  // ── Screen 1: Location ──
+  // ── Location ──
   function _startLocation() {
-    if (!navigator.geolocation) { _showSearch(); return; }
+    if (!navigator.geolocation) { _openSearch(); return; }
     navigator.geolocation.getCurrentPosition(
       function (pos) {
         _lat = pos.coords.latitude;
         _lon = pos.coords.longitude;
-        _alt = pos.coords.altitude; // may be null
+        _alt = pos.coords.altitude; // may be null on some devices
         _tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         _reverseGeocode(_lat, _lon);
       },
-      function () { _showSearch(); },
+      function () { _openSearch(); },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }
@@ -5602,64 +5523,63 @@ setTimeout(setupScrollObservers,500);
       .then(function (r) { return r.json(); })
       .then(function (d) {
         var addr = d.address || {};
-        var city = addr.city || addr.town || addr.village || addr.county || addr.state || '';
-        _city = city || d.display_name || '';
-        _showCityConfirm(_city);
+        _city = addr.city || addr.town || addr.village || addr.county || addr.state || d.display_name || '';
+        _showCity(_city);
       })
-      .catch(function () { _showSearch(); });
+      .catch(function () { _openSearch(); });
   }
 
-  function _showCityConfirm(city) {
-    var spinner = document.getElementById('obSpinner');
-    var hint = document.getElementById('obLocHint');
-    var confirm = document.getElementById('obCityConfirm');
+  function _showCity(city) {
+    var spinner = document.getElementById('foSpinner');
+    var cityEl = document.getElementById('foCityName');
+    var changeBtn = document.getElementById('foChangeBtn');
+    var methodEl = document.getElementById('foMethod');
     if (spinner) spinner.style.display = 'none';
-    if (hint) hint.style.display = 'none';
-    var nameEl = document.getElementById('obCityName');
-    if (nameEl) nameEl.textContent = city;
-    if (confirm) confirm.style.display = 'flex';
-    // Show elevation toggle if altitude is available and meaningful
+    if (cityEl) { cityEl.textContent = '📍 ' + city; cityEl.style.display = ''; }
+    if (changeBtn) changeBtn.style.display = '';
+    // Method line
+    if (typeof getCalculationMethod === 'function' && _lat !== null) {
+      var result = getCalculationMethod(_lat, _lon);
+      if (methodEl) { methodEl.textContent = 'Using ' + result.name + ' for your region'; methodEl.style.display = ''; }
+    }
+    // Elevation toggle — only if altitude is meaningful
     if (_alt !== null && _alt > 0) {
-      var row = document.getElementById('obElevationRow');
-      var lbl = document.getElementById('obElevationLabel');
-      if (row) row.classList.add('ob-visible');
-      if (lbl) lbl.textContent = 'Adjust for elevation (' + Math.round(_alt) + ' m)';
+      var elevRow = document.getElementById('foElevRow');
+      var elevLbl = document.getElementById('foElevLabel');
+      if (elevRow) elevRow.classList.add('fo-open');
+      if (elevLbl) elevLbl.textContent = 'Adjust for elevation (' + Math.round(_alt) + '\u202fm)';
     }
   }
 
-  window._obConfirmCity = function () {
-    _saveElevationPrefs();
-    window._obNext(2);
+  window._foOpenSearch = function () {
+    var cityEl = document.getElementById('foCityName');
+    var changeBtn = document.getElementById('foChangeBtn');
+    var methodEl = document.getElementById('foMethod');
+    var wrap = document.getElementById('foSearchWrap');
+    if (cityEl) cityEl.style.display = 'none';
+    if (changeBtn) changeBtn.style.display = 'none';
+    if (methodEl) methodEl.style.display = 'none';
+    if (wrap) wrap.classList.add('fo-open');
+    var inp = document.getElementById('foSearchInput');
+    if (inp) setTimeout(function () { inp.focus(); }, 80);
   };
-
-  function _saveElevationPrefs() {
-    var toggle = document.getElementById('obElevationToggle');
-    var enabled = toggle && toggle.checked;
-    try {
-      localStorage.setItem('fajr_elevation_enabled', enabled ? 'true' : 'false');
-      if (_alt !== null) localStorage.setItem('fajr_altitude', String(_alt));
-    } catch (e) {}
-  }
-
-  window._obShowSearch = function () {
-    var spinner = document.getElementById('obSpinner');
-    var hint = document.getElementById('obLocHint');
-    var confirm = document.getElementById('obCityConfirm');
-    var wrap = document.getElementById('obSearchWrap');
-    if (spinner) spinner.style.display = 'none';
-    if (hint) hint.style.display = 'none';
-    if (confirm) confirm.style.display = 'none';
-    if (wrap) wrap.classList.add('ob-visible');
-    var inp = document.getElementById('obSearchInput');
-    if (inp) setTimeout(function () { inp.focus(); }, 100);
-  };
+  function _openSearch() { window._foOpenSearch(); }
 
   // ── City search ──
+  var _inp = document.getElementById('foSearchInput');
+  if (_inp) {
+    _inp.addEventListener('input', function () {
+      clearTimeout(_searchTimer);
+      var q = _inp.value.trim();
+      _searchTimer = setTimeout(function () { _doSearch(q); }, 300);
+    });
+  }
+
   function _doSearch(q) {
-    var resultsEl = document.getElementById('obSearchResults');
-    if (!q || q.length < 2) { if (resultsEl) resultsEl.innerHTML = ''; return; }
+    var el = document.getElementById('foResults');
+    if (!q || q.length < 2) { if (el) el.innerHTML = ''; return; }
     if (_searchCache[q]) { _renderResults(_searchCache[q]); return; }
-    fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=6&language=en&format=json')
+    fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=5&language=en&format=json')
       .then(function (r) { return r.json(); })
       .then(function (d) {
         var results = (d.results || []).map(function (r) {
@@ -5675,57 +5595,35 @@ setTimeout(setupScrollObservers,500);
   }
 
   function _renderResults(results) {
-    var container = document.getElementById('obSearchResults');
+    var container = document.getElementById('foResults');
     if (!container) return;
     container.innerHTML = '';
     results.forEach(function (r) {
       var btn = document.createElement('button');
-      btn.className = 'ob-result-item';
+      btn.className = 'fo-result-item';
       btn.textContent = r.name;
       btn.onclick = function () {
-        _lat = r.lat; _lon = r.lon; _city = r.name; _tz = r.tz || '';
-        _alt = null; // no altitude from search
-        _saveElevationPrefs();
-        window._obNext(2);
+        _lat = r.lat; _lon = r.lon; _city = r.name; _tz = r.tz || ''; _alt = null;
+        // Collapse search, show city row
+        var wrap = document.getElementById('foSearchWrap');
+        if (wrap) wrap.classList.remove('fo-open');
+        _showCity(_city);
       };
       container.appendChild(btn);
     });
   }
 
-  var _searchInp = document.getElementById('obSearchInput');
-  if (_searchInp) {
-    _searchInp.addEventListener('input', function () {
-      clearTimeout(_searchTimer);
-      _searchTimer = setTimeout(function () { _doSearch(_searchInp.value.trim()); }, 320);
-    });
-  }
-
-  // ── Screen 2: Madhab ──
-  window._obSelectMadhab = function (choice) {
+  // ── Madhab ──
+  window._foSetMadhab = function (choice) {
     _madhab = choice;
-    var s = document.getElementById('obMadhabShafii');
-    var h = document.getElementById('obMadhabHanafi');
-    if (s) s.classList.toggle('ob-selected', choice === 'shafii');
-    if (h) h.classList.toggle('ob-selected', choice === 'hanafi');
+    var s = document.getElementById('foMadhabStd');
+    var h = document.getElementById('foMadhabHanafi');
+    if (s) s.classList.toggle('fo-active', choice === 'shafii');
+    if (h) h.classList.toggle('fo-active', choice === 'hanafi');
   };
 
-  // ── Screen 3: Method ──
-  function _prepareMethod() {
-    if (typeof getCalculationMethod === 'function' && _lat !== null) {
-      var result = getCalculationMethod(_lat, _lon);
-      _method = result.name;
-      _methodDesc = _methodDescs[result.name] || '';
-    }
-    var cityEl = document.getElementById('obS3City');
-    var methodEl = document.getElementById('obS3Method');
-    var descEl = document.getElementById('obS3Desc');
-    if (cityEl) cityEl.textContent = _city;
-    if (methodEl) methodEl.textContent = _method;
-    if (descEl) descEl.textContent = _methodDesc;
-  }
-
-  // ── Screen 4: Sensors ──
-  window._obRequestSensors = function () {
+  // ── Sensors ──
+  window._foRequestSensors = function (btn) {
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission()
@@ -5733,45 +5631,44 @@ setTimeout(setupScrollObservers,500);
           if (state === 'granted' && typeof _requestCompassPermission === 'function') {
             _requestCompassPermission();
           }
-          window._obNext(5);
+          if (btn) {
+            btn.textContent = state === 'granted' ? '✓ Compass enabled' : 'Compass unavailable';
+            btn.disabled = true;
+          }
         })
-        .catch(function () { window._obNext(5); });
-    } else {
-      window._obNext(5);
+        .catch(function () {
+          if (btn) { btn.textContent = 'Compass unavailable'; btn.disabled = true; }
+        });
     }
   };
 
-  // ── Screen 5: All Set ──
-  function _prepareAllSet() {
-    var el = document.getElementById('obS5Summary');
-    var madhabLabel = _madhab === 'hanafi' ? 'Hanafi' : 'Standard';
-    if (el && _city) {
-      el.textContent = _city + ' · ' + _method + ' · ' + madhabLabel + ' Asr';
-    }
-  }
-
-  // ── Finish ──
-  window._obFinish = function () {
+  // ── Enter ──
+  window._foEnter = function () {
+    var toggle = document.getElementById('foElevToggle');
+    var elevEnabled = toggle && toggle.checked;
     try {
-      localStorage.setItem('agot_loc', JSON.stringify({ lat: _lat, lon: _lon, name: _city, tz: _tz }));
+      if (_lat !== null) {
+        localStorage.setItem('agot_loc', JSON.stringify({ lat: _lat, lon: _lon, name: _city, tz: _tz }));
+      }
       localStorage.setItem('fajr_madhab', _madhab);
+      localStorage.setItem('fajr_elevation_enabled', elevEnabled ? 'true' : 'false');
+      if (_alt !== null) localStorage.setItem('fajr_altitude', String(_alt));
       localStorage.setItem('fajr_onboarded', '1');
     } catch (e) {}
 
-    var overlay = document.getElementById('onboarding');
+    // Apply location immediately without waiting for next page load
+    if (_lat !== null && typeof _setPrayerLocation === 'function') {
+      if (typeof _cityTz !== 'undefined') window._cityTz = _tz || null;
+      _setPrayerLocation(_lat, _lon, _city);
+    }
+
+    var overlay = document.getElementById('fajr-onboarding');
     if (overlay) {
       overlay.style.opacity = '0';
-      setTimeout(function () { overlay.remove(); }, 900);
+      setTimeout(function () { overlay.remove(); }, 800);
     }
   };
 
-  // Hide sensor dot if not iOS
-  if (!_needsSensors) {
-    var d3 = document.getElementById('obDot3');
-    if (d3) d3.style.display = 'none';
-  }
-
-  // Kick off location detection
   _startLocation();
 })();
 </script>
