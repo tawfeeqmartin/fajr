@@ -127,5 +127,22 @@
     },
     "changes": "eval/data/train/: jakarta.json (JAKIM 20°/18°), karachi.json (Karachi 18°/18°), dubai.json (UmmAlQura), paris.json (UOIF 12°/12°), toronto.json (ISNA). engine.js: detectCountry + selectMethod for Indonesia, Pakistan, UAE, France, Canada. eval.js: 5 new UTC offsets.",
     "notes": "WMAE improved 15%: 1.83 → 1.55. All per-prayer MAEs below 2 min. Dataset now covers 18 cities across 15 countries. Generalization holds: new cities match expected accuracy. Now well below Young (2006) ±2 min floor on a per-prayer average basis."
+  },
+  {
+    "experiment": 7,
+    "name": "Elevation correction retry with USNO validation",
+    "date": "2026-04-12",
+    "description": "Validated geometric horizon dip formula against USNO API at actual elevation vs sea level",
+    "classification": "closed-negative",
+    "wikiRef": "wiki/corrections/elevation",
+    "wmae_minutes": 1.55,
+    "usno_validation": {
+      "La Paz":       { "h_m": 3640, "predicted_min": 8.08, "usno_delta_min": 0.0 },
+      "Denver":       { "h_m": 1609, "predicted_min": 6.70, "usno_delta_min": 0.0 },
+      "Bogota":       { "h_m": 2640, "predicted_min": 6.62, "usno_delta_min": 0.0 },
+      "Burj Khalifa": { "h_m":  828, "predicted_min": 4.08, "usno_delta_min": 0.0 }
+    },
+    "changes": "No engine changes. scripts/validate-elevation.js added. Elevation correction remains disabled.",
+    "notes": "WMAE unchanged at 1.55 (elevation correction not re-enabled). KEY FINDING: USNO API returns identical sunrise/sunset times at all elevations (Δ = 0 min for all 4 cities, 3 days each). Standard astronomical rise/set is defined relative to the sea-level horizon. Both USNO and Aladhan use sea-level definitions. Our geometric formula (arccos(R/(R+h)) × 4/cos(φ)) is physically correct for an elevated observer but is NOT applied by any standard institution. Classification remains 🟡 Limited precedent. Cannot create elevation-aware ground truth from USNO. Elevation correction is DISABLED pending availability of elevation-corrected ground truth from a primary source."
   }
 ]
