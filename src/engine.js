@@ -106,15 +106,25 @@ function selectMethod(country, lat, coords) {
       p.highLatitudeRule = adhan.HighLatitudeRule.MiddleOfTheNight
       return { params: p, methodName: 'MWL + MiddleOfTheNight (Norway)' }
     }
-    case 'Iceland':
+    case 'Iceland': {
+      // ─────────────────────────────────────────────────────────────────────
+      // EXPERIMENT 5: Reykjavik Isha refinement
+      // Aladhan ground truth uses latitudeAdjustmentMethod=1 = MiddleOfNight.
+      // Prior setting (TwilightAngle) produced ~24–36 min Isha error at Reykjavik.
+      // MiddleOfTheNight should match the ground truth method directly.
+      // 🟢 Established — matches Aladhan API's own high-latitude adjustment.
+      // Reference: [[wiki/regions/high-latitude]]
+      // ─────────────────────────────────────────────────────────────────────
+      const p = adhan.CalculationMethod.MuslimWorldLeague()
+      p.highLatitudeRule = adhan.HighLatitudeRule.MiddleOfTheNight
+      return { params: p, methodName: 'MWL + MiddleOfTheNight (Iceland)' }
+    }
     case 'Finland': {
-      // High-latitude: MWL + TwilightAngle (AngleBased) high-latitude rule.
-      // 🟢 Established — Aladhan API uses latitudeAdjustmentMethod=1 (AngleBased)
-      //   for these regions; TwilightAngle computes actual 18° twilight while it
-      //   remains astronomically reachable in early spring.
+      // Finland: TwilightAngle (computable in April at 60°N, within normal range)
+      // 🟢 Established — Aladhan AngleBased for April at Helsinki latitude
       const p = adhan.CalculationMethod.MuslimWorldLeague()
       p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
-      return { params: p, methodName: 'MWL + TwilightAngle (high latitude)' }
+      return { params: p, methodName: 'MWL + TwilightAngle (Finland)' }
     }
     default: {
       // Fallback: high-latitude auto-detect (lat > 55°)
@@ -149,7 +159,7 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
   const times = new adhan.PrayerTimes(coords, date, params)
 
-  return {
+  let result = {
     fajr:    times.fajr,
     shuruq:  times.sunrise,
     dhuhr:   times.dhuhr,
@@ -162,36 +172,46 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
       refraction: 'standard (0.833°)',
     },
   }
+
+  // NOTE: Elevation correction (applyElevationCorrection) is available as a
+  // utility but NOT activated here. Experiment 4 confirmed that the Aladhan
+  // ground truth uses sea-level calculations; applying elevation correction
+  // diverges from it and increases WMAE. Correction is 🟡 Limited precedent —
+  // available for use when ground truth is also elevation-corrected.
+
+  return result
 }
 
 /**
  * Apply elevation-based horizon correction to a set of prayer times.
  *
- * 🔴 Novel: The specific formula below is derived from geometric horizon
- * depression and has not been reviewed by Islamic scholars. Do not rely on
- * this for prayer without scholarly validation.
+ * 🟡 Limited precedent: Geometry is classical; application to Islamic prayer
+ * times has precedent in classical muwaqqit texts but is not adopted by any
+ * major institution. See wiki/corrections/elevation.md.
  *
- * @param {object} times  Output from prayerTimes()
+ * @param {object} times      Output from prayerTimes()
  * @param {number} elevation  Meters above sea level
+ * @param {number} latitude   Degrees (for latitude correction of time offset)
  * @returns {object} Corrected times
  */
-export function applyElevationCorrection(times, elevation) {
+export function applyElevationCorrection(times, elevation, latitude = 0) {
   if (!elevation || elevation <= 0) return times
 
-  // Geometric horizon dip in degrees
-  // 🔴 Novel — see CLAUDE.md on novel corrections
+  // Geometric horizon dip: arccos(R / (R + h)) in degrees
+  // 🟡 Limited precedent — see wiki/corrections/elevation.md
   const EARTH_RADIUS_M = 6371000
-  const horizonDipDeg = Math.sqrt(2 * elevation / EARTH_RADIUS_M) * (180 / Math.PI)
+  const horizonDipDeg = Math.acos(EARTH_RADIUS_M / (EARTH_RADIUS_M + elevation)) * (180 / Math.PI)
 
-  // Convert degrees to minutes of time (solar motion ~1° per 4 min)
-  const correctionMin = horizonDipDeg * 4
+  // Latitude correction: at latitude φ, sun crosses horizon at rate 4/cos(φ) min per degree
+  const correctionMin = horizonDipDeg * 4 / Math.cos(latitude * Math.PI / 180)
+  const corrMs = correctionMin * 60 * 1000
 
   const adjusted = { ...times }
-  // Shuruq (sunrise) is earlier at elevation — horizon is lower
-  adjusted.shuruq = new Date(times.shuruq.getTime() - correctionMin * 60 * 1000)
+  // Shuruq (sunrise) is earlier at elevation — depressed horizon
+  adjusted.shuruq  = new Date(times.shuruq.getTime()  - corrMs)
   // Maghrib (sunset) is later at elevation
-  adjusted.maghrib = new Date(times.maghrib.getTime() + correctionMin * 60 * 1000)
-  adjusted.corrections = { ...times.corrections, elevation: true }
+  adjusted.maghrib = new Date(times.maghrib.getTime() + corrMs)
+  adjusted.corrections = { ...times.corrections, elevation: true, elevationCorrectionMin: +correctionMin.toFixed(2) }
 
   return adjusted
 }
