@@ -254,3 +254,5 @@ MIT © Tawfeeq Martin
 ---
 
 > **Fajr** (فجر) is a sadaqah jariyah dedicated to my daughters Nurjaan and Kauthar.
+>
+> It began with [A Gift of Time](https://agiftoftime.app) — a Ramadan prayer clock built with Kauthar — and a simple question: how do we know these times are right? That question led here.
