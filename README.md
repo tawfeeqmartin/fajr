@@ -250,3 +250,7 @@ This library stands on the shoulders of centuries of *'ilm al-miqat* (the scienc
 MIT © Tawfeeq Martin
 
 *"Indeed, the prayer has been decreed upon the believers a decree of specified times."* — Quran 4:103
+
+---
+
+> **Fajr** (فجر) is a sadaqah jariyah dedicated to my daughters Nurjaan and Kauthar.

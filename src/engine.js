@@ -34,14 +34,14 @@ import * as adhan from 'adhan'
  */
 export function prayerTimes({ latitude, longitude, date, elevation = 0, method }) {
   const coords = new adhan.Coordinates(latitude, longitude)
-  const dateComponents = adhan.DateComponents.from(date)
 
   // 🟢 Established: Method selection — baseline is ISNA
   // TODO (autoresearch): replace with region-aware method selection
   // See knowledge/wiki/methods/ for per-region angle tables
   const params = adhan.CalculationMethod.NorthAmerica()
 
-  const times = new adhan.PrayerTimes(coords, dateComponents, params)
+  // adhan v4+ takes a plain Date directly (DateComponents was removed)
+  const times = new adhan.PrayerTimes(coords, date, params)
 
   return {
     fajr:    times.fajr,

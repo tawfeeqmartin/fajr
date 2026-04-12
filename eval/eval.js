@@ -38,8 +38,80 @@ const WEIGHTS = {
 const PRAYERS = Object.keys(WEIGHTS)
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Data loading
+// Data loading + normalization
 // ─────────────────────────────────────────────────────────────────────────────
+
+// UTC offsets for April 2026 (DST-aware).
+// Add new entries here as new timezones appear in ground truth files.
+const UTC_OFFSETS = {
+  'Africa/Casablanca':    1,   // Morocco UTC+1 year-round
+  'Africa/Cairo':         2,   // Egypt UTC+2
+  'Asia/Riyadh':          3,   // Saudi Arabia UTC+3
+  'Europe/Istanbul':      3,   // Turkey UTC+3 (no DST since 2016)
+  'Europe/London':        1,   // UK BST in April (UTC+1)
+  'Asia/Kuala_Lumpur':    8,   // Malaysia UTC+8
+  'America/New_York':    -4,   // US EDT in April
+  'America/Chicago':     -5,   // US CDT in April
+  'America/Los_Angeles': -7,   // US PDT in April
+  'America/Denver':      -6,   // US MDT in April
+  'America/La_Paz':      -4,   // Bolivia UTC-4 (no DST)
+  'America/Bogota':      -5,   // Colombia UTC-5 (no DST)
+  'America/Guayaquil':   -5,   // Ecuador UTC-5 (no DST)
+  'Europe/Oslo':          2,   // Norway CEST in April
+  'Atlantic/Reykjavik':   0,   // Iceland UTC+0 (no DST)
+  'Europe/Helsinki':      3,   // Finland EEST in April
+}
+
+// Supported flat-entry format:
+// { source, city, latitude, longitude, elevation, timezone, method,
+//   date, utcOffset, times: { fajr, shuruq, dhuhr, asr, maghrib, isha } }
+//
+// Also supports grouped format from ground truth files:
+// { city, latitude, longitude, elevation, timezone, method, source,
+//   dates: [ { date, fajr, sunrise, dhuhr, asr, maghrib, isha }, … ] }
+//
+// "sunrise" is accepted as an alias for "shuruq".
+
+function normalizeEntries(raw) {
+  const flat = []
+
+  for (const item of raw) {
+    if (!item.dates) {
+      // Already flat format — ensure times object and shuruq alias
+      const times = { ...item.times }
+      if (!times.shuruq && times.sunrise) times.shuruq = times.sunrise
+      flat.push({ ...item, times })
+      continue
+    }
+
+    // Grouped format: expand dates array into individual entries
+    const utcOffset = UTC_OFFSETS[item.timezone] ?? 0
+    for (const day of item.dates) {
+      flat.push({
+        source:    item.source,
+        city:      item.city,
+        country:   item.country,
+        latitude:  item.latitude,
+        longitude: item.longitude,
+        elevation: item.elevation || 0,
+        timezone:  item.timezone,
+        method:    item.method,
+        date:      day.date,
+        utcOffset,
+        times: {
+          fajr:    day.fajr,
+          shuruq:  day.shuruq ?? day.sunrise,
+          dhuhr:   day.dhuhr,
+          asr:     day.asr,
+          maghrib: day.maghrib,
+          isha:    day.isha,
+        },
+      })
+    }
+  }
+
+  return flat
+}
 
 function loadGroundTruth(dir) {
   const entries = []
@@ -49,38 +121,22 @@ function loadGroundTruth(dir) {
   for (const file of files) {
     const raw = readFileSync(join(dir, file), 'utf8')
     const data = JSON.parse(raw)
-    entries.push(...data)
+    entries.push(...normalizeEntries(data))
   }
   return entries
 }
-
-// Ground truth format:
-// [
-//   {
-//     "source": "Morocco-Rabat-2024",
-//     "latitude": 33.9716,
-//     "longitude": -6.8498,
-//     "elevation": 75,
-//     "date": "2024-03-15",
-//     "times": {
-//       "fajr": "04:47",
-//       "shuruq": "06:14",
-//       "dhuhr": "13:22",
-//       "asr": "16:43",
-//       "maghrib": "19:31",
-//       "isha": "20:48"
-//     }
-//   }
-// ]
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Error calculation
 // ─────────────────────────────────────────────────────────────────────────────
 
-function parseTimeHHMM(hhmmStr, dateStr) {
+// utcOffset: hours east of UTC (e.g. +1 for Morocco, -5 for US/CDT)
+// Times in the JSON are LOCAL time; subtract utcOffset to get UTC.
+function parseTimeHHMM(hhmmStr, dateStr, utcOffset = 0) {
   const [h, m] = hhmmStr.split(':').map(Number)
   const d = new Date(dateStr + 'T00:00:00Z')
-  d.setUTCHours(h, m, 0, 0)
+  // Store as UTC: local HH:MM minus UTC offset
+  d.setUTCHours(h - utcOffset, m, 0, 0)
   return d
 }
 
@@ -102,7 +158,7 @@ function evaluateEntry(entry) {
 
   for (const prayer of prayers) {
     if (!entry.times[prayer] || !calculated[prayer]) continue
-    const gt = parseTimeHHMM(entry.times[prayer], entry.date)
+    const gt = parseTimeHHMM(entry.times[prayer], entry.date, entry.utcOffset || 0)
     const calc = calculated[prayer]
     errors[prayer] = absMinutesDiff(gt, calc)
   }
