@@ -11,9 +11,9 @@
 
 ## Why "Fajr"?
 
-**Fajr (فجر)** means *dawn* in Arabic. This library represents a new dawn for prayer time accuracy.
+**Fajr (فجر)** means *dawn* in Arabic — the pre-dawn prayer whose accuracy depends most on the very problems this library aims to solve.
 
-Fajr is the prayer **most affected by the accuracy problems this library solves**:
+It is the prayer **most affected by the open questions this library addresses**:
 
 - The **twilight angle debate** (15° vs 18° for true dawn — a difference of 10–20 minutes)
 - **Atmospheric refraction** variations at extreme altitudes and latitudes
@@ -22,7 +22,7 @@ Fajr is the prayer **most affected by the accuracy problems this library solves*
 
 While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus Qibla direction, Hijri calendar, hilal (crescent) visibility prediction, night-thirds calculation, and traveler mode. Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
 
-The name also honors the Islamic tradition: **each day begins at Fajr**, with precision and devotion. Starting here is fitting.
+The name also grounds the project in the Islamic tradition: each day begins at Fajr, and the precision of that moment is what this library is trying to improve.
 
 ---
 
@@ -68,7 +68,7 @@ Fajr is built around two interlocking research loops and a stable calculation en
 
 ---
 
-## What Makes Fajr Different
+## How Fajr Works
 
 ### Built on `adhan.js`, not a replacement
 

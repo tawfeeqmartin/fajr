@@ -1,7 +1,6 @@
 # Knowledge Wiki — Master Index
 
-This wiki contains structured, compiled knowledge distilled from raw sources in `../raw/`.
-It is the primary reference for the autoresearch agent.
+Structured, compiled knowledge distilled from raw sources in `../raw/`. Primary reference for the autoresearch agent.
 
 See `../compile.md` for how to update this wiki from raw sources.
 See `../lint.md` for quality and consistency rules.
@@ -12,51 +11,49 @@ See `../lint.md` for quality and consistency rules.
 
 | Article | Description |
 |---------|-------------|
-| [Solar position](astronomy/solar-position.md) | SPA algorithm, equation of time, equation of center |
-| [Twilight](astronomy/twilight.md) | Civil, nautical, astronomical twilight; al-fajr al-sadiq vs al-kadhib |
-| [Atmospheric refraction](astronomy/refraction.md) | Standard 0.833°, temperature/pressure corrections |
-| [Horizon geometry](astronomy/horizon.md) | Dip of horizon, elevation effects |
-| [High latitudes](astronomy/high-latitudes.md) | Midnight sun, permanent twilight, scholarly rulings |
+| [Solar position](astronomy/solar-position.md) | NREL SPA (±0.0003°), Meeus VSOP87, JPL DE440; algorithm selection by use case |
+| [Atmospheric refraction](astronomy/refraction.md) | Standard 0.833° = 16' semidiameter + 34' refraction; Bennett 1982; Saemundsson 1986; Young 2006 ±2 min floor |
+| [Elevation and horizon](astronomy/elevation.md) | Dip angle δ = arccos(R/(R+h)); Burj Khalifa example; Fajr/Isha scholarly question; elevation data sources |
+
+---
 
 ## Fiqh (Islamic Law)
 
 | Article | Description |
 |---------|-------------|
-| [Prayer time definitions](fiqh/definitions.md) | Quranic and hadith basis for each prayer time |
-| [Twilight disagreement](fiqh/twilight-ikhtilaf.md) | Scholarly positions on Fajr twilight angle (15° vs 18° vs other) |
-| [Asr madhab difference](fiqh/asr-madhab.md) | Hanafi (2x shadow) vs standard (1x shadow) |
-| [High latitude rulings](fiqh/high-latitude-rulings.md) | Scholarly positions on prayers in extreme latitudes |
-| [Traveler rulings](fiqh/traveler.md) | Conditions for qasr and jam' |
+| [Prayer time definitions](fiqh/prayer-definitions.md) | Quranic basis (Al-Isra 17:78, Hud 11:114, Ta-Ha 20:130); Hadith of Jibril (Tirmidhi 149); Hanafi vs Shafi'i Asr |
+| [Scholarly oversight](fiqh/scholarly-oversight.md) | 🟢/🟡/🔴 classification framework; ihtiyat, ikhtilaf, wasail vs ibadat |
+
+---
 
 ## Calculation Methods
 
 | Article | Description |
 |---------|-------------|
-| [Method comparison](methods/comparison.md) | Side-by-side angle tables for all major methods |
-| [ISNA](methods/isna.md) | Islamic Society of North America — 15°/15° |
-| [MWL](methods/mwl.md) | Muslim World League — 18°/17° |
-| [Egypt](methods/egypt.md) | Egyptian General Authority — 19.5°/17.5° |
-| [Morocco](methods/morocco.md) | Moroccan Ministry of Habous — 18°/17° |
-| [Umm al-Qura](methods/umm-al-qura.md) | Saudi method — 18.5° / 90 min after maghrib |
-| [Turkey](methods/turkey.md) | Diyanet — 18°/17°, Hanafi Asr |
+| [Methods overview](methods/overview.md) | Full comparison table: MWL 18°/17°, ISNA 15°/15°, Egyptian 19.5°/17.5°, Umm al-Qura 18.5°/90min, Karachi, UOIF, Tehran, Morocco, Diyanet, JAKIM 20°/18° |
+| [ISNA](methods/isna.md) | 15°/15°; changed from 17.5° in 2011; Fiqh Council of North America; used in North America |
+| [MWL](methods/mwl.md) | 18°/17°; Muslim World League; most widely used globally; conservative Fajr angle |
+| [Umm al-Qura](methods/umm-al-qura.md) | 18.5° Fajr; Isha = Maghrib + 90 min (120 in Ramadan); used in Saudi Arabia |
+| [Morocco](methods/morocco.md) | 19°/17° base with per-city adjustments; Ministry of Habous publishes official times monthly |
 
-## Regional Corrections
+---
+
+## Regions
 
 | Article | Description |
 |---------|-------------|
-| [Morocco](regions/morocco.md) | Official timetable notes, known corrections |
-| [Saudi Arabia](regions/saudi-arabia.md) | Umm al-Qura vs Makkah observed |
-| [North America](regions/north-america.md) | High latitude corrections, ISNA vs closest city |
-| [Southeast Asia](regions/southeast-asia.md) | JAKIM method, Malaysia/Indonesia variations |
+| [Morocco](regions/morocco.md) | Sea level to 4167m (Toubkal); DST complications; Ministry authoritative timetables; Azan Now app |
+| [High latitudes](regions/high-latitude.md) | Above ~48°N: persistent twilight; 1/7 night, nearest city, middle of night, angle-based solutions; ECFR rulings |
+
+---
 
 ## Correction Algorithms
 
 | Article | Classification | Description |
 |---------|---------------|-------------|
-| [Elevation horizon](corrections/elevation-horizon.md) | 🟡 Limited precedent | Horizon dip formula and prayer time shift |
-| [Atmospheric refraction](corrections/refraction-temperature.md) | 🟡 Limited precedent | Temperature/pressure refraction correction |
-| [Terrain horizon](corrections/terrain-horizon.md) | 🔴 Novel | Surrounding terrain blocking the horizon |
-| [Light pollution](corrections/light-pollution.md) | 🔴 Novel | Urban sky glow affecting visual dawn threshold |
+| [Elevation](corrections/elevation.md) | 🟡 Limited precedent | Dip angle correction for Shuruq/Maghrib; adhan.js implementation; per-prayer applicability |
+| [Atmospheric refraction](corrections/atmosphere.md) | 🟡 Limited precedent | Bennett formula with T/P: R × (P/1010) × (283/(273+T)); 0–2 min practical impact |
+| [Terrain horizon](corrections/terrain.md) | 🔴 Novel | DEM/SRTM horizon profiles; PVGIS API; 30–60 min shifts in mountain valleys; no Islamic precedent |
 
 ---
 
