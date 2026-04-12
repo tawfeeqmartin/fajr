@@ -1,24 +1,22 @@
-# A Gift of Time
+# A Gift of Time — agiftoftime.app
 
-> *"Time is like a sword — if you do not cut it, it will cut you."*
+> *"a study in light, time, orientation and a call to prayer"*
 
-This example demonstrates fajr's full feature set in a simple, human-readable prayer schedule generator.
+[A Gift of Time](https://agiftoftime.app) is a free Progressive Web App — completely free with no ads and no tracking — offered as a sadaqah jariyah (ongoing charity) for the Muslim community.
 
----
+It features:
 
-## What this does
-
-Generates a beautiful, complete prayer schedule for any location — including:
-
-- All six prayer times with local timezone formatting
-- Qibla direction with magnetic declination
-- Night thirds for Tahajjud
-- Hijri date
-- Hilal visibility for the current month (when data is available)
+- **Dichroic glass cube clock** — a Three.js cube refracting the hands of time, built with PBR materials and HDRI reflections
+- **Qibla compass** — lights up the way toward the Ka'bah so you can "turn towards what's best for you"
+- **Spatial adhan** — hear the call to prayer from the direction of Makkah using HRTF binaural audio (use headphones)
+- **Rolling prayer windows** — tracks the current and upcoming prayer throughout the day
+- **Works offline** as a PWA — install it and it runs without a connection
 
 ---
 
-## Usage
+## This example
+
+The `examples/agiftoftime/` directory is a CLI demo that exercises fajr's core feature set — the same prayer time data, Qibla bearing, night thirds, Hijri date, and hilal visibility that powers A Gift of Time's time calculations.
 
 ```bash
 node examples/agiftoftime/index.js --lat 33.9716 --lng -6.8498 --elevation 75 --tz "Africa/Casablanca"
@@ -49,4 +47,4 @@ Night thirds:
 
 ---
 
-*The name comes from the Islamic tradition that knowing prayer times precisely is itself a gift — it lets you prepare, not scramble.*
+*Fajr began with A Gift of Time — built with Kauthar — and a simple question: how do we know these times are right?*

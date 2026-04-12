@@ -241,6 +241,7 @@ This library stands on the shoulders of centuries of *'ilm al-miqat* (the scienc
 - **[adhan.js](https://github.com/batoulapps/adhan-js)** by Batoul Apps — the prayer time calculation engine this library wraps
 - **[NREL SPA](https://midcdmz.nrel.gov/spa/)** — National Renewable Energy Laboratory Solar Position Algorithm
 - **NASA/JPL** — DE440 planetary ephemeris
+- **[Aladhan API](https://aladhan.com)** — prayer time reference data and method validation
 - Muslim communities and institutions worldwide who publish official timetables and make them freely available
 
 ---
@@ -255,4 +256,4 @@ MIT © Tawfeeq Martin
 
 > **Fajr** (فجر) is a sadaqah jariyah dedicated to my daughters Nurjaan and Kauthar.
 >
-> It began with [A Gift of Time](https://agiftoftime.app) — a Ramadan prayer clock built with Kauthar — and a simple question: how do we know these times are right? That question led here.
+> It began with [A Gift of Time](https://agiftoftime.app) — described as "a study in light, time, orientation and a call to prayer": a free PWA with a dichroic glass cube clock, spatial adhan toward Makkah, and Qibla compass, built with Kauthar — and a simple question: how do we know these times are right? That question led here.
