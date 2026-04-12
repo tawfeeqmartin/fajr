@@ -784,17 +784,28 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 @keyframes _pillIn{from{opacity:0;transform:scale(.85) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
 #_swipeContentPill:active{transform:scale(.94)!important}
 
-/* ── Onboarding (single screen) ── */
+/* ── Onboarding (single screen, progressive) ── */
 #fajr-onboarding{position:fixed;inset:0;z-index:10000;background:#0d0d12;display:flex;align-items:center;justify-content:center;font-family:var(--font);padding:clamp(16px,4vw,32px);transition:opacity .75s ease}
 .fo-card{width:100%;max-width:380px;background:rgba(255,255,255,.03);border:1px solid rgba(232,228,220,.08);border-radius:20px;padding:clamp(22px,5vw,34px) clamp(20px,4vw,30px);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;flex-direction:column;gap:16px}
 .fo-bismillah{font-family:'Noto Naskh Arabic','Lateef',serif;font-size:clamp(.95rem,2.6vw,1.25rem);color:rgba(232,228,220,.55);text-align:center;direction:rtl;line-height:1.5}
-.fo-loc-row{display:flex;align-items:center;gap:8px;min-height:26px}
-.fo-loc-city{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(.95rem,2.8vw,1.15rem);font-weight:400;color:rgba(232,228,220,.9);flex:1}
-.fo-loc-spinner{width:14px;height:14px;border:1.5px solid rgba(232,228,220,.1);border-top-color:rgba(232,228,220,.4);border-radius:50%;animation:fo-spin .7s linear infinite;flex-shrink:0}
+/* Phase 1 — location prompt */
+.fo-prompt-text{font-size:.83rem;font-weight:300;color:rgba(232,228,220,.55);text-align:center;line-height:1.6}
+.fo-loc-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:.7rem 1.4rem;border-radius:100px;font-family:var(--font);font-size:.85rem;font-weight:400;letter-spacing:.04em;cursor:pointer;border:1px solid rgba(120,160,255,.3);background:rgba(120,160,255,.12);color:rgba(180,200,255,.9);transition:all .18s ease}
+.fo-loc-btn:hover,.fo-loc-btn:active{background:rgba(120,160,255,.22);border-color:rgba(120,160,255,.5)}
+.fo-manual-link{background:none;border:none;cursor:pointer;font-family:var(--font);font-size:.74rem;font-weight:300;color:rgba(232,228,220,.3);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(232,228,220,.15);padding:0;width:100%;text-align:center;transition:color .15s}
+.fo-manual-link:hover{color:rgba(232,228,220,.6)}
+/* Loading state */
+.fo-loading-row{display:flex;align-items:center;justify-content:center;gap:9px;min-height:28px}
+.fo-loc-spinner{width:13px;height:13px;border:1.5px solid rgba(232,228,220,.1);border-top-color:rgba(232,228,220,.4);border-radius:50%;animation:fo-spin .7s linear infinite;flex-shrink:0}
 @keyframes fo-spin{to{transform:rotate(360deg)}}
+.fo-loading-text{font-size:.78rem;font-weight:300;color:rgba(232,228,220,.38)}
+/* Phase 2 — confirmed location row */
+.fo-loc-row{display:flex;align-items:center;gap:8px}
+.fo-loc-city{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(.95rem,2.8vw,1.15rem);font-weight:400;color:rgba(232,228,220,.9);flex:1}
 .fo-change-btn{background:none;border:none;cursor:pointer;font-family:var(--font);font-size:.7rem;font-weight:300;color:rgba(232,228,220,.28);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(232,228,220,.14);padding:0;flex-shrink:0;transition:color .15s}
 .fo-change-btn:hover{color:rgba(232,228,220,.6)}
-.fo-method{font-size:.72rem;font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.01em;padding-left:22px}
+.fo-method{font-size:.72rem;font-weight:300;color:rgba(232,228,220,.3);letter-spacing:.01em}
+/* Search */
 .fo-search-wrap{display:none;flex-direction:column;gap:4px}
 .fo-search-wrap.fo-open{display:flex}
 .fo-search-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(232,228,220,.11);border-radius:9px;padding:.48rem .75rem;color:rgba(232,228,220,.9);font-family:var(--font);font-size:.8rem;font-weight:300;outline:none;transition:border-color .15s}
@@ -803,6 +814,10 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
 .fo-results{display:flex;flex-direction:column;gap:1px;max-height:120px;overflow-y:auto}
 .fo-result-item{padding:.38rem .6rem;border-radius:6px;font-size:.76rem;font-weight:300;color:rgba(232,228,220,.65);cursor:pointer;transition:background .1s;text-align:left;border:none;background:transparent;width:100%;font-family:var(--font)}
 .fo-result-item:hover{background:rgba(255,255,255,.06)}
+/* Phase 2+ — rest of form, revealed after location */
+.fo-after{display:none;flex-direction:column;gap:14px;animation:fo-fadein .3s ease both}
+.fo-after.fo-open{display:flex}
+@keyframes fo-fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .fo-divider{height:1px;background:rgba(232,228,220,.06)}
 .fo-label{font-size:.65rem;font-weight:400;letter-spacing:.09em;color:rgba(232,228,220,.28);text-transform:uppercase}
 .fo-madhab-pills{display:flex;gap:5px}
@@ -837,51 +852,69 @@ body.chrome-hidden .compass-chrome{opacity:0!important;pointer-events:none;trans
   <div class="fo-card">
     <div class="fo-bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>
 
-    <!-- Location -->
-    <div>
-      <div class="fo-loc-row">
-        <div class="fo-loc-spinner" id="foSpinner"></div>
-        <span class="fo-loc-city" id="foCityName" style="display:none"></span>
-        <button class="fo-change-btn" id="foChangeBtn" style="display:none" onclick="_foOpenSearch()">Change</button>
+    <!-- Phase 1: location prompt (visible on load) -->
+    <div id="foPhase1">
+      <div class="fo-prompt-text" id="foPromptText">To show accurate prayer times, we need your location.</div>
+      <!-- Loading state (hidden until GPS tapped) -->
+      <div class="fo-loading-row" id="foLoadingRow" style="display:none">
+        <div class="fo-loc-spinner"></div>
+        <span class="fo-loading-text" id="foLoadingText">Finding you…</span>
+      </div>
+      <!-- Confirmed city row (hidden until geocode returns) -->
+      <div class="fo-loc-row" id="foLocRow" style="display:none">
+        <span class="fo-loc-city" id="foCityName"></span>
+        <button class="fo-change-btn" onclick="_foOpenSearch()">Change</button>
       </div>
       <div class="fo-method" id="foMethod" style="display:none"></div>
+      <!-- Search (shown if GPS denied or "Change" tapped) -->
       <div class="fo-search-wrap" id="foSearchWrap">
         <input class="fo-search-input" id="foSearchInput" type="text" placeholder="Search for your city…" autocomplete="off" spellcheck="false">
         <div class="fo-results" id="foResults"></div>
       </div>
-    </div>
-
-    <div class="fo-divider"></div>
-
-    <!-- Madhab -->
-    <div style="display:flex;flex-direction:column;gap:7px">
-      <div class="fo-label">Asr prayer</div>
-      <div class="fo-madhab-pills">
-        <button class="fo-madhab-pill fo-active" id="foMadhabStd" onclick="_foSetMadhab('shafii')">Standard</button>
-        <button class="fo-madhab-pill" id="foMadhabHanafi" onclick="_foSetMadhab('hanafi')">Hanafi</button>
+      <!-- Action buttons — shown until location confirmed -->
+      <div id="foLocActions" style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <button class="fo-loc-btn" id="foGpsBtn" onclick="_foRequestLocation(this)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+          Share my location
+        </button>
+        <button class="fo-manual-link" onclick="_foOpenSearch()">Or enter your city manually</button>
       </div>
     </div>
 
-    <!-- Elevation (shown only if GPS altitude available) -->
-    <div class="fo-elevation-row" id="foElevRow">
-      <div class="fo-elevation-text">
-        <div class="fo-elevation-main" id="foElevLabel">Adjust for elevation</div>
-        <div class="fo-elevation-note">Accounts for how altitude affects the horizon. Scholarly precedent in UAE &amp; Malaysia — not universally adopted.</div>
+    <!-- Phase 2: rest of form, revealed after location confirmed -->
+    <div class="fo-after" id="foAfter">
+      <div class="fo-divider"></div>
+
+      <!-- Madhab -->
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div class="fo-label">Asr prayer</div>
+        <div class="fo-madhab-pills">
+          <button class="fo-madhab-pill fo-active" id="foMadhabStd" onclick="_foSetMadhab('shafii')">Standard</button>
+          <button class="fo-madhab-pill" id="foMadhabHanafi" onclick="_foSetMadhab('hanafi')">Hanafi</button>
+        </div>
       </div>
-      <label class="fo-toggle">
-        <input type="checkbox" id="foElevToggle">
-        <div class="fo-toggle-track"></div>
-        <div class="fo-toggle-thumb"></div>
-      </label>
-    </div>
 
-    <!-- Sensor permission (iOS only) -->
-    <div class="fo-sensor-row" id="foSensorRow">
-      <button class="fo-sensor-btn" id="foSensorBtn" onclick="_foRequestSensors(this)">Enable compass</button>
-      <div class="fo-sensor-note">Required for Qibla direction</div>
-    </div>
+      <!-- Elevation (only if GPS altitude available) -->
+      <div class="fo-elevation-row" id="foElevRow">
+        <div class="fo-elevation-text">
+          <div class="fo-elevation-main" id="foElevLabel">Adjust for elevation</div>
+          <div class="fo-elevation-note">Accounts for how altitude affects the horizon. Scholarly precedent in UAE &amp; Malaysia — not universally adopted.</div>
+        </div>
+        <label class="fo-toggle">
+          <input type="checkbox" id="foElevToggle">
+          <div class="fo-toggle-track"></div>
+          <div class="fo-toggle-thumb"></div>
+        </label>
+      </div>
 
-    <button class="fo-enter-btn" onclick="_foEnter()">Enter</button>
+      <!-- Sensor permission (iOS only) -->
+      <div class="fo-sensor-row" id="foSensorRow">
+        <button class="fo-sensor-btn" id="foSensorBtn" onclick="_foRequestSensors(this)">Enable compass</button>
+        <div class="fo-sensor-note">Required for Qibla direction</div>
+      </div>
+
+      <button class="fo-enter-btn" onclick="_foEnter()">Enter</button>
+    </div>
   </div>
 </div>
 
@@ -5479,7 +5512,7 @@ setTimeout(setupScrollObservers,500);
 <script>
 // بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
 // Bismillah ir-Rahman ir-Rahim
-// ── First-time Onboarding (single screen) ──
+// ── First-time Onboarding (progressive single screen) ──
 (function () {
   'use strict';
 
@@ -5490,7 +5523,7 @@ setTimeout(setupScrollObservers,500);
     return;
   }
 
-  // Show sensor row on iOS (requestPermission requires user gesture — the button tap satisfies this)
+  // Show sensor row on iOS — requestPermission needs a user gesture, handled by foSensorBtn tap
   if (typeof DeviceOrientationEvent !== 'undefined' &&
       typeof DeviceOrientationEvent.requestPermission === 'function') {
     var sr = document.getElementById('foSensorRow');
@@ -5501,24 +5534,56 @@ setTimeout(setupScrollObservers,500);
   var _lat = null, _lon = null, _alt = null, _city = '', _tz = '';
   var _madhab = 'shafii';
   var _searchTimer = null, _searchCache = {};
+  var _locationConfirmed = false;
 
-  // ── Location ──
-  function _startLocation() {
-    if (!navigator.geolocation) { _openSearch(); return; }
+  // ── Phase 1 → Phase 2 reveal ──
+  function _revealForm() {
+    if (_locationConfirmed) return;
+    _locationConfirmed = true;
+    var actions = document.getElementById('foLocActions');
+    if (actions) actions.style.display = 'none';
+    var after = document.getElementById('foAfter');
+    if (after) after.classList.add('fo-open');
+  }
+
+  // ── "Share my location" button tap ──
+  window._foRequestLocation = function (btn) {
+    if (!navigator.geolocation) { _showSearch(); return; }
+    // Hide prompt, show spinner — triggered by user gesture so GPS permission dialog will fire
+    var prompt = document.getElementById('foPromptText');
+    var actions = document.getElementById('foLocActions');
+    var loading = document.getElementById('foLoadingRow');
+    if (prompt) prompt.style.display = 'none';
+    if (actions) actions.style.display = 'none';
+    if (loading) loading.style.display = 'flex';
+
+    // On iOS, also request compass here since we're already in a user gesture
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().catch(function () {});
+    }
+
     navigator.geolocation.getCurrentPosition(
       function (pos) {
         _lat = pos.coords.latitude;
         _lon = pos.coords.longitude;
-        _alt = pos.coords.altitude; // may be null on some devices
+        _alt = pos.coords.altitude;
         _tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         _reverseGeocode(_lat, _lon);
       },
-      function () { _openSearch(); },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      function () {
+        // Permission denied or error — drop into manual search
+        if (loading) loading.style.display = 'none';
+        if (prompt) { prompt.textContent = 'Enter your city to get started.'; prompt.style.display = ''; }
+        _showSearch();
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
-  }
+  };
 
   function _reverseGeocode(lat, lon) {
+    var loading = document.getElementById('foLoadingText');
+    if (loading) loading.textContent = 'Almost there\u2026';
     fetch('https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lon + '&format=json&accept-language=en')
       .then(function (r) { return r.json(); })
       .then(function (d) {
@@ -5526,46 +5591,46 @@ setTimeout(setupScrollObservers,500);
         _city = addr.city || addr.town || addr.village || addr.county || addr.state || d.display_name || '';
         _showCity(_city);
       })
-      .catch(function () { _openSearch(); });
+      .catch(function () { _showSearch(); });
   }
 
   function _showCity(city) {
-    var spinner = document.getElementById('foSpinner');
+    var loadingRow = document.getElementById('foLoadingRow');
+    var locRow = document.getElementById('foLocRow');
     var cityEl = document.getElementById('foCityName');
-    var changeBtn = document.getElementById('foChangeBtn');
     var methodEl = document.getElementById('foMethod');
-    if (spinner) spinner.style.display = 'none';
-    if (cityEl) { cityEl.textContent = '📍 ' + city; cityEl.style.display = ''; }
-    if (changeBtn) changeBtn.style.display = '';
-    // Method line
+    if (loadingRow) loadingRow.style.display = 'none';
+    if (cityEl) cityEl.textContent = '\uD83D\uDCCD ' + city;
+    if (locRow) locRow.style.display = 'flex';
     if (typeof getCalculationMethod === 'function' && _lat !== null) {
       var result = getCalculationMethod(_lat, _lon);
       if (methodEl) { methodEl.textContent = 'Using ' + result.name + ' for your region'; methodEl.style.display = ''; }
     }
-    // Elevation toggle — only if altitude is meaningful
     if (_alt !== null && _alt > 0) {
       var elevRow = document.getElementById('foElevRow');
       var elevLbl = document.getElementById('foElevLabel');
       if (elevRow) elevRow.classList.add('fo-open');
       if (elevLbl) elevLbl.textContent = 'Adjust for elevation (' + Math.round(_alt) + '\u202fm)';
     }
+    _revealForm();
   }
 
-  window._foOpenSearch = function () {
-    var cityEl = document.getElementById('foCityName');
-    var changeBtn = document.getElementById('foChangeBtn');
-    var methodEl = document.getElementById('foMethod');
+  // ── Manual search ──
+  function _showSearch() {
     var wrap = document.getElementById('foSearchWrap');
-    if (cityEl) cityEl.style.display = 'none';
-    if (changeBtn) changeBtn.style.display = 'none';
-    if (methodEl) methodEl.style.display = 'none';
     if (wrap) wrap.classList.add('fo-open');
     var inp = document.getElementById('foSearchInput');
     if (inp) setTimeout(function () { inp.focus(); }, 80);
-  };
-  function _openSearch() { window._foOpenSearch(); }
+  }
 
-  // ── City search ──
+  window._foOpenSearch = function () {
+    var locRow = document.getElementById('foLocRow');
+    var methodEl = document.getElementById('foMethod');
+    if (locRow) locRow.style.display = 'none';
+    if (methodEl) methodEl.style.display = 'none';
+    _showSearch();
+  };
+
   var _inp = document.getElementById('foSearchInput');
   if (_inp) {
     _inp.addEventListener('input', function () {
@@ -5604,7 +5669,6 @@ setTimeout(setupScrollObservers,500);
       btn.textContent = r.name;
       btn.onclick = function () {
         _lat = r.lat; _lon = r.lon; _city = r.name; _tz = r.tz || ''; _alt = null;
-        // Collapse search, show city row
         var wrap = document.getElementById('foSearchWrap');
         if (wrap) wrap.classList.remove('fo-open');
         _showCity(_city);
@@ -5632,7 +5696,7 @@ setTimeout(setupScrollObservers,500);
             _requestCompassPermission();
           }
           if (btn) {
-            btn.textContent = state === 'granted' ? '✓ Compass enabled' : 'Compass unavailable';
+            btn.textContent = state === 'granted' ? '\u2713 Compass enabled' : 'Compass unavailable';
             btn.disabled = true;
           }
         })
@@ -5656,7 +5720,6 @@ setTimeout(setupScrollObservers,500);
       localStorage.setItem('fajr_onboarded', '1');
     } catch (e) {}
 
-    // Apply location immediately without waiting for next page load
     if (_lat !== null && typeof _setPrayerLocation === 'function') {
       if (typeof _cityTz !== 'undefined') window._cityTz = _tz || null;
       _setPrayerLocation(_lat, _lon, _city);
@@ -5669,7 +5732,7 @@ setTimeout(setupScrollObservers,500);
     }
   };
 
-  _startLocation();
+  // Do NOT call _startLocation() — wait for user tap
 })();
 </script>
 
