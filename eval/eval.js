@@ -158,8 +158,17 @@ function evaluateEntry(entry) {
 
   for (const prayer of prayers) {
     if (!entry.times[prayer] || !calculated[prayer]) continue
-    const gt = parseTimeHHMM(entry.times[prayer], entry.date, entry.utcOffset || 0)
+    let gt = parseTimeHHMM(entry.times[prayer], entry.date, entry.utcOffset || 0)
     const calc = calculated[prayer]
+    // Day-rollover fix for post-midnight Isha in high-latitude cities.
+    // Aladhan stores Isha under the date the night *begins*, so "00:48" on
+    // "2026-04-01" means the Isha of the April 1 night — which in clock time
+    // is early April 2. parseTimeHHMM puts it on March 31 (utcOffset drift),
+    // making the GT ~24 h behind calc. If calc is >12 h later than GT, the
+    // ground-truth day boundary has wrapped and we shift GT forward by 24 h.
+    if (prayer === 'isha' && calc.getTime() - gt.getTime() > 12 * 60 * 60 * 1000) {
+      gt = new Date(gt.getTime() + 24 * 60 * 60 * 1000)
+    }
     errors[prayer] = absMinutesDiff(gt, calc)
   }
 

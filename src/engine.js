@@ -39,9 +39,11 @@ function detectCountry(lat, lon) {
   if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
   if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
   if (lat >= -6   && lat <= 2    && lon >= -82  && lon <= -74)  return 'Ecuador'
-  if (lat >= 56   && lat <= 72   && lon >= 4    && lon <= 32)   return 'Norway'
-  if (lat >= 62   && lat <= 68   && lon >= -26  && lon <= -12)  return 'Iceland'
+  // Finland and Iceland must be checked before Norway: their bounding boxes
+  // are subsets of Norway's broader (4-32°E) box.
   if (lat >= 59   && lat <= 71   && lon >= 19   && lon <= 32)   return 'Finland'
+  if (lat >= 62   && lat <= 68   && lon >= -26  && lon <= -12)  return 'Iceland'
+  if (lat >= 56   && lat <= 72   && lon >= 4    && lon <= 32)   return 'Norway'
   return null
 }
 
@@ -90,10 +92,23 @@ function selectMethod(country, lat, coords) {
     case 'Ecuador':
       // South America: Muslim World League is the reference method
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South America)' }
-    case 'Norway':
+    case 'Norway': {
+      // Extreme high-latitude (Tromsø 69.6°N): 18° astronomical twilight never
+      // occurs in April — geometric Isha is unreachable and the TwilightAngle
+      // fallback (sunset + 18/60 × night ≈ 22:38 local) is too early.
+      // Aladhan AngleBased produces ≈ 00:48 local, which matches
+      // MiddleOfTheNight (sunset + ½ × night ≈ 00:46 local).
+      // 🟢 Established — MiddleOfTheNight is a recognised fallback for
+      //   latitudes where astronomical twilight does not occur;
+      //   consistent with Aladhan AngleBased output for this region.
+      // Reference: [[wiki/regions/high-latitude]]
+      const p = adhan.CalculationMethod.MuslimWorldLeague()
+      p.highLatitudeRule = adhan.HighLatitudeRule.MiddleOfTheNight
+      return { params: p, methodName: 'MWL + MiddleOfTheNight (Norway)' }
+    }
     case 'Iceland':
     case 'Finland': {
-      // High-latitude: MWL + TwilightAngle (AngleBased) high-latitude rule
+      // High-latitude: MWL + TwilightAngle (AngleBased) high-latitude rule.
       // 🟢 Established — Aladhan API uses latitudeAdjustmentMethod=1 (AngleBased)
       //   for these regions; TwilightAngle computes actual 18° twilight while it
       //   remains astronomically reachable in early spring.
