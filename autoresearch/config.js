@@ -67,4 +67,22 @@ export const config = {
     // 🟢 Established corrections may be auto-merged without human review
     autoMergeGreen: true,
   },
+
+  // Model tier configuration for the autoresearch pipeline
+  models: {
+    experiment: 'haiku',        // fast iteration, ~100 runs/night
+    complexExperiment: 'sonnet', // when experiment needs nuanced reasoning
+    wikiCompilation: 'sonnet',  // knowledge base updates
+    batchReview: 'opus',        // Layer 2 code review (once per batch)
+    lint: null,                 // Layer 1: no LLM, pure automation
+  },
+
+  costEstimate: {
+    perOvernightRun: '$1-3',
+    breakdown: {
+      '100 haiku experiments': '$0.50-2.00',
+      '1 sonnet wiki update': '$0.10-0.30',
+      '1 opus batch review': '$0.50-1.00',
+    }
+  }
 }

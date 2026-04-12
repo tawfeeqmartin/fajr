@@ -1,0 +1,24 @@
+[
+  {
+    "city": "Kuala Lumpur",
+    "country": "Malaysia",
+    "latitude": 3.1390,
+    "longitude": 101.6869,
+    "elevation": 22,
+    "timezone": "Asia/Kuala_Lumpur",
+    "method": "jakim",
+    "source": "Jabatan Kemajuan Islam Malaysia (JAKIM)",
+    "dates": [
+      {"date":"2026-04-01","fajr":"05:50","sunrise":"07:11","dhuhr":"13:14","asr":"16:33","maghrib":"19:19","isha":"20:29"},
+      {"date":"2026-04-02","fajr":"05:50","sunrise":"07:11","dhuhr":"13:14","asr":"16:33","maghrib":"19:19","isha":"20:30"},
+      {"date":"2026-04-03","fajr":"05:50","sunrise":"07:11","dhuhr":"13:14","asr":"16:33","maghrib":"19:19","isha":"20:30"},
+      {"date":"2026-04-04","fajr":"05:49","sunrise":"07:11","dhuhr":"13:13","asr":"16:33","maghrib":"19:19","isha":"20:30"},
+      {"date":"2026-04-05","fajr":"05:49","sunrise":"07:11","dhuhr":"13:13","asr":"16:33","maghrib":"19:18","isha":"20:30"},
+      {"date":"2026-04-06","fajr":"05:49","sunrise":"07:11","dhuhr":"13:13","asr":"16:33","maghrib":"19:18","isha":"20:30"},
+      {"date":"2026-04-07","fajr":"05:49","sunrise":"07:11","dhuhr":"13:13","asr":"16:33","maghrib":"19:18","isha":"20:29"},
+      {"date":"2026-04-08","fajr":"05:49","sunrise":"07:11","dhuhr":"13:13","asr":"16:33","maghrib":"19:18","isha":"20:29"},
+      {"date":"2026-04-09","fajr":"05:49","sunrise":"07:11","dhuhr":"13:12","asr":"16:33","maghrib":"19:17","isha":"20:29"},
+      {"date":"2026-04-10","fajr":"05:49","sunrise":"07:11","dhuhr":"13:12","asr":"16:33","maghrib":"19:17","isha":"20:29"}
+    ]
+  }
+]
