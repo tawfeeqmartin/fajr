@@ -103,6 +103,26 @@ For inland/elevated cities (Fes, Meknes, Marrakech), a larger discrepancy (~2–
 
 ---
 
+## Data Sources
+
+**Ground truth dataset:** `eval/data/train/morocco.json`
+
+Real prayer times were collected from the Aladhan API (api.aladhan.com) for **April 1–10, 2026** using the following parameters:
+
+| City | Coordinates | Method | API Parameters |
+|------|------------|--------|---------------|
+| Casablanca | 33.5731°N, 7.5898°W, 56m | Custom 99 | `method=99&methodSettings=19,null,17` |
+| Rabat | 34.0132°N, 6.8326°W, 75m | Custom 99 | `method=99&methodSettings=19,null,17` |
+
+**Method rationale:** Morocco uses a custom Aladhan method (99) with Fajr 19° and Isha 17°. This differs slightly from the Ministry's published 18°/17° parameters but reflects the actual angles that best reproduce the Ministry's timetable according to community calibration.
+
+**Observations from the collected data:**
+- Casablanca and Rabat times differ by approximately 2–4 minutes across all prayers due to their different longitudes (7.59°W vs 6.83°W), consistent with ~0.3 min/km east-west separation.
+- Fajr for Casablanca on April 1, 2026: 05:08; Rabat: 05:04 — confirming the westward delay.
+- No anomalous values detected; times progress smoothly day over day with expected spring shortening of night.
+
+---
+
 ## Cross-References
 
 - [[wiki/methods/morocco]] — Method parameters and institutional authority

@@ -157,6 +157,30 @@ During winter (polar night), Tromsø has very short days or no sunrise at all. D
 
 ---
 
+## Ground Truth Data — April 2026
+
+**Dataset:** `eval/data/test/high_latitude.json`
+
+Real prayer times were collected from the Aladhan API (api.aladhan.com) for **April 1–7, 2026** using MWL method (1) with `latitudeAdjustmentMethod=1` (AngleBased):
+
+| City | Latitude | Timezone | Fajr Apr 1 | Isha Apr 1 |
+|------|----------|----------|-----------|-----------|
+| Tromsø, Norway | 69.6496°N | Europe/Oslo (UTC+2 CEST) | 00:49 | 00:48 |
+| Reykjavik, Iceland | 64.1466°N | Atlantic/Reykjavik (UTC+0) | 03:27 | 23:40 |
+| Helsinki, Finland | 60.1699°N | Europe/Helsinki (UTC+3 EEST) | 03:25 | 22:49 |
+
+**Observations from April 2026 data:**
+
+**Tromsø:** The AngleBased high-latitude adjustment caps Fajr and Isha near the middle of the night (approximately 00:47–00:49 throughout the week). By April 7, Fajr is 00:47 and Isha is 00:46 — the gap is less than 2 minutes, indicating the algorithm is already applying the cap for essentially all of the nominal night period. The 18° MWL angle is failing or nearly failing even in early April at 69.6°N. This confirms that Tromsø requires high-latitude accommodation for most of the spring/summer period, not just the midnight sun months.
+
+**Reykjavik:** Still fully computable in early April. Fajr progresses from 03:27 (Apr 1) to 02:34 (Apr 7) — gaining ~8 minutes per day, consistent with the rapid day lengthening at 64°N in spring. Isha similarly advances toward midnight by Apr 7 (00:33). No high-latitude failure yet in early April, but the rapid progression means failures may begin in May.
+
+**Helsinki:** More moderate progression. Fajr ranges from 03:25 to 03:05 across the week; Isha from 22:49 to 23:23. At 60°N, Helsinki is at the threshold for summer issues (18° Isha fails around late June) but is well within normal range for April. Times are in UTC+3 (EEST, Eastern European Summer Time).
+
+**Note on the old approximated data:** The previous test data for Tromsø used standard angle-based times (Fajr 03:46 → 02:12 across April 1–7), which did not account for the high-latitude adjustment. The new data from the Aladhan API with `latitudeAdjustmentMethod=1` correctly shows the capped behavior, making this a more meaningful test of the library's high-latitude handling.
+
+---
+
 ## Related Pages
 
 - [[wiki/fiqh/scholarly-oversight]] — Classification framework governing high-latitude solutions

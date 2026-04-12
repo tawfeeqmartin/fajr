@@ -106,6 +106,28 @@ The fajr library must provide both Asr conventions and must not suppress or de-e
 
 ---
 
+## Ground Truth Data
+
+All training and test datasets use real prayer times fetched from the Aladhan API (api.aladhan.com) with each region's correct calculation method. Data covers **April 1–10, 2026** (training) and **April 1–7, 2026** (test).
+
+| File | Cities | Method | API Method ID | Days |
+|------|--------|--------|--------------|------|
+| `eval/data/train/turkey.json` | Istanbul, Ankara | Diyanet | 13 | 10 |
+| `eval/data/train/saudi.json` | Makkah, Madinah, Riyadh | Umm al-Qura | 4 | 10 |
+| `eval/data/train/egypt.json` | Cairo, Alexandria | Egyptian | 3 | 10 |
+| `eval/data/train/morocco.json` | Casablanca, Rabat | Custom (19°/17°) | 99 | 10 |
+| `eval/data/train/malaysia.json` | Kuala Lumpur | JAKIM (20°/18°) | 99 | 10 |
+| `eval/data/train/uk.json` | London | Moonsighting Committee | 15 | 10 |
+| `eval/data/train/usa.json` | New York, Los Angeles | ISNA | 2 | 10 |
+| `eval/data/test/high_elevation.json` | La Paz, Bogota, Denver | MWL / ISNA | 1 / 2 | 7 |
+| `eval/data/test/high_latitude.json` | Tromsø, Reykjavik, Helsinki | MWL + AngleBased | 1 | 7 |
+
+**Total records:** ~780 prayer time records (13 cities × ~6 prayers × ~10 days).
+
+**Collection date:** April 2026. The high-latitude test data uses `latitudeAdjustmentMethod=1` (AngleBased), which produces valid times for Tromsø in early April (Fajr ~00:49, Isha ~00:48 — capped near midnight).
+
+---
+
 ## Individual Method Pages
 
 - [[wiki/methods/isna]] — ISNA: Islamic Society of North America

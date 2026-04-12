@@ -109,6 +109,27 @@ Note the use of `ishaInterval` (minutes) rather than `ishaAngle` (degrees), whic
 
 ---
 
+## Ground Truth Data
+
+**Dataset:** `eval/data/train/saudi.json`
+
+Real prayer times were collected from the Aladhan API (api.aladhan.com) for **April 1–10, 2026** using `method=4` (Umm al-Qura):
+
+| City | Coordinates | Elevation |
+|------|------------|-----------|
+| Makkah | 21.3891°N, 39.8579°E | 277m |
+| Madinah | 24.4686°N, 39.6142°E | 631m |
+| Riyadh | 24.6877°N, 46.7219°E | 612m |
+
+**Observations from the collected data:**
+- Isha for all cities is consistently Maghrib + 90 minutes, confirming the fixed-offset behavior of the method.
+- Makkah Maghrib on April 1, 2026: 18:36; Isha: 20:06 — exactly 90 minutes offset.
+- Riyadh is approximately 7.3° east of Makkah, resulting in ~29 minutes earlier prayer times.
+- Madinah and Riyadh are at similar latitudes but ~7° different longitudes, producing a corresponding time separation.
+- All times in `Asia/Riyadh` (UTC+3, no DST).
+
+---
+
 ## Related Pages
 
 - [[wiki/methods/overview]] — Full comparison table of all methods
