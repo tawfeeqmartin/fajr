@@ -2,7 +2,7 @@
 
 > **High-accuracy Islamic prayer time library** — validated against 222 ground truth data points across 18 cities and 15 countries.
 
-[![npm version](https://img.shields.io/npm/v/fajr.svg)](https://www.npmjs.com/package/fajr)
+[![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > **Current status (as of Experiment 7):** WMAE 1.55 minutes across 18 cities — a 93.6% reduction from the 24.17-minute baseline. All per-prayer MAEs under 2 minutes. The autoresearch loop is active; accuracy improves with each validated experiment. Do not use in production until v1.0.
@@ -187,11 +187,11 @@ Every correction in `src/engine.js` is tagged:
 ## Quick Start
 
 ```bash
-npm install fajr
+npm install @tawfeeqmartin/fajr
 ```
 
 ```js
-import fajr from 'fajr'
+import fajr from '@tawfeeqmartin/fajr'
 
 const times = fajr.prayerTimes({
   latitude: 33.9716,
