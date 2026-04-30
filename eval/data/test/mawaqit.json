@@ -1,0 +1,177 @@
+[
+  {
+    "city": "Casablanca",
+    "country": "Morocco",
+    "latitude": 33.5769322,
+    "longitude": -7.5473133,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque moulay-ismail-casablanca-20400-morocco (مولاي إسماعيل-سيدي مومن الدار البيضاء)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (مولاي إسماعيل-سيدي مومن الدار البيضاء)",
+    "source_url": "https://mawaqit.net/en/m/moulay-ismail-casablanca-20400-morocco",
+    "source_fetched": "2026-04-30T21:26:53.895Z",
+    "dates": [
+      {
+        "date": "2026-04-30",
+        "fajr": "05:07",
+        "sunrise": "06:43",
+        "dhuhr": "13:33",
+        "asr": "17:08",
+        "maghrib": "20:17",
+        "isha": "21:38"
+      }
+    ]
+  },
+  {
+    "city": "Casablanca",
+    "country": "Morocco",
+    "latitude": 33.584595812835,
+    "longitude": -7.582797480365,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-qm-lslm-casablanca-20320-morocco (مسجد اقامة السلام)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (مسجد اقامة السلام)",
+    "source_url": "https://mawaqit.net/en/m/msjd-qm-lslm-casablanca-20320-morocco",
+    "source_fetched": "2026-04-30T21:26:53.944Z",
+    "dates": [
+      {
+        "date": "2026-04-30",
+        "fajr": "05:07",
+        "sunrise": "06:43",
+        "dhuhr": "13:33",
+        "asr": "17:10",
+        "maghrib": "20:18",
+        "isha": "21:38"
+      }
+    ]
+  },
+  {
+    "city": "Casablanca",
+    "country": "Morocco",
+    "latitude": 33.564414864453,
+    "longitude": -7.624730634625,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque mosquee-bab-arrahmane-casablanca-20050-morocco (مسجد باب الرحمن)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (مسجد باب الرحمن)",
+    "source_url": "https://mawaqit.net/en/m/mosquee-bab-arrahmane-casablanca-20050-morocco",
+    "source_fetched": "2026-04-30T21:26:53.986Z",
+    "dates": [
+      {
+        "date": "2026-04-30",
+        "fajr": "05:06",
+        "sunrise": "06:40",
+        "dhuhr": "13:33",
+        "asr": "17:10",
+        "maghrib": "20:17",
+        "isha": "21:39"
+      }
+    ]
+  },
+  {
+    "city": "Rabat",
+    "country": "Morocco",
+    "latitude": 33.9850372,
+    "longitude": -6.8802134,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lm-masjid-ummah-rabat-10130-morocco (مسجد الأمة   Masjid Ummah)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (مسجد الأمة   Masjid Ummah)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lm-masjid-ummah-rabat-10130-morocco",
+    "source_fetched": "2026-04-30T21:26:54.588Z",
+    "dates": [
+      {
+        "date": "2026-04-30",
+        "fajr": "05:00",
+        "sunrise": "06:40",
+        "dhuhr": "13:30",
+        "asr": "17:06",
+        "maghrib": "20:14",
+        "isha": "21:37"
+      }
+    ]
+  },
+  {
+    "city": "Marrakech",
+    "country": "Morocco",
+    "latitude": 31.679100362266,
+    "longitude": -8.0564385652542,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lthr-marrakech-40170-morocco (مسجد الطاهر)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (مسجد الطاهر)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lthr-marrakech-40170-morocco",
+    "source_fetched": "2026-04-30T21:26:54.633Z",
+    "dates": [
+      {
+        "date": "2026-04-30",
+        "fajr": "05:14",
+        "sunrise": "06:48",
+        "dhuhr": "13:34",
+        "asr": "17:09",
+        "maghrib": "20:17",
+        "isha": "21:35"
+      }
+    ]
+  },
+  {
+    "city": "Limoges",
+    "country": "France",
+    "latitude": 45.8511354,
+    "longitude": 1.2996139,
+    "elevation": 0,
+    "timezone": "Europe/Paris",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque les-compagnons-limoges-87000-france-1 (Les Compagnons)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (Les Compagnons)",
+    "source_url": "https://mawaqit.net/en/m/les-compagnons-limoges-87000-france-1",
+    "source_fetched": "2026-04-30T21:26:55.923Z",
+    "dates": [
+      {
+        "date": "2026-04-30",
+        "fajr": "05:26",
+        "sunrise": "06:44",
+        "dhuhr": "13:57",
+        "asr": "17:50",
+        "maghrib": "21:04",
+        "isha": "22:22"
+      }
+    ]
+  },
+  {
+    "city": "Mulhouse",
+    "country": "France",
+    "latitude": 47.7308124,
+    "longitude": 7.2979767,
+    "elevation": 0,
+    "timezone": "Europe/Paris",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque association-des-musulmans-des-coteaux-mulhouse (Association des Musulmans des Coteaux)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (Association des Musulmans des Coteaux)",
+    "source_url": "https://mawaqit.net/en/m/association-des-musulmans-des-coteaux-mulhouse",
+    "source_fetched": "2026-04-30T21:26:56.576Z",
+    "dates": [
+      {
+        "date": "2026-04-30",
+        "fajr": "04:54",
+        "sunrise": "06:16",
+        "dhuhr": "13:33",
+        "asr": "17:26",
+        "maghrib": "20:44",
+        "isha": "22:03"
+      }
+    ]
+  }
+]

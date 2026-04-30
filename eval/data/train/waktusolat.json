@@ -1,0 +1,320 @@
+[
+  {
+    "city": "Kuala Lumpur",
+    "country": "Malaysia",
+    "latitude": 3.139,
+    "longitude": 101.6869,
+    "elevation": 22,
+    "timezone": "Asia/Kuala_Lumpur",
+    "method": "jakim",
+    "source": "JAKIM via waktusolat.app zone WLY01",
+    "source_institution": "JAKIM (via waktusolat.app)",
+    "source_method": "JAKIM (Fajr 20°, Isha 18°, topographic elevation)",
+    "source_url": "https://api.waktusolat.app/v2/solat/wly01",
+    "source_fetched": "2026-04-30T20:57:51.743Z",
+    "dates": [
+      {
+        "date": "2026-04-01",
+        "fajr": "06:05",
+        "sunrise": "07:12",
+        "dhuhr": "13:20",
+        "asr": "16:22",
+        "maghrib": "19:23",
+        "isha": "20:33"
+      },
+      {
+        "date": "2026-04-02",
+        "fajr": "06:05",
+        "sunrise": "07:12",
+        "dhuhr": "13:20",
+        "asr": "16:22",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-03",
+        "fajr": "06:04",
+        "sunrise": "07:11",
+        "dhuhr": "13:19",
+        "asr": "16:23",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-04",
+        "fajr": "06:04",
+        "sunrise": "07:11",
+        "dhuhr": "13:19",
+        "asr": "16:23",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-05",
+        "fajr": "06:04",
+        "sunrise": "07:11",
+        "dhuhr": "13:19",
+        "asr": "16:24",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-06",
+        "fajr": "06:03",
+        "sunrise": "07:10",
+        "dhuhr": "13:18",
+        "asr": "16:24",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-07",
+        "fajr": "06:03",
+        "sunrise": "07:10",
+        "dhuhr": "13:18",
+        "asr": "16:24",
+        "maghrib": "19:22",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-08",
+        "fajr": "06:02",
+        "sunrise": "07:09",
+        "dhuhr": "13:18",
+        "asr": "16:25",
+        "maghrib": "19:22",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-09",
+        "fajr": "06:02",
+        "sunrise": "07:09",
+        "dhuhr": "13:18",
+        "asr": "16:25",
+        "maghrib": "19:22",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-10",
+        "fajr": "06:01",
+        "sunrise": "07:09",
+        "dhuhr": "13:17",
+        "asr": "16:25",
+        "maghrib": "19:22",
+        "isha": "20:31"
+      }
+    ]
+  },
+  {
+    "city": "Shah Alam",
+    "country": "Malaysia",
+    "latitude": 3.0738,
+    "longitude": 101.5183,
+    "elevation": 26,
+    "timezone": "Asia/Kuala_Lumpur",
+    "method": "jakim",
+    "source": "JAKIM via waktusolat.app zone SGR01",
+    "source_institution": "JAKIM (via waktusolat.app)",
+    "source_method": "JAKIM (Fajr 20°, Isha 18°, topographic elevation)",
+    "source_url": "https://api.waktusolat.app/v2/solat/sgr01",
+    "source_fetched": "2026-04-30T20:57:51.944Z",
+    "dates": [
+      {
+        "date": "2026-04-01",
+        "fajr": "06:05",
+        "sunrise": "07:12",
+        "dhuhr": "13:20",
+        "asr": "16:22",
+        "maghrib": "19:23",
+        "isha": "20:33"
+      },
+      {
+        "date": "2026-04-02",
+        "fajr": "06:05",
+        "sunrise": "07:11",
+        "dhuhr": "13:20",
+        "asr": "16:22",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-03",
+        "fajr": "06:04",
+        "sunrise": "07:11",
+        "dhuhr": "13:19",
+        "asr": "16:23",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-04",
+        "fajr": "06:04",
+        "sunrise": "07:10",
+        "dhuhr": "13:19",
+        "asr": "16:23",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-05",
+        "fajr": "06:04",
+        "sunrise": "07:10",
+        "dhuhr": "13:19",
+        "asr": "16:24",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-06",
+        "fajr": "06:03",
+        "sunrise": "07:10",
+        "dhuhr": "13:18",
+        "asr": "16:24",
+        "maghrib": "19:23",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-07",
+        "fajr": "06:03",
+        "sunrise": "07:09",
+        "dhuhr": "13:18",
+        "asr": "16:24",
+        "maghrib": "19:22",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-08",
+        "fajr": "06:02",
+        "sunrise": "07:09",
+        "dhuhr": "13:18",
+        "asr": "16:25",
+        "maghrib": "19:22",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-09",
+        "fajr": "06:02",
+        "sunrise": "07:09",
+        "dhuhr": "13:18",
+        "asr": "16:25",
+        "maghrib": "19:22",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-04-10",
+        "fajr": "06:01",
+        "sunrise": "07:08",
+        "dhuhr": "13:17",
+        "asr": "16:25",
+        "maghrib": "19:22",
+        "isha": "20:31"
+      }
+    ]
+  },
+  {
+    "city": "George Town",
+    "country": "Malaysia",
+    "latitude": 5.4141,
+    "longitude": 100.3288,
+    "elevation": 3,
+    "timezone": "Asia/Kuala_Lumpur",
+    "method": "jakim",
+    "source": "JAKIM via waktusolat.app zone PNG01",
+    "source_institution": "JAKIM (via waktusolat.app)",
+    "source_method": "JAKIM (Fajr 20°, Isha 18°, topographic elevation)",
+    "source_url": "https://api.waktusolat.app/v2/solat/png01",
+    "source_fetched": "2026-04-30T20:57:52.157Z",
+    "dates": [
+      {
+        "date": "2026-04-01",
+        "fajr": "06:10",
+        "sunrise": "07:16",
+        "dhuhr": "13:25",
+        "asr": "16:26",
+        "maghrib": "19:29",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-02",
+        "fajr": "06:09",
+        "sunrise": "07:16",
+        "dhuhr": "13:24",
+        "asr": "16:25",
+        "maghrib": "19:29",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-03",
+        "fajr": "06:09",
+        "sunrise": "07:15",
+        "dhuhr": "13:24",
+        "asr": "16:24",
+        "maghrib": "19:28",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-04",
+        "fajr": "06:08",
+        "sunrise": "07:15",
+        "dhuhr": "13:24",
+        "asr": "16:25",
+        "maghrib": "19:28",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-05",
+        "fajr": "06:08",
+        "sunrise": "07:15",
+        "dhuhr": "13:24",
+        "asr": "16:25",
+        "maghrib": "19:28",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-06",
+        "fajr": "06:07",
+        "sunrise": "07:14",
+        "dhuhr": "13:23",
+        "asr": "16:26",
+        "maghrib": "19:28",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-07",
+        "fajr": "06:07",
+        "sunrise": "07:14",
+        "dhuhr": "13:23",
+        "asr": "16:26",
+        "maghrib": "19:28",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-08",
+        "fajr": "06:06",
+        "sunrise": "07:13",
+        "dhuhr": "13:23",
+        "asr": "16:27",
+        "maghrib": "19:28",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-04-09",
+        "fajr": "06:06",
+        "sunrise": "07:13",
+        "dhuhr": "13:22",
+        "asr": "16:27",
+        "maghrib": "19:28",
+        "isha": "20:37"
+      },
+      {
+        "date": "2026-04-10",
+        "fajr": "06:05",
+        "sunrise": "07:12",
+        "dhuhr": "13:22",
+        "asr": "16:28",
+        "maghrib": "19:28",
+        "isha": "20:37"
+      }
+    ]
+  }
+]

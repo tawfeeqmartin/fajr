@@ -2,7 +2,12 @@
 // Bismillah ir-Rahman ir-Rahim
 /**
  * Fetch prayer time calendar from Aladhan API for a list of cities.
- * Outputs JSON files in the eval/data/train/ format.
+ *
+ * By default, output files land in eval/data/train/. A city may set
+ *   outDir: 'test'
+ * to route its output to eval/data/test/ instead — used for the holdout
+ * stress-test set (extreme latitudes, extreme elevations). The holdout
+ * is REPORTED but never optimized against. See CLAUDE.md ratchet rules.
  *
  * Usage: node scripts/fetch-aladhan.js
  */
@@ -76,11 +81,66 @@ const CITIES = [
     outFile: 'toronto.json',
     days: 10,
   },
+
+  // ── Holdout stress-test cities ────────────────────────────────────────────
+  // These route to eval/data/test/. They are HOLDOUT — reported by eval.js
+  // but not used by the ratchet. They exist to detect overfitting and silent
+  // failures at extremes (very high latitude, very high elevation).
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    city: 'Longyearbyen',
+    country: 'Svalbard (Norway)',
+    latitude: 78.2232,
+    longitude: 15.6267,
+    elevation: 5,
+    timezone: 'Arctic/Longyearbyen',
+    method: 3,                          // MWL
+    latitudeAdjustmentMethod: 1,        // AngleBased
+    methodLabel: 'MWL + AngleBased (extreme high-latitude)',
+    outFile: 'svalbard.json',
+    outDir: 'test',
+    days: 10,
+  },
+  {
+    city: 'Anchorage',
+    country: 'United States',
+    latitude: 61.2181,
+    longitude: -149.9003,
+    elevation: 31,
+    timezone: 'America/Anchorage',
+    method: 3,                          // MWL
+    latitudeAdjustmentMethod: 1,
+    methodLabel: 'MWL + AngleBased (Western Hemisphere high-lat)',
+    outFile: 'anchorage.json',
+    outDir: 'test',
+    days: 10,
+  },
+  {
+    city: 'Quito',
+    country: 'Ecuador',
+    latitude: -0.1807,
+    longitude: -78.4678,
+    elevation: 2850,
+    timezone: 'America/Guayaquil',
+    method: 3,                          // MWL
+    methodLabel: 'MWL (equatorial high-elevation)',
+    outFile: 'quito.json',
+    outDir: 'test',
+    days: 10,
+  },
 ]
 
 function buildUrl(city) {
-  const base = `https://api.aladhan.com/v1/calendar/2026/4?latitude=${city.latitude}&longitude=${city.longitude}&method=${city.method}`
-  return city.methodSettings ? `${base}&methodSettings=${city.methodSettings}` : base
+  const params = new URLSearchParams({
+    latitude:  city.latitude,
+    longitude: city.longitude,
+    method:    city.method,
+  })
+  if (city.methodSettings) params.set('methodSettings', city.methodSettings)
+  if (city.latitudeAdjustmentMethod !== undefined) {
+    params.set('latitudeAdjustmentMethod', city.latitudeAdjustmentMethod)
+  }
+  return `https://api.aladhan.com/v1/calendar/2026/4?${params}`
 }
 
 async function fetchCity(city) {
@@ -125,7 +185,8 @@ async function main() {
   for (const city of CITIES) {
     try {
       const data = await fetchCity(city)
-      const outPath = join(__dirname, '..', 'eval', 'data', 'train', city.outFile)
+      const outDir = city.outDir === 'test' ? 'test' : 'train'
+      const outPath = join(__dirname, '..', 'eval', 'data', outDir, city.outFile)
       writeFileSync(outPath, JSON.stringify(data, null, 2))
       console.log(`  → wrote ${outPath} (${data[0].dates.length} days)`)
     } catch (err) {
