@@ -25,6 +25,14 @@
   },
   "scripts": {
     "eval": "node eval/eval.js",
-    "test": "node eval/eval.js"
+    "test": "node eval/eval.js",
+    "compare": "node eval/compare.js",
+    "build:charts": "node scripts/build-readme-charts.js",
+    "fetch:aladhan": "node scripts/fetch-aladhan.js",
+    "fetch:diyanet": "node scripts/fetch-diyanet.js",
+    "fetch:waktusolat": "node scripts/fetch-waktusolat.js",
+    "fetch:muslimsalat": "node scripts/fetch-muslimsalat.js",
+    "fetch:praytimes": "node scripts/fetch-praytimes.js",
+    "fetch:all": "npm run fetch:aladhan && npm run fetch:diyanet && npm run fetch:waktusolat && npm run fetch:muslimsalat && npm run fetch:praytimes"
   }
 }

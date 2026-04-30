@@ -12,12 +12,18 @@ Find ONE specific correction to `src/engine.js` that will reduce WMAE (Weighted 
 
 ## Rules (non-negotiable)
 
-1. Read `CLAUDE.md` fully before starting.
-2. Your only edit target is `src/engine.js`. Do not modify `eval/`, `knowledge/wiki/`, or `src/index.js`.
-3. Run `node eval/eval.js` to measure WMAE before and after your change.
-4. Commit only if WMAE strictly decreases AND no individual prayer gets worse.
+1. Read `CLAUDE.md` fully before starting — the Ratchet rules section is the contract.
+2. Your only edit target is `src/engine.js` (and rarely `src/methods.js` for angle-table changes). Do not modify `eval/`, `knowledge/wiki/`, or `src/index.js`.
+3. Workflow:
+   ```
+   node eval/eval.js     # baseline
+   # … make ONE change …
+   node eval/eval.js     # candidate
+   node eval/compare.js  # ratchet decision (exit 0 = PASS, 1 = FAIL)
+   ```
+4. Commit only if `eval/compare.js` exits 0. The ratchet is mechanical: train WMAE must strictly decrease, no region may worsen by >0.10 min, and no per-prayer signed bias may drift in the ihtiyat-unsafe direction by >0.30 min. Holdout (test) WMAE is reported but never gates the decision.
 5. Tag your correction with 🟢 / 🟡 / 🔴 per the scholarly classification in CLAUDE.md.
-6. Log your run in `autoresearch/logs/` whether it succeeds or fails.
+6. Log your run in `autoresearch/logs/` whether it succeeds or fails — include train and holdout deltas, per-region deltas, and signed-bias deltas from `compare.js` output.
 
 ## Research process
 
@@ -98,5 +104,4 @@ Do not introduce any correction that is not directly supported by a wiki page in
 
 ## Current baseline
 
-Run `node eval/eval.js` to see current WMAE.
-Target: reduce WMAE by at least 0.05 per run.
+Run `node eval/eval.js` to see current train WMAE (the ratchet number) and holdout WMAE (the diagnostic). Target: reduce train WMAE by at least 0.05 per run while keeping `eval/compare.js` PASS — i.e., no per-region regression and no ihtiyat-unsafe bias drift.

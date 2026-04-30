@@ -3,15 +3,28 @@
 /**
  * fajr eval harness
  *
- * Measures Weighted Mean Absolute Error (WMAE) against ground truth timetables.
+ * Reports two WMAE numbers:
+ *   - Train WMAE: the ratchet number. Accept/reject is judged against this.
+ *   - Test WMAE:  a holdout, reported but NEVER optimized against. If it
+ *                 diverges from train WMAE, the engine is overfitting to
+ *                 whichever timetables happened to be digitized first.
+ *
+ * Three aggregation dimensions:
+ *   - per-region   (grouped by city)
+ *   - per-source   (grouped by source_institution)
+ *   - per-cell     (grouped by city + source — the granular ratchet unit)
+ *
+ * Per-prayer signed bias (calc − ground truth, in minutes) is tracked
+ * alongside MAE because ihtiyat (precaution) requires asymmetric error: Fajr
+ * drifting earlier or Maghrib drifting earlier is far worse than the same
+ * absolute error the other way, even though MAE treats them as equivalent.
  *
  * READ-ONLY for the autoresearch agent — see CLAUDE.md.
- * Modifying this file to make tests pass is cheating.
  *
  * Usage:
  *   node eval/eval.js
  *   node eval/eval.js --verbose
- *   node eval/eval.js --prayer fajr    (focus on one prayer)
+ *   node eval/eval.js --prayer fajr
  */
 
 import { readFileSync, readdirSync, existsSync, appendFileSync, mkdirSync } from 'fs'
@@ -25,7 +38,6 @@ const PRAYER_FILTER = process.argv.includes('--prayer')
   ? process.argv[process.argv.indexOf('--prayer') + 1]
   : null
 
-// Prayer weights for WMAE (Fajr and Isha are most affected by twilight uncertainty)
 const WEIGHTS = {
   fajr:    1.5,
   shuruq:  1.0,
@@ -34,66 +46,86 @@ const WEIGHTS = {
   maghrib: 1.0,
   isha:    1.5,
 }
-
 const PRAYERS = Object.keys(WEIGHTS)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Data loading + normalization
 // ─────────────────────────────────────────────────────────────────────────────
 
-// UTC offsets for April 2026 (DST-aware).
-// Add new entries here as new timezones appear in ground truth files.
 const UTC_OFFSETS = {
-  'Africa/Casablanca':    1,   // Morocco UTC+1 year-round
-  'Africa/Cairo':         2,   // Egypt UTC+2
-  'Asia/Riyadh':          3,   // Saudi Arabia UTC+3
-  'Europe/Istanbul':      3,   // Turkey UTC+3 (no DST since 2016)
-  'Europe/London':        1,   // UK BST in April (UTC+1)
-  'Asia/Kuala_Lumpur':    8,   // Malaysia UTC+8
-  'America/New_York':    -4,   // US EDT in April
-  'America/Chicago':     -5,   // US CDT in April
-  'America/Los_Angeles': -7,   // US PDT in April
-  'America/Denver':      -6,   // US MDT in April
-  'America/La_Paz':      -4,   // Bolivia UTC-4 (no DST)
-  'America/Bogota':      -5,   // Colombia UTC-5 (no DST)
-  'America/Guayaquil':   -5,   // Ecuador UTC-5 (no DST)
-  'Europe/Oslo':          2,   // Norway CEST in April
-  'Atlantic/Reykjavik':   0,   // Iceland UTC+0 (no DST)
-  'Europe/Helsinki':      3,   // Finland EEST in April
-  'Asia/Jakarta':         7,   // Indonesia UTC+7 (no DST)
-  'Asia/Karachi':         5,   // Pakistan UTC+5 (no DST)
-  'Asia/Dubai':           4,   // UAE UTC+4 (no DST)
-  'Europe/Paris':         2,   // France CEST in April (UTC+2)
-  'America/Toronto':     -4,   // Canada EDT in April (UTC-4)
+  'Africa/Casablanca':    1,
+  'Africa/Cairo':         2,
+  'Asia/Riyadh':          3,
+  'Europe/Istanbul':      3,
+  'Europe/London':        1,
+  'Asia/Kuala_Lumpur':    8,
+  'America/New_York':    -4,
+  'America/Chicago':     -5,
+  'America/Los_Angeles': -7,
+  'America/Denver':      -6,
+  'America/Anchorage':   -8,
+  'America/La_Paz':      -4,
+  'America/Bogota':      -5,
+  'America/Guayaquil':   -5,
+  'Europe/Oslo':          2,
+  'Atlantic/Reykjavik':   0,
+  'Europe/Helsinki':      3,
+  'Asia/Jakarta':         7,
+  'Asia/Karachi':         5,
+  'Asia/Dubai':           4,
+  'Europe/Paris':         2,
+  'America/Toronto':     -4,
+  'Arctic/Longyearbyen':  2,
+  'Asia/Singapore':       8,
 }
 
-// Supported flat-entry format:
-// { source, city, latitude, longitude, elevation, timezone, method,
-//   date, utcOffset, times: { fajr, shuruq, dhuhr, asr, maghrib, isha } }
-//
-// Also supports grouped format from ground truth files:
-// { city, latitude, longitude, elevation, timezone, method, source,
-//   dates: [ { date, fajr, sunrise, dhuhr, asr, maghrib, isha }, … ] }
-//
-// "sunrise" is accepted as an alias for "shuruq".
+// If a fixture lacks the structured source_institution field, try to derive a
+// short label from the legacy free-text `source` field, so older fixtures still
+// stratify cleanly in per-source tables.
+function deriveInstitution(rawSource) {
+  if (!rawSource) return 'unknown'
+  const s = rawSource.toLowerCase()
+  if (s.includes('aladhan'))      return 'Aladhan API'
+  if (s.includes('diyanet'))      return 'Diyanet'
+  if (s.includes('jakim') || s.includes('waktusolat')) return 'JAKIM (waktusolat)'
+  if (s.includes('muslimsalat'))  return 'muslimsalat.com'
+  if (s.includes('praytimes'))    return 'praytimes.org'
+  if (s.includes('iacad'))        return 'IACAD Dubai'
+  if (s.includes('muis'))         return 'MUIS Singapore'
+  return rawSource.split(' ')[0]
+}
 
 function normalizeEntries(raw) {
   const flat = []
 
   for (const item of raw) {
+    const sourceInstitution = item.source_institution ?? deriveInstitution(item.source)
+    const sourceMethod      = item.source_method      ?? item.method ?? null
+    const sourceUrl         = item.source_url         ?? null
+    const sourceFetched     = item.source_fetched     ?? null
+
     if (!item.dates) {
-      // Already flat format — ensure times object and shuruq alias
       const times = { ...item.times }
       if (!times.shuruq && times.sunrise) times.shuruq = times.sunrise
-      flat.push({ ...item, times })
+      flat.push({
+        ...item,
+        source_institution: sourceInstitution,
+        source_method:      sourceMethod,
+        source_url:         sourceUrl,
+        source_fetched:     sourceFetched,
+        times,
+      })
       continue
     }
 
-    // Grouped format: expand dates array into individual entries
     const utcOffset = UTC_OFFSETS[item.timezone] ?? 0
     for (const day of item.dates) {
       flat.push({
-        source:    item.source,
+        source:             item.source,
+        source_institution: sourceInstitution,
+        source_method:      sourceMethod,
+        source_url:         sourceUrl,
+        source_fetched:     sourceFetched,
         city:      item.city,
         country:   item.country,
         latitude:  item.latitude,
@@ -135,18 +167,21 @@ function loadGroundTruth(dir) {
 // Error calculation
 // ─────────────────────────────────────────────────────────────────────────────
 
-// utcOffset: hours east of UTC (e.g. +1 for Morocco, -5 for US/CDT)
-// Times in the JSON are LOCAL time; subtract utcOffset to get UTC.
 function parseTimeHHMM(hhmmStr, dateStr, utcOffset = 0) {
   const [h, m] = hhmmStr.split(':').map(Number)
   const d = new Date(dateStr + 'T00:00:00Z')
-  // Store as UTC: local HH:MM minus UTC offset
   d.setUTCHours(h - utcOffset, m, 0, 0)
   return d
 }
 
 function absMinutesDiff(a, b) {
   return Math.abs(a.getTime() - b.getTime()) / 60000
+}
+
+// Signed: positive = `calc` is LATER than `gt`. For Fajr/Maghrib/Isha, positive
+// is the cautious direction. For Shuruq (end of Fajr), negative is cautious.
+function signedMinutesDiff(calc, gt) {
+  return (calc.getTime() - gt.getTime()) / 60000
 }
 
 function evaluateEntry(entry) {
@@ -159,25 +194,204 @@ function evaluateEntry(entry) {
   })
 
   const errors = {}
+  const signed = {}
   const prayers = PRAYER_FILTER ? [PRAYER_FILTER] : PRAYERS
 
   for (const prayer of prayers) {
     if (!entry.times[prayer] || !calculated[prayer]) continue
     let gt = parseTimeHHMM(entry.times[prayer], entry.date, entry.utcOffset || 0)
     const calc = calculated[prayer]
-    // Day-rollover fix for post-midnight Isha in high-latitude cities.
-    // Aladhan stores Isha under the date the night *begins*, so "00:48" on
-    // "2026-04-01" means the Isha of the April 1 night — which in clock time
-    // is early April 2. parseTimeHHMM puts it on March 31 (utcOffset drift),
-    // making the GT ~24 h behind calc. If calc is >12 h later than GT, the
-    // ground-truth day boundary has wrapped and we shift GT forward by 24 h.
+    // Day-rollover fix for post-midnight Isha at high latitude.
     if (prayer === 'isha' && calc.getTime() - gt.getTime() > 12 * 60 * 60 * 1000) {
       gt = new Date(gt.getTime() + 24 * 60 * 60 * 1000)
     }
     errors[prayer] = absMinutesDiff(gt, calc)
+    signed[prayer] = signedMinutesDiff(calc, gt)
   }
 
-  return errors
+  return { errors, signed }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Aggregation
+// ─────────────────────────────────────────────────────────────────────────────
+
+function emptyBucket(meta = {}) {
+  return {
+    ...meta,
+    count: 0,
+    totals:        Object.fromEntries(PRAYERS.map(p => [p, 0])),
+    counts:        Object.fromEntries(PRAYERS.map(p => [p, 0])),
+    signedTotals:  Object.fromEntries(PRAYERS.map(p => [p, 0])),
+  }
+}
+
+function finalizeBucket(b) {
+  const perPrayer = {}, perPrayerSigned = {}
+  let wSum = 0, wTot = 0
+  for (const p of PRAYERS) {
+    if (b.counts[p] === 0) continue
+    perPrayer[p]       = b.totals[p]       / b.counts[p]
+    perPrayerSigned[p] = b.signedTotals[p] / b.counts[p]
+    wSum += perPrayer[p] * WEIGHTS[p]
+    wTot += WEIGHTS[p]
+  }
+  return {
+    ...b,
+    wmae: wTot > 0 ? wSum / wTot : 0,
+    perPrayer,
+    perPrayerSigned,
+    // strip raw totals from the public shape to keep runs.jsonl tidy
+    totals: undefined,
+    counts: undefined,
+    signedTotals: undefined,
+  }
+}
+
+function aggregate(entries) {
+  const overall = emptyBucket()
+  const perRegion = {}                        // keyed by city
+  const perSource = {}                        // keyed by source_institution
+  const perCell   = {}                        // keyed by `${city} / ${source_institution}`
+
+  for (const entry of entries) {
+    const { errors, signed } = evaluateEntry(entry)
+    const region = entry.city || 'unknown'
+    const source = entry.source_institution || 'unknown'
+    const cell   = `${region} / ${source}`
+
+    if (!perRegion[region]) perRegion[region] = emptyBucket({
+      country: entry.country ?? null,
+      latitude: entry.latitude,
+      longitude: entry.longitude,
+      elevation: entry.elevation ?? 0,
+    })
+    if (!perSource[source]) perSource[source] = emptyBucket({
+      sourceMethod: entry.source_method ?? null,
+    })
+    if (!perCell[cell]) perCell[cell] = emptyBucket({
+      city: region,
+      sourceInstitution: source,
+      country: entry.country ?? null,
+      latitude: entry.latitude,
+      elevation: entry.elevation ?? 0,
+    })
+
+    overall.count++
+    perRegion[region].count++
+    perSource[source].count++
+    perCell[cell].count++
+
+    for (const prayer of Object.keys(errors)) {
+      for (const b of [overall, perRegion[region], perSource[source], perCell[cell]]) {
+        b.totals[prayer]       += errors[prayer]
+        b.counts[prayer]       += 1
+        b.signedTotals[prayer] += signed[prayer]
+      }
+    }
+  }
+
+  const final = finalizeBucket(overall)
+  const fRegion = Object.fromEntries(Object.entries(perRegion).map(([k, v]) => [k, finalizeBucket(v)]))
+  const fSource = Object.fromEntries(Object.entries(perSource).map(([k, v]) => [k, finalizeBucket(v)]))
+  const fCell   = Object.fromEntries(Object.entries(perCell)  .map(([k, v]) => [k, finalizeBucket(v)]))
+
+  return {
+    wmae:            final.wmae,
+    perPrayer:       final.perPrayer,
+    perPrayerSigned: final.perPrayerSigned,
+    perRegion:       fRegion,
+    perSource:       fSource,
+    perCell:         fCell,
+    entries:         entries.length,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Output
+// ─────────────────────────────────────────────────────────────────────────────
+
+function fmtSigned(n) {
+  if (n === undefined || Number.isNaN(n)) return '   —   '
+  return n >= 0 ? `+${n.toFixed(2)}` : n.toFixed(2)
+}
+
+function printSplit(label, stats) {
+  console.log(label)
+  console.log('─'.repeat(label.length))
+  console.log(`Entries: ${stats.entries}`)
+  if (stats.entries === 0) { console.log('(no data)'); console.log(); return }
+  console.log()
+  console.log('Prayer   | MAE (min) |   Bias    | Weight | Weighted |')
+  console.log('---------|-----------|-----------|--------|----------|')
+  for (const prayer of PRAYERS) {
+    const mae = stats.perPrayer[prayer]
+    if (mae === undefined) continue
+    const bias = stats.perPrayerSigned[prayer]
+    const weight = WEIGHTS[prayer]
+    const weighted = mae * weight
+    console.log(
+      `${prayer.padEnd(8)} | ${mae.toFixed(2).padStart(9)} | ${fmtSigned(bias).padStart(9)} | ${weight.toFixed(1).padStart(6)} | ${weighted.toFixed(2).padStart(8)} |`
+    )
+  }
+  console.log('---------|-----------|-----------|--------|----------|')
+  console.log(`WMAE     |           |           |        | ${stats.wmae.toFixed(2).padStart(8)} |`)
+  console.log()
+}
+
+function printPerSource(label, stats) {
+  if (stats.entries === 0) return
+  console.log(label)
+  console.log('─'.repeat(label.length))
+  const rows = Object.entries(stats.perSource).sort(([, a], [, b]) => b.wmae - a.wmae)
+  console.log('Source                              |  n  | WMAE  | Fajr bias | Maghrib bias | Isha bias |')
+  console.log('------------------------------------|-----|-------|-----------|--------------|-----------|')
+  for (const [src, r] of rows) {
+    const fb = fmtSigned(r.perPrayerSigned.fajr)
+    const mb = fmtSigned(r.perPrayerSigned.maghrib)
+    const ib = fmtSigned(r.perPrayerSigned.isha)
+    console.log(
+      `${src.padEnd(35).slice(0, 35)} | ${r.count.toString().padStart(3)} | ${r.wmae.toFixed(2).padStart(5)} | ${fb.padStart(9)} | ${mb.padStart(12)} | ${ib.padStart(9)} |`
+    )
+  }
+  console.log()
+}
+
+function printPerCell(label, stats) {
+  if (stats.entries === 0) return
+  console.log(label)
+  console.log('─'.repeat(label.length))
+  const rows = Object.entries(stats.perCell).sort(([, a], [, b]) => b.wmae - a.wmae)
+  console.log('Cell (city / source)                              |  n  | WMAE  | Fajr bias | Maghrib | Isha   |')
+  console.log('--------------------------------------------------|-----|-------|-----------|---------|--------|')
+  for (const [cell, r] of rows) {
+    const fb = fmtSigned(r.perPrayerSigned.fajr)
+    const mb = fmtSigned(r.perPrayerSigned.maghrib)
+    const ib = fmtSigned(r.perPrayerSigned.isha)
+    console.log(
+      `${cell.padEnd(49).slice(0, 49)} | ${r.count.toString().padStart(3)} | ${r.wmae.toFixed(2).padStart(5)} | ${fb.padStart(9)} | ${mb.padStart(7)} | ${ib.padStart(6)} |`
+    )
+  }
+  console.log()
+}
+
+function stripBucketsForLog(map) {
+  const out = {}
+  for (const [k, v] of Object.entries(map)) {
+    out[k] = {
+      count: v.count,
+      wmae: v.wmae,
+      perPrayer: v.perPrayer,
+      perPrayerSigned: v.perPrayerSigned,
+      ...(v.latitude  !== undefined ? { latitude:  v.latitude  } : {}),
+      ...(v.elevation !== undefined ? { elevation: v.elevation } : {}),
+      ...(v.country   !== undefined ? { country:   v.country   } : {}),
+      ...(v.sourceInstitution !== undefined ? { sourceInstitution: v.sourceInstitution } : {}),
+      ...(v.sourceMethod      !== undefined ? { sourceMethod:      v.sourceMethod      } : {}),
+      ...(v.city              !== undefined ? { city:              v.city              } : {}),
+    }
+  }
+  return out
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -190,76 +404,69 @@ function run() {
 
   const trainData = loadGroundTruth(trainDir)
   const testData  = loadGroundTruth(testDir)
-  const allData   = [...trainData, ...testData]
 
-  if (allData.length === 0) {
+  if (trainData.length === 0 && testData.length === 0) {
     console.log('No ground truth data found.')
     console.log('Add .json files to eval/data/train/ or eval/data/test/')
-    console.log('See CLAUDE.md for the expected format.')
-    console.log()
-    console.log('WMAE: N/A (no data)')
     process.exit(0)
   }
 
-  // Accumulate per-prayer errors across all entries
-  const totals = {}
-  const counts = {}
-  for (const p of PRAYERS) { totals[p] = 0; counts[p] = 0 }
+  const trainStats = aggregate(trainData)
+  const testStats  = aggregate(testData)
 
-  for (const entry of allData) {
-    const errors = evaluateEntry(entry)
-    for (const [prayer, err] of Object.entries(errors)) {
-      totals[prayer] += err
-      counts[prayer]++
-    }
-  }
-
-  // Print report
   console.log()
   console.log('WMAE Report')
   console.log('===========')
-  console.log(`Ground truth entries: ${allData.length} (train: ${trainData.length}, test: ${testData.length})`)
   console.log()
 
-  let weightedSum = 0
-  let weightTotal = 0
-
-  console.log('Prayer   | MAE (min) | Weight | Weighted |')
-  console.log('---------|-----------|--------|----------|')
-
-  for (const prayer of PRAYERS) {
-    if (counts[prayer] === 0) continue
-    const mae = totals[prayer] / counts[prayer]
-    const weight = WEIGHTS[prayer]
-    const weighted = mae * weight
-    weightedSum += weighted
-    weightTotal += weight
-
-    const prayerPad  = prayer.padEnd(8)
-    const maePad     = mae.toFixed(2).padStart(9)
-    const weightPad  = weight.toFixed(1).padStart(6)
-    const wPad       = weighted.toFixed(2).padStart(8)
-    console.log(`${prayerPad} | ${maePad} | ${weightPad} | ${wPad} |`)
+  printSplit('Train (ratchet)', trainStats)
+  if (testData.length > 0) {
+    printSplit('Test (holdout — diagnostic only, do NOT optimize against)', testStats)
+    if (trainStats.wmae > 0) {
+      const ratio = testStats.wmae / trainStats.wmae
+      if (ratio > 1.5) {
+        console.log(`⚠  Holdout WMAE is ${ratio.toFixed(2)}× train WMAE — possible overfitting to train regions.`)
+        console.log()
+      }
+    }
   }
 
-  const wmae = weightTotal > 0 ? weightedSum / weightTotal : 0
-  console.log('---------|-----------|--------|----------|')
-  console.log(`WMAE     |           |        | ${wmae.toFixed(2).padStart(8)} |`)
-  console.log()
-  console.log(`WMAE: ${wmae.toFixed(4)}`)
+  printPerSource('Per-source agreement (train)', trainStats)
+  if (testData.length > 0) printPerSource('Per-source agreement (test holdout)', testStats)
 
-  // Auto-log every run to eval/results/runs.jsonl
-  const perPrayer = {}
-  for (const p of PRAYERS) {
-    if (counts[p] > 0) perPrayer[p] = totals[p] / counts[p]
+  if (VERBOSE) {
+    printPerCell('Per-cell (train) — granular ratchet unit', trainStats)
+    if (testData.length > 0) printPerCell('Per-cell (test holdout)', testStats)
+  } else {
+    console.log('(use --verbose for the per-cell breakdown)')
+    console.log()
   }
+
+  console.log(`Ratchet WMAE (train): ${trainStats.wmae.toFixed(4)}`)
+  if (testData.length > 0) console.log(`Holdout WMAE (test):  ${testStats.wmae.toFixed(4)}`)
+
+  // Auto-log every run to eval/results/runs.jsonl (schema 3 — adds perSource, perCell)
   const result = {
+    schema: 3,
     timestamp: new Date().toISOString(),
-    wmae,
-    perPrayer,
-    totalEntries: allData.length,
-    trainEntries: trainData.length,
-    testEntries: testData.length,
+    train: {
+      wmae: trainStats.wmae,
+      entries: trainStats.entries,
+      perPrayer: trainStats.perPrayer,
+      perPrayerSigned: trainStats.perPrayerSigned,
+      perRegion: stripBucketsForLog(trainStats.perRegion),
+      perSource: stripBucketsForLog(trainStats.perSource),
+      perCell:   stripBucketsForLog(trainStats.perCell),
+    },
+    test: {
+      wmae: testStats.wmae,
+      entries: testStats.entries,
+      perPrayer: testStats.perPrayer,
+      perPrayerSigned: testStats.perPrayerSigned,
+      perRegion: stripBucketsForLog(testStats.perRegion),
+      perSource: stripBucketsForLog(testStats.perSource),
+      perCell:   stripBucketsForLog(testStats.perCell),
+    },
   }
   const resultsDir = join(__dirname, 'results')
   mkdirSync(resultsDir, { recursive: true })

@@ -126,19 +126,25 @@ The **WMAE** (Weighted Mean Absolute Error) is the single number to minimize. Fa
 
 ## Ratchet rules
 
-These rules are non-negotiable:
+These rules are non-negotiable. They are mechanically enforced by `eval/compare.js` — run it after every candidate change.
 
-1. **Commit only if WMAE strictly decreases.** A wash (same WMAE) is not an improvement.
+1. **Commit only if TRAIN WMAE strictly decreases.** The ratchet number is `train.wmae` from `eval/results/runs.jsonl`, computed only from `eval/data/train/`. A wash is a rejection.
 
-2. **Never sacrifice one prayer to improve another.** If your change reduces overall WMAE but makes Fajr worse by 3 minutes at any test location, reject it.
+2. **The test set (`eval/data/test/`) is a holdout.** It is reported as `Holdout WMAE` but never gates accept/reject. Its purpose is to detect overfitting: if holdout WMAE rises while train WMAE falls, the engine is overfitting to whichever timetables happened to be digitized first. Never tune against the holdout — doing so destroys its signal.
 
-3. **Never modify eval/ to make the eval pass.** The eval is the ground truth.
+3. **No per-region regression.** If any single city in the train set worsens by more than `REGION_TOLERANCE_MIN` (currently 0.10 min), reject the change even if overall WMAE falls. This prevents the optimizer from flattening legitimate ikhtilaf — improving an aggregate by sacrificing a region's accuracy.
 
-4. **Always log your run** in `autoresearch/logs/YYYY-MM-DD-HH-MM.md` whether it succeeds or fails. Include: hypothesis, change made, before/after WMAE, verdict.
+4. **No ihtiyat-unsafe bias drift.** `eval/compare.js` tracks per-prayer signed bias (calc − ground truth, in minutes). If Fajr / Maghrib / Isha bias drifts more than `BIAS_TOLERANCE_MIN` (currently 0.30 min) toward EARLIER (negative direction), or Shuruq drifts toward LATER (positive direction), reject the change. MAE alone is direction-blind; ihtiyat is not.
 
-5. **Tag every correction** with its scholarly classification (see below).
+5. **Never modify `eval/data/`.** Ground truth is sacred. New stress-test fixtures may be *added* via `scripts/fetch-aladhan.js` (test cases route to `eval/data/test/`), but existing files are not edited.
 
-6. **One concern at a time.** Do not combine multiple correction changes in one commit. Isolate variables.
+6. **`eval/eval.js` and `eval/compare.js` are also read-only for the autoresearch agent.** They are the ratchet itself; modifying them to make a change pass is cheating. Framework improvements to the eval are a separate, human-driven track.
+
+7. **Always log your run** in `autoresearch/logs/YYYY-MM-DD-HH-MM.md` whether it succeeds or fails. Include: hypothesis, change made, before/after WMAE (train and holdout), per-region deltas, signed-bias deltas, verdict.
+
+8. **Tag every correction** with its scholarly classification (see below).
+
+9. **One concern at a time.** Do not combine multiple correction changes in one commit. Isolate variables.
 
 ---
 
@@ -146,12 +152,22 @@ These rules are non-negotiable:
 
 ### Ihtiyat (احتياط) — Precaution
 
-When uncertain between two values, err toward the **more cautious time**:
-- Fajr: if uncertain, use the **later** time (more time in the night)
-- Maghrib: if uncertain, use the **later** time (more time for fasting in Ramadan)
-- Isha: if uncertain, use the **later** time
+When uncertain between two values, err toward the **more cautious time**. The cautious direction depends on which Islamic obligation is at stake:
 
-Never implement a "bold" correction that risks cutting short a prayer's valid time. The error must be asymmetric toward caution.
+**Prayer-validity ihtiyat (the default in `eval/compare.js`):**
+- Fajr: use the **later** time — praying before actual dawn invalidates the prayer
+- Maghrib: use the **later** time — to ensure sunset has completed
+- Isha: use the **later** time — to ensure twilight has fully ended
+
+**Ramadan-fasting ihtiyat (inverts Fajr's polarity):**
+- Imsak / start of fasting: stop eating at the **earlier** candidate time — eating past actual dawn breaks the fast
+- The classical resolution is *imsak* — a buffer (typically ~10 minutes) **before** the calculated Fajr at which fasters stop eating, while the prayer itself begins at the (later) calculated Fajr. Imsak provides the fasting-precaution; the calculated Fajr should be the *actual* astronomical dawn so both obligations are honoured.
+
+Concretely: a Fajr time that is 5 minutes *late* relative to mosque-published reality is prayer-safe but **fasting-unsafe** — fasters following imsak (Fajr − 10 min) would be eating until 5 minutes past actual dawn. For populations where Ramadan fasting is the dominant concern (Morocco, Maghreb, much of the Muslim world during Ramadan), the "later = safe" prayer-only heuristic is wrong. See `autoresearch/logs/2026-04-30-21-27.md` for the case study.
+
+**How `eval/compare.js` handles this:** The default ratchet flags prayer-validity ihtiyat — Fajr drifting earlier is treated as unsafe. There is an **escape clause** (Path A): if the aggregate drift is in the prayer-only-unsafe direction BUT at least one independent reference source's per-source signed bias for that prayer also moves toward zero by ≥2× the aggregate drift magnitude, the drift is treated as cross-validated and is NOT flagged. This catches the case where the engine is moving toward what mosques actually publish — fasting-safer and reality-aligned — rather than drifting away.
+
+Never implement a "bold" correction that risks cutting short a prayer's valid time **without independent corroboration from a non-calc source** (Mawaqit / Diyanet / JAKIM). Mathematical math-vs-math improvements alone do not justify breaching prayer-validity ihtiyat.
 
 ### Ikhtilaf (اختلاف) — Legitimate disagreement
 
@@ -274,19 +290,22 @@ This is the first line of every file, before any imports or code. Adapt comment 
 ## Quick reference
 
 ```bash
-# Run eval
-node eval/eval.js
-
 # Typical autoresearch session
-git stash                    # save current state
-# ... make change to src/engine.js ...
-node eval/eval.js            # measure new WMAE
-# if WMAE decreased:
+node eval/eval.js                # baseline — appends record to runs.jsonl
+# ... make ONE change to src/engine.js ...
+node eval/eval.js                # candidate — appends second record
+node eval/compare.js             # ratchet decision (exit 0 = PASS, 1 = FAIL)
+
+# If PASS:
 git add src/engine.js
-git commit -m "correction: [name] — WMAE [before] → [after]"
-# if not:
-git checkout src/engine.js   # revert
+git commit -m "correction: [name] — train WMAE [before] → [after]"
+
+# If FAIL:
+git checkout src/engine.js       # revert
+# Log the attempt anyway in autoresearch/logs/
 ```
+
+Train WMAE drives the ratchet. Holdout WMAE (test set) is reported but never optimized against. Per-region and signed-bias checks are enforced by `compare.js`.
 
 ---
 
