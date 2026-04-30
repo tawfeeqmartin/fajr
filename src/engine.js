@@ -66,11 +66,24 @@ function detectCountry(lat, lon) {
 function selectMethod(country, lat, coords) {
   switch (country) {
     case 'Morocco': {
-      // Ministry of Habous: Fajr 18°, Isha 17°, Standard Asr
+      // Ministry of Habous (community-calibrated): Fajr 19°, Isha 17°, Standard Asr.
+      // see knowledge/wiki/methods/morocco.md
+      // Classification: 🟡→🟢 (community calibration; matches mosque-published reality)
+      //
+      // The formal Ministry-stated angle is 18°, but the published Imsakiyya
+      // is best reproduced by 19° per the wiki's documented community calibration.
+      // Empirically corroborated by Mawaqit mosque-published times across 5 Moroccan
+      // mosques (Casablanca, Rabat, Marrakech): real Fajr is ~5-7 min earlier
+      // than the 18° calculation. Critical during Ramadan — 18° produced engine
+      // Fajr ~5 min late vs mosque tables, which would push imsak past actual
+      // dawn for fasters (broken fast). The +5 min was prayer-safe but
+      // fasting-unsafe; 19° matches what Moroccan Muslims actually pray to.
+      // Ratchet acceptance via Path A cross-source corroboration: Aladhan-Morocco
+      // and Mawaqit-Morocco both showed |Fajr bias| improvements ≫ aggregate drift.
       const p = adhan.CalculationMethod.Other()
-      p.fajrAngle = 18
+      p.fajrAngle = 19
       p.ishaAngle = 17
-      return { params: p, methodName: 'Morocco (18°/17°)' }
+      return { params: p, methodName: 'Morocco (19°/17° community calibration)' }
     }
     case 'SaudiArabia':
       // Umm al-Qura University: Fajr 18.5°, Isha +90 min

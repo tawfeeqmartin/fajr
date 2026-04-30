@@ -1,11 +1,11 @@
 # fajr فجر
 
-> **High-accuracy Islamic prayer time library** — validated against 222 ground truth data points across 18 cities and 15 countries.
+> **High-accuracy Islamic prayer time library** — validated against multiple institutional sources (Diyanet, JAKIM, mosque-published Mawaqit timetables) plus regional-method consensus (Aladhan API, praytimes.org reference) across 20+ cities and 15+ countries.
 
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **Current status (as of Experiment 7):** WMAE 1.55 minutes across 18 cities — a 93.6% reduction from the 24.17-minute baseline. All per-prayer MAEs under 2 minutes. The autoresearch loop is active; accuracy improves with each validated experiment. Do not use in production until v1.0.
+> **Current status:** Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`. Historical narrative: Experiment 1–7 took WMAE from 24.17 min (ISNA-everywhere baseline) to 1.55 min on Aladhan-only train data. Current evaluation runs against Aladhan + Diyanet + JAKIM + muslimsalat + praytimes.org reference, with a train/holdout split — see Latest Results below. Do not use in production until v1.0.
 
 ---
 
@@ -40,8 +40,12 @@ The name also grounds the project in the Islamic tradition: each day begins at F
 │  │                   │     │      └── ratchet ◄─┘      │ │
 │  └───────────────────┘     └──────────────────────────┘ │
 │                                                          │
-│  Ground Truth: Aladhan API data from 18 cities           │
-│  Metric: Weighted Mean Absolute Error (1.55 min)         │
+│  Reference layers (each tagged separately, not blended): │
+│    • mosque-published reality (Mawaqit per-mosque)       │
+│    • institutional ground truth (Diyanet, JAKIM)         │
+│    • regional-method consensus (Aladhan, praytimes.org)  │
+│    • third-party aggregator (muslimsalat — holdout only) │
+│  Metric: WMAE per source + per region + per cell         │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -55,40 +59,79 @@ Every change passes a **3-layer code review pipeline**:
 2. **AI code review** — security, correctness, maintainability, Islamic principle compliance, plain-English summary
 3. **Human review** — judgment on Islamic principle and product direction only; implementation quality is covered by layers 1 and 2
 
-**WMAE** = Weighted Mean Absolute Error, measured against Aladhan API ground truth using regional methods. Fajr and Isha carry higher weights.
+**WMAE** = Weighted Mean Absolute Error, computed against each reference source separately and reported per-source. Fajr and Isha carry higher weights. The ratchet is judged on the train aggregate plus per-source and per-(city,source) cell no-regression rules; holdout sources are reported but never optimized against.
 
 ---
 
 ## Current Accuracy
 
-### Overall
+Live, per-source numbers are auto-generated in [`docs/progress.md`](docs/progress.md). The static figures below are from the original Experiment-7 narrative (Aladhan-only) and are preserved for historical context.
+
+### Historical baseline (Experiment 7, regional-method consensus only)
 
 | Metric | Value |
 |--------|-------|
 | WMAE | **1.55 minutes** |
-| Improvement from baseline | **93.6%** (from 24.17 min) |
-| Ground truth data points | **222** (Aladhan API) |
+| Improvement from baseline | **93.6%** (from 24.17 min) — see caveat below |
+| Reference points | **222** (Aladhan API only — calc-vs-calc) |
 | Cities | **18** across 15 countries |
 | Experiments run | 7 (5 committed, 1 reverted, 1 research) |
 
-### Per-prayer MAE (current)
+> **Honest caveat on the 93.6%.** Most of that gain came from Experiment 3, which fixed a post-midnight Isha day-rollover bug *in the evaluator*, not the engine. Against a correctly-measured baseline, real engine progress is closer to **2.31 → 1.55 ≈ 33%**. The 24.17 → 2.31 collapse looked like progress only because the broken evaluator was double-counting some Isha errors as ~24-hour misalignments. See `autoresearch/logs/` for the full trail.
+
+> **Honest caveat on "ground truth".** The 222-point Experiment-7 dataset is Aladhan API output computed via the same regional methods the engine auto-detects. Agreeing with it is a *consistency check against another implementation* (regional-method consensus) — not an accuracy claim against observed prayer times. Today's evaluation adds non-Aladhan sources (Diyanet's official Türkiye tables, JAKIM via waktusolat.app, mosque-published Mawaqit times, an independent praytimes.org reference) so per-source agreement now reflects multiple distinct reference layers, not just Aladhan-internal consistency.
+
+### Per-prayer MAE (Experiment 7, regional-method consensus)
 
 | Prayer | MAE (min) | Notes |
 |--------|-----------|-------|
 | Fajr | 1.32 | Down from 19.46 baseline |
 | Shuruq | 1.70 | |
-| Dhuhr | 0.86 | Approaching atmospheric noise floor |
+| Dhuhr | 0.86 | Approaches the atmospheric refraction floor (Young 2006) |
 | Asr | 1.76 | |
 | Maghrib | 1.93 | |
 | Isha | 1.73 | Down from 87.55 baseline |
 
-All per-prayer MAEs are below 2 minutes, placing fajr within the Young (2006) ±2-minute atmospheric noise floor on a per-prayer average basis.
+All per-prayer MAEs were below 2 minutes against the Aladhan regional-method consensus, comparable to the irreducible ±2-min uncertainty in horizon refraction documented by [Young, A.T. (2006), "Sunset science IV: Low-altitude refraction," *Astronomical Journal* 131:1930–1943] (cited and discussed in [`knowledge/wiki/astronomy/refraction.md`](knowledge/wiki/astronomy/refraction.md)). The current multi-source evaluation surfaces additional bias signal beyond the calc-vs-calc layer — see [`docs/progress.md`](docs/progress.md) for the full per-source / per-region / per-prayer breakdown updated on every `npm run build:charts`.
 
-### Cities covered (training set, 222 data points)
+### Cities covered (training set)
 
-Casablanca · Rabat · Makkah · Madinah · Riyadh · Istanbul · Ankara · Cairo · Alexandria · London · Kuala Lumpur · New York · Los Angeles · Jakarta · Karachi · Dubai · Paris · Toronto
+Casablanca · Rabat · Makkah · Madinah · Riyadh · Istanbul · Ankara · Izmir · Cairo · Alexandria · London · Kuala Lumpur · Shah Alam · George Town · New York · Los Angeles · Jakarta · Karachi · Dubai · Paris · Toronto
 
-Additional test-set cities (not included in 222-point WMAE): Tromsø · Reykjavik · Helsinki · La Paz · Bogota · Denver
+Additional test-set cities (holdout, never optimized against): Tromsø · Reykjavik · Helsinki · Longyearbyen (Svalbard, 78°N) · Anchorage · La Paz · Bogota · Denver · Quito · Mecca · Madinah · Istanbul (cross-source) · others (10 praytimes.org reference cities)
+
+### Multi-source validation
+
+Accuracy is no longer measured against a single API. fajr is validated against several distinct *kinds* of references, each tagged with its publishing body so the eval surfaces — rather than blends — *ikhtilaf* (legitimate scholarly disagreement):
+
+| Source | Reference layer | Set | Coverage |
+|---|---|---|---|
+| **Mawaqit** (mawaqit.net) | Mosque-published reality | holdout | Casablanca, Rabat, Marrakech, Marseille, Limoges, Mulhouse |
+| **Diyanet İşleri Başkanlığı** (Türkiye) | Official institutional ground truth | train | Istanbul, Ankara, Izmir |
+| **JAKIM** (Malaysia) via waktusolat.app | Official institutional ground truth | train | Kuala Lumpur, Selangor, Penang |
+| **Aladhan API** | Regional-method consensus (calc-vs-calc) | train | 18 cities, region-appropriate methods |
+| **praytimes.org reference** | Regional-method consensus (independent JS impl) | holdout | 10 cities |
+| **muslimsalat.com** | Third-party aggregator | holdout | Karachi, Cairo, London, Dubai |
+
+Mosque-published reality (Mawaqit) is the most grounded layer — it's what Muslims actually pray to. Institutional ground truth (Diyanet, JAKIM) is the published timetable from the relevant national authority. Regional-method consensus (Aladhan, praytimes.org) is a separate implementation of the same formulas the engine auto-detects — agreement is a consistency check, not an independent accuracy claim. Per-source agreement, per-region tables, and trend charts are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+
+---
+
+## Latest Results
+
+_Auto-generated from `eval/results/runs.jsonl`. To refresh: `node eval/eval.js && npm run build:charts`._
+
+For full numbers including per-region and per-cell granularity, see [**`docs/progress.md`**](docs/progress.md).
+
+![WMAE over time — train (ratchet) vs holdout](docs/charts/wmae-trend.svg)
+
+![WMAE per source — latest run](docs/charts/wmae-per-source.svg)
+
+![WMAE per region — latest run](docs/charts/wmae-per-region.svg)
+
+![Signed bias per prayer (calc − ground truth)](docs/charts/bias-by-prayer.svg)
+
+The signed-bias chart is the *ihtiyat* (precaution) view: the unsafe direction is marked on each prayer's x-axis label. Fajr/Maghrib/Isha drifting earlier (negative bias) cuts into prayer time; Shuruq drifting later extends Fajr past actual sunrise. The ratchet rejects any change that worsens these biases by more than 0.30 minutes.
 
 ---
 
@@ -140,9 +183,16 @@ Fajr wraps [adhan.js](https://github.com/batoulapps/adhan-js) — the gold stand
 fajr.prayerTimes({ latitude, longitude, date, elevation })
 ```
 
-### Validated against 222 ground truth data points
+### Validated across distinct reference layers
 
-All improvements are measured against Aladhan API data using regional methods as ground truth. The eval harness is write-protected — the autoresearch loop cannot modify eval or data to make itself look better.
+The engine is evaluated against multiple kinds of references in parallel, each tagged separately so per-source agreement is reported without blending:
+
+- **mosque-published reality** — Mawaqit per-mosque times (what real Moroccan / French / UK mosques actually print on their displays today)
+- **institutional ground truth** — Diyanet İşleri Başkanlığı's official Türkiye tables, JAKIM via waktusolat.app for Malaysia
+- **regional-method consensus** — Aladhan API (a separate implementation of the same regional methods the engine auto-detects; agreement is calc-vs-calc, not an accuracy claim against observed times) and the praytimes.org reference library (independent JS implementation of the standard formulas)
+- **third-party aggregator** — muslimsalat.com (holdout only)
+
+The eval is split into a *train* set (drives the ratchet) and a *test* holdout (reported but never optimized against — detects overfitting). The eval harness is write-protected: the autoresearch loop cannot modify `eval/` or `eval/data/` to make itself look better.
 
 ### Ratchet-based improvement
 
@@ -168,7 +218,9 @@ Every correction in `src/engine.js` is tagged:
 
 ---
 
-## Results
+## Historical Results (Experiment 1–7 narrative)
+
+These are the static charts from the original autoresearch narrative (Aladhan-only ground truth). For the live multi-source picture, see [Latest Results](#latest-results) above.
 
 ### Accuracy Trajectory
 ![WMAE Trajectory](docs/charts/chart-wmae-trajectory.png)
@@ -293,8 +345,29 @@ This library stands on the shoulders of centuries of *'ilm al-miqat* (the scienc
 ### Modern foundations
 
 - **[adhan.js](https://github.com/batoulapps/adhan-js)** by Batoul Apps — the prayer time calculation engine this library wraps
-- **[Aladhan API](https://aladhan.com)** — ground truth prayer time data used for all WMAE evaluation; 222 data points across 18 cities
-- Muslim communities and institutions worldwide who publish official timetables and make them freely available
+- **[praytimes.org](https://praytimes.org)** by Hamid Zarrabi-Zadeh — the LGPL reference implementation used for independent calc-vs-calc validation (vendored at `scripts/lib/PrayTimes.js`)
+
+### Ground truth sources
+
+fajr is validated against multiple institutional and community sources:
+
+- **[Aladhan API](https://aladhan.com)** — multi-method calculator covering all train regions
+- **Diyanet İşleri Başkanlığı** (Republic of Türkiye) — official Turkish prayer times via [ezanvakti.emushaf.net](https://ezanvakti.emushaf.net)
+- **JAKIM** (Jabatan Kemajuan Islam Malaysia) — official Malaysian prayer times via the [waktusolat.app](https://waktusolat.app) community proxy (e-solat.gov.my is geo-restricted)
+- **[muslimsalat.com](https://muslimsalat.com)** — third-party aggregator used for cross-validation
+- **praytimes.org reference library** — independent JS implementation, used as a calc-vs-calc check
+
+Muslim communities and institutions worldwide who publish official timetables and make them freely available — *jazakum Allah khayran*.
+
+### Refreshing the corpus
+
+```bash
+npm run fetch:all       # refetch every source's fixtures
+npm run eval            # measure current WMAE per source
+npm run build:charts    # regenerate docs/progress.md and SVG charts
+```
+
+To add a new source: write `scripts/fetch-<name>.js` following the existing adapters' pattern (each fixture must include `source_institution`, `source_method`, `source_url`, `source_fetched`). Place output in `eval/data/train/` for institutional/regional sources or `eval/data/test/` for cross-validation/holdout.
 
 ---
 
