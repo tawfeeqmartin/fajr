@@ -1,6 +1,6 @@
 # fajr فجر
 
-> **High-accuracy Islamic prayer time library** — validated against multiple institutional sources (Diyanet, JAKIM, mosque-published Mawaqit timetables) plus regional-method consensus (Aladhan API, praytimes.org reference) across 20+ cities and 15+ countries.
+> **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, not the engine, is where most of fajr's distinctive work lives today.
 
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -162,7 +162,14 @@ The signed-bias chart is the *ihtiyat* (precaution) view: the unsafe direction i
 
 ### Built on `adhan.js`, not a replacement
 
-Fajr wraps [adhan.js](https://github.com/batoulapps/adhan-js) — the gold standard for Islamic prayer time calculation — with an **accuracy layer**. It inherits adhan's proven astronomical foundations and adds corrections on top.
+Fajr is a thin layer over [adhan.js](https://github.com/batoulapps/adhan-js) — a widely used and well-regarded Islamic prayer time calculation library by Batoul Apps. The astronomical core (sun position, refraction, sunrise/sunset, twilight angles) is adhan's; fajr does not reimplement any of that. What fajr adds is honestly small and specific:
+
+- **Auto-detects the right adhan calculation method** for your coordinates so you don't have to configure it per region. (UX, not new accuracy — adhan already implements every method fajr selects from.)
+- **Two custom angle configs not in adhan's defaults:** Morocco 19°/17° (community-calibrated to match Habous-published Imsakiyya — confirmed against Mawaqit mosque-published times) and France UOIF 12°/12°.
+- **Region-appropriate high-latitude rule selection** for Norway / Iceland / Finland.
+- **Optional elevation correction utility** (currently disabled by default; see Experiment 4 in the history below).
+
+For a user who already knows their region's correct adhan method, raw adhan.js produces the same numbers fajr does. The real distinctive work is one level up: fajr ships an **evaluation methodology** that measures the engine against multiple independent reference layers separately (rather than blending them into a single "ground truth"), and a **ratchet** that refuses to accept changes which improve one source by sacrificing another. That eval framework is described below.
 
 ### Auto-detects the right method for your region
 
@@ -196,7 +203,14 @@ The eval is split into a *train* set (drives the ratchet) and a *test* holdout (
 
 ### Ratchet-based improvement
 
-Only changes that strictly decrease WMAE are committed. A wash (same WMAE) is rejected. No individual prayer is allowed to get worse at any test location, even if overall WMAE improves.
+Mechanically enforced by `eval/compare.js`. A change is committed only if **all** of:
+
+- Train WMAE strictly decreases (a wash is a rejection)
+- No source's per-source WMAE worsens by >0.10 min
+- No (city, source) cell worsens by >0.10 min
+- No per-prayer signed bias drifts in the prayer-only-unsafe direction by >0.30 min — *unless* an independent source's per-source \|bias\| improves by ≥ max(2·\|drift\|, 1.0 min), in which case the drift is treated as cross-validated (Path A; how today's Morocco fix passed). See the [Ihtiyat dual-polarity discussion in CLAUDE.md](CLAUDE.md#islamic-accuracy-principles).
+
+Holdout (test) WMAE is reported but never gates the decision.
 
 ### Elevation correction — validated formula, pending application
 
