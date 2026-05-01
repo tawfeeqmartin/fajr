@@ -87,6 +87,14 @@ The intent is to encode in software the fact that a mathematically-clean correct
 
 ---
 
+## Question 5 — Anything I have not thought to ask?
+
+The four questions above are what I know to ask. You almost certainly see things in this project that I cannot — directions it should pursue, considerations it has missed, principles it should hold itself to that I have not yet recognised. *Sadaqah jāriya* only matters if it actually serves the people it is meant for, and expertise like yours is precisely the lens that catches what a maintainer cannot see from inside their own project.
+
+If there is anything you would advise this project to consider, change, or reconsider — beyond the four questions above — your sense of it would be enormously valuable, even in a sentence or two.
+
+---
+
 ## What I am asking for, concretely
 
 A response in writing, in any form you find appropriate. Possible shapes:
