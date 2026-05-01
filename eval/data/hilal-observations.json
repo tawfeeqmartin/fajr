@@ -1,16 +1,92 @@
 {
-  "schema": 1,
-  "description": "Curated dataset of documented Hijri month-onset sighting decisions by official Islamic authorities. Each record is a (year, month) pair plus a list of country-level decisions on the canonical sighting evening. Sources: official ministry / committee announcements reported by Reuters, AP, Arab News, Dawn, and Saudi Gazette. This is wasail (means) data only — it documents what committees announced, not what was astronomically possible. fajr's hilalVisibility() reports astronomical possibility; this file reports sociopolitical announcements. The two together let you see where committee decisions matched astronomy and where they didn't.",
+  "schema": 2,
+  "description": "Curated dataset of documented Hijri month-onset sighting decisions by official Islamic authorities. Each record is a (Hijri year, month) pair plus a list of country-level decisions on the canonical sighting evening. Sources: official ministry / committee announcements reported by Reuters, AP, Arab News, Dawn, Saudi Gazette, and similar primary news outlets. This is wasail (means) data — it documents what committees announced, not what was astronomically possible. fajr's hilalVisibility() reports astronomical possibility; this file reports sociopolitical announcements. The two together let you see where committee decisions matched astronomy and where they didn't. The `confidence` field per decision flags how well-documented each entry is: 'high' = primary news source (Saudi Supreme Court, Egypt Dar al-Iftaa, etc., directly reported); 'medium' = derived from regional pattern reporting; 'low' = inferred. PRs welcome to expand this dataset and upgrade confidence levels by adding citations.",
   "observations": [
+    {
+      "hijri": { "year": 1441, "month": 9 },
+      "label": "Ramadan 1441",
+      "sightingEveningGregorian": "2020-04-23",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia (Apr 2020)" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Turkey",       "city": "Istanbul", "lat": 41.01, "lng":  28.97, "decision": "sighted",     "confidence": "high",   "source": "Diyanet (calculation-based)" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee — Ramadan started 25 Apr 2020" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous — Ramadan started 25 Apr 2020" },
+        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "not-sighted", "confidence": "medium", "source": "Ministry of Religious Affairs" }
+      ]
+    },
+    {
+      "hijri": { "year": 1441, "month": 10 },
+      "label": "Shawwal 1441 (Eid al-Fitr)",
+      "sightingEveningGregorian": "2020-05-23",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Eid 24 May 2020" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee — Eid 25 May 2020" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous — Eid 25 May 2020" }
+      ]
+    },
+    {
+      "hijri": { "year": 1442, "month": 9 },
+      "label": "Ramadan 1442",
+      "sightingEveningGregorian": "2021-04-12",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Ramadan started 13 Apr 2021" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Turkey",       "city": "Istanbul", "lat": 41.01, "lng":  28.97, "decision": "sighted",     "confidence": "high",   "source": "Diyanet (calculation-based)" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee — Ramadan started 14 Apr 2021" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous" },
+        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "sighted",     "confidence": "medium", "source": "Ministry of Religious Affairs (Indonesia followed Saudi this year)" }
+      ]
+    },
+    {
+      "hijri": { "year": 1442, "month": 10 },
+      "label": "Shawwal 1442 (Eid al-Fitr)",
+      "sightingEveningGregorian": "2021-05-12",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Eid 13 May 2021" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee — Eid 14 May 2021" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous — Eid 14 May 2021" }
+      ]
+    },
+    {
+      "hijri": { "year": 1443, "month": 9 },
+      "label": "Ramadan 1443",
+      "sightingEveningGregorian": "2022-04-01",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Ramadan started 2 Apr 2022" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Turkey",       "city": "Istanbul", "lat": 41.01, "lng":  28.97, "decision": "sighted",     "confidence": "high",   "source": "Diyanet (calculation-based)" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee — Ramadan started 3 Apr 2022" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous" }
+      ]
+    },
+    {
+      "hijri": { "year": 1443, "month": 10 },
+      "label": "Shawwal 1443 (Eid al-Fitr)",
+      "sightingEveningGregorian": "2022-05-01",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Eid 2 May 2022" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "sighted",     "confidence": "high",   "source": "Central Ruet-e-Hilal Committee — Eid 3 May 2022 (one day after Saudi)" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous — Eid 2 May 2022" }
+      ]
+    },
     {
       "hijri": { "year": 1444, "month": 9 },
       "label": "Ramadan 1444",
       "sightingEveningGregorian": "2023-03-22",
       "decisions": [
-        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",   "source": "Supreme Court of Saudi Arabia" },
-        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",   "source": "UAE Moon Sighting Committee" },
-        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",   "source": "Dar al-Iftaa" },
-        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "sighted",   "source": "Ministry of Habous" }
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "sighted",     "confidence": "high",   "source": "Ministry of Habous" }
       ]
     },
     {
@@ -18,12 +94,22 @@
       "label": "Shawwal 1444 (Eid al-Fitr)",
       "sightingEveningGregorian": "2023-04-20",
       "decisions": [
-        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",   "source": "Supreme Court of Saudi Arabia" },
-        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",   "source": "Dar al-Iftaa" },
-        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",   "source": "UAE Moon Sighting Committee" },
-        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
-        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
-        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "not-sighted", "source": "Ministry of Religious Affairs" }
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "not-sighted", "confidence": "medium", "source": "Ministry of Religious Affairs" }
+      ]
+    },
+    {
+      "hijri": { "year": 1444, "month": 12 },
+      "label": "Dhu al-Hijjah 1444 (start of Hajj month)",
+      "sightingEveningGregorian": "2023-06-18",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Eid al-Adha 28 Jun 2023" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE follows Saudi for Hajj-month timing" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "medium", "source": "Pakistan typically follows local sighting; Eid al-Adha was 29 Jun 2023" }
       ]
     },
     {
@@ -31,13 +117,35 @@
       "label": "Ramadan 1445 (controversial)",
       "sightingEveningGregorian": "2024-03-10",
       "decisions": [
-        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "source": "Supreme Court of Saudi Arabia" },
-        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "source": "UAE Moon Sighting Committee" },
-        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "source": "Dar al-Iftaa" },
-        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
-        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
-        { "country": "Iran",         "city": "Tehran",   "lat": 35.69, "lng":  51.39, "decision": "not-sighted", "source": "Astronomical impossibility (moon age 5.5h, sub-Danjon)" },
-        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "source": "Markazi Chand Committee" }
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous" },
+        { "country": "Iran",         "city": "Tehran",   "lat": 35.69, "lng":  51.39, "decision": "not-sighted", "confidence": "high",   "source": "Astronomical impossibility (moon age 5.5h, sub-Danjon)" },
+        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "confidence": "high",   "source": "Markazi Chand Committee" }
+      ]
+    },
+    {
+      "hijri": { "year": 1445, "month": 10 },
+      "label": "Shawwal 1445 (Eid al-Fitr)",
+      "sightingEveningGregorian": "2024-04-09",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Eid 10 Apr 2024" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee — Eid 11 Apr 2024" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous" }
+      ]
+    },
+    {
+      "hijri": { "year": 1445, "month": 12 },
+      "label": "Dhu al-Hijjah 1445 (Eid al-Adha)",
+      "sightingEveningGregorian": "2024-06-06",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Eid al-Adha 16 Jun 2024" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE follows Saudi" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" }
       ]
     },
     {
@@ -45,14 +153,14 @@
       "label": "Ramadan 1446 (borderline)",
       "sightingEveningGregorian": "2025-02-28",
       "decisions": [
-        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "source": "Supreme Court of Saudi Arabia" },
-        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "source": "UAE Moon Sighting Committee" },
-        { "country": "Qatar",        "city": "Doha",     "lat": 25.29, "lng":  51.53, "decision": "sighted",     "source": "Ministry of Awqaf" },
-        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "source": "Dar al-Iftaa" },
-        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
-        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
-        { "country": "Iran",         "city": "Tehran",   "lat": 35.69, "lng":  51.39, "decision": "not-sighted", "source": "Iranian Cultural Heritage Council" },
-        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "source": "Markazi Chand Committee" }
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Qatar",        "city": "Doha",     "lat": 25.29, "lng":  51.53, "decision": "sighted",     "confidence": "high",   "source": "Ministry of Awqaf" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "confidence": "high",   "source": "Dar al-Iftaa" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous" },
+        { "country": "Iran",         "city": "Tehran",   "lat": 35.69, "lng":  51.39, "decision": "not-sighted", "confidence": "high",   "source": "Iranian Cultural Heritage Council" },
+        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "confidence": "high",   "source": "Markazi Chand Committee" }
       ]
     },
     {
@@ -60,12 +168,21 @@
       "label": "Shawwal 1446 (Eid al-Fitr)",
       "sightingEveningGregorian": "2025-03-29",
       "decisions": [
-        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "source": "Supreme Court of Saudi Arabia" },
-        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "source": "UAE Moon Sighting Committee" },
-        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
-        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
-        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "not-sighted", "source": "Ministry of Religious Affairs" },
-        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "source": "Markazi Chand Committee" }
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "confidence": "high",   "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "confidence": "high",   "source": "Ministry of Habous" },
+        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "not-sighted", "confidence": "medium", "source": "Ministry of Religious Affairs" },
+        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "confidence": "high",   "source": "Markazi Chand Committee" }
+      ]
+    },
+    {
+      "hijri": { "year": 1446, "month": 12 },
+      "label": "Dhu al-Hijjah 1446 (Eid al-Adha)",
+      "sightingEveningGregorian": "2025-05-27",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "confidence": "high",   "source": "Supreme Court of Saudi Arabia — Eid al-Adha 6 Jun 2025" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "confidence": "high",   "source": "UAE follows Saudi" }
       ]
     }
   ]

@@ -131,8 +131,19 @@ Hilal classification accuracy is *currently inferred* from validated primitives 
 | Layer | Status | What we'd need |
 |---|---|---|
 | Atmospheric extinction model | Trusted via Odeh / Yallop / Shaukat polynomial fits to their training datasets (737 / variable / variable observations respectively). fajr does not validate the underlying atmospheric model independently. | Field measurements of crescent visibility under varying atmospheric conditions, beyond the published training data. |
-| End-to-end accuracy at scale | The 5-case validation is illustrative, not statistical. The Ramadan 1446 alignment with 8 committee decisions is a single example. | The historical-sightings backfill on the roadmap (Hijri 1430-onward, ~15 years × 12 months × ~10 committees ≈ 1,800 decisions) is the path to actually testing whether fajr's three-criterion classification correlates with documented committee outcomes at statistical significance. |
-| Single-criterion preference | fajr returns all three criteria with `criteriaAgree`; it does NOT measure which criterion is most predictive of any specific committee's decisions. | Cross-tabulating each committee's historical decisions against each criterion's predictions — a research output the open-sightings dataset would enable. |
+| End-to-end accuracy at scale | **Partial — see below.** [`scripts/analyze-hilal-historical.js`](../../../scripts/analyze-hilal-historical.js) measures fajr's three criteria against 78 documented committee decisions across 15 Hijri month onsets (1441–1446). Not yet at the ~1,800-decision Hijri 1430-onward target on the roadmap. | Continued backfill of `eval/data/hilal-observations.json`. PRs welcome. |
+| Single-criterion preference per region | fajr returns all three criteria with `criteriaAgree` and the historical-analysis tool now reports per-country alignment rates — see headline finding below. | Continued growth of the dataset for tighter per-country statistics. |
+
+### Headline finding from the historical analysis
+
+Across 78 documented committee decisions, fajr's astronomical criteria align with two distinct committee clusters at very different rates:
+
+| Cluster | Odeh | Yallop | Shaukat |
+|---|---:|---:|---:|
+| Strict naked-eye sighting (Pakistan, Morocco, India, Iran, Indonesia) | 81.8% | 87.9% | 84.8% |
+| Accepts witness testimony / calculation (Saudi Arabia, UAE, Egypt, Qatar, Turkey) | 15.6% | 15.6% | 20.0% |
+
+This bimodal pattern is itself the empirical demonstration of the wasāʾil/ʿibādāt distinction the project is built on. Software (astronomy) reliably predicts what astronomy predicts — agreeing 80–88% with committees that themselves require naked-eye astronomical visibility. It cannot — and should not try to — predict what scholars decide based on testimony and authority. See the full breakdown in [`docs/hilal-historical-analysis.md`](../../../docs/hilal-historical-analysis.md).
 
 ### The honest summary
 
