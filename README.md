@@ -1,11 +1,12 @@
 # fajr فجر
 
-> **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
-
+[![Tests](https://github.com/tawfeeqmartin/fajr/actions/workflows/test.yml/badge.svg)](https://github.com/tawfeeqmartin/fajr/actions/workflows/test.yml)
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **Current status:** Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`. Historical narrative: Experiment 1–7 took WMAE from 24.17 min (ISNA-everywhere baseline) to 1.55 min on Aladhan-only train data. Current evaluation runs against Aladhan + Diyanet + JAKIM + muslimsalat + praytimes.org reference, with a train/holdout split — see Latest Results below. Do not use in production until v1.0.
+> **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
+
+> **Status — v1.0.** Public API surfaces (prayerTimes, hilalVisibility, qibla, hijri, nightThirds, travelerMode) are stable; breaking changes will require a major version bump. See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -370,6 +371,46 @@ const hilal = fajr.hilalVisibility({ year: 1445, month: 9, latitude, longitude }
 // Traveler mode (shortened/combined prayers)
 const travelerTimes = fajr.travelerMode({ ...coords, madhab: 'hanafi' })
 ```
+
+TypeScript declarations ship with the package (`src/index.d.ts`); `import` from `@tawfeeqmartin/fajr` gets full type coverage out of the box.
+
+---
+
+## API stability
+
+fajr v1.0 makes the following stability promises. **Stable** surfaces will not change in non-breaking ways without a major version bump. **Experimental** surfaces may change in minor versions; they're shipped because they're useful, not because they're frozen.
+
+### Stable (v1.0 contract)
+
+| API | Signature |
+|---|---|
+| `prayerTimes` | `({ latitude, longitude, date, elevation? }) → { fajr, shuruq, dhuhr, asr, maghrib, isha, method, corrections }` |
+| `qibla` | `({ latitude, longitude }) → { bearing, magneticDeclination, trueBearing }` |
+| `hijri` | `(Date) → { year, month, day, monthName }` |
+| `hilalVisibility` | `({ year, month, latitude, longitude }) → { visible, code, V, yallop, shaukat, criteriaAgree, … }` |
+| `nightThirds` | `({ date, latitude, longitude })` *or* `({ maghrib, fajr })` → `{ firstThird, secondThird, lastThird, midnight }` |
+| `travelerMode` | `({ times, madhab? }) → { qasr, jam, … }` |
+
+The default export object exposing all six is also stable.
+
+### Experimental (subject to change)
+
+- `applyElevationCorrection(times, elevation, latitude?)` — opt-in geometric horizon-dip correction. Disabled by default in `prayerTimes`. May move to a separate package or change signature based on scholarly review of the 🟡→🟢 classification.
+- `magneticDeclination` field on `qibla` output — currently 0 (placeholder). Will be filled with a real WMM2024 lookup in a minor version, which may shift `trueBearing` for users who relied on it being identical to `bearing`.
+
+### Internal (not part of the public API)
+
+- `src/lunar.js` — Meeus lunar/solar position primitives used by `hilalVisibility`. Validated against JPL Horizons but not stability-promised at the function level.
+- `src/methods.js`, `src/engine.js` — implementation details of region detection / method selection. Behaviour observable through `prayerTimes`'s output is stable; the internal modules are not.
+- `eval/`, `scripts/`, `knowledge/` — research framework, data, build tools. Not consumer surface.
+
+### What "v1.0" doesn't yet mean
+
+Honest items still on the v1.0+ roadmap:
+
+- **External scholarly review.** Morocco's 19° community-calibrated angle, the dual-ihtiyat handling in `compare.js`, and the choice of Odeh/Yallop/Shaukat as fajr's hilal criteria are sound by fajr's own wasail/ibadat principle but have not yet been reviewed by a named scholar. Flagged in [`knowledge/wiki/astronomy/hilal.md`](knowledge/wiki/astronomy/hilal.md) "Validation status".
+- **End-to-end hilal accuracy at scale.** Lunar and solar position primitives are validated against JPL Horizons DE441 (see `docs/lunar-jpl-validation.md`, `docs/solar-jpl-validation.md`); end-to-end hilal classification has only a 5-case illustrative validation. The historical-sightings backfill (~1,800 committee decisions across Hijri 1430-onward) is the path to honest empirical validation at scale.
+- **Production deployment.** [agiftoftime.app](https://agiftoftime.app) integration is mapped (see [`examples/agiftoftime/INTEGRATION.md`](examples/agiftoftime/INTEGRATION.md)) but not yet shipped. Until at least one production deployment runs against fajr, "v1.0 stable" is a claim, not yet a track record.
 
 ---
 

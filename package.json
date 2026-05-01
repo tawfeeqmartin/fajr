@@ -1,9 +1,21 @@
 {
   "name": "@tawfeeqmartin/fajr",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "High-accuracy Islamic prayer time library combining NASA/JPL astronomical algorithms with classical Islamic scholarship",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "keywords": [
     "prayer-times",
     "salah",
@@ -25,7 +37,8 @@
   },
   "scripts": {
     "eval": "node eval/eval.js",
-    "test": "node eval/eval.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "compare": "node eval/compare.js",
     "validate:hilal": "node scripts/validate-hilal.js",
     "validate:lunar-jpl": "node scripts/validate-lunar-against-jpl.js",
@@ -39,5 +52,8 @@
     "fetch:muslimsalat": "node scripts/fetch-muslimsalat.js",
     "fetch:praytimes": "node scripts/fetch-praytimes.js",
     "fetch:all": "npm run fetch:aladhan && npm run fetch:diyanet && npm run fetch:waktusolat && npm run fetch:muslimsalat && npm run fetch:praytimes"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.5"
   }
 }
