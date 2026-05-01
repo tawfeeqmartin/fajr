@@ -461,10 +461,90 @@ The definitions of prayer times are derived from primary Islamic sources:
 
 ### Institutional validation
 
-- **UAE (Burj Khalifa fatwa)** — IACAD Dulook DXB app; floor-stratified elevation corrections, Dr. Ahmed Al Haddad
-- **Malaysia (JAKIM)** — systematic topographic elevation correction applied nationally
-- **USNO** — sea-level convention confirmed; sunrise/sunset identical at all elevations by definition
-- **ICOP / International Astronomical Center** — Mohammad Shawkat Odeh's [astronomycenter.net](https://astronomycenter.net/paper.html) archive is the principal source for fajr's high-latitude rule and Fajr-angle scholarship. Thirteen papers from this archive are now cited and archived under [`knowledge/raw/papers/2026-05-01-astronomycenter/`](knowledge/raw/papers/2026-05-01-astronomycenter/) — see the [papers review](docs/papers-review-2026-05-01.md) for the per-paper findings and the recommended-actions table.
+fajr's calculation methods, scholarly classifications, and eval ground truth derive from the published guidance of the Islamic-astronomy institutions below. The list is organised by region so that users can locate their own authority. Each entry states **what fajr does in relation** — auto-selects the institution's method by region, validates against their published timetables in the eval corpus, cites their fatwa or scholarly work, or aligns with their methodology. Where fajr's auto-selection diverges from a country's nominal authority (e.g. Iran is recognised but not yet auto-detected), it's noted explicitly.
+
+#### Holy cities and the Arabian Peninsula
+
+- **Saudi Arabia — Umm al-Qura University, Makkah al-Mukarramah** — official calendar authority for Saudi Arabia and one of the most widely-deployed methods globally (Fajr 18.5°, Isha = Maghrib + 90 min, +30 min in Ramadan). fajr auto-selects Umm al-Qura at Saudi coordinates. Eval ground truth: [`eval/data/train/saudi.json`](eval/data/train/saudi.json) (Makkah). See [`knowledge/wiki/methods/umm-al-qura.md`](knowledge/wiki/methods/umm-al-qura.md).
+- **Saudi Arabia — Hilāl Sighting Committee (Royal Court / Supreme Court)** — the body that announces hilāl verdicts for Ramadan/Eid. fajr's three-criterion hilal output (Odeh + Yallop + Shaukat) is validated against 78 documented committee decisions across 15 Hijri month onsets including the Saudi Royal Court — see [`docs/hilal-historical-analysis.md`](docs/hilal-historical-analysis.md) for the bimodal alignment finding.
+- **UAE — IACAD (Islamic Affairs and Charitable Activities Department, Dubai)** — issued the floor-stratified Burj Khalifa fatwa (Dr. Ahmed Al Haddad, Grand Mufti) implemented in the IACAD Dulook DXB app. fajr's `applyElevationCorrection` is grounded in this fatwa; eval ground truth: [`eval/data/train/dubai.json`](eval/data/train/dubai.json).
+- **Qatar — Qatar Calendar House (دار التقويم)** — official Qatari calendar authority. fajr auto-selects Umm al-Qura at Qatar coordinates (Gulf-region default); the Qatar method is also independently declared in [`src/methods.js`](src/methods.js).
+- **Yemen — Yemen Astronomical Society + Ministry of Endowments** — long-standing hilāl-sighting community. The Kuwait method (Fajr 18°, Isha 17.5°) is recognised as the regional default per `src/methods.js`. *Honest gap:* engine.js bounding-box detection does not yet auto-select for Yemen-only coordinates; users at Sanaa fall through to the MWL fallback.
+
+#### Levant and North-East Africa
+
+- **Egypt — Egyptian General Authority of Survey + Dār al-Iftāʾ Egypt** — the official survey body publishes the 19.5°/17.5° angles used for the Egyptian method. Dār al-Iftāʾ uses Odeh's ICOP criterion for hilal sighting decisions. fajr auto-selects Egyptian at Egyptian coordinates and at coordinates in the country group EG/SD/LY/IQ/LB/JO/PS/SY per `methods.js`. Eval ground truth: [`eval/data/train/egypt.json`](eval/data/train/egypt.json).
+- **Türkiye — Diyanet İşleri Başkanlığı** — Republic of Türkiye's Presidency of Religious Affairs, the largest single Sunni religious authority in Eurasia. fajr auto-selects Diyanet's full method (with Hanafi Asr) for TR/AZ/KZ/UZ/TM/KG/TJ. Eval ground truth: two complementary fixtures — [`eval/data/train/turkey.json`](eval/data/train/turkey.json) (regional consensus) and [`eval/data/train/diyanet.json`](eval/data/train/diyanet.json) (Diyanet's own publishing endpoint via [ezanvakti.emushaf.net](https://ezanvakti.emushaf.net)).
+
+#### North and West Africa
+
+- **Morocco — Ministry of Habous and Islamic Affairs (وزارة الأوقاف والشؤون الإسلامية)** — publisher of the Moroccan *imsākiyya* (annual prayer time tables) that are the authoritative reference for Moroccan Muslims. fajr ships a community-calibrated 19°/17° method that empirically reproduces the Ministry's published tables to ~1 minute (the formally-stated 18° angle diverges by ~5 minutes in the fasting-unsafe direction). Validated triply: institutional tables in [`eval/data/train/morocco.json`](eval/data/train/morocco.json), mosque-published times across five active Moroccan mosques in [`eval/data/test/mawaqit.json`](eval/data/test/mawaqit.json) (Casablanca x3, Rabat, Marrakech), and dedicated regional documentation in [`knowledge/wiki/regions/morocco.md`](knowledge/wiki/regions/morocco.md). The 19° community calibration is the subject of [Question 1 in the scholar review brief](docs/scholar-review-brief.md).
+- **Algeria, Tunisia** — institutional alignment with the Moroccan/Egyptian methods per `methods.js` regional groupings.
+- **South Africa — SANHA, COSSA, MJC** — the South African National Halaal Authority, Crescent Observers' Society of Southern Africa, and Muslim Judicial Council jointly oversee Islamic dates and timing for the SA Muslim community. fajr auto-selects MWL (18°/17°) at South African coordinates per the MWL regional grouping (`['GB', 'DE', 'FR', 'BE', 'NL', 'AU', 'ZA']`). South Africa is also covered in fajr's hilal geographic-diversity test set (Cape Town at 33.92°S — see [`docs/hilal-historical-analysis.md`](docs/hilal-historical-analysis.md)).
+
+#### South and Southeast Asia
+
+- **Pakistan — Central Ruet-e-Hilāl Committee + University of Islamic Sciences, Karachi** — the Karachi method (Fajr 18°, Isha 18°, Hanafi Asr) is one of the oldest published institutional methods, used across Pakistan, Afghanistan, India, and Bangladesh. fajr auto-selects Karachi for PK/AF/IN/BD. Eval ground truth: [`eval/data/train/karachi.json`](eval/data/train/karachi.json). The Pakistan Ruet-e-Hilāl Committee is one of the strict-naked-eye-sighting committees against which fajr's Shaukat-criterion hilal output is calibrated (~85% alignment per [`docs/hilal-historical-analysis.md`](docs/hilal-historical-analysis.md#headline-finding--bimodal-alignment)).
+- **Indonesia — Kementerian Agama Republik Indonesia (Kemenag)** — Ministry of Religious Affairs, the principal Muslim authority in the world's most populous Muslim country. Indonesia uses *rukyat dan hisab* (sighting + calculation). fajr auto-selects the JAKIM/Singapore equatorial method (Fajr 20°, Isha 18°) for Indonesian coordinates per the regional grouping `['MY', 'SG', 'BN', 'ID']`. Eval ground truth: [`eval/data/train/jakarta.json`](eval/data/train/jakarta.json).
+- **Malaysia — JAKIM (Jabatan Kemajuan Islam Malaysia)** — Department of Islamic Development Malaysia, the federal Islamic authority. JAKIM applies systematic topographic elevation correction nationally — one of the two institutional precedents for fajr's `applyElevationCorrection`. Eval ground truth: two complementary fixtures — [`eval/data/train/malaysia.json`](eval/data/train/malaysia.json) (regional baseline) and [`eval/data/train/waktusolat.json`](eval/data/train/waktusolat.json) (JAKIM's own publishing via the [waktusolat.app](https://waktusolat.app) community proxy, since e-solat.gov.my is geo-restricted).
+- **Singapore — MUIS (Majlis Ugama Islam Singapura)** — Islamic Religious Council of Singapore. Uses the Singapore method (Fajr 20°, Isha 18°), identical angles to JAKIM/Malaysia. fajr auto-selects this for Singapore coordinates.
+- **Brunei — JKAS (Jabatan Hal Ehwal Syariah)** — Brunei's Sharia Affairs Department uses Singapore-equivalent angles. Auto-detected as part of the JAKIM regional group.
+
+#### Iran and surrounding region
+
+- **Iran — Tehran Institute of Geophysics + Office of the Supreme Leader** — Tehran method (Fajr 17.7°, Maghrib +4.5 min, Isha 14°) is the published Iranian institutional method. *Honest gap:* fajr declares Tehran in [`src/methods.js`](src/methods.js) but engine.js's bounding-box detection does not yet auto-select for Iran-specific coordinates; Iranian users currently fall through to the MWL fallback. Roadmapped for a future engine update with Iranian-source eval ground truth.
+
+#### Europe and the Western diaspora
+
+- **United Kingdom — Moonsighting Committee Worldwide (MoonsightingCommittee.com) + Wifaqul Ulama** — UK Muslim community predominantly follows the Moonsighting Committee's seasonally-adjusted 18°/18° method with shafaq-al-aḥmar handling at high-latitude summers. fajr auto-selects MoonsightingCommittee for UK coordinates. Eval ground truth: [`eval/data/train/uk.json`](eval/data/train/uk.json).
+- **France — UOIF (Union des Organisations Islamiques de France)** — uses the European Council for Fatwa and Research (ECFR)'s 12°/12° rule for European latitudes. fajr auto-selects UOIF for French coordinates. Eval ground truth: [`eval/data/train/paris.json`](eval/data/train/paris.json). The 12° angle's reasoning (high-latitude accommodation) is documented in [`knowledge/wiki/regions/high-latitude.md`](knowledge/wiki/regions/high-latitude.md).
+- **United States — ISNA (Islamic Society of North America) + FCNA (Fiqh Council of North America)** — the predominant North American Sunni authorities. ISNA uses 15°/15° (the most pragmatic accommodation in the major-method set, calibrated for North American latitudes). fajr auto-selects ISNA for US/Canada coordinates. Eval ground truth: [`eval/data/train/usa.json`](eval/data/train/usa.json) (New York), [`eval/data/train/toronto.json`](eval/data/train/toronto.json) (Canada). The ISNA history — angle change from 17.5° to 15° in 2011 — is documented in [`knowledge/wiki/methods/isna.md`](knowledge/wiki/methods/isna.md).
+- **Canada — same FCNA / ISNA-aligned authorities** — auto-detected with US in the North America bounding box.
+
+#### Latin America
+
+- **Bolivia, Colombia, Ecuador, Argentina, Brazil** — South American Muslim communities default to MWL (18°/17°). fajr auto-selects MWL for Bolivia/Colombia/Ecuador via dedicated bounding boxes; other countries in the region fall through to the MWL global fallback. Eval ground truth (geographic stress test): [`eval/data/test/quito.json`](eval/data/test/quito.json) (Ecuador equator + 2,850m elevation), [`eval/data/test/high_elevation.json`](eval/data/test/high_elevation.json) (La Paz, Bolivia, 3,656m).
+
+#### High-latitude regions
+
+- **Norway, Iceland, Sweden, Finland, Denmark** — Scandinavian and Nordic Muslim communities' calculation problem is geometric, not method-choice. fajr applies adhan.js's `MiddleOfTheNight` rule per the Odeh (2009) ICOP-endorsed methodology for Norway and Iceland; `TwilightAngle` fallback for Finland. See [`knowledge/wiki/regions/iceland.md`](knowledge/wiki/regions/iceland.md). Eval geographic-stress fixtures: [`eval/data/test/high_latitude.json`](eval/data/test/high_latitude.json) (Tromsø, Reykjavik, Helsinki) and [`eval/data/test/svalbard.json`](eval/data/test/svalbard.json) (Longyearbyen, 78°N).
+- **Alaska / North-Western Canada** — partial coverage via [`eval/data/test/anchorage.json`](eval/data/test/anchorage.json) — Alaska auto-selects ISNA via the US bounding box but the high-latitude rule kicks in.
+
+#### Independent astronomical reference layers
+
+- **Aladhan API** ([aladhan.com](https://aladhan.com)) — multi-method calculator covering all train regions. Used as the regional-method-consensus reference layer in fajr's eval; **not** treated as institutional ground truth (it is calc-vs-calc) but as a cross-check on whether fajr's region-detection plumbing matches independent implementations.
+- **praytimes.org** ([praytimes.org](https://praytimes.org)) — Hamid Zarrabi-Zadeh's reference implementation, vendored at [`scripts/lib/PrayTimes.js`](scripts/lib/PrayTimes.js) for independent calc-vs-calc validation.
+- **muslimsalat.com** — third-party aggregator used as cross-validation holdout (never used for ratchet decisions).
+
+#### Astronomical / scientific institutional grounding
+
+- **USNO (United States Naval Observatory)** — sea-level convention confirmed via API: sunrise/sunset are identical at all elevations by definition (the convention against which fajr's `applyElevationCorrection` is opt-in rather than default).
+- **JPL (Jet Propulsion Laboratory) Horizons DE441** — NASA's planetary ephemeris. fajr's lunar and solar position primitives are validated against DE441; max ΔRA 156″ for the Moon, max 15″ for the Sun. See [`docs/lunar-jpl-validation.md`](docs/lunar-jpl-validation.md), [`docs/solar-jpl-validation.md`](docs/solar-jpl-validation.md).
+- **ICOP / International Astronomical Center** — Mohammad Shawkat Odeh's [astronomycenter.net](https://astronomycenter.net/paper.html) archive is the principal source for fajr's high-latitude rule and Fajr-angle scholarship. Thirteen papers from this archive are cited and archived under [`knowledge/raw/papers/2026-05-01-astronomycenter/`](knowledge/raw/papers/2026-05-01-astronomycenter/) — see the [papers review](docs/papers-review-2026-05-01.md) for the per-paper findings and recommended-actions table.
+- **Jordan Astronomical Society + Jordan Journal for Islamic Studies** — peer-reviewed academic publishing context for the Aabed (2015) empirical Fajr-angle observation study underlying `applyTayakkunBuffer`.
+- **Mu'tah University** — peer-reviewed publisher (ISSN 1022-6812) of Odeh's 2012 *Calendar Accuracy* methodology paper that fajr's `eval/compare.js` cross-references.
+
+#### Hilāl-sighting committee coverage
+
+fajr's three-criterion hilal output is validated against 78 documented committee decisions across 15 Hijri month onsets (Hijri 1441–1446), spanning both **strict naked-eye sighting committees** (Pakistan, Morocco, India, Iran, Indonesia — ~82–88% criterion alignment) and **witness-testimony / calculation committees** (Saudi Arabia, UAE, Egypt, Qatar, Türkiye — ~16–20% criterion alignment, since these committees announce on testimony rather than astronomical predictability). The split is documented in detail in [`docs/hilal-historical-analysis.md`](docs/hilal-historical-analysis.md) as an empirical demonstration of the *wasāʾil/ʿibādāt* distinction the project is built on.
+
+The astronomical criteria themselves are the work of:
+
+- **HM Nautical Almanac Office (UK)** — Yallop (1997) q parameter
+- **ICOP (Jordan)** — Odeh (2004) V parameter
+- **Pakistan Central Ruet-e-Hilāl Committee** — Shaukat (2002) rule-based criterion
+
+#### Honest gaps in current coverage
+
+Three institutional regions are recognised in `src/methods.js` but not yet auto-selected by fajr's `engine.js` country-detection (these users currently fall through to the MWL global fallback):
+
+| Country | Recognised method | Gap |
+|---|---|---|
+| Iran | Tehran 17.7°/14° + 4.5min Maghrib | No bounding-box detection; needs Iranian-source eval ground truth |
+| Yemen | Kuwait 18°/17.5° | Sanaa would otherwise auto-detect via Saudi bounding box; needs explicit Yemen handling |
+| Bahrain, Kuwait, Oman | Kuwait 18°/17.5° | Auto-selects via Saudi bounding-box overlap; should be made explicit |
+
+Filing these as eval-corpus expansion roadmap items: contributors with verified institutional timetables for Iran (Tehran Institute of Geophysics), Yemen, or any of the recognised-but-not-auto-detected countries are encouraged to open an issue. fajr's eval framework is designed precisely for this kind of incremental institutional-coverage expansion — see [Refreshing the corpus](#refreshing-the-corpus) below.
 
 ### Scholarly papers (newly cited 2026-05)
 
