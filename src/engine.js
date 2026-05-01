@@ -234,46 +234,6 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
 }
 
 /**
- * Convenience wrapper returning all common day-times in a single call:
- * the 6 prayers, sunrise + sunset (astronomical), midnight (mid-night),
- * and qiyam (start of last third of night, recommended time for tahajjud).
- *
- * Computes today's prayer times AND tomorrow's fajr internally to derive
- * the night-third boundaries. For callers that only need the 6 prayers,
- * `prayerTimes()` remains the leaner single call.
- *
- * 🟢 Established: division of night into thirds is documented in hadith
- * and classical fiqh; sunset / sunrise are standard astronomical instants.
- *
- * @param {object} params
- * @param {number} params.latitude
- * @param {number} params.longitude
- * @param {Date}   params.date
- * @param {number} [params.elevation=0]
- * @returns {object} prayerTimes(...) result extended with `midnight` and `qiyam` Dates.
- */
-export function dayTimes({ latitude, longitude, date, elevation = 0 }) {
-  const today = prayerTimes({ latitude, longitude, date, elevation })
-  const tomorrow = prayerTimes({
-    latitude, longitude, elevation,
-    date: new Date(date.getTime() + 24 * 60 * 60 * 1000),
-  })
-  // Inline night-thirds calculation from today's maghrib to tomorrow's fajr,
-  // avoiding a third call into prayerTimes via nightThirds().
-  const nightDuration = tomorrow.fajr.getTime() - today.maghrib.getTime()
-  const midnight = new Date(today.maghrib.getTime() + nightDuration / 2)
-  const qiyam    = new Date(today.maghrib.getTime() + (2 * nightDuration) / 3)
-
-  return {
-    ...today,
-    midnight,
-    /** Start of the last third of the night — the recommended time window
-     *  for qiyām al-layl / tahajjud per hadith tradition. */
-    qiyam,
-  }
-}
-
-/**
  * Apply elevation-based horizon correction to a set of prayer times.
  *
  * 🟡 Limited precedent: Geometry is classical; application to Islamic prayer
@@ -301,8 +261,12 @@ export function applyElevationCorrection(times, elevation, latitude = 0) {
   // Shuruq (sunrise) is earlier at elevation — depressed horizon
   adjusted.shuruq  = new Date(times.shuruq.getTime()  - corrMs)
   adjusted.sunrise = adjusted.shuruq    // keep alias in sync with shuruq
-  // Maghrib (sunset) is later at elevation
+  // Maghrib (sunset) is later at elevation. Astronomical `sunset` shifts by
+  // the same geometric amount as `maghrib` for methods where they coincide;
+  // for methods with a maghrib offset we still want the astronomical sunset
+  // itself elevation-corrected, so update both.
   adjusted.maghrib = new Date(times.maghrib.getTime() + corrMs)
+  adjusted.sunset  = new Date(times.sunset.getTime()  + corrMs)
   adjusted.corrections = { ...times.corrections, elevation: true, elevationCorrectionMin: +correctionMin.toFixed(2) }
 
   return adjusted

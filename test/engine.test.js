@@ -146,6 +146,24 @@ describe('dayTimes', () => {
       expect(day[f].getTime()).toBe(six[f].getTime())
     }
   })
+
+  it('applies elevation correction when elevation > 0 (matches prayerTimes wrapper)', () => {
+    // Denver, ~1600m. The bug was that dayTimes() bypassed the elevation
+    // wrapper and returned sea-level shuruq/maghrib regardless of elevation.
+    const args = { latitude: 39.7392, longitude: -104.9903, date: TEST_DATE, elevation: 1600 }
+    const day = dayTimes(args)
+    const six = prayerTimes(args)
+    expect(day.shuruq.getTime()).toBe(six.shuruq.getTime())
+    expect(day.sunrise.getTime()).toBe(six.sunrise.getTime())
+    expect(day.maghrib.getTime()).toBe(six.maghrib.getTime())
+    expect(day.corrections.elevation).toBe(true)
+    expect(day.corrections.elevationCorrectionMin).toBeGreaterThan(0)
+
+    // And the corrected shuruq must actually differ from the sea-level value.
+    const sea = dayTimes({ ...args, elevation: 0 })
+    expect(day.shuruq.getTime()).toBeLessThan(sea.shuruq.getTime())
+    expect(day.maghrib.getTime()).toBeGreaterThan(sea.maghrib.getTime())
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -323,8 +341,9 @@ describe('applyElevationCorrection', () => {
   const baseTimes = () => {
     const t = new Date('2026-04-15T12:00:00Z')
     return {
-      fajr: new Date(t), shuruq: new Date(t), dhuhr: new Date(t),
-      asr: new Date(t), maghrib: new Date(t), isha: new Date(t),
+      fajr: new Date(t), shuruq: new Date(t), sunrise: new Date(t),
+      dhuhr: new Date(t), asr: new Date(t),
+      maghrib: new Date(t), sunset: new Date(t), isha: new Date(t),
       method: 'test', corrections: { elevation: false, refraction: 'standard' },
     }
   }
