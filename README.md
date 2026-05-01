@@ -212,14 +212,18 @@ Mechanically enforced by `eval/compare.js`. A change is committed only if **all*
 
 Holdout (test) WMAE is reported but never gates the decision.
 
-### Elevation correction — validated formula, pending application
+### Case study: handling a contested correction (elevation)
 
-At elevation:
-- Shuruq and Maghrib shift by the geometric horizon depression: `arccos(R / (R + h)) × 4/cos(φ)` minutes
-- At 3,640m (La Paz): ~8 minutes; at 828m (Burj Khalifa): ~4 minutes
-- Formula validated against USNO API
-- **Currently disabled** because standard ground truth (Aladhan, USNO) uses sea-level definitions
-- Islamic scholarly precedent: UAE Burj Khalifa fatwa (IACAD), Malaysia JAKIM topographic correction
+Elevation is the cleanest worked example of how fajr reasons about a correction where the math, the prevailing convention, and the scholarly tradition do not all agree. The pieces:
+
+- **The math says yes.** Geometric horizon dip at altitude h is `arccos(R / (R + h)) × 4/cos(φ)` minutes — pure spherical geometry, in Meeus and every astronomy textbook. ~4 min at 828m (Burj Khalifa), ~8 min at 3,640m (La Paz). Formula validated against USNO API (Δ ≈ 0 between USNO-at-elevation and USNO-at-sea-level — USNO defines sunrise relative to a sea-level horizon by convention, so the API doesn't apply the dip).
+- **Prevailing convention says no.** Aladhan API and USNO both publish sea-level sunrise/sunset by definition. If fajr applied the dip, it would diverge from those references — and from most calculator apps Muslims use today.
+- **Scholarly tradition is split, with documented institutional positions on both sides:**
+  - 🟢 *Apply it:* UAE Grand Mufti Dr. Ahmed Al Haddad issued a floor-stratified fatwa for the Burj Khalifa, implemented in the IACAD Dulook DXB app. Malaysia's JAKIM applies topographic elevation correction systematically across the country.
+  - 🟢 *Deliberately do not apply it:* Saudi Arabia under Umm al-Qura prioritises *jama'ah* (congregational unity) over geographic precision and explicitly does not apply elevation correction even in mountainous regions.
+- **fajr's call:** ship the formula as an exported utility (`applyElevationCorrection`), tagged 🟡→🟢 (Approaching established), **disabled by default** so the engine matches whatever ground truth the user is comparing against — and turn it on once a primary-source timetable that *also* applies elevation enters the corpus, so engine and ground truth align.
+
+This is the wasail/ibadat principle as code: the math is correct (wasail), but the *shar'i* application is contested, so fajr neither imposes the correction silently nor ignores it — it surfaces the disagreement, classifies it explicitly, and gates deployment on alignment between engine behaviour and the ground truth the user actually compares against. Most prayer-time libraries don't model this kind of disagreement at all.
 
 ### Scholarly oversight classification
 
