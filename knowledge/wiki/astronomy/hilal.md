@@ -2,7 +2,7 @@
 
 Predicting whether the new lunar crescent will be visible from a given location after a Hijri month's conjunction. The decision of whether to begin a Hijri month rests with Islamic authorities, not with software; this page documents the *astronomical* methods fajr uses to estimate visibility, and explicitly distinguishes that from the *shar'i* (legal) act of declaring a month begun.
 
-🟡 **Limited precedent** — fajr implements both the Odeh (2004) and Yallop (1997) criteria, returning their classifications side-by-side along with a `criteriaAgree` flag highlighting borderline ikhtilaf cases. Shaukat (2002) and pure naked-eye sighting traditions remain equally legitimate and are not yet implemented.
+🟡 **Limited precedent** — fajr implements three criteria side-by-side: Odeh (2004) and Yallop (1997) as polynomial fits on shared (ARCV, W) inputs, and Shaukat (2002) as a rule-based check on geocentric lag, elongation, moon age, and moon altitude at sunset. The result includes a `criteriaAgree` flag flagging borderline ikhtilaf cases where any of the three disagrees. Pure naked-eye sighting traditions remain equally legitimate and are not modelled.
 
 ---
 
@@ -27,19 +27,24 @@ Each was empirically fit to a different observational dataset, and each gives sl
 
 ---
 
-## fajr's implementation: Odeh (2004) + Yallop (1997)
+## fajr's implementation: Odeh + Yallop + Shaukat
 
-fajr's `hilalVisibility(...)` function returns classifications from **both** the Odeh (2004) and Yallop (1997) criteria. The two share their geometric inputs (ARCV, W) but use different empirical polynomial fits and different category boundaries, so they can disagree in borderline cases — and that disagreement is itself useful signal.
+fajr's `hilalVisibility(...)` function returns classifications from three independent criteria simultaneously. Two are empirical polynomial fits with shared inputs; the third is a rule-based threshold check on different inputs.
 
-**Why both, rather than picking one as canonical:**
+| Criterion | Type | Inputs | Output classes |
+|---|---|---|---|
+| **Odeh (2004)** | Polynomial in (ARCV, W) | topocentric ARCV, crescent width | A / B / C / D |
+| **Yallop (1997)** | Polynomial in (ARCV, W), same coefficients with different constant + scale | topocentric ARCV, crescent width | A / B / C / D / E / F |
+| **Shaukat (2002)** | Rule-based, independent thresholds | geocentric elongation, geocentric lag, moon age (Danjon), moon altitude at sunset | A / B / D |
 
-1. They were fit to different observation datasets (Odeh: 737 records published 2004; Yallop: HMNAO records published 1997). Either alone overfits to its training data.
-2. Different national authorities reference different criteria. Egypt's Dar al-Iftaa and ICOP align with Odeh; UK Nautical Almanac Office and several European committees use Yallop.
-3. When both agree on visible/not-visible, the verdict is stable. When they disagree, the case is borderline and witness testimony / scholarly judgment matters more — fajr surfaces this with `criteriaAgree: false`.
+**Why three, rather than picking one canonical:**
 
-**Why these two, not Shaukat or others:**
+1. **Different training data.** Each was fit to a different observation dataset (Odeh: 737 records, 2004; Yallop: HMNAO records, 1997; Shaukat: Pakistan Ruet-e-Hilal historical record, 2002). Any single one overfits to its training set.
+2. **Different decision logic.** Odeh and Yallop use the same polynomial structure (cubic in W) but different constants — they almost always agree. Shaukat asks a structurally different question (does each individual physical threshold pass?), so it can disagree where Odeh and Yallop agree, and that disagreement carries information.
+3. **Different national authorities reference different criteria.** Egypt's Dar al-Iftaa and ICOP align with Odeh; UK Nautical Almanac Office uses Yallop; Pakistan's Ruet-e-Hilal Committee uses Shaukat. Returning all three lets a downstream app match the user's own region's authority without pinning fajr itself to one institutional choice.
+4. **`criteriaAgree: false` is the right UI signal for borderline cases.** When all three agree, the verdict is stable. When at least one disagrees, the case is contested and witness testimony / scholarly judgment matters more than any one polynomial.
 
-Odeh and Yallop are the two most-cited modern criteria with published, validated polynomial fits. Shaukat (2002) is also legitimate and is used by Pakistan's Ruet-e-Hilal Committee; it is on the roadmap but not yet implemented.
+**Threshold-source caveat for Shaukat:** different sources publish slightly different Shaukat threshold numbers (elongation minimums of 6.4°–8°, age minimums of 16–17 h, lag minimums of 27–41 min). fajr uses the most commonly cited values (age ≥ 17 h, elongation ≥ 7°, lag ≥ 29 min, moon altitude at sunset ≥ 5°) but treats Shaukat's class boundaries as ~10% softer than the Odeh/Yallop polynomial outputs. The criterion's strength is its independent decision logic, not its threshold precision.
 
 ### Computation
 
@@ -73,19 +78,35 @@ For a given Hijri (year, month) and observer (latitude, longitude), fajr:
    - **E** — `−0.293 ≤ q < −0.232` — not visible with telescope
    - **F** — `q < −0.293` — not visible (below Danjon limit)
 
-The two polynomials are structurally similar (same cubic in W with the same coefficients) but anchored to different visibility thresholds — Odeh's constant is 7.1651, Yallop's is 11.8371, and Yallop's overall division by 10 gives him finer-grained bin boundaries near zero. In practice Yallop is the more conservative of the two (an Odeh "C" — optical aid only — typically maps to a Yallop E or F).
+   The two polynomials are structurally similar (same cubic in W with the same coefficients) but anchored to different visibility thresholds — Odeh's constant is 7.1651, Yallop's is 11.8371, and Yallop's overall division by 10 gives him finer-grained bin boundaries near zero. In practice Yallop is the more conservative of the two (an Odeh "C" — optical aid only — typically maps to a Yallop E or F).
+
+10. **Applies Shaukat's rule-based check:**
+    Shaukat takes inputs the polynomials don't:
+    - Geocentric Sun-Moon elongation at sunset
+    - Geocentric lag time (sunset → moonset, minutes)
+    - Moon age since conjunction (hours; Danjon limit ≈ 17 h)
+    - Moon's topocentric altitude at sunset (degrees)
+
+    Three classes:
+    - **D** — any threshold violated (age < 17 h OR elongation < 7° OR lag < 29 min OR altitude < 5° at sunset)
+    - **B** — all four thresholds met but at least one is near its boundary (elongation < 10° OR lag < 41 min OR age < 24 h)
+    - **A** — every threshold comfortably satisfied
+
+    Shaukat's strength is *independence from the polynomial fit*. When Odeh and Yallop both say "visible" but Shaukat says D ("below Danjon"), the polynomial values are extrapolating outside their training range — Shaukat catches this. Conversely Shaukat is coarser-grained: it cannot distinguish the Odeh "B" / "C" gradient.
 
 ### Validation
 
 `scripts/validate-hilal.js` tests the implementation against five Hijri month transitions (Ramadan 1444, Shawwal 1444, Ramadan 1445, Ramadan 1446, Shawwal 1446) at the relevant national observatory locations.
 
-| Case | Moon age | Odeh V (class) | Yallop q (class) | Astronomically expected | Committee |
-|---|---:|---:|---:|---|---|
-| Ramadan 1444 — Riyadh | 22 h | +6.28 (A) | +0.161 (B) | visible | visible (Saudi) ✓ |
-| Shawwal 1444 — Riyadh | 11 h | −1.79 (D) | −0.646 (F) | not visible | not visible (Saudi) ✓ |
-| Ramadan 1445 — Dubai | 5.5 h | −4.05 (D) | −0.872 (F) | not visible | UAE accepted ◇ |
-| Ramadan 1446 — Cairo | 15 h | +1.60 (C) | −0.307 (F) | not visible | Egypt accepted ◇ |
-| Shawwal 1446 — Rabat | 8 h | −3.01 (D) | −0.768 (F) | not visible | not visible (Morocco) ✓ |
+| Case | Moon age | Odeh (class) | Yallop (class) | Shaukat (class) | All agree? | Committee |
+|---|---:|---|---|---|:-:|---|
+| Ramadan 1444 — Riyadh | 22 h | A (V=+6.28) | B (q=+0.161) | B (borderline) | ✓ visible | visible (Saudi) ✓ |
+| Shawwal 1444 — Riyadh | 11 h | D | F | D (sub-Danjon) | ✓ not visible | not visible (Saudi) ✓ |
+| Ramadan 1445 — Dubai | 5.5 h | D | F | D (sub-Danjon) | ✓ not visible | UAE accepted ◇ |
+| Ramadan 1446 — Cairo | 15 h | C (optical aid) | F | D (sub-Danjon) | ✓ not naked-eye | Egypt accepted ◇ |
+| Shawwal 1446 — Rabat | 8 h | D | F | D (sub-Danjon) | ✓ not visible | not visible (Morocco) ✓ |
+
+For these five cases, all three criteria agree on the binary visible/not-visible question (`criteriaAgree: true` for every row), though they disagree on *severity* — Yallop and Shaukat are more conservative than Odeh, correctly flagging that the Egypt 1446 sighting was sub-Danjon-impossible even though Odeh's polynomial gives it class C ("optical aid"). The polynomial extrapolation versus Shaukat's hard Danjon cutoff is exactly the kind of disagreement the multi-criterion design is meant to surface.
 
 **Astronomical accuracy: 5/5.** Every case matches the astronomically-defensible expectation derived from moon age and Danjon limit (~18 hours minimum for any naked-eye crescent).
 
@@ -95,7 +116,7 @@ The two polynomials are structurally similar (same cubic in W with the same coef
 
 ## What fajr does NOT do
 
-- **Shaukat or Bruin criteria.** fajr currently runs Odeh + Yallop. Shaukat (2002, used by Pakistan's Ruet-e-Hilal Committee) and Bruin (1977) are on the roadmap but not yet implemented.
+- **Bruin / Maunder / SAAO criteria.** fajr currently runs Odeh + Yallop + Shaukat. Bruin (1977) and Maunder (1911) and the SAAO theoretical-contrast model are on the roadmap but not yet implemented.
 - **Atmospheric customisation.** Local extinction, light pollution, dust, humidity all affect real visibility but are not modelled. fajr uses standard atmospheric refraction (-0.5667°).
 - **Witness testimony arbitration.** Committee decisions about whether to *accept* a reported sighting are matters of fiqh, not astronomy. fajr provides the astronomical possibility; the committees decide.
 - **Scholarly authority.** This module is wasail (means). The decision to begin a Hijri month is ibadat (worship). fajr does not and cannot replace either a sighting committee or scholarly judgment.

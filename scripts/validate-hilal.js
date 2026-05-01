@@ -97,12 +97,13 @@ function main() {
       continue
     }
 
-    console.log(`    Odeh   ${result.code} (V = ${fmt(result.V, 2)}) — ${result.label}`)
-    console.log(`    Yallop ${result.yallop.code} (q = ${fmt(result.yallop.q, 4)}) — ${result.yallop.label}`)
+    console.log(`    Odeh    ${result.code} (V = ${fmt(result.V, 2)}) — ${result.label}`)
+    console.log(`    Yallop  ${result.yallop.code} (q = ${fmt(result.yallop.q, 4)}) — ${result.yallop.label}`)
+    console.log(`    Shaukat ${result.shaukat.code} (elong=${fmt(result.shaukat.elongationDeg, 1)}°, alt=${fmt(result.shaukat.moonAltAtSunsetDeg, 1)}°, lag=${fmt(result.shaukat.lagMinutes, 0)}m, age=${fmt(result.shaukat.moonAgeHours, 1)}h) — ${result.shaukat.label}`)
     if (!result.criteriaAgree) {
       console.log(`    ◆ criteria disagree — this is a borderline / ikhtilaf case`)
     }
-    console.log(`    ARCV = ${fmt(result.arcvDeg, 2)}°, W = ${fmt(result.widthArcmin, 2)}', lag = ${fmt(result.lagTimeMinutes, 1)} min, moon age = ${fmt(result.moonAgeHours, 1)} h`)
+    console.log(`    ARCV = ${fmt(result.arcvDeg, 2)}°, W = ${fmt(result.widthArcmin, 2)}'`)
     console.log(`    sunset / moonset / best time (UTC): ${result.sunsetUTC?.slice(11,16) ?? '—'} / ${result.moonsetUTC?.slice(11,16) ?? '—'} / ${result.bestTimeUTC?.slice(11,16) ?? '—'}`)
     console.log(`    conjunction (UTC): ${result.conjunctionUTC ?? '—'}`)
 

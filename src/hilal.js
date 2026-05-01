@@ -234,6 +234,64 @@ function classifyYallop(q) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Shaukat (2002) classification — Pakistan Ruet-e-Hilal practice
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Structurally different from Odeh and Yallop: rather than a polynomial fit
+// on (ARCV, W), Shaukat applies independent thresholds on four physical
+// quantities at the relevant epoch:
+//
+//   - Moon age since conjunction (hours)        — Danjon limit
+//   - Geocentric Sun-Moon elongation (degrees)
+//   - Lag time, sunset → moonset (minutes)
+//   - Moon's topocentric altitude at sunset (degrees)
+//
+// Different sources publish slightly different threshold numbers (the cited
+// minimums for elongation range from 6.4° to 8°, for age from 16 h to 17 h,
+// for lag from 27 min to 41 min depending on the formulation). The values
+// below are the most commonly cited Shaukat-style minimums for naked-eye
+// visibility, with a "comfortable" margin used to separate "easily visible"
+// from "borderline."
+//
+// Because of this source variation, treat Shaukat's class boundaries as
+// ~10% softer than Odeh's or Yallop's polynomial outputs. The criterion's
+// strength is its independent decision logic, not its threshold precision.
+function classifyShaukat({ lagMinutes, elongationDeg, moonAgeHours, moonAltAtSunsetDeg }) {
+  if (
+    lagMinutes === null || elongationDeg === null ||
+    moonAgeHours === null || moonAltAtSunsetDeg === null ||
+    Number.isNaN(lagMinutes) || Number.isNaN(elongationDeg) ||
+    Number.isNaN(moonAgeHours) || Number.isNaN(moonAltAtSunsetDeg)
+  ) {
+    return { code: '?', label: 'unknown', visible: null }
+  }
+
+  // Below Danjon limit: physically impossible to see, regardless of geometry.
+  if (moonAgeHours < 17) {
+    return { code: 'D', label: 'below Danjon limit (age < 17 h)', visible: false }
+  }
+
+  // Hard minimums — failing ANY of these three rules out a sighting.
+  if (elongationDeg < 7) {
+    return { code: 'D', label: `elongation ${elongationDeg.toFixed(1)}° below 7° threshold`, visible: false }
+  }
+  if (lagMinutes < 29) {
+    return { code: 'D', label: `lag ${lagMinutes.toFixed(0)} min below 29 min threshold`, visible: false }
+  }
+  if (moonAltAtSunsetDeg < 5) {
+    return { code: 'D', label: `moon altitude at sunset ${moonAltAtSunsetDeg.toFixed(1)}° below 5° threshold`, visible: false }
+  }
+
+  // Borderline naked-eye region: thresholds met but margin of safety small.
+  if (elongationDeg < 10 || lagMinutes < 41 || moonAgeHours < 24) {
+    return { code: 'B', label: 'visible naked-eye but borderline (one threshold near boundary)', visible: true }
+  }
+
+  // Comfortable margin on every threshold: Shaukat's "easily visible."
+  return { code: 'A', label: 'easily visible to naked eye', visible: true }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Public API
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -297,18 +355,39 @@ export function hilalVisibility({ year, month, latitude, longitude }) {
   const ARCL = ARCV   // for sub-degree crescents these differ by < 0.1°
   const W    = crescentWidth(ARCL, moonGeo.distance)   // distance unchanged by parallax
 
-  // Compute both criteria. Odeh is the top-level "primary" answer for
-  // backward compatibility; Yallop is reported alongside so that
-  // disagreement between the two is surfaced rather than hidden.
+  // Compute Odeh and Yallop polynomials from the shared (ARCV, W) inputs.
   const V          = odehV(ARCV, W)
   const odeh       = classifyOdeh(V)
   const q          = yallopQ(ARCV, W)
   const yallop     = classifyYallop(q)
-  const agree      = odeh.visible === yallop.visible
 
-  // Conjunction (for reporting only).
+  // Conjunction time and moon age — needed for Shaukat too.
   const jdConjunction = findConjunction(jdEval - 1, 1.5)
   const moonAgeHours  = jdConjunction === null ? null : (jdBestTime - jdConjunction) * 24
+
+  // Shaukat operates on a different feature set: geocentric elongation and
+  // moonset-lag (already computed) plus the moon's topocentric altitude
+  // *at sunset itself*, not at best time. Compute that here.
+  const sunAtSunset           = solarPosition(jdSunset)
+  const moonAtSunsetGeo       = lunarPosition(jdSunset)
+  const moonAltAtSunsetDeg    = altitude(moonAtSunsetGeo, latitude, longitude, jdSunset)
+  const elongationGeo         = angularSeparation(
+    sunAtSunset.ra, sunAtSunset.dec,
+    moonAtSunsetGeo.ra, moonAtSunsetGeo.dec,
+  )
+
+  const shaukat = classifyShaukat({
+    lagMinutes,
+    elongationDeg:        elongationGeo,
+    moonAgeHours:         moonAgeHours,
+    moonAltAtSunsetDeg:   moonAltAtSunsetDeg,
+  })
+
+  // criteriaAgree is true only if all three criteria agree on the binary
+  // visible/not-visible question. False = a borderline ikhtilaf case where
+  // at least one criterion disagrees and the sighting decision is contested.
+  const verdicts = [odeh.visible, yallop.visible, shaukat.visible]
+  const agree = verdicts.every(v => v === verdicts[0])
 
   return {
     // Top-level: Odeh (primary, preserved API).
@@ -318,7 +397,7 @@ export function hilalVisibility({ year, month, latitude, longitude }) {
     criterion: 'Odeh (2004)',
     V: round(V, 3),
 
-    // Yallop side-by-side.
+    // Yallop side-by-side (polynomial, distinct empirical fit).
     yallop: {
       criterion: 'Yallop (1997)',
       visible: yallop.visible,
@@ -327,9 +406,23 @@ export function hilalVisibility({ year, month, latitude, longitude }) {
       q:       round(q, 4),
     },
 
+    // Shaukat side-by-side (rule-based, distinct decision logic).
+    shaukat: {
+      criterion: 'Shaukat (2002)',
+      visible: shaukat.visible,
+      code:    shaukat.code,
+      label:   shaukat.label,
+      // The four input quantities Shaukat thresholds against:
+      elongationDeg:      round(elongationGeo, 3),
+      moonAltAtSunsetDeg: round(moonAltAtSunsetDeg, 3),
+      moonAgeHours:       moonAgeHours === null ? null : round(moonAgeHours, 2),
+      lagMinutes:         round(lagMinutes, 1),
+    },
+
     // Multi-criterion agreement summary. `criteriaAgree: false` flags an
-    // ikhtilaf case worth surfacing in any UI — the two empirical fits
-    // give different verdicts, so neither alone is decisive.
+    // ikhtilaf case where at least one of the three criteria disagrees
+    // with the others — the sighting is borderline and witness testimony /
+    // scholarly judgment carry more weight than any one polynomial fit.
     criteriaAgree: agree,
 
     // Geometry (shared between criteria).
@@ -347,7 +440,7 @@ export function hilalVisibility({ year, month, latitude, longitude }) {
     forHijriMonth:      { year, month },
     latitude, longitude,
 
-    note: "Odeh (2004) and Yallop (1997) are two of several legitimate visibility criteria. When they disagree (`criteriaAgree: false`), the case is borderline and witness testimony / scholarly judgment matters. The decision of whether to begin a Hijri month rests with Islamic authorities, not with software. See knowledge/wiki/astronomy/hilal.md.",
+    note: "Odeh (2004), Yallop (1997), and Shaukat (2002) are three of several legitimate visibility criteria. When they disagree (`criteriaAgree: false`) the case is borderline and witness testimony / scholarly judgment matters more than any single criterion. The decision of whether to begin a Hijri month rests with Islamic authorities, not with software. See knowledge/wiki/astronomy/hilal.md.",
   }
 }
 
@@ -356,9 +449,9 @@ function notVisible(meta) {
 }
 
 function degenerateNotVisible(meta) {
-  // Both criteria agree on degenerate cases (no sunset, no moonset, or
+  // All three criteria agree on degenerate cases (no sunset, no moonset, or
   // moon-before-sun). Construct a uniform response shape so callers don't
-  // need to special-case missing yallop fields.
+  // need to special-case missing fields.
   return {
     visible: false,
     code: 'D',
@@ -371,6 +464,16 @@ function degenerateNotVisible(meta) {
       code: 'F',
       label: meta.reason,
       q: null,
+    },
+    shaukat: {
+      criterion: 'Shaukat (2002)',
+      visible: false,
+      code: 'D',
+      label: meta.reason,
+      elongationDeg: null,
+      moonAltAtSunsetDeg: null,
+      moonAgeHours: null,
+      lagMinutes: meta.lagMinutes ?? null,
     },
     criteriaAgree: true,
     lagTimeMinutes: meta.lagMinutes ?? null,
