@@ -4,6 +4,8 @@
 
 *Independent Research, 2026*
 
+> **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, and the live per-source breakdown — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
+
 ---
 
 ## Abstract
@@ -411,6 +413,25 @@ Future work should address: (1) integration of actual atmospheric data (temperat
 - JAKIM (Department of Islamic Development Malaysia). *Prayer Time Calculation Methodology*. Putrajaya, 2013.
 - Muslim World League. *Prayer Time Calculation Manual*. Mecca, 1987.
 - Umm al-Qura Calendar Committee. *Calculation Method for the Umm al-Qura Calendar*. Mecca, 2002.
+
+### Hilal Visibility Criteria
+- Odeh, Mohammad Shawkat. *New criterion for lunar crescent visibility*. *Experimental Astronomy* 18:39–64, 2004. — V parameter, A–D classification; basis for `hilalVisibility`'s primary criterion.
+- Yallop, B.D. *A method for predicting the first sighting of the new crescent moon*. HM Nautical Almanac Office Technical Note 69, 1997. — q parameter, A–F classification.
+- Shaukat, Khalid. *Pakistan Ruet-e-Hilal Committee criteria*. 2002. — Rule-based criterion on geocentric elongation, topocentric altitude, moon age, and lag.
+
+### Prayer-Time Calibration Scholarship (newly cited 2026-05; archived under `knowledge/raw/papers/2026-05-01-astronomycenter/`)
+- Odeh, Mohammad Shawkat. *A New Method to Calculate Fajr and Isha Times When They Disappear in The Area Between Latitude 48.6° and 66.6°*. ICOP, 2009. — Endorses middle-of-night Isha at high latitudes; characterises narrow Isha-Fajr gap at extreme summer latitudes as expected. Drives fajr's `notes` advisory at `|lat| ≥ 48.6°`.
+- Odeh, Mohammad Shawkat. *Astronomical and Juristic Problems Regarding Prayer Times*. 2010. — Comprehensive review of Fajr/Isha angles, Hanafi Asr definition, Maghrib elevation effect.
+- Odeh, Mohammad Shawkat. *How to Ensure the Accuracy of Salat Times in the Calendars*. Mu'tah University, 2012, ISSN 1022-6812. — Published verification methodology cross-referenced against `eval/compare.js`.
+- Odeh, Mohammad Shawkat. *Differences of Matla': Areas Having the Same Matla'*. 2010. — Matla' definitions and crescent-sighting union criteria.
+- Aabed, Abdulkader M. *Determining the beginning of the true dawn (Al-Fajr Al-Sadek) observationally by the naked eye in Jordan*. *Jordan Journal for Islamic Studies* 11(2), 2015. — 12 naked-eye observation sessions empirically validate 18° within 5 minutes; basis for `applyTayakkunBuffer`'s 5-min default.
+- Almisnid + Al-Sukakir. *Solving Fajr and Isha Calculations in High Latitude Areas, and Prayer Times for Muslim Astronauts*. 2010.
+- Almisnid + Al-Sukakir. *Determining the Beginning of Fajer Prayer Time in Qassim Area Practically*. 2012. — Sky Quality Meter and camera observations.
+- Khanji, Jalal al-Din. *Prayer Times at High Latitudes — Astronomical-Jurisprudential Approach*. 2010.
+- Khanji, Jalal al-Din. *Asr Prayer Time: A Critique of the Current Approach and A Suggestion of an Alternative Method*. 2006.
+- Guessoum, Nidhal. *New Astronomical Method to Calculate Salat Times Whenever the Solar Sign Disappears: From Latitude 48.5° to the Pole*. 2010.
+- Tarabishy, Mohamed Nabeel. *Salat / Fasting Time in Northern Regions*. 2014. — Argues 45° as the highest "normal" latitude; basis for `tarabishyTimes`.
+- Sumeat, Mustafa bin Hamid. *The Claim of Error in the Time of Fajr Prayer through the Texts of Jurists and Astronomers*. 2019.
 
 ### Astronomical and NASA References
 - Reda, Ibrahim & Andreas, Afshin. *Solar Position Algorithm for Solar Radiation Applications*. NREL/TP-560-34302. National Renewable Energy Laboratory, 2004. Revised 2008.

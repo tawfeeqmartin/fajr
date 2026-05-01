@@ -26,16 +26,27 @@
   </style>
 </head>
 <body>
-  <h1>Fajr Accuracy Dashboard</h1>
-  <p class="subtitle">AutoResearch experiment trajectory — placeholder</p>
+  <h1>Fajr Accuracy Dashboard — historical (v1.0 milestone)</h1>
+  <p class="subtitle">Experiment 1–7 narrative; for current numbers see docs/progress.md</p>
+
+  <div class="note" style="background:#fff8e6;border-left-color:#c8881a;">
+    <strong>Snapshot:</strong> the metrics on this page are from the v1.0 milestone
+    (Experiment 7) and are <em>not live</em>. fajr now evaluates against six independent
+    sources (Aladhan, Diyanet, JAKIM via waktusolat, Mawaqit, praytimes.org, muslimsalat)
+    with a multi-layer ratchet — current train WMAE is <strong>1.25 min</strong> and
+    holdout WMAE is <strong>6.15 min</strong> across <strong>240 train + 211 holdout</strong>
+    entries. The auto-generated live progress lives at
+    <a href="progress.md"><code>docs/progress.md</code></a>, regenerated on every
+    <code>npm run build:charts</code>.
+  </div>
 
   <p class="metric">1.55 min</p>
-  <p>Current WMAE across 18 cities (Experiment 7) — 93.6% reduction from baseline 24.17 min.</p>
+  <p>Historical WMAE across 18 cities (Experiment 7, Aladhan-only calc-vs-calc consistency check) — 93.6% reduction from baseline 24.17 min. Note: most of that reduction came from a single eval-bug fix in Experiment 3, not engine progress; see the README's "Honest caveat" section.</p>
 
   <div class="note">
-    The interactive dashboard is in <code>fajr-dashboard.html</code> at the project root.
-    This file is a documentation placeholder. See <code>docs/paper.md</code> for full methodology
-    and results, and <code>docs/DASHBOARD.md</code> for dashboard feature documentation.
+    See <a href="paper.md"><code>docs/paper.md</code></a> for the full methodology
+    writeup of Experiments 1–7, <a href="papers-review-2026-05-01.md"><code>docs/papers-review-2026-05-01.md</code></a> for the post-v1.0 scholarly grounding,
+    and <a href="DASHBOARD.md"><code>docs/DASHBOARD.md</code></a> for dashboard feature documentation.
   </div>
 
   <h2>Experiment Trajectory</h2>

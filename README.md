@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.0.** Public API surfaces (prayerTimes, hilalVisibility, qibla, hijri, nightThirds, travelerMode) are stable; breaking changes will require a major version bump. See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.3.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -21,7 +21,7 @@ It is the prayer **most affected by the open questions this library addresses**:
 - **Elevation effects** on the horizon — a mosque at 2,000m sees dawn earlier than one in a valley
 - **Light pollution** distorting the visual threshold in urban areas
 
-While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus Qibla direction (great-circle), Hijri calendar (Kuwaiti tabular algorithm), hilal (crescent) visibility prediction via the Odeh (2004) criterion (5/5 astronomically-defensible on validation cases — see [`scripts/validate-hilal.js`](scripts/validate-hilal.js)), night-thirds calculation, and traveler-mode metadata (qasr / jam' permissibility by madhab — fajr does not determine traveler status, that's left to the user). Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
+While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus astronomical Sunrise / Sunset distinct from Maghrib, single-call `dayTimes()` for the 9-field bundle (six prayers + sunrise + sunset + midnight + qiyam start), Qibla direction (great-circle), Hijri calendar (Kuwaiti tabular algorithm), three-criterion hilal (crescent) visibility prediction (Odeh 2004 + Yallop 1997 + Shaukat 2002 computed side-by-side, with `criteriaAgree` flagging borderline ikhtilaf — see [`scripts/validate-hilal.js`](scripts/validate-hilal.js)), night-thirds calculation, traveler-mode metadata (qasr / jam' permissibility by madhab — fajr does not determine traveler status, that's left to the user), and opt-in scholarly corrections: `applyElevationCorrection` (geometric horizon-dip per Burj Khalifa fatwa / Malaysia JAKIM), `applyTayakkunBuffer` (Aabed-2015 5-min Fajr buffer for naked-eye certainty), and `tarabishyTimes` (Tarabishy-2014 45° latitude-truncation alternative to the default high-latitude rule). Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
 
 The name also grounds the project in the Islamic tradition: each day begins at Fajr, and the precision of that moment is what this library is trying to improve.
 
@@ -299,13 +299,41 @@ console.log(times)
 // {
 //   fajr:    2024-03-15T04:47:00.000Z,
 //   shuruq:  2024-03-15T06:14:00.000Z,
+//   sunrise: 2024-03-15T06:14:00.000Z,   // English alias for shuruq
 //   dhuhr:   2024-03-15T13:22:00.000Z,
 //   asr:     2024-03-15T16:43:00.000Z,
 //   maghrib: 2024-03-15T19:31:00.000Z,
+//   sunset:  2024-03-15T19:31:00.000Z,   // astronomical sunset, distinct from
+//                                        // maghrib for methods with offset
 //   isha:    2024-03-15T20:48:00.000Z,
-//   method:  'Morocco (18°/17°)',
-//   corrections: { elevation: true, refraction: 'standard' }
+//   method:  'Morocco (19°/17° community calibration)',
+//   notes:   [],                         // location-specific advisories
+//                                        // (e.g. high-lat at |lat| ≥ 48.6°)
+//   corrections: { elevation: true, refraction: 'standard (0.833°)',
+//                  elevationCorrectionMin: 0.59 }
 // }
+
+// One-call alternative returning all 9 day-times in one object —
+// six prayers + sunrise + sunset + midnight + qiyam (last-third start).
+const day = fajr.dayTimes({
+  latitude: 33.9716,
+  longitude: -6.8498,
+  date: new Date(),
+})
+// Same shape as prayerTimes plus: midnight, qiyam (Date instances).
+
+// Opt-in: 5-min tayakkun buffer per Aabed (2015), for fasting-precaution
+// where naked-eye verification trails the calculated 18° dawn.
+const buffered = fajr.applyTayakkunBuffer(times)   // adds 5min to fajr
+// Optional buffer minutes parameter:
+fajr.applyTayakkunBuffer(times, 10)                 // 10-min buffer
+
+// Opt-in: Tarabishy (2014) high-latitude method — uses 45° latitude
+// truncation as the alternative to the default Odeh-2009 middle-of-night
+// rule. Below 45°, identical to prayerTimes(). Above, computes at 45°.
+const tarabishy = fajr.tarabishyTimes({
+  latitude: 64.15, longitude: -21.94, date: new Date(),  // Reykjavik
+})
 ```
 
 ```js
@@ -380,22 +408,28 @@ TypeScript declarations ship with the package (`src/index.d.ts`); `import` from 
 
 fajr v1.0 makes the following stability promises. **Stable** surfaces will not change in non-breaking ways without a major version bump. **Experimental** surfaces may change in minor versions; they're shipped because they're useful, not because they're frozen.
 
-### Stable (v1.0 contract)
+### Stable (v1.0 contract — extended in v1.1+)
 
-| API | Signature |
-|---|---|
-| `prayerTimes` | `({ latitude, longitude, date, elevation? }) → { fajr, shuruq, dhuhr, asr, maghrib, isha, method, corrections }` |
-| `qibla` | `({ latitude, longitude }) → { bearing, magneticDeclination, trueBearing }` |
-| `hijri` | `(Date) → { year, month, day, monthName }` |
-| `hilalVisibility` | `({ year, month, latitude, longitude }) → { visible, code, V, yallop, shaukat, criteriaAgree, … }` |
-| `nightThirds` | `({ date, latitude, longitude })` *or* `({ maghrib, fajr })` → `{ firstThird, secondThird, lastThird, midnight }` |
-| `travelerMode` | `({ times, madhab? }) → { qasr, jam, … }` |
+| API | Signature | Since |
+|---|---|---|
+| `prayerTimes` | `({ latitude, longitude, date, elevation? }) → { fajr, shuruq, sunrise, dhuhr, asr, maghrib, sunset, isha, method, notes, corrections }` | v1.0 (`sunrise` alias added v1.0.1; `sunset` and `notes` added v1.1+) |
+| `dayTimes` | `({ latitude, longitude, date, elevation? }) → prayerTimes shape ∪ { midnight, qiyam }` | v1.1 |
+| `applyElevationCorrection` | `(times, elevation, latitude?) → times` (opt-in geometric horizon-dip) | v1.0 |
+| `applyTayakkunBuffer` | `(times, mins=5) → times` (opt-in Fajr buffer per Aabed 2015) | v1.3 |
+| `tarabishyTimes` | `(params, thresholdLat=45) → prayerTimes shape` (opt-in 45°-truncation per Tarabishy 2014) | v1.3 |
+| `qibla` | `({ latitude, longitude }) → { bearing, magneticDeclination, trueBearing }` | v1.0 |
+| `hijri` | `(Date) → { year, month, day, monthName }` | v1.0 |
+| `hilalVisibility` | `({ year, month, latitude, longitude }) → { visible, code, V, yallop, shaukat, criteriaAgree, … }` | v1.0 |
+| `nightThirds` | `({ date, latitude, longitude })` *or* `({ maghrib, fajr })` → `{ firstThird, secondThird, lastThird, midnight }` | v1.0 |
+| `travelerMode` | `({ times, madhab? }) → { qasr, jam, … }` | v1.0 |
 
-The default export object exposing all six is also stable.
+The default export object exposes all of the above.
 
 ### Experimental (subject to change)
 
-- `applyElevationCorrection(times, elevation, latitude?)` — opt-in geometric horizon-dip correction. Disabled by default in `prayerTimes`. May move to a separate package or change signature based on scholarly review of the 🟡→🟢 classification.
+- `applyTayakkunBuffer(times, mins=5)` — opt-in Fajr-delay buffer per [Aabed (2015)](knowledge/raw/papers/2026-05-01-astronomycenter/aabed_2015_fajr_empirical.pdf). Classification 🟡 (one peer-reviewed paper, naked-eye empirical from Jordan). Default 5 min; may be revised based on scholarly feedback.
+- `tarabishyTimes(params, thresholdLat=45)` — opt-in alternative high-latitude method per [Tarabishy (2014)](knowledge/raw/papers/2026-05-01-astronomycenter/tarabishy_2014.pdf). The 45° threshold is Tarabishy's published recommendation; signature accepts a custom threshold for experimentation.
+- `notes: string[]` field on `prayerTimes`/`dayTimes` output — scholarly-grounded advisories. Currently emits one Odeh-2009 high-latitude string at `|lat| ≥ 48.6°`. The set of advisories may grow in minor versions (e.g., light-pollution caveat per Aabed 2015, DST-transition flags). Consumers should treat `notes` as user-displayable text, not a stable enum.
 - `magneticDeclination` field on `qibla` output — currently 0 (placeholder). Will be filled with a real WMM2024 lookup in a minor version, which may shift `trueBearing` for users who relied on it being identical to `bearing`.
 
 ### Internal (not part of the public API)
@@ -410,7 +444,7 @@ Honest items still on the v1.0+ roadmap:
 
 - **External scholarly review.** Morocco's 19° community-calibrated angle, the dual-ihtiyat handling in `compare.js`, and the choice of Odeh/Yallop/Shaukat as fajr's hilal criteria are sound by fajr's own wasail/ibadat principle but have not yet been reviewed by a named scholar. Flagged in [`knowledge/wiki/astronomy/hilal.md`](knowledge/wiki/astronomy/hilal.md) "Validation status".
 - **End-to-end hilal accuracy at scale.** Lunar and solar position primitives are validated against JPL Horizons DE441 (see `docs/lunar-jpl-validation.md`, `docs/solar-jpl-validation.md`). End-to-end hilal classification is measured against **78 documented committee decisions across 15 Hijri month onsets** (Hijri 1441–1446) plus **240 location × event predictions across 16 geographically-diverse test points** (latitudes 64°N to 34°S, elevations 8m to 3,656m, including Cape Town, Sanaa, Quito, Tromsø, Lhasa, Lagos, Tashkent, etc.) — full analysis in [`docs/hilal-historical-analysis.md`](docs/hilal-historical-analysis.md). Notable headline: criteria align with strict naked-eye-sighting committees (Pakistan, Morocco, India, Iran, Indonesia) at **82–88%** and with witness-testimony / calculation committees (Saudi Arabia, UAE, Egypt, Turkey) at **16–20%** — empirically demonstrating the *wasāʾil/ʿibādāt* split the project is built on. Cross-criterion structural analysis: the Odeh-vs-Yallop *ikhtilāf* band is a constant **2.53° in ARCV** across all W ([`docs/charts/criterion-isolines.svg`](docs/charts/criterion-isolines.svg)) — a structural fact that follows directly from the published polynomial forms. Continued dataset growth (target: backfill Hijri 1430–1440) is on the roadmap.
-- **Production deployment.** [agiftoftime.app](https://agiftoftime.app) integration is mapped (see [`examples/agiftoftime/INTEGRATION.md`](examples/agiftoftime/INTEGRATION.md)) but not yet shipped. Until at least one production deployment runs against fajr, "v1.0 stable" is a claim, not yet a track record.
+- **Production deployment.** [agiftoftime.app](https://agiftoftime.app) integration is wired up behind a `?fajr=1` flag (Tier 1 — `dayTimes()`-driven prayer display with adhan.js as fallback). Field-validation issues found during the v1.1 integration window (`dayTimes()` elevation-correction bypass, the Reykjavik narrow-Isha-Fajr-gap regime) have been resolved or documented. Broader public rollout (Tier 1 default-on, Tier 2 provenance UX, Tier 3 hilal banner) is sequenced in agiftoftime's roadmap. Until that happens, "v1.0 stable" is supported by a track record of one wired-but-flagged integration.
 
 ---
 
@@ -430,12 +464,30 @@ The definitions of prayer times are derived from primary Islamic sources:
 - **UAE (Burj Khalifa fatwa)** — IACAD Dulook DXB app; floor-stratified elevation corrections, Dr. Ahmed Al Haddad
 - **Malaysia (JAKIM)** — systematic topographic elevation correction applied nationally
 - **USNO** — sea-level convention confirmed; sunrise/sunset identical at all elevations by definition
+- **ICOP / International Astronomical Center** — Mohammad Shawkat Odeh's [astronomycenter.net](https://astronomycenter.net/paper.html) archive is the principal source for fajr's high-latitude rule and Fajr-angle scholarship. Thirteen papers from this archive are now cited and archived under [`knowledge/raw/papers/2026-05-01-astronomycenter/`](knowledge/raw/papers/2026-05-01-astronomycenter/) — see the [papers review](docs/papers-review-2026-05-01.md) for the per-paper findings and the recommended-actions table.
+
+### Scholarly papers (newly cited 2026-05)
+
+These are the principal published works informing fajr's calculation choices, in addition to the classical Islamic astronomy tradition. All are archived under `knowledge/raw/papers/`.
+
+- **[Odeh, 2004]** *Lunar Crescent Sighting Versus Astronomical Calculations* — basis of `hilalVisibility`'s primary criterion (V parameter, A–D classification)
+- **[Yallop, 1997]** *HMNAO TN No. 69* — hilal q parameter, A–F classification (computed alongside Odeh)
+- **[Shaukat, 2002]** *Pakistan Ruet-e-Hilal* — rule-based hilal criterion (computed alongside Odeh + Yallop)
+- **[Odeh, 2009]** *A New Method to Calculate Fajr and Isha Times When They Disappear in The Area Between Latitude 48.6° and 66.6°* — endorses middle-of-night Isha at high latitudes (fajr's default for Iceland) and characterises the narrow Isha-Fajr gap at extreme summer latitudes as expected behaviour. Drives the `notes` advisory at `|lat| ≥ 48.6°`. See [`knowledge/wiki/regions/iceland.md`](knowledge/wiki/regions/iceland.md).
+- **[Odeh, 2010]** *Astronomical and Juristic Problems Regarding Prayer Times* — comprehensive review covering Fajr/Isha angles, Hanafi Asr, Maghrib elevation effect; primary citation for `methods.js` angle-table choices.
+- **[Odeh, 2012]** *How to Ensure the Accuracy of Salat Times in the Calendars* (Mu'tah University, ISSN 1022-6812) — published verification methodology, cross-referenced against `eval/compare.js`.
+- **[Aabed, 2015]** *Determining the beginning of the true dawn (Al-Fajr Al-Sadek) observationally by the naked eye in Jordan* (Jordan Journal for Islamic Studies, v. 11(2)) — 12 naked-eye observation sessions empirically validate 18° within 5 minutes; the 5-min tayakkun buffer in `applyTayakkunBuffer` follows directly from this paper's recommendation. See [`knowledge/wiki/methods/fajr-angle-empirics.md`](knowledge/wiki/methods/fajr-angle-empirics.md).
+- **[Tarabishy, 2014]** *Salat / Fasting Time in Northern Regions* — argues 45° as the highest "normal" latitude using physiological day-length; basis for `tarabishyTimes` opt-in alternative.
+- **[Almisnid, 2010]** + **[Khanji, 2010]** + **[Guessoum, 2010]** — independent treatments of the high-latitude problem, all converging on middle-of-night for Isha (cited in [`knowledge/wiki/regions/high-latitude.md`](knowledge/wiki/regions/high-latitude.md)).
+- **[Almisnid, 2012]** *Determining the Beginning of Fajer Prayer Time in Qassim Area Practically* — instrumented Sky Quality Meter + camera observations confirming 18° empirical anchor at Qassim, KSA.
+- **[Sumeat, 2019]** *The Claim of Error in the Time of Fajr Prayer through the Texts of Jurists and Astronomers* — engages with the 2018 Moonsighting.com 18° announcement and the recurring "Fajr is wrong" community debates.
 
 ### Computational sources
 
 - **[adhan.js](https://github.com/batoulapps/adhan-js)** — core solar position and prayer time engine
 - **Meeus, *Astronomical Algorithms* (2nd ed.)** — horizon geometry and refraction formulas
 - **USNO Astronomical Almanac** — sunrise/sunset convention reference
+- **JPL Horizons DE441** — lunar/solar position primitives validated against NASA's planetary ephemeris (see [`docs/lunar-jpl-validation.md`](docs/lunar-jpl-validation.md), [`docs/solar-jpl-validation.md`](docs/solar-jpl-validation.md))
 
 ---
 
