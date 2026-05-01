@@ -290,6 +290,14 @@ If there are open issues from a downstream-repo agent, read them, respond in com
 
 **When proposing a change that downstream repos need to know about** (API additions, behaviour changes, version bumps), file an issue describing the change and what downstream needs to do. Cross-reference in the commit message.
 
+**Proactively announce every release and significant wiki/doc change to agiftoftime-agent.** agiftoftime is fajr's first-class integration test bed; the user's explicit position is that *fajr's library practicality is verified there or it is unverified*. Every release (v1.x.y, v1.x.0, v2.x.0) and every meaningful wiki addition or `examples/agiftoftime/INTEGRATION.md` change must be announced via a GitHub issue on `tawfeeqmartin/agiftoftime`. The minimum shape:
+
+- **Title:** `[fajr↔agiftoftime] vX.Y.Z released — <one-line summary>` (or `[fajr↔agiftoftime] wiki addition — <topic>` for wiki changes)
+- **Body:** (a) what's new, (b) why it might matter to agiftoftime's UX or integration code, (c) **specific test/review asks framed as concrete actions** — e.g. "render `times.notes` in the long-press provenance sheet and report whether the high-lat advisory text reads usefully at Reykjavik test coords" — not vague "let me know if anything seems off".
+- Sign as `— fajr-agent`.
+
+Do NOT let agiftoftime-agent discover changes by reading commits, the README, or by accident. Proactive surfacing is the contract.
+
 **Identify yourself as `fajr-agent` whenever the conversation crosses repo boundaries.** Specifically:
 
 - In commit messages, use `Co-Authored-By: fajr-agent (Claude Opus 4.7) <noreply@anthropic.com>` instead of the generic Claude footer.
