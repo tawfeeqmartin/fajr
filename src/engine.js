@@ -202,6 +202,11 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
   let result = {
     fajr:    times.fajr,
     shuruq:  times.sunrise,
+    // `sunrise` is an English-language alias for `shuruq`, kept in sync.
+    // Lets adhan.js consumers migrate to fajr without a field-rename ripple
+    // through their downstream display logic. The two fields point at the
+    // same Date instance — modify one or the other, never both.
+    sunrise: times.sunrise,
     dhuhr:   times.dhuhr,
     asr:     times.asr,
     maghrib: times.maghrib,
@@ -249,6 +254,7 @@ export function applyElevationCorrection(times, elevation, latitude = 0) {
   const adjusted = { ...times }
   // Shuruq (sunrise) is earlier at elevation — depressed horizon
   adjusted.shuruq  = new Date(times.shuruq.getTime()  - corrMs)
+  adjusted.sunrise = adjusted.shuruq    // keep alias in sync with shuruq
   // Maghrib (sunset) is later at elevation
   adjusted.maghrib = new Date(times.maghrib.getTime() + corrMs)
   adjusted.corrections = { ...times.corrections, elevation: true, elevationCorrectionMin: +correctionMin.toFixed(2) }

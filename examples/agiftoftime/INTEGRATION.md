@@ -44,7 +44,7 @@ const times = prayerTimes({ latitude, longitude, date, elevation })
 **Key differences from raw adhan:**
 
 - No method config needed — fajr auto-selects per country/coordinates.
-- Field rename: `sunrise` → `shuruq` (matches Arabic prayer terminology).
+- New primary field name: `shuruq` (Arabic prayer terminology). **`sunrise` is also exposed as an alias** — points at the same `Date` instance, so existing display code referencing `sunrise` (or `t.Sunrise` once you upper-case at your boundary) keeps working without a rename ripple. Use whichever feels right; they're interchangeable.
 - Adds `method` field (the human-readable label, e.g. `"Habous (19°/17°)"` or `"Diyanet (Türkiye)"`) suitable for surfacing in UI.
 - All returned times are `Date` objects in UTC, same as adhan.
 

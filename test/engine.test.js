@@ -68,6 +68,12 @@ describe('prayerTimes invariants', () => {
     }
   })
 
+  it('exposes `sunrise` as an alias for `shuruq` (back-compat for adhan.js consumers)', () => {
+    const result = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    expect(result.sunrise).toBeInstanceOf(Date)
+    expect(result.sunrise.getTime()).toBe(result.shuruq.getTime())
+  })
+
   it('returns prayers in chronological order for a typical mid-latitude location', () => {
     const result = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
     for (let i = 1; i < PRAYERS.length; i++) {

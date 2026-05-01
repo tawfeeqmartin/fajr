@@ -23,6 +23,10 @@ export interface PrayerTimesParams {
 export interface PrayerTimesResult {
   fajr:    Date
   shuruq:  Date
+  /** English-language alias for `shuruq`, kept in sync. Lets adhan.js
+   *  consumers migrate to fajr without a field-rename ripple through their
+   *  downstream display logic. Points at the same Date instance as `shuruq`. */
+  sunrise: Date
   dhuhr:   Date
   asr:     Date
   maghrib: Date
