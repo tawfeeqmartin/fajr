@@ -23,6 +23,7 @@ import { writeFileSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hilalVisibility } from '../src/hilal.js'
+import { STYLE } from './lib/chart-style.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -47,17 +48,17 @@ const MONTH_NAMES = [
 ]
 
 const PALETTE = {
-  bg:           '#0f1923',
-  ocean:        '#1c2733',
-  visible:      '#2e9a58',
-  borderline:   '#d6a833',
-  'not-visible':'#3b4a59',
-  disagree:     '#c44141',
+  bg:           STYLE.bg,
+  ocean:        STYLE.panel,
+  visible:      STYLE.visible,
+  borderline:   STYLE.borderline,
+  'not-visible':STYLE.notVisible,
+  disagree:     STYLE.unsafe,
   unknown:      '#222',
-  fg:           '#ecedf2',
-  city:         '#ffffff',
-  cityHalo:     '#0f1923',
-  grid:         '#2a3a4a',
+  fg:           STYLE.fg,
+  city:         STYLE.city,
+  cityHalo:     STYLE.cityHalo,
+  grid:         STYLE.grid,
 }
 
 const CITY_ANCHORS = [

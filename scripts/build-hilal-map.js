@@ -35,6 +35,7 @@ import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hilalVisibility } from '../src/hilal.js'
+import { STYLE } from './lib/chart-style.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -100,17 +101,17 @@ function classifyCell(result) {
 }
 
 const PALETTE = {
-  bg:           '#0f1923',
-  ocean:        '#1c2733',
-  visible:      '#2e9a58',
-  borderline:   '#d6a833',
-  'not-visible':'#3b4a59',
-  disagree:     '#c44141',
+  bg:           STYLE.bg,
+  ocean:        STYLE.panel,
+  visible:      STYLE.visible,
+  borderline:   STYLE.borderline,
+  'not-visible':STYLE.notVisible,
+  disagree:     STYLE.unsafe,
   unknown:      '#222',
-  fg:           '#ecedf2',
-  city:         '#ffffff',
-  cityHalo:     '#0f1923',
-  grid:         '#2a3a4a',
+  fg:           STYLE.fg,
+  city:         STYLE.city,
+  cityHalo:     STYLE.cityHalo,
+  grid:         STYLE.grid,
 }
 
 const CITY_ANCHORS = [
@@ -212,7 +213,7 @@ function render(cells, hijriLabel, gregorianLabel, summary, decisions) {
   // Observation overlays — diamond markers for documented committee decisions.
   for (const d of decisions ?? []) {
     const [x, y] = projectClipped(d.lat, d.lng)
-    const fill = d.decision === 'sighted' ? '#3ed16f' : '#ff5252'
+    const fill = d.decision === 'sighted' ? STYLE.sighted : STYLE.notSighted
     const r = 6
     // Diamond (rotated square)
     body += `<polygon points="${x},${y-r} ${x+r},${y} ${x},${y+r} ${x-r},${y}" fill="${fill}" stroke="${PALETTE.cityHalo}" stroke-width="1.4" />`
@@ -239,10 +240,10 @@ function render(cells, hijriLabel, gregorianLabel, summary, decisions) {
   if (decisions && decisions.length > 0) {
     const ly2 = ly + 22
     const r = 6
-    body += `<polygon points="${lx+7},${ly2-8} ${lx+13},${ly2-2} ${lx+7},${ly2+4} ${lx+1},${ly2-2}" fill="#3ed16f" stroke="${PALETTE.cityHalo}" stroke-width="1.2" />`
+    body += `<polygon points="${lx+7},${ly2-8} ${lx+13},${ly2-2} ${lx+7},${ly2+4} ${lx+1},${ly2-2}" fill="${STYLE.sighted}" stroke="${PALETTE.cityHalo}" stroke-width="1.2" />`
     body += `<text x="${lx + 22}" y="${ly2}" fill="${PALETTE.fg}" font-size="10">committee declared SIGHTED</text>`
     const lx3 = lx + 230
-    body += `<polygon points="${lx3+7},${ly2-8} ${lx3+13},${ly2-2} ${lx3+7},${ly2+4} ${lx3+1},${ly2-2}" fill="#ff5252" stroke="${PALETTE.cityHalo}" stroke-width="1.2" />`
+    body += `<polygon points="${lx3+7},${ly2-8} ${lx3+13},${ly2-2} ${lx3+7},${ly2+4} ${lx3+1},${ly2-2}" fill="${STYLE.notSighted}" stroke="${PALETTE.cityHalo}" stroke-width="1.2" />`
     body += `<text x="${lx3 + 22}" y="${ly2}" fill="${PALETTE.fg}" font-size="10">committee declared NOT SIGHTED</text>`
   }
 

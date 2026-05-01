@@ -18,6 +18,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import { STYLE, svgOpen, svgClose, title, subtitle, escapeXml as escape, scale, niceCeil } from './lib/chart-style.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const RUNS_PATH = join(__dirname, '..', 'eval', 'results', 'runs.jsonl')
@@ -49,52 +50,30 @@ function loadRuns() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SVG helpers
+// SVG helpers — uses shared palette from scripts/lib/chart-style.js
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Local alias for the shared palette so the existing chart code reads naturally.
 const PALETTE = {
-  bg:        '#fafaf7',
-  fg:        '#1a1a1a',
-  grid:      '#dcdcd0',
-  train:     '#1f7a4d',     // green for train
-  trainBg:   '#dff1e7',
-  test:      '#7a4d9c',     // purple for holdout
-  testBg:    '#ece1f3',
-  zero:      '#999',
-  warn:      '#c83030',
-  cool:      '#2060c0',
-  ok:        '#2a8a2a',
+  bg:      STYLE.bg,
+  fg:      STYLE.fg,
+  fgDim:   STYLE.fgDim,
+  grid:    STYLE.grid,
+  panel:   STYLE.panel,
+  train:   STYLE.train,
+  trainBg: STYLE.trainBg,
+  test:    STYLE.test,
+  testBg:  STYLE.testBg,
+  zero:    STYLE.zero,
+  warn:    STYLE.unsafe,
 }
 
-function svgHeader(w, h, title) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" font-family="-apple-system, system-ui, sans-serif" font-size="11">
-  <rect width="${w}" height="${h}" fill="${PALETTE.bg}" />
-  <text x="${w/2}" y="22" text-anchor="middle" font-size="14" font-weight="600" fill="${PALETTE.fg}">${escape(title)}</text>`
+function svgHeader(w, h, t) {
+  return svgOpen(w, h)
+       + title(w, 26, t, { size: STYLE.titleSize })
 }
 
-function svgFooter() { return `</svg>` }
-
-function escape(s) {
-  return String(s).replace(/[&<>"']/g, c =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]))
-}
-
-// Linear scale: domain [d0, d1] → range [r0, r1]
-function scale(d0, d1, r0, r1) {
-  if (d1 === d0) return () => (r0 + r1) / 2
-  return d => r0 + (d - d0) * (r1 - r0) / (d1 - d0)
-}
-
-function niceCeil(v) {
-  if (v <= 0) return 1
-  const p = Math.pow(10, Math.floor(Math.log10(v)))
-  const m = v / p
-  if (m <= 1)   return 1   * p
-  if (m <= 2)   return 2   * p
-  if (m <= 2.5) return 2.5 * p
-  if (m <= 5)   return 5   * p
-  return 10 * p
-}
+function svgFooter() { return svgClose() }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Charts

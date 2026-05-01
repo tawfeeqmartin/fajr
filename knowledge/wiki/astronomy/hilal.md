@@ -177,7 +177,9 @@ Output: `docs/charts/hilal-year-{year}.svg`. Uses SMIL `<animate>` elements with
 - [[wiki/astronomy/refraction]] — atmospheric refraction conventions
 - `src/lunar.js` — Meeus-based lunar and solar position implementation
 - `src/hilal.js` — Odeh + Yallop + Shaukat classifications and the public `hilalVisibility` API
-- `scripts/validate-hilal.js` — historical validation cases
+- `scripts/validate-hilal.js` — historical validation cases (Odeh + Yallop + Shaukat against documented Hijri month transitions)
+- `scripts/validate-lunar-against-jpl.js` — `src/lunar.js` Meeus implementation validated against NASA JPL Horizons DE441 ephemeris (currently within 156″ RA / 60″ Dec / 0.03% distance over 30 daily samples in April 2026)
+- `docs/lunar-jpl-validation.md` — auto-generated validation report from the above
 - `scripts/build-hilal-map.js` — world disagreement map generator (with committee-decision overlays)
 - `scripts/build-hilal-year-animation.js` — 12-month year-cycle animated SVG
 - `eval/data/hilal-observations.json` — curated dataset of documented committee sighting decisions
