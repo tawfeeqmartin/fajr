@@ -114,6 +114,32 @@ For these five cases, all three criteria agree on the binary visible/not-visible
 
 ---
 
+## Validation status — what's measured vs. what's inferred
+
+Hilal classification accuracy is *currently inferred* from validated primitives × cited published-criterion accuracy, not *directly measured* end-to-end at scale. This section names that gap honestly so downstream consumers don't over-trust the chain.
+
+### What IS measured
+
+| Layer | Validation | Result |
+|---|---|---|
+| Lunar position primitive | [`scripts/validate-lunar-against-jpl.js`](../../../scripts/validate-lunar-against-jpl.js) — 30 daily samples vs JPL Horizons DE441 (April 2026) | Max abs ΔRA 156″, ΔDec 60″, Δdistance 0.030% — within ≤0.05° / ≤0.5% target ✓ |
+| Solar position primitive | [`scripts/validate-solar-against-jpl.js`](../../../scripts/validate-solar-against-jpl.js) — 30 daily samples vs JPL Horizons DE441 (April 2026) | Max abs ΔRA 15″, ΔDec 10″, Δdistance 0.004% — well within Meeus 25 simplified's ~1' published accuracy ✓ |
+| Three-criterion algorithm | [`scripts/validate-hilal.js`](../../../scripts/validate-hilal.js) — 5 documented Hijri month transitions | 5/5 astronomically defensible verdicts (Odeh + Yallop + Shaukat agree on visible/not-visible across all 5 cases) |
+
+### What is NOT measured — and is currently *inferred* instead
+
+| Layer | Status | What we'd need |
+|---|---|---|
+| Atmospheric extinction model | Trusted via Odeh / Yallop / Shaukat polynomial fits to their training datasets (737 / variable / variable observations respectively). fajr does not validate the underlying atmospheric model independently. | Field measurements of crescent visibility under varying atmospheric conditions, beyond the published training data. |
+| End-to-end accuracy at scale | The 5-case validation is illustrative, not statistical. The Ramadan 1446 alignment with 8 committee decisions is a single example. | The historical-sightings backfill on the roadmap (Hijri 1430-onward, ~15 years × 12 months × ~10 committees ≈ 1,800 decisions) is the path to actually testing whether fajr's three-criterion classification correlates with documented committee outcomes at statistical significance. |
+| Single-criterion preference | fajr returns all three criteria with `criteriaAgree`; it does NOT measure which criterion is most predictive of any specific committee's decisions. | Cross-tabulating each committee's historical decisions against each criterion's predictions — a research output the open-sightings dataset would enable. |
+
+### The honest summary
+
+For *primitives* (lunar + solar position), accuracy is measured against JPL DE441 and within published-series tolerances. For *end-to-end hilal classification*, accuracy is **plausibly bounded** by the published accuracy of the three criteria (Odeh: trained on 737 records; Yallop: HMNAO; Shaukat: Pakistan Ruet-e-Hilal historical data) but **not independently re-measured** at scale by fajr.
+
+Practically: trust the primitives; treat the criterion outputs as ikhtilaf-respecting reference predictions, not as predictive ground truth for any specific committee's behaviour. The single Ramadan 1446 alignment in the README is a striking illustration, not a published empirical claim.
+
 ## What fajr does NOT do
 
 - **Bruin / Maunder / SAAO criteria.** fajr currently runs Odeh + Yallop + Shaukat. Bruin (1977) and Maunder (1911) and the SAAO theoretical-contrast model are on the roadmap but not yet implemented.

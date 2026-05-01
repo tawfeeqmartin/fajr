@@ -139,7 +139,7 @@ The signed-bias chart is the *ihtiyat* (precaution) view: the unsafe direction i
 
 Three-criterion (Odeh / Yallop / Shaukat) hilal visibility evaluated at every cell of a 10° lat/lng grid for Hijri 1446-09 (Ramadan 1446, sighting evening 28 February 2025), with **green diamonds** marking countries whose committees declared *sighted* and **red diamonds** marking countries that declared *not sighted*. Cell colors: green = all three criteria say visible; grey = all three say not visible; amber = "optical aid only" (Odeh C, others D/F); **red cells = full ikhtilaf zones** where the criteria disagree on visible vs not visible.
 
-For Ramadan 1446, the red ikhtilaf zone covered ~24% of the world's surface — and **the actual committee decisions split exactly along that astronomical fault line.** Saudi Arabia, UAE, Qatar, Egypt declared sighted; Pakistan, Morocco, Iran, India did not. The map shows in one image why those announcements legitimately differed: the sighting was astronomically borderline at every Muslim-majority observatory, and which side of the threshold a committee landed on came down to which of the (legitimately competing) criteria they applied.
+For Ramadan 1446, the red ikhtilaf zone covered ~24% of the world's surface. The **8 documented committee decisions for that month** — Saudi Arabia / UAE / Qatar / Egypt declaring sighted, Pakistan / Morocco / Iran / India declaring not sighted — sit along the predicted boundary in this single example. That's *illustrative* of the pattern, not statistical evidence for it. A larger historical sample (the Hijri 1430-onward backfill of `eval/data/hilal-observations.json` listed on the roadmap — ~15 years × 12 months × ~10 committees) is what would actually test whether the correlation holds at scale. For now: a striking single-case alignment that the multi-criterion machinery makes legible, not a published empirical result.
 
 Regenerate for any Hijri month with `npm run build:hilal-map -- --year YEAR --month MONTH`. Committee decisions are loaded from [`eval/data/hilal-observations.json`](eval/data/hilal-observations.json); pass `--no-observations` to render without overlays.
 
@@ -317,22 +317,55 @@ const night = fajr.nightThirds({ date, latitude, longitude })
 // Hijri date
 const hijri = fajr.hijri(new Date())
 
-// Hilal (lunar crescent) visibility — Odeh + Yallop + Shaukat
-// Returns:
-//   {
-//     visible, code: 'A'|'B'|'C'|'D', V,                          // Odeh, top-level
-//     yallop:  { visible, code: 'A'..'F', q, ... },                // polynomial, distinct fit
-//     shaukat: { visible, code: 'A'|'B'|'D',                       // rule-based, Pakistan practice
-//                elongationDeg, moonAltAtSunsetDeg, moonAgeHours, lagMinutes, ... },
-//     criteriaAgree,                                                // false = borderline ikhtilaf
-//     arcvDeg, widthArcmin, lagTimeMinutes, moonAgeHours,
-//     sunsetUTC, moonsetUTC, bestTimeUTC, conjunctionUTC,
-//     ...
-//   }
+// Hilal (lunar crescent) visibility — three criteria computed in parallel.
 // Note: hilal sighting decisions are ultimately a matter of fiqh; this
 // returns astronomical possibility, not a religious ruling. See
 // knowledge/wiki/astronomy/hilal.md.
 const hilal = fajr.hilalVisibility({ year: 1445, month: 9, latitude, longitude })
+
+// Full return shape:
+// {
+//   // Odeh (2004) — primary, top-level fields preserved for back-compat.
+//   visible:        true | false,
+//   code:           'A' | 'B' | 'C' | 'D',
+//   label:          string,
+//   V:              number,         // Odeh's polynomial parameter
+//   criterion:      'Odeh (2004)',
+//
+//   // Yallop (1997) — same (ARCV, W) inputs, different polynomial fit.
+//   yallop: {
+//     criterion:    'Yallop (1997)',
+//     visible:      true | false,
+//     code:         'A' | 'B' | 'C' | 'D' | 'E' | 'F',
+//     label:        string,
+//     q:            number,
+//   },
+//
+//   // Shaukat (2002) — rule-based on a different feature set; Pakistan practice.
+//   shaukat: {
+//     criterion:    'Shaukat (2002)',
+//     visible:      true | false,
+//     code:         'A' | 'B' | 'D',
+//     label:        string,
+//     elongationDeg, moonAltAtSunsetDeg, moonAgeHours, lagMinutes,
+//   },
+//
+//   // True iff all three criteria agree on the binary visible/not-visible
+//   // verdict. False = borderline ikhtilaf — surface this in any UI; the
+//   // sighting is contested and witness testimony / scholarly judgment matter.
+//   criteriaAgree:  true | false,
+//
+//   // Geometry (shared between criteria).
+//   arcvDeg, widthArcmin, lagTimeMinutes, moonAgeHours,
+//   sunsetUTC, moonsetUTC, bestTimeUTC, conjunctionUTC,
+//
+//   // Hijri context.
+//   evaluatedHijriDate: { year, month: 9 (= 8 + 1 — sighting eve of month 9 starts at day 29 of month 8), day: 29 },
+//   forHijriMonth:      { year, month },
+//   latitude, longitude,
+//
+//   note: '...wasail/ibadat reminder...',
+// }
 
 // Traveler mode (shortened/combined prayers)
 const travelerTimes = fajr.travelerMode({ ...coords, madhab: 'hanafi' })
