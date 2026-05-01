@@ -7,7 +7,7 @@
  * Internal implementation lives in engine.js and the other src/ modules.
  */
 
-import { prayerTimes as _prayerTimes, applyElevationCorrection } from './engine.js'
+import { prayerTimes as _prayerTimes, applyElevationCorrection, dayTimes as _dayTimes } from './engine.js'
 import { qibla } from './qibla.js'
 import { hijri } from './hijri.js'
 import { hilalVisibility } from './hilal.js'
@@ -33,8 +33,17 @@ function prayerTimes(params) {
   return times
 }
 
+/**
+ * Single-call convenience returning the 6 prayers + sunrise + sunset +
+ * midnight + qiyam in one object. See engine.js dayTimes() for details.
+ */
+function dayTimes(params) {
+  return _dayTimes(params)
+}
+
 export default {
   prayerTimes,
+  dayTimes,
   qibla,
   hijri,
   hilalVisibility,
@@ -44,6 +53,7 @@ export default {
 
 export {
   prayerTimes,
+  dayTimes,
   qibla,
   hijri,
   hilalVisibility,

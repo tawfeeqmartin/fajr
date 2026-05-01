@@ -12,7 +12,7 @@
 
 import { describe, it, expect } from 'vitest'
 import fajr, {
-  prayerTimes, qibla, hijri, hilalVisibility,
+  prayerTimes, dayTimes, qibla, hijri, hilalVisibility,
   nightThirds, travelerMode,
 } from '../src/index.js'
 import { applyElevationCorrection } from '../src/engine.js'
@@ -74,6 +74,17 @@ describe('prayerTimes invariants', () => {
     expect(result.sunrise.getTime()).toBe(result.shuruq.getTime())
   })
 
+  it('exposes `sunset` as a Date distinct from internal storage (matches adhan.js shape)', () => {
+    const result = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    expect(result.sunset).toBeInstanceOf(Date)
+    expect(Number.isFinite(result.sunset.getTime())).toBe(true)
+    // For the standard methods used here, sunset and maghrib are typically
+    // identical or differ by < 1 second; only some method-specific offsets
+    // (e.g. certain Diyanet variants) produce a meaningful gap.
+    const gapMs = Math.abs(result.sunset.getTime() - result.maghrib.getTime())
+    expect(gapMs).toBeLessThan(60_000)
+  })
+
   it('returns prayers in chronological order for a typical mid-latitude location', () => {
     const result = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
     for (let i = 1; i < PRAYERS.length; i++) {
@@ -99,6 +110,40 @@ describe('prayerTimes invariants', () => {
     const result = prayerTimes({ latitude: -33.92, longitude: 18.42, date: TEST_DATE })
     for (const p of PRAYERS) {
       expect(Number.isFinite(result[p].getTime())).toBe(true)
+    }
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// dayTimes — single-call convenience returning all 9 day-times
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('dayTimes', () => {
+  it('returns prayer times + sunset + midnight + qiyam in one object', () => {
+    const result = dayTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    for (const f of ['fajr', 'shuruq', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha', 'sunset', 'midnight', 'qiyam']) {
+      expect(result[f]).toBeInstanceOf(Date)
+      expect(Number.isFinite(result[f].getTime())).toBe(true)
+    }
+  })
+
+  it('orders night-third boundaries correctly: maghrib < midnight < qiyam < next-day fajr', () => {
+    const result = dayTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    expect(result.maghrib.getTime()).toBeLessThan(result.midnight.getTime())
+    expect(result.midnight.getTime()).toBeLessThan(result.qiyam.getTime())
+    // qiyam should be in the last third of the night, before fajr-of-tomorrow
+    // (we don't have tomorrow's fajr in the result but we know the night
+    // ends around fajr+24h since fajr in the result is for today).
+    const tomorrowDate = new Date(TEST_DATE.getTime() + 24 * 60 * 60 * 1000)
+    const tomorrow = prayerTimes({ latitude: 33.97, longitude: -6.85, date: tomorrowDate })
+    expect(result.qiyam.getTime()).toBeLessThan(tomorrow.fajr.getTime())
+  })
+
+  it('is consistent with prayerTimes() for the prayer fields', () => {
+    const day = dayTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    const six = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    for (const f of ['fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha', 'sunset']) {
+      expect(day[f].getTime()).toBe(six[f].getTime())
     }
   })
 })
@@ -341,8 +386,8 @@ describe('nightThirds', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('default export', () => {
-  it('exposes prayerTimes, qibla, hijri, hilalVisibility, nightThirds, travelerMode', () => {
-    for (const fn of ['prayerTimes', 'qibla', 'hijri', 'hilalVisibility', 'nightThirds', 'travelerMode']) {
+  it('exposes prayerTimes, dayTimes, qibla, hijri, hilalVisibility, nightThirds, travelerMode', () => {
+    for (const fn of ['prayerTimes', 'dayTimes', 'qibla', 'hijri', 'hilalVisibility', 'nightThirds', 'travelerMode']) {
       expect(typeof fajr[fn]).toBe('function')
     }
   })

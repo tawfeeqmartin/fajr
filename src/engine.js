@@ -211,6 +211,12 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
     asr:     times.asr,
     maghrib: times.maghrib,
     isha:    times.isha,
+    // Astronomical sunset, distinct from `maghrib` for methods that apply
+    // a post-sunset offset (e.g. some Diyanet variants). For most methods
+    // these are identical to within a second. adhan.js exposes both, so
+    // fajr does too — back-compat for adhan-migrating apps that tracked
+    // them as separate fields.
+    sunset:  times.sunset,
     method:  methodName,
     corrections: {
       elevation: false,
@@ -225,6 +231,46 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
   // available for use when ground truth is also elevation-corrected.
 
   return result
+}
+
+/**
+ * Convenience wrapper returning all common day-times in a single call:
+ * the 6 prayers, sunrise + sunset (astronomical), midnight (mid-night),
+ * and qiyam (start of last third of night, recommended time for tahajjud).
+ *
+ * Computes today's prayer times AND tomorrow's fajr internally to derive
+ * the night-third boundaries. For callers that only need the 6 prayers,
+ * `prayerTimes()` remains the leaner single call.
+ *
+ * 🟢 Established: division of night into thirds is documented in hadith
+ * and classical fiqh; sunset / sunrise are standard astronomical instants.
+ *
+ * @param {object} params
+ * @param {number} params.latitude
+ * @param {number} params.longitude
+ * @param {Date}   params.date
+ * @param {number} [params.elevation=0]
+ * @returns {object} prayerTimes(...) result extended with `midnight` and `qiyam` Dates.
+ */
+export function dayTimes({ latitude, longitude, date, elevation = 0 }) {
+  const today = prayerTimes({ latitude, longitude, date, elevation })
+  const tomorrow = prayerTimes({
+    latitude, longitude, elevation,
+    date: new Date(date.getTime() + 24 * 60 * 60 * 1000),
+  })
+  // Inline night-thirds calculation from today's maghrib to tomorrow's fajr,
+  // avoiding a third call into prayerTimes via nightThirds().
+  const nightDuration = tomorrow.fajr.getTime() - today.maghrib.getTime()
+  const midnight = new Date(today.maghrib.getTime() + nightDuration / 2)
+  const qiyam    = new Date(today.maghrib.getTime() + (2 * nightDuration) / 3)
+
+  return {
+    ...today,
+    midnight,
+    /** Start of the last third of the night — the recommended time window
+     *  for qiyām al-layl / tahajjud per hadith tradition. */
+    qiyam,
+  }
 }
 
 /**

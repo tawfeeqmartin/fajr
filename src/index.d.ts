@@ -31,6 +31,11 @@ export interface PrayerTimesResult {
   asr:     Date
   maghrib: Date
   isha:    Date
+  /** Astronomical sunset, distinct from `maghrib` for methods that apply a
+   *  post-sunset offset (e.g. some Diyanet variants); for most methods these
+   *  are identical to within a second. Mirrors adhan.js's separate `sunset`
+   *  field for back-compat with adhan-migrating apps. */
+  sunset:  Date
   /** Human-readable label of the auto-selected calculation method,
    *  e.g. `"Morocco (19°/17° community calibration)"` or `"Diyanet (Türkiye)"`. */
   method:  string
@@ -43,6 +48,20 @@ export interface PrayerTimesResult {
 }
 
 export function prayerTimes(params: PrayerTimesParams): PrayerTimesResult
+
+/** Single-call convenience returning all common day-times in one object:
+ *  the 6 prayers, sunrise + sunset, midnight (mid-night), and qiyam (start
+ *  of last third of night, recommended time for tahajjud). Computes today's
+ *  prayer times AND tomorrow's fajr internally to derive the night-third
+ *  boundaries. For callers needing only the 6 prayers, use `prayerTimes()`. */
+export interface DayTimesResult extends PrayerTimesResult {
+  midnight: Date
+  /** Start of the last third of the night — recommended window for
+   *  qiyām al-layl / tahajjud per hadith tradition. */
+  qiyam:    Date
+}
+
+export function dayTimes(params: PrayerTimesParams): DayTimesResult
 
 /** Apply an opt-in geometric horizon-dip correction for elevated locations.
  *
@@ -271,6 +290,7 @@ export function travelerMode(params: {
 
 declare const fajr: {
   prayerTimes:     typeof prayerTimes
+  dayTimes:        typeof dayTimes
   qibla:           typeof qibla
   hijri:           typeof hijri
   hilalVisibility: typeof hilalVisibility
