@@ -278,17 +278,17 @@ The human does **not** need to review code quality, mathematical correctness, or
 
 fajr is consumed downstream by other repos (notably [agiftoftime.app](https://agiftoftime.app), which integrates fajr's prayer-time and hilal output). The agents working in those repos will sometimes have fajr-side questions — API behaviour, edge cases, integration patterns, regression concerns. The convention for handling those:
 
-**At the start of any session in this repo, check the GitHub issue tracker.** Specifically:
+**At the start of any session in this repo, check the GitHub issue tracker:**
 
 ```bash
-gh issue list --repo tawfeeqmartin/fajr --label cross-repo --state open
+gh issue list --repo tawfeeqmartin/fajr --state open
 ```
 
-If there are open `cross-repo` issues, read them, respond in comments (or open a PR if a code change is needed and reference the issue with `Fixes #N`), and close when resolved.
+If there are open issues from a downstream-repo agent, read them, respond in comments (or open a PR if a code change is needed and reference the issue with `Fixes #N`), and close when resolved.
 
 **When asked a question that affects another repo's integration**, prefer to answer in a GitHub issue comment rather than only in the local conversation — that creates durable cross-repo memory both agents and humans can reference.
 
-**When proposing a change that downstream repos need to know about** (API additions, behaviour changes, version bumps), file an issue tagged `cross-repo` describing the change and what downstream needs to do. Cross-reference in the commit message.
+**When proposing a change that downstream repos need to know about** (API additions, behaviour changes, version bumps), file an issue describing the change and what downstream needs to do. Cross-reference in the commit message.
 
 This pattern lets each agent work asynchronously in its own repo without bottlenecking the human as a relay between sessions.
 

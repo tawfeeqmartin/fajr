@@ -4,25 +4,7 @@
 
 ---
 
-## Step 1 — Create the `cross-repo` label on both repos
-
-Run once, from any terminal where `gh` is authenticated:
-
-```bash
-gh label create cross-repo \
-  --repo tawfeeqmartin/fajr \
-  --description "Coordination question between agents in two repos" \
-  --color "C5DEF5"
-
-gh label create cross-repo \
-  --repo tawfeeqmartin/agiftoftime \
-  --description "Coordination question between agents in two repos" \
-  --color "C5DEF5"
-```
-
-Light blue (`#C5DEF5`) is a calm, easy-to-spot color that doesn't clash with standard GitHub label palettes. Pick a different hex if you want.
-
-## Step 2 — Add the snippet below to `agiftoftime/CLAUDE.md`
+## Step 1 — Add the snippet below to `agiftoftime/CLAUDE.md`
 
 If agiftoftime has its own `CLAUDE.md` (it should, given it has its own agent), add this section. The fajr-side equivalent is already committed to fajr's CLAUDE.md.
 
@@ -36,7 +18,6 @@ agiftoftime depends on the [fajr](https://github.com/tawfeeqmartin/fajr) library
 ```bash
 gh issue create \
   --repo tawfeeqmartin/fajr \
-  --label cross-repo \
   --title "<concise question>" \
   --body "<context: what agiftoftime is doing, what's blocking, what response would unblock>"
 ```
@@ -44,7 +25,7 @@ gh issue create \
 **At the start of any session in this repo, check whether fajr-side has responded to any open issues you filed:**
 
 ```bash
-gh issue list --repo tawfeeqmartin/fajr --label cross-repo --state all --author @me
+gh issue list --repo tawfeeqmartin/fajr --state all --author @me
 ```
 
 If fajr-side answered or merged a PR addressing your question, integrate the response and close out the local task that depended on it.
@@ -54,13 +35,13 @@ If fajr-side answered or merged a PR addressing your question, integrate the res
 This pattern keeps the human (Tawfeeq) out of the relay loop. Fire-and-forget per question; both agents work asynchronously in their own repos and read the GitHub-hosted thread as the durable record.
 ```
 
-## Step 3 — Optional: add a recurring `gh issue list` to your routine
+## Step 2 — Optional: add a recurring `gh issue list` to your routine
 
 If you want to monitor the cross-repo conversation without asking either agent, run periodically:
 
 ```bash
-gh issue list --repo tawfeeqmartin/fajr --label cross-repo --state open
-gh issue list --repo tawfeeqmartin/agiftoftime --label cross-repo --state open
+gh issue list --repo tawfeeqmartin/fajr --state open
+gh issue list --repo tawfeeqmartin/agiftoftime --state open
 ```
 
 Each agent's CLAUDE.md instructs them to check at session start, but you can spot-check anytime.
