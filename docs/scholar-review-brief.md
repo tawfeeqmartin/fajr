@@ -98,9 +98,9 @@ A response in writing, in any form you find appropriate. Possible shapes:
 
 If you find the methodology sound on a question and would permit attribution, I would record the attestation in writing in the project's documentation, naming the date of review and the specific scope of what you reviewed. Nothing about this is institutional certification — only a scholar's reading and assessment, attributed if you allow. If you would prefer to remain unattributed while still offering a review, your input would be just as gratefully received and held in confidence.
 
-I would prefer to handle this entirely in writing rather than meeting in person or by video call. Asynchronous correspondence respects your time, lets you respond when convenient, and gives me time to address any follow-up questions carefully rather than on the spot.
+Please reply by email at whatever pace and depth the questions deserve — there is no deadline. If another arrangement suits you better, please let me know.
 
-If you would like to look further into anything I have summarised above before responding, the project lives at <https://github.com/tawfeeqmartin/fajr> — but nothing there is required reading; the four questions above are intended to stand fully on their own.
+If you would like to look further into anything I have summarised above, the project lives at <https://github.com/tawfeeqmartin/fajr> — but nothing there is required reading; the four questions above are intended to stand fully on their own.
 
 *Jazākum Allāhu khayran* for any time you can give to this. I remain grateful for your work and for the broader tradition of *ʿilm al-mīqāt* on which all of this rests.
 
