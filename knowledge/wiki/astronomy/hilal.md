@@ -142,7 +142,7 @@ Running the three criteria on a global lat/lng grid produces a per-Hijri-month m
 npm run build:hilal-map -- --year 1446 --month 9
 ```
 
-Output: `docs/charts/hilal-{year}-{month}.svg`. ~0.1 s for a 10° grid (432 cells) at the moment.
+Output: `docs/charts/hilal-{year}-{month}.svg`. ~0.1 s for a 10° grid (432 cells).
 
 The four cell categories:
 
@@ -153,7 +153,23 @@ The four cell categories:
 | ⬛ grey  | all three criteria say not visible |
 | 🔴 red   | criteria disagree on the binary visible vs not-visible question (the ikhtilaf zones) |
 
-For Ramadan 1446 (sighting 28 February 2025), ~24% of the world's surface fell in the red zone. That's why announced sightings differed: Egypt, Saudi Arabia, UAE, and Qatar accepted; Pakistan, Morocco, Iran, India, and several others did not. The map gives a quick geographic reading of which regions are in stable agreement and which are in genuine ikhtilaf for any given month.
+### Committee-decision overlays
+
+When the script can find a matching record in `eval/data/hilal-observations.json` for the requested Hijri month, it overlays the documented national-committee decisions as **green diamonds** (sighted) or **red diamonds** (not sighted), each labelled with the country.
+
+Comparing the diamond pattern against the cell-color zones lets you see directly whether the actual sighting outcomes followed astronomical possibility or diverged from it. For Ramadan 1446 the diamonds sit squarely in the red ikhtilaf zone, which is the geometric statement of why announced sightings legitimately differed by country that month.
+
+Pass `--no-observations` to render without overlays (useful for prediction-mode use where committee decisions are not yet known).
+
+### Year-cycle animations
+
+To produce all 12 months of a Hijri year as a single animated SVG cycling at 1 s / month:
+
+```
+npm run build:hilal-year -- --year 1446
+```
+
+Output: `docs/charts/hilal-year-{year}.svg`. Uses SMIL `<animate>` elements with `calcMode="discrete"` for stepped frame transitions. SMIL is supported by Firefox and Safari natively; Chromium-based viewers may render only the first frame, which is acceptable degradation since the static frame is itself a useful map.
 
 ## Cross-references
 
@@ -162,4 +178,6 @@ For Ramadan 1446 (sighting 28 February 2025), ~24% of the world's surface fell i
 - `src/lunar.js` — Meeus-based lunar and solar position implementation
 - `src/hilal.js` — Odeh + Yallop + Shaukat classifications and the public `hilalVisibility` API
 - `scripts/validate-hilal.js` — historical validation cases
-- `scripts/build-hilal-map.js` — world disagreement map generator
+- `scripts/build-hilal-map.js` — world disagreement map generator (with committee-decision overlays)
+- `scripts/build-hilal-year-animation.js` — 12-month year-cycle animated SVG
+- `eval/data/hilal-observations.json` — curated dataset of documented committee sighting decisions

@@ -31,12 +31,14 @@
  * Default: Hijri (1446, 9) = Ramadan 1446 = February-March 2025.
  */
 
-import { writeFileSync, mkdirSync } from 'fs'
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hilalVisibility } from '../src/hilal.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+const DEFAULT_OBSERVATIONS = join(__dirname, '..', 'eval', 'data', 'hilal-observations.json')
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Args
@@ -50,10 +52,26 @@ function arg(name, fallback) {
 const YEAR  = parseInt(arg('year',  '1446'), 10)
 const MONTH = parseInt(arg('month', '9'),    10)
 const STEP  = parseFloat(arg('step', '10'))         // grid spacing (deg)
+const OBSERVATIONS_PATH = arg('observations', DEFAULT_OBSERVATIONS)
+const NO_OVERLAY = process.argv.includes('--no-observations')
 const OUT_PATH = arg(
   'out',
   join(__dirname, '..', 'docs', 'charts', `hilal-${YEAR}-${String(MONTH).padStart(2,'0')}.svg`),
 )
+
+function loadObservations(year, month) {
+  if (NO_OVERLAY) return []
+  if (!existsSync(OBSERVATIONS_PATH)) return []
+  try {
+    const data = JSON.parse(readFileSync(OBSERVATIONS_PATH, 'utf8'))
+    const record = (data.observations ?? []).find(
+      o => o.hijri?.year === year && o.hijri?.month === month
+    )
+    return record?.decisions ?? []
+  } catch {
+    return []
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cells, classification, palette
@@ -130,7 +148,7 @@ function escape(s) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]))
 }
 
-function render(cells, hijriLabel, gregorianLabel, summary) {
+function render(cells, hijriLabel, gregorianLabel, summary, decisions) {
   // Equirectangular: x = (lng + 180) / 360 × width, y = (90 − lat) / 180 × height
   const W = 1100
   const H = 600
@@ -180,14 +198,28 @@ function render(cells, hijriLabel, gregorianLabel, summary) {
     body += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(cellPx).toFixed(1)}" height="${(cellPxH).toFixed(1)}" fill="${PALETTE[cell.classification]}" opacity="0.85" />`
   }
 
-  // City anchors
+  // City anchors (skip cities that overlap with an overlay marker — the
+  // marker carries the same geography, so doubling up adds noise).
+  const overlayKey = (lat, lng) => `${lat.toFixed(1)},${lng.toFixed(1)}`
+  const overlaySet = new Set((decisions ?? []).map(d => overlayKey(d.lat, d.lng)))
   for (const c of CITY_ANCHORS) {
+    if (overlaySet.has(overlayKey(c.lat, c.lng))) continue
     const [x, y] = projectClipped(c.lat, c.lng)
     body += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.5" fill="${PALETTE.city}" stroke="${PALETTE.cityHalo}" stroke-width="0.8" />`
     body += `<text x="${(x+4).toFixed(1)}" y="${(y-4).toFixed(1)}" fill="${PALETTE.city}" font-size="9" stroke="${PALETTE.cityHalo}" stroke-width="2" paint-order="stroke" opacity="0.95">${escape(c.name)}</text>`
   }
 
-  // Legend
+  // Observation overlays — diamond markers for documented committee decisions.
+  for (const d of decisions ?? []) {
+    const [x, y] = projectClipped(d.lat, d.lng)
+    const fill = d.decision === 'sighted' ? '#3ed16f' : '#ff5252'
+    const r = 6
+    // Diamond (rotated square)
+    body += `<polygon points="${x},${y-r} ${x+r},${y} ${x},${y+r} ${x-r},${y}" fill="${fill}" stroke="${PALETTE.cityHalo}" stroke-width="1.4" />`
+    body += `<text x="${(x+9).toFixed(1)}" y="${(y+3).toFixed(1)}" fill="${PALETTE.fg}" font-size="10" font-weight="600" stroke="${PALETTE.cityHalo}" stroke-width="2.5" paint-order="stroke">${escape(d.country)}</text>`
+  }
+
+  // Legend (cell colors)
   const lx = ML
   const ly = H - MB + 30
   const items = [
@@ -201,6 +233,17 @@ function render(cells, hijriLabel, gregorianLabel, summary) {
     body += `<rect x="${lxi}" y="${ly-8}" width="14" height="10" fill="${PALETTE[key]}" />`
     body += `<text x="${lxi + 18}" y="${ly}" fill="${PALETTE.fg}" font-size="10">${escape(label)}</text>`
     lxi += 18 + label.length * 6 + 18
+  }
+
+  // Legend (overlays, second row, only if decisions present)
+  if (decisions && decisions.length > 0) {
+    const ly2 = ly + 22
+    const r = 6
+    body += `<polygon points="${lx+7},${ly2-8} ${lx+13},${ly2-2} ${lx+7},${ly2+4} ${lx+1},${ly2-2}" fill="#3ed16f" stroke="${PALETTE.cityHalo}" stroke-width="1.2" />`
+    body += `<text x="${lx + 22}" y="${ly2}" fill="${PALETTE.fg}" font-size="10">committee declared SIGHTED</text>`
+    const lx3 = lx + 230
+    body += `<polygon points="${lx3+7},${ly2-8} ${lx3+13},${ly2-2} ${lx3+7},${ly2+4} ${lx3+1},${ly2-2}" fill="#ff5252" stroke="${PALETTE.cityHalo}" stroke-width="1.2" />`
+    body += `<text x="${lx3 + 22}" y="${ly2}" fill="${PALETTE.fg}" font-size="10">committee declared NOT SIGHTED</text>`
   }
 
   // Summary count
@@ -265,7 +308,13 @@ function main() {
 
   const hijriLabel = `Hijri ${YEAR}-${String(MONTH).padStart(2, '0')}`
   const gregorianLabel = gregorianRangeForHijri(YEAR, MONTH, firstResult)
-  const svg = render(cells, hijriLabel, gregorianLabel, summary)
+
+  const decisions = loadObservations(YEAR, MONTH)
+  if (decisions.length > 0) {
+    console.log(`  overlay: ${decisions.length} committee decisions for Hijri ${YEAR}-${MONTH}`)
+  }
+
+  const svg = render(cells, hijriLabel, gregorianLabel, summary, decisions)
 
   mkdirSync(dirname(OUT_PATH), { recursive: true })
   writeFileSync(OUT_PATH, svg)

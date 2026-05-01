@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "description": "Curated dataset of documented Hijri month-onset sighting decisions by official Islamic authorities. Each record is a (year, month) pair plus a list of country-level decisions on the canonical sighting evening. Sources: official ministry / committee announcements reported by Reuters, AP, Arab News, Dawn, and Saudi Gazette. This is wasail (means) data only — it documents what committees announced, not what was astronomically possible. fajr's hilalVisibility() reports astronomical possibility; this file reports sociopolitical announcements. The two together let you see where committee decisions matched astronomy and where they didn't.",
+  "observations": [
+    {
+      "hijri": { "year": 1444, "month": 9 },
+      "label": "Ramadan 1444",
+      "sightingEveningGregorian": "2023-03-22",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",   "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",   "source": "Dar al-Iftaa" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "sighted",   "source": "Ministry of Habous" }
+      ]
+    },
+    {
+      "hijri": { "year": 1444, "month": 10 },
+      "label": "Shawwal 1444 (Eid al-Fitr)",
+      "sightingEveningGregorian": "2023-04-20",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",   "source": "Supreme Court of Saudi Arabia" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",   "source": "Dar al-Iftaa" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",   "source": "UAE Moon Sighting Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "not-sighted", "source": "Ministry of Religious Affairs" }
+      ]
+    },
+    {
+      "hijri": { "year": 1445, "month": 9 },
+      "label": "Ramadan 1445 (controversial)",
+      "sightingEveningGregorian": "2024-03-10",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "source": "UAE Moon Sighting Committee" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "source": "Dar al-Iftaa" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
+        { "country": "Iran",         "city": "Tehran",   "lat": 35.69, "lng":  51.39, "decision": "not-sighted", "source": "Astronomical impossibility (moon age 5.5h, sub-Danjon)" },
+        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "source": "Markazi Chand Committee" }
+      ]
+    },
+    {
+      "hijri": { "year": 1446, "month": 9 },
+      "label": "Ramadan 1446 (borderline)",
+      "sightingEveningGregorian": "2025-02-28",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "source": "UAE Moon Sighting Committee" },
+        { "country": "Qatar",        "city": "Doha",     "lat": 25.29, "lng":  51.53, "decision": "sighted",     "source": "Ministry of Awqaf" },
+        { "country": "Egypt",        "city": "Cairo",    "lat": 30.04, "lng":  31.24, "decision": "sighted",     "source": "Dar al-Iftaa" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
+        { "country": "Iran",         "city": "Tehran",   "lat": 35.69, "lng":  51.39, "decision": "not-sighted", "source": "Iranian Cultural Heritage Council" },
+        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "source": "Markazi Chand Committee" }
+      ]
+    },
+    {
+      "hijri": { "year": 1446, "month": 10 },
+      "label": "Shawwal 1446 (Eid al-Fitr)",
+      "sightingEveningGregorian": "2025-03-29",
+      "decisions": [
+        { "country": "Saudi Arabia", "city": "Riyadh",   "lat": 24.71, "lng":  46.68, "decision": "sighted",     "source": "Supreme Court of Saudi Arabia" },
+        { "country": "UAE",          "city": "Dubai",    "lat": 25.20, "lng":  55.27, "decision": "sighted",     "source": "UAE Moon Sighting Committee" },
+        { "country": "Pakistan",     "city": "Karachi",  "lat": 24.86, "lng":  67.00, "decision": "not-sighted", "source": "Central Ruet-e-Hilal Committee" },
+        { "country": "Morocco",      "city": "Rabat",    "lat": 34.02, "lng":  -6.84, "decision": "not-sighted", "source": "Ministry of Habous" },
+        { "country": "Indonesia",    "city": "Jakarta",  "lat": -6.21, "lng": 106.85, "decision": "not-sighted", "source": "Ministry of Religious Affairs" },
+        { "country": "India",        "city": "New Delhi","lat": 28.61, "lng":  77.21, "decision": "not-sighted", "source": "Markazi Chand Committee" }
+      ]
+    }
+  ]
+}
