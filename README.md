@@ -133,6 +133,14 @@ For full numbers including per-region and per-cell granularity, see [**`docs/pro
 
 The signed-bias chart is the *ihtiyat* (precaution) view: the unsafe direction is marked on each prayer's x-axis label. Fajr/Maghrib/Isha drifting earlier (negative bias) cuts into prayer time; Shuruq drifting later extends Fajr past actual sunrise. The ratchet rejects any change that worsens these biases by more than 0.30 minutes.
 
+### Hilal world disagreement map (Ramadan 1446 example)
+
+![Hilal world disagreement map](docs/charts/hilal-1446-09.svg)
+
+Three-criterion (Odeh / Yallop / Shaukat) hilal visibility evaluated at every cell of a 10° lat/lng grid for Hijri 1446-09 (Ramadan 1446, sighting evening 28 February 2025). Green = all three criteria say visible; grey = all three say not visible; amber = "optical aid only" (Odeh class C while the other two say not visible — a polynomial-vs-rule disagreement on severity but not on the binary verdict); **red = full ikhtilaf zones** where the criteria disagree on visible vs not visible. For Ramadan 1446, ~24% of the world's surface fell in the red zone — that's why the announced sightings differed by country.
+
+Regenerate for any Hijri month with `npm run build:hilal-map -- --year YEAR --month MONTH`. ~0.1s per map at 10° resolution.
+
 ---
 
 ## Experiment History

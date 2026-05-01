@@ -134,10 +134,32 @@ For these five cases, all three criteria agree on the binary visible/not-visible
 
 ---
 
+## World disagreement maps
+
+Running the three criteria on a global lat/lng grid produces a per-Hijri-month map showing which regions face a contested sighting decision and which face an astronomically-clear one. Generate with:
+
+```
+npm run build:hilal-map -- --year 1446 --month 9
+```
+
+Output: `docs/charts/hilal-{year}-{month}.svg`. ~0.1 s for a 10° grid (432 cells) at the moment.
+
+The four cell categories:
+
+| Colour | Meaning |
+|---|---|
+| 🟢 green | all three criteria say visible |
+| 🟡 amber | "optical aid only" — Odeh class C, but Yallop and Shaukat both say not visible |
+| ⬛ grey  | all three criteria say not visible |
+| 🔴 red   | criteria disagree on the binary visible vs not-visible question (the ikhtilaf zones) |
+
+For Ramadan 1446 (sighting 28 February 2025), ~24% of the world's surface fell in the red zone. That's why announced sightings differed: Egypt, Saudi Arabia, UAE, and Qatar accepted; Pakistan, Morocco, Iran, India, and several others did not. The map gives a quick geographic reading of which regions are in stable agreement and which are in genuine ikhtilaf for any given month.
+
 ## Cross-references
 
 - [[wiki/fiqh/scholarly-oversight]] — wasail / ibadat distinction; legitimate scholarly disagreement
 - [[wiki/astronomy/refraction]] — atmospheric refraction conventions
 - `src/lunar.js` — Meeus-based lunar and solar position implementation
-- `src/hilal.js` — Odeh classification and the public `hilalVisibility` API
+- `src/hilal.js` — Odeh + Yallop + Shaukat classifications and the public `hilalVisibility` API
 - `scripts/validate-hilal.js` — historical validation cases
+- `scripts/build-hilal-map.js` — world disagreement map generator

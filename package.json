@@ -28,6 +28,7 @@
     "test": "node eval/eval.js",
     "compare": "node eval/compare.js",
     "validate:hilal": "node scripts/validate-hilal.js",
+    "build:hilal-map": "node scripts/build-hilal-map.js",
     "build:charts": "node scripts/build-readme-charts.js",
     "fetch:aladhan": "node scripts/fetch-aladhan.js",
     "fetch:diyanet": "node scripts/fetch-diyanet.js",
