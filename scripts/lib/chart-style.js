@@ -47,7 +47,10 @@ export const STYLE = {
   notSighted:   '#c83030',
 
   // Typography
-  fontFamily:   '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  // Inner font names use single quotes so this string is safe to interpolate
+  // into a double-quoted SVG attribute. (Earlier double-quoted form broke XML
+  // parsing — GitHub rendered the chart as a missing-image icon.)
+  fontFamily:   "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
   fontSize:     11,
   titleSize:    17,
   subtitleSize: 11,
