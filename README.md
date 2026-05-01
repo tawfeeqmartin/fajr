@@ -1,6 +1,6 @@
 # fajr فجر
 
-> **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, not the engine, is where most of fajr's distinctive work lives today.
+> **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via the Odeh (2004) criterion** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -20,7 +20,7 @@ It is the prayer **most affected by the open questions this library addresses**:
 - **Elevation effects** on the horizon — a mosque at 2,000m sees dawn earlier than one in a valley
 - **Light pollution** distorting the visual threshold in urban areas
 
-While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus Qibla direction, Hijri calendar, hilal (crescent) visibility prediction, night-thirds calculation, and traveler mode. Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
+While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus Qibla direction (great-circle), Hijri calendar (Kuwaiti tabular algorithm), hilal (crescent) visibility prediction via the Odeh (2004) criterion (5/5 astronomically-defensible on validation cases — see [`scripts/validate-hilal.js`](scripts/validate-hilal.js)), night-thirds calculation, and traveler-mode metadata (qasr / jam' permissibility by madhab — fajr does not determine traveler status, that's left to the user). Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
 
 The name also grounds the project in the Islamic tradition: each day begins at Fajr, and the precision of that moment is what this library is trying to improve.
 
@@ -167,9 +167,10 @@ Fajr is a thin layer over [adhan.js](https://github.com/batoulapps/adhan-js) —
 - **Auto-detects the right adhan calculation method** for your coordinates so you don't have to configure it per region. (UX, not new accuracy — adhan already implements every method fajr selects from.)
 - **Two custom angle configs not in adhan's defaults:** Morocco 19°/17° (community-calibrated to match Habous-published Imsakiyya — confirmed against Mawaqit mosque-published times) and France UOIF 12°/12°.
 - **Region-appropriate high-latitude rule selection** for Norway / Iceland / Finland.
-- **Optional elevation correction utility** (currently disabled by default; see Experiment 4 in the history below).
+- **Optional elevation correction utility** (currently disabled by default; see [the contested-correction case study](#case-study-handling-a-contested-correction-elevation) below).
+- **Hilal (lunar crescent) visibility prediction** via the Odeh (2004) criterion — adhan is solar-only and does not compute lunar position. fajr ships a Meeus-based lunar position implementation (`src/lunar.js`, ~250 lines) plus the Odeh classification logic. Validates 5/5 astronomically defensible against documented Hijri month transitions ([`scripts/validate-hilal.js`](scripts/validate-hilal.js)), with explicit handling of the wasail/ibadat distinction — fajr returns astronomical possibility, not a religious ruling. See [`knowledge/wiki/astronomy/hilal.md`](knowledge/wiki/astronomy/hilal.md).
 
-For a user who already knows their region's correct adhan method, raw adhan.js produces the same numbers fajr does. The real distinctive work is one level up: fajr ships an **evaluation methodology** that measures the engine against multiple independent reference layers separately (rather than blending them into a single "ground truth"), and a **ratchet** that refuses to accept changes which improve one source by sacrificing another. That eval framework is described below.
+For prayer-time calculation specifically, raw adhan.js produces the same numbers fajr does (if you already know your region's correct method). The two genuine fajr additions are the lunar/hilal stack and the Morocco custom angle. The real distinctive work is one level up: fajr ships an **evaluation methodology** that measures the engine against multiple independent reference layers separately (rather than blending them into a single "ground truth"), and a **ratchet** that refuses to accept changes which improve one source by sacrificing another. That eval framework is described below.
 
 ### Auto-detects the right method for your region
 
@@ -293,8 +294,14 @@ const night = fajr.nightThirds({ date, latitude, longitude })
 // Hijri date
 const hijri = fajr.hijri(new Date())
 
-// Hilal visibility
-const hilal = fajr.hilalVisibility({ year: 1445, month: 6, latitude, longitude })
+// Hilal (lunar crescent) visibility — Odeh (2004) criterion
+// Returns: { visible, code: 'A'|'B'|'C'|'D', V, arcvDeg, widthArcmin,
+//            lagTimeMinutes, moonAgeHours, sunsetUTC, moonsetUTC,
+//            bestTimeUTC, conjunctionUTC, ... }
+// Note: hilal sighting decisions are ultimately a matter of fiqh; this
+// returns astronomical possibility, not a religious ruling. See
+// knowledge/wiki/astronomy/hilal.md.
+const hilal = fajr.hilalVisibility({ year: 1445, month: 9, latitude, longitude })
 
 // Traveler mode (shortened/combined prayers)
 const travelerTimes = fajr.travelerMode({ ...coords, madhab: 'hanafi' })
