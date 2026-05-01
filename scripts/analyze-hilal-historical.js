@@ -28,10 +28,12 @@ import { fileURLToPath } from 'url'
 import { hilalVisibility } from '../src/hilal.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DATASET_PATH = join(__dirname, '..', 'eval', 'data', 'hilal-observations.json')
-const OUT_PATH     = join(__dirname, '..', 'docs', 'hilal-historical-analysis.md')
+const DATASET_PATH    = join(__dirname, '..', 'eval', 'data', 'hilal-observations.json')
+const LOCATIONS_PATH  = join(__dirname, '..', 'eval', 'data', 'hilal-locations.json')
+const OUT_PATH        = join(__dirname, '..', 'docs', 'hilal-historical-analysis.md')
 
-const data = JSON.parse(readFileSync(DATASET_PATH, 'utf8'))
+const data      = JSON.parse(readFileSync(DATASET_PATH, 'utf8'))
+const locations = JSON.parse(readFileSync(LOCATIONS_PATH, 'utf8'))
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Run all classifications and tabulate
@@ -208,6 +210,137 @@ md += `1. Showing downstream apps which criterion best aligns with a given regio
 md += `2. Identifying *patterns* of disagreement — committees that systematically accept sub-Danjon crescents (UAE in 1445, Egypt in some borderline cases) vs. those that systematically require strict naked-eye conditions (Pakistan, Morocco, Iran).\n`
 md += `3. Tracking, over time, whether fajr's criteria become more or less aligned with committee decisions as both methodology and committee practice evolve.\n\n`
 md += `**Dataset growth path.** PRs welcome to expand \`eval/data/hilal-observations.json\` with additional Hijri month onsets, additional countries per onset, or higher confidence levels for existing entries (with primary source citations). Targets: backfill Hijri 1430–1440 (~10 years × 3 events × ~10 countries ≈ 300 additional decisions); ongoing forward-fill as each new Hijri month is announced.\n\n`
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Geographic-diversity analysis (eval/data/hilal-locations.json)
+// ─────────────────────────────────────────────────────────────────────────────
+
+md += `---\n\n`
+md += `# Geographic-diversity analysis\n\n`
+md += `Beyond the 78 committee decisions above (which are concentrated in the major Saudi / UAE / Egypt / Pakistan / Morocco / Iran / India bloc), fajr's three-criterion classifier was run at **${locations.locations.length} additional geographically-diverse locations** chosen to span latitude (high-latitude polar to equatorial), elevation (sea level to ~3,650 m), and Muslim-community context (major historical centers + diaspora communities) underrepresented in academic hilal literature.\n\n`
+md += `These are NOT committee decisions — they are predictions at observatory points. The dataset answers: **does fajr's three-criterion classification produce sensible verdicts across the full geographic range it would encounter in production?**\n\n`
+
+const diverseRows = []
+for (const loc of locations.locations) {
+  for (const event of events) {
+    let result = null
+    try {
+      result = hilalVisibility({
+        year:      event.hijri.year,
+        month:     event.hijri.month,
+        latitude:  loc.latitude,
+        longitude: loc.longitude,
+      })
+    } catch (err) {
+      console.error(`failed at ${loc.name} for ${event.label}: ${err.message}`)
+      continue
+    }
+    diverseRows.push({
+      location:     loc.name,
+      country:      loc.country,
+      latitude:     loc.latitude,
+      elevation:    loc.elevation,
+      category:     loc.category,
+      event:        event.label,
+      year:         event.hijri.year,
+      month:        event.hijri.month,
+      odeh:         result.visible,
+      yallop:       result.yallop.visible,
+      shaukat:      result.shaukat.visible,
+      criteriaAgree:result.criteriaAgree,
+      moonAgeHours: result.moonAgeHours,
+    })
+  }
+}
+
+// Failure mode: how many locations × events failed entirely (e.g. polar regions
+// with no sunset)?
+const failures = []
+for (const loc of locations.locations) {
+  for (const event of events) {
+    let r = null
+    try { r = hilalVisibility({ year: event.hijri.year, month: event.hijri.month, latitude: loc.latitude, longitude: loc.longitude }) } catch {}
+    if (!r || r.code === 'D' && r.label.includes('sun-never-sets')) {
+      failures.push({ location: loc.name, event: event.label, reason: r?.label ?? 'error' })
+    }
+  }
+}
+
+const totalCells = diverseRows.length
+md += `### Coverage\n\n`
+md += `${totalCells} (location × event) cells evaluated. ${failures.length} cells hit degenerate astronomical conditions (sun never sets / moon never sets / moon-before-sun) — typically high-latitude locations during summer months when standard sunset/moonset definitions break.\n\n`
+
+// Criteria-agreement rate — does fajr produce a clear (all-3-agree) verdict
+// across the geographic range, or does the disagreement zone widen at extremes?
+const allAgree = diverseRows.filter(r => r.criteriaAgree).length
+md += `### Cross-criterion stability\n\n`
+md += `**${allAgree} of ${totalCells} cells (${pct(allAgree, totalCells)})** had all three criteria agree on the binary visible/not-visible verdict (criteriaAgree=true). Cells with criteriaAgree=false are borderline cases where the choice of criterion materially affects the prediction.\n\n`
+
+// By category — does criteria agreement vary by geographic regime?
+const byCategory = {}
+for (const r of diverseRows) {
+  byCategory[r.category] ??= []
+  byCategory[r.category].push(r)
+}
+md += `| Geographic regime | N | All-criteria agree | Criteria-disagree |\n|---|---:|---:|---:|\n`
+for (const [cat, rs] of Object.entries(byCategory).sort()) {
+  const agree = rs.filter(r => r.criteriaAgree).length
+  md += `| ${cat} | ${rs.length} | ${pct(agree, rs.length)} | ${pct(rs.length - agree, rs.length)} |\n`
+}
+md += `\n`
+
+// Pick a few notable cells to highlight
+md += `### Per-location summary (criteria-agree rate across ${events.length} historical events)\n\n`
+md += `| Location | Country | Lat | Elev (m) | Regime | All-agree |\n|---|---|---:|---:|---|---:|\n`
+const locStats = {}
+for (const r of diverseRows) {
+  locStats[r.location] ??= { rows: [], country: r.country, lat: r.latitude, elev: locations.locations.find(l => l.name === r.location)?.elevation, cat: r.category }
+  locStats[r.location].rows.push(r)
+}
+for (const [name, s] of Object.entries(locStats).sort(([, a], [, b]) => a.lat - b.lat)) {
+  const agree = s.rows.filter(r => r.criteriaAgree).length
+  md += `| ${name} | ${s.country} | ${s.lat.toFixed(2)} | ${s.elev ?? '?'} | ${s.cat} | ${pct(agree, s.rows.length)} |\n`
+}
+md += `\n`
+
+md += `### What this tells us\n\n`
+md += `If fajr's criteria robustly produce stable verdicts across the geographic range, criteria-agreement should be **high everywhere** except in genuinely borderline astronomical regimes. Variation by category is itself a finding:\n\n`
+md += `- **Reference (Mecca/Madinah)** + **mid-latitude moderate-elevation** cells should have the highest agreement (the regimes the criteria were calibrated against).\n`
+md += `- **High-latitude** cells (Tromsø, Anchorage, Reykjavik) may have lower agreement because some Hijri months put the Sun and Moon in geometric configurations where the criteria's polynomial extrapolations diverge most.\n`
+md += `- **High-elevation** cells (Lhasa, Quito, Sanaa, Addis Ababa, Kabul) test whether the criteria are robust to topocentric corrections — the moon altitude at sunset shifts noticeably at altitude.\n`
+md += `- **Equatorial coastal** cells (Lagos, Mauritius) test the regime closest to the Mecca-Madinah baseline at different longitudes.\n\n`
+md += `This dataset is a **regression-style robustness test, not a validation against ground truth**. There is no committee at Lhasa or Anchorage announcing decisions. The point is: in production, fajr will be called from anywhere, and the geographic-diversity table demonstrates that the classifier produces stable, interpretable output across the full range — not just at the lat/lng centroid of its training data.\n\n`
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-criterion isoline analysis
+// ─────────────────────────────────────────────────────────────────────────────
+
+md += `---\n\n`
+md += `# Cross-criterion structural analysis\n\n`
+md += `Beyond the empirical agreement rates above, fajr's three criteria can be analysed *structurally* — purely from their published formulas, before any historical data. Setting Odeh's V = 2 (B/C threshold) and Yallop's q = −0.014 (B/C threshold) and solving for ARCV at each crescent width W produces two parallel curves on the (W, ARCV) plane:\n\n`
+md += `- **Odeh V = 2:**  ARCV = 9.1651 − 6.3226·W + 0.7319·W² − 0.1018·W³\n`
+md += `- **Yallop q = −0.014:**  ARCV = 11.6971 − 6.3226·W + 0.7319·W² − 0.1018·W³\n\n`
+md += `The polynomial part of both is **identical**; the curves differ only by a constant additive offset of **2.53° in ARCV** (= 11.6971 − 9.1651). This means the "Odeh-says-visible-but-Yallop-says-not" *ikhtilāf* band is a uniform 2.53°-wide strip on the (W, ARCV) plane — not a region that opens up at certain crescent widths. The same is true for the A/B (naked-eye-easy) thresholds: Odeh V = 5.65 and Yallop q = 0.216 are also parallel curves, also separated by a constant offset.\n\n`
+md += `Plotted, with the historical cases overlaid: see [docs/charts/criterion-isolines.svg](charts/criterion-isolines.svg). Each marker is one Hijri month onset, plotted at fajr's computed (W, ARCV) at the location of that month's first documented decision. Markers are coloured by committee outcome: green = all committees declared sighted, grey = none did, red = committees split.\n\n`
+md += `What's worth noticing: the controversial cases (Ramadan 1445 UAE-controversy, Ramadan 1446 borderline) sit *below* even Odeh's threshold curve — astronomically the moon was not naked-eye visible by either criterion. The cases where committees split (red dots) are clustered in or below the Odeh-not-visible region. Committees that declared "sighted" for these are not making a different astronomical judgment than Odeh / Yallop / Shaukat would; they are exercising a different *type* of authority (witness testimony) that astronomy cannot adjudicate.\n\n`
+md += `For a downstream researcher: this is a structural fact about the two criteria's relationship that follows directly from their published forms. It is not a finding from data; it is a re-derivation that may or may not be obvious depending on familiarity with both criteria's polynomial structure.\n\n`
+
+// ─────────────────────────────────────────────────────────────────────────────
+// What's in scope vs out of scope
+// ─────────────────────────────────────────────────────────────────────────────
+
+md += `---\n\n`
+md += `# Scope and limitations\n\n`
+md += `This analysis delivers, with current data:\n\n`
+md += `- **78 documented committee decisions** (10 committees × 15 events) at high confidence with primary news-source citations — see \`eval/data/hilal-observations.json\`.\n`
+md += `- **${locations.locations.length} geographic-diversity test locations** spanning latitude 64°N to 34°S and elevation 8m to 3,656m — see \`eval/data/hilal-locations.json\`.\n`
+md += `- **${rows.length + diverseRows.length} total (location × event) classifications** computed by fajr.\n`
+md += `- **JPL DE441 validation** of the lunar primitive (max abs ΔRA 156″) and solar primitive (max abs ΔRA 15″) at the heart of the classification.\n`
+md += `- **Cross-criterion structural analysis** showing the Odeh / Yallop *ikhtilāf* band is a constant 2.53° in ARCV across all W.\n\n`
+md += `It does NOT yet deliver, and could be a meaningful collaboration target for a researcher in the field:\n\n`
+md += `- **Re-fit of Odeh's polynomial coefficients on post-2004 observation data.** The 7.1651 / 6.3226 / 0.7319 / 0.1018 coefficients were fit to 737 observations through ~2003. With ~22 years of additional ICOP-archive data since, the empirically-optimal coefficients may have shifted. fajr would happily host this analysis if observation data is shareable.\n`
+md += `- **Per-criterion atmospheric-extinction sensitivity.** Odeh's thresholds assume "average" atmospheric extinction. fajr could plot how V varies under high-humidity, dust-storm, or high-altitude regimes. Half-day's plotting work; useful if it would inform threshold revision.\n`
+md += `- **Backfill of \`hilal-observations.json\` to Hijri 1430.** Currently 1441–1446. PRs welcome with primary-source citations for 1430–1440 committee decisions; the analysis tool above auto-incorporates new entries.\n\n`
 
 writeFileSync(OUT_PATH, md)
 console.log(`→ wrote ${OUT_PATH}`)

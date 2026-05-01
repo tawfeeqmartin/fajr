@@ -44,6 +44,7 @@
     "validate:lunar-jpl": "node scripts/validate-lunar-against-jpl.js",
     "validate:solar-jpl": "node scripts/validate-solar-against-jpl.js",
     "analyze:hilal-historical": "node scripts/analyze-hilal-historical.js",
+    "build:criterion-isolines": "node scripts/build-criterion-isolines.js",
     "build:hilal-map": "node scripts/build-hilal-map.js",
     "build:hilal-year": "node scripts/build-hilal-year-animation.js",
     "build:charts": "node scripts/build-readme-charts.js",

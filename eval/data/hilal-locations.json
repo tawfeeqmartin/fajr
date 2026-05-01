@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "description": "Geographic-diversity test locations for fajr's hilal classifier. These are NOT committee decisions; they are observation points chosen to span latitude (high-latitude polar to equatorial), elevation (sea level to high mountain), and Muslim-community context (major historical centers + diaspora communities). The dataset answers: does fajr's three-criterion classification produce sensible verdicts across the full geographic range users would encounter in production? Each location is run against the same Hijri month onsets in hilal-observations.json. Locations were chosen for: (a) active or historically-significant Muslim communities, (b) astronomical interest (extreme latitude or elevation), (c) under-represented in academic hilal literature relative to Saudi/Egypt/Pakistan-centric default. Combined output in docs/hilal-historical-analysis.md.",
+  "locations": [
+    {
+      "name": "Cape Town",
+      "country": "South Africa",
+      "latitude": -33.92,
+      "longitude": 18.42,
+      "elevation": 50,
+      "category": "southern-hemisphere",
+      "rationale": "Southern tip of Africa, active Cape Malay Muslim community since the 1700s, Muslim Judicial Council (MJC) operates here. Important for testing Southern Hemisphere classification at moderate latitude."
+    },
+    {
+      "name": "Sanaa",
+      "country": "Yemen",
+      "latitude": 15.37,
+      "longitude": 44.19,
+      "elevation": 2250,
+      "category": "high-elevation",
+      "rationale": "Historical Muslim center at significant altitude. Active sighting tradition. Tests fajr at high elevation in a Muslim-majority context."
+    },
+    {
+      "name": "Kabul",
+      "country": "Afghanistan",
+      "latitude": 34.53,
+      "longitude": 69.17,
+      "elevation": 1790,
+      "category": "high-elevation",
+      "rationale": "Large Muslim community, mountainous setting. Tests at moderate altitude with regional sighting authority."
+    },
+    {
+      "name": "Quito",
+      "country": "Ecuador",
+      "latitude": -0.18,
+      "longitude": -78.47,
+      "elevation": 2850,
+      "category": "equatorial-high-elevation",
+      "rationale": "Equatorial AND high-elevation simultaneously — a regime not represented in standard hilal datasets. Small but active Muslim community."
+    },
+    {
+      "name": "Lhasa",
+      "country": "China (Tibet)",
+      "latitude": 29.65,
+      "longitude": 91.12,
+      "elevation": 3656,
+      "category": "extreme-high-elevation",
+      "rationale": "Extreme high-elevation regime. Small Muslim presence (Hui community). Astronomically interesting because horizon dip + atmospheric pressure deviate strongly from sea-level baseline."
+    },
+    {
+      "name": "Addis Ababa",
+      "country": "Ethiopia",
+      "latitude": 9.03,
+      "longitude": 38.74,
+      "elevation": 2355,
+      "category": "high-elevation",
+      "rationale": "Significant Muslim minority (~30% of Ethiopia). Historical Muslim presence since 7th century. High-elevation East African regime."
+    },
+    {
+      "name": "Tromsø",
+      "country": "Norway",
+      "latitude": 69.65,
+      "longitude": 18.96,
+      "elevation": 10,
+      "category": "high-latitude",
+      "rationale": "Within the Arctic Circle. Small Muslim community follows Norwegian Council of Muftis guidance. For some Hijri months sun-Earth geometry makes naked-eye sighting astronomically impossible regardless of crescent age."
+    },
+    {
+      "name": "Anchorage",
+      "country": "United States",
+      "latitude": 61.22,
+      "longitude": -149.90,
+      "elevation": 30,
+      "category": "high-latitude",
+      "rationale": "Sub-Arctic. Small US Muslim community. Tests Western-Hemisphere high-latitude classification."
+    },
+    {
+      "name": "Reykjavik",
+      "country": "Iceland",
+      "latitude": 64.15,
+      "longitude": -21.94,
+      "elevation": 18,
+      "category": "high-latitude",
+      "rationale": "Small mosque, growing Muslim community. Atlantic-island high-latitude case."
+    },
+    {
+      "name": "Lagos",
+      "country": "Nigeria",
+      "latitude": 6.45,
+      "longitude": 3.41,
+      "elevation": 8,
+      "category": "equatorial-coastal",
+      "rationale": "Largest Muslim population in West Africa. Nigerian Supreme Council for Islamic Affairs operates here. Sea-level equatorial counterpart to Quito."
+    },
+    {
+      "name": "Tashkent",
+      "country": "Uzbekistan",
+      "latitude": 41.31,
+      "longitude": 69.24,
+      "elevation": 455,
+      "category": "central-asia",
+      "rationale": "Central Asia, historical Naqshbandi center, Muslim Spiritual Board of Uzbekistan operates here. Underrepresented in academic hilal literature dominated by Arab/South-Asian sources."
+    },
+    {
+      "name": "Mauritius (Port Louis)",
+      "country": "Mauritius",
+      "latitude": -20.16,
+      "longitude": 57.50,
+      "elevation": 25,
+      "category": "indian-ocean-island",
+      "rationale": "Indian Ocean island, ~17% Muslim population, active Sunni and Shia communities. Geographically isolated case for cross-criterion comparison."
+    },
+    {
+      "name": "Buenos Aires",
+      "country": "Argentina",
+      "latitude": -34.61,
+      "longitude": -58.38,
+      "elevation": 25,
+      "category": "southern-hemisphere",
+      "rationale": "Southern-hemisphere Western-hemisphere case. Small Muslim community (mostly Syrian-Lebanese descent). Tests symmetry with Cape Town across continents."
+    },
+    {
+      "name": "Dakar",
+      "country": "Senegal",
+      "latitude": 14.69,
+      "longitude": -17.45,
+      "elevation": 22,
+      "category": "west-africa",
+      "rationale": "Tijaniyya Sufi tradition, ~95% Muslim Senegal. Strong local Maliki tradition, distinct from North African sighting traditions."
+    },
+    {
+      "name": "Mecca",
+      "country": "Saudi Arabia",
+      "latitude": 21.42,
+      "longitude": 39.83,
+      "elevation": 277,
+      "category": "reference",
+      "rationale": "The reference Muslim location. Included for direct comparison — fajr's prediction at Mecca itself for each Hijri month is the natural baseline."
+    },
+    {
+      "name": "Madinah",
+      "country": "Saudi Arabia",
+      "latitude": 24.47,
+      "longitude": 39.61,
+      "elevation": 631,
+      "category": "reference",
+      "rationale": "Second-most-significant Muslim site. Slightly elevated, slightly more northerly than Mecca."
+    }
+  ]
+}

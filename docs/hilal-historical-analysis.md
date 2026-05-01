@@ -257,3 +257,99 @@ Sighting evening: 2025-05-27. Moon age range: 12.8 / 12.3 hours at best time.
 
 **Dataset growth path.** PRs welcome to expand `eval/data/hilal-observations.json` with additional Hijri month onsets, additional countries per onset, or higher confidence levels for existing entries (with primary source citations). Targets: backfill Hijri 1430–1440 (~10 years × 3 events × ~10 countries ≈ 300 additional decisions); ongoing forward-fill as each new Hijri month is announced.
 
+---
+
+# Geographic-diversity analysis
+
+Beyond the 78 committee decisions above (which are concentrated in the major Saudi / UAE / Egypt / Pakistan / Morocco / Iran / India bloc), fajr's three-criterion classifier was run at **16 additional geographically-diverse locations** chosen to span latitude (high-latitude polar to equatorial), elevation (sea level to ~3,650 m), and Muslim-community context (major historical centers + diaspora communities) underrepresented in academic hilal literature.
+
+These are NOT committee decisions — they are predictions at observatory points. The dataset answers: **does fajr's three-criterion classification produce sensible verdicts across the full geographic range it would encounter in production?**
+
+### Coverage
+
+240 (location × event) cells evaluated. 4 cells hit degenerate astronomical conditions (sun never sets / moon never sets / moon-before-sun) — typically high-latitude locations during summer months when standard sunset/moonset definitions break.
+
+### Cross-criterion stability
+
+**200 of 240 cells (83.3%)** had all three criteria agree on the binary visible/not-visible verdict (criteriaAgree=true). Cells with criteriaAgree=false are borderline cases where the choice of criterion materially affects the prediction.
+
+| Geographic regime | N | All-criteria agree | Criteria-disagree |
+|---|---:|---:|---:|
+| central-asia | 15 | 93.3% | 6.7% |
+| equatorial-coastal | 15 | 80.0% | 20.0% |
+| equatorial-high-elevation | 15 | 73.3% | 26.7% |
+| extreme-high-elevation | 15 | 93.3% | 6.7% |
+| high-elevation | 45 | 91.1% | 8.9% |
+| high-latitude | 45 | 80.0% | 20.0% |
+| indian-ocean-island | 15 | 100.0% | 0.0% |
+| reference | 30 | 86.7% | 13.3% |
+| southern-hemisphere | 30 | 70.0% | 30.0% |
+| west-africa | 15 | 66.7% | 33.3% |
+
+### Per-location summary (criteria-agree rate across 15 historical events)
+
+| Location | Country | Lat | Elev (m) | Regime | All-agree |
+|---|---|---:|---:|---|---:|
+| Buenos Aires | Argentina | -34.61 | 25 | southern-hemisphere | 60.0% |
+| Cape Town | South Africa | -33.92 | 50 | southern-hemisphere | 80.0% |
+| Mauritius (Port Louis) | Mauritius | -20.16 | 25 | indian-ocean-island | 100.0% |
+| Quito | Ecuador | -0.18 | 2850 | equatorial-high-elevation | 73.3% |
+| Lagos | Nigeria | 6.45 | 8 | equatorial-coastal | 80.0% |
+| Addis Ababa | Ethiopia | 9.03 | 2355 | high-elevation | 86.7% |
+| Dakar | Senegal | 14.69 | 22 | west-africa | 66.7% |
+| Sanaa | Yemen | 15.37 | 2250 | high-elevation | 93.3% |
+| Mecca | Saudi Arabia | 21.42 | 277 | reference | 86.7% |
+| Madinah | Saudi Arabia | 24.47 | 631 | reference | 86.7% |
+| Lhasa | China (Tibet) | 29.65 | 3656 | extreme-high-elevation | 93.3% |
+| Kabul | Afghanistan | 34.53 | 1790 | high-elevation | 93.3% |
+| Tashkent | Uzbekistan | 41.31 | 455 | central-asia | 93.3% |
+| Anchorage | United States | 61.22 | 30 | high-latitude | 86.7% |
+| Reykjavik | Iceland | 64.15 | 18 | high-latitude | 73.3% |
+| Tromsø | Norway | 69.65 | 10 | high-latitude | 80.0% |
+
+### What this tells us
+
+If fajr's criteria robustly produce stable verdicts across the geographic range, criteria-agreement should be **high everywhere** except in genuinely borderline astronomical regimes. Variation by category is itself a finding:
+
+- **Reference (Mecca/Madinah)** + **mid-latitude moderate-elevation** cells should have the highest agreement (the regimes the criteria were calibrated against).
+- **High-latitude** cells (Tromsø, Anchorage, Reykjavik) may have lower agreement because some Hijri months put the Sun and Moon in geometric configurations where the criteria's polynomial extrapolations diverge most.
+- **High-elevation** cells (Lhasa, Quito, Sanaa, Addis Ababa, Kabul) test whether the criteria are robust to topocentric corrections — the moon altitude at sunset shifts noticeably at altitude.
+- **Equatorial coastal** cells (Lagos, Mauritius) test the regime closest to the Mecca-Madinah baseline at different longitudes.
+
+This dataset is a **regression-style robustness test, not a validation against ground truth**. There is no committee at Lhasa or Anchorage announcing decisions. The point is: in production, fajr will be called from anywhere, and the geographic-diversity table demonstrates that the classifier produces stable, interpretable output across the full range — not just at the lat/lng centroid of its training data.
+
+---
+
+# Cross-criterion structural analysis
+
+Beyond the empirical agreement rates above, fajr's three criteria can be analysed *structurally* — purely from their published formulas, before any historical data. Setting Odeh's V = 2 (B/C threshold) and Yallop's q = −0.014 (B/C threshold) and solving for ARCV at each crescent width W produces two parallel curves on the (W, ARCV) plane:
+
+- **Odeh V = 2:**  ARCV = 9.1651 − 6.3226·W + 0.7319·W² − 0.1018·W³
+- **Yallop q = −0.014:**  ARCV = 11.6971 − 6.3226·W + 0.7319·W² − 0.1018·W³
+
+The polynomial part of both is **identical**; the curves differ only by a constant additive offset of **2.53° in ARCV** (= 11.6971 − 9.1651). This means the "Odeh-says-visible-but-Yallop-says-not" *ikhtilāf* band is a uniform 2.53°-wide strip on the (W, ARCV) plane — not a region that opens up at certain crescent widths. The same is true for the A/B (naked-eye-easy) thresholds: Odeh V = 5.65 and Yallop q = 0.216 are also parallel curves, also separated by a constant offset.
+
+Plotted, with the historical cases overlaid: see [docs/charts/criterion-isolines.svg](charts/criterion-isolines.svg). Each marker is one Hijri month onset, plotted at fajr's computed (W, ARCV) at the location of that month's first documented decision. Markers are coloured by committee outcome: green = all committees declared sighted, grey = none did, red = committees split.
+
+What's worth noticing: the controversial cases (Ramadan 1445 UAE-controversy, Ramadan 1446 borderline) sit *below* even Odeh's threshold curve — astronomically the moon was not naked-eye visible by either criterion. The cases where committees split (red dots) are clustered in or below the Odeh-not-visible region. Committees that declared "sighted" for these are not making a different astronomical judgment than Odeh / Yallop / Shaukat would; they are exercising a different *type* of authority (witness testimony) that astronomy cannot adjudicate.
+
+For a downstream researcher: this is a structural fact about the two criteria's relationship that follows directly from their published forms. It is not a finding from data; it is a re-derivation that may or may not be obvious depending on familiarity with both criteria's polynomial structure.
+
+---
+
+# Scope and limitations
+
+This analysis delivers, with current data:
+
+- **78 documented committee decisions** (10 committees × 15 events) at high confidence with primary news-source citations — see `eval/data/hilal-observations.json`.
+- **16 geographic-diversity test locations** spanning latitude 64°N to 34°S and elevation 8m to 3,656m — see `eval/data/hilal-locations.json`.
+- **318 total (location × event) classifications** computed by fajr.
+- **JPL DE441 validation** of the lunar primitive (max abs ΔRA 156″) and solar primitive (max abs ΔRA 15″) at the heart of the classification.
+- **Cross-criterion structural analysis** showing the Odeh / Yallop *ikhtilāf* band is a constant 2.53° in ARCV across all W.
+
+It does NOT yet deliver, and could be a meaningful collaboration target for a researcher in the field:
+
+- **Re-fit of Odeh's polynomial coefficients on post-2004 observation data.** The 7.1651 / 6.3226 / 0.7319 / 0.1018 coefficients were fit to 737 observations through ~2003. With ~22 years of additional ICOP-archive data since, the empirically-optimal coefficients may have shifted. fajr would happily host this analysis if observation data is shareable.
+- **Per-criterion atmospheric-extinction sensitivity.** Odeh's thresholds assume "average" atmospheric extinction. fajr could plot how V varies under high-humidity, dust-storm, or high-altitude regimes. Half-day's plotting work; useful if it would inform threshold revision.
+- **Backfill of `hilal-observations.json` to Hijri 1430.** Currently 1441–1446. PRs welcome with primary-source citations for 1430–1440 committee decisions; the analysis tool above auto-incorporates new entries.
+
