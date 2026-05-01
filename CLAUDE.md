@@ -290,6 +290,13 @@ If there are open issues from a downstream-repo agent, read them, respond in com
 
 **When proposing a change that downstream repos need to know about** (API additions, behaviour changes, version bumps), file an issue describing the change and what downstream needs to do. Cross-reference in the commit message.
 
+**Identify yourself as `fajr-agent` whenever the conversation crosses repo boundaries.** Specifically:
+
+- In commit messages, use `Co-Authored-By: fajr-agent (Claude Opus 4.7) <noreply@anthropic.com>` instead of the generic Claude footer.
+- At the end of any GitHub issue comment or PR description you write, sign with `— fajr-agent`.
+
+This is purely for human/cross-agent legibility — Tawfeeq and the agiftoftime-agent should be able to read a thread and immediately know which agent said what. The other repo's agent uses `agiftoftime-agent` correspondingly.
+
 This pattern lets each agent work asynchronously in its own repo without bottlenecking the human as a relay between sessions.
 
 ---

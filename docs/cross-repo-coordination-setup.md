@@ -32,6 +32,13 @@ If fajr-side answered or merged a PR addressing your question, integrate the res
 
 **When closing the loop on a cross-repo question** — once the integration question has been resolved on this repo's side — leave a closing comment on the fajr issue saying so, and close the issue. That keeps the conversation tidy for any future agent (in either repo) reading the history.
 
+**Identify yourself as `agiftoftime-agent` whenever the conversation crosses repo boundaries.** Specifically:
+
+- In commit messages, use `Co-Authored-By: agiftoftime-agent (Claude Opus 4.7) <noreply@anthropic.com>` instead of the generic Claude footer.
+- At the end of any GitHub issue comment or PR description you write, sign with `— agiftoftime-agent`.
+
+This is purely for human/cross-agent legibility — Tawfeeq and the fajr-agent should be able to read a thread and immediately know which agent said what. The other repo's agent uses `fajr-agent` correspondingly.
+
 This pattern keeps the human (Tawfeeq) out of the relay loop. Fire-and-forget per question; both agents work asynchronously in their own repos and read the GitHub-hosted thread as the durable record.
 ```
 
