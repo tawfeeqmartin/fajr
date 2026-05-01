@@ -69,13 +69,17 @@ The thresholds below are approximate and vary significantly with the sun's decli
 
 ### 2. Middle of Night (Nisf al-Layl / نصف الليل)
 
-**Classification:** 🟡 Limited precedent
+**Classification:** 🟡→🟢 Approaching established (per Odeh 2009 endorsement and ICOP adoption)
 
 **Method:** Divide the night in half (where "night" is defined as the period from Maghrib to the next sunrise, or from Maghrib to Fajr as computed at a lower-latitude reference). Isha is placed at the midpoint; Fajr is placed at midnight (or some symmetric point around midnight).
 
 **Scholarly basis:** The night is conceptually divided into halves and thirds in various Quranic and hadith contexts. [Quran 73:20] refers to "half the night" as a period of prayer. Dividing the night and distributing prayers proportionally is a recognized approach in some contemporary fatwas.
 
-**Endorsement:** Used by some European Islamic councils; referenced in fatwa literature for high-latitude situations.
+**Citation:** [Odeh, 2009] — *A New Method to Calculate Fajr and Isha Times When They Disappear in The Area Between Latitude 48.6° and 66.6°* (24pp, ICOP). Mohammad Shawkat Odeh enumerates twelve different proposed high-latitude methods (Aqrab al-Bilad at multiple latitude truncations, 1/7-night, time-proportional, modified twilight angles, etc.) with detailed pros and cons of each. He concludes that adopting **the middle of the night** as the time for Isha when the twilight sign disappears is **the closest time to physical fact** — preferable to all other surveyed methods because it does not suffer from their disadvantages. The paper is the most-cited published treatment of this problem and represents Odeh's authoritative review on behalf of ICOP. See [`knowledge/raw/papers/2026-05-01-astronomycenter/odeh_2009_high_latitude.pdf`](../../raw/papers/2026-05-01-astronomycenter/odeh_2009_high_latitude.pdf).
+
+**Expected behaviour at extreme summer latitudes:** Odeh 2009 explicitly observes that as the latitude approaches 66.6°, the calculated Isha (using middle-of-night) and the next-day Fajr converge to within minutes of each other. Direct quote from the paper: *"e.g., at 55° on June 21, the calculated Fajr is at 01:39, and Isha is at 00:21, gap = 78 minutes only — that's hardly enough time for taraweeh"*. At 64.5°N (Reykjavik) during late June through August, this gap can be small enough that the calculated Isha lands a few minutes *after* the next-day Fajr — this is acknowledged as a known consequence of the rule, not a calculation error. See [Iceland](./iceland.md) for the Reykjavik-specific case study and the practical guidance for downstream apps.
+
+**Endorsement:** Used by some European Islamic councils; referenced in fatwa literature for high-latitude situations. ICOP-endorsed via Odeh 2009. Implemented as `MiddleOfTheNight` in `adhan.js` and is fajr's default for Iceland.
 
 **Variant:** Some implementations define the night as from Maghrib to Fajr (at a reference latitude, e.g., Makkah) and divide that proportionally by night fraction. This requires defining the reference which reintroduces arbitrariness.
 
@@ -197,7 +201,26 @@ Results measured against Aladhan API ground truth (`eval/data/test/high_latitude
 
 ---
 
+## Modern scholarly references
+
+The five solution methods above (Aqrab al-Bilad, Middle of Night, 1/7-Night, Angle-Based with Time Cap, ECFR 12°) are the methods commonly cited by adhan.js, fajr, and other prayer-time libraries. The astronomical-jurisprudential literature on this problem is substantially richer; the papers below are the most-cited sources and inform fajr's specific choices.
+
+| Citation | Year | Argument | fajr position |
+|---|---|---|---|
+| [Odeh, 2009] *High Latitude (48.6°–66.6°)* | 2009 | Reviews 12 proposed methods; recommends middle-of-night for Isha | **Adopted** for Iceland (lat ≥48.6°). See [Iceland](./iceland.md). |
+| [Tarabishy, 2014] *Salat / Fasting in Northern Regions* | 2014 | Argues 45° as the threshold for "normal" days using physiological day-length normalcy | Diverges from fajr's 48.6° threshold. London (51.5°N) is *inside* Tarabishy's danger zone; explains the large MoonsightingCommittee UK Isha disagreements observed in agiftoftime's integration eval. |
+| [Aabed, 2015] *Jordan empirical Fajr* | 2015 | 12 naked-eye sessions validate 18° Fajr within 5 min in Jordan | Empirical support for fajr's 18°/19° default cluster. **Critical caveat: city light pollution shifts observed dawn 20–30 min later** than calculated 18° — this is not a calculation error. See [`methods/fajr-angle-empirics.md`](../methods/fajr-angle-empirics.md). |
+| [Almisnid, 2010] *High Lat + Astronaut Times* | 2010 | Independent treatment of fajr/isha at high lat; bonus: ISS-orbit prayer times | Reinforces middle-of-night consensus from a different methodological angle. |
+| [Khanji, 2010] *Prayer Times at High Latitudes — Astronomical-Jurisprudential* | 2010 | Quotes Hamidullah's classical fiqh treatment (above 66°N, services impossible by sun-marker) | Reinforces the latitude threshold split: ≤48.6° normal → ≤66.6° middle-of-night → >66.6° follow nearest "normal" lat or Mecca. |
+| [Guessoum, 2010] *Salat Times When Solar Sign Disappears (48.5° → pole)* | 2010 | Method extends past 66.6° toward the pole | **Open question for fajr:** how to treat lat ≥66.6° where Odeh defers. |
+
+All six papers are archived under `knowledge/raw/papers/2026-05-01-astronomycenter/`.
+
+---
+
 ## Related Pages
 
+- [[wiki/regions/iceland]] — Iceland-specific case study and downstream-app guidance for the Reykjavik narrow-Isha-Fajr-gap regime
+- [[wiki/methods/fajr-angle-empirics]] — Aabed 2015 empirical Fajr observations and the urban light-pollution caveat
 - [[wiki/fiqh/scholarly-oversight]] — Classification framework governing high-latitude solutions
 - [[wiki/methods/overview]] — UOIF and ECFR methods that address high-latitude issues at the method level

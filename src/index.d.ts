@@ -39,6 +39,16 @@ export interface PrayerTimesResult {
   /** Human-readable label of the auto-selected calculation method,
    *  e.g. `"Morocco (19°/17° community calibration)"` or `"Diyanet (Türkiye)"`. */
   method:  string
+  /** Scholarly-grounded caveats specific to this location and method. Each
+   *  entry is a complete sentence with a wiki citation. Empty array when no
+   *  specific notes apply. Consumers may render none, all, or a curated
+   *  subset depending on UX.
+   *
+   *  Currently emits a high-latitude advisory at |latitude| ≥ 48.6° per
+   *  [Odeh, 2009] — see knowledge/wiki/regions/iceland.md. Future versions
+   *  may add other location-specific caveats (light pollution, elevation,
+   *  DST transition days). */
+  notes: string[]
   corrections: {
     elevation:  boolean
     refraction: string

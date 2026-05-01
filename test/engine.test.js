@@ -112,6 +112,34 @@ describe('prayerTimes invariants', () => {
       expect(Number.isFinite(result[p].getTime())).toBe(true)
     }
   })
+
+  it('returns empty notes array at low latitudes', () => {
+    // Casablanca — well below the high-latitude threshold
+    const result = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
+    expect(Array.isArray(result.notes)).toBe(true)
+    expect(result.notes).toEqual([])
+  })
+
+  it('emits high-latitude advisory at |lat| ≥ 48.6° per Odeh 2009', () => {
+    // Reykjavik — fajr#4 case
+    const reykjavik = prayerTimes({ latitude: 64.15, longitude: -21.94, date: TEST_DATE })
+    expect(reykjavik.notes.length).toBe(1)
+    expect(reykjavik.notes[0]).toMatch(/Odeh.*2009/i)
+    expect(reykjavik.notes[0]).toMatch(/48\.6/)
+
+    // Symmetrical southern hemisphere — Macquarie Island at -54.5° latitude
+    const macquarie = prayerTimes({ latitude: -54.5, longitude: 158.95, date: TEST_DATE })
+    expect(macquarie.notes.length).toBe(1)
+    expect(macquarie.notes[0]).toMatch(/Odeh.*2009/i)
+
+    // Just above the threshold — should still emit
+    const edge = prayerTimes({ latitude: 48.6, longitude: 0, date: TEST_DATE })
+    expect(edge.notes.length).toBe(1)
+
+    // Just below — should not
+    const justBelow = prayerTimes({ latitude: 48.5, longitude: 0, date: TEST_DATE })
+    expect(justBelow.notes).toEqual([])
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

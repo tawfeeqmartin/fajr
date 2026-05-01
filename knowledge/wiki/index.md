@@ -35,6 +35,7 @@ See `../lint.md` for quality and consistency rules.
 | [MWL](methods/mwl.md) | 18°/17°; Muslim World League; most widely used globally; conservative Fajr angle |
 | [Umm al-Qura](methods/umm-al-qura.md) | 18.5° Fajr; Isha = Maghrib + 90 min (120 in Ramadan); used in Saudi Arabia |
 | [Morocco](methods/morocco.md) | 19°/17° base with per-city adjustments; Ministry of Habous publishes official times monthly |
+| [Fajr angle empirics](methods/fajr-angle-empirics.md) | Aabed 2015 Jordan naked-eye sessions, Almisnid 2012 instrumented Qassim study, Odeh 2010 review, Sumeat 2019 controversy: 18° validated, light-pollution caveat |
 
 ---
 
@@ -43,7 +44,8 @@ See `../lint.md` for quality and consistency rules.
 | Article | Description |
 |---------|-------------|
 | [Morocco](regions/morocco.md) | Sea level to 4167m (Toubkal); DST complications; Ministry authoritative timetables; Azan Now app |
-| [High latitudes](regions/high-latitude.md) | Above ~48°N: persistent twilight; 1/7 night, nearest city, middle of night, angle-based solutions; ECFR rulings |
+| [High latitudes](regions/high-latitude.md) | Above ~48°N: persistent twilight; 1/7 night, nearest city, middle of night, angle-based solutions; ECFR rulings; Odeh 2009 + Tarabishy 2014 modern references |
+| [Iceland](regions/iceland.md) | Reykjavik narrow Isha-Fajr gap regime; Odeh 2009 endorsement of middle-of-night; downstream-app guidance |
 
 ---
 

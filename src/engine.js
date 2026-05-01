@@ -199,6 +199,21 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
   const times = new adhan.PrayerTimes(coords, date, params)
 
+  // Surface scholarly-grounded caveats specific to this location. Empty
+  // array when no specific notes apply. Each entry is a complete sentence
+  // with a wiki citation. Consumers may render none, all, or a curated
+  // subset depending on UX. Currently emits the high-latitude note when
+  // |lat| ≥ 48.6° per Odeh 2009 — see wiki/regions/iceland.md.
+  const notes = []
+  if (Math.abs(latitude) >= 48.6) {
+    notes.push(
+      'High-latitude regime: at latitudes ≥48.6°, calculated Isha and ' +
+      'next-day Fajr may converge to within minutes during summer per ' +
+      'Odeh (2009). This is expected behaviour of the middle-of-night ' +
+      'rule, not a calculation error. See knowledge/wiki/regions/iceland.md.'
+    )
+  }
+
   let result = {
     fajr:    times.fajr,
     shuruq:  times.sunrise,
@@ -218,6 +233,7 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
     // them as separate fields.
     sunset:  times.sunset,
     method:  methodName,
+    notes,
     corrections: {
       elevation: false,
       refraction: 'standard (0.833°)',
