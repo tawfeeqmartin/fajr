@@ -276,6 +276,76 @@ function chartBiasByPrayer(latest) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Historical trajectory — Experiment 1–7 narrative (Aladhan-only baseline)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Static data: the original autoresearch experiment milestones. These predate
+// today's multi-source eval framework; numbers are from the Experiment 7
+// README baseline (Aladhan-only, ~222 ground-truth points, 18 cities).
+const HISTORICAL_EXPERIMENTS = [
+  { label: 'Baseline',           wmae: 24.17, note: 'ISNA hardcoded for all regions' },
+  { label: 'Exp 1',              wmae: 21.39, note: 'Regional method auto-selection' },
+  { label: 'Exp 3',              wmae:  2.31, note: 'High-lat Isha + eval-bug fix (most of the gain)' },
+  { label: 'Exp 5',              wmae:  1.83, note: 'Reykjavik MiddleOfTheNight refinement' },
+  { label: 'Exp 6',              wmae:  1.55, note: '+5 cities: Jakarta, Karachi, Dubai, Paris, Toronto' },
+]
+
+function chartHistoricalTrajectory() {
+  const W = 880, H = 380
+  const ML = 70, MR = 50, MT = 60, MB = 100
+  const yMax = niceCeil(Math.max(...HISTORICAL_EXPERIMENTS.map(e => e.wmae)))
+  const xMin = 0, xMax = HISTORICAL_EXPERIMENTS.length - 1
+  const x = scale(xMin, xMax, ML, W - MR)
+  const y = scale(0, yMax, H - MB, MT)
+
+  let body = svgOpen(W, H)
+  body += title(W, 28, 'Historical accuracy trajectory — Experiments 1–7 (Aladhan-only baseline)', { size: STYLE.titleSize })
+  body += subtitle(W, 48, '24.17 → 1.55 min headline gain — but 89% of that came from Exp 3 fixing an evaluator bug, not engine work')
+
+  // Plot panel
+  body += `<rect x="${ML}" y="${MT}" width="${W - ML - MR}" height="${H - MT - MB}" fill="${STYLE.panel}" />`
+
+  // Y grid + labels
+  for (let i = 0; i <= 5; i++) {
+    const v = (yMax * i) / 5
+    const yp = y(v)
+    body += `<line x1="${ML}" y1="${yp}" x2="${W-MR}" y2="${yp}" stroke="${STYLE.grid}" stroke-width="0.5" stroke-dasharray="2,3" />`
+    body += `<text x="${ML-6}" y="${yp+3}" text-anchor="end" fill="${STYLE.fgDim}" font-size="${STYLE.tickSize}">${v.toFixed(1)}</text>`
+  }
+  body += `<text x="${ML/2 - 4}" y="${(MT+H-MB)/2}" transform="rotate(-90 ${ML/2 - 4} ${(MT+H-MB)/2})" text-anchor="middle" fill="${STYLE.fgDim}" font-size="${STYLE.axisSize}">WMAE (minutes)</text>`
+
+  // Reference line: ~2-min atmospheric refraction floor (Young 2006)
+  const yFloor = y(2)
+  body += `<line x1="${ML}" y1="${yFloor}" x2="${W-MR}" y2="${yFloor}" stroke="${STYLE.borderline}" stroke-width="1" stroke-dasharray="4,4" opacity="0.6" />`
+  body += `<text x="${W-MR-8}" y="${yFloor-6}" text-anchor="end" fill="${STYLE.borderline}" font-size="${STYLE.tickSize}" opacity="0.85">~2 min atmospheric refraction floor (Young 2006)</text>`
+
+  // Trajectory line
+  const points = HISTORICAL_EXPERIMENTS.map((e, i) => `${x(i).toFixed(1)},${y(e.wmae).toFixed(1)}`).join(' ')
+  body += `<polyline points="${points}" fill="none" stroke="${STYLE.train}" stroke-width="2.5" />`
+
+  // Mark the "honest baseline" — Exp 3 onward is real engine work; before that
+  // the high WMAE was partially an eval-counting bug.
+  const xExp3 = x(2)
+  body += `<line x1="${xExp3}" y1="${MT+10}" x2="${xExp3}" y2="${H-MB}" stroke="${STYLE.unsafe}" stroke-width="1" stroke-dasharray="3,4" opacity="0.6" />`
+  body += `<text x="${xExp3 + 6}" y="${MT+22}" fill="${STYLE.unsafe}" font-size="${STYLE.axisSize}" opacity="0.95">eval-bug fix landed here</text>`
+  body += `<text x="${xExp3 + 6}" y="${MT+36}" fill="${STYLE.unsafe}" font-size="${STYLE.tickSize}" opacity="0.8">— real engine progress is 2.31 → 1.55 ≈ 33%, not the 93.6% headline</text>`
+
+  // Markers + labels
+  for (let i = 0; i < HISTORICAL_EXPERIMENTS.length; i++) {
+    const e = HISTORICAL_EXPERIMENTS[i]
+    const xp = x(i), yp = y(e.wmae)
+    body += `<circle cx="${xp.toFixed(1)}" cy="${yp.toFixed(1)}" r="4.5" fill="${STYLE.train}" stroke="${STYLE.bg}" stroke-width="2" />`
+    body += `<text x="${xp.toFixed(1)}" y="${(yp - 12).toFixed(1)}" text-anchor="middle" fill="${STYLE.fg}" font-size="${STYLE.axisSize}" font-weight="600">${e.wmae.toFixed(2)}</text>`
+    // X-axis label (two lines: name + brief note)
+    body += `<text x="${xp.toFixed(1)}" y="${H-MB+18}" text-anchor="middle" fill="${STYLE.fg}" font-size="${STYLE.axisSize}" font-weight="600">${escape(e.label)}</text>`
+    body += `<text x="${xp.toFixed(1)}" y="${H-MB+34}" text-anchor="middle" fill="${STYLE.fgDim}" font-size="${STYLE.tickSize}">${escape(e.note)}</text>`
+  }
+
+  body += svgClose()
+  return body
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // progress.md
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -416,6 +486,10 @@ function main() {
   const bias = chartBiasByPrayer(latest)
   writeFileSync(join(CHARTS_DIR, 'bias-by-prayer.svg'), bias)
   console.log(`→ wrote ${join(CHARTS_DIR, 'bias-by-prayer.svg')}`)
+
+  const historical = chartHistoricalTrajectory()
+  writeFileSync(join(CHARTS_DIR, 'historical-trajectory.svg'), historical)
+  console.log(`→ wrote ${join(CHARTS_DIR, 'historical-trajectory.svg')}`)
 
   writeFileSync(PROGRESS_PATH, progressMd(runs))
   console.log(`→ wrote ${PROGRESS_PATH}`)

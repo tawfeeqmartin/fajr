@@ -270,19 +270,11 @@ Every correction in `src/engine.js` is tagged:
 
 ## Historical Results (Experiment 1–7 narrative)
 
-These are the static charts from the original autoresearch narrative (Aladhan-only ground truth). For the live multi-source picture, see [Latest Results](#latest-results) above.
+The original autoresearch narrative ran against an Aladhan-only baseline (~222 ground-truth points across 18 cities) before today's multi-source eval framework. The trajectory below shows the WMAE progression from that era — preserved for context, with the eval-bug-fix inflection honestly marked.
 
-### Accuracy Trajectory
-![WMAE Trajectory](docs/charts/chart-wmae-trajectory.png)
+![Historical accuracy trajectory across experiments 1–7](docs/charts/historical-trajectory.svg)
 
-### Per-Prayer Accuracy
-![Per-Prayer Comparison](docs/charts/chart-prayer-comparison.png)
-
-### Per-City Accuracy
-![City Accuracy](docs/charts/chart-city-accuracy.png)
-
-### Elevation Correction Validation
-![Elevation Correction](docs/charts/chart-elevation.png)
+The 24.17 → 1.55 min headline reduction looks dramatic, but **most of the gain (Exp 1 → Exp 3) was fixing an evaluator bug, not engine work.** Real engine progress against a correctly-measured baseline is closer to 2.31 → 1.55 ≈ 33%. The remaining per-city, per-prayer, and elevation-correction visualisations from the Experiment-7 narrative are now superseded by the live tables in [`docs/progress.md`](docs/progress.md) and the [Latest Results](#latest-results) section above.
 
 ---
 
