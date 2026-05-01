@@ -287,3 +287,44 @@ export function applyElevationCorrection(times, elevation, latitude = 0) {
 
   return adjusted
 }
+
+/**
+ * Apply a tayakkun (تيقن — "certainty") buffer to Fajr.
+ *
+ * 🟡 Limited precedent: based on Aabed (2015), a peer-reviewed naked-eye
+ * observational study published in the Jordan Journal for Islamic Studies
+ * v. 11(2). Twelve observation sessions in four Jordanian localities during
+ * 1430/1431 AH found that the true dawn was observed 4–5 minutes after the
+ * calculated 18° Fajr time. The paper recommends keeping the calculated
+ * time as-is, but adds: *"It is also accepted to delay A'than by 5 minutes
+ * only to be sure of the right timing (tayakkun)."*
+ *
+ * This function applies that recommended buffer. It is opt-in (default
+ * pipeline does not apply it) because the calculated 18° angle is itself
+ * astronomically correct; the buffer is for fasting-precaution / observer-
+ * certainty. Apply selectively when the consumer wants to err toward the
+ * fasting-safer direction at locations where naked-eye verification would
+ * trail the calculated time.
+ *
+ * See knowledge/wiki/methods/fajr-angle-empirics.md for the full discussion.
+ *
+ * @param {object} times    Output from prayerTimes() or dayTimes()
+ * @param {number} [mins=5] Buffer in minutes; default 5 per Aabed 2015
+ * @returns {object} Times with Fajr delayed by `mins` and a note appended
+ */
+export function applyTayakkunBuffer(times, mins = 5) {
+  if (!mins || mins <= 0) return times
+
+  const adjusted = { ...times }
+  adjusted.fajr = new Date(times.fajr.getTime() + mins * 60 * 1000)
+  // Notes is always present on prayerTimes() output as of v1.2.0; guard
+  // for callers that hand-roll a `times` object without it.
+  const noteText =
+    `Tayakkun buffer applied: Fajr delayed by ${mins} minute${mins === 1 ? '' : 's'} ` +
+    `per Aabed (2015) recommendation for naked-eye certainty. The unbuffered ` +
+    `calculated 18° Fajr is astronomically correct; this buffer is for ` +
+    `fasting-precaution and observer-certainty (tayakkun).`
+  adjusted.notes = [...(times.notes || []), noteText]
+
+  return adjusted
+}

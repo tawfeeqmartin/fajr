@@ -12,8 +12,8 @@
 
 import { describe, it, expect } from 'vitest'
 import fajr, {
-  prayerTimes, dayTimes, qibla, hijri, hilalVisibility,
-  nightThirds, travelerMode,
+  prayerTimes, dayTimes, tarabishyTimes, qibla, hijri, hilalVisibility,
+  nightThirds, travelerMode, applyTayakkunBuffer,
 } from '../src/index.js'
 import { applyElevationCorrection } from '../src/engine.js'
 
@@ -393,6 +393,97 @@ describe('applyElevationCorrection', () => {
     const before = baseTimes()
     const after = applyElevationCorrection(before, 0, 30)
     expect(after).toBe(before)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// applyTayakkunBuffer (Aabed 2015) — opt-in 5-min Fajr delay
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('applyTayakkunBuffer', () => {
+  it('delays Fajr by 5 minutes by default', () => {
+    const before = prayerTimes({ latitude: 31.95, longitude: 35.93, date: TEST_DATE })
+    const after = applyTayakkunBuffer(before)
+    expect(after.fajr.getTime() - before.fajr.getTime()).toBe(5 * 60 * 1000)
+    // Other prayers unchanged
+    for (const p of ['shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+      expect(after[p].getTime()).toBe(before[p].getTime())
+    }
+  })
+
+  it('accepts a custom buffer minutes value', () => {
+    const before = prayerTimes({ latitude: 31.95, longitude: 35.93, date: TEST_DATE })
+    const after = applyTayakkunBuffer(before, 10)
+    expect(after.fajr.getTime() - before.fajr.getTime()).toBe(10 * 60 * 1000)
+  })
+
+  it('returns input unchanged for mins <= 0', () => {
+    const before = prayerTimes({ latitude: 31.95, longitude: 35.93, date: TEST_DATE })
+    expect(applyTayakkunBuffer(before, 0)).toBe(before)
+    expect(applyTayakkunBuffer(before, -5)).toBe(before)
+  })
+
+  it('appends a notes entry citing Aabed 2015', () => {
+    const before = prayerTimes({ latitude: 31.95, longitude: 35.93, date: TEST_DATE })
+    const after = applyTayakkunBuffer(before)
+    expect(after.notes.length).toBe(before.notes.length + 1)
+    const note = after.notes[after.notes.length - 1]
+    expect(note).toMatch(/Aabed.*2015/i)
+    expect(note).toMatch(/tayakkun/i)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// tarabishyTimes (Tarabishy 2014) — opt-in 45° latitude-truncation method
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('tarabishyTimes', () => {
+  it('returns prayerTimes() output unchanged below the 45° threshold', () => {
+    const params = { latitude: 33.97, longitude: -6.85, date: TEST_DATE }
+    const tarabishy = tarabishyTimes(params)
+    const standard  = prayerTimes(params)
+    for (const p of ['fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+      expect(tarabishy[p].getTime()).toBe(standard[p].getTime())
+    }
+  })
+
+  it('truncates latitude to 45° above the threshold (preserving sign)', () => {
+    // Reykjavik, 64.15°N — should compute as if at 45°N
+    const reykjavik = tarabishyTimes({ latitude: 64.15, longitude: -21.94, date: TEST_DATE })
+    const at45      = prayerTimes({ latitude: 45,    longitude: -21.94, date: TEST_DATE })
+    for (const p of ['fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+      expect(reykjavik[p].getTime()).toBe(at45[p].getTime())
+    }
+    expect(reykjavik.method).toMatch(/Tarabishy/i)
+    expect(reykjavik.method).toMatch(/45/)
+  })
+
+  it('preserves sign on southern-hemisphere truncation', () => {
+    // Macquarie Island, -54.5° — should compute as if at -45°
+    const macquarie = tarabishyTimes({ latitude: -54.5, longitude: 158.95, date: TEST_DATE })
+    const atMinus45 = prayerTimes({ latitude: -45,   longitude: 158.95, date: TEST_DATE })
+    for (const p of ['fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+      expect(macquarie[p].getTime()).toBe(atMinus45[p].getTime())
+    }
+  })
+
+  it('appends a notes entry citing Tarabishy 2014 above threshold', () => {
+    const reykjavik = tarabishyTimes({ latitude: 64.15, longitude: -21.94, date: TEST_DATE })
+    const note = reykjavik.notes[reykjavik.notes.length - 1]
+    expect(note).toMatch(/Tarabishy.*2014/i)
+  })
+
+  it('accepts a custom threshold latitude', () => {
+    // Force truncation at 50° even for Paris (48.86°) — should NOT truncate
+    const params = { latitude: 48.86, longitude: 2.35, date: TEST_DATE }
+    const customAbove = tarabishyTimes(params, 50)
+    const standard    = prayerTimes(params)
+    expect(customAbove.fajr.getTime()).toBe(standard.fajr.getTime())
+
+    // Force truncation at 30° — Paris IS above 30°, should truncate to 30°
+    const customBelow = tarabishyTimes(params, 30)
+    const at30        = prayerTimes({ ...params, latitude: 30 })
+    expect(customBelow.fajr.getTime()).toBe(at30.fajr.getTime())
   })
 })
 

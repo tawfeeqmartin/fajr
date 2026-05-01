@@ -7,7 +7,7 @@
  * Internal implementation lives in engine.js and the other src/ modules.
  */
 
-import { prayerTimes as _prayerTimes, applyElevationCorrection } from './engine.js'
+import { prayerTimes as _prayerTimes, applyElevationCorrection, applyTayakkunBuffer } from './engine.js'
 import { qibla } from './qibla.js'
 import { hijri } from './hijri.js'
 import { hilalVisibility } from './hilal.js'
@@ -51,9 +51,52 @@ function dayTimes(params) {
   return { ...today, midnight, qiyam }
 }
 
+/**
+ * Compute prayer times using Tarabishy's (2014) latitude-truncation method.
+ *
+ * 🟡 Limited precedent: Tarabishy 2014 argues that 45° is the highest
+ * latitude with "normal" days year-round (using physiological day-length
+ * as the criterion). Above 45°, his method computes prayer times for the
+ * truncated latitude (45° preserving sign) at the actual longitude, on the
+ * grounds that those times match physiological day-length expectations
+ * better than direct calculation at the high latitude.
+ *
+ * This is an opt-in alternative to fajr's default high-latitude rule
+ * (MiddleOfTheNight per Odeh 2009). It is NOT a default — Odeh 2009 surveys
+ * 12 high-latitude proposals including Tarabishy-style truncation and
+ * recommends middle-of-night instead. The Tarabishy approach is included
+ * here because it is the principal published dissent and downstream apps
+ * may want to expose it as a user-selectable alternative.
+ *
+ * Below the threshold, behaviour is identical to `prayerTimes()`.
+ *
+ * @param {object} params           Same as prayerTimes
+ * @param {number} [thresholdLat=45] Truncate latitude above this; preserves sign
+ * @returns {object} prayerTimes-shape result with method and notes annotated
+ */
+function tarabishyTimes(params, thresholdLat = 45) {
+  if (Math.abs(params.latitude) <= thresholdLat) {
+    return prayerTimes(params)
+  }
+  const truncatedLat = thresholdLat * Math.sign(params.latitude)
+  const result = prayerTimes({ ...params, latitude: truncatedLat })
+  result.method = `Tarabishy (truncated to ${thresholdLat}° from ${params.latitude.toFixed(2)}°)`
+  result.notes = [...result.notes,
+    `Times computed at ${thresholdLat}° latitude per Tarabishy (2014); your ` +
+    `actual latitude is ${params.latitude.toFixed(2)}°. Tarabishy argues 45° is the ` +
+    `highest "normal" latitude where calculated times match physiological ` +
+    `day-length expectations. This is the published dissent from the ` +
+    `Odeh-2009-endorsed middle-of-night rule.`,
+  ]
+  return result
+}
+
 export default {
   prayerTimes,
   dayTimes,
+  tarabishyTimes,
+  applyElevationCorrection,
+  applyTayakkunBuffer,
   qibla,
   hijri,
   hilalVisibility,
@@ -64,6 +107,9 @@ export default {
 export {
   prayerTimes,
   dayTimes,
+  tarabishyTimes,
+  applyElevationCorrection,
+  applyTayakkunBuffer,
   qibla,
   hijri,
   hilalVisibility,

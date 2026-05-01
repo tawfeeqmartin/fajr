@@ -84,6 +84,38 @@ export function applyElevationCorrection(
   latitude?: number,
 ): PrayerTimesResult
 
+/** Apply an opt-in tayakkun (تيقن — "certainty") buffer to Fajr.
+ *
+ *  🟡 Limited precedent — Aabed (2015), peer-reviewed naked-eye observational
+ *  study, Jordan Journal for Islamic Studies v. 11(2). Twelve sessions in
+ *  four Jordanian localities found true dawn was observed 4–5 minutes after
+ *  the calculated 18° Fajr time. The paper recommends keeping the calculated
+ *  time, but adds: *"It is also accepted to delay A'than by 5 minutes only
+ *  to be sure of the right timing (tayakkun)."*
+ *
+ *  This buffer is for fasting-precaution and observer-certainty; the
+ *  unbuffered calculated 18° Fajr is itself astronomically correct. */
+export function applyTayakkunBuffer(
+  times: PrayerTimesResult,
+  mins?: number,
+): PrayerTimesResult
+
+/** Compute prayer times using Tarabishy's (2014) latitude-truncation method.
+ *
+ *  🟡 Limited precedent — Tarabishy 2014 argues 45° is the highest latitude
+ *  with "normal" days year-round (using physiological day-length as the
+ *  criterion). Above 45°, this function computes prayer times for the
+ *  truncated latitude (45° preserving sign) at the actual longitude. Below
+ *  45° the result is identical to `prayerTimes()`.
+ *
+ *  This is the principal published dissent from the Odeh-2009-endorsed
+ *  middle-of-night high-latitude rule. Opt-in only — fajr's default high-
+ *  latitude behaviour remains middle-of-night via adhan.js. */
+export function tarabishyTimes(
+  params: PrayerTimesParams,
+  thresholdLat?: number,
+): PrayerTimesResult
+
 // ─────────────────────────────────────────────────────────────────────────────
 // qibla
 // ─────────────────────────────────────────────────────────────────────────────
@@ -299,13 +331,16 @@ export function travelerMode(params: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 declare const fajr: {
-  prayerTimes:     typeof prayerTimes
-  dayTimes:        typeof dayTimes
-  qibla:           typeof qibla
-  hijri:           typeof hijri
-  hilalVisibility: typeof hilalVisibility
-  nightThirds:     typeof nightThirds
-  travelerMode:    typeof travelerMode
+  prayerTimes:              typeof prayerTimes
+  dayTimes:                 typeof dayTimes
+  tarabishyTimes:           typeof tarabishyTimes
+  applyElevationCorrection: typeof applyElevationCorrection
+  applyTayakkunBuffer:      typeof applyTayakkunBuffer
+  qibla:                    typeof qibla
+  hijri:                    typeof hijri
+  hilalVisibility:          typeof hilalVisibility
+  nightThirds:              typeof nightThirds
+  travelerMode:             typeof travelerMode
 }
 
 export default fajr

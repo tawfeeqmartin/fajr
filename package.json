@@ -1,6 +1,6 @@
 {
   "name": "@tawfeeqmartin/fajr",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "High-accuracy Islamic prayer time library combining NASA/JPL astronomical algorithms with classical Islamic scholarship",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -40,6 +40,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "compare": "node eval/compare.js",
+    "validate:aabed": "node scripts/validate-against-aabed-2015.js",
     "validate:hilal": "node scripts/validate-hilal.js",
     "validate:lunar-jpl": "node scripts/validate-lunar-against-jpl.js",
     "validate:solar-jpl": "node scripts/validate-solar-against-jpl.js",
