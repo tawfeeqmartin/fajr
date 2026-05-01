@@ -8,44 +8,43 @@
  *   - scripts/build-hilal-map.js       (per-month world map)
  *   - scripts/build-hilal-year-animation.js (12-month animated map)
  *
- * The unified theme is dark — the hilal world maps need a dark canvas for
- * the colour-coded cells to read cleanly, and harmonising the WMAE charts
- * to the same palette keeps the published artifacts visually coherent.
- *
+ * Light/cream theme — chosen to match GitHub's white README rendering so
+ * the embedded SVGs sit on the page rather than floating as dark rectangles.
  * Series colours are consistent across charts: green for train / visible,
  * purple for holdout / test, amber for borderline, red for unsafe / disagree.
  */
 
 export const STYLE = {
   // Page-level + plot panels
-  bg:           '#0f1923',    // page background
-  panel:        '#1c2733',    // chart plot area
-  panelAlt:     '#243140',    // alternating row / hover
-  fg:           '#ecedf2',    // primary text
-  fgDim:        '#9aa4b0',    // secondary text / labels
-  fgFaint:      '#5a6a7a',    // axis tick labels, deemphasised
-  grid:         '#2a3a4a',    // chart grid lines (dashed)
-  axis:         '#3b4a59',    // chart axis lines (solid)
-  zero:         '#5a6a7a',    // zero / reference lines
+  bg:           '#fafaf7',    // page background (warm cream, matches GitHub light)
+  panel:        '#f1efe8',    // chart plot area (slightly darker cream)
+  panelAlt:     '#e8e6df',    // alternating row / hover
+  fg:           '#1a1a1a',    // primary text (near-black)
+  fgDim:        '#5a5a5a',    // secondary text / labels
+  fgFaint:      '#8a8a8a',    // axis tick labels, deemphasised
+  grid:         '#dcdcd0',    // chart grid lines (dashed)
+  axis:         '#a8a89a',    // chart axis lines (solid)
+  zero:         '#888',       // zero / reference lines
 
-  // Series — train vs holdout
-  train:        '#3ed16f',    // train data, "visible" cells
-  trainBg:      '#1f3a2a',
-  test:         '#9d7bff',    // holdout data, "test" cells
-  testBg:       '#2c2244',
+  // Series — train vs holdout. Slightly darker than typical "vivid" greens
+  // so they read with strong contrast on the cream background.
+  train:        '#1f7a4d',    // train data, "visible" cells
+  trainBg:      '#dff1e7',
+  test:         '#7a4d9c',    // holdout data, "test" cells
+  testBg:       '#ece1f3',
 
   // Status / classification
-  visible:      '#3ed16f',    // matches train
-  borderline:   '#d6a833',
-  notVisible:   '#3b4a59',    // muted neutral
-  unsafe:       '#ff5252',    // ihtiyat-unsafe drift, ikhtilaf disagreement
-  warn:         '#ff5252',    // alias
+  visible:      '#1f7a4d',    // matches train
+  borderline:   '#c8881a',    // warmer amber for white bg
+  notVisible:   '#9aa0a8',    // muted neutral grey
+  unsafe:       '#c83030',    // ihtiyat-unsafe drift, ikhtilaf disagreement
+  warn:         '#c83030',    // alias
 
   // City anchors / overlays
-  city:         '#ffffff',
-  cityHalo:     '#0f1923',    // halo behind city dot/text for legibility
-  sighted:      '#3ed16f',
-  notSighted:   '#ff5252',
+  city:         '#1a1a1a',    // dark dot on cream
+  cityHalo:     '#fafaf7',    // halo behind city dot/text for legibility
+  sighted:      '#1f7a4d',
+  notSighted:   '#c83030',
 
   // Typography
   fontFamily:   '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',

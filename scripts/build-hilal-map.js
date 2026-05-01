@@ -107,7 +107,7 @@ const PALETTE = {
   borderline:   STYLE.borderline,
   'not-visible':STYLE.notVisible,
   disagree:     STYLE.unsafe,
-  unknown:      '#222',
+  unknown:      '#cccccc',
   fg:           STYLE.fg,
   city:         STYLE.city,
   cityHalo:     STYLE.cityHalo,

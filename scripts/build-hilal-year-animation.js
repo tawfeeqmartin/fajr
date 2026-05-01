@@ -54,7 +54,7 @@ const PALETTE = {
   borderline:   STYLE.borderline,
   'not-visible':STYLE.notVisible,
   disagree:     STYLE.unsafe,
-  unknown:      '#222',
+  unknown:      '#cccccc',
   fg:           STYLE.fg,
   city:         STYLE.city,
   cityHalo:     STYLE.cityHalo,
@@ -173,7 +173,7 @@ function render({ cellList, monthCells, monthSummaries }) {
   // Use 12 stacked text elements, each visible during its second only.
   const labelX = ML + 8
   const labelY = MT + 18
-  body += `<rect x="${ML+4}" y="${MT+4}" width="220" height="22" fill="#000" opacity="0.5" rx="3" />`
+  body += `<rect x="${ML+4}" y="${MT+4}" width="220" height="22" fill="#fff" opacity="0.7" rx="3" />`
   for (let m = 0; m < 12; m++) {
     // Each month label: opacity 1 only during its 1-second slot, else 0.
     // calcMode="discrete" with 13 keyTimes (12 frames + the final wrap).
@@ -185,7 +185,7 @@ function render({ cellList, monthCells, monthSummaries }) {
   // Animated summary in upper right
   const summaryX = W - MR - 4
   const summaryY = MT + 18
-  body += `<rect x="${summaryX - 326}" y="${MT+4}" width="326" height="22" fill="#000" opacity="0.5" rx="3" />`
+  body += `<rect x="${summaryX - 326}" y="${MT+4}" width="326" height="22" fill="#fff" opacity="0.7" rx="3" />`
   for (let m = 0; m < 12; m++) {
     const opacityVals = []
     for (let k = 0; k < 12; k++) opacityVals.push(k === m ? '1' : '0')
