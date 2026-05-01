@@ -208,6 +208,32 @@ function classifyOdeh(V) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Yallop (1997) classification — HM Nautical Almanac Office TN No. 69
+// ─────────────────────────────────────────────────────────────────────────────
+
+// q = (ARCV − f(W)) / 10
+// where f(W) = 11.8371 − 6.3226 W + 0.7319 W² − 0.1018 W³
+// (Same polynomial structure as Odeh but with constant 11.8371 vs 7.1651
+// and a /10 normalisation. Empirically fit to a different sighting record;
+// gives 6-class A–F output instead of Odeh's 4-class A–D.)
+function yallopQ(arcvDeg, widthArcmin) {
+  const W = widthArcmin
+  const fW = 11.8371 - 6.3226*W + 0.7319*W*W - 0.1018*W*W*W
+  return (arcvDeg - fW) / 10
+}
+
+// Classification thresholds (Yallop 1997, Table 2).
+function classifyYallop(q) {
+  if (q === null || Number.isNaN(q)) return { code: '?', label: 'unknown', visible: null }
+  if (q >=  0.216) return { code: 'A', label: 'easily visible to naked eye',                          visible: true  }
+  if (q >= -0.014) return { code: 'B', label: 'visible to naked eye in perfect conditions',           visible: true  }
+  if (q >= -0.160) return { code: 'C', label: 'may need optical aid to find crescent',                visible: false }
+  if (q >= -0.232) return { code: 'D', label: 'will need optical aid to find crescent',               visible: false }
+  if (q >= -0.293) return { code: 'E', label: 'not visible with a telescope',                          visible: false }
+  return            { code: 'F', label: 'not visible (below Danjon limit)',                            visible: false }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Public API
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -249,13 +275,10 @@ export function hilalVisibility({ year, month, latitude, longitude }) {
   // Lag time (minutes).
   const lagMinutes = (jdMoonset - jdSunset) * 1440
   if (lagMinutes <= 0) {
-    return {
-      visible: false, code: 'D',
-      label: 'moon sets before sun — crescent below horizon at sunset',
-      criterion: 'Odeh (2004)',
-      lagTimeMinutes: lagMinutes,
-      year, month, latitude, longitude,
-    }
+    return degenerateNotVisible({
+      reason: 'moon sets before sun — crescent below horizon at sunset',
+      lagMinutes, year, month, latitude, longitude,
+    })
   }
 
   // Best time = sunset + 4/9 × lag (Odeh 2004 §3.1).
@@ -274,37 +297,91 @@ export function hilalVisibility({ year, month, latitude, longitude }) {
   const ARCL = ARCV   // for sub-degree crescents these differ by < 0.1°
   const W    = crescentWidth(ARCL, moonGeo.distance)   // distance unchanged by parallax
 
-  // Odeh V parameter and classification.
-  const V = odehV(ARCV, W)
-  const classification = classifyOdeh(V)
+  // Compute both criteria. Odeh is the top-level "primary" answer for
+  // backward compatibility; Yallop is reported alongside so that
+  // disagreement between the two is surfaced rather than hidden.
+  const V          = odehV(ARCV, W)
+  const odeh       = classifyOdeh(V)
+  const q          = yallopQ(ARCV, W)
+  const yallop     = classifyYallop(q)
+  const agree      = odeh.visible === yallop.visible
 
   // Conjunction (for reporting only).
   const jdConjunction = findConjunction(jdEval - 1, 1.5)
-  const moonAgeHours = jdConjunction === null ? null : (jdBestTime - jdConjunction) * 24
+  const moonAgeHours  = jdConjunction === null ? null : (jdBestTime - jdConjunction) * 24
 
   return {
-    visible: classification.visible,
-    code: classification.code,
-    label: classification.label,
+    // Top-level: Odeh (primary, preserved API).
+    visible:   odeh.visible,
+    code:      odeh.code,
+    label:     odeh.label,
     criterion: 'Odeh (2004)',
     V: round(V, 3),
-    arcvDeg: round(ARCV, 3),
-    widthArcmin: round(W, 3),
+
+    // Yallop side-by-side.
+    yallop: {
+      criterion: 'Yallop (1997)',
+      visible: yallop.visible,
+      code:    yallop.code,
+      label:   yallop.label,
+      q:       round(q, 4),
+    },
+
+    // Multi-criterion agreement summary. `criteriaAgree: false` flags an
+    // ikhtilaf case worth surfacing in any UI — the two empirical fits
+    // give different verdicts, so neither alone is decisive.
+    criteriaAgree: agree,
+
+    // Geometry (shared between criteria).
+    arcvDeg:        round(ARCV, 3),
+    widthArcmin:    round(W, 3),
     lagTimeMinutes: round(lagMinutes, 1),
-    moonAgeHours: moonAgeHours === null ? null : round(moonAgeHours, 2),
-    bestTimeUTC: dateFromJd(jdBestTime).toISOString(),
-    sunsetUTC:   dateFromJd(jdSunset).toISOString(),
-    moonsetUTC:  dateFromJd(jdMoonset).toISOString(),
+    moonAgeHours:   moonAgeHours === null ? null : round(moonAgeHours, 2),
+    bestTimeUTC:    dateFromJd(jdBestTime).toISOString(),
+    sunsetUTC:      dateFromJd(jdSunset).toISOString(),
+    moonsetUTC:     dateFromJd(jdMoonset).toISOString(),
     conjunctionUTC: jdConjunction === null ? null : dateFromJd(jdConjunction).toISOString(),
+
+    // Hijri context.
     evaluatedHijriDate: { year: priorYear, month: priorMonth, day: 29 },
-    forHijriMonth: { year, month },
+    forHijriMonth:      { year, month },
     latitude, longitude,
-    note: "Odeh (2004) is one of several legitimate visibility criteria. The decision of whether to begin a Hijri month rests with Islamic authorities, not with software. See knowledge/wiki/astronomy/hilal.md.",
+
+    note: "Odeh (2004) and Yallop (1997) are two of several legitimate visibility criteria. When they disagree (`criteriaAgree: false`), the case is borderline and witness testimony / scholarly judgment matters. The decision of whether to begin a Hijri month rests with Islamic authorities, not with software. See knowledge/wiki/astronomy/hilal.md.",
   }
 }
 
 function notVisible(meta) {
-  return { visible: false, code: 'D', label: meta.reason, criterion: 'Odeh (2004)', ...meta }
+  return degenerateNotVisible(meta)
+}
+
+function degenerateNotVisible(meta) {
+  // Both criteria agree on degenerate cases (no sunset, no moonset, or
+  // moon-before-sun). Construct a uniform response shape so callers don't
+  // need to special-case missing yallop fields.
+  return {
+    visible: false,
+    code: 'D',
+    label: meta.reason,
+    criterion: 'Odeh (2004)',
+    V: null,
+    yallop: {
+      criterion: 'Yallop (1997)',
+      visible: false,
+      code: 'F',
+      label: meta.reason,
+      q: null,
+    },
+    criteriaAgree: true,
+    lagTimeMinutes: meta.lagMinutes ?? null,
+    moonAgeHours: null,
+    arcvDeg: null,
+    widthArcmin: null,
+    forHijriMonth: { year: meta.year, month: meta.month },
+    latitude: meta.latitude,
+    longitude: meta.longitude,
+    note: meta.reason,
+  }
 }
 
 function round(x, digits) {

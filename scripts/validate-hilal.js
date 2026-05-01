@@ -97,23 +97,27 @@ function main() {
       continue
     }
 
-    console.log(`  Result: ${result.code} — ${result.label}`)
-    console.log(`    V = ${fmt(result.V, 2)}, ARCV = ${fmt(result.arcvDeg, 2)}°, W = ${fmt(result.widthArcmin, 2)}', lag = ${fmt(result.lagTimeMinutes, 1)} min, moon age = ${fmt(result.moonAgeHours, 1)} h`)
+    console.log(`    Odeh   ${result.code} (V = ${fmt(result.V, 2)}) — ${result.label}`)
+    console.log(`    Yallop ${result.yallop.code} (q = ${fmt(result.yallop.q, 4)}) — ${result.yallop.label}`)
+    if (!result.criteriaAgree) {
+      console.log(`    ◆ criteria disagree — this is a borderline / ikhtilaf case`)
+    }
+    console.log(`    ARCV = ${fmt(result.arcvDeg, 2)}°, W = ${fmt(result.widthArcmin, 2)}', lag = ${fmt(result.lagTimeMinutes, 1)} min, moon age = ${fmt(result.moonAgeHours, 1)} h`)
     console.log(`    sunset / moonset / best time (UTC): ${result.sunsetUTC?.slice(11,16) ?? '—'} / ${result.moonsetUTC?.slice(11,16) ?? '—'} / ${result.bestTimeUTC?.slice(11,16) ?? '—'}`)
     console.log(`    conjunction (UTC): ${result.conjunctionUTC ?? '—'}`)
 
     if (result.visible === c.astronomicallyExpected) {
-      console.log(`    ✓ astronomically defensible (matches expected ${c.astronomicallyExpected ? 'visible' : 'not visible'})`)
+      console.log(`    ✓ Odeh astronomically defensible (matches expected ${c.astronomicallyExpected ? 'visible' : 'not visible'})`)
       astroPass++
     } else {
-      console.log(`    ✗ ASTRONOMICALLY INCONSISTENT — predicted ${result.visible ? 'visible' : 'not visible'}, expected ${c.astronomicallyExpected ? 'visible' : 'not visible'}`)
+      console.log(`    ✗ Odeh ASTRONOMICALLY INCONSISTENT — predicted ${result.visible ? 'visible' : 'not visible'}, expected ${c.astronomicallyExpected ? 'visible' : 'not visible'}`)
       astroFail++
     }
     if (result.visible === c.committeeDecision) {
       committeeAgree++
     } else {
       committeeDisagree++
-      console.log(`    ◇ disagrees with committee decision (committee said ${c.committeeDecision ? 'visible' : 'not visible'}; this is expected for controversial / astronomically-impossible sightings)`)
+      console.log(`    ◇ Odeh disagrees with committee decision (committee said ${c.committeeDecision ? 'visible' : 'not visible'}; expected for controversial / astronomically-impossible sightings)`)
     }
     console.log()
   }

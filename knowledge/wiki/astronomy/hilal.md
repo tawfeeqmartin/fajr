@@ -2,7 +2,7 @@
 
 Predicting whether the new lunar crescent will be visible from a given location after a Hijri month's conjunction. The decision of whether to begin a Hijri month rests with Islamic authorities, not with software; this page documents the *astronomical* methods fajr uses to estimate visibility, and explicitly distinguishes that from the *shar'i* (legal) act of declaring a month begun.
 
-🟡 **Limited precedent** — fajr currently implements the Odeh (2004) criterion. Yallop (1997) and Shaukat (2002) are equally legitimate alternatives that may give different answers in borderline cases.
+🟡 **Limited precedent** — fajr implements both the Odeh (2004) and Yallop (1997) criteria, returning their classifications side-by-side along with a `criteriaAgree` flag highlighting borderline ikhtilaf cases. Shaukat (2002) and pure naked-eye sighting traditions remain equally legitimate and are not yet implemented.
 
 ---
 
@@ -27,13 +27,19 @@ Each was empirically fit to a different observational dataset, and each gives sl
 
 ---
 
-## fajr's implementation: Odeh (2004)
+## fajr's implementation: Odeh (2004) + Yallop (1997)
 
-fajr's `hilalVisibility(...)` function returns a classification using the Odeh (2004) criterion, chosen because:
+fajr's `hilalVisibility(...)` function returns classifications from **both** the Odeh (2004) and Yallop (1997) criteria. The two share their geometric inputs (ARCV, W) but use different empirical polynomial fits and different category boundaries, so they can disagree in borderline cases — and that disagreement is itself useful signal.
 
-1. It is fit to the largest published observation dataset (737 sightings, naked-eye and aided).
-2. It is the basis of the official calculations used by Egypt's Dar al-Iftaa, Jordan, and the Islamic Crescents' Observation Project (ICOP).
-3. It produces a single continuous *V* parameter that maps cleanly to four visibility classes.
+**Why both, rather than picking one as canonical:**
+
+1. They were fit to different observation datasets (Odeh: 737 records published 2004; Yallop: HMNAO records published 1997). Either alone overfits to its training data.
+2. Different national authorities reference different criteria. Egypt's Dar al-Iftaa and ICOP align with Odeh; UK Nautical Almanac Office and several European committees use Yallop.
+3. When both agree on visible/not-visible, the verdict is stable. When they disagree, the case is borderline and witness testimony / scholarly judgment matters more — fajr surfaces this with `criteriaAgree: false`.
+
+**Why these two, not Shaukat or others:**
+
+Odeh and Yallop are the two most-cited modern criteria with published, validated polynomial fits. Shaukat (2002) is also legitimate and is used by Pakistan's Ruet-e-Hilal Committee; it is on the roadmap but not yet implemented.
 
 ### Computation
 
@@ -49,25 +55,37 @@ For a given Hijri (year, month) and observer (latitude, longitude), fajr:
    - Lunar topocentric correction from Meeus chapter 40.
 6. **Computes ARCV** (arc of vision) — angular separation between Sun (geocentric) and Moon (topocentric) centres at best time.
 7. **Computes W** (crescent width in arcminutes) — `SD × (1 − cos(ARCL))`, where SD is the Moon's apparent semi-diameter and ARCL is the elongation.
-8. **Computes V**, the Odeh parameter:
+8. **Computes Odeh's V parameter:**
    `V = ARCV − (−0.1018 W³ + 0.7319 W² − 6.3226 W + 7.1651)`
-9. **Classifies:**
+   Classified into four bins (A–D):
    - **A** — `V ≥ 5.65` — visible to naked eye
    - **B** — `2.0 ≤ V < 5.65` — visible to naked eye in perfect sky
    - **C** — `−0.96 ≤ V < 2.0` — visible only with optical aid
    - **D** — `V < −0.96` — not visible even with optical aid
 
+9. **Computes Yallop's q parameter:**
+   `q = (ARCV − (11.8371 − 6.3226 W + 0.7319 W² − 0.1018 W³)) / 10`
+   Classified into six bins (A–F):
+   - **A** — `q ≥ 0.216` — easily visible to naked eye
+   - **B** — `−0.014 ≤ q < 0.216` — visible to naked eye in perfect conditions
+   - **C** — `−0.160 ≤ q < −0.014` — may need optical aid
+   - **D** — `−0.232 ≤ q < −0.160` — will need optical aid
+   - **E** — `−0.293 ≤ q < −0.232` — not visible with telescope
+   - **F** — `q < −0.293` — not visible (below Danjon limit)
+
+The two polynomials are structurally similar (same cubic in W with the same coefficients) but anchored to different visibility thresholds — Odeh's constant is 7.1651, Yallop's is 11.8371, and Yallop's overall division by 10 gives him finer-grained bin boundaries near zero. In practice Yallop is the more conservative of the two (an Odeh "C" — optical aid only — typically maps to a Yallop E or F).
+
 ### Validation
 
 `scripts/validate-hilal.js` tests the implementation against five Hijri month transitions (Ramadan 1444, Shawwal 1444, Ramadan 1445, Ramadan 1446, Shawwal 1446) at the relevant national observatory locations.
 
-| Case | Moon age | fajr V | fajr class | Astronomically expected | Committee decision |
-|---|---:|---:|---|---|---|
-| Ramadan 1444 — Riyadh | 22 h | +6.28 | A | visible | visible (Saudi) ✓ |
-| Shawwal 1444 — Riyadh | 11 h | −1.79 | D | not visible | not visible (Saudi) ✓ |
-| Ramadan 1445 — Dubai | 5.5 h | −4.05 | D | not visible | UAE accepted ◇ |
-| Ramadan 1446 — Cairo | 15 h | +1.60 | C | borderline | Egypt accepted ◇ |
-| Shawwal 1446 — Rabat | 8 h | −3.01 | D | not visible | not visible (Morocco) ✓ |
+| Case | Moon age | Odeh V (class) | Yallop q (class) | Astronomically expected | Committee |
+|---|---:|---:|---:|---|---|
+| Ramadan 1444 — Riyadh | 22 h | +6.28 (A) | +0.161 (B) | visible | visible (Saudi) ✓ |
+| Shawwal 1444 — Riyadh | 11 h | −1.79 (D) | −0.646 (F) | not visible | not visible (Saudi) ✓ |
+| Ramadan 1445 — Dubai | 5.5 h | −4.05 (D) | −0.872 (F) | not visible | UAE accepted ◇ |
+| Ramadan 1446 — Cairo | 15 h | +1.60 (C) | −0.307 (F) | not visible | Egypt accepted ◇ |
+| Shawwal 1446 — Rabat | 8 h | −3.01 (D) | −0.768 (F) | not visible | not visible (Morocco) ✓ |
 
 **Astronomical accuracy: 5/5.** Every case matches the astronomically-defensible expectation derived from moon age and Danjon limit (~18 hours minimum for any naked-eye crescent).
 
@@ -77,7 +95,7 @@ For a given Hijri (year, month) and observer (latitude, longitude), fajr:
 
 ## What fajr does NOT do
 
-- **Multi-criterion ensemble.** fajr uses Odeh only; Yallop and Shaukat are not implemented. A future enhancement could compute all three and surface disagreement.
+- **Shaukat or Bruin criteria.** fajr currently runs Odeh + Yallop. Shaukat (2002, used by Pakistan's Ruet-e-Hilal Committee) and Bruin (1977) are on the roadmap but not yet implemented.
 - **Atmospheric customisation.** Local extinction, light pollution, dust, humidity all affect real visibility but are not modelled. fajr uses standard atmospheric refraction (-0.5667°).
 - **Witness testimony arbitration.** Committee decisions about whether to *accept* a reported sighting are matters of fiqh, not astronomy. fajr provides the astronomical possibility; the committees decide.
 - **Scholarly authority.** This module is wasail (means). The decision to begin a Hijri month is ibadat (worship). fajr does not and cannot replace either a sighting committee or scholarly judgment.
