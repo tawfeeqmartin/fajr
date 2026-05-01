@@ -36,22 +36,49 @@ Replace with:
 import { prayerTimes } from '@tawfeeqmartin/fajr'
 
 const times = prayerTimes({ latitude, longitude, date, elevation })
-// Returns: { fajr, shuruq, dhuhr, asr, maghrib, isha,
-//            method (string),
-//            corrections: { elevation: bool, refraction: 'standard (0.833°)' } }
+// Returns: { fajr, shuruq, sunrise,         // sunrise is alias for shuruq
+//            dhuhr, asr,
+//            maghrib, sunset,                // sunset is astronomical sunset
+//                                             // (= maghrib for most methods)
+//            isha,
+//            method,                          // human-readable label
+//            notes,                           // string[] of location-specific
+//                                             // advisories (e.g. high-lat ≥ 48.6°)
+//            corrections: { elevation: bool, refraction: 'standard (0.833°)',
+//                           elevationCorrectionMin?: number } }
 ```
 
 **Key differences from raw adhan:**
 
 - No method config needed — fajr auto-selects per country/coordinates.
-- New primary field name: `shuruq` (Arabic prayer terminology). **`sunrise` is also exposed as an alias** — points at the same `Date` instance, so existing display code referencing `sunrise` (or `t.Sunrise` once you upper-case at your boundary) keeps working without a rename ripple. Use whichever feels right; they're interchangeable.
-- Adds `method` field (the human-readable label, e.g. `"Habous (19°/17°)"` or `"Diyanet (Türkiye)"`) suitable for surfacing in UI.
+- New primary field name: `shuruq` (Arabic prayer terminology). **`sunrise` is also exposed as an alias** — points at the same `Date` instance, so existing display code referencing `sunrise` (or `t.Sunrise` once you upper-case at your boundary) keeps working without a rename ripple.
+- New `sunset` field exposed alongside `maghrib`; for most methods these are identical, but Diyanet-style methods with a post-sunset offset will diverge.
+- `method` field (the human-readable label, e.g. `"Morocco (19°/17° community calibration)"` or `"Diyanet (Türkiye)"`) suitable for surfacing in UI.
+- `notes: string[]` field — scholarly-grounded advisories that vary by location. Currently emits a high-latitude warning at `|lat| ≥ 48.6°` per Odeh (2009); future versions may add light-pollution or DST-transition flags. Render none, all, or filter for the ones your UX wants to surface.
 - All returned times are `Date` objects in UTC, same as adhan.
+
+### Single-call alternative — `dayTimes()`
+
+For consumers that want all 9 day-times (six prayers + sunrise + sunset + midnight + qiyam start) in one call:
+
+```js
+import { dayTimes } from '@tawfeeqmartin/fajr'
+
+const day = dayTimes({ latitude, longitude, date })
+//   → prayerTimes shape ∪ { midnight: Date, qiyam: Date }
+//   midnight = midpoint of night (Maghrib → next-day Fajr)
+//   qiyam    = start of last third of night, recommended for tahajjud
+```
+
+`dayTimes()` internally calls `prayerTimes()` for today and tomorrow's Fajr to derive the night-third boundaries. ~26 µs per call on mobile-class hardware; safe to call 60×/min, but memoize on `(lat, lon, dayString-in-city-tz)` for clock-loop correctness.
 
 ### Other fajr exports agiftoftime probably uses
 
 ```js
-import { qibla, hijri, hilalVisibility, nightThirds, travelerMode } from '@tawfeeqmartin/fajr'
+import {
+  qibla, hijri, hilalVisibility, nightThirds, travelerMode,
+  applyElevationCorrection, applyTayakkunBuffer, tarabishyTimes,
+} from '@tawfeeqmartin/fajr'
 
 const bearing = qibla({ latitude, longitude })
 //   → { bearing: 97.4, ... }   bearing in degrees from true north
@@ -67,6 +94,22 @@ const thirds = nightThirds({ date, latitude, longitude })
 
 const traveler = travelerMode({ times, madhab: 'shafii' })
 //   → qasr/jam' permissibility metadata; user determines actual safar status
+
+// Opt-in scholarly corrections (fajr does not apply these by default):
+
+const elevated = applyElevationCorrection(times, elevationMeters, latitude)
+//   → geometric horizon-dip correction per Burj Khalifa fatwa / JAKIM topographic
+//   adjustment. 🟡→🟢 classification.
+
+const buffered = applyTayakkunBuffer(times)              // default 5min
+//   → Fajr delayed by 5 minutes per Aabed (2015) recommendation for naked-eye
+//   certainty (tayakkun). Useful for Ramadan suhoor UI where the calculated
+//   18° is correct but observers in lit cities want a buffer. 🟡 classification.
+
+const truncated = tarabishyTimes({ latitude, longitude, date }, 45)
+//   → above 45° latitude, computes prayer times at 45° (preserving sign) per
+//   Tarabishy (2014). Below 45°, identical to prayerTimes(). Opt-in alternative
+//   to fajr's default Odeh-2009 middle-of-night rule. 🟡 classification.
 ```
 
 ### What gets better automatically
@@ -270,7 +313,7 @@ Every accuracy improvement that lands in fajr's master (passes the autoresearch 
 
 If something below stops you, ping the human (or me, working in the fajr repo) — these are the questions worth a synchronous answer rather than guessing:
 
-1. **API stability** — fajr is currently 0.x. Before agiftoftime depends on it in production, is there a v1.0 plan / pinned API surface? (See open question in fajr's README about defining the v1.0 bar.)
+1. **API stability** — fajr is at v1.3.0 as of 2026-05-01 with a published v1.0 API contract (see fajr's README "API stability" section). v1.x minor bumps add fields/exports but don't break existing consumers; major bumps require breaking-change justification. Pinning to `^1.0.0` is the recommended range.
 2. **Bundle size** — fajr's hilal stack adds ~700 lines of lunar/solar math. If agiftoftime is already aggressively code-split for PWA size, may want to import only the modules you use (`prayerTimes` + `hilalVisibility` + `hijri`) rather than the full default export.
 3. **Date-fns / dayjs / moment compatibility** — fajr returns native `Date` objects. If agiftoftime uses a date library, no conversion needed; just check timezone handling at the integration boundary.
 4. **Geolocation precision** — fajr is most accurate when given real lat/lng. IP-geo (~10 km) is fine for Tier 1; for the hilal banner the topocentric corrections matter more, so prefer `navigator.geolocation` if user has granted permission.
