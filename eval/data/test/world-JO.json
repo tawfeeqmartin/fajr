@@ -10,7 +10,7 @@
     "method": "22",
     "methodLabel": "Jordan (Awqaf)",
     "source": "Aladhan API (api.aladhan.com) — Jordan (Awqaf) (Aladhan method 22)",
-    "sourceFetched": "2026-05-02T00:19:54.554Z",
+    "sourceFetched": "2026-05-02T22:43:28.389Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -50,7 +50,7 @@
       },
       {
         "date": "2026-05-06",
-        "fajr": "04:16",
+        "fajr": "04:15",
         "sunrise": "05:46",
         "dhuhr": "12:38",
         "asr": "16:12",
@@ -69,11 +69,11 @@
       {
         "date": "2026-05-08",
         "fajr": "04:13",
-        "sunrise": "05:45",
+        "sunrise": "05:44",
         "dhuhr": "12:38",
         "asr": "16:12",
-        "maghrib": "19:24",
-        "isha": "20:41"
+        "maghrib": "19:25",
+        "isha": "20:42"
       }
     ]
   }

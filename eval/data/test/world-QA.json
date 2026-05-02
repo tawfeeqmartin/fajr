@@ -10,7 +10,7 @@
     "method": "9",
     "methodLabel": "Qatar",
     "source": "Aladhan API (api.aladhan.com) — Qatar (Aladhan method 9)",
-    "sourceFetched": "2026-05-02T01:01:48.178Z",
+    "sourceFetched": "2026-05-02T22:45:45.508Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -19,7 +19,7 @@
         "dhuhr": "11:31",
         "asr": "14:59",
         "maghrib": "18:05",
-        "isha": "19:24"
+        "isha": "19:25"
       },
       {
         "date": "2026-05-03",
@@ -41,7 +41,7 @@
       },
       {
         "date": "2026-05-05",
-        "fajr": "03:33",
+        "fajr": "03:32",
         "sunrise": "04:55",
         "dhuhr": "11:31",
         "asr": "14:58",
@@ -51,7 +51,7 @@
       {
         "date": "2026-05-06",
         "fajr": "03:32",
-        "sunrise": "04:55",
+        "sunrise": "04:54",
         "dhuhr": "11:31",
         "asr": "14:58",
         "maghrib": "18:07",

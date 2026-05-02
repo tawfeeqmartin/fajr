@@ -10,7 +10,7 @@
     "method": "1",
     "methodLabel": "Karachi",
     "source": "Aladhan API (api.aladhan.com) — Karachi (Aladhan method 1)",
-    "sourceFetched": "2026-05-02T00:20:45.723Z",
+    "sourceFetched": "2026-05-02T22:44:19.136Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -64,7 +64,7 @@
         "dhuhr": "12:03",
         "asr": "15:24",
         "maghrib": "18:11",
-        "isha": "19:23"
+        "isha": "19:24"
       },
       {
         "date": "2026-05-08",

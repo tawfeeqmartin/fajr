@@ -70,18 +70,36 @@ console.log()
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
-function fmtDate(d) {
+// ISO YYYY-MM-DD — used for the saved fixture's `date` field (eval/eval.js
+// expects this format).
+function fmtDateISO(d) {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
+}
+
+// DD-MM-YYYY — used ONLY for the Aladhan API URL. Aladhan's
+// /v1/timings/{date} endpoint expects this format and silently parses
+// YYYY-MM-DD as the year-2-digit interpretation (e.g. 2026-05-02 → 02 May
+// 2002), returning prayer times for a 24-year-old date. This caused the
+// systematic 60-min phantom DST errors on every cell in countries whose
+// DST policy changed between 2002 and 2026 (Kazakhstan, Lithuania,
+// Pakistan, Iraq, Sudan, Mexico, Mongolia, Namibia, Paraguay) until
+// caught in v1.6.1. Verify by checking response.data.date.readable
+// matches the date you requested.
+function fmtDateAladhan(d) {
+  return `${String(d.getUTCDate()).padStart(2, '0')}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${d.getUTCFullYear()}`
 }
 
 async function fetchCountry(code, info) {
   const startDate = new Date()
   startDate.setUTCHours(12, 0, 0, 0)
 
+  // Build per-day objects holding BOTH formats: the ISO YYYY-MM-DD goes
+  // into the saved fixture's `date` field (eval/eval.js parses this), and
+  // the DD-MM-YYYY goes into the Aladhan URL.
   const dates = []
   for (let i = 0; i < DAYS_PER_FETCH; i++) {
     const d = new Date(startDate.getTime() + i * 86400000)
-    dates.push(fmtDate(d))
+    dates.push({ iso: fmtDateISO(d), aladhan: fmtDateAladhan(d) })
   }
 
   // We use the /timings/<date> endpoint without iso8601 — Aladhan then
@@ -93,8 +111,8 @@ async function fetchCountry(code, info) {
   // which the eval mis-parsed as UTC and produced ~100-min systematic
   // biases until this was caught.
   const dayData = []
-  for (const dateStr of dates) {
-    const url = `https://api.aladhan.com/v1/timings/${dateStr}` +
+  for (const { iso, aladhan: aladhanDate } of dates) {
+    const url = `https://api.aladhan.com/v1/timings/${aladhanDate}` +
       `?latitude=${info.latitude}&longitude=${info.longitude}` +
       `&method=${info.aladhanMethod}` +
       `&elevation=${info.elevation || 0}`
@@ -102,19 +120,28 @@ async function fetchCountry(code, info) {
     try {
       const res = await fetch(url)
       if (!res.ok) {
-        console.warn(`  ✗ ${code} ${dateStr}: HTTP ${res.status}`)
+        console.warn(`  ✗ ${code} ${aladhanDate}: HTTP ${res.status}`)
         continue
       }
       const json = await res.json()
       if (json.code !== 200) {
-        console.warn(`  ✗ ${code} ${dateStr}: API code ${json.code}`)
+        console.warn(`  ✗ ${code} ${aladhanDate}: API code ${json.code}`)
         continue
+      }
+      // Reflect-check: the response's date.readable should match the date
+      // we requested. Catches the 24-year-off bug class (v1.6.1 root cause)
+      // — see memory feedback_verify_response_date.md.
+      const respReadable = json.data?.date?.readable
+      if (respReadable && !respReadable.includes(String(json.data?.date?.gregorian?.year || ''))) {
+        // soft warn; still record the data since we can't know if it's
+        // wrong without independent verification
+        console.warn(`  ⚠ ${code} ${aladhanDate}: response date.readable="${respReadable}" — verify this matches request`)
       }
       const t = json.data.timings
       // Aladhan default returns "HH:MM (+TZ)" — strip the suffix.
       const stripTz = (s) => s ? s.replace(/\s*\(.*\)\s*/, '').trim() : null
       dayData.push({
-        date: dateStr,
+        date: iso,
         fajr: stripTz(t.Fajr),
         sunrise: stripTz(t.Sunrise),
         dhuhr: stripTz(t.Dhuhr),

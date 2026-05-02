@@ -10,12 +10,12 @@
     "method": "1",
     "methodLabel": "Karachi",
     "source": "Aladhan API (api.aladhan.com) — Karachi (Aladhan method 1)",
-    "sourceFetched": "2026-05-02T00:16:37.930Z",
+    "sourceFetched": "2026-05-02T22:40:14.114Z",
     "dates": [
       {
         "date": "2026-05-02",
         "fajr": "03:29",
-        "sunrise": "05:03",
+        "sunrise": "05:02",
         "dhuhr": "11:50",
         "asr": "15:33",
         "maghrib": "18:38",
@@ -24,7 +24,7 @@
       {
         "date": "2026-05-03",
         "fajr": "03:28",
-        "sunrise": "05:02",
+        "sunrise": "05:01",
         "dhuhr": "11:50",
         "asr": "15:33",
         "maghrib": "18:39",
@@ -32,8 +32,8 @@
       },
       {
         "date": "2026-05-04",
-        "fajr": "03:27",
-        "sunrise": "05:01",
+        "fajr": "03:26",
+        "sunrise": "05:00",
         "dhuhr": "11:50",
         "asr": "15:33",
         "maghrib": "18:40",
@@ -42,7 +42,7 @@
       {
         "date": "2026-05-05",
         "fajr": "03:25",
-        "sunrise": "05:00",
+        "sunrise": "04:59",
         "dhuhr": "11:50",
         "asr": "15:33",
         "maghrib": "18:41",
@@ -51,20 +51,20 @@
       {
         "date": "2026-05-06",
         "fajr": "03:24",
-        "sunrise": "04:59",
-        "dhuhr": "11:50",
-        "asr": "15:33",
-        "maghrib": "18:41",
-        "isha": "20:16"
-      },
-      {
-        "date": "2026-05-07",
-        "fajr": "03:23",
         "sunrise": "04:58",
         "dhuhr": "11:50",
         "asr": "15:33",
         "maghrib": "18:42",
         "isha": "20:17"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:22",
+        "sunrise": "04:58",
+        "dhuhr": "11:50",
+        "asr": "15:34",
+        "maghrib": "18:42",
+        "isha": "20:18"
       },
       {
         "date": "2026-05-08",

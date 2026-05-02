@@ -10,70 +10,70 @@
     "method": "3",
     "methodLabel": "MWL",
     "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
-    "sourceFetched": "2026-05-02T00:37:30.545Z",
+    "sourceFetched": "2026-05-02T22:39:14.291Z",
     "dates": [
       {
         "date": "2026-05-02",
-        "fajr": "04:55",
-        "sunrise": "06:11",
-        "dhuhr": "11:49",
-        "asr": "15:03",
-        "maghrib": "17:26",
-        "isha": "18:38"
+        "fajr": "05:55",
+        "sunrise": "07:11",
+        "dhuhr": "12:49",
+        "asr": "16:03",
+        "maghrib": "18:26",
+        "isha": "19:38"
       },
       {
         "date": "2026-05-03",
-        "fajr": "04:55",
-        "sunrise": "06:11",
-        "dhuhr": "11:49",
-        "asr": "15:02",
-        "maghrib": "17:25",
-        "isha": "18:37"
+        "fajr": "05:55",
+        "sunrise": "07:12",
+        "dhuhr": "12:49",
+        "asr": "16:02",
+        "maghrib": "18:25",
+        "isha": "19:37"
       },
       {
         "date": "2026-05-04",
-        "fajr": "04:55",
-        "sunrise": "06:12",
-        "dhuhr": "11:48",
-        "asr": "15:02",
-        "maghrib": "17:25",
-        "isha": "18:37"
+        "fajr": "05:55",
+        "sunrise": "07:12",
+        "dhuhr": "12:48",
+        "asr": "16:02",
+        "maghrib": "18:25",
+        "isha": "19:37"
       },
       {
         "date": "2026-05-05",
-        "fajr": "04:56",
-        "sunrise": "06:12",
-        "dhuhr": "11:48",
-        "asr": "15:01",
-        "maghrib": "17:24",
-        "isha": "18:36"
+        "fajr": "05:56",
+        "sunrise": "07:12",
+        "dhuhr": "12:48",
+        "asr": "16:01",
+        "maghrib": "18:24",
+        "isha": "19:36"
       },
       {
         "date": "2026-05-06",
-        "fajr": "04:56",
-        "sunrise": "06:13",
-        "dhuhr": "11:48",
-        "asr": "15:01",
-        "maghrib": "17:24",
-        "isha": "18:36"
+        "fajr": "05:56",
+        "sunrise": "07:13",
+        "dhuhr": "12:48",
+        "asr": "16:01",
+        "maghrib": "18:23",
+        "isha": "19:36"
       },
       {
         "date": "2026-05-07",
-        "fajr": "04:56",
-        "sunrise": "06:13",
-        "dhuhr": "11:48",
-        "asr": "15:00",
-        "maghrib": "17:23",
-        "isha": "18:35"
+        "fajr": "05:56",
+        "sunrise": "07:13",
+        "dhuhr": "12:48",
+        "asr": "16:00",
+        "maghrib": "18:23",
+        "isha": "19:35"
       },
       {
         "date": "2026-05-08",
-        "fajr": "04:57",
-        "sunrise": "06:14",
-        "dhuhr": "11:48",
-        "asr": "15:00",
-        "maghrib": "17:22",
-        "isha": "18:35"
+        "fajr": "05:57",
+        "sunrise": "07:14",
+        "dhuhr": "12:48",
+        "asr": "16:00",
+        "maghrib": "18:22",
+        "isha": "19:35"
       }
     ]
   }

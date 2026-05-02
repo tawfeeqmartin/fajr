@@ -10,7 +10,7 @@
     "method": "5",
     "methodLabel": "Egyptian",
     "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
-    "sourceFetched": "2026-05-02T00:22:03.048Z",
+    "sourceFetched": "2026-05-02T22:45:36.818Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -32,11 +32,11 @@
       },
       {
         "date": "2026-05-04",
-        "fajr": "04:13",
+        "fajr": "04:12",
         "sunrise": "05:51",
         "dhuhr": "12:36",
         "asr": "16:15",
-        "maghrib": "19:21",
+        "maghrib": "19:22",
         "isha": "20:49"
       },
       {
@@ -63,13 +63,13 @@
         "sunrise": "05:48",
         "dhuhr": "12:36",
         "asr": "16:15",
-        "maghrib": "19:23",
+        "maghrib": "19:24",
         "isha": "20:52"
       },
       {
         "date": "2026-05-08",
         "fajr": "04:08",
-        "sunrise": "05:48",
+        "sunrise": "05:47",
         "dhuhr": "12:36",
         "asr": "16:15",
         "maghrib": "19:24",

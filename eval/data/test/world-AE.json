@@ -10,13 +10,13 @@
     "method": "15",
     "methodLabel": "Dubai",
     "source": "Aladhan API (api.aladhan.com) — Dubai (Aladhan method 15)",
-    "sourceFetched": "2026-05-02T00:24:11.550Z",
+    "sourceFetched": "2026-05-02T22:47:49.539Z",
     "dates": [
       {
         "date": "2026-05-02",
         "fajr": "04:18",
         "sunrise": "05:47",
-        "dhuhr": "12:19",
+        "dhuhr": "12:20",
         "asr": "15:46",
         "maghrib": "18:52",
         "isha": "20:03"
@@ -50,7 +50,7 @@
       },
       {
         "date": "2026-05-06",
-        "fajr": "04:14",
+        "fajr": "04:15",
         "sunrise": "05:44",
         "dhuhr": "12:19",
         "asr": "15:45",
@@ -71,7 +71,7 @@
         "fajr": "04:13",
         "sunrise": "05:43",
         "dhuhr": "12:19",
-        "asr": "15:44",
+        "asr": "15:45",
         "maghrib": "18:55",
         "isha": "20:06"
       }

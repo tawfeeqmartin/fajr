@@ -10,7 +10,7 @@
     "method": "1",
     "methodLabel": "Karachi",
     "source": "Aladhan API (api.aladhan.com) — Karachi (Aladhan method 1)",
-    "sourceFetched": "2026-05-02T00:32:31.233Z",
+    "sourceFetched": "2026-05-02T22:49:30.543Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -28,7 +28,7 @@
         "dhuhr": "11:58",
         "asr": "15:30",
         "maghrib": "18:36",
-        "isha": "20:00"
+        "isha": "20:01"
       },
       {
         "date": "2026-05-04",
@@ -36,13 +36,13 @@
         "sunrise": "05:20",
         "dhuhr": "11:58",
         "asr": "15:30",
-        "maghrib": "18:36",
+        "maghrib": "18:37",
         "isha": "20:01"
       },
       {
         "date": "2026-05-05",
         "fajr": "03:55",
-        "sunrise": "05:20",
+        "sunrise": "05:19",
         "dhuhr": "11:58",
         "asr": "15:30",
         "maghrib": "18:37",
@@ -73,7 +73,7 @@
         "dhuhr": "11:58",
         "asr": "15:29",
         "maghrib": "18:39",
-        "isha": "20:04"
+        "isha": "20:05"
       }
     ]
   }

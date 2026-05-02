@@ -10,12 +10,12 @@
     "method": "4",
     "methodLabel": "Umm al-Qura",
     "source": "Aladhan API (api.aladhan.com) — Umm al-Qura (Aladhan method 4)",
-    "sourceFetched": "2026-05-02T00:22:20.178Z",
+    "sourceFetched": "2026-05-02T22:45:54.029Z",
     "dates": [
       {
         "date": "2026-05-02",
-        "fajr": "03:54",
-        "sunrise": "05:18",
+        "fajr": "03:53",
+        "sunrise": "05:17",
         "dhuhr": "11:50",
         "asr": "15:17",
         "maghrib": "18:23",
@@ -23,7 +23,7 @@
       },
       {
         "date": "2026-05-03",
-        "fajr": "03:53",
+        "fajr": "03:52",
         "sunrise": "05:17",
         "dhuhr": "11:50",
         "asr": "15:17",
@@ -44,7 +44,7 @@
         "fajr": "03:51",
         "sunrise": "05:15",
         "dhuhr": "11:50",
-        "asr": "15:16",
+        "asr": "15:17",
         "maghrib": "18:25",
         "isha": "19:55"
       },
@@ -69,7 +69,7 @@
       {
         "date": "2026-05-08",
         "fajr": "03:48",
-        "sunrise": "05:14",
+        "sunrise": "05:13",
         "dhuhr": "11:50",
         "asr": "15:16",
         "maghrib": "18:26",

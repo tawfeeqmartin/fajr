@@ -10,14 +10,14 @@
     "method": "12",
     "methodLabel": "Diyanet",
     "source": "Aladhan API (api.aladhan.com) — Diyanet (Aladhan method 12)",
-    "sourceFetched": "2026-05-02T00:23:46.010Z",
+    "sourceFetched": "2026-05-02T22:47:18.927Z",
     "dates": [
       {
         "date": "2026-05-02",
         "fajr": "04:43",
         "sunrise": "05:48",
         "dhuhr": "12:46",
-        "asr": "16:35",
+        "asr": "16:36",
         "maghrib": "19:44",
         "isha": "20:49"
       },
@@ -33,15 +33,15 @@
       {
         "date": "2026-05-04",
         "fajr": "04:40",
-        "sunrise": "05:46",
+        "sunrise": "05:45",
         "dhuhr": "12:45",
         "asr": "16:36",
         "maghrib": "19:46",
-        "isha": "20:51"
+        "isha": "20:52"
       },
       {
         "date": "2026-05-05",
-        "fajr": "04:39",
+        "fajr": "04:38",
         "sunrise": "05:44",
         "dhuhr": "12:45",
         "asr": "16:36",
@@ -73,7 +73,7 @@
         "dhuhr": "12:45",
         "asr": "16:37",
         "maghrib": "19:50",
-        "isha": "20:56"
+        "isha": "20:57"
       }
     ]
   }

@@ -10,7 +10,7 @@
     "method": "8",
     "methodLabel": "Kuwait",
     "source": "Aladhan API (api.aladhan.com) — Kuwait (Aladhan method 8)",
-    "sourceFetched": "2026-05-02T00:17:12.089Z",
+    "sourceFetched": "2026-05-02T22:40:47.950Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -45,8 +45,8 @@
         "sunrise": "04:58",
         "dhuhr": "11:34",
         "asr": "15:04",
-        "maghrib": "18:11",
-        "isha": "19:41"
+        "maghrib": "18:12",
+        "isha": "19:42"
       },
       {
         "date": "2026-05-06",
@@ -69,7 +69,7 @@
       {
         "date": "2026-05-08",
         "fajr": "03:23",
-        "sunrise": "04:56",
+        "sunrise": "04:55",
         "dhuhr": "11:34",
         "asr": "15:03",
         "maghrib": "18:13",
