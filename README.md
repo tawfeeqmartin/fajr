@@ -107,10 +107,11 @@ Accuracy is no longer measured against a single API. fajr is validated against s
 
 | Source | Reference layer | Set | Coverage |
 |---|---|---|---|
-| **Mawaqit** (mawaqit.net) | Mosque-published reality | holdout | Casablanca, Rabat, Marrakech, Marseille, Limoges, Mulhouse |
+| **Mawaqit-Morocco** (mawaqit.net) | Mosque-published reality | train (v1.5.0) | 25 mosques across 14 Moroccan cities — Casablanca/Rabat/Marrakech metro, Northern (Tanger/Nador), Eastern (Oujda), Interior (Fes/Meknes/Taza/Khouribga/Settat), Atlantic coast (Sale/Kenitra/Safi/Essaouira/Agadir/Taroudant), high-elevation Atlas/Sahara (Ouarzazate 1135 m, Errachidia 1037 m). Refreshed daily by the cloud routine. |
+| **Mawaqit** (non-Morocco) | Mosque-published reality | holdout | Cairo, London, Marseille, Limoges, Mulhouse, Doha, Kuwait, Dammam, Jakarta, Singapore, Kuala Lumpur, Tunis, Algiers |
 | **Diyanet İşleri Başkanlığı** (Türkiye) | Official institutional ground truth | train | Istanbul, Ankara, Izmir |
 | **JAKIM** (Malaysia) via waktusolat.app | Official institutional ground truth | train | Kuala Lumpur, Selangor, Penang |
-| **Aladhan API** | Regional-method consensus (calc-vs-calc) | train | 18 cities, region-appropriate methods |
+| **Aladhan API** | Regional-method consensus (calc-vs-calc) | train (non-Morocco/non-Türkiye) + holdout | 11 cities in train; ~145 country fixtures in holdout |
 | **praytimes.org reference** | Regional-method consensus (independent JS impl) | holdout | 10 cities |
 | **muslimsalat.com** | Third-party aggregator | holdout | Karachi, Cairo, London, Dubai |
 
@@ -126,7 +127,7 @@ For full numbers including per-region and per-cell granularity, see [**`docs/pro
 
 ![WMAE Journey — train + holdout WMAE annotated with release inflection points](docs/charts/wmae-journey.svg)
 
-The journey chart annotates each tagged release with the change that drove its train- or holdout-WMAE delta. Releases that added features (notes field, opt-in correction helpers, world-coverage data) leave train WMAE flat at the ratchet level — only calibration refinements move the train number. As of v1.4.4 the train ratchet has dropped from the v1.0 baseline of 1.16 → **0.68** via three accuracy releases: v1.4.1 (JAKIM Fajr +8min Path A, train −16.6%), v1.4.3 (eval elevation-policy fix removing phantom artifacts, train −32%), and v1.4.4 (JAKIM Isha +1min Path A, train −3.2%). The v1.4 holdout climb reflects the eval-corpus widening to 163 country fixtures, not an engine regression. See [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the methodology behind each Path A correction.
+The journey chart annotates each tagged release with the change that drove its train- or holdout-WMAE delta. Releases that added features (notes field, opt-in correction helpers, world-coverage data) leave train WMAE flat at the ratchet level — only calibration refinements move the train number. Across v1.0 → v1.5.0, the engine has shipped five Path A community calibrations (JAKIM Fajr, JAKIM Isha, Diyanet Maghrib/Isha, Morocco Maghrib) plus the v1.4.3 elevation-policy fix that exposed real institutional residuals. The aggregate train number on a like-for-like corpus has dropped from the v1.0 baseline of 1.16 toward 0.80, but the headline aggregate is no longer the cleanest signal — v1.5.0's corpus restructure (moving 23 mosque-published Mawaqit-Morocco fixtures into train and 20 Aladhan calc-vs-calc Morocco entries to test) introduced higher-fidelity / higher-noise institutional ground truth, so the v1.5.0 aggregate sits above the v1.4.5 aggregate even though the engine is more accurate. See [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the methodology behind each Path A correction; the journey chart's per-release labels narrate the same story visually.
 
 ![WMAE over time — train (ratchet) vs holdout](docs/charts/wmae-trend.svg)
 
