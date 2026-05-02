@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 38 cities across 12 institutional-train countries plus a 163-country Aladhan-routed holdout corpus. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.5.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.4.x shipped four Path A community calibrations (JAKIM Fajr +8 + Isha +1, Diyanet Maghrib/Isha −1, eval elevation-policy heuristic). v1.5.0 expanded the Mawaqit Morocco corpus from 5 mosques to 25 across 19 zones and shipped the Morocco Maghrib +5min Path A calibration. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.5.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151) below. v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -271,6 +271,27 @@ Every correction in `src/engine.js` is tagged:
 - 🟡→🟢 **Approaching established** — recently documented by one or more regional institutions; trajectory toward consensus
 - 🟡 **Limited precedent** — supported by some scholars/institutions, minority scholarly view
 - 🔴 **Novel** — requires Islamic scholarly review before relying upon
+
+### Per-prayer ihtiyat-aware minute rounding (v1.5.1)
+
+Prayer-time libraries traditionally round their calculated sub-second-precision astronomical events to whole minutes for display using *round-to-nearest*. That symmetric rounding produces a displayed minute on the *unsafe* side of the underlying solar event ~50% of the time — meaning ~half of all displayed Maghribs could be up to 29 seconds *before* actual sunset, which would invalidate iftar by classical fiqh's *yaqeen* (certainty) requirement. The same logic applies to every other prayer, with each one having a one-sided shar'i precaution direction.
+
+Since v1.5.1, fajr applies **directional rounding per prayer** so every minute it displays is on the prayer-validity-safe side of actual reality, by construction:
+
+| Prayer | Minute-rounding direction | Reasoning |
+|---|---|---|
+| Imsak | DOWN (earlier) | Fasting yaqeen — stop eating before actual dawn |
+| Fajr | UP (later) | Prayer must start AFTER actual dawn |
+| Shuruq / Sunrise | DOWN (earlier) | Fajr-window-close — don't pray Fajr after actual sunrise |
+| Dhuhr | UP (later) | Prayer-validity — sun must have crossed meridian |
+| Asr | UP (later) | Prayer-validity — shadow must have reached Asr length |
+| Maghrib | UP (later) | Iftar yaqeen — fast must end after actual sunset |
+| Isha | UP (later) | Prayer-validity — twilight must have ended |
+| Sunset | UP (later) | Astronomical event coinciding with Maghrib |
+
+These are **rounding directions** for the displayed whole minute — the underlying astronomical computation is unchanged. The shift is at most 1 minute per prayer compared to the prior round-to-nearest behavior, always in the safer direction.
+
+**Dual-ihtiyat resolution.** Fasting and prayer-validity have *different* safe directions for Fajr — fasters want Fajr earlier (so they stop eating before actual dawn); prayers want Fajr later (so prayer is performed inside the valid window). The classical resolution from every printed Imsakiyya in Mecca, Medina, and Cairo for over a century is **two columns**: an *imsak* (إمساك, "abstaining") column for fast-stop, and a *Fajr* column for prayer-start. fajr's API exposes both as separate fields. Imsak defaults to Fajr − 10 min (the universal Imsakiyya convention), rounded DOWN for fasting safety. Apps wanting a different imsak buffer can recompute downstream — the offset and rounding policy are reported in `result.corrections.imsak_offset_min` and `result.corrections.rounding`.
 
 ---
 

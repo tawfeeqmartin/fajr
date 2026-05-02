@@ -365,12 +365,73 @@ function selectMethod(country, lat, coords) {
  * @param {string} [params.method]       Override auto-detected method
  * @returns {object} Prayer times with metadata
  */
+/**
+ * Per-prayer ihtiyat-aware minute rounding.
+ *
+ * 🟢 Established — direct application of classical fiqh's *yaqeen* (certainty)
+ * principle to display-time rounding. See knowledge/wiki/fiqh/scholarly-oversight.md
+ * and CLAUDE.md → "Islamic accuracy principles → Ihtiyat".
+ *
+ * adhan.js's default rounding is round-to-nearest-minute, which produces a
+ * displayed minute on the unsafe side of the underlying solar event ~50% of
+ * the time. fajr's prayer-time fields are interpreted as **prayer-start /
+ * window-close events** (the canonical interpretation matching classical
+ * Imsakiyya tables), so the rounding direction for each prayer is the one
+ * that keeps the displayed minute on the prayer-validity-safe side:
+ *
+ *   Fajr     → UP   (later).    Prayer must start AFTER actual dawn — display later
+ *                                so users praying on the displayed minute pray
+ *                                inside the valid window.
+ *   Shuruq   → DOWN (earlier).  Fajr-window-close event — display earlier so
+ *                                the apparent window-close arrives BEFORE actual
+ *                                sunrise. Users see the window as already closing
+ *                                a few seconds early — prayer-safe.
+ *   Dhuhr    → UP   (later).    Sun must have crossed the meridian.
+ *   Asr      → UP   (later).    Shadow must have reached the Asr length.
+ *   Maghrib  → UP   (later).    Sun must have fully set — also iftar-yaqeen safe.
+ *   Isha     → UP   (later).    Twilight must have ended.
+ *
+ * Dual-ihtiyat note for fasting (imsak): the canonical fiqh resolution is to
+ * compute imsak as Fajr − 10 min (rounded DOWN), separately from the Fajr
+ * prayer-start field. fajr's API does not expose imsak directly; downstream
+ * apps wanting to display fast-stop time should compute it from the returned
+ * Fajr value and apply DOWN-rounding themselves. This matches how every
+ * Imsakiyya printed in Mecca/Medina/Cairo structures the table — separate
+ * Fajr and Imsak columns. Rounding Fajr itself DOWN would invalidate the
+ * prayer-start interpretation by potentially displaying a time before actual
+ * astronomical dawn.
+ *
+ * @param {Date} date  Sub-minute-precision Date from adhan.js (rounding=None).
+ * @param {'up'|'down'} dir
+ * @returns {Date} Date with seconds=0 and minute adjusted per direction.
+ */
+function roundIhtiyat(date, dir) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return date
+  const seconds = date.getUTCSeconds()
+  const ms = date.getUTCMilliseconds()
+  if (seconds === 0 && ms === 0) return date
+  const out = new Date(date.getTime())
+  if (dir === 'up') {
+    // Advance to the next whole minute (any fractional second rounds up).
+    out.setUTCSeconds(60, 0)
+  } else {
+    // Truncate to the current whole minute (fractional second discarded).
+    out.setUTCSeconds(0, 0)
+  }
+  return out
+}
+
 export function prayerTimes({ latitude, longitude, date, elevation = 0, method }) {
   const coords = new adhan.Coordinates(latitude, longitude)
 
   // 🟢 Established: Region-aware method selection
   const country = detectCountry(latitude, longitude)
   const { params, methodName } = selectMethod(country, latitude, coords)
+
+  // Ask adhan.js for unrounded (seconds-precision) times. We apply our own
+  // per-prayer ihtiyat-aware rounding below — see roundIhtiyat() docstring.
+  // This overrides whatever rounding the selected method preset specified.
+  params.rounding = adhan.Rounding.None
 
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
   const times = new adhan.PrayerTimes(coords, date, params)
@@ -390,29 +451,57 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
     )
   }
 
+  // Per-prayer ihtiyat rounding — see roundIhtiyat() docstring above.
+  const fajr_   = roundIhtiyat(times.fajr,    'up')
+  const shuruq_ = roundIhtiyat(times.sunrise, 'down')
+  const dhuhr_  = roundIhtiyat(times.dhuhr,   'up')
+  const asr_    = roundIhtiyat(times.asr,     'up')
+  const maghrib_= roundIhtiyat(times.maghrib, 'up')
+  const isha_   = roundIhtiyat(times.isha,    'up')
+  // Sunset is the astronomical event coinciding with Maghrib's start in most
+  // methods. Round UP — same direction as Maghrib so the two fields stay
+  // consistent for methods where the only difference is a post-sunset offset
+  // (some Diyanet variants).
+  const sunset_ = roundIhtiyat(times.sunset,  'up')
+
+  // Imsak — classical fasting-yaqeen field. Computed as the astronomical
+  // (sub-minute-precision) Fajr minus IMSAK_OFFSET_MIN, then rounded DOWN
+  // for fasting-validity safety. The 10-minute default offset is the
+  // classical convention from Imsakiyya tables published in Mecca, Medina,
+  // and Cairo for over a century. Apps wanting a different offset can
+  // recompute as Fajr − N minutes downstream.
+  //
+  // 🟢 Established — universal Imsakiyya convention.
+  const IMSAK_OFFSET_MIN = 10
+  const imsakRaw = new Date(times.fajr.getTime() - IMSAK_OFFSET_MIN * 60 * 1000)
+  const imsak_   = roundIhtiyat(imsakRaw, 'down')
+
   let result = {
-    fajr:    times.fajr,
-    shuruq:  times.sunrise,
+    imsak:   imsak_,
+    fajr:    fajr_,
+    shuruq:  shuruq_,
     // `sunrise` is an English-language alias for `shuruq`, kept in sync.
     // Lets adhan.js consumers migrate to fajr without a field-rename ripple
     // through their downstream display logic. The two fields point at the
     // same Date instance — modify one or the other, never both.
-    sunrise: times.sunrise,
-    dhuhr:   times.dhuhr,
-    asr:     times.asr,
-    maghrib: times.maghrib,
-    isha:    times.isha,
+    sunrise: shuruq_,
+    dhuhr:   dhuhr_,
+    asr:     asr_,
+    maghrib: maghrib_,
+    isha:    isha_,
     // Astronomical sunset, distinct from `maghrib` for methods that apply
     // a post-sunset offset (e.g. some Diyanet variants). For most methods
     // these are identical to within a second. adhan.js exposes both, so
     // fajr does too — back-compat for adhan-migrating apps that tracked
     // them as separate fields.
-    sunset:  times.sunset,
+    sunset:  sunset_,
     method:  methodName,
     notes,
     corrections: {
       elevation: false,
       refraction: 'standard (0.833°)',
+      rounding:  'ihtiyat-aware per-prayer (Imsak/Shuruq DOWN; Fajr/Dhuhr/Asr/Maghrib/Isha/Sunset UP)',
+      imsak_offset_min: 10,
     },
   }
 
