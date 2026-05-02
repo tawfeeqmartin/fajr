@@ -1,29 +1,24 @@
-# Dependencies
-node_modules/
-
-# Environment
-.env
-.env.local
-
-# OS
-.DS_Store
-Thumbs.db
 
 # Build
-dist/
-*.js.map
-
-# Logs (autoresearch run logs are committed; these are transient)
-*.log
-npm-debug.log*
-
+# Dependencies
+# Editor
+# Environment
 # Eval results (committed only when curated)
+# Logs (autoresearch run logs are committed; these are transient)
+# OS
+*.js.map
+*.log
+*.swo
+*.swp
+.DS_Store
+.claude/
+.env
+.env.local
+.idea/
+.vscode/
+Thumbs.db
+dist/
 eval/results/*.csv
 eval/results/*.json
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-
+node_modules/
+npm-debug.log*
