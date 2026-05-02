@@ -44,7 +44,7 @@ See `../lint.md` for quality and consistency rules.
 | Article | Description |
 |---------|-------------|
 | [Morocco](regions/morocco.md) | Sea level to 4167m (Toubkal); DST complications; Ministry authoritative timetables; Azan Now app |
-| [Malaysia](regions/malaysia.md) | JAKIM ihtiyati 8-min Fajr offset Path A; Razali & Hisham 2021 + Aabed 2015 grounding; KEMENAG (Indonesia) does NOT need the offset |
+| [Malaysia](regions/malaysia.md) | JAKIM ihtiyati Path A: +8min Fajr (v1.4.1) + +1min Isha (v1.4.4); Razali & Hisham 2021 + Aabed 2015 grounding; KEMENAG (Indonesia) does NOT need the offset |
 | [High latitudes](regions/high-latitude.md) | Above ~48°N: persistent twilight; 1/7 night, nearest city, middle of night, angle-based solutions; ECFR rulings; Odeh 2009 + Tarabishy 2014 modern references |
 | [Iceland](regions/iceland.md) | Reykjavik narrow Isha-Fajr gap regime; Odeh 2009 endorsement of middle-of-night; downstream-app guidance |
 
