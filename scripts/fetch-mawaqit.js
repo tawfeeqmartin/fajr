@@ -59,21 +59,39 @@ async function searchAndPick(slug, keyword) {
   const found = list.find(m => m.slug === slug)
   if (!found) {
     const sample = list.slice(0, 3).map(m => m.slug).join(', ')
-    throw new Error(`slug "${slug}" not in first ${list.length} results for "${city}". Got: ${sample}…`)
+    throw new Error(`slug "${slug}" not in first ${list.length} results for "${keyword}". Got: ${sample}…`)
   }
   return found
 }
 
-// Filter out entries whose Fajr is implausibly early (<03:30) — these are
-// usually mosques with a misconfigured timezone (e.g. UTC+0 instead of UTC+1
-// during Moroccan summer). They mislead the eval if blindly included.
+// Filter out entries whose Fajr is implausibly early or whose times look
+// like a tz misconfig. The original Moroccan-only floor of 03:30 was
+// inappropriate for higher-latitude / higher-UTC-offset cells (Moscow May
+// Fajr 02:10 is correct; Tokyo 03:13 is correct). Accept any Fajr from
+// 01:30 to 06:30 — captures every legitimate latitude/season we care about.
+// Also require the prayer-array shape to be sane (sunrise after fajr,
+// dhuhr after sunrise, etc.) to catch the Türkiye-style "dhuhr 05:54"
+// data corruption we excluded in PR #5.
 function looksReasonable(times, expectedFajrHour = 5) {
   if (!times || times.length < 6) return false
-  const [fajr] = times
-  const [h, m] = fajr.split(':').map(Number)
-  if (Number.isNaN(h)) return false
-  // Accept Fajr between 03:30 and 06:30
-  return h >= 3 && h <= 6 && (h !== 3 || m >= 30)
+  const [fajr, sunrise, dhuhr, asr, maghrib, isha] = times
+  function toMin(s) {
+    if (!s || typeof s !== 'string') return NaN
+    const [h, m] = s.split(':').map(Number)
+    if (Number.isNaN(h) || Number.isNaN(m)) return NaN
+    return h * 60 + m
+  }
+  const [fM, sM, dM, aM, mM, iM] = [fajr, sunrise, dhuhr, asr, maghrib, isha].map(toMin)
+  if ([fM, sM, dM, aM, mM, iM].some(Number.isNaN)) return false
+  // Fajr in 01:30..06:30. Maghrib later than sunrise. Dhuhr later than sunrise.
+  // Maghrib later than dhuhr. (We tolerate Isha < Maghrib for high-lat
+  // cases where Isha rolls past midnight — those need separate handling
+  // but aren't a tz-misconfig signature.)
+  if (fM < 90 || fM > 6 * 60 + 30) return false
+  if (sM <= fM) return false
+  if (dM <= sM) return false
+  if (mM <= dM) return false
+  return true
 }
 
 async function fetchMosque(m) {
@@ -117,25 +135,51 @@ async function main() {
     process.exit(1)
   }
 
-  // Split fixtures by corpus partition. Per the v1.5.0 corpus restructure,
-  // Moroccan Mawaqit fixtures form the institutional Path A train signal
-  // (eval/data/train/mawaqit-morocco.json) — the engine's Maghrib +5min
-  // calibration is gated against them. All other Mawaqit fixtures are
-  // holdout-only (eval/data/test/mawaqit.json) — reported but not gating.
-  const moroccan = fixtures.filter(f => f.country === 'Morocco')
-  const other    = fixtures.filter(f => f.country !== 'Morocco')
+  // Split fixtures by registry-tagged corpus partition:
+  //   • corpus=train          → eval/data/train/mawaqit-morocco.json
+  //                             (the v1.5.0 Path A calibration anchor — 25
+  //                             original Moroccan mosques calibrated against
+  //                             when the +5min Maghrib offset was shipped)
+  //   • corpus=test_extended  → eval/data/test/mawaqit-morocco-extended.json
+  //                             (Moroccan mosques added post-v1.5.0 — kept
+  //                             in holdout so the train ratchet stays clean
+  //                             against the calibrated baseline; future
+  //                             calibrations targeting these regions can
+  //                             promote them to train)
+  //   • corpus=test (default) → eval/data/test/mawaqit.json
+  //                             (non-Moroccan Mawaqit mosques — pure
+  //                             holdout coverage)
+  const fxBySlug = new Map()
+  for (const f of fixtures) {
+    const m = (f.source || '').match(/Mawaqit mosque (\S+)/)
+    if (m) fxBySlug.set(m[1], f)
+  }
+  const train = [], ext = [], test = []
+  for (const m of MOSQUES) {
+    const f = fxBySlug.get(m.slug)
+    if (!f) continue
+    const corpus = m.corpus || 'test'
+    if (corpus === 'train')              train.push(f)
+    else if (corpus === 'test_extended') ext.push(f)
+    else                                  test.push(f)
+  }
 
   const trainPath = join(__dirname, '..', 'eval', 'data', 'train', 'mawaqit-morocco.json')
+  const extPath   = join(__dirname, '..', 'eval', 'data', 'test',  'mawaqit-morocco-extended.json')
   const testPath  = join(__dirname, '..', 'eval', 'data', 'test',  'mawaqit.json')
   mkdirSync(dirname(trainPath), { recursive: true })
   mkdirSync(dirname(testPath),  { recursive: true })
 
-  if (moroccan.length > 0) {
-    writeFileSync(trainPath, JSON.stringify(moroccan, null, 2))
-    console.log(`→ wrote ${trainPath} (${moroccan.length} Moroccan mosques — train Path A signal)`)
+  if (train.length > 0) {
+    writeFileSync(trainPath, JSON.stringify(train, null, 2))
+    console.log(`→ wrote ${trainPath} (${train.length} Moroccan mosques — train v1.5.0 Path A anchor)`)
   }
-  writeFileSync(testPath, JSON.stringify(other, null, 2))
-  console.log(`→ wrote ${testPath} (${other.length} non-Morocco mosques — holdout)`)
+  if (ext.length > 0) {
+    writeFileSync(extPath, JSON.stringify(ext, null, 2))
+    console.log(`→ wrote ${extPath} (${ext.length} Moroccan mosques — extended holdout)`)
+  }
+  writeFileSync(testPath, JSON.stringify(test, null, 2))
+  console.log(`→ wrote ${testPath} (${test.length} non-Morocco mosques — holdout)`)
   console.log('Note: Mawaqit fixtures are single-day snapshots. Re-run daily to refresh.')
 }
 
