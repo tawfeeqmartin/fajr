@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.5.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151) below. v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.5.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -270,6 +270,31 @@ Every correction in `src/engine.js` is tagged:
 - 🟡→🟢 **Approaching established** — recently documented by one or more regional institutions; trajectory toward consensus
 - 🟡 **Limited precedent** — supported by some scholars/institutions, minority scholarly view
 - 🔴 **Novel** — requires Islamic scholarly review before relying upon
+
+### Elevation advisory at significant altitude (v1.5.2)
+
+GPS receivers return altitude alongside latitude and longitude. At altitudes above ~500 m, the geometric horizon dip becomes practically significant — sun rises *earlier* and sets *later* than the sea-level calculation by 2 to 6+ minutes depending on elevation. This is real and predictable; the institutional question is whether it should be applied to displayed prayer times.
+
+**Institutional stances differ:**
+
+- **UAE (Burj Khalifa fatwa, IACAD Dulook DXB)** — applies floor-stratified prayer times; institutional acknowledgement that observers at altitude see the horizon differently.
+- **Malaysia JAKIM** — applies topographic elevation correction systematically across the country.
+- **Saudi Arabia / Umm al-Qura** — explicitly *declines* the correction. Reasoning: jama'ah unity. A high-rise resident in Riyadh praying with their floor's correction would pray a different time than the rest of the city, fragmenting the congregation. Saudi prioritises uniform community time over per-observer geometric accuracy.
+
+These are competing valid stances and fajr does not pick one for the user — but it does inform them. **When the caller passes `elevation ≥ 500 m`, fajr emits a `notes[]` advisory describing the elevation, the magnitude of the shift, and which institutions apply vs decline the correction.** Apps can render the advisory to the user with a toggle and pass `elevation: 0` if the user (or their local mosque) follows the Saudi stance.
+
+The threshold is set at 500 m because:
+
+| Elevation band | Geometric impact (Shuruq/Maghrib) | Action |
+|---|---|---|
+| < 200 m | < 1 min | Silent — sub-prayer-buffer noise |
+| 200–500 m | 1–2 min | Silent — within institutional ihtiyati buffers |
+| **500–1500 m** | **2–5 min** | **Advisory note emitted** |
+| 1500 m+ | > 5 min | Advisory note + magnitude emphasis |
+
+This catches the cities where institutional bodies have actually weighed in (Riyadh 612 m, Mecca highlands, Atlas / Sahara 1000+ m, Sana'a 2250 m, Tehran 1200 m, Damascus 700 m) and tolerates phone-GPS altitude noise (typically ±10–30 m) without flickering the advisory state.
+
+The principle behind both the elevation advisory and the dual-ihtiyat resolution from v1.5.1 is the same: **fajr's library role is to surface scholarly disagreement transparently, not to resolve it silently. The defaults are conservative; the information is complete; the user (or their scholar) makes the call.**
 
 ### Per-prayer ihtiyat-aware minute rounding (v1.5.1)
 

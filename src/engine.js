@@ -451,6 +451,39 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
     )
   }
 
+  // Elevation advisory (v1.5.2). When the caller passes a non-trivial
+  // elevation (≥ 500 m, where the geometric horizon dip is > 2 min on
+  // Shuruq/Maghrib), surface a notes[] entry describing the institutional
+  // disagreement so the consumer can make an informed choice. The dip is
+  // NOT applied automatically — fajr leaves the correction off by default
+  // (matching Saudi/Umm al-Qura's jama'ah-unity stance) but documents that
+  // UAE / Malaysia JAKIM apply it. Apps wanting to apply pass the result
+  // through applyElevationCorrection(times, elevation, latitude).
+  //
+  // 500 m threshold is chosen because:
+  //   • below 200 m, the dip is < 1 min (sub-prayer-buffer noise)
+  //   • 200–500 m is 1–2 min (within institutional ihtiyati buffers)
+  //   • 500–1500 m is 2–5 min (where institutional bodies have weighed in)
+  //   • > 1500 m is > 5 min (definitely worth flagging)
+  // The threshold also tolerates phone-GPS altitude noise (typically
+  // ±10–30 m) without flickering the advisory state.
+  if (elevation >= 500) {
+    const dipMin = computeElevationDipMinutes(elevation, latitude)
+    notes.push(
+      `Elevation advisory: altitude ${Math.round(elevation)} m is above the ` +
+      `500 m threshold where the geometric horizon dip becomes practically ` +
+      `significant — sun rises ~${dipMin.toFixed(1)} min EARLIER and Maghrib ` +
+      `falls ~${dipMin.toFixed(1)} min LATER than at sea level. Institutional ` +
+      `stances differ: UAE (Burj Khalifa fatwa, IACAD Dulook DXB) and Malaysia ` +
+      `JAKIM apply this correction; Saudi Arabia / Umm al-Qura declines it for ` +
+      `jama'ah unity. Because you passed a non-zero elevation, fajr's public ` +
+      `\`prayerTimes\` wrapper has applied the correction (apply-stance default ` +
+      `when elevation is supplied). To compute sea-level times instead, call ` +
+      `again with \`elevation: 0\`. The app/user should choose based on local ` +
+      `mosque practice. See knowledge/wiki/corrections/elevation.md.`
+    )
+  }
+
   // Per-prayer ihtiyat rounding — see roundIhtiyat() docstring above.
   const fajr_   = roundIhtiyat(times.fajr,    'up')
   const shuruq_ = roundIhtiyat(times.sunrise, 'down')
@@ -515,11 +548,35 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
 }
 
 /**
+ * Pure helper — compute the elevation horizon-dip correction in minutes.
+ *
+ * Geometric horizon dip: dip° = arccos(R / (R + h))
+ * Time conversion at latitude φ: minutes = dip° × 4 / cos(φ)
+ *
+ * Used by applyElevationCorrection (which applies it) AND by prayerTimes
+ * (which surfaces it as a `notes[]` advisory when elevation ≥ 500 m).
+ *
+ * @param {number} elevation  Meters above sea level
+ * @param {number} latitude   Degrees (for latitude correction of time offset)
+ * @returns {number} Correction magnitude in minutes (always positive)
+ */
+export function computeElevationDipMinutes(elevation, latitude = 0) {
+  if (!elevation || elevation <= 0) return 0
+  const EARTH_RADIUS_M = 6371000
+  const horizonDipDeg = Math.acos(EARTH_RADIUS_M / (EARTH_RADIUS_M + elevation)) * (180 / Math.PI)
+  return horizonDipDeg * 4 / Math.cos(latitude * Math.PI / 180)
+}
+
+/**
  * Apply elevation-based horizon correction to a set of prayer times.
  *
- * 🟡 Limited precedent: Geometry is classical; application to Islamic prayer
- * times has precedent in classical muwaqqit texts but is not adopted by any
- * major institution. See wiki/corrections/elevation.md.
+ * 🟡→🟢 Approaching established: Geometry is classical; institutional
+ * precedent includes UAE Grand Mufti's Burj Khalifa fatwa (IACAD Dulook DXB
+ * publishes floor-stratified times) and Malaysia JAKIM's systematic
+ * topographic correction. Saudi Arabia / Umm al-Qura explicitly DECLINES
+ * the correction, prioritising jama'ah unity (high-rise residents pray with
+ * their city, not their floor). fajr leaves it OFF by default; pass through
+ * this function to apply. See wiki/corrections/elevation.md.
  *
  * @param {object} times      Output from prayerTimes()
  * @param {number} elevation  Meters above sea level
@@ -529,25 +586,23 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
 export function applyElevationCorrection(times, elevation, latitude = 0) {
   if (!elevation || elevation <= 0) return times
 
-  // Geometric horizon dip: arccos(R / (R + h)) in degrees
-  // 🟡 Limited precedent — see wiki/corrections/elevation.md
-  const EARTH_RADIUS_M = 6371000
-  const horizonDipDeg = Math.acos(EARTH_RADIUS_M / (EARTH_RADIUS_M + elevation)) * (180 / Math.PI)
-
-  // Latitude correction: at latitude φ, sun crosses horizon at rate 4/cos(φ) min per degree
-  const correctionMin = horizonDipDeg * 4 / Math.cos(latitude * Math.PI / 180)
+  const correctionMin = computeElevationDipMinutes(elevation, latitude)
   const corrMs = correctionMin * 60 * 1000
 
   const adjusted = { ...times }
-  // Shuruq (sunrise) is earlier at elevation — depressed horizon
-  adjusted.shuruq  = new Date(times.shuruq.getTime()  - corrMs)
+  // Shuruq (sunrise) is earlier at elevation — depressed horizon. Re-apply
+  // ihtiyat-aware DOWN rounding so the post-correction Date stays on whole
+  // minutes (input was rounded by prayerTimes; sub-minute shift would
+  // reintroduce fractional seconds).
+  adjusted.shuruq  = roundIhtiyat(new Date(times.shuruq.getTime()  - corrMs), 'down')
   adjusted.sunrise = adjusted.shuruq    // keep alias in sync with shuruq
   // Maghrib (sunset) is later at elevation. Astronomical `sunset` shifts by
   // the same geometric amount as `maghrib` for methods where they coincide;
   // for methods with a maghrib offset we still want the astronomical sunset
-  // itself elevation-corrected, so update both.
-  adjusted.maghrib = new Date(times.maghrib.getTime() + corrMs)
-  adjusted.sunset  = new Date(times.sunset.getTime()  + corrMs)
+  // itself elevation-corrected, so update both. Re-apply UP rounding for
+  // both per the v1.5.1 ihtiyat principle.
+  adjusted.maghrib = roundIhtiyat(new Date(times.maghrib.getTime() + corrMs), 'up')
+  adjusted.sunset  = roundIhtiyat(new Date(times.sunset.getTime()  + corrMs), 'up')
   adjusted.corrections = { ...times.corrections, elevation: true, elevationCorrectionMin: +correctionMin.toFixed(2) }
 
   return adjusted
