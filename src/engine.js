@@ -128,8 +128,46 @@ function selectMethod(country, lat, coords) {
       // 🟢 Established — UK Muslim community predominantly follows Moonsighting Committee
       return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (UK)' }
     case 'Malaysia': {
-      // JAKIM: Fajr 20°, Isha 18° — equatorial standard; use Singapore (same angles)
-      return { params: adhan.CalculationMethod.Singapore(), methodName: 'JAKIM/Singapore (20°/18°)' }
+      // JAKIM: formal 20°/18° + ihtiyati buffer of ~8 minutes for Fajr.
+      //
+      // Classification: 🟡→🟢 Path A community calibration (community-published
+      // reality + multi-source corroboration). Same shape as Morocco's
+      // formal-vs-published gap. See knowledge/wiki/regions/malaysia.md.
+      //
+      // Background: JAKIM's official documentation states Fajr 20° (per
+      // adhan.js's Singapore() method). Empirically, JAKIM's published
+      // calendar (via waktusolat.app, the community proxy for the geo-
+      // restricted e-solat.gov.my) consistently lands ~8.9 minutes LATER
+      // than a pure 20° calculation across all Malaysian zones we have
+      // ground truth for:
+      //
+      //   Kuala Lumpur (JAKIM zone WLY01): mean Fajr bias -8.90 min
+      //   Shah Alam    (JAKIM zone SGR01): mean Fajr bias -8.20 min
+      //   George Town  (JAKIM zone PNG01): mean Fajr bias -9.00 min
+      //
+      // The ~8-min gap decomposes into the documented 2-minute ihtiyati
+      // (precaution buffer) per Razali & Hisham (2021), *Re-evaluation of
+      // the Method Used in Determining the Prayer Time Zone in Pahang*
+      // (IJHTC v.10(1), Universiti Malaysia Pahang) citing Nurul Asikin
+      // (2016), plus a ~6-minute additional margin commonly attributed to
+      // naked-eye visibility tolerance — analogous to Aabed (2015)'s
+      // recommended 5-minute tayakkun buffer empirically validated for
+      // Jordan (Jordan Journal for Islamic Studies v.11(2), 12 naked-eye
+      // sessions). Both papers are in knowledge/raw/papers/.
+      //
+      // The 8-minute offset is applied via adhan's methodAdjustments.fajr
+      // rather than by changing the angle, preserving the formally-cited
+      // 20° angle in the engine while matching JAKIM's published reality.
+      // This is fasting-safer (later Fajr widens the suhoor eating window)
+      // AND prayer-validity-safer (later Fajr eliminates pre-dawn risk),
+      // satisfying both polarities of ihtiyat — same logic as Morocco 19°.
+      //
+      // Indonesia (KEMENAG) does NOT need this offset — Aladhan KEMENAG-
+      // method ground truth at Jakarta matches a pure 20° calc within
+      // 1 minute. The JAKIM offset is institution-specific to Malaysia.
+      const p = adhan.CalculationMethod.Singapore()
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8 }
+      return { params: p, methodName: 'JAKIM (20°/18° + 8min ihtiyati per Path A community calibration)' }
     }
     case 'USA':
       // ISNA: Fajr 15°, Isha 15°

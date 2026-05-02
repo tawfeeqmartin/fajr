@@ -31,7 +31,7 @@ describe('region-aware method auto-selection', () => {
     [41.01,  28.97,  /Diyanet/i,                 'Istanbul'],
     [30.04,  31.24,  /Egyptian/i,                'Cairo'],
     [51.51,  -0.13,  /Moonsighting|MoonsightingCommittee/i, 'London'],
-    [3.14,   101.69, /JAKIM|Singapore/i,         'Kuala Lumpur'],
+    [3.14,   101.69, /JAKIM.*ihtiyati|JAKIM.*8min/i, 'Kuala Lumpur'],
     [40.71,  -74.01, /ISNA|NorthAmerica/i,       'New York'],
     [25.20,  55.27,  /Umm al-Qura|UAE/i,         'Dubai'],
     [48.86,  2.35,   /UOIF|12/i,                 'Paris'],
@@ -44,7 +44,7 @@ describe('region-aware method auto-selection', () => {
     [26.23,  50.58,  /Kuwait.*Bahrain/i,         'Manama'],
     [23.59,  58.41,  /Kuwait.*Oman/i,            'Muscat'],
     [-33.92, 18.42,  /MWL.*South Africa/i,       'Cape Town'],
-    [4.90,   114.94, /JAKIM|Singapore.*Brunei/i, 'Bandar Seri Begawan'],
+    [4.90,   114.94, /JAKIM\/Singapore.*Brunei/i, 'Bandar Seri Begawan'],
     [1.35,   103.82, /MUIS|Singapore/i,          'Singapore'],
   ])('coordinates (%f, %f) → method matches /%s/ — %s', (lat, lng, pattern, _city) => {
     const result = prayerTimes({ latitude: lat, longitude: lng, date: TEST_DATE })
