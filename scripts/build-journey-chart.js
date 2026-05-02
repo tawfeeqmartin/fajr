@@ -38,6 +38,7 @@ const MILESTONES = [
   { tag: 'v1.3.0', tsPrefix: '2026-05-01T23',   label: 'v1.3',   change: 'applyTayakkunBuffer + tarabishyTimes (Aabed/Tarabishy)' },
   { tag: 'v1.4.0', tsPrefix: '2026-05-02T01:0', label: 'v1.4',   change: 'world-coverage eval (163 countries) + 9 engine bboxes' },
   { tag: 'v1.4.1', tsPrefix: '2026-05-02T01:5', label: 'v1.4.1', change: 'JAKIM Path A ihtiyati offset (train −16.6%)' },
+  { tag: 'v1.4.3', tsPrefix: '2026-05-02T09:5', label: 'v1.4.3', change: 'eval elevation-policy fix (train −32% to 0.70)' },
 ]
 
 function loadRuns() {

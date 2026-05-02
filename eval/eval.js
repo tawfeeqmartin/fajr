@@ -246,11 +246,35 @@ function signedMinutesDiff(calc, gt) {
 
 function evaluateEntry(entry) {
   const date = new Date(entry.date + 'T12:00:00Z')
+  // Pass elevation only when the fixture's institutional source publishes
+  // elevation-corrected times. We detect this from existing fixture
+  // metadata — the source_method string mentioning "topographic" or
+  // "elevation" — rather than requiring a separate flag, so no fixture
+  // file edits are needed. Most institutional publishers (Aladhan
+  // default, Diyanet, Egyptian, Umm al-Qura, ISNA, praytimes.org)
+  // publish sea-level times and don't carry the marker; JAKIM via
+  // waktusolat.app does ("JAKIM (Fajr 20°, Isha 18°, topographic
+  // elevation)" — see Razali & Hisham 2021 documenting JAKIM's
+  // systematic topographic correction).
+  //
+  // Why this matters: applying elevation correction in the eval
+  // against sea-level ground truth produced a phantom +3.93-min Maghrib
+  // bias for Ankara (938m) under Diyanet in v1.4.1, inflating the
+  // Diyanet Maghrib aggregate to +2.82 when the real calibration drift
+  // was ~+1 min. Production consumers retain the public prayerTimes()
+  // wrapper's elevation behaviour unchanged; this scope is ONLY the
+  // eval's measurement convention against institutional ground truth.
+  const sourceMethodStr = String(entry.source_method ?? entry.source ?? '').toLowerCase()
+  const sourcePublishesElevationCorrected =
+    sourceMethodStr.includes('topographic') ||
+    sourceMethodStr.includes('topographical') ||
+    /elevation[\s-]?correct/.test(sourceMethodStr)
+  const passElevation = sourcePublishesElevationCorrected ? (entry.elevation || 0) : 0
   const calculated = prayerTimes({
     latitude: entry.latitude,
     longitude: entry.longitude,
     date,
-    elevation: entry.elevation || 0,
+    elevation: passElevation,
   })
 
   const errors = {}

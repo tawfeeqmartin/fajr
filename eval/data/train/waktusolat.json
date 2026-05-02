@@ -9,7 +9,7 @@
     "method": "jakim",
     "source": "JAKIM via waktusolat.app zone WLY01",
     "source_institution": "JAKIM (via waktusolat.app)",
-    "source_method": "JAKIM (Fajr 20°, Isha 18°, topographic elevation)",
+    "source_method": "JAKIM (Fajr 20\u00b0, Isha 18\u00b0, topographic elevation)",
     "source_url": "https://api.waktusolat.app/v2/solat/wly01",
     "source_fetched": "2026-04-30T20:57:51.743Z",
     "dates": [
@@ -115,7 +115,7 @@
     "method": "jakim",
     "source": "JAKIM via waktusolat.app zone SGR01",
     "source_institution": "JAKIM (via waktusolat.app)",
-    "source_method": "JAKIM (Fajr 20°, Isha 18°, topographic elevation)",
+    "source_method": "JAKIM (Fajr 20\u00b0, Isha 18\u00b0, topographic elevation)",
     "source_url": "https://api.waktusolat.app/v2/solat/sgr01",
     "source_fetched": "2026-04-30T20:57:51.944Z",
     "dates": [
@@ -221,7 +221,7 @@
     "method": "jakim",
     "source": "JAKIM via waktusolat.app zone PNG01",
     "source_institution": "JAKIM (via waktusolat.app)",
-    "source_method": "JAKIM (Fajr 20°, Isha 18°, topographic elevation)",
+    "source_method": "JAKIM (Fajr 20\u00b0, Isha 18\u00b0, topographic elevation)",
     "source_url": "https://api.waktusolat.app/v2/solat/png01",
     "source_fetched": "2026-04-30T20:57:52.157Z",
     "dates": [
