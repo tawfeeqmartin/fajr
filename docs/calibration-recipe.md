@@ -279,6 +279,25 @@ Remaining residuals in priority order:
 
 Combined potential: ~0.10 train WMAE drop, putting train below 0.60. Diminishing returns — most of the easy wins are now realised.
 
+### Update (2026-05-02): institutional-corpus saturation
+
+After v1.4.5, the calibration loop has hit a structural saturation point. The remaining train residuals fall into three categories, none of which are immediately Path-A-actionable:
+
+1. **JAKIM Maghrib heterogeneity (deferred)** — KL/Shah Alam/George Town show inconsistent Maghrib direction (KL −0.90, SA −0.25, GT −0.48). Resolving requires either more Malaysian zones (waktusolat seasonal-drift caveat — see [`autoresearch/logs/2026-05-02-jakim-zone-expansion-deferred.md`](../autoresearch/logs/2026-05-02-jakim-zone-expansion-deferred.md)) OR finer per-zone calibration data not currently available.
+
+2. **Aladhan-routed cells (~70% of remaining bias)** — Cairo/Alexandria Fajr −7, London Maghrib +3, etc. These aren't Path A targets because the source is Aladhan's reproduction of the regional method (calc-vs-calc consensus, per recipe step 2). Calibrating against them would be circular.
+
+3. **Saturation** — fajr's existing institutional ground-truth fixtures (Diyanet via ezanvakti, JAKIM via waktusolat, Mawaqit mosque-published) have all been calibrated against in v1.4.1/v1.4.4/v1.4.5 + the v1.0 Morocco predecessor. No additional institutional sources are currently in the train corpus, so no additional Path A targets exist.
+
+The next-tier accuracy work requires **corpus expansion** (find new institutional ground-truth sources) rather than calibration. Web search confirmed (2026-05-02) that:
+
+- **Egyptian General Authority of Survey** — no public-facing JSON API. Their methodology is documented but the published timetables are not directly fetchable in machine-readable form.
+- **UK Wifaqul Ulama / Moonsighting Committee** — mirror-services exist but mostly reproduce calc-vs-calc.
+- **Saudi Royal Court / Umm al-Qura University** — published calendars, no API.
+- **More waktusolat zones** — fetch returns API's "current" month (now May, not April), creating month-mismatch with the existing April train corpus until next April or until we capture multiple months.
+
+Path forward: manual scrape / contact institutions to grow the corpus beyond the current 3 institutional sources, then resume Path A. Until then, train WMAE 0.6732 is the steady-state floor for this corpus.
+
 **Holdout signals** (1141 entries from 145 country fixtures): 60-min outliers cluster around DST transitions (Tehran in IRDT, Vilnius in EEST, etc.). These are NOT calibration opportunities — they're tz-handling refinements in `eval/eval.js`'s dynamic resolver. Address as framework improvements, not Path A corrections.
 
 ---
