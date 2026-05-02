@@ -10,16 +10,16 @@
     "method": "3",
     "methodLabel": "MWL",
     "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
-    "sourceFetched": "2026-05-02T00:26:10.793Z",
+    "sourceFetched": "2026-05-02T22:50:29.352Z",
     "dates": [
       {
         "date": "2026-05-02",
         "fajr": "04:08",
-        "sunrise": "06:14",
+        "sunrise": "06:13",
         "dhuhr": "13:27",
         "asr": "17:25",
-        "maghrib": "20:41",
-        "isha": "22:38"
+        "maghrib": "20:42",
+        "isha": "22:39"
       },
       {
         "date": "2026-05-03",
@@ -32,8 +32,8 @@
       },
       {
         "date": "2026-05-04",
-        "fajr": "04:04",
-        "sunrise": "06:11",
+        "fajr": "04:03",
+        "sunrise": "06:10",
         "dhuhr": "13:27",
         "asr": "17:26",
         "maghrib": "20:44",
@@ -45,13 +45,13 @@
         "sunrise": "06:09",
         "dhuhr": "13:27",
         "asr": "17:27",
-        "maghrib": "20:45",
+        "maghrib": "20:46",
         "isha": "22:45"
       },
       {
         "date": "2026-05-06",
-        "fajr": "03:59",
-        "sunrise": "06:08",
+        "fajr": "03:58",
+        "sunrise": "06:07",
         "dhuhr": "13:27",
         "asr": "17:27",
         "maghrib": "20:47",
@@ -64,16 +64,16 @@
         "dhuhr": "13:27",
         "asr": "17:28",
         "maghrib": "20:48",
-        "isha": "22:49"
+        "isha": "22:50"
       },
       {
         "date": "2026-05-08",
-        "fajr": "03:54",
-        "sunrise": "06:05",
+        "fajr": "03:53",
+        "sunrise": "06:04",
         "dhuhr": "13:27",
         "asr": "17:28",
-        "maghrib": "20:49",
-        "isha": "22:51"
+        "maghrib": "20:50",
+        "isha": "22:52"
       }
     ]
   }

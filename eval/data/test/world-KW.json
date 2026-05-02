@@ -10,7 +10,7 @@
     "method": "8",
     "methodLabel": "Kuwait",
     "source": "Aladhan API (api.aladhan.com) — Kuwait (Aladhan method 8)",
-    "sourceFetched": "2026-05-02T00:20:11.501Z",
+    "sourceFetched": "2026-05-02T22:43:45.300Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -54,8 +54,8 @@
         "sunrise": "05:02",
         "dhuhr": "11:45",
         "asr": "15:20",
-        "maghrib": "18:27",
-        "isha": "19:57"
+        "maghrib": "18:28",
+        "isha": "19:58"
       },
       {
         "date": "2026-05-07",

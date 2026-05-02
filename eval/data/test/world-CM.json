@@ -10,7 +10,7 @@
     "method": "3",
     "methodLabel": "MWL",
     "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
-    "sourceFetched": "2026-05-02T00:17:54.876Z",
+    "sourceFetched": "2026-05-02T22:41:30.196Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -70,7 +70,7 @@
         "date": "2026-05-08",
         "fajr": "04:50",
         "sunrise": "06:02",
-        "dhuhr": "12:10",
+        "dhuhr": "12:11",
         "asr": "15:32",
         "maghrib": "18:19",
         "isha": "19:27"
