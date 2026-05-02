@@ -18,91 +18,22 @@
  * Usage: node scripts/fetch-mawaqit.js
  */
 
-import { writeFileSync, mkdirSync } from 'fs'
+import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-// Curated mosque slugs — each is a real, active mosque on mawaqit.net.
-// Coverage span: institutional regions where fajr currently has weak or
-// no institutional ground truth in train (Egypt, UK, Türkiye, Gulf, SE Asia
-// equatorial). Mosque-published reality is the highest-quality grounding
-// signal — it's what users actually pray to.
-const MOSQUES = [
-  // ── Morocco — broad geographic coverage of the Habous-method region ─────
-  // Casablanca/Rabat/Marrakech (original 5) plus 18 mosques across all major
-  // Moroccan regions: northern (Tanger, Nador), eastern (Oujda), interior
-  // (Fez, Meknes, Taza, Khouribga, Settat), Atlantic coast (Sale, Kenitra,
-  // Mohammedia, El Jadida, Safi, Essaouira, Agadir, Taroudant), and
-  // crucially the high-elevation edge-of-Sahara cities (Ouarzazate 1135m,
-  // Errachidia 1037m) — the latter two are fajr's first elevation-validated
-  // Moroccan ground truth above 500m. Closes the validation gaps documented
-  // in knowledge/wiki/regions/morocco.md.
-  { slug: 'moulay-ismail-casablanca-20400-morocco',           city: 'Casablanca', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-qm-lslm-casablanca-20320-morocco',            city: 'Casablanca', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'mosquee-bab-arrahmane-casablanca-20050-morocco',   city: 'Casablanca', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-lm-masjid-ummah-rabat-10130-morocco',         city: 'Rabat',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-lthr-marrakech-40170-morocco',                city: 'Marrakech',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  // ── Northern Morocco ────────────────────────────────────────────────────
-  { slug: 'msjd-sydy-qsm-tanger-90000-morocco',               city: 'Tanger',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-hjryyn-tnj-tanger-90000-morocco',             city: 'Tanger',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'masjid-al-falah-nador-66000-morocco',              city: 'Nador',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  // Selouane (lfth-selouane-nador-62702-morocco) excluded: published times
-  // are 1 hour off from other Nador mosques — likely stale Ramadan-DST data.
-  // ── Eastern Morocco ─────────────────────────────────────────────────────
-  { slug: 'lmoubacharine-biljna-oujda-60020-morocco',         city: 'Oujda',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco', city: 'Oujda',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  // ── Interior / Atlas-foothill ───────────────────────────────────────────
-  { slug: 'masjid-aamrou-bn-laas-fes-30000-morocco-1',        city: 'Fes',        country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-lhsn-ryd-llymwn-fes-30000-morocco',           city: 'Fes',        country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'mosquee-elamine-meknes-50000-morocco',             city: 'Meknes',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco',     city: 'Taza',       country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1',    city: 'Khouribga',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'mosquee-imam-tarmidi-settat-26000-morocco',        city: 'Settat',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  // ── Atlantic coast (north + central) ────────────────────────────────────
-  { slug: 'msjd-lsf-sale-11000-morocco',                      city: 'Sale',       country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-lqdsy-kenitra-14000-morocco',                 city: 'Kenitra',    country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  // Mohammedia (msjd-lrdwn-mohammedia-28810-morocco) excluded: published
-  // times +60 min off all other Moroccan mosques — likely a misconfigured
-  // mosque using UTC+2 for display.
-  // El Jadida (masjid-makka-el-jadida-20000-morocco) excluded: published
-  // times -60 min off — likely stale Ramadan-DST data (UTC+0).
-  { slug: 'msjd-blkhy-safi-46000-morocco',                    city: 'Safi',       country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-lrwnq-essaouira-44000-morocco',               city: 'Essaouira',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  // ── Atlantic south ──────────────────────────────────────────────────────
-  { slug: 'msjd-hl-sws-agadir-80000-morocco',                 city: 'Agadir',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  { slug: 'msjd-wld-brhym-taroudant-83300-morocco',           city: 'Taroudant',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
-  // ── HIGH-ELEVATION test cells (the big Morocco coverage gap) ────────────
-  { slug: 'msjd-lqds-masjid-elqods-ouarzazate-45000-morocco', city: 'Ouarzazate', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 }, // 1135m
-  { slug: 'msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco',     city: 'Ouarzazate', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 }, // 1135m
-  { slug: 'masjid-marzouga-lgharbia-errachidia-52202-morocco',city: 'Errachidia', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 }, // 1037m
-  // ── France / UK — Mawaqit's home turf ────────────────────────────────────
-  { slug: 'mosquee-de-frais-vallon-marseille-13013-france-1', city: 'Marseille',  country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
-  { slug: 'les-compagnons-limoges-87000-france-1',            city: 'Limoges',    country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
-  { slug: 'association-des-musulmans-des-coteaux-mulhouse',   city: 'Mulhouse',   country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
-  { slug: 'dar-ul-quran-london-london-nw1-1hw-united-kingdom',city: 'London',     country: 'United Kingdom', timezone: 'Europe/London', utcOffset: 1 },
-  // ── North Africa (non-Morocco) — Egyptian-method institutional ──────────
-  { slug: 'msjd-l-lm-lnf-nouveau-caire-4710001-egypt',        city: 'Cairo',      country: 'Egypt',   timezone: 'Africa/Cairo',      utcOffset: 2 },
-  { slug: 'msjd-sydy-qwysm-tunis-1006-tunisia',               city: 'Tunis',      country: 'Tunisia', timezone: 'Africa/Tunis',      utcOffset: 1 },
-  { slug: 'masjid-abi-bakr-lsidiq-algiers-16200-algeria',     city: 'Algiers',    country: 'Algeria', timezone: 'Africa/Algiers',    utcOffset: 1 },
-  // ── Türkiye / Levant — DEFERRED ─────────────────────────────────────────
-  // Both Istanbul mosques tested via Mawaqit search (ali-qushji-…-34283
-  // and camlivadi-camii-…-34408) returned malformed times (dhuhr 05:54,
-  // maghrib 16:58 — physically impossible for Istanbul). Mawaqit's
-  // Türkiye-mosque coverage appears to have systematic data-quality
-  // issues. Diyanet's own ezanvakti.emushaf.net remains the institutional
-  // ground-truth channel for Türkiye and is already in train (diyanet.json).
-  // Re-evaluate after Mawaqit fixes Türkiye coverage.
-  // ── Gulf / Arabian Peninsula — Umm al-Qura / Kuwait method cross-check ──
-  { slug: 'masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar',     city: 'Doha',     country: 'Qatar',         timezone: 'Asia/Qatar',        utcOffset: 3 },
-  { slug: 'mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait',     city: 'Kuwait',   country: 'Kuwait',        timezone: 'Asia/Kuwait',       utcOffset: 3 },
-  { slug: 'jawharah-taybah-dammam-32275-saudi-arabia',                  city: 'Dammam',   country: 'Saudi Arabia',  timezone: 'Asia/Riyadh',       utcOffset: 3 },
-  // ── SE Asia equatorial — JAKIM / KEMENAG / MUIS cross-check ─────────────
-  { slug: 'attaufiq-cptiv-jakarta-dki-jakarta-10510-indonesia',         city: 'Jakarta',  country: 'Indonesia',     timezone: 'Asia/Jakarta',      utcOffset: 7 },
-  { slug: 'al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore',city: 'Singapore',country: 'Singapore',     timezone: 'Asia/Singapore',    utcOffset: 8 },
-  { slug: 'surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2',    city: 'Kuala Lumpur', country: 'Malaysia',  timezone: 'Asia/Kuala_Lumpur', utcOffset: 8 },
-]
+// The mosque list is sourced from scripts/data/mawaqit-mosques.json — a curated
+// JSON registry of real, active mosque slugs on mawaqit.net annotated with
+// city/country/timezone, exclusion records, and an iconic-mosque wishlist for
+// the scholarly-corpus expansion pass. Editing the registry instead of this
+// file lets non-engineers contribute slugs without touching code, and lets
+// future tooling (validators, cross-references against scholarly sources)
+// consume the same data.
+const REGISTRY_PATH = join(__dirname, 'data', 'mawaqit-mosques.json')
+const REGISTRY = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'))
+const MOSQUES = REGISTRY.active
 
 const SOURCE_INSTITUTION = 'Mawaqit (mosque-published)'
 
@@ -115,11 +46,15 @@ function todayLocal(utcOffsetHours) {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`
 }
 
-async function searchAndPick(slug, city) {
-  // Search the city name (returns up to ~20 mosques) then filter by exact slug.
-  const url = `https://mawaqit.net/api/2.0/mosque/search?word=${encodeURIComponent(city.toLowerCase())}`
+async function searchAndPick(slug, keyword) {
+  // Search the keyword (city name, or registry-supplied searchKeyword override)
+  // and filter by exact slug. Mawaqit's search ranks by name fuzzy-match across
+  // the global mosque list, so for cities whose name partially matches French
+  // mosque names (e.g. "Fes" → "frais"/"compagnons") the registry should
+  // supply a more specific searchKeyword (e.g. "fez", "fes 30000").
+  const url = `https://mawaqit.net/api/2.0/mosque/search?word=${encodeURIComponent(keyword.toLowerCase())}`
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status} searching for ${city}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status} searching for ${keyword}`)
   const list = await res.json()
   const found = list.find(m => m.slug === slug)
   if (!found) {
@@ -143,7 +78,8 @@ function looksReasonable(times, expectedFajrHour = 5) {
 
 async function fetchMosque(m) {
   console.log(`Fetching ${m.slug}…`)
-  const found = await searchAndPick(m.slug, m.city)
+  const keyword = m.searchKeyword || m.city
+  const found = await searchAndPick(m.slug, keyword)
   const times = found.times
   if (!looksReasonable(times)) {
     throw new Error(`Times array looks misconfigured for ${m.slug}: ${JSON.stringify(times)}`)
@@ -180,10 +116,26 @@ async function main() {
     console.error('No fixtures fetched. Aborting.')
     process.exit(1)
   }
-  const outPath = join(__dirname, '..', 'eval', 'data', 'test', 'mawaqit.json')
-  mkdirSync(dirname(outPath), { recursive: true })
-  writeFileSync(outPath, JSON.stringify(fixtures, null, 2))
-  console.log(`→ wrote ${outPath} (${fixtures.length} mosques, ${fixtures.length} day-entries)`)
+
+  // Split fixtures by corpus partition. Per the v1.5.0 corpus restructure,
+  // Moroccan Mawaqit fixtures form the institutional Path A train signal
+  // (eval/data/train/mawaqit-morocco.json) — the engine's Maghrib +5min
+  // calibration is gated against them. All other Mawaqit fixtures are
+  // holdout-only (eval/data/test/mawaqit.json) — reported but not gating.
+  const moroccan = fixtures.filter(f => f.country === 'Morocco')
+  const other    = fixtures.filter(f => f.country !== 'Morocco')
+
+  const trainPath = join(__dirname, '..', 'eval', 'data', 'train', 'mawaqit-morocco.json')
+  const testPath  = join(__dirname, '..', 'eval', 'data', 'test',  'mawaqit.json')
+  mkdirSync(dirname(trainPath), { recursive: true })
+  mkdirSync(dirname(testPath),  { recursive: true })
+
+  if (moroccan.length > 0) {
+    writeFileSync(trainPath, JSON.stringify(moroccan, null, 2))
+    console.log(`→ wrote ${trainPath} (${moroccan.length} Moroccan mosques — train Path A signal)`)
+  }
+  writeFileSync(testPath, JSON.stringify(other, null, 2))
+  console.log(`→ wrote ${testPath} (${other.length} non-Morocco mosques — holdout)`)
   console.log('Note: Mawaqit fixtures are single-day snapshots. Re-run daily to refresh.')
 }
 
