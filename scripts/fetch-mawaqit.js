@@ -25,8 +25,10 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // Curated mosque slugs — each is a real, active mosque on mawaqit.net.
-// Coverage focus: (a) Morocco — addresses the Habous gap, (b) French/UK
-// community mosques — the Mawaqit network's primary user base.
+// Coverage span: institutional regions where fajr currently has weak or
+// no institutional ground truth in train (Egypt, UK, Türkiye, Gulf, SE Asia
+// equatorial). Mosque-published reality is the highest-quality grounding
+// signal — it's what users actually pray to.
 const MOSQUES = [
   // ── Morocco — addresses the Habous coverage gap ──────────────────────────
   { slug: 'moulay-ismail-casablanca-20400-morocco',           city: 'Casablanca', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
@@ -35,9 +37,30 @@ const MOSQUES = [
   { slug: 'msjd-lm-masjid-ummah-rabat-10130-morocco',         city: 'Rabat',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
   { slug: 'msjd-lthr-marrakech-40170-morocco',                city: 'Marrakech',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
   // ── France / UK — Mawaqit's home turf ────────────────────────────────────
-  { slug: 'mosquee-acra-marseille-13014-france',              city: 'Marseille',  country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
+  { slug: 'mosquee-de-frais-vallon-marseille-13013-france-1', city: 'Marseille',  country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
   { slug: 'les-compagnons-limoges-87000-france-1',            city: 'Limoges',    country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
   { slug: 'association-des-musulmans-des-coteaux-mulhouse',   city: 'Mulhouse',   country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
+  { slug: 'dar-ul-quran-london-london-nw1-1hw-united-kingdom',city: 'London',     country: 'United Kingdom', timezone: 'Europe/London', utcOffset: 1 },
+  // ── North Africa (non-Morocco) — Egyptian-method institutional ──────────
+  { slug: 'msjd-l-lm-lnf-nouveau-caire-4710001-egypt',        city: 'Cairo',      country: 'Egypt',   timezone: 'Africa/Cairo',      utcOffset: 2 },
+  { slug: 'msjd-sydy-qwysm-tunis-1006-tunisia',               city: 'Tunis',      country: 'Tunisia', timezone: 'Africa/Tunis',      utcOffset: 1 },
+  { slug: 'masjid-abi-bakr-lsidiq-algiers-16200-algeria',     city: 'Algiers',    country: 'Algeria', timezone: 'Africa/Algiers',    utcOffset: 1 },
+  // ── Türkiye / Levant — DEFERRED ─────────────────────────────────────────
+  // Both Istanbul mosques tested via Mawaqit search (ali-qushji-…-34283
+  // and camlivadi-camii-…-34408) returned malformed times (dhuhr 05:54,
+  // maghrib 16:58 — physically impossible for Istanbul). Mawaqit's
+  // Türkiye-mosque coverage appears to have systematic data-quality
+  // issues. Diyanet's own ezanvakti.emushaf.net remains the institutional
+  // ground-truth channel for Türkiye and is already in train (diyanet.json).
+  // Re-evaluate after Mawaqit fixes Türkiye coverage.
+  // ── Gulf / Arabian Peninsula — Umm al-Qura / Kuwait method cross-check ──
+  { slug: 'masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar',     city: 'Doha',     country: 'Qatar',         timezone: 'Asia/Qatar',        utcOffset: 3 },
+  { slug: 'mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait',     city: 'Kuwait',   country: 'Kuwait',        timezone: 'Asia/Kuwait',       utcOffset: 3 },
+  { slug: 'jawharah-taybah-dammam-32275-saudi-arabia',                  city: 'Dammam',   country: 'Saudi Arabia',  timezone: 'Asia/Riyadh',       utcOffset: 3 },
+  // ── SE Asia equatorial — JAKIM / KEMENAG / MUIS cross-check ─────────────
+  { slug: 'attaufiq-cptiv-jakarta-dki-jakarta-10510-indonesia',         city: 'Jakarta',  country: 'Indonesia',     timezone: 'Asia/Jakarta',      utcOffset: 7 },
+  { slug: 'al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore',city: 'Singapore',country: 'Singapore',     timezone: 'Asia/Singapore',    utcOffset: 8 },
+  { slug: 'surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2',    city: 'Kuala Lumpur', country: 'Malaysia',  timezone: 'Asia/Kuala_Lumpur', utcOffset: 8 },
 ]
 
 const SOURCE_INSTITUTION = 'Mawaqit (mosque-published)'
