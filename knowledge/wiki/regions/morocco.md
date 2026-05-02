@@ -123,8 +123,49 @@ Real prayer times were collected from the Aladhan API (api.aladhan.com) for **Ap
 
 ---
 
+## Coverage and Validation Gaps (2026-05-02)
+
+fajr's Morocco accuracy claims should be read with these scope boundaries in mind. The 19° community calibration is well-validated for the **specific cities, elevations, and date ranges** listed below — not as a blanket Morocco-wide guarantee.
+
+### What is validated
+
+| Layer | Cities | Sample size | Status |
+|---|---|---|---|
+| Aladhan-Habous calc-vs-calc | Casablanca, Rabat | 20 day-entries (Apr 1–10, 2026) | ~0-min match per [`eval/data/train/morocco.json`](../../../eval/data/train/morocco.json) |
+| Mawaqit mosque-published | Casablanca (3 mosques: Moulay Ismail, Qm L-Slm, Bab Arrahmane), Rabat (Ummah), Marrakech (Lthr) | 5 single-day entries | ~2-min WMAE per [`eval/data/test/mawaqit.json`](../../../eval/data/test/mawaqit.json) |
+
+All validated cities are in **coastal or central Morocco at <500m elevation** (Casablanca 56m, Rabat 75m, Marrakech 466m). All validation is on **non-Ramadan days**.
+
+### What is NOT validated
+
+| Untested scope | Why it might matter |
+|---|---|
+| **Northern Morocco** — Tangier (35.78°N), Tetouan, Al Hoceima, Nador | Latitudes 35°+ produce slightly different twilight-angle behaviour vs Casablanca's 33.6°N. Most likely fine since Habous-19° still routes; needs direct validation. |
+| **Eastern Morocco** — Oujda (34.69°N, 1.91°W), Berkane | Eastern longitudes shift sun position. Same fix-pattern as northern; untested. |
+| **High-elevation cities** — Ifrane (1665m), Errachidia (1100m), Imilchil (2230m), Ouarzazate (1135m), High Atlas village settlements | fajr's `applyElevationCorrection` is opt-in. Default behaviour returns sea-level times (matches Habous Ministry). If a consumer passes `elevation > 0`, the auto-correction may shift Maghrib/Sunrise by minutes vs local mosque tables. **Untested at any Moroccan coordinate above 500m.** |
+| **Sahara / southern provinces** — Laayoune (27.15°N), Dakhla (23.69°N), Smara | Southern latitudes 23-27°N progress further from Casa's 33.6°N. Different shadow lengths affect Asr; different Fajr-angle convergence. Untested. |
+| **Ramadan DST transition** | Morocco shifts UTC+1 → UTC+0 during Ramadan, then back. fajr's eval uses `eval/eval.js`'s Intl-based dynamic resolver — handles standard DST transitions but Morocco's Ramadan-specific shift may not resolve cleanly across the transition day. Re-test before relying on fajr for Ramadan suhoor. |
+| **Mosque-to-mosque variance** | The 3-mosque Casablanca Mawaqit sample shows ~1-3 min individual variance between mosques. fajr matches the *aggregate* / Habous-published time; individual mosques may add their own *ihtiyati* offset. |
+
+### Known *ikhtilāf* about the 19° community calibration
+
+The Habous Ministry's **formally stated** Fajr angle is **18°**. fajr ships **19°** because that empirically reproduces what Habous actually publishes (Path A community calibration). Users who follow the **formal 18°** will see fajr's Fajr ~5 minutes earlier than their preference.
+
+This is a known *ikhtilāf*, not a bug. Both are defensible:
+- **19° (fajr default):** matches what Habous Ministry tables ACTUALLY publish + what Moroccan mosques pray to. Fasting-safer (later imsak window for suhoor).
+- **18° (formal stated):** matches the methodology document literally. Some users prefer literal-formal alignment.
+
+### How to extend coverage
+
+1. **Mawaqit slug additions** — extend `scripts/fetch-mawaqit.js` with mosque slugs from Tangier, Oujda, Ifrane, Laayoune. Re-run `npm run fetch:mawaqit`. Each new mosque adds an institutional-grounding signal that the daily refresh routine then tracks.
+2. **Habous PDF *imsākiyya* digitisation** — manually transcribe a Habous-published timetable for an untested city (Tangier, Ifrane) into `eval/data/test/habous-extended.json`. Single source of authoritative ground truth covering otherwise-untested coords.
+3. **Ramadan-transition test** — once Ramadan 1448 (Feb 2027) approaches, run fajr at Casablanca for the DST-transition days and compare against Habous-published Ramadan calendar.
+
+---
+
 ## Cross-References
 
 - [[wiki/methods/morocco]] — Method parameters and institutional authority
 - [[wiki/corrections/elevation]] — Elevation correction implementation and classification
 - [[wiki/corrections/atmosphere]] — Atmospheric refraction corrections (relevant for coastal/mountain variation)
+- [`docs/calibration-recipe.md`](../../../docs/calibration-recipe.md) — generalized methodology for Path A calibrations
