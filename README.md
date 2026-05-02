@@ -480,10 +480,13 @@ fajr's calculation methods, scholarly classifications, and eval ground truth der
 - **Egypt — Egyptian General Authority of Survey + Dār al-Iftāʾ Egypt** — the official survey body publishes the 19.5°/17.5° angles used for the Egyptian method. Dār al-Iftāʾ uses Odeh's ICOP criterion for hilal sighting decisions. fajr auto-selects Egyptian at Egyptian coordinates and at coordinates in the country group EG/SD/LY/IQ/LB/JO/PS/SY per `methods.js`. Eval ground truth: [`eval/data/train/egypt.json`](eval/data/train/egypt.json).
 - **Türkiye — Diyanet İşleri Başkanlığı** — Republic of Türkiye's Presidency of Religious Affairs, the largest single Sunni religious authority in Eurasia. fajr auto-selects Diyanet's full method (with Hanafi Asr) for TR/AZ/KZ/UZ/TM/KG/TJ. Eval ground truth: two complementary fixtures — [`eval/data/train/turkey.json`](eval/data/train/turkey.json) (regional consensus) and [`eval/data/train/diyanet.json`](eval/data/train/diyanet.json) (Diyanet's own publishing endpoint via [ezanvakti.emushaf.net](https://ezanvakti.emushaf.net)).
 
-#### North and West Africa
+#### North-West Africa (Maghreb)
 
 - **Morocco — Ministry of Habous and Islamic Affairs (وزارة الأوقاف والشؤون الإسلامية)** — publisher of the Moroccan *imsākiyya* (annual prayer time tables) that are the authoritative reference for Moroccan Muslims. fajr ships a community-calibrated 19°/17° method that empirically reproduces the Ministry's published tables to ~1 minute (the formally-stated 18° angle diverges by ~5 minutes in the fasting-unsafe direction). Validated triply: institutional tables in [`eval/data/train/morocco.json`](eval/data/train/morocco.json), mosque-published times across five active Moroccan mosques in [`eval/data/test/mawaqit.json`](eval/data/test/mawaqit.json) (Casablanca x3, Rabat, Marrakech), and dedicated regional documentation in [`knowledge/wiki/regions/morocco.md`](knowledge/wiki/regions/morocco.md). The 19° community calibration is the subject of [Question 1 in the scholar review brief](docs/scholar-review-brief.md).
 - **Algeria, Tunisia** — institutional alignment with the Moroccan/Egyptian methods per `methods.js` regional groupings.
+
+#### Southern Africa
+
 - **South Africa — SANHA, COSSA, MJC** — the South African National Halaal Authority, Crescent Observers' Society of Southern Africa, and Muslim Judicial Council jointly oversee Islamic dates and timing for the SA Muslim community. fajr auto-selects MWL (18°/17°) at South African coordinates per the MWL regional grouping (`['GB', 'DE', 'FR', 'BE', 'NL', 'AU', 'ZA']`). South Africa is also covered in fajr's hilal geographic-diversity test set (Cape Town at 33.92°S — see [`docs/hilal-historical-analysis.md`](docs/hilal-historical-analysis.md)).
 
 #### South and Southeast Asia
