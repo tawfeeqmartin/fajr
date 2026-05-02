@@ -21,6 +21,18 @@ export interface PrayerTimesParams {
 }
 
 export interface PrayerTimesResult {
+  /** Imsak (إمساك) — fasting-yaqeen field. Computed as Fajr − 10 min and
+   *  rounded DOWN (earlier) to ensure the displayed minute arrives BEFORE
+   *  actual astronomical dawn, so fasters who stop eating at imsak finish
+   *  their suhur with safety margin before the fast officially begins. The
+   *  10-minute default offset is the universal Imsakiyya convention used
+   *  in Mecca, Medina, Cairo printed tables for over a century. To use a
+   *  different offset, recompute as `fajr - N minutes` and round DOWN. */
+  imsak:   Date
+  /** Fajr (فجر) — start of the dawn prayer window. Rounded UP (later) to
+   *  ensure prayer-validity yaqeen: the displayed minute is guaranteed to
+   *  fall AFTER actual astronomical Fajr, so prayers performed at the
+   *  displayed time fall inside the valid window. */
   fajr:    Date
   shuruq:  Date
   /** English-language alias for `shuruq`, kept in sync. Lets adhan.js
@@ -52,6 +64,17 @@ export interface PrayerTimesResult {
   corrections: {
     elevation:  boolean
     refraction: string
+    /** Description of the per-prayer rounding policy applied to the
+     *  returned Date fields. Since v1.5.1 fajr applies ihtiyat-aware
+     *  directional rounding (Imsak/Shuruq DOWN, Fajr/Dhuhr/Asr/Maghrib/
+     *  Isha/Sunset UP) so every displayed minute is on the prayer-validity-
+     *  safe (or, for Imsak, fasting-validity-safe) side of the underlying
+     *  solar event, by construction. */
+    rounding?: string
+    /** The number of minutes Imsak is computed before Fajr. Default 10
+     *  per the universal Imsakiyya convention. Read-only; recompute
+     *  downstream if a different offset is needed. */
+    imsak_offset_min?: number
     /** Present if elevation correction was applied via `applyElevationCorrection`. */
     elevationCorrectionMin?: number
   }
