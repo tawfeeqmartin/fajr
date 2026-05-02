@@ -234,43 +234,101 @@ ACCEPTED / REJECTED — [reason]
 
 ## Code Review Pipeline
 
-Every change that passes the ratchet goes through three review layers. Layers 1 and 2 are automated; layer 3 is a lightweight human gate.
+Every PR goes through **four** review layers before merge. Layers 1, 2, and 3 run automatically on every PR; Layer 4 is the human merge gate. **All four are wired up — see implementation pointers below.**
 
-### Layer 1 — Automated Lint (every ratchet commit)
+```
+PR opened → Layer 1 (Lint, CI, blocks)
+         → Layer 2 (Engineering review, daily routine, advisory)
+         → Layer 3 (Fiqh review, daily routine, advisory)
+         → Layer 4 (Human merge, judgment-only)
+```
 
-Run automatically after each successful autoresearch commit. A commit is rejected if any check fails.
+Layers 1, 2, 3 are *complementary not redundant* — Layer 1 enforces convention mechanically (Bismillah, classification-tag presence), Layer 2 reviews engineering correctness (correctness, ratchet, API contract), Layer 3 reviews scholarly accuracy (classification *correctness*, fiqh grounding, ikhtilaf preservation). The human reads all three findings + the diff and makes the merge call.
 
-| Check | Rule |
-|-------|------|
-| **Bismillah headers** | All `.js` and `.sh` files must start with the two Bismillah lines |
-| **No hardcoded angles** | Twilight angles and method parameters must live in `src/methods.js`, not scattered in engine logic |
-| **No per-prayer regression** | Redundant with the ratchet, but verified again — no individual prayer gets worse at any test location |
-| **Scholarly classification present** | Every new correction block must carry a `// Classification: 🟢/🟡/🔴` comment |
-| **Wiki citation present** | Every new correction block must cite the supporting wiki page: `// see knowledge/wiki/...` |
-| **Public API contract** | All exports in `src/index.js` must still resolve — no silent breakage of the public interface |
+### Layer 1 — Automated Lint (`.github/workflows/lint.yml`)
 
-### Layer 2 — AI Code Review (after each overnight batch)
+Implemented as a GitHub Actions workflow that runs on every push and PR to master. Fast (~5s), deterministic, blocks merge on any check that's in enforce mode.
 
-After a full autoresearch run completes, a separate review agent reads the cumulative diff (all commits since the last human review) and produces a structured report covering:
+| Check | Mode | Rule |
+|-------|------|------|
+| **Bismillah headers** | enforce | All `.js` and `.sh` source files must start with the two-line Bismillah header (adapt comment syntax to language; for shebang scripts place after shebang). |
+| **No hardcoded angles** | enforce | `fajrAngle` / `ishaAngle` outside `src/engine.js` and `src/methods.js` is rejected. Catches drift where contributors copy-paste an angle into tests / eval / scripts. |
+| **Scholarly classification + wiki citation** | warn-only (Phase 1) | Every `case '<Country>':` in `selectMethod()` should carry a 🟢/🟡/🔴 tag AND cite `knowledge/wiki/...`. Phase 1 surfaces missing tags as warnings while master is being backfilled; Phase 2 (after backfill) flips to enforce. |
+| **Tests must pass** | enforce | `npm test` (vitest, 76+ tests) must pass. The existing `test.yml` workflow covers this independently; the lint job runs it again as a single-stop gate. |
+| **No per-prayer regression** | enforced by `eval/compare.js` | Verified by the ratchet check, not the lint job — `eval/compare.js` is the source of truth and is read-only for the autoresearch agent. |
+| **Public API contract** | enforced by tests | The 76-test vitest suite covers public API stability — type checks via `src/index.d.ts` and behavioural assertions via `test/engine.test.js`. |
 
-- **Security** — no injection risks, no unsafe eval, no external network calls added
-- **Correctness** — are the formulas mathematically sound? Do the units work out? Edge cases handled?
-- **Maintainability** — is the code readable? Are variable names clear? Is complexity growing unnecessarily?
-- **Islamic principle compliance** — is ihtiyat (precaution) respected? Are multiple valid methods preserved? Is ikhtilaf acknowledged rather than flattened?
-- **Plain-English summary** — one paragraph a non-astronomer can read
-- **Flags for human judgment** — anything the review agent cannot resolve with confidence
+### Layer 2 — Engineering Review (RemoteTrigger cloud routine `trig_01QvX1USUVEK9w8mVSyesKPX`)
 
-The review agent writes its report to `autoresearch/logs/review-YYYY-MM-DD.md`.
+Runs **daily at 18:30 UTC** in Anthropic's cloud (Claude Sonnet 4.6, sandboxed CCR session with read-only tools). Reviews every open PR that doesn't already carry a `🔎 fajr-code-reviewer` comment, then posts a structured PR comment with findings. **Engineer-perspective:** correctness, ratchet integrity, code quality.
 
-### Layer 3 — Human Review (intent, not implementation)
+The review prompt covers:
 
-The human reads the Layer 2 plain-English summary and makes yes/no calls on:
+- **Correctness** — diff matches description; off-by-ones; sign errors against the `signedMinutesDiff(calc, gt)` convention; missing null guards; wrong defaults.
+- **Ratchet integrity** — does the autoresearch log support the claimed eval result? Any forbidden modifications to `eval/eval.js` / `eval/compare.js` / `eval/data/`?
+- **Ihtiyat alignment** — rounding direction shar'i-safe? Dual-ihtiyat tension cited correctly? Ikhtilaf preserved rather than flattened?
+- **Scholarly classification** — new corrections have 🟢/🟡/🔴 + wiki citation?
+- **API contract** — `src/index.js` / `src/index.d.ts` changes non-breaking?
+- **Bismillah / convention** — new files have header?
+- **Test coverage** — new behaviour covered in `test/engine.test.js`?
+- **Surface-disagreement principle** — new institutional disagreements use `notes[]` not silent defaults?
 
-- Any correction flagged 🟡 (limited precedent) or 🔴 (novel) — approve or reject
-- Strategic direction changes — e.g., "start using official timetable data as the primary source rather than calculated values"
-- Method additions or removals
+Output format: structured PR comment with `🟥 Blockers / 🟨 Suggestions / 🟪 Flags for human judgment / 🟩 Looks good` sections plus a CLAUDE.md compliance paragraph and test-coverage note. Comments are **advisory not blocking** — they don't approve / request-changes via the GitHub PR review API; merge stays a Layer 3 human decision.
 
-The human does **not** need to review code quality, mathematical correctness, or test results — those are covered by layers 1 and 2. The human's job is judgment on Islamic principle and product direction, not implementation review.
+The routine prompt itself lives in the RemoteTrigger configuration; to update it, fetch via `RemoteTrigger.get(trigger_id)`, edit, and `RemoteTrigger.update(trigger_id, body)`.
+
+### Layer 3 — Fiqh Review (RemoteTrigger cloud routine `trig_01MNbo5NtCp2rE5PuD2CNqJ2`)
+
+Runs **daily at 19:30 UTC** (one hour after Layer 2 to avoid comment collision) in Anthropic's cloud (Claude Sonnet 4.6, sandboxed CCR session with Read / Glob / Grep / Bash / WebFetch). Reviews every open PR that doesn't already carry a `📜 fajr-fiqh-reviewer` comment, then posts a structured PR comment with **scholar-perspective findings**.
+
+What Layer 3 covers (and Layer 2 doesn't):
+
+- **Scholarly-classification accuracy** — verifies the assigned 🟢/🟡→🟢/🟡/🔴 tag matches the actual scholarly precedent. Flags tags that are too generous (e.g. 🟢 used for what's actually 🟡→🟢; 🟡 used as placeholder for 🔴).
+- **Wiki-citation validity** — reads the cited wiki pages and verifies they actually support the claim. Catches cherry-picked sentences, paraphrased institutional positions, stale citations.
+- **Ihtiyat alignment** — direction-correct? Dual-ihtiyat tension cited correctly? Path A escape clause justification valid?
+- **Ikhtilaf preservation** — institutional disagreements surfaced via `notes[]` rather than picked silently? Active disagreements not collapsed?
+- **Muwaqqit-tradition grounding** — calculations consistent with Battani / Biruni / Ibn al-Shatir / Khalili / Ibn Yunus consensus on prayer-time astronomy.
+- **Institutional-position accuracy** — Diyanet / JAKIM / Habous / Umm al-Qura / Egyptian / KEMENAG positions described accurately.
+- **Quranic / hadith grounding** — fiqh-boundary features grounded in scriptural sources (Al-Isra 17:78, Hud 11:114, Al-Baqarah 2:187, Hadith of Jibril, etc.).
+
+Layer 3 does NOT cover code style, WMAE numbers, off-by-ones, Bismillah-presence — those are Layer 1 / Layer 2 / ratchet jobs. Layer 3 reads scholarly context where Layer 2 reads code.
+
+Output: a structured PR comment with `🟥 Blockers / 🟨 Suggestions / 🟪 Flags for human judgment / 🟩 Looks good` sections plus three required paragraphs: classification accuracy, ihtiyat/ikhtilaf check, wiki/scholarly grounding. Comments are advisory; merge stays a Layer 4 human decision.
+
+### Layer 4 — Human Review (intent, not implementation)
+
+The human reads Layers 1, 2, 3 findings + the diff and makes yes/no calls on:
+
+- Any correction flagged 🟡 (limited precedent) or 🔴 (novel) — approve or reject.
+- Strategic direction changes — e.g., "start using official timetable data as the primary source rather than calculated values".
+- Method additions or removals.
+- Anything Layer 2 or Layer 3 flagged in their respective 🟪 "Flags for human judgment" sections.
+- Disagreements between Layer 2 and Layer 3 (rare but possible — e.g. Layer 2 says correctness OK while Layer 3 says classification wrong).
+
+The human does **not** need to review code style, mathematical correctness, test results, Bismillah-presence, classification-tag presence, or wiki-citation presence — those are covered by Layers 1, 2, 3. The human's job is judgment on Islamic principle and product direction.
+
+### `/ultrareview` (heavy-weight, user-triggered)
+
+Separate from the daily Layer 2 + Layer 3 routines: when the user invokes `/ultrareview` (or `/ultrareview <PR#>`), a multi-agent cloud review runs against the current branch or named PR. Heavier and billed; user-initiated only, not automated. Use it for marquee changes (major refactors, new method additions, releases preceding tag, anything where the daily Layer 2 + Layer 3 advisory feels insufficient).
+
+---
+
+## Continuous Research & Documentation Custodianship (RemoteTrigger `trig_01DbgkRPvVVMmo9FjDFJQ54C`)
+
+Separate from the per-PR review pipeline above. Runs **weekly, Mondays 06:00 UTC**. Cares about the project as a whole rather than any single PR — the role explicitly cares that *every Muslim everywhere in the world is accurately served by fajr and not put at risk by wrong data we might have supplied*.
+
+The agent runs six audits per week and reports findings as GitHub Issues:
+
+1. **README coherence audit** — geographic miscategorisations (the South Africa example), stale numbers, architectural drift between diagram and code, section ordering, internal-link rot, cross-doc version inconsistencies, factual claims unsupported by data.
+2. **Wiki completeness audit** — every method dispatched by `selectMethod()` should have a `wiki/methods/<method>.md`; every country in `detectCountry()` should have a `wiki/regions/<country>.md`; every 🟡→🟢/🟡/🔴 correction should have a `wiki/corrections/<topic>.md`; flag stale entries and dead citations.
+3. **Coverage holes audit** — country bbox holes (every Muslim-majority country + every Muslim-minority country with > 1 M Muslims should have a bbox + method dispatch + ≥ 3 ground-truth fixtures); city-level coverage; elevation coverage above the 500 m threshold; per-method ground-truth asymmetry.
+4. **Risk audit** — score each gap HIGH/MED/LOW/INFO based on Muslim-population magnitude × prayer-time-error magnitude. HIGH and MED gaps get separate `[custodian-risk]` issues for individual triage; LOW + INFO go in the consolidated weekly report.
+5. **Source freshness audit** — verify ezanvakti.emushaf.net, waktusolat.app, bimasislam.kemenag.go.id, data.gov.sg MUIS dataset, mawaqit.net, aladhan.com still respond. Early warning for fixture-refresh routines that might start failing.
+6. **Architectural-drift audit** — does the actual code structure match what `CLAUDE.md` describes? Bismillah convention sweep across all .js / .sh files. Code review pipeline (Layers 1–4) all wired up?
+
+Output: one consolidated `[custodian] Weekly audit — YYYY-MM-DD` issue plus separate `[custodian-risk] <country> — <description>` issues for each HIGH/MED gap. Read-only — never modifies files, only opens issues.
+
+This is the layer that catches **structural risk** (a Muslim-majority country fajr silently returns wrong times for) and **drift** (README claiming "20+ cities" when the registry now has 191). The user's framing: this agent's job is to find the holes BEFORE a user does.
 
 ---
 
