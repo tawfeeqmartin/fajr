@@ -28,7 +28,11 @@ import { travelerMode } from './traveler.js'
 function prayerTimes(params) {
   let times = _prayerTimes(params)
   if (params.elevation && params.elevation > 0) {
-    times = applyElevationCorrection(times, params.elevation)
+    // Pass latitude so the time-correction scales by 4 / cos(φ). Without it
+    // the correction defaults to cos(0°) = 1 — underapplying the geometric
+    // shift at non-equatorial latitudes (15% under at lat 33°, 50% under
+    // at lat 60°). Bug fix v1.5.2.
+    times = applyElevationCorrection(times, params.elevation, params.latitude)
   }
   return times
 }

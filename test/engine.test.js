@@ -157,6 +157,30 @@ describe('prayerTimes invariants', () => {
     expect(result.notes).toEqual([])
   })
 
+  it('does NOT emit elevation advisory below 500 m threshold (v1.5.2)', () => {
+    // Casablanca, ~3m — no elevation note expected
+    const result = prayerTimes({ latitude: 33.5731, longitude: -7.5898, date: TEST_DATE, elevation: 3 })
+    const elevNotes = result.notes.filter(n => /^Elevation advisory/.test(n))
+    expect(elevNotes.length).toBe(0)
+  })
+
+  it('emits elevation advisory at ≥500 m with institutional context (v1.5.2)', () => {
+    // Riyadh, 612 m — advisory should fire
+    const result = prayerTimes({ latitude: 24.7136, longitude: 46.6753, date: TEST_DATE, elevation: 612 })
+    const elevNote = result.notes.find(n => /^Elevation advisory/.test(n))
+    expect(elevNote).toBeDefined()
+    // Advisory should mention the institutional disagreement explicitly
+    expect(elevNote).toMatch(/UAE|JAKIM/)
+    expect(elevNote).toMatch(/Saudi|Umm al-Qura/)
+    expect(elevNote).toMatch(/jama'ah/)
+    expect(elevNote).toMatch(/612/)
+    // High-elevation case scales up
+    const sanaa = prayerTimes({ latitude: 15.3694, longitude: 44.1910, date: TEST_DATE, elevation: 2250 })
+    const sanaaNote = sanaa.notes.find(n => /^Elevation advisory/.test(n))
+    expect(sanaaNote).toBeDefined()
+    expect(sanaaNote).toMatch(/2250/)
+  })
+
   it('emits high-latitude advisory at |lat| ≥ 48.6° per Odeh 2009', () => {
     // Reykjavik — fajr#4 case
     const reykjavik = prayerTimes({ latitude: 64.15, longitude: -21.94, date: TEST_DATE })

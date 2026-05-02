@@ -121,6 +121,71 @@ const truncated = tarabishyTimes({ latitude, longitude, date }, 45)
 - Turkish users: full Diyanet method (with Hanafi Asr) auto-applied
 - Saudi / UAE / Pakistan / Indonesia / Malaysia / UK / USA / etc.: each gets its institutional method automatically
 
+### 1c. Geolocation altitude — required for elevation accuracy (v1.5.2+)
+
+This is the part most prayer-time apps get wrong. **agiftoftime should capture and pass the user's altitude alongside lat/lon.** Without it, fajr returns sea-level times silently — incorrect for any user above ~500 m (Riyadh 612, Tehran 1200, Atlas / pre-Sahara cities at 1000+, Sana'a 2250, Cape Town's Table Mountain 1086, much of Kabul / Bogotá / Mexico City / Quito / Asmara / etc.). At those altitudes, sun rises 2–6+ minutes earlier and Maghrib falls 2–6+ minutes later than at sea level — material to iftar timing.
+
+**The 4-step pattern every downstream app should follow:**
+
+```js
+// 1. Request enableHighAccuracy: true so the GPS returns altitude.
+navigator.geolocation.getCurrentPosition(
+  position => {
+    const { latitude, longitude, altitude, altitudeAccuracy } = position.coords
+
+    // 2. Pass altitude to fajr. If GPS didn't return one (altitude can be
+    //    null on Wi-Fi-only devices, indoors, or under heavy canopy),
+    //    pass 0 explicitly so the wrapper computes sea-level times.
+    //    If altitudeAccuracy is worse than ~200m, treat the reading as
+    //    unreliable and pass 0 — phone GPS altitude can be wildly off.
+    const elevation = (
+      altitude != null && (altitudeAccuracy == null || altitudeAccuracy < 200)
+    ) ? altitude : 0
+
+    const times = prayerTimes({ latitude, longitude, date: new Date(), elevation })
+
+    // 3. Render result.notes to the user. v1.5.2 may emit an
+    //    "Elevation advisory:" entry describing the institutional
+    //    disagreement (UAE/JAKIM apply, Saudi/Umm al-Qura declines)
+    //    along with the magnitude of the shift in minutes.
+    for (const note of times.notes) renderAdvisoryWithToggle(note)
+
+    // 4. If the user toggles "I follow my city's time, not my floor's"
+    //    (the Saudi/jama'ah-unity stance), recompute with elevation: 0:
+    //    const sealevel = prayerTimes({ latitude, longitude, date, elevation: 0 })
+  },
+  err => { /* fall back to elevation: 0 */ },
+  { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 }
+)
+```
+
+**Why each step matters:**
+
+1. **`enableHighAccuracy: true`** — without it, browsers may return `coords.altitude = null` even on devices that can read GPS altitude. Default geolocation requests skip altitude.
+2. **Pass altitude to fajr** — fajr can only emit the elevation advisory and apply the geometric correction if it knows the elevation. lat/lon-only callers always get sea-level math.
+3. **Render `result.notes`** — fajr returns scholarly-grounded advisories there. Currently emits two: high-latitude regime warning (|lat| ≥ 48.6° per Odeh 2009), and elevation advisory (≥ 500 m, v1.5.2+). Future versions may add light-pollution / DST / other location-specific flags. **Treat `notes[]` as the canonical channel for "things the user should know about their location's calc".**
+4. **User toggle** — the elevation advisory specifically describes a real institutional disagreement: UAE / Malaysia JAKIM apply the geometric horizon-dip correction; Saudi Arabia / Umm al-Qura declines it for jama'ah unity (a high-rise resident in Riyadh praying with their floor's correction would diverge from the rest of the city). **Neither stance is wrong** — it's `ikhtilaf`. fajr surfaces both; the user's local mosque/scholar makes the call. agiftoftime's UX should respect that by offering an "Apply correction / Don't apply" toggle that recomputes with `elevation: 0` when toggled off.
+
+**What this looks like for the Cape Town user on Table Mountain (1086 m, lat -33.96°):**
+
+```text
+notes: [
+  "Elevation advisory: altitude 1086 m is above the 500 m threshold where
+   the geometric horizon dip becomes practically significant — sun rises
+   ~5.1 min EARLIER and Maghrib falls ~5.1 min LATER than at sea level.
+   Institutional stances differ: UAE (Burj Khalifa fatwa, IACAD Dulook DXB)
+   and Malaysia JAKIM apply this correction; Saudi Arabia / Umm al-Qura
+   declines it for jama'ah unity. Because you passed a non-zero elevation,
+   fajr's public `prayerTimes` wrapper has applied the correction
+   (apply-stance default when elevation is supplied). To compute sea-level
+   times instead, call again with `elevation: 0`. The app/user should
+   choose based on local mosque practice. See knowledge/wiki/corrections/
+   elevation.md."
+]
+```
+
+Render that with the magnitude highlighted ("5.1 min later Maghrib at this altitude"), the institutional split shown plainly, and a toggle. Below 500 m the advisory doesn't fire — sea-level / coastal / ordinary-elevation users see no UI noise.
+
 ## Tier 2 — Provenance UX (~3–4 days)
 
 The point is to surface fajr's distinctive layer **without breaking agiftoftime's contemplative mood**. Subtle and discoverable, not loud.
