@@ -250,25 +250,34 @@ CORPUS CURATION SIDE-EFFECT (if applicable)
 
 ## What's left on the table — current state and priorities
 
-As of v1.4.1, the train residuals look like this:
+As of v1.4.4, the train residuals look like this:
 
 ```
 Per-source agreement (train)
 Source       | n   | WMAE | Fajr | Maghrib | Isha
-Diyanet      | 30  | 1.06 | -0.13|  +2.82  | +1.10  ← largest residual
-Aladhan      | 170 | 1.06 | -0.75|  +1.54  | +0.48
-JAKIM        | 30  | 0.92 | -0.70|  -0.54  | -1.10  ← cleared in v1.4.1
+JAKIM        | 30  | 0.75 | -0.70|  -0.54  | -0.10  ← largest source WMAE
+Aladhan      | 170 | 0.70 | -0.75|  +0.24  | +0.48
+Diyanet      | 30  | 0.50 | -0.13|  +0.87  | +1.10
 ```
 
-The remaining train residuals in priority order:
+Train WMAE: **0.6814** (was 1.0394 at v1.4.1, 1.2472 at v1.0 baseline).
+
+Calibrations shipped so far:
+- **v1.4.1** — JAKIM Fajr +8min Path A (Razali & Hisham 2021 + Aabed 2015). Train 1.25 → 1.04.
+- **v1.4.3** — eval elevation-policy heuristic. Removed phantom Diyanet/Aladhan Maghrib biases caused by elevation correction being applied where ground truth is sea-level. Train 1.04 → 0.70.
+- **v1.4.4** — JAKIM Isha +1min Path A (same Razali & Hisham 2021 grounding, half-share of the documented 2-min ihtiyati). Train 0.70 → 0.68.
+
+Remaining residuals in priority order:
 
 | # | Target | Magnitude | Likely root cause | Path A available? |
 |---|---|---|---|---|
-| 1 | Diyanet Maghrib +2.82 | 0.07 train WMAE | `adhan.CalculationMethod.Turkey()` Maghrib offset config doesn't match Diyanet's published times. ezanvakti.emushaf.net is the institutional ground truth source. | Likely — Diyanet publishes their methodology; need to find the documented Maghrib offset value. |
-| 2 | Aladhan Maghrib +1.54 | 0.06 train WMAE | Cross-method refraction-convention drift. Aladhan applies its own refraction model that may differ from adhan.js's standard 0.833°. | Maybe — would need to confirm refraction is the cause and find scholarly grounding (Bennett vs Saemundsson, etc.). |
-| 3 | Aladhan Fajr -0.75 | 0.03 train WMAE | Small consistent earlier-than-Aladhan signal. Could be method-config detail or refraction. | Probably not — magnitude is sub-minute and within atmospheric refraction noise floor. |
+| 1 | Diyanet Isha +1.10 | 0.04 train WMAE | Likely Diyanet ihtiyati for Isha; need documented Diyanet methodology pdf | Likely — Diyanet publishes their methodology |
+| 2 | Diyanet Maghrib +0.87 | 0.03 train WMAE | Sub-minute residual after elevation-policy fix; refraction-convention or Maghrib offset config in adhan.Turkey() | Maybe |
+| 3 | Aladhan Fajr −0.75 | 0.03 train WMAE | Cross-method refraction-convention drift across mixed Aladhan-method fixtures | Probably not — atmospheric noise floor |
+| 4 | JAKIM Fajr −0.70 | 0.03 train WMAE | Residual after the +8 Path A; varies by zone | Maybe — would need finer per-zone calibration data |
+| 5 | JAKIM Maghrib −0.54 (deferred) | 0.02 train WMAE | Heterogeneous across zones; +1 offset would break Shah Alam per-cell ratchet | Deferred per v1.4.4 code comment |
 
-Combined potential: ~0.15 train WMAE drop, putting train below 0.90.
+Combined potential: ~0.10 train WMAE drop, putting train below 0.60. Diminishing returns — most of the easy wins are now realised.
 
 **Holdout signals** (1141 entries from 145 country fixtures): 60-min outliers cluster around DST transitions (Tehran in IRDT, Vilnius in EEST, etc.). These are NOT calibration opportunities — they're tz-handling refinements in `eval/eval.js`'s dynamic resolver. Address as framework improvements, not Path A corrections.
 
