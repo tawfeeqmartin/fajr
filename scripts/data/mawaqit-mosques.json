@@ -1,0 +1,704 @@
+{
+  "$schema_doc": "Curated registry of mosque slugs on mawaqit.net used as ground-truth fixtures by scripts/fetch-mawaqit.js. Each ACTIVE entry's prayer times are pulled into eval/data/test/mawaqit.json (or train/mawaqit-morocco.json for Moroccan entries) on each fetch run. EXCLUDED entries record slugs that returned data-quality issues (timezone misconfigs, malformed time arrays, stale Ramadan-DST data) so future agents don't re-add them blindly. ICONIC entries are mosques of high scholarly/historical significance whose inclusion is prioritised — populated from canonical references (UNESCO Islamic World Heritage, OIC publications, classical fiqh registries) per the user's scholarly-corpus mandate.",
+  "version": 1,
+  "updated": "2026-05-02",
+  "license": "Mosque-published times are public broadcast data; this registry is metadata only (slugs, locations, timezone) and is MIT-licensed alongside the rest of fajr.",
+  "active": [
+    {
+      "slug": "moulay-ismail-casablanca-20400-morocco",
+      "city": "Casablanca",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (Casablanca metro)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-qm-lslm-casablanca-20320-morocco",
+      "city": "Casablanca",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (Casablanca metro)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "mosquee-bab-arrahmane-casablanca-20050-morocco",
+      "city": "Casablanca",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (Casablanca metro)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-lm-masjid-ummah-rabat-10130-morocco",
+      "city": "Rabat",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-lthr-marrakech-40170-morocco",
+      "city": "Marrakech",
+      "country": "Morocco",
+      "region": "Morocco / Interior (Marrakech)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-sydy-qsm-tanger-90000-morocco",
+      "city": "Tanger",
+      "country": "Morocco",
+      "region": "Morocco / Northern",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-hjryyn-tnj-tanger-90000-morocco",
+      "city": "Tanger",
+      "country": "Morocco",
+      "region": "Morocco / Northern",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "masjid-al-falah-nador-66000-morocco",
+      "city": "Nador",
+      "country": "Morocco",
+      "region": "Morocco / Northern",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "lmoubacharine-biljna-oujda-60020-morocco",
+      "city": "Oujda",
+      "country": "Morocco",
+      "region": "Morocco / Eastern",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco",
+      "city": "Oujda",
+      "country": "Morocco",
+      "region": "Morocco / Eastern",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "masjid-aamrou-bn-laas-fes-30000-morocco-1",
+      "city": "Fes",
+      "country": "Morocco",
+      "region": "Morocco / Interior / Atlas-foothill",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-lhsn-ryd-llymwn-fes-30000-morocco",
+      "city": "Fes",
+      "country": "Morocco",
+      "region": "Morocco / Interior / Atlas-foothill",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "mosquee-elamine-meknes-50000-morocco",
+      "city": "Meknes",
+      "country": "Morocco",
+      "region": "Morocco / Interior / Atlas-foothill",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco",
+      "city": "Taza",
+      "country": "Morocco",
+      "region": "Morocco / Interior / Atlas-foothill",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1",
+      "city": "Khouribga",
+      "country": "Morocco",
+      "region": "Morocco / Interior",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "mosquee-imam-tarmidi-settat-26000-morocco",
+      "city": "Settat",
+      "country": "Morocco",
+      "region": "Morocco / Interior",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-lsf-sale-11000-morocco",
+      "city": "Sale",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-lqdsy-kenitra-14000-morocco",
+      "city": "Kenitra",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-blkhy-safi-46000-morocco",
+      "city": "Safi",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (central)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-lrwnq-essaouira-44000-morocco",
+      "city": "Essaouira",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (central)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-hl-sws-agadir-80000-morocco",
+      "city": "Agadir",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-wld-brhym-taroudant-83300-morocco",
+      "city": "Taroudant",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-lqds-masjid-elqods-ouarzazate-45000-morocco",
+      "city": "Ouarzazate",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation (Atlas / pre-Sahara)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "elevation_m": 1135,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco",
+      "city": "Ouarzazate",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation (Atlas / pre-Sahara)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "elevation_m": 1135,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "masjid-marzouga-lgharbia-errachidia-52202-morocco",
+      "city": "Errachidia",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation (Atlas / pre-Sahara)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "elevation_m": 1037,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "mosquee-de-frais-vallon-marseille-13013-france-1",
+      "city": "Marseille",
+      "country": "France",
+      "region": "France",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "les-compagnons-limoges-87000-france-1",
+      "city": "Limoges",
+      "country": "France",
+      "region": "France",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "association-des-musulmans-des-coteaux-mulhouse",
+      "city": "Mulhouse",
+      "country": "France",
+      "region": "France",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "dar-ul-quran-london-london-nw1-1hw-united-kingdom",
+      "city": "London",
+      "country": "United Kingdom",
+      "region": "United Kingdom",
+      "timezone": "Europe/London",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-l-lm-lnf-nouveau-caire-4710001-egypt",
+      "city": "Cairo",
+      "country": "Egypt",
+      "region": "Egypt / Cairo metro",
+      "timezone": "Africa/Cairo",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "msjd-sydy-qwysm-tunis-1006-tunisia",
+      "city": "Tunis",
+      "country": "Tunisia",
+      "region": "Tunisia",
+      "timezone": "Africa/Tunis",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "masjid-abi-bakr-lsidiq-algiers-16200-algeria",
+      "city": "Algiers",
+      "country": "Algeria",
+      "region": "Algeria",
+      "timezone": "Africa/Algiers",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar",
+      "city": "Doha",
+      "country": "Qatar",
+      "region": "Gulf / Qatar",
+      "timezone": "Asia/Qatar",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait",
+      "city": "Kuwait",
+      "country": "Kuwait",
+      "region": "Gulf / Kuwait",
+      "timezone": "Asia/Kuwait",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "jawharah-taybah-dammam-32275-saudi-arabia",
+      "city": "Dammam",
+      "country": "Saudi Arabia",
+      "region": "Gulf / Saudi Arabia (Eastern Province)",
+      "timezone": "Asia/Riyadh",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "attaufiq-cptiv-jakarta-dki-jakarta-10510-indonesia",
+      "city": "Jakarta",
+      "country": "Indonesia",
+      "region": "SE Asia equatorial / Indonesia",
+      "timezone": "Asia/Jakarta",
+      "utcOffset": 7,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore",
+      "city": "Singapore",
+      "country": "Singapore",
+      "region": "SE Asia equatorial / Singapore",
+      "timezone": "Asia/Singapore",
+      "utcOffset": 8,
+      "iconic": false,
+      "references": []
+    },
+    {
+      "slug": "surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2",
+      "city": "Kuala Lumpur",
+      "country": "Malaysia",
+      "region": "SE Asia equatorial / Malaysia",
+      "timezone": "Asia/Kuala_Lumpur",
+      "utcOffset": 8,
+      "iconic": false,
+      "references": []
+    }
+  ],
+  "excluded": [
+    {
+      "slug": "msjd-lrdwn-mohammedia-28810-morocco",
+      "city": "Mohammedia",
+      "country": "Morocco",
+      "reason": "Times +60 min off all other Moroccan mosques — likely UTC+2 misconfiguration",
+      "discovered": "2026-05-02"
+    },
+    {
+      "slug": "masjid-makka-el-jadida-20000-morocco",
+      "city": "El Jadida",
+      "country": "Morocco",
+      "reason": "Times -60 min off — likely stale Ramadan-DST data (UTC+0)",
+      "discovered": "2026-05-02"
+    },
+    {
+      "slug": "lfth-selouane-nador-62702-morocco",
+      "city": "Nador (Selouane)",
+      "country": "Morocco",
+      "reason": "Times +30 min off — likely stale Ramadan-DST data",
+      "discovered": "2026-05-02"
+    },
+    {
+      "slug": "ali-qushji-mosque-istanbul-airport-34283",
+      "city": "Istanbul",
+      "country": "Türkiye",
+      "reason": "Mawaqit returned malformed times (dhuhr 05:54). Mawaqit's Türkiye coverage has systematic data-quality issues; Diyanet's ezanvakti.emushaf.net remains the institutional channel.",
+      "discovered": "2026-05-02"
+    },
+    {
+      "slug": "camlivadi-camii-istanbul-34408-turkiye",
+      "city": "Istanbul",
+      "country": "Türkiye",
+      "reason": "Mawaqit returned malformed times (dhuhr 05:54). See ali-qushji entry for context.",
+      "discovered": "2026-05-02"
+    }
+  ],
+  "iconic_wishlist": {
+    "$comment": "Mosques of high scholarly / historical significance whose inclusion is prioritised. Populated from canonical references per scholarly-corpus mandate. An entry sits here while a working Mawaqit slug is being identified; once a slug is confirmed working, the entry is moved to `active` with the iconic flag set true and the references retained.",
+    "candidates": [
+      {
+        "name": "Masjid al-Haram",
+        "city": "Mecca",
+        "country": "Saudi Arabia",
+        "significance": "Holiest mosque in Islam (Qiblah). Imam-published times are the institutional reference for Umm al-Qura method.",
+        "references": [
+          "Saudi Ministry of Hajj and Umrah official Imsakiyya",
+          "UNESCO World Heritage Tentative List"
+        ]
+      },
+      {
+        "name": "Al-Masjid an-Nabawi",
+        "city": "Medina",
+        "country": "Saudi Arabia",
+        "significance": "Prophet's Mosque. Second-holiest in Islam.",
+        "references": [
+          "Saudi Ministry of Hajj and Umrah official Imsakiyya"
+        ]
+      },
+      {
+        "name": "Al-Aqsa Mosque",
+        "city": "Jerusalem",
+        "country": "Palestine",
+        "significance": "Third holiest mosque in Islam. First Qiblah.",
+        "references": [
+          "UNESCO World Heritage (Old City of Jerusalem, 1981)",
+          "Jerusalem Awqaf Department published Imsakiyya"
+        ]
+      },
+      {
+        "name": "Al-Qarawiyyin",
+        "city": "Fes",
+        "country": "Morocco",
+        "significance": "Founded 859 CE — recognised by UNESCO and Guinness as the oldest continuously operating university and one of the oldest continuously operating mosques in the world.",
+        "references": [
+          "UNESCO World Heritage (Medina of Fez, 1981)",
+          "Habous Ministry official timetable"
+        ]
+      },
+      {
+        "name": "Hassan II Mosque",
+        "city": "Casablanca",
+        "country": "Morocco",
+        "significance": "Largest mosque in Morocco; principal Friday mosque of the Habous Ministry.",
+        "references": [
+          "Habous Ministry official Imsakiyya"
+        ]
+      },
+      {
+        "name": "Al-Azhar Mosque",
+        "city": "Cairo",
+        "country": "Egypt",
+        "significance": "Founded 970 CE. Seat of Al-Azhar University, the leading institution of Sunni Islamic scholarship.",
+        "references": [
+          "UNESCO World Heritage (Historic Cairo, 1979)",
+          "Egyptian General Authority of Survey official Imsakiyya"
+        ]
+      },
+      {
+        "name": "Mosque of Muhammad Ali",
+        "city": "Cairo",
+        "country": "Egypt",
+        "significance": "Citadel of Saladin (UNESCO Historic Cairo).",
+        "references": [
+          "UNESCO World Heritage (Historic Cairo, 1979)"
+        ]
+      },
+      {
+        "name": "Sultan Ahmed (Blue) Mosque",
+        "city": "Istanbul",
+        "country": "Türkiye",
+        "significance": "Iconic Ottoman imperial mosque (1616).",
+        "references": [
+          "UNESCO World Heritage (Historic Areas of Istanbul, 1985)",
+          "Diyanet İşleri Başkanlığı official ezanvakti"
+        ]
+      },
+      {
+        "name": "Süleymaniye Mosque",
+        "city": "Istanbul",
+        "country": "Türkiye",
+        "significance": "Mimar Sinan masterwork (1557); seat of Ottoman Sheikh ul-Islam.",
+        "references": [
+          "UNESCO World Heritage (Historic Areas of Istanbul, 1985)"
+        ]
+      },
+      {
+        "name": "Hagia Sophia",
+        "city": "Istanbul",
+        "country": "Türkiye",
+        "significance": "Reverted to mosque 2020.",
+        "references": [
+          "UNESCO World Heritage (Historic Areas of Istanbul, 1985)"
+        ]
+      },
+      {
+        "name": "Selimiye Mosque",
+        "city": "Edirne",
+        "country": "Türkiye",
+        "significance": "Mimar Sinan's stated masterpiece (1574).",
+        "references": [
+          "UNESCO World Heritage (Selimiye Mosque and its Social Complex, 2011)"
+        ]
+      },
+      {
+        "name": "Sheikh Zayed Grand Mosque",
+        "city": "Abu Dhabi",
+        "country": "United Arab Emirates",
+        "significance": "National grand mosque of the UAE; institutional reference for IACAD method.",
+        "references": [
+          "IACAD (Islamic Affairs and Charitable Activities Department) Dulook DXB app"
+        ]
+      },
+      {
+        "name": "Faisal Mosque",
+        "city": "Islamabad",
+        "country": "Pakistan",
+        "significance": "National mosque of Pakistan; principal reference for the Karachi 18°/18° calculation convention.",
+        "references": [
+          "University of Islamic Sciences Karachi published timetable"
+        ]
+      },
+      {
+        "name": "Badshahi Mosque",
+        "city": "Lahore",
+        "country": "Pakistan",
+        "significance": "Mughal imperial mosque (1673).",
+        "references": [
+          "UNESCO World Heritage (Fort and Shalamar Gardens of Lahore, 1981) — adjacent",
+          "Punjab Auqaf Department"
+        ]
+      },
+      {
+        "name": "Masjid al-Negara (National Mosque)",
+        "city": "Kuala Lumpur",
+        "country": "Malaysia",
+        "significance": "National mosque of Malaysia; institutional reference for JAKIM 20°/18° + ihtiyati.",
+        "references": [
+          "JAKIM (Department of Islamic Development Malaysia) e-Solat / waktusolat.app"
+        ]
+      },
+      {
+        "name": "Istiqlal Mosque",
+        "city": "Jakarta",
+        "country": "Indonesia",
+        "significance": "Largest mosque in Southeast Asia; principal reference for KEMENAG 20°/18° method.",
+        "references": [
+          "KEMENAG (Ministry of Religious Affairs of Indonesia) jadwalsholat.bimasislam.kemenag.go.id"
+        ]
+      },
+      {
+        "name": "Masjid Sultan Singapura",
+        "city": "Singapore",
+        "country": "Singapore",
+        "significance": "National mosque of Singapore (1928); principal reference for MUIS jadual waktu solat.",
+        "references": [
+          "MUIS (Majlis Ugama Islam Singapura) muis.gov.sg",
+          "Singapore National Heritage Board"
+        ]
+      },
+      {
+        "name": "Sultan Omar Ali Saifuddien Mosque",
+        "city": "Bandar Seri Begawan",
+        "country": "Brunei",
+        "significance": "National mosque of Brunei.",
+        "references": [
+          "Brunei Ministry of Religious Affairs jadual waktu solat"
+        ]
+      },
+      {
+        "name": "Mosque-Cathedral of Córdoba",
+        "city": "Córdoba",
+        "country": "Spain",
+        "significance": "8th-century Umayyad masterwork (now a Catholic cathedral; structure is a UNESCO site).",
+        "references": [
+          "UNESCO World Heritage (Historic Centre of Córdoba, 1984)"
+        ]
+      },
+      {
+        "name": "Great Mosque of Kairouan",
+        "city": "Kairouan",
+        "country": "Tunisia",
+        "significance": "670 CE; the oldest mosque in Africa and the fourth holiest in Sunni Islam.",
+        "references": [
+          "UNESCO World Heritage (Kairouan, 1988)"
+        ]
+      },
+      {
+        "name": "Great Mosque of Djenné",
+        "city": "Djenné",
+        "country": "Mali",
+        "significance": "Largest mud-brick mosque in the world; centre of West African Islamic scholarship.",
+        "references": [
+          "UNESCO World Heritage (Old Towns of Djenné, 1988)"
+        ]
+      },
+      {
+        "name": "Great Mosque of Touba",
+        "city": "Touba",
+        "country": "Senegal",
+        "significance": "Mouride brotherhood seat; one of the largest mosques in Africa.",
+        "references": [
+          "Mouride Caliphate official publications"
+        ]
+      },
+      {
+        "name": "Great Mosque of Damascus (Umayyad)",
+        "city": "Damascus",
+        "country": "Syria",
+        "significance": "705 CE; one of the largest and oldest mosques in the world.",
+        "references": [
+          "UNESCO World Heritage (Ancient City of Damascus, 1979)"
+        ]
+      },
+      {
+        "name": "Imam Reza Shrine (Mashhad)",
+        "city": "Mashhad",
+        "country": "Iran",
+        "significance": "Shia 8th Imam shrine; largest mosque complex in the world by area.",
+        "references": [
+          "Astan Quds Razavi (custodial body) published timetable"
+        ]
+      },
+      {
+        "name": "Shah Mosque (Imam Mosque)",
+        "city": "Isfahan",
+        "country": "Iran",
+        "significance": "Safavid masterwork (1611–1629).",
+        "references": [
+          "UNESCO World Heritage (Meidan Emam, Isfahan, 1979)"
+        ]
+      },
+      {
+        "name": "Bibi Heybat Mosque",
+        "city": "Baku",
+        "country": "Azerbaijan",
+        "significance": "Caucasian Sunni reference mosque.",
+        "references": []
+      },
+      {
+        "name": "Hazratbal Shrine",
+        "city": "Srinagar",
+        "country": "India (Kashmir)",
+        "significance": "Reliquary mosque; Kashmir's premier shrine.",
+        "references": []
+      },
+      {
+        "name": "Jama Masjid (Delhi)",
+        "city": "Delhi",
+        "country": "India",
+        "significance": "Largest mosque in India (Mughal, 1656).",
+        "references": []
+      },
+      {
+        "name": "Sultan Hassan Mosque",
+        "city": "Cairo",
+        "country": "Egypt",
+        "significance": "Mamluk monumental architecture (1356).",
+        "references": [
+          "UNESCO World Heritage (Historic Cairo, 1979)"
+        ]
+      },
+      {
+        "name": "Great Mosque of Samarra",
+        "city": "Samarra",
+        "country": "Iraq",
+        "significance": "9th-century Abbasid; iconic spiral minaret (Malwiya).",
+        "references": [
+          "UNESCO World Heritage (Samarra Archaeological City, 2007)"
+        ]
+      }
+    ]
+  }
+}
