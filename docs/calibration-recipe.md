@@ -266,37 +266,34 @@ Calibrations shipped so far:
 - **v1.4.1** — JAKIM Fajr +8min Path A (Razali & Hisham 2021 + Aabed 2015). Train 1.25 → 1.04.
 - **v1.4.3** — eval elevation-policy heuristic. Removed phantom Diyanet/Aladhan Maghrib biases caused by elevation correction being applied where ground truth is sea-level. Train 1.04 → 0.70.
 - **v1.4.4** — JAKIM Isha +1min Path A (same Razali & Hisham 2021 grounding, half-share of the documented 2-min ihtiyati). Train 0.70 → 0.68.
+- **v1.4.5** — Diyanet Maghrib/Isha −1min Path A (matching ezanvakti.emushaf.net institutional convention across Istanbul/Ankara/Izmir). Train 0.68 → 0.67. Corpus side-effect: `turkey.json` moved to test (Aladhan calc-vs-calc).
+- **v1.5.0** — Morocco Maghrib +5min Path A across 23 mosque-published Mawaqit-Morocco fixtures spanning 14 cities (north / east / interior / coast / Atlas-Sahara high-elevation 1135 m + 1037 m). Source-level Maghrib bias closed −5.57 → −0.57. Corpus restructured: `morocco.json` moved to test (Aladhan calc-vs-calc), new `train/mawaqit-morocco.json` is now the institutional Path A signal for Morocco. Clean apples-to-apples train delta −0.07; aggregate train rises 0.67 → 0.80 only because the new train fixture is high-fidelity / high-noise institutional ground truth replacing low-error calc-vs-calc entries.
 
-Remaining residuals in priority order:
+### Update (2026-05-02): post-v1.5.0 corpus state
 
-| # | Target | Magnitude | Likely root cause | Path A available? |
-|---|---|---|---|---|
-| 1 | Diyanet Isha +1.10 | 0.04 train WMAE | Likely Diyanet ihtiyati for Isha; need documented Diyanet methodology pdf | Likely — Diyanet publishes their methodology |
-| 2 | Diyanet Maghrib +0.87 | 0.03 train WMAE | Sub-minute residual after elevation-policy fix; refraction-convention or Maghrib offset config in adhan.Turkey() | Maybe |
-| 3 | Aladhan Fajr −0.75 | 0.03 train WMAE | Cross-method refraction-convention drift across mixed Aladhan-method fixtures | Probably not — atmospheric noise floor |
-| 4 | JAKIM Fajr −0.70 | 0.03 train WMAE | Residual after the +8 Path A; varies by zone | Maybe — would need finer per-zone calibration data |
-| 5 | JAKIM Maghrib −0.54 (deferred) | 0.02 train WMAE | Heterogeneous across zones; +1 offset would break Shah Alam per-cell ratchet | Deferred per v1.4.4 code comment |
+After v1.5.0 the calibration loop has hit the same structural ceiling for fajr's three integrated institutional sources (Diyanet ezanvakti, JAKIM waktusolat, Mawaqit mosque-published). All four institutional Path A residuals identified through the v1.4 series have been closed; the remaining train residuals fall into three categories, none of which are immediately Path-A-actionable:
 
-Combined potential: ~0.10 train WMAE drop, putting train below 0.60. Diminishing returns — most of the easy wins are now realised.
+1. **JAKIM heterogeneity (deferred)** — Fajr/Maghrib direction varies by zone (KL/Shah Alam/George Town). Resolving requires more Malaysian zones (waktusolat seasonal-drift caveat — see [`autoresearch/logs/2026-05-02-jakim-zone-expansion-deferred.md`](../autoresearch/logs/2026-05-02-jakim-zone-expansion-deferred.md)) OR finer per-zone calibration data not currently available.
 
-### Update (2026-05-02): institutional-corpus saturation
+2. **Aladhan-routed cells (~70% of remaining bias)** — Cairo/Alexandria Fajr −7, London Maghrib +3, etc. These aren't Path A targets because the source is Aladhan's reproduction of the regional method (calc-vs-calc consensus). Calibrating against them would be circular.
 
-After v1.4.5, the calibration loop has hit a structural saturation point. The remaining train residuals fall into three categories, none of which are immediately Path-A-actionable:
+3. **Source saturation** — Diyanet, JAKIM, Mawaqit-Morocco have all been calibrated. No additional institutional sources are currently in the train corpus.
 
-1. **JAKIM Maghrib heterogeneity (deferred)** — KL/Shah Alam/George Town show inconsistent Maghrib direction (KL −0.90, SA −0.25, GT −0.48). Resolving requires either more Malaysian zones (waktusolat seasonal-drift caveat — see [`autoresearch/logs/2026-05-02-jakim-zone-expansion-deferred.md`](../autoresearch/logs/2026-05-02-jakim-zone-expansion-deferred.md)) OR finer per-zone calibration data not currently available.
+**The next-tier accuracy work requires corpus expansion**, specifically adding native national-awqaf-API channels. Mawaqit search has been verified to NOT cover state-monumental mosques (Hassan II, Al-Qarawiyyin, Al-Azhar, Sheikh Zayed, Faisal, Masjid Negara, Istiqlal, Süleymaniye) — its coverage is community / diaspora. The high-leverage source channels are documented in [`scripts/data/mawaqit-mosques.json`](../scripts/data/mawaqit-mosques.json)'s `iconic_wishlist[*].recommended_channel`:
 
-2. **Aladhan-routed cells (~70% of remaining bias)** — Cairo/Alexandria Fajr −7, London Maghrib +3, etc. These aren't Path A targets because the source is Aladhan's reproduction of the regional method (calc-vs-calc consensus, per recipe step 2). Calibrating against them would be circular.
+| Country | Channel | Status |
+|---|---|---|
+| Indonesia | KEMENAG `bimasislam.kemenag.go.id` | Probed 2026-05-02; ajax endpoint behind session/CSRF gate. Not currently scriptable from a clean curl. Documented dead-end for now. |
+| Singapore | MUIS `muis.gov.sg` | Probed 2026-05-02; CloudFront WAF returns 403 to non-browser UA. Documented dead-end. |
+| UAE | IACAD Dulook DXB | Probed 2026-05-02; `/services/prayertimes` redirects to login. Mobile-app-gated. Documented dead-end. |
+| Saudi Arabia | Hajj Ministry Haramain Imsakiyya | PDF-only. Manual transcription. |
+| Egypt | Egyptian GAS | No public JSON API. Manual transcription. |
+| Pakistan | Karachi University reference | Investigate (not yet probed). |
+| Türkiye | Diyanet ezanvakti.emushaf.net | ✅ Already integrated. |
+| Malaysia | JAKIM via waktusolat.app | ✅ Already integrated. |
+| Morocco | Habous (via Mawaqit-Morocco) | ✅ Integrated v1.5.0. |
 
-3. **Saturation** — fajr's existing institutional ground-truth fixtures (Diyanet via ezanvakti, JAKIM via waktusolat, Mawaqit mosque-published) have all been calibrated against in v1.4.1/v1.4.4/v1.4.5 + the v1.0 Morocco predecessor. No additional institutional sources are currently in the train corpus, so no additional Path A targets exist.
-
-The next-tier accuracy work requires **corpus expansion** (find new institutional ground-truth sources) rather than calibration. Web search confirmed (2026-05-02) that:
-
-- **Egyptian General Authority of Survey** — no public-facing JSON API. Their methodology is documented but the published timetables are not directly fetchable in machine-readable form.
-- **UK Wifaqul Ulama / Moonsighting Committee** — mirror-services exist but mostly reproduce calc-vs-calc.
-- **Saudi Royal Court / Umm al-Qura University** — published calendars, no API.
-- **More waktusolat zones** — fetch returns API's "current" month (now May, not April), creating month-mismatch with the existing April train corpus until next April or until we capture multiple months.
-
-Path forward: manual scrape / contact institutions to grow the corpus beyond the current 3 institutional sources, then resume Path A. Until then, train WMAE 0.6732 is the steady-state floor for this corpus.
+Until at least one of the dead-end channels yields a fetchable endpoint, **train WMAE 0.80 is the steady-state floor for the v1.5.0 corpus**. The Mawaqit Morocco fixture refreshes daily via the `fajr · daily Mawaqit refresh` cloud routine (06:00 UTC), so per-date drift is captured automatically — but the institutional source set is what gates further calibration.
 
 **Holdout signals** (1141 entries from 145 country fixtures): 60-min outliers cluster around DST transitions (Tehran in IRDT, Vilnius in EEST, etc.). These are NOT calibration opportunities — they're tz-handling refinements in `eval/eval.js`'s dynamic resolver. Address as framework improvements, not Path A corrections.
 

@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 38 cities across 12 institutional-train countries plus a 163-country Aladhan-routed holdout corpus. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.5.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.4.x shipped four Path A community calibrations (JAKIM Fajr +8 + Isha +1, Diyanet Maghrib/Isha −1, eval elevation-policy heuristic). v1.5.0 expanded the Mawaqit Morocco corpus from 5 mosques to 25 across 19 zones and shipped the Morocco Maghrib +5min Path A calibration. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.5.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151) below. v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -107,11 +107,11 @@ Accuracy is no longer measured against a single API. fajr is validated against s
 
 | Source | Reference layer | Set | Coverage |
 |---|---|---|---|
-| **Mawaqit-Morocco** (mawaqit.net) | Mosque-published reality | train (v1.5.0) | 19 Moroccan zones / 25 mosques: Casablanca x3, Rabat, Marrakech, Tanger x2, Nador, Oujda x2, Fes x2, Meknes, Taza, Khouribga, Settat, Sale, Kenitra, Safi, Essaouira, Agadir, Taroudant, Ouarzazate x2 (1135 m), Errachidia (1037 m) |
-| **Mawaqit international** (mawaqit.net) | Mosque-published reality | holdout | Marseille, Limoges, Mulhouse, London, Cairo, Tunis, Algiers, Doha, Kuwait, Dammam, Jakarta, Singapore, Kuala Lumpur |
+| **Mawaqit-Morocco** (mawaqit.net) | Mosque-published reality | train (v1.5.0) | 25 mosques across 14 Moroccan cities — Casablanca/Rabat/Marrakech metro, Northern (Tanger/Nador), Eastern (Oujda), Interior (Fes/Meknes/Taza/Khouribga/Settat), Atlantic coast (Sale/Kenitra/Safi/Essaouira/Agadir/Taroudant), high-elevation Atlas/Sahara (Ouarzazate 1135 m, Errachidia 1037 m). Refreshed daily by the cloud routine. |
+| **Mawaqit** (non-Morocco) | Mosque-published reality | holdout | Cairo, London, Marseille, Limoges, Mulhouse, Doha, Kuwait, Dammam, Jakarta, Singapore, Kuala Lumpur, Tunis, Algiers |
 | **Diyanet İşleri Başkanlığı** (Türkiye) | Official institutional ground truth | train | Istanbul, Ankara, Izmir |
 | **JAKIM** (Malaysia) via waktusolat.app | Official institutional ground truth | train | Kuala Lumpur, Selangor, Penang |
-| **Aladhan API** | Regional-method consensus (calc-vs-calc) | train | 18 cities, region-appropriate methods |
+| **Aladhan API** | Regional-method consensus (calc-vs-calc) | train (non-Morocco/non-Türkiye) + holdout | 11 cities in train; ~145 country fixtures in holdout |
 | **praytimes.org reference** | Regional-method consensus (independent JS impl) | holdout | 10 cities |
 | **muslimsalat.com** | Third-party aggregator | holdout | Karachi, Cairo, London, Dubai |
 
@@ -127,7 +127,7 @@ For full numbers including per-region and per-cell granularity, see [**`docs/pro
 
 ![WMAE Journey — train + holdout WMAE annotated with release inflection points](docs/charts/wmae-journey.svg)
 
-The journey chart annotates each tagged release with the change that drove its train- or holdout-WMAE delta. Releases that added features (notes field, opt-in correction helpers, world-coverage data) leave train WMAE flat at the ratchet level — only calibration refinements move the train number. As of v1.4.4 the train ratchet has dropped from the v1.0 baseline of 1.16 → **0.68** via three accuracy releases: v1.4.1 (JAKIM Fajr +8min Path A, train −16.6%), v1.4.3 (eval elevation-policy fix removing phantom artifacts, train −32%), and v1.4.4 (JAKIM Isha +1min Path A, train −3.2%). The v1.4 holdout climb reflects the eval-corpus widening to 163 country fixtures, not an engine regression. See [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the methodology behind each Path A correction.
+The journey chart annotates each tagged release with the change that drove its train- or holdout-WMAE delta. Releases that added features (notes field, opt-in correction helpers, world-coverage data) leave train WMAE flat at the ratchet level — only calibration refinements move the train number. Across v1.0 → v1.5.0, the engine has shipped five Path A community calibrations (JAKIM Fajr, JAKIM Isha, Diyanet Maghrib/Isha, Morocco Maghrib) plus the v1.4.3 elevation-policy fix that exposed real institutional residuals. The aggregate train number on a like-for-like corpus has dropped from the v1.0 baseline of 1.16 toward 0.80, but the headline aggregate is no longer the cleanest signal — v1.5.0's corpus restructure (moving 23 mosque-published Mawaqit-Morocco fixtures into train and 20 Aladhan calc-vs-calc Morocco entries to test) introduced higher-fidelity / higher-noise institutional ground truth, so the v1.5.0 aggregate sits above the v1.4.5 aggregate even though the engine is more accurate. See [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the methodology behind each Path A correction; the journey chart's per-release labels narrate the same story visually.
 
 ![WMAE over time — train (ratchet) vs holdout](docs/charts/wmae-trend.svg)
 
@@ -271,6 +271,27 @@ Every correction in `src/engine.js` is tagged:
 - 🟡→🟢 **Approaching established** — recently documented by one or more regional institutions; trajectory toward consensus
 - 🟡 **Limited precedent** — supported by some scholars/institutions, minority scholarly view
 - 🔴 **Novel** — requires Islamic scholarly review before relying upon
+
+### Per-prayer ihtiyat-aware minute rounding (v1.5.1)
+
+Prayer-time libraries traditionally round their calculated sub-second-precision astronomical events to whole minutes for display using *round-to-nearest*. That symmetric rounding produces a displayed minute on the *unsafe* side of the underlying solar event ~50% of the time — meaning ~half of all displayed Maghribs could be up to 29 seconds *before* actual sunset, which would invalidate iftar by classical fiqh's *yaqeen* (certainty) requirement. The same logic applies to every other prayer, with each one having a one-sided shar'i precaution direction.
+
+Since v1.5.1, fajr applies **directional rounding per prayer** so every minute it displays is on the prayer-validity-safe side of actual reality, by construction:
+
+| Prayer | Minute-rounding direction | Reasoning |
+|---|---|---|
+| Imsak | DOWN (earlier) | Fasting yaqeen — stop eating before actual dawn |
+| Fajr | UP (later) | Prayer must start AFTER actual dawn |
+| Shuruq / Sunrise | DOWN (earlier) | Fajr-window-close — don't pray Fajr after actual sunrise |
+| Dhuhr | UP (later) | Prayer-validity — sun must have crossed meridian |
+| Asr | UP (later) | Prayer-validity — shadow must have reached Asr length |
+| Maghrib | UP (later) | Iftar yaqeen — fast must end after actual sunset |
+| Isha | UP (later) | Prayer-validity — twilight must have ended |
+| Sunset | UP (later) | Astronomical event coinciding with Maghrib |
+
+These are **rounding directions** for the displayed whole minute — the underlying astronomical computation is unchanged. The shift is at most 1 minute per prayer compared to the prior round-to-nearest behavior, always in the safer direction.
+
+**Dual-ihtiyat resolution.** Fasting and prayer-validity have *different* safe directions for Fajr — fasters want Fajr earlier (so they stop eating before actual dawn); prayers want Fajr later (so prayer is performed inside the valid window). The classical resolution from every printed Imsakiyya in Mecca, Medina, and Cairo for over a century is **two columns**: an *imsak* (إمساك, "abstaining") column for fast-stop, and a *Fajr* column for prayer-start. fajr's API exposes both as separate fields. Imsak defaults to Fajr − 10 min (the universal Imsakiyya convention), rounded DOWN for fasting safety. Apps wanting a different imsak buffer can recompute downstream — the offset and rounding policy are reported in `result.corrections.imsak_offset_min` and `result.corrections.rounding`.
 
 ---
 
