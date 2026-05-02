@@ -450,9 +450,11 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'Algeria (Ministry of Religious Affairs, 18°/17°)' }
     case 'Libya':
       // No Libya-specific institutional preset documented. Awqaf timetables
-      // follow Maghreb 18°/17° convention; MWL is the multi-app default.
-      // Classification: 🟡 Limited precedent. see knowledge/wiki/regions/libya.md (TODO)
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Libya, Aladhan world default)' }
+      // align with the Egyptian regional cluster (19.5°/17.5°) per Aladhan
+      // and ITL/arabeyes — not the Maghreb MWL cluster despite geographic
+      // proximity to Tunisia/Algeria. Classification: 🟡 Limited precedent.
+      // see knowledge/wiki/regions/libya.md (TODO)
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Libya, regional convention)' }
     case 'Mauritania':
       // Mauritania (Maliki-majority): no published national preset; MWL per
       // MuslimPro/IslamicFinder default. Classification: 🟡.
@@ -502,33 +504,38 @@ function selectMethod(country, lat, coords) {
       // presence. Classification: 🟡.
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Georgia, Adjara Sunni Hanafi via Turkish institutional presence)' }
     case 'Azerbaijan':
-      // Caucasian Muslims Office (~85% Twelver Shia): Tehran method
-      // (17.7°/14° + middle-of-night). ~15% Sunni Hanafi in Lankaran/north
-      // (intra-country ikhtilaf — v1.6.2 override planned).
-      // Classification: 🟡 Limited precedent (multi-method country).
-      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Turkey (Azerbaijan, Aladhan world default)' }
+      // Caucasian Muslims Office / QMİ (~85% Twelver Shia): Tehran method
+      // (17.7°/14° + middle-of-night) — Jafari Maghrib timed to disappearance
+      // of redness in eastern sky (~5–15 min after sunset), matched
+      // numerically by Tehran's angle-pair. ~15% Sunni Hanafi in Lankaran/
+      // north — v1.7.0 city-override planned to switch them to Diyanet.
+      // Classification: 🟡→🟢 (institutional convention, Shia majority).
+      return { params: adhan.CalculationMethod.Tehran(), methodName: 'Tehran (Azerbaijan QMİ, Shia majority)' }
 
     // ─── Central Asia ─────────────────────────────────────────────────────
     case 'Tajikistan':
-      // Council of Ulema of Tajikistan (Hanafi): MWL default. Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Tajikistan, Aladhan world default)' }
+      // Council of Ulema of Tajikistan (Hanafi): MWL 18°/17° per institutional
+      // convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Tajikistan, Council of Ulema)' }
     case 'Turkmenistan':
-      // Muftiate of Turkmenistan (Hanafi): MWL default. Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Turkmenistan, Aladhan world default)' }
+      // Muftiate of Turkmenistan (Hanafi): MWL 18°/17° per institutional
+      // convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Turkmenistan, Muftiate)' }
     case 'Kyrgyzstan':
-      // Spiritual Administration of Muslims of Kyrgyzstan (Hanafi): MWL default.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Kyrgyzstan, Aladhan world default)' }
+      // Spiritual Administration of Muslims of Kyrgyzstan (Hanafi): MWL 18°/17°
+      // per institutional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kyrgyzstan, SAMK)' }
     case 'Uzbekistan':
-      // Muslim Board of Uzbekistan (Hanafi): MWL default per IslamicFinder.
-      // Note: Russia SAM 16°/15° preset exists but Uzbek Muftiate has not
-      // published a definitive preset. Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Uzbekistan, Aladhan world default)' }
+      // Muslim Board of Uzbekistan (Hanafi): MWL 18°/17° per IslamicFinder
+      // convention. Note: Russia SAM 16°/15° preset exists but Uzbek Muftiate
+      // has not published a definitive preset. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Uzbekistan, Muslim Board)' }
     case 'Kazakhstan':
       // Spiritual Administration of Muslims of Kazakhstan / DUMK (Hanafi):
-      // MWL default per multi-app convention. Some Russia-influenced regions
+      // MWL 18°/17° per multi-app convention. Some Russia-influenced regions
       // use SAMR 16°/15°; DUMK has not published a definitive angle pair.
       // Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Kazakhstan, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kazakhstan, DUMK)' }
 
     // ─── Balkans ──────────────────────────────────────────────────────────
     case 'Albania':
@@ -538,15 +545,17 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Albania KMSH, Turkish institutional)' }
     case 'Kosovo':
       // Bashkësia Islame e Kosovës / BIK (Sunni Hanafi ~96%): Diyanet
-      // 18°/17° per Turkish institutional convention.
+      // 18°/17° per Turkish institutional convention. Hanafi Asr (2× shadow)
+      // is correctly applied via the Diyanet method.
       // Classification: 🟢 Established.
-      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kosovo, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Kosovo BIK, Turkish institutional)' }
     case 'Bosnia':
       // Rijaset / Islamska Zajednica u BiH (Sunni Hanafi ~51%): Diyanet
-      // 18°/17° closest published match to traditional Takvim. v1.6.2:
+      // 18°/17° closest published match to traditional Takvim. Hanafi Asr
+      // (2× shadow) correctly applied via Diyanet method. v1.6.2 follow-up:
       // validate against Rijaset's own Takvim publication; consider custom
       // offset if needed. Classification: 🟡→🟢 (regional Diyanet convention).
-      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Bosnia, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Bosnia Rijaset, Hanafi Takvim)' }
 
     // ─── NE Africa / Horn ─────────────────────────────────────────────────
     case 'Djibouti':
@@ -559,17 +568,17 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Eritrea default)' }
     case 'Somalia':
       // Ministry of Endowments and Religious Affairs (Sunni Shafi'i): MWL
-      // default per regional convention + multi-app corroboration.
+      // 18°/17° per regional convention + multi-app corroboration.
       // Classification: 🟢.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Somalia, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Somalia, Ministry of Endowments)' }
     case 'SouthSudan':
       // Small Muslim minority (~6%); no national institutional preset; MWL
       // fallback. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South Sudan fallback)' }
     case 'Ethiopia':
       // Ethiopian Islamic Affairs Supreme Council / Majlis (~34% Muslim):
-      // no specific preset; MWL per regional convention. Classification: 🟡.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Ethiopia, Aladhan world default)' }
+      // no specific preset; MWL 18°/17° per regional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Ethiopia, Majlis regional convention)' }
     case 'Sudan':
       // Egyptian General Authority of Survey method (19.5°/17.5°) — Sudan is
       // documented in the Egyptian-method regional cluster (ITL/arabeyes);
@@ -609,9 +618,11 @@ function selectMethod(country, lat, coords) {
       // ~99% Sunni Maliki: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Niger default)' }
     case 'Nigeria':
-      // Supreme Council for Islamic Affairs (Sultan of Sokoto chair):
-      // No national preset; MWL per MuslimPro Sokoto/Kano/Lagos default.
-      // Classification: 🟡→🟢 (multi-app corroboration).
+      // Supreme Council for Islamic Affairs (Sultan of Sokoto chair): no
+      // formal national preset published; MWL per MuslimPro Sokoto/Kano/
+      // Lagos multi-app convention. Classification: 🟡 (institutional
+      // citation pending — Sultan of Sokoto council has not endorsed MWL
+      // by name).
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Nigeria, Sultan of Sokoto council default)' }
     case 'Chad':
       // ~52% Sunni Maliki/Tijaniyya, West African convention (not Sudan
@@ -630,12 +641,13 @@ function selectMethod(country, lat, coords) {
       // ~7% Muslim (Sunni Shafi'i NW coast): MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Madagascar default)' }
     case 'Kenya':
-      // SUPKEM / Sunni Shafi'i ~11%: MWL default. Classification: 🟡.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Kenya, Aladhan world default)' }
-    case 'Tanzania':
-      // BAKWATA / Sunni Shafi'i ~35% (Zanzibar ~99%): MWL default.
+      // SUPKEM / Sunni Shafi'i ~11%: MWL 18°/17° per institutional convention.
       // Classification: 🟡.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Tanzania, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kenya, SUPKEM)' }
+    case 'Tanzania':
+      // BAKWATA / Sunni Shafi'i ~35% (Zanzibar ~99%): MWL 18°/17° per
+      // institutional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Tanzania, BAKWATA)' }
     case 'Mozambique':
       // CISLAMO / Sunni Shafi'i ~18%: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Mozambique default)' }
