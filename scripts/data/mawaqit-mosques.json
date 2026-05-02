@@ -111,6 +111,8 @@
       "region": "Morocco / Interior / Atlas-foothill",
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
+      "searchKeyword": "fez",
+      "$searchKeyword_reason": "Mawaqit search for 'fes' returns French mosques matching 'frais'/'compagnons'; 'fez' disambiguates.",
       "iconic": false,
       "references": []
     },
@@ -121,6 +123,8 @@
       "region": "Morocco / Interior / Atlas-foothill",
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
+      "searchKeyword": "fez",
+      "$searchKeyword_reason": "Mawaqit search for 'fes' returns French mosques matching 'frais'/'compagnons'; 'fez' disambiguates.",
       "iconic": false,
       "references": []
     },

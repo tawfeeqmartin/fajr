@@ -46,11 +46,15 @@ function todayLocal(utcOffsetHours) {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`
 }
 
-async function searchAndPick(slug, city) {
-  // Search the city name (returns up to ~20 mosques) then filter by exact slug.
-  const url = `https://mawaqit.net/api/2.0/mosque/search?word=${encodeURIComponent(city.toLowerCase())}`
+async function searchAndPick(slug, keyword) {
+  // Search the keyword (city name, or registry-supplied searchKeyword override)
+  // and filter by exact slug. Mawaqit's search ranks by name fuzzy-match across
+  // the global mosque list, so for cities whose name partially matches French
+  // mosque names (e.g. "Fes" → "frais"/"compagnons") the registry should
+  // supply a more specific searchKeyword (e.g. "fez", "fes 30000").
+  const url = `https://mawaqit.net/api/2.0/mosque/search?word=${encodeURIComponent(keyword.toLowerCase())}`
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status} searching for ${city}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status} searching for ${keyword}`)
   const list = await res.json()
   const found = list.find(m => m.slug === slug)
   if (!found) {
@@ -74,7 +78,8 @@ function looksReasonable(times, expectedFajrHour = 5) {
 
 async function fetchMosque(m) {
   console.log(`Fetching ${m.slug}…`)
-  const found = await searchAndPick(m.slug, m.city)
+  const keyword = m.searchKeyword || m.city
+  const found = await searchAndPick(m.slug, keyword)
   const times = found.times
   if (!looksReasonable(times)) {
     throw new Error(`Times array looks misconfigured for ${m.slug}: ${JSON.stringify(times)}`)
@@ -111,10 +116,26 @@ async function main() {
     console.error('No fixtures fetched. Aborting.')
     process.exit(1)
   }
-  const outPath = join(__dirname, '..', 'eval', 'data', 'test', 'mawaqit.json')
-  mkdirSync(dirname(outPath), { recursive: true })
-  writeFileSync(outPath, JSON.stringify(fixtures, null, 2))
-  console.log(`→ wrote ${outPath} (${fixtures.length} mosques, ${fixtures.length} day-entries)`)
+
+  // Split fixtures by corpus partition. Per the v1.5.0 corpus restructure,
+  // Moroccan Mawaqit fixtures form the institutional Path A train signal
+  // (eval/data/train/mawaqit-morocco.json) — the engine's Maghrib +5min
+  // calibration is gated against them. All other Mawaqit fixtures are
+  // holdout-only (eval/data/test/mawaqit.json) — reported but not gating.
+  const moroccan = fixtures.filter(f => f.country === 'Morocco')
+  const other    = fixtures.filter(f => f.country !== 'Morocco')
+
+  const trainPath = join(__dirname, '..', 'eval', 'data', 'train', 'mawaqit-morocco.json')
+  const testPath  = join(__dirname, '..', 'eval', 'data', 'test',  'mawaqit.json')
+  mkdirSync(dirname(trainPath), { recursive: true })
+  mkdirSync(dirname(testPath),  { recursive: true })
+
+  if (moroccan.length > 0) {
+    writeFileSync(trainPath, JSON.stringify(moroccan, null, 2))
+    console.log(`→ wrote ${trainPath} (${moroccan.length} Moroccan mosques — train Path A signal)`)
+  }
+  writeFileSync(testPath, JSON.stringify(other, null, 2))
+  console.log(`→ wrote ${testPath} (${other.length} non-Morocco mosques — holdout)`)
   console.log('Note: Mawaqit fixtures are single-day snapshots. Re-run daily to refresh.')
 }
 

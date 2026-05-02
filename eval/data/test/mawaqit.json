@@ -7,11 +7,11 @@
     "elevation": 0,
     "timezone": "Europe/Paris",
     "method": "mosque-published",
-    "source": "Mawaqit mosque mosquee-de-frais-vallon-marseille-13013-france-1 (Mosqu\u00e9e de Frais Vallon Marseille)",
+    "source": "Mawaqit mosque mosquee-de-frais-vallon-marseille-13013-france-1 (Mosquée de Frais Vallon Marseille)",
     "source_institution": "Mawaqit (mosque-published)",
-    "source_method": "Mosque-published (Mosqu\u00e9e de Frais Vallon Marseille)",
+    "source_method": "Mosque-published (Mosquée de Frais Vallon Marseille)",
     "source_url": "https://mawaqit.net/en/m/mosquee-de-frais-vallon-marseille-13013-france-1",
-    "source_fetched": "2026-05-02T13:50:28.120Z",
+    "source_fetched": "2026-05-02T14:21:31.868Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -36,7 +36,7 @@
     "source_institution": "Mawaqit (mosque-published)",
     "source_method": "Mosque-published (Les Compagnons)",
     "source_url": "https://mawaqit.net/en/m/les-compagnons-limoges-87000-france-1",
-    "source_fetched": "2026-05-02T13:50:28.165Z",
+    "source_fetched": "2026-05-02T14:21:31.919Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -61,7 +61,7 @@
     "source_institution": "Mawaqit (mosque-published)",
     "source_method": "Mosque-published (Association des Musulmans des Coteaux)",
     "source_url": "https://mawaqit.net/en/m/association-des-musulmans-des-coteaux-mulhouse",
-    "source_fetched": "2026-05-02T13:50:28.205Z",
+    "source_fetched": "2026-05-02T14:21:31.959Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -86,7 +86,7 @@
     "source_institution": "Mawaqit (mosque-published)",
     "source_method": "Mosque-published (Darul Quran London Masjid)",
     "source_url": "https://mawaqit.net/en/m/dar-ul-quran-london-london-nw1-1hw-united-kingdom",
-    "source_fetched": "2026-05-02T13:50:28.253Z",
+    "source_fetched": "2026-05-02T14:21:32.007Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -107,11 +107,11 @@
     "elevation": 0,
     "timezone": "Africa/Cairo",
     "method": "mosque-published",
-    "source": "Mawaqit mosque msjd-l-lm-lnf-nouveau-caire-4710001-egypt (\u0645\u0633\u062c\u062f \u0627\u0644\u0639\u0644\u0645 \u0627\u0644\u0646\u0627\u0641\u0639)",
+    "source": "Mawaqit mosque msjd-l-lm-lnf-nouveau-caire-4710001-egypt (مسجد العلم النافع)",
     "source_institution": "Mawaqit (mosque-published)",
-    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0639\u0644\u0645 \u0627\u0644\u0646\u0627\u0641\u0639)",
+    "source_method": "Mosque-published (مسجد العلم النافع)",
     "source_url": "https://mawaqit.net/en/m/msjd-l-lm-lnf-nouveau-caire-4710001-egypt",
-    "source_fetched": "2026-05-02T13:50:28.295Z",
+    "source_fetched": "2026-05-02T14:21:32.053Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -132,11 +132,11 @@
     "elevation": 0,
     "timezone": "Africa/Tunis",
     "method": "mosque-published",
-    "source": "Mawaqit mosque msjd-sydy-qwysm-tunis-1006-tunisia (\u0645\u0633\u062c\u062f \u0633\u064a\u062f\u064a \u06a8\u0648\u064a\u0633\u0645)",
+    "source": "Mawaqit mosque msjd-sydy-qwysm-tunis-1006-tunisia (مسجد سيدي ڨويسم)",
     "source_institution": "Mawaqit (mosque-published)",
-    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0633\u064a\u062f\u064a \u06a8\u0648\u064a\u0633\u0645)",
+    "source_method": "Mosque-published (مسجد سيدي ڨويسم)",
     "source_url": "https://mawaqit.net/en/m/msjd-sydy-qwysm-tunis-1006-tunisia",
-    "source_fetched": "2026-05-02T13:50:28.338Z",
+    "source_fetched": "2026-05-02T14:21:32.093Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -157,11 +157,11 @@
     "elevation": 0,
     "timezone": "Africa/Algiers",
     "method": "mosque-published",
-    "source": "Mawaqit mosque masjid-abi-bakr-lsidiq-algiers-16200-algeria (\u0645\u0633\u062c\u062f \u0623\u0628\u064a \u0628\u0643\u0631 \u0627\u0644\u0635\u062f\u064a\u0642)",
+    "source": "Mawaqit mosque masjid-abi-bakr-lsidiq-algiers-16200-algeria (مسجد أبي بكر الصديق)",
     "source_institution": "Mawaqit (mosque-published)",
-    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0623\u0628\u064a \u0628\u0643\u0631 \u0627\u0644\u0635\u062f\u064a\u0642)",
+    "source_method": "Mosque-published (مسجد أبي بكر الصديق)",
     "source_url": "https://mawaqit.net/en/m/masjid-abi-bakr-lsidiq-algiers-16200-algeria",
-    "source_fetched": "2026-05-02T13:50:28.382Z",
+    "source_fetched": "2026-05-02T14:21:32.143Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -182,11 +182,11 @@
     "elevation": 0,
     "timezone": "Asia/Qatar",
     "method": "mosque-published",
-    "source": "Mawaqit mosque masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar (\u062c\u0627\u0645\u0639 \u0627\u0644\u0625\u0645\u0627\u0645 \u0645\u062d\u0645\u062f \u0628\u0646 \u0639\u0628\u062f \u0627\u0644\u0648\u0647\u0627\u0628)",
+    "source": "Mawaqit mosque masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar (جامع الإمام محمد بن عبد الوهاب)",
     "source_institution": "Mawaqit (mosque-published)",
-    "source_method": "Mosque-published (\u062c\u0627\u0645\u0639 \u0627\u0644\u0625\u0645\u0627\u0645 \u0645\u062d\u0645\u062f \u0628\u0646 \u0639\u0628\u062f \u0627\u0644\u0648\u0647\u0627\u0628)",
+    "source_method": "Mosque-published (جامع الإمام محمد بن عبد الوهاب)",
     "source_url": "https://mawaqit.net/en/m/masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar",
-    "source_fetched": "2026-05-02T13:50:28.429Z",
+    "source_fetched": "2026-05-02T14:21:32.182Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -207,11 +207,11 @@
     "elevation": 0,
     "timezone": "Asia/Kuwait",
     "method": "mosque-published",
-    "source": "Mawaqit mosque mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait (\u0645\u0633\u062c\u062f \u0645\u0628\u0627\u0631\u0643 \u0639\u0645\u0631 \u0630\u064a\u0627\u0628 \u0627\u0644\u0631\u0627\u062c\u062d\u064a)",
+    "source": "Mawaqit mosque mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait (مسجد مبارك عمر ذياب الراجحي)",
     "source_institution": "Mawaqit (mosque-published)",
-    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0645\u0628\u0627\u0631\u0643 \u0639\u0645\u0631 \u0630\u064a\u0627\u0628 \u0627\u0644\u0631\u0627\u062c\u062d\u064a)",
+    "source_method": "Mosque-published (مسجد مبارك عمر ذياب الراجحي)",
     "source_url": "https://mawaqit.net/en/m/mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait",
-    "source_fetched": "2026-05-02T13:50:28.476Z",
+    "source_fetched": "2026-05-02T14:21:32.224Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -232,11 +232,11 @@
     "elevation": 0,
     "timezone": "Asia/Riyadh",
     "method": "mosque-published",
-    "source": "Mawaqit mosque jawharah-taybah-dammam-32275-saudi-arabia (\u062c\u0648\u0647\u0631\u0629 \u0637\u064a\u0628\u0629)",
+    "source": "Mawaqit mosque jawharah-taybah-dammam-32275-saudi-arabia (جوهرة طيبة)",
     "source_institution": "Mawaqit (mosque-published)",
-    "source_method": "Mosque-published (\u062c\u0648\u0647\u0631\u0629 \u0637\u064a\u0628\u0629)",
+    "source_method": "Mosque-published (جوهرة طيبة)",
     "source_url": "https://mawaqit.net/en/m/jawharah-taybah-dammam-32275-saudi-arabia",
-    "source_fetched": "2026-05-02T13:50:28.517Z",
+    "source_fetched": "2026-05-02T14:21:32.269Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -261,7 +261,7 @@
     "source_institution": "Mawaqit (mosque-published)",
     "source_method": "Mosque-published (Attaufiq CPT-VI Jakarta)",
     "source_url": "https://mawaqit.net/en/m/attaufiq-cptiv-jakarta-dki-jakarta-10510-indonesia",
-    "source_fetched": "2026-05-02T13:50:28.566Z",
+    "source_fetched": "2026-05-02T14:21:32.313Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -286,7 +286,7 @@
     "source_institution": "Mawaqit (mosque-published)",
     "source_method": "Mosque-published (Al-Khair Mosque | Darul Tafsir)",
     "source_url": "https://mawaqit.net/en/m/al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore",
-    "source_fetched": "2026-05-02T13:50:28.610Z",
+    "source_fetched": "2026-05-02T14:21:32.351Z",
     "dates": [
       {
         "date": "2026-05-02",
@@ -311,7 +311,7 @@
     "source_institution": "Mawaqit (mosque-published)",
     "source_method": "Mosque-published (SURAU AR-RAUDHAH ISLAMIAH)",
     "source_url": "https://mawaqit.net/en/m/surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2",
-    "source_fetched": "2026-05-02T13:50:28.665Z",
+    "source_fetched": "2026-05-02T14:21:32.398Z",
     "dates": [
       {
         "date": "2026-05-02",
