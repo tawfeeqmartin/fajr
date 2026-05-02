@@ -117,9 +117,33 @@ function selectMethod(country, lat, coords) {
     case 'SaudiArabia':
       // Umm al-Qura University: Fajr 18.5°, Isha +90 min
       return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura' }
-    case 'Turkey':
-      // Diyanet İşleri Başkanlığı: Fajr 18°, Isha 17° + minute adjustments
-      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Turkey)' }
+    case 'Turkey': {
+      // Diyanet İşleri Başkanlığı: Fajr 18°, Isha 17° + adhan's preset
+      // adjustments {sunrise:-7, dhuhr:5, asr:4, maghrib:7, isha:0}.
+      //
+      // Path A community calibration (v1.4.5): Diyanet's published reality
+      // via ezanvakti.emushaf.net sits 1 minute EARLIER than fajr's
+      // calc-with-adhan-preset for both Maghrib and Isha. Per-cell empirical
+      // residuals across the 3 Turkish ground-truth zones:
+      //
+      //   Istanbul: Maghrib +0.80, Isha +1.20
+      //   Ankara:   Maghrib +1.00, Isha +1.10
+      //   Izmir:    Maghrib +0.80, Isha +1.00
+      //
+      // All three zones consistent in direction and magnitude (sub-2-minute,
+      // sub-zone variance). Shifting calc earlier by 1 min for Maghrib and
+      // Isha closes the bias uniformly without breaking any per-cell ratchet.
+      // The drift is in the ihtiyat-unsafe direction (Maghrib/Isha earlier
+      // than calc-default) but is corroborated by the source-bias
+      // improvement (Diyanet |Maghrib bias| 0.87→0.13, |Isha bias| 1.10→0.10
+      // — both above the Path A floor) and aligns calc with what Turkish
+      // Muslims actually pray to per Diyanet's institutional convention.
+      // Same Path A pattern as Morocco's formal-vs-published 19° angle and
+      // JAKIM's Fajr +8 ihtiyati. 🟡→🟢 community calibration.
+      const p = adhan.CalculationMethod.Turkey()
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 6, isha: -1 }
+      return { params: p, methodName: 'Diyanet (Türkiye, Path A −1min Maghrib/Isha to match ezanvakti)' }
+    }
     case 'Egypt':
       // Egyptian General Authority of Survey: Fajr 19.5°, Isha 17.5°
       return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (19.5°/17.5°)' }
