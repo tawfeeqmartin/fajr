@@ -430,7 +430,8 @@
     }
   ],
   "iconic_wishlist": {
-    "$comment": "Mosques of high scholarly / historical significance whose inclusion is prioritised. Populated from canonical references per scholarly-corpus mandate. An entry sits here while a working Mawaqit slug is being identified; once a slug is confirmed working, the entry is moved to `active` with the iconic flag set true and the references retained.",
+    "$comment": "Mosques of high scholarly / historical significance whose inclusion is prioritised. Populated from canonical references per scholarly-corpus mandate.",
+    "$mawaqit_search_finding_2026_05_02": "An exhaustive sweep tried 30+ canonical mosque names against Mawaqit's search endpoint with multiple keyword variants (city / mosque-name / spelling alternates). Result: 0 of the canonical state-monumental mosques are listed on Mawaqit. The hits surfaced (e.g. azhar-academy-bolton, cordoba-essen-germany, suleymaniye-ludenscheid-germany, masjid-darul-istiqlal-thailand) are DIASPORA mosques NAMED AFTER the canonical ones, not the canonicals themselves. Mawaqit's coverage is structurally community/diaspora — state-monumental mosques are managed by national awqaf apps (IACAD Dulook for UAE, Saudi Hajj Ministry for Haramain, Egyptian GAS for Al-Azhar, Astan Quds Razavi for Imam Reza, etc.). Future iconic-wishlist coverage requires non-Mawaqit channels — see `recommended_channel` per entry.",
     "candidates": [
       {
         "name": "Masjid al-Haram",
@@ -440,7 +441,10 @@
         "references": [
           "Saudi Ministry of Hajj and Umrah official Imsakiyya",
           "UNESCO World Heritage Tentative List"
-        ]
+        ],
+        "recommended_channel": "Saudi Ministry of Hajj and Umrah Imsakiyya (no public API; PDF transcription)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Al-Masjid an-Nabawi",
@@ -449,7 +453,10 @@
         "significance": "Prophet's Mosque. Second-holiest in Islam.",
         "references": [
           "Saudi Ministry of Hajj and Umrah official Imsakiyya"
-        ]
+        ],
+        "recommended_channel": "Saudi Ministry of Hajj and Umrah Imsakiyya (no public API; PDF transcription)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Al-Aqsa Mosque",
@@ -459,7 +466,10 @@
         "references": [
           "UNESCO World Heritage (Old City of Jerusalem, 1981)",
           "Jerusalem Awqaf Department published Imsakiyya"
-        ]
+        ],
+        "recommended_channel": "Jerusalem Awqaf Department (Aladhan custom-method-3 as proxy)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Al-Qarawiyyin",
@@ -469,7 +479,10 @@
         "references": [
           "UNESCO World Heritage (Medina of Fez, 1981)",
           "Habous Ministry official timetable"
-        ]
+        ],
+        "recommended_channel": "Habous Ministry (Aladhan custom-method-99 as proxy; mosque-published via Mawaqit captures community calibration)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Hassan II Mosque",
@@ -478,7 +491,10 @@
         "significance": "Largest mosque in Morocco; principal Friday mosque of the Habous Ministry.",
         "references": [
           "Habous Ministry official Imsakiyya"
-        ]
+        ],
+        "recommended_channel": "Habous Ministry (Aladhan custom-method-99 as proxy; mosque-published via Mawaqit captures community calibration)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Al-Azhar Mosque",
@@ -488,7 +504,10 @@
         "references": [
           "UNESCO World Heritage (Historic Cairo, 1979)",
           "Egyptian General Authority of Survey official Imsakiyya"
-        ]
+        ],
+        "recommended_channel": "Egyptian General Authority of Survey (Aladhan method 5 as proxy; Al-Azhar may publish own Imsakiyya)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Mosque of Muhammad Ali",
@@ -497,7 +516,10 @@
         "significance": "Citadel of Saladin (UNESCO Historic Cairo).",
         "references": [
           "UNESCO World Heritage (Historic Cairo, 1979)"
-        ]
+        ],
+        "recommended_channel": "Egyptian General Authority of Survey (Aladhan method 5 as proxy; Al-Azhar may publish own Imsakiyya)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Sultan Ahmed (Blue) Mosque",
@@ -507,7 +529,10 @@
         "references": [
           "UNESCO World Heritage (Historic Areas of Istanbul, 1985)",
           "Diyanet İşleri Başkanlığı official ezanvakti"
-        ]
+        ],
+        "recommended_channel": "Diyanet ezanvakti.emushaf.net (already integrated; covers all Türkiye mosques by zone)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Süleymaniye Mosque",
@@ -516,7 +541,10 @@
         "significance": "Mimar Sinan masterwork (1557); seat of Ottoman Sheikh ul-Islam.",
         "references": [
           "UNESCO World Heritage (Historic Areas of Istanbul, 1985)"
-        ]
+        ],
+        "recommended_channel": "Diyanet ezanvakti.emushaf.net (already integrated; covers all Türkiye mosques by zone)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Hagia Sophia",
@@ -525,7 +553,10 @@
         "significance": "Reverted to mosque 2020.",
         "references": [
           "UNESCO World Heritage (Historic Areas of Istanbul, 1985)"
-        ]
+        ],
+        "recommended_channel": "Diyanet ezanvakti.emushaf.net (already integrated; covers all Türkiye mosques by zone)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Selimiye Mosque",
@@ -534,7 +565,10 @@
         "significance": "Mimar Sinan's stated masterpiece (1574).",
         "references": [
           "UNESCO World Heritage (Selimiye Mosque and its Social Complex, 2011)"
-        ]
+        ],
+        "recommended_channel": "Diyanet ezanvakti.emushaf.net (already integrated; covers all Türkiye mosques by zone)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Sheikh Zayed Grand Mosque",
@@ -543,7 +577,10 @@
         "significance": "National grand mosque of the UAE; institutional reference for IACAD method.",
         "references": [
           "IACAD (Islamic Affairs and Charitable Activities Department) Dulook DXB app"
-        ]
+        ],
+        "recommended_channel": "IACAD Dulook DXB app (Sheikh Zayed times via Abu Dhabi zone; floor-stratified for Burj Khalifa)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Faisal Mosque",
@@ -552,7 +589,10 @@
         "significance": "National mosque of Pakistan; principal reference for the Karachi 18°/18° calculation convention.",
         "references": [
           "University of Islamic Sciences Karachi published timetable"
-        ]
+        ],
+        "recommended_channel": "Pakistan Auqaf Department (Aladhan method 1 as proxy)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Badshahi Mosque",
@@ -562,7 +602,10 @@
         "references": [
           "UNESCO World Heritage (Fort and Shalamar Gardens of Lahore, 1981) — adjacent",
           "Punjab Auqaf Department"
-        ]
+        ],
+        "recommended_channel": "Pakistan Auqaf Department (Aladhan method 1 as proxy)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Masjid al-Negara (National Mosque)",
@@ -571,7 +614,10 @@
         "significance": "National mosque of Malaysia; institutional reference for JAKIM 20°/18° + ihtiyati.",
         "references": [
           "JAKIM (Department of Islamic Development Malaysia) e-Solat / waktusolat.app"
-        ]
+        ],
+        "recommended_channel": "JAKIM e-Solat / waktusolat.app (already integrated; Masjid Negara via KL zone)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Istiqlal Mosque",
@@ -580,7 +626,10 @@
         "significance": "Largest mosque in Southeast Asia; principal reference for KEMENAG 20°/18° method.",
         "references": [
           "KEMENAG (Ministry of Religious Affairs of Indonesia) jadwalsholat.bimasislam.kemenag.go.id"
-        ]
+        ],
+        "recommended_channel": "KEMENAG jadwalsholat.bimasislam.kemenag.go.id (NOT yet integrated; opportunity)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Masjid Sultan Singapura",
@@ -590,7 +639,10 @@
         "references": [
           "MUIS (Majlis Ugama Islam Singapura) muis.gov.sg",
           "Singapore National Heritage Board"
-        ]
+        ],
+        "recommended_channel": "MUIS muis.gov.sg (NOT yet integrated; opportunity)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Sultan Omar Ali Saifuddien Mosque",
@@ -599,7 +651,10 @@
         "significance": "National mosque of Brunei.",
         "references": [
           "Brunei Ministry of Religious Affairs jadual waktu solat"
-        ]
+        ],
+        "recommended_channel": "Brunei MoRA jadual waktu solat (NOT yet integrated)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Mosque-Cathedral of Córdoba",
@@ -608,7 +663,10 @@
         "significance": "8th-century Umayyad masterwork (now a Catholic cathedral; structure is a UNESCO site).",
         "references": [
           "UNESCO World Heritage (Historic Centre of Córdoba, 1984)"
-        ]
+        ],
+        "recommended_channel": "Cordoba Cathedral is Catholic since 1236 — no Islamic prayer-time publication; UNESCO heritage value only",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Great Mosque of Kairouan",
@@ -617,7 +675,10 @@
         "significance": "670 CE; the oldest mosque in Africa and the fourth holiest in Sunni Islam.",
         "references": [
           "UNESCO World Heritage (Kairouan, 1988)"
-        ]
+        ],
+        "recommended_channel": "Tunisian Ministère des Affaires Religieuses (Aladhan method 5 as proxy)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Great Mosque of Djenné",
@@ -626,7 +687,10 @@
         "significance": "Largest mud-brick mosque in the world; centre of West African Islamic scholarship.",
         "references": [
           "UNESCO World Heritage (Old Towns of Djenné, 1988)"
-        ]
+        ],
+        "recommended_channel": "No central awqaf API; Mauritanian / West African community calculation conventions",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Great Mosque of Touba",
@@ -635,7 +699,10 @@
         "significance": "Mouride brotherhood seat; one of the largest mosques in Africa.",
         "references": [
           "Mouride Caliphate official publications"
-        ]
+        ],
+        "recommended_channel": "Mouride Caliphate publications (Touba) — typically print-only",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Great Mosque of Damascus (Umayyad)",
@@ -644,7 +711,10 @@
         "significance": "705 CE; one of the largest and oldest mosques in the world.",
         "references": [
           "UNESCO World Heritage (Ancient City of Damascus, 1979)"
-        ]
+        ],
+        "recommended_channel": "Syrian Ministry of Awqaf (limited public API access)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Imam Reza Shrine (Mashhad)",
@@ -653,7 +723,10 @@
         "significance": "Shia 8th Imam shrine; largest mosque complex in the world by area.",
         "references": [
           "Astan Quds Razavi (custodial body) published timetable"
-        ]
+        ],
+        "recommended_channel": "Astan Quds Razavi (Mashhad) for Imam Reza; for Shah Mosque use Aladhan Tehran method",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Shah Mosque (Imam Mosque)",
@@ -662,28 +735,40 @@
         "significance": "Safavid masterwork (1611–1629).",
         "references": [
           "UNESCO World Heritage (Meidan Emam, Isfahan, 1979)"
-        ]
+        ],
+        "recommended_channel": "Astan Quds Razavi (Mashhad) for Imam Reza; for Shah Mosque use Aladhan Tehran method",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Bibi Heybat Mosque",
         "city": "Baku",
         "country": "Azerbaijan",
         "significance": "Caucasian Sunni reference mosque.",
-        "references": []
+        "references": [],
+        "recommended_channel": "No central institutional API; Aladhan method 13 (Diyanet) as proxy for Sunni mosques",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Hazratbal Shrine",
         "city": "Srinagar",
         "country": "India (Kashmir)",
         "significance": "Reliquary mosque; Kashmir's premier shrine.",
-        "references": []
+        "references": [],
+        "recommended_channel": "No central awqaf API; Hilal moonsighting Committee India publications",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Jama Masjid (Delhi)",
         "city": "Delhi",
         "country": "India",
         "significance": "Largest mosque in India (Mughal, 1656).",
-        "references": []
+        "references": [],
+        "recommended_channel": "No central awqaf API; Hilal moonsighting Committee India publications",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Sultan Hassan Mosque",
@@ -692,7 +777,10 @@
         "significance": "Mamluk monumental architecture (1356).",
         "references": [
           "UNESCO World Heritage (Historic Cairo, 1979)"
-        ]
+        ],
+        "recommended_channel": "Egyptian General Authority of Survey (Aladhan method 5 as proxy; Al-Azhar may publish own Imsakiyya)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       },
       {
         "name": "Great Mosque of Samarra",
@@ -701,7 +789,10 @@
         "significance": "9th-century Abbasid; iconic spiral minaret (Malwiya).",
         "references": [
           "UNESCO World Heritage (Samarra Archaeological City, 2007)"
-        ]
+        ],
+        "recommended_channel": "Iraqi Sunni / Shia Awqaf Diwans (limited API access)",
+        "mawaqit_search_attempted": true,
+        "mawaqit_match": null
       }
     ]
   }
