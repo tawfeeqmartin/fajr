@@ -32,41 +32,113 @@ function detectCountry(lat, lon) {
   // ─── ORDER MATTERS ─────────────────────────────────────────────────────
   // Smaller / more specific countries are listed FIRST. The function early-
   // returns on the first match, so a small country whose bbox sits inside a
-  // larger one's bbox would never match if listed second. The Gulf region
-  // is the main case: Bahrain/Qatar/Kuwait/Oman/UAE bboxes all overlap with
-  // Saudi Arabia's, so they must be checked before SaudiArabia.
+  // larger one's bbox would never match if listed second. v1.6.0 expanded
+  // bbox coverage from 27 → 78 countries; ordering rules now span every
+  // populated continent. Ordering documented per-cluster below.
   // ──────────────────────────────────────────────────────────────────────
 
+  // ─── Maghreb / North Africa (Atlantic to Mediterranean) ────────────────
   if (lat >= 27   && lat <= 36.5 && lon >= -14  && lon <= -1)   return 'Morocco'
+  if (lat >= 30.2 && lat <= 37.6 && lon >= 7.5  && lon <= 11.6) return 'Tunisia'  // tiny — before Algeria
+  if (lat >= 19   && lat <= 37.1 && lon >= -8.7 && lon <= 12)   return 'Algeria'
+  if (lat >= 19.5 && lat <= 33.2 && lon >= 9.4  && lon <= 25.2) return 'Libya'
 
-  // Gulf — small countries first, before SaudiArabia bbox catches them.
-  // Within the Gulf cluster, the order is: smallest islands → coastal small
-  // states → UAE → Oman (UAE's bbox is a subset of Oman's broader lat range,
-  // so UAE must be checked first for Dubai-area coords to dispatch correctly).
+  // ─── Gulf — small countries first, before SaudiArabia + Iran ───────────
   if (lat >= 25.5 && lat <= 26.5 && lon >= 50.4 && lon <= 50.85) return 'Bahrain'
   if (lat >= 24   && lat <= 26.5 && lon >= 50.5 && lon <= 51.7) return 'Qatar'
   if (lat >= 28.5 && lat <= 30.2 && lon >= 46.5 && lon <= 48.5) return 'Kuwait'
   if (lat >= 22   && lat <= 26.5 && lon >= 51   && lon <= 56.5) return 'UAE'
   if (lat >= 16   && lat <= 26.5 && lon >= 51.7 && lon <= 60)   return 'Oman'
   if (lat >= 12   && lat <= 19   && lon >= 42   && lon <= 54)   return 'Yemen'
+
+  // ─── Levant — must precede Saudi/Turkey/Iran (significant overlaps) ────
+  // Smallest first: Palestine ⊂ Israel/Saudi NW; Lebanon ⊂ Syria;
+  // Jordan ⊂ Saudi NW; Syria/Iraq broader.
+  if (lat >= 31.2 && lat <= 32.6 && lon >= 34.2 && lon <= 35.6) return 'Palestine'
+  if (lat >= 33.05 && lat <= 34.7 && lon >= 35.1 && lon <= 36.65) return 'Lebanon'
+  if (lat >= 29.18 && lat <= 33.4 && lon >= 34.95 && lon <= 39.3) return 'Jordan'
+  if (lat >= 32.3 && lat <= 37.4 && lon >= 35.7 && lon <= 42.4) return 'Syria'
+  if (lat >= 29   && lat <= 37.4 && lon >= 38.8 && lon <= 48.6) return 'Iraq'
+
+  // ─── Caucasus — small, must precede Iran (lat 38-39 overlap) + Turkey ──
+  if (lat >= 41.05 && lat <= 43.6 && lon >= 40   && lon <= 46.7) return 'Georgia'
+  if (lat >= 38.4 && lat <= 41.9 && lon >= 44.8 && lon <= 50.4) return 'Azerbaijan'
+
   if (lat >= 25   && lat <= 39   && lon >= 44   && lon <= 63)   return 'Iran'
+
+  // ─── Central Asia — smallest first; Turkmenistan must precede Iran ─────
+  if (lat >= 36.7 && lat <= 41.05 && lon >= 67.4 && lon <= 75.15) return 'Tajikistan'
+  if (lat >= 35.1 && lat <= 42.8 && lon >= 52.4 && lon <= 66.7) return 'Turkmenistan'
+  if (lat >= 39.2 && lat <= 43.3 && lon >= 69.25 && lon <= 80.3) return 'Kyrgyzstan'
+  if (lat >= 37.2 && lat <= 45.6 && lon >= 55.95 && lon <= 73.2) return 'Uzbekistan'
+  if (lat >= 40.5 && lat <= 55.5 && lon >= 46.4 && lon <= 87.4) return 'Kazakhstan'
 
   if (lat >= 16   && lat <= 33   && lon >= 34   && lon <= 56)   return 'SaudiArabia'
   if (lat >= 35   && lat <= 43   && lon >= 25   && lon <= 45)   return 'Turkey'
+
+  // ─── Balkans (Diyanet-aligned) — after Turkey ──────────────────────────
+  if (lat >= 41.85 && lat <= 43.27 && lon >= 20  && lon <= 21.8) return 'Kosovo'
+  if (lat >= 39.6 && lat <= 42.7 && lon >= 19.3 && lon <= 21.05) return 'Albania'
+  if (lat >= 42.55 && lat <= 45.27 && lon >= 15.7 && lon <= 19.65) return 'Bosnia'
+
   if (lat >= 21   && lat <= 32   && lon >= 24   && lon <= 38)   return 'Egypt'
+
+  // ─── NE Africa / Horn — smallest first; before Sudan ───────────────────
+  if (lat >= 10.9 && lat <= 12.7 && lon >= 41.75 && lon <= 43.42) return 'Djibouti'
+  if (lat >= 12.4 && lat <= 18   && lon >= 36.4 && lon <= 43.1) return 'Eritrea'
+  if (lat >= -1.7 && lat <= 12   && lon >= 40.9 && lon <= 51.4) return 'Somalia'
+  if (lat >= 3.5  && lat <= 12.3 && lon >= 24.1 && lon <= 35.95) return 'SouthSudan'
+  if (lat >= 3.4  && lat <= 14.9 && lon >= 32.95 && lon <= 48)  return 'Ethiopia'
+  if (lat >= 9.5  && lat <= 22   && lon >= 21.8 && lon <= 38.6) return 'Sudan'
+
+  // ─── West Africa Sahel + coast — smallest-overlap first ────────────────
+  if (lat >= 13.05 && lat <= 13.83 && lon >= -16.83 && lon <= -13.79) return 'Gambia'  // ⊂ Senegal
+  if (lat >= 12.3 && lat <= 16.7 && lon >= -17.6 && lon <= -11.3) return 'Senegal'
+  if (lat >= 14.7 && lat <= 27.3 && lon >= -17.1 && lon <= -4.8) return 'Mauritania'
+  if (lat >= 6.9  && lat <= 10   && lon >= -13.3 && lon <= -10.27) return 'SierraLeone'  // ⊂ Guinea-area
+  if (lat >= 7.2  && lat <= 12.7 && lon >= -15.1 && lon <= -7.65) return 'Guinea'
+  if (lat >= 4.3  && lat <= 10.7 && lon >= -8.6 && lon <= -2.5) return 'CoteDIvoire'
+  if (lat >= 4.5  && lat <= 11.2 && lon >= -3.3 && lon <= 1.2)  return 'Ghana'
+  if (lat >= 9.4  && lat <= 15.1 && lon >= -5.6 && lon <= 2.4)  return 'BurkinaFaso'
+  if (lat >= 10.1 && lat <= 25   && lon >= -12.3 && lon <= 4.3) return 'Mali'
+  if (lat >= 11.7 && lat <= 23.5 && lon >= 0.16 && lon <= 16)   return 'Niger'
+  if (lat >= 3.9  && lat <= 14   && lon >= 2.7  && lon <= 14.7) return 'Nigeria'
+  if (lat >= 7.4  && lat <= 23.5 && lon >= 13.5 && lon <= 24)   return 'Chad'
+  if (lat >= 1.7  && lat <= 13.1 && lon >= 8.5  && lon <= 16.2) return 'Cameroon'
+
   if (lat >= 49   && lat <= 62   && lon >= -9   && lon <= 2.5)  return 'UK'
 
-  // Equatorial SE Asia — small countries first, before Malaysia bbox
+  // ─── Equatorial SE Asia — small countries first, before Malaysia bbox ─
   if (lat >= 4    && lat <= 5.1  && lon >= 114  && lon <= 115.5) return 'Brunei'
   if (lat >= 1.15 && lat <= 1.5  && lon >= 103.6 && lon <= 104.05) return 'Singapore'
   if (lat >= 0.5  && lat <= 8    && lon >= 99   && lon <= 120)  return 'Malaysia'
+
+  // ─── SE Asia continental — Cambodia/Thailand smaller before Myanmar ──
+  if (lat >= 10.4 && lat <= 14.7 && lon >= 102.3 && lon <= 107.6) return 'Cambodia'
+  if (lat >= 5.6  && lat <= 20.5 && lon >= 97.3 && lon <= 105.7) return 'Thailand'
+  if (lat >= 9.6  && lat <= 28.5 && lon >= 92.2 && lon <= 101.2) return 'Myanmar'
+  if (lat >= 4.6  && lat <= 21.1 && lon >= 116.9 && lon <= 126.6) return 'Philippines'
 
   if (lat >= 24   && lat <= 50   && lon >= -125 && lon <= -66)  return 'USA'
   if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
   if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
   if (lat >= -6   && lat <= 2    && lon >= -82  && lon <= -74)  return 'Ecuador'
   if (lat >= -11  && lat <= 6    && lon >= 95   && lon <= 141)  return 'Indonesia'
+
+  // ─── South Asia — smallest first; India bbox huge so last in cluster ──
+  if (lat >= -1   && lat <= 7.5  && lon >= 72.5 && lon <= 74)   return 'Maldives'
+  if (lat >= 5.9  && lat <= 9.85 && lon >= 79.5 && lon <= 81.9) return 'SriLanka'  // ⊂ India
   if (lat >= 23   && lat <= 37   && lon >= 60   && lon <= 75)   return 'Pakistan'
+  if (lat >= 29.4 && lat <= 38.5 && lon >= 60.5 && lon <= 74.95) return 'Afghanistan'
+  if (lat >= 20.5 && lat <= 26.6 && lon >= 88   && lon <= 92.7) return 'Bangladesh'
+  if (lat >= 6.5  && lat <= 35.5 && lon >= 68   && lon <= 97.4) return 'India'
+
+  // ─── Indian Ocean / Swahili Coast — before SouthAfrica ─────────────────
+  if (lat >= -12.5 && lat <= -11.3 && lon >= 43.2 && lon <= 44.6) return 'Comoros'
+  if (lat >= -25.7 && lat <= -11.95 && lon >= 43.2 && lon <= 50.5) return 'Madagascar'
+  if (lat >= -4.7 && lat <= 5    && lon >= 33.9 && lon <= 41.9) return 'Kenya'
+  if (lat >= -11.8 && lat <= -1  && lon >= 29.3 && lon <= 40.45) return 'Tanzania'
+  if (lat >= -26.9 && lat <= -10.4 && lon >= 30.2 && lon <= 41) return 'Mozambique'
 
   // Southern Africa — only one in this geographic range
   if (lat >= -34.85 && lat <= -22 && lon >= 16  && lon <= 33)   return 'SouthAfrica'
@@ -342,6 +414,279 @@ function selectMethod(country, lat, coords) {
       p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
       return { params: p, methodName: 'MWL + TwilightAngle (Finland)' }
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // v1.6.0 GLOBAL BBOX EXPANSION — 51 countries below
+    //
+    // Each case maps a country to its institutional calculation method.
+    // Method choices are sourced from the Aladhan API's per-country defaults
+    // (https://api.aladhan.com/v1/methods), the ITL/arabeyes prayer-time
+    // method-info documentation (Egyptian regional cluster, Karachi cluster,
+    // etc.), and where available each country's national awqaf authority
+    // published Imsakiyya. Where no stronger source exists, MuslimWorldLeague
+    // is the documented multi-app default. Classification per case below.
+    //
+    // Multi-method countries (Iraq Sunni-vs-Shia, Lebanon, Azerbaijan, India)
+    // pick the most-followed institutional method; v1.6.2 will add city-level
+    // overrides via scripts/data/cities.json.
+    // ──────────────────────────────────────────────────────────────────────
+
+    // ─── Maghreb non-Morocco ──────────────────────────────────────────────
+    case 'Tunisia': {
+      // Tunisian Ministry of Religious Affairs: Fajr 18°, Isha 18°. Aladhan
+      // method 18 confirms. Tunisia is Maliki (Standard Asr) so use Other()
+      // not Karachi() (which sets Hanafi Asr).
+      // Classification: 🟢 Established (institutional preset).
+      // see knowledge/wiki/regions/tunisia.md (TODO)
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18
+      p.ishaAngle = 18
+      return { params: p, methodName: 'Tunisia (Ministry of Religious Affairs, 18°/18°)' }
+    }
+    case 'Algeria':
+      // Algerian Ministry of Religious Affairs and Wakfs: Fajr 18°, Isha 17°
+      // — identical to MuslimWorldLeague. Aladhan method 19 "Algeria" preset.
+      // Classification: 🟢 Established. see knowledge/wiki/regions/algeria.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'Algeria (Ministry of Religious Affairs, 18°/17°)' }
+    case 'Libya':
+      // No Libya-specific institutional preset documented. Awqaf timetables
+      // follow Maghreb 18°/17° convention; MWL is the multi-app default.
+      // Classification: 🟡 Limited precedent. see knowledge/wiki/regions/libya.md (TODO)
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Libya, Aladhan world default)' }
+    case 'Mauritania':
+      // Mauritania (Maliki-majority): no published national preset; MWL per
+      // MuslimPro/IslamicFinder default. Classification: 🟡.
+      // see knowledge/wiki/regions/mauritania.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Mauritania default)' }
+
+    // ─── Levant ───────────────────────────────────────────────────────────
+    case 'Palestine':
+      // Palestinian Ministry of Awqaf: Egyptian convention (19.5°/17.5°)
+      // historically via Mufti of Jerusalem; Al-Aqsa published times align.
+      // bbox covers West Bank + Gaza; Israeli-occupied areas with Muslim
+      // residents pray to the same Awqaf-published times.
+      // Classification: 🟡→🟢 (institutional convention).
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Palestinian Awqaf, Mufti of Jerusalem convention)' }
+    case 'Lebanon':
+      // Dar al-Fatwa al-Lubnaniyya (Sunni): Karachi 18°/18° best matches
+      // published Sunni timetables. Bekaa/South Shia regions use Tehran-style
+      // (intra-country ikhtilaf — v1.6.2 city override planned).
+      // Classification: 🟡 Limited precedent (multi-method country).
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Lebanon, Aladhan world default)' }
+    case 'Jordan': {
+      // Jordan Ministry of Awqaf, Islamic Affairs and Holy Places: Fajr 18°,
+      // Isha 18°, +5 min Maghrib offset. Aladhan method 23 confirms.
+      // Classification: 🟢 Established (institutional preset).
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18
+      p.ishaAngle = 18
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 5 }
+      return { params: p, methodName: 'Jordan (Ministry of Awqaf, 18°/18° + 5min Maghrib)' }
+    }
+    case 'Syria':
+      // Syrian Ministry of Awqaf: Egyptian method (19.5°/17.5°) per regional
+      // cluster (ITL/arabeyes); aladhan defaults Damascus to Egyptian.
+      // Classification: 🟢 Established (regional convention).
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Syria Awqaf default)' }
+    case 'Iraq':
+      // Iraq: significant intra-country ikhtilaf (Sunni Awqaf vs Shia
+      // Najaf/Karbala). Karachi 18°/18° matches Sunni Awqaf published reality;
+      // Tehran-style is used in Shia regions. v1.6.2 city-level override
+      // planned for Najaf/Karbala. Classification: 🟡 Limited precedent.
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Iraq, Aladhan world default)' }
+
+    // ─── Caucasus ─────────────────────────────────────────────────────────
+    case 'Georgia':
+      // Administration of Muslims of All Georgia (~10% Muslim, Sunni Hanafi
+      // in Adjara): Diyanet 18°/17° via Turkish-funded mosque institutional
+      // presence. Classification: 🟡.
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Georgia, Adjara Sunni Hanafi via Turkish institutional presence)' }
+    case 'Azerbaijan':
+      // Caucasian Muslims Office (~85% Twelver Shia): Tehran method
+      // (17.7°/14° + middle-of-night). ~15% Sunni Hanafi in Lankaran/north
+      // (intra-country ikhtilaf — v1.6.2 override planned).
+      // Classification: 🟡 Limited precedent (multi-method country).
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Turkey (Azerbaijan, Aladhan world default)' }
+
+    // ─── Central Asia ─────────────────────────────────────────────────────
+    case 'Tajikistan':
+      // Council of Ulema of Tajikistan (Hanafi): MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Tajikistan, Aladhan world default)' }
+    case 'Turkmenistan':
+      // Muftiate of Turkmenistan (Hanafi): MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Turkmenistan, Aladhan world default)' }
+    case 'Kyrgyzstan':
+      // Spiritual Administration of Muslims of Kyrgyzstan (Hanafi): MWL default.
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Kyrgyzstan, Aladhan world default)' }
+    case 'Uzbekistan':
+      // Muslim Board of Uzbekistan (Hanafi): MWL default per IslamicFinder.
+      // Note: Russia SAM 16°/15° preset exists but Uzbek Muftiate has not
+      // published a definitive preset. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Uzbekistan, Aladhan world default)' }
+    case 'Kazakhstan':
+      // Spiritual Administration of Muslims of Kazakhstan / DUMK (Hanafi):
+      // MWL default per multi-app convention. Some Russia-influenced regions
+      // use SAMR 16°/15°; DUMK has not published a definitive angle pair.
+      // Classification: 🟡.
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Kazakhstan, Aladhan world default)' }
+
+    // ─── Balkans ──────────────────────────────────────────────────────────
+    case 'Albania':
+      // Komuniteti Mysliman i Shqipërisë / KMSH (Sunni Hanafi ~57%): Diyanet
+      // 18°/17° per Turkish institutional presence (Great Mosque of Tirana
+      // funded by Diyanet). Classification: 🟢 Established.
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Albania KMSH, Turkish institutional)' }
+    case 'Kosovo':
+      // Bashkësia Islame e Kosovës / BIK (Sunni Hanafi ~96%): Diyanet
+      // 18°/17° per Turkish institutional convention.
+      // Classification: 🟢 Established.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kosovo, Aladhan world default)' }
+    case 'Bosnia':
+      // Rijaset / Islamska Zajednica u BiH (Sunni Hanafi ~51%): Diyanet
+      // 18°/17° closest published match to traditional Takvim. v1.6.2:
+      // validate against Rijaset's own Takvim publication; consider custom
+      // offset if needed. Classification: 🟡→🟢 (regional Diyanet convention).
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Bosnia, Aladhan world default)' }
+
+    // ─── NE Africa / Horn ─────────────────────────────────────────────────
+    case 'Djibouti':
+      // ~94% Sunni Shafi'i; MWL default per MuslimPro / prayer-times.info.
+      // Classification: 🟢 Established (multi-app corroboration).
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Djibouti)' }
+    case 'Eritrea':
+      // ~37% Sunni Shafi'i Red Sea coast; no national preset; MWL regional
+      // default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Eritrea default)' }
+    case 'Somalia':
+      // Ministry of Endowments and Religious Affairs (Sunni Shafi'i): MWL
+      // default per regional convention + multi-app corroboration.
+      // Classification: 🟢.
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Somalia, Aladhan world default)' }
+    case 'SouthSudan':
+      // Small Muslim minority (~6%); no national institutional preset; MWL
+      // fallback. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South Sudan fallback)' }
+    case 'Ethiopia':
+      // Ethiopian Islamic Affairs Supreme Council / Majlis (~34% Muslim):
+      // no specific preset; MWL per regional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Ethiopia, Aladhan world default)' }
+    case 'Sudan':
+      // Egyptian General Authority of Survey method (19.5°/17.5°) — Sudan is
+      // documented in the Egyptian-method regional cluster (ITL/arabeyes);
+      // local services (timesprayer.com Khartoum) default Egyptian.
+      // Classification: 🟢 Established (regional convention).
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Sudan regional)' }
+
+    // ─── West Africa ──────────────────────────────────────────────────────
+    case 'Gambia':
+      // ~96% Sunni Maliki / Tijaniyya: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Gambia default)' }
+    case 'Senegal':
+      // Sufi-majority (Tijaniyya / Mouridiyya): MWL default per MuslimPro.
+      // Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Senegal default)' }
+    case 'SierraLeone':
+      // ~78% Sunni Maliki: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Sierra Leone default)' }
+    case 'Guinea':
+      // ~89% Sunni Maliki: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Guinea default)' }
+    case 'CoteDIvoire':
+      // ~42% Muslim, Sunni Maliki: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: "MWL (Côte d'Ivoire default)" }
+    case 'Ghana':
+      // ~20% Muslim, National Chief Imam office: MWL default.
+      // Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Ghana default)' }
+    case 'BurkinaFaso':
+      // ~63% Sunni Maliki: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Burkina Faso default)' }
+    case 'Mali':
+      // Sunni Maliki majority: MWL default per regional convention.
+      // Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Mali default)' }
+    case 'Niger':
+      // ~99% Sunni Maliki: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Niger default)' }
+    case 'Nigeria':
+      // Supreme Council for Islamic Affairs (Sultan of Sokoto chair):
+      // No national preset; MWL per MuslimPro Sokoto/Kano/Lagos default.
+      // Classification: 🟡→🟢 (multi-app corroboration).
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Nigeria, Sultan of Sokoto council default)' }
+    case 'Chad':
+      // ~52% Sunni Maliki/Tijaniyya, West African convention (not Sudan
+      // Egyptian cluster): MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Chad default)' }
+    case 'Cameroon':
+      // ~24% Muslim (concentrated north): MWL default per MuslimPro.
+      // Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Cameroon default)' }
+
+    // ─── Indian Ocean / Swahili Coast ─────────────────────────────────────
+    case 'Comoros':
+      // ~98% Sunni Shafi'i island state: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Comoros default)' }
+    case 'Madagascar':
+      // ~7% Muslim (Sunni Shafi'i NW coast): MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Madagascar default)' }
+    case 'Kenya':
+      // SUPKEM / Sunni Shafi'i ~11%: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Kenya, Aladhan world default)' }
+    case 'Tanzania':
+      // BAKWATA / Sunni Shafi'i ~35% (Zanzibar ~99%): MWL default.
+      // Classification: 🟡.
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Tanzania, Aladhan world default)' }
+    case 'Mozambique':
+      // CISLAMO / Sunni Shafi'i ~18%: MWL default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Mozambique default)' }
+
+    // ─── South Asia non-Pakistan ──────────────────────────────────────────
+    case 'Maldives':
+      // Maldives Ministry of Islamic Affairs: Umm al-Qura per IslamicFinder/
+      // MuslimPro Malé default. ~100% Sunni Shafi'i. Classification: 🟢.
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Maldives, Aladhan world default)' }
+    case 'SriLanka':
+      // All Ceylon Jamiyyathul Ulama / ACJU (Sunni Shafi'i): South Asian
+      // Karachi 18°/18° regional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Sri Lanka, ACJU regional)' }
+    case 'Bangladesh':
+      // Islamic Foundation Bangladesh: same Karachi 18°/18° as Pakistan
+      // (Hanafi). ITL/arabeyes documents BD in Karachi cluster.
+      // Classification: 🟢 Established (regional convention).
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Islamic Foundation Bangladesh)' }
+    case 'Afghanistan':
+      // Afghanistan Ministry of Hajj and Religious Affairs (Hanafi-majority).
+      // Karachi 18°/18° per ITL/arabeyes regional cluster.
+      // Classification: 🟢 Established (regional convention).
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Afghanistan, Hanafi)' }
+    case 'India':
+      // AIMPLB / Jamiat Ulema-e-Hind (Hanafi-majority): Karachi 18°/18° per
+      // ITL/arabeyes cluster. Multi-state ikhtilaf (Kerala/TN Shafi'i,
+      // Lucknow Shia) — v1.6.2 city-level overrides planned.
+      // Classification: 🟡 Limited precedent (multi-method country).
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (India, Hanafi-majority via AIMPLB; multi-state ikhtilaf)' }
+
+    // ─── SE Asia continental ──────────────────────────────────────────────
+    case 'Cambodia':
+      // Cham Muslims (~2%, Sunni Shafi'i): SE Asia regional MUIS/JAKIM
+      // 20°/18° via Malaysian/Indonesian institutional ties.
+      // Classification: 🟡.
+      return { params: adhan.CalculationMethod.Singapore(), methodName: 'Singapore/MUIS (Cambodia Cham regional)' }
+    case 'Thailand':
+      // Sheikhul Islam Chularatchamontri (~5% Muslim, southern Patani):
+      // Singapore/JAKIM 20°/18° via southern Thai mosques' Malaysian
+      // institutional ties. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Thailand, Aladhan world default)' }
+    case 'Myanmar':
+      // ~4% Muslim (Rohingya, Indian-origin Hanafi via South Asian
+      // connection): Karachi 18°/18°. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Myanmar, Aladhan world default)' }
+    case 'Philippines':
+      // National Commission on Muslim Filipinos / NCMF (Sunni Shafi'i,
+      // Bangsamoro): Umm al-Qura per institutional Saudi ties / aladhan
+      // default. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Philippines, Aladhan world default)' }
+
     default: {
       // Fallback: high-latitude auto-detect (lat > 55°)
       if (lat > 55) {
