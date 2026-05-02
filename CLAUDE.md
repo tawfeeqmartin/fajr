@@ -234,16 +234,17 @@ ACCEPTED / REJECTED — [reason]
 
 ## Code Review Pipeline
 
-Every PR goes through **four** review layers before merge. Layers 1, 2, and 3 run automatically on every PR; Layer 4 is the human merge gate. **All four are wired up — see implementation pointers below.**
+Every PR goes through up to **five** review layers before merge. Layers 1, 2, 3 run automatically on every PR; Layer 4.5 is an auto-merger that executes routine merges; Layer 4 is the human, reserved for the cases that actually need judgment. **All five are wired up — see implementation pointers below.**
 
 ```
-PR opened → Layer 1 (Lint, CI, blocks)
-         → Layer 2 (Engineering review, daily routine, advisory)
-         → Layer 3 (Fiqh review, daily routine, advisory)
-         → Layer 4 (Human merge, judgment-only)
+PR opened → Layer 1   (Lint, CI, blocks)
+         → Layer 2   (Engineering review, daily routine, advisory)
+         → Layer 3   (Fiqh review, daily routine, advisory)
+         → Layer 4.5 (Auto-merger, daily routine; merges if all gates pass; else escalates)
+         → Layer 4   (Human merge, judgment-only — only for PRs Layer 4.5 escalated)
 ```
 
-Layers 1, 2, 3 are *complementary not redundant* — Layer 1 enforces convention mechanically (Bismillah, classification-tag presence), Layer 2 reviews engineering correctness (correctness, ratchet, API contract), Layer 3 reviews scholarly accuracy (classification *correctness*, fiqh grounding, ikhtilaf preservation). The human reads all three findings + the diff and makes the merge call.
+Layers 1, 2, 3 are *complementary not redundant* — Layer 1 enforces convention mechanically (Bismillah, classification-tag presence), Layer 2 reviews engineering correctness (correctness, ratchet, API contract), Layer 3 reviews scholarly accuracy (classification *correctness*, fiqh grounding, ikhtilaf preservation). Layer 4.5 then reads Layers 1+2+3 outputs and either merges (if all six gates below pass) or escalates to the human (Layer 4) for cases that genuinely need judgment.
 
 ### Layer 1 — Automated Lint (`.github/workflows/lint.yml`)
 
@@ -294,6 +295,41 @@ What Layer 3 covers (and Layer 2 doesn't):
 Layer 3 does NOT cover code style, WMAE numbers, off-by-ones, Bismillah-presence — those are Layer 1 / Layer 2 / ratchet jobs. Layer 3 reads scholarly context where Layer 2 reads code.
 
 Output: a structured PR comment with `🟥 Blockers / 🟨 Suggestions / 🟪 Flags for human judgment / 🟩 Looks good` sections plus three required paragraphs: classification accuracy, ihtiyat/ikhtilaf check, wiki/scholarly grounding. Comments are advisory; merge stays a Layer 4 human decision.
+
+### Layer 4.5 — Auto-merger (RemoteTrigger cloud routine `trig_01VnAw1bT4JqVxhCyLHKEmRL`, Moderate scope)
+
+Runs **daily at 20:30 UTC** (one hour after Layer 3 fires at 19:30 so both Layer 2 and Layer 3 advisory comments have landed by the time it runs). Sandboxed CCR session with read-only file tools + `gh` CLI (Bash). Reads each open PR's CI status + Layer 2 + Layer 3 advisory comments, then either merges or escalates.
+
+A PR auto-merges only if **all six gates** pass:
+
+1. **Gate 1 — CI green:** `statusCheckRollup` shows `SUCCESS` for every check (no FAILURE / CANCELLED / pending).
+2. **Gate 2 — Layer 2 (engineering) reviewed, no 🟥 Blockers:** at least one `🔎 fajr-code-reviewer` comment exists; its 🟥 Blockers section is empty.
+3. **Gate 3 — Layer 3 (fiqh) reviewed, no 🟥 Blockers:** at least one `📜 fajr-fiqh-reviewer` comment; same emptiness rule.
+4. **Gate 4 — No 🟪 Flags for human judgment:** neither Layer 2 nor Layer 3 flagged anything that explicitly punted to the human.
+5. **Gate 5 — No public-API surface change:** PR diff doesn't touch `src/index.js`, `src/index.d.ts`, or the `main`/`exports`/`types`/`type` fields in `package.json`. Version-only bumps are fine.
+6. **Gate 6 — No new 🟡 or 🔴 classification:** the diff doesn't INTRODUCE a new 🟡 (limited precedent) or 🔴 (novel) classification tag in `src/engine.js`. Modifying existing 🟡/🔴 cases is fine.
+
+Plus three meta-rules:
+
+- **Branch allowlist:** only `calibration/*`, `fix/*`, `feat/*`, `docs/*`, `chore/*`, `corpus/*`, `progress/*` head branches are eligible. Anything else escalates.
+- **Daily cap of 3 auto-merges per run** to prevent runaway batches.
+- **Stacked PRs escalate** (`baseRefName !== master`) — dependency ordering is a Layer 4 decision.
+
+When all gates pass: `gh pr merge --squash --auto`, then post a `✅ fajr-auto-merger` comment listing which gates passed and noting Layer 4.5 (Moderate scope) handled this PR.
+
+When any gate fails or the PR is stacked / outside the allowlist: post a `⚠️ fajr-auto-merger` comment listing the failed gate(s) and explicitly escalating to the human, but do NOT merge.
+
+What Layer 4.5 explicitly DOES NOT do:
+
+- Make judgment calls. Layer 2 + Layer 3 do the judging; Layer 4.5 just executes their verdict.
+- Decide whether a calibration is correct, whether a method choice is right, or whether a classification is appropriate.
+- Touch the public API contract (`src/index.js`, `src/index.d.ts`, package exports). Always escalates.
+- Approve novel scholarly classifications. New 🟡 / 🔴 always need human review.
+- Override CI failures. If Layer 1 (lint) didn't pass, Layer 4.5 doesn't bypass — escalates.
+
+If the human wants to disable Layer 4.5 (e.g., during a release week or major refactor sprint), call `RemoteTrigger.update(trigger_id='trig_01VnAw1bT4JqVxhCyLHKEmRL', body={enabled:false})`. Re-enable when ready.
+
+The Moderate scope is documented in the routine prompt itself — the human can switch to Conservative (only docs/chore branches; nothing under `src/`) or Aggressive (any PR passing Layers 1-3 regardless of API surface) by editing the prompt via `RemoteTrigger.update`.
 
 ### Layer 4 — Human Review (intent, not implementation)
 
