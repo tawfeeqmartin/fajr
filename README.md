@@ -122,7 +122,11 @@ Mosque-published reality (Mawaqit) is the most grounded layer — it's what Musl
 
 _Auto-generated from `eval/results/runs.jsonl`. To refresh: `node eval/eval.js && npm run build:charts`._
 
-For full numbers including per-region and per-cell granularity, see [**`docs/progress.md`**](docs/progress.md).
+For full numbers including per-region and per-cell granularity, see [**`docs/progress.md`**](docs/progress.md). For the per-release WMAE-improvement narrative — what each release shipped and why train WMAE moved — see the journey chart below or [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the durable methodology guide that future calibration work follows.
+
+![WMAE Journey — train + holdout WMAE annotated with release inflection points](docs/charts/wmae-journey.svg)
+
+The journey chart annotates each tagged release with the change that drove its train- or holdout-WMAE delta. Releases that added features (notes field, opt-in correction helpers, world-coverage data) leave train WMAE flat at the ratchet level — only calibration refinements (v1.4.1's JAKIM Path A) move the train number. The v1.4 holdout climb reflects the eval-corpus widening to 163 country fixtures, not an engine regression. See [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the methodology behind each Path A correction.
 
 ![WMAE over time — train (ratchet) vs holdout](docs/charts/wmae-trend.svg)
 
