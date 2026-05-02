@@ -53,13 +53,15 @@ A combined 2-minute formal ihtiyati + 5-to-6-minute tayakkun visual margin match
 
 ## fajr's resolution — Path A community calibration
 
-fajr applies a **+8-minute Fajr offset** when the auto-detected country is Malaysia (latitude/longitude bbox). Implementation lives in `src/engine.js`'s `selectMethod` for the `'Malaysia'` case:
+fajr applies **+8-minute Fajr** and **+1-minute Isha** offsets when the auto-detected country is Malaysia (latitude/longitude bbox). Implementation lives in `src/engine.js`'s `selectMethod` for the `'Malaysia'` case:
 
 ```js
 const p = adhan.CalculationMethod.Singapore()  // 20°/18° base
-p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8 }
-return { params: p, methodName: 'JAKIM (20°/18° + 8min ihtiyati per Path A community calibration)' }
+p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8, isha: 1 }
+return { params: p, methodName: 'JAKIM (20°/18° + 8min Fajr / 1min Isha ihtiyati per Path A community calibration)' }
 ```
+
+The Fajr +8 (v1.4.1) decomposes as the documented 2-min *waktu ihtiyati* + ~6-min *tayakkun* visual margin per Aabed (2015). The Isha +1 (v1.4.4) is half the same documented 2-min ihtiyati — chosen empirically because per-cell biases for the 3 Malaysian zones (KL/Shah Alam/George Town) are −1.60/−0.90/−0.80 mean −1.10, and a +1 offset closes all three uniformly while a +2 would flip sign at SA/GT.
 
 **Classification:** 🟡→🟢 (Path A approaching established) per [`fiqh/scholarly-oversight.md`](../fiqh/scholarly-oversight.md). Justification:
 

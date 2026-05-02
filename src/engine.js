@@ -165,9 +165,31 @@ function selectMethod(country, lat, coords) {
       // Indonesia (KEMENAG) does NOT need this offset — Aladhan KEMENAG-
       // method ground truth at Jakarta matches a pure 20° calc within
       // 1 minute. The JAKIM offset is institution-specific to Malaysia.
+      // Per-cell empirical residuals from waktusolat.app for Isha (post-
+      // v1.4.3 elevation-policy fix):
+      //   Kuala Lumpur Isha bias: -1.60 min
+      //   Shah Alam    Isha bias: -0.90 min
+      //   George Town  Isha bias: -0.80 min  (mean -1.10)
+      // All three cells show fajr's 18° Isha calc consistently EARLIER than
+      // JAKIM's published Isha — magnitude smaller than the +8min Fajr gap
+      // but same direction and same documented basis (the 2-minute waktu
+      // ihtiyati per Razali & Hisham 2021 / Nurul Asikin 2016, applied
+      // across all prayer times by JAKIM's institutional convention). A
+      // +1-minute Isha offset closes all three cells uniformly without
+      // breaking the per-cell ratchet (KL -1.60→-0.60, Shah Alam
+      // -0.90→+0.10, George Town -0.80→+0.20 — all improve |bias|).
+      //
+      // Maghrib shows similar per-cell direction (-0.90 / -0.25 / -0.48
+      // mean -0.54) but heterogeneously: a +1-min Maghrib offset would
+      // worsen Shah Alam by ~0.50 min (per-cell ratchet failure). We
+      // therefore leave Maghrib untouched until either (a) the heterogeneity
+      // resolves into a uniform direction across more zones, or (b) we
+      // gain finer-grained per-zone calibration data. Sub-minute Maghrib
+      // bias remains within the atmospheric refraction noise floor
+      // documented in Young (2006); see knowledge/wiki/astronomy/refraction.md.
       const p = adhan.CalculationMethod.Singapore()
-      p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8 }
-      return { params: p, methodName: 'JAKIM (20°/18° + 8min ihtiyati per Path A community calibration)' }
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8, isha: 1 }
+      return { params: p, methodName: 'JAKIM (20°/18° + 8min Fajr / 1min Isha ihtiyati per Path A community calibration)' }
     }
     case 'USA':
       // ISNA: Fajr 15°, Isha 15°

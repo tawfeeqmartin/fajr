@@ -31,7 +31,7 @@ describe('region-aware method auto-selection', () => {
     [41.01,  28.97,  /Diyanet/i,                 'Istanbul'],
     [30.04,  31.24,  /Egyptian/i,                'Cairo'],
     [51.51,  -0.13,  /Moonsighting|MoonsightingCommittee/i, 'London'],
-    [3.14,   101.69, /JAKIM.*ihtiyati|JAKIM.*8min/i, 'Kuala Lumpur'],
+    [3.14,   101.69, /JAKIM.*8min.*Fajr.*1min.*Isha|JAKIM.*ihtiyati/i, 'Kuala Lumpur'],
     [40.71,  -74.01, /ISNA|NorthAmerica/i,       'New York'],
     [25.20,  55.27,  /Umm al-Qura|UAE/i,         'Dubai'],
     [48.86,  2.35,   /UOIF|12/i,                 'Paris'],
