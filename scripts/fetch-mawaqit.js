@@ -59,7 +59,7 @@ async function searchAndPick(slug, keyword) {
   const found = list.find(m => m.slug === slug)
   if (!found) {
     const sample = list.slice(0, 3).map(m => m.slug).join(', ')
-    throw new Error(`slug "${slug}" not in first ${list.length} results for "${city}". Got: ${sample}…`)
+    throw new Error(`slug "${slug}" not in first ${list.length} results for "${keyword}". Got: ${sample}…`)
   }
   return found
 }
