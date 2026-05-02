@@ -4,9 +4,9 @@
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 20+ cities and 15+ countries. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
+> **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 38 cities across 12 institutional-train countries plus a 163-country Aladhan-routed holdout corpus. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.3.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.6.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection. v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -97,7 +97,7 @@ All per-prayer MAEs were below 2 minutes against the Aladhan regional-method con
 
 ### Cities covered (training set)
 
-Casablanca · Rabat · Makkah · Madinah · Riyadh · Istanbul · Ankara · Izmir · Cairo · Alexandria · London · Kuala Lumpur · Shah Alam · George Town · New York · Los Angeles · Jakarta · Karachi · Dubai · Paris · Toronto
+Casablanca · Rabat · Marrakech · Tanger · Nador · Oujda · Fes · Meknes · Taza · Khouribga · Settat · Sale · Kenitra · Safi · Essaouira · Agadir · Taroudant · Ouarzazate (1135 m) · Errachidia (1037 m) · Makkah · Madinah · Riyadh · Istanbul · Ankara · Izmir · Cairo · Alexandria · London · Kuala Lumpur · Shah Alam · George Town · New York · Los Angeles · Jakarta · Karachi · Dubai · Paris · Toronto
 
 Additional test-set cities (holdout, never optimized against): Tromsø · Reykjavik · Helsinki · Longyearbyen (Svalbard, 78°N) · Anchorage · La Paz · Bogota · Denver · Quito · Mecca · Madinah · Istanbul (cross-source) · others (10 praytimes.org reference cities)
 
@@ -107,10 +107,11 @@ Accuracy is no longer measured against a single API. fajr is validated against s
 
 | Source | Reference layer | Set | Coverage |
 |---|---|---|---|
-| **Mawaqit** (mawaqit.net) | Mosque-published reality | holdout | Casablanca, Rabat, Marrakech, Marseille, Limoges, Mulhouse |
+| **Mawaqit-Morocco** (mawaqit.net) | Mosque-published reality | train (v1.5.0) | 25 mosques across 14 Moroccan cities — Casablanca/Rabat/Marrakech metro, Northern (Tanger/Nador), Eastern (Oujda), Interior (Fes/Meknes/Taza/Khouribga/Settat), Atlantic coast (Sale/Kenitra/Safi/Essaouira/Agadir/Taroudant), high-elevation Atlas/Sahara (Ouarzazate 1135 m, Errachidia 1037 m). Refreshed daily by the cloud routine. |
+| **Mawaqit** (non-Morocco) | Mosque-published reality | holdout | Cairo, London, Marseille, Limoges, Mulhouse, Doha, Kuwait, Dammam, Jakarta, Singapore, Kuala Lumpur, Tunis, Algiers |
 | **Diyanet İşleri Başkanlığı** (Türkiye) | Official institutional ground truth | train | Istanbul, Ankara, Izmir |
 | **JAKIM** (Malaysia) via waktusolat.app | Official institutional ground truth | train | Kuala Lumpur, Selangor, Penang |
-| **Aladhan API** | Regional-method consensus (calc-vs-calc) | train | 18 cities, region-appropriate methods |
+| **Aladhan API** | Regional-method consensus (calc-vs-calc) | train (non-Morocco/non-Türkiye) + holdout | 11 cities in train; ~145 country fixtures in holdout |
 | **praytimes.org reference** | Regional-method consensus (independent JS impl) | holdout | 10 cities |
 | **muslimsalat.com** | Third-party aggregator | holdout | Karachi, Cairo, London, Dubai |
 
@@ -126,7 +127,7 @@ For full numbers including per-region and per-cell granularity, see [**`docs/pro
 
 ![WMAE Journey — train + holdout WMAE annotated with release inflection points](docs/charts/wmae-journey.svg)
 
-The journey chart annotates each tagged release with the change that drove its train- or holdout-WMAE delta. Releases that added features (notes field, opt-in correction helpers, world-coverage data) leave train WMAE flat at the ratchet level — only calibration refinements move the train number. As of v1.4.4 the train ratchet has dropped from the v1.0 baseline of 1.16 → **0.68** via three accuracy releases: v1.4.1 (JAKIM Fajr +8min Path A, train −16.6%), v1.4.3 (eval elevation-policy fix removing phantom artifacts, train −32%), and v1.4.4 (JAKIM Isha +1min Path A, train −3.2%). The v1.4 holdout climb reflects the eval-corpus widening to 163 country fixtures, not an engine regression. See [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the methodology behind each Path A correction.
+The journey chart annotates each tagged release with the change that drove its train- or holdout-WMAE delta. Releases that added features (notes field, opt-in correction helpers, world-coverage data) leave train WMAE flat at the ratchet level — only calibration refinements move the train number. Across v1.0 → v1.5.0, the engine has shipped five Path A community calibrations (JAKIM Fajr, JAKIM Isha, Diyanet Maghrib/Isha, Morocco Maghrib) plus the v1.4.3 elevation-policy fix that exposed real institutional residuals. The aggregate train number on a like-for-like corpus has dropped from the v1.0 baseline of 1.16 toward 0.80, but the headline aggregate is no longer the cleanest signal — v1.5.0's corpus restructure (moving 23 mosque-published Mawaqit-Morocco fixtures into train and 20 Aladhan calc-vs-calc Morocco entries to test) introduced higher-fidelity / higher-noise institutional ground truth, so the v1.5.0 aggregate sits above the v1.4.5 aggregate even though the engine is more accurate. See [`docs/calibration-recipe.md`](docs/calibration-recipe.md) for the methodology behind each Path A correction; the journey chart's per-release labels narrate the same story visually.
 
 ![WMAE over time — train (ratchet) vs holdout](docs/charts/wmae-trend.svg)
 
@@ -271,6 +272,52 @@ Every correction in `src/engine.js` is tagged:
 - 🟡 **Limited precedent** — supported by some scholars/institutions, minority scholarly view
 - 🔴 **Novel** — requires Islamic scholarly review before relying upon
 
+### Elevation advisory at significant altitude (v1.5.2)
+
+GPS receivers return altitude alongside latitude and longitude. At altitudes above ~500 m, the geometric horizon dip becomes practically significant — sun rises *earlier* and sets *later* than the sea-level calculation by 2 to 6+ minutes depending on elevation. This is real and predictable; the institutional question is whether it should be applied to displayed prayer times.
+
+**Institutional stances differ:**
+
+- **UAE (Burj Khalifa fatwa, IACAD Dulook DXB)** — applies floor-stratified prayer times; institutional acknowledgement that observers at altitude see the horizon differently.
+- **Malaysia JAKIM** — applies topographic elevation correction systematically across the country.
+- **Saudi Arabia / Umm al-Qura** — explicitly *declines* the correction. Reasoning: jama'ah unity. A high-rise resident in Riyadh praying with their floor's correction would pray a different time than the rest of the city, fragmenting the congregation. Saudi prioritises uniform community time over per-observer geometric accuracy.
+
+These are competing valid stances and fajr does not pick one for the user — but it does inform them. **When the caller passes `elevation ≥ 500 m`, fajr emits a `notes[]` advisory describing the elevation, the magnitude of the shift, and which institutions apply vs decline the correction.** Apps can render the advisory to the user with a toggle and pass `elevation: 0` if the user (or their local mosque) follows the Saudi stance.
+
+The threshold is set at 500 m because:
+
+| Elevation band | Geometric impact (Shuruq/Maghrib) | Action |
+|---|---|---|
+| < 200 m | < 1 min | Silent — sub-prayer-buffer noise |
+| 200–500 m | 1–2 min | Silent — within institutional ihtiyati buffers |
+| **500–1500 m** | **2–5 min** | **Advisory note emitted** |
+| 1500 m+ | > 5 min | Advisory note + magnitude emphasis |
+
+This catches the cities where institutional bodies have actually weighed in (Riyadh 612 m, Mecca highlands, Atlas / Sahara 1000+ m, Sana'a 2250 m, Tehran 1200 m, Damascus 700 m) and tolerates phone-GPS altitude noise (typically ±10–30 m) without flickering the advisory state.
+
+The principle behind both the elevation advisory and the dual-ihtiyat resolution from v1.5.1 is the same: **fajr's library role is to surface scholarly disagreement transparently, not to resolve it silently. The defaults are conservative; the information is complete; the user (or their scholar) makes the call.**
+
+### Per-prayer ihtiyat-aware minute rounding (v1.5.1)
+
+Prayer-time libraries traditionally round their calculated sub-second-precision astronomical events to whole minutes for display using *round-to-nearest*. That symmetric rounding produces a displayed minute on the *unsafe* side of the underlying solar event ~50% of the time — meaning ~half of all displayed Maghribs could be up to 29 seconds *before* actual sunset, which would invalidate iftar by classical fiqh's *yaqeen* (certainty) requirement. The same logic applies to every other prayer, with each one having a one-sided shar'i precaution direction.
+
+Since v1.5.1, fajr applies **directional rounding per prayer** so every minute it displays is on the prayer-validity-safe side of actual reality, by construction:
+
+| Prayer | Minute-rounding direction | Reasoning |
+|---|---|---|
+| Imsak | DOWN (earlier) | Fasting yaqeen — stop eating before actual dawn |
+| Fajr | UP (later) | Prayer must start AFTER actual dawn |
+| Shuruq / Sunrise | DOWN (earlier) | Fajr-window-close — don't pray Fajr after actual sunrise |
+| Dhuhr | UP (later) | Prayer-validity — sun must have crossed meridian |
+| Asr | UP (later) | Prayer-validity — shadow must have reached Asr length |
+| Maghrib | UP (later) | Iftar yaqeen — fast must end after actual sunset |
+| Isha | UP (later) | Prayer-validity — twilight must have ended |
+| Sunset | UP (later) | Astronomical event coinciding with Maghrib |
+
+These are **rounding directions** for the displayed whole minute — the underlying astronomical computation is unchanged. The shift is at most 1 minute per prayer compared to the prior round-to-nearest behavior, always in the safer direction.
+
+**Dual-ihtiyat resolution.** Fasting and prayer-validity have *different* safe directions for Fajr — fasters want Fajr earlier (so they stop eating before actual dawn); prayers want Fajr later (so prayer is performed inside the valid window). The classical resolution from every printed Imsakiyya in Mecca, Medina, and Cairo for over a century is **two columns**: an *imsak* (إمساك, "abstaining") column for fast-stop, and a *Fajr* column for prayer-start. fajr's API exposes both as separate fields. Imsak defaults to Fajr − 10 min (the universal Imsakiyya convention), rounded DOWN for fasting safety. Apps wanting a different imsak buffer can recompute downstream — the offset and rounding policy are reported in `result.corrections.imsak_offset_min` and `result.corrections.rounding`.
+
 ---
 
 ## Historical Results (Experiment 1–7 narrative)
@@ -284,6 +331,21 @@ The 24.17 → 1.55 min headline reduction looks dramatic, but **most of the gain
 ---
 
 ## Quick Start
+
+> **For downstream apps integrating fajr:** the four-step pattern below is the canonical wiring. Skipping any step disables features fajr would otherwise provide for free (elevation accuracy, location-specific advisories, ihtiyat-aware UX). See [`examples/agiftoftime/INTEGRATION.md`](examples/agiftoftime/INTEGRATION.md) for the full integration walkthrough.
+
+### The four-step downstream-app pattern
+
+Most prayer-time apps wire up only the first two fields (lat, lon) and miss the value fajr's library design provides. The canonical pattern:
+
+1. **Request `enableHighAccuracy: true`** from the browser/native geolocation API. This is what unlocks `coords.altitude` — without it, browsers may return `null` for altitude even on devices that have a GPS altitude reading.
+2. **Pass `position.coords.altitude` to `fajr.prayerTimes({...})`** as the `elevation` parameter. Apps that pass only `lat/lon` get sea-level times silently — incorrect for any user above ~500 m (Riyadh, Tehran, Atlas / pre-Sahara cities, Sana'a, Kabul, Bogotá, Mexico City, Cape Town's Table Mountain summit, etc.). At those altitudes, sun rises 2–6+ minutes earlier and Maghrib falls 2–6+ minutes later than at sea level — material to iftar timing during Ramadan.
+3. **Render `result.notes[]` to the user** with a UI toggle alongside each entry. fajr emits scholarly-grounded advisories there: high-latitude regime warnings (|lat| ≥ 48.6° per Odeh 2009), elevation advisories (≥ 500 m, v1.5.2+), and any future location-specific flags. Each entry is a complete sentence with a wiki citation suitable for direct rendering.
+4. **If the user toggles "I follow my city's time, not my floor's"** (the Saudi/jama'ah-unity stance for elevation), recompute with `elevation: 0` to get sea-level times. fajr does not pick a side between UAE/JAKIM (apply correction) and Saudi/Umm al-Qura (decline) — the user's local mosque/scholar makes the call. Your UX surfaces that choice.
+
+This is fajr's deliberate library philosophy: **surface scholarly disagreement transparently, don't resolve it silently.** Defaults are conservative; opt-in utilities cover alternative stances; `notes[]` carries institutional context. See README sections [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151) and [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152) for the principle in action.
+
+### Install + minimal call
 
 ```bash
 npm install @tawfeeqmartin/fajr
@@ -339,6 +401,60 @@ const tarabishy = fajr.tarabishyTimes({
   latitude: 64.15, longitude: -21.94, date: new Date(),  // Reykjavik
 })
 ```
+
+### Full downstream-app pattern (recommended)
+
+Wires up all four canonical steps end-to-end. Use this as the starting template for any web/mobile app integrating fajr.
+
+```js
+import { prayerTimes } from '@tawfeeqmartin/fajr'
+
+// Step 1 — Request enableHighAccuracy so the GPS returns altitude
+navigator.geolocation.getCurrentPosition(
+  position => {
+    const { latitude, longitude, altitude, altitudeAccuracy } = position.coords
+
+    // Step 2 — Pass altitude to fajr (or 0 if unreliable / unavailable)
+    // Phone GPS altitude can be very inaccurate (±100 m+ indoors); if the
+    // browser reports altitudeAccuracy worse than 200 m, treat altitude
+    // as unreliable. altitude itself can be null on Wi-Fi-only devices.
+    const elevation = (
+      altitude != null && (altitudeAccuracy == null || altitudeAccuracy < 200)
+    ) ? altitude : 0
+
+    let times = prayerTimes({ latitude, longitude, date: new Date(), elevation })
+
+    // Step 3 — Render result.notes to the user with a toggle alongside
+    // each advisory. v1.5.2 emits "Elevation advisory:" entries when
+    // elevation ≥ 500 m, describing the institutional disagreement;
+    // "High-latitude regime:" entries fire when |lat| ≥ 48.6°.
+    for (const note of times.notes) {
+      renderAdvisoryWithToggle(note, {
+        // Step 4 — On user toggle, recompute with the alternative stance
+        onToggleOff: () => {
+          // For the elevation advisory specifically, "off" means follow
+          // the Saudi/jama'ah-unity stance (decline geometric correction).
+          // Recompute with elevation: 0 to get sea-level times.
+          times = prayerTimes({ latitude, longitude, date: new Date(), elevation: 0 })
+          rerenderPrayerCard(times)
+        }
+      })
+    }
+
+    rerenderPrayerCard(times)
+  },
+  err => {
+    // Geolocation denied / unavailable — fall back to elevation: 0
+    const times = prayerTimes({ latitude: defaultLat, longitude: defaultLng, date: new Date(), elevation: 0 })
+    rerenderPrayerCard(times)
+  },
+  { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 }
+)
+```
+
+**The same shape applies to native mobile** — replace `navigator.geolocation` with the platform GPS API (CoreLocation `desiredAccuracy = .best`, Android `LocationRequest.Builder().setPriority(PRIORITY_HIGH_ACCURACY)`), but keep the four steps identical. fajr's library API is platform-agnostic.
+
+### Other API entry points
 
 ```js
 // Qibla direction
@@ -480,10 +596,13 @@ fajr's calculation methods, scholarly classifications, and eval ground truth der
 - **Egypt — Egyptian General Authority of Survey + Dār al-Iftāʾ Egypt** — the official survey body publishes the 19.5°/17.5° angles used for the Egyptian method. Dār al-Iftāʾ uses Odeh's ICOP criterion for hilal sighting decisions. fajr auto-selects Egyptian at Egyptian coordinates and at coordinates in the country group EG/SD/LY/IQ/LB/JO/PS/SY per `methods.js`. Eval ground truth: [`eval/data/train/egypt.json`](eval/data/train/egypt.json).
 - **Türkiye — Diyanet İşleri Başkanlığı** — Republic of Türkiye's Presidency of Religious Affairs, the largest single Sunni religious authority in Eurasia. fajr auto-selects Diyanet's full method (with Hanafi Asr) for TR/AZ/KZ/UZ/TM/KG/TJ. Eval ground truth: two complementary fixtures — [`eval/data/train/turkey.json`](eval/data/train/turkey.json) (regional consensus) and [`eval/data/train/diyanet.json`](eval/data/train/diyanet.json) (Diyanet's own publishing endpoint via [ezanvakti.emushaf.net](https://ezanvakti.emushaf.net)).
 
-#### North and West Africa
+#### North-West Africa (Maghreb)
 
 - **Morocco — Ministry of Habous and Islamic Affairs (وزارة الأوقاف والشؤون الإسلامية)** — publisher of the Moroccan *imsākiyya* (annual prayer time tables) that are the authoritative reference for Moroccan Muslims. fajr ships a community-calibrated 19°/17° method that empirically reproduces the Ministry's published tables to ~1 minute (the formally-stated 18° angle diverges by ~5 minutes in the fasting-unsafe direction). Validated triply: institutional tables in [`eval/data/train/morocco.json`](eval/data/train/morocco.json), mosque-published times across five active Moroccan mosques in [`eval/data/test/mawaqit.json`](eval/data/test/mawaqit.json) (Casablanca x3, Rabat, Marrakech), and dedicated regional documentation in [`knowledge/wiki/regions/morocco.md`](knowledge/wiki/regions/morocco.md). The 19° community calibration is the subject of [Question 1 in the scholar review brief](docs/scholar-review-brief.md).
 - **Algeria, Tunisia** — institutional alignment with the Moroccan/Egyptian methods per `methods.js` regional groupings.
+
+#### Southern Africa
+
 - **South Africa — SANHA, COSSA, MJC** — the South African National Halaal Authority, Crescent Observers' Society of Southern Africa, and Muslim Judicial Council jointly oversee Islamic dates and timing for the SA Muslim community. fajr auto-selects MWL (18°/17°) at South African coordinates per the MWL regional grouping (`['GB', 'DE', 'FR', 'BE', 'NL', 'AU', 'ZA']`). South Africa is also covered in fajr's hilal geographic-diversity test set (Cape Town at 33.92°S — see [`docs/hilal-historical-analysis.md`](docs/hilal-historical-analysis.md)).
 
 #### South and Southeast Asia

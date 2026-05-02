@@ -450,9 +450,11 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'Algeria (Ministry of Religious Affairs, 18°/17°)' }
     case 'Libya':
       // No Libya-specific institutional preset documented. Awqaf timetables
-      // follow Maghreb 18°/17° convention; MWL is the multi-app default.
-      // Classification: 🟡 Limited precedent. see knowledge/wiki/regions/libya.md (TODO)
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Libya, Aladhan world default)' }
+      // align with the Egyptian regional cluster (19.5°/17.5°) per Aladhan
+      // and ITL/arabeyes — not the Maghreb MWL cluster despite geographic
+      // proximity to Tunisia/Algeria. Classification: 🟡 Limited precedent.
+      // see knowledge/wiki/regions/libya.md (TODO)
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Libya, regional convention)' }
     case 'Mauritania':
       // Mauritania (Maliki-majority): no published national preset; MWL per
       // MuslimPro/IslamicFinder default. Classification: 🟡.
@@ -502,33 +504,38 @@ function selectMethod(country, lat, coords) {
       // presence. Classification: 🟡.
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Georgia, Adjara Sunni Hanafi via Turkish institutional presence)' }
     case 'Azerbaijan':
-      // Caucasian Muslims Office (~85% Twelver Shia): Tehran method
-      // (17.7°/14° + middle-of-night). ~15% Sunni Hanafi in Lankaran/north
-      // (intra-country ikhtilaf — v1.6.2 override planned).
-      // Classification: 🟡 Limited precedent (multi-method country).
-      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Turkey (Azerbaijan, Aladhan world default)' }
+      // Caucasian Muslims Office / QMİ (~85% Twelver Shia): Tehran method
+      // (17.7°/14° + middle-of-night) — Jafari Maghrib timed to disappearance
+      // of redness in eastern sky (~5–15 min after sunset), matched
+      // numerically by Tehran's angle-pair. ~15% Sunni Hanafi in Lankaran/
+      // north — v1.7.0 city-override planned to switch them to Diyanet.
+      // Classification: 🟡→🟢 (institutional convention, Shia majority).
+      return { params: adhan.CalculationMethod.Tehran(), methodName: 'Tehran (Azerbaijan QMİ, Shia majority)' }
 
     // ─── Central Asia ─────────────────────────────────────────────────────
     case 'Tajikistan':
-      // Council of Ulema of Tajikistan (Hanafi): MWL default. Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Tajikistan, Aladhan world default)' }
+      // Council of Ulema of Tajikistan (Hanafi): MWL 18°/17° per institutional
+      // convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Tajikistan, Council of Ulema)' }
     case 'Turkmenistan':
-      // Muftiate of Turkmenistan (Hanafi): MWL default. Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Turkmenistan, Aladhan world default)' }
+      // Muftiate of Turkmenistan (Hanafi): MWL 18°/17° per institutional
+      // convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Turkmenistan, Muftiate)' }
     case 'Kyrgyzstan':
-      // Spiritual Administration of Muslims of Kyrgyzstan (Hanafi): MWL default.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Kyrgyzstan, Aladhan world default)' }
+      // Spiritual Administration of Muslims of Kyrgyzstan (Hanafi): MWL 18°/17°
+      // per institutional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kyrgyzstan, SAMK)' }
     case 'Uzbekistan':
-      // Muslim Board of Uzbekistan (Hanafi): MWL default per IslamicFinder.
-      // Note: Russia SAM 16°/15° preset exists but Uzbek Muftiate has not
-      // published a definitive preset. Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Uzbekistan, Aladhan world default)' }
+      // Muslim Board of Uzbekistan (Hanafi): MWL 18°/17° per IslamicFinder
+      // convention. Note: Russia SAM 16°/15° preset exists but Uzbek Muftiate
+      // has not published a definitive preset. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Uzbekistan, Muslim Board)' }
     case 'Kazakhstan':
       // Spiritual Administration of Muslims of Kazakhstan / DUMK (Hanafi):
-      // MWL default per multi-app convention. Some Russia-influenced regions
+      // MWL 18°/17° per multi-app convention. Some Russia-influenced regions
       // use SAMR 16°/15°; DUMK has not published a definitive angle pair.
       // Classification: 🟡.
-      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Kazakhstan, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kazakhstan, DUMK)' }
 
     // ─── Balkans ──────────────────────────────────────────────────────────
     case 'Albania':
@@ -538,15 +545,17 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Albania KMSH, Turkish institutional)' }
     case 'Kosovo':
       // Bashkësia Islame e Kosovës / BIK (Sunni Hanafi ~96%): Diyanet
-      // 18°/17° per Turkish institutional convention.
+      // 18°/17° per Turkish institutional convention. Hanafi Asr (2× shadow)
+      // is correctly applied via the Diyanet method.
       // Classification: 🟢 Established.
-      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kosovo, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Kosovo BIK, Turkish institutional)' }
     case 'Bosnia':
       // Rijaset / Islamska Zajednica u BiH (Sunni Hanafi ~51%): Diyanet
-      // 18°/17° closest published match to traditional Takvim. v1.6.2:
+      // 18°/17° closest published match to traditional Takvim. Hanafi Asr
+      // (2× shadow) correctly applied via Diyanet method. v1.6.2 follow-up:
       // validate against Rijaset's own Takvim publication; consider custom
       // offset if needed. Classification: 🟡→🟢 (regional Diyanet convention).
-      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Bosnia, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Bosnia Rijaset, Hanafi Takvim)' }
 
     // ─── NE Africa / Horn ─────────────────────────────────────────────────
     case 'Djibouti':
@@ -559,17 +568,17 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Eritrea default)' }
     case 'Somalia':
       // Ministry of Endowments and Religious Affairs (Sunni Shafi'i): MWL
-      // default per regional convention + multi-app corroboration.
+      // 18°/17° per regional convention + multi-app corroboration.
       // Classification: 🟢.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Somalia, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Somalia, Ministry of Endowments)' }
     case 'SouthSudan':
       // Small Muslim minority (~6%); no national institutional preset; MWL
       // fallback. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South Sudan fallback)' }
     case 'Ethiopia':
       // Ethiopian Islamic Affairs Supreme Council / Majlis (~34% Muslim):
-      // no specific preset; MWL per regional convention. Classification: 🟡.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Ethiopia, Aladhan world default)' }
+      // no specific preset; MWL 18°/17° per regional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Ethiopia, Majlis regional convention)' }
     case 'Sudan':
       // Egyptian General Authority of Survey method (19.5°/17.5°) — Sudan is
       // documented in the Egyptian-method regional cluster (ITL/arabeyes);
@@ -609,9 +618,11 @@ function selectMethod(country, lat, coords) {
       // ~99% Sunni Maliki: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Niger default)' }
     case 'Nigeria':
-      // Supreme Council for Islamic Affairs (Sultan of Sokoto chair):
-      // No national preset; MWL per MuslimPro Sokoto/Kano/Lagos default.
-      // Classification: 🟡→🟢 (multi-app corroboration).
+      // Supreme Council for Islamic Affairs (Sultan of Sokoto chair): no
+      // formal national preset published; MWL per MuslimPro Sokoto/Kano/
+      // Lagos multi-app convention. Classification: 🟡 (institutional
+      // citation pending — Sultan of Sokoto council has not endorsed MWL
+      // by name).
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Nigeria, Sultan of Sokoto council default)' }
     case 'Chad':
       // ~52% Sunni Maliki/Tijaniyya, West African convention (not Sudan
@@ -630,12 +641,13 @@ function selectMethod(country, lat, coords) {
       // ~7% Muslim (Sunni Shafi'i NW coast): MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Madagascar default)' }
     case 'Kenya':
-      // SUPKEM / Sunni Shafi'i ~11%: MWL default. Classification: 🟡.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Kenya, Aladhan world default)' }
-    case 'Tanzania':
-      // BAKWATA / Sunni Shafi'i ~35% (Zanzibar ~99%): MWL default.
+      // SUPKEM / Sunni Shafi'i ~11%: MWL 18°/17° per institutional convention.
       // Classification: 🟡.
-      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Tanzania, Aladhan world default)' }
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Kenya, SUPKEM)' }
+    case 'Tanzania':
+      // BAKWATA / Sunni Shafi'i ~35% (Zanzibar ~99%): MWL 18°/17° per
+      // institutional convention. Classification: 🟡.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Tanzania, BAKWATA)' }
     case 'Mozambique':
       // CISLAMO / Sunni Shafi'i ~18%: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Mozambique default)' }
@@ -710,12 +722,73 @@ function selectMethod(country, lat, coords) {
  * @param {string} [params.method]       Override auto-detected method
  * @returns {object} Prayer times with metadata
  */
+/**
+ * Per-prayer ihtiyat-aware minute rounding.
+ *
+ * 🟢 Established — direct application of classical fiqh's *yaqeen* (certainty)
+ * principle to display-time rounding. See knowledge/wiki/fiqh/scholarly-oversight.md
+ * and CLAUDE.md → "Islamic accuracy principles → Ihtiyat".
+ *
+ * adhan.js's default rounding is round-to-nearest-minute, which produces a
+ * displayed minute on the unsafe side of the underlying solar event ~50% of
+ * the time. fajr's prayer-time fields are interpreted as **prayer-start /
+ * window-close events** (the canonical interpretation matching classical
+ * Imsakiyya tables), so the rounding direction for each prayer is the one
+ * that keeps the displayed minute on the prayer-validity-safe side:
+ *
+ *   Fajr     → UP   (later).    Prayer must start AFTER actual dawn — display later
+ *                                so users praying on the displayed minute pray
+ *                                inside the valid window.
+ *   Shuruq   → DOWN (earlier).  Fajr-window-close event — display earlier so
+ *                                the apparent window-close arrives BEFORE actual
+ *                                sunrise. Users see the window as already closing
+ *                                a few seconds early — prayer-safe.
+ *   Dhuhr    → UP   (later).    Sun must have crossed the meridian.
+ *   Asr      → UP   (later).    Shadow must have reached the Asr length.
+ *   Maghrib  → UP   (later).    Sun must have fully set — also iftar-yaqeen safe.
+ *   Isha     → UP   (later).    Twilight must have ended.
+ *
+ * Dual-ihtiyat note for fasting (imsak): the canonical fiqh resolution is to
+ * compute imsak as Fajr − 10 min (rounded DOWN), separately from the Fajr
+ * prayer-start field. fajr's API does not expose imsak directly; downstream
+ * apps wanting to display fast-stop time should compute it from the returned
+ * Fajr value and apply DOWN-rounding themselves. This matches how every
+ * Imsakiyya printed in Mecca/Medina/Cairo structures the table — separate
+ * Fajr and Imsak columns. Rounding Fajr itself DOWN would invalidate the
+ * prayer-start interpretation by potentially displaying a time before actual
+ * astronomical dawn.
+ *
+ * @param {Date} date  Sub-minute-precision Date from adhan.js (rounding=None).
+ * @param {'up'|'down'} dir
+ * @returns {Date} Date with seconds=0 and minute adjusted per direction.
+ */
+function roundIhtiyat(date, dir) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return date
+  const seconds = date.getUTCSeconds()
+  const ms = date.getUTCMilliseconds()
+  if (seconds === 0 && ms === 0) return date
+  const out = new Date(date.getTime())
+  if (dir === 'up') {
+    // Advance to the next whole minute (any fractional second rounds up).
+    out.setUTCSeconds(60, 0)
+  } else {
+    // Truncate to the current whole minute (fractional second discarded).
+    out.setUTCSeconds(0, 0)
+  }
+  return out
+}
+
 export function prayerTimes({ latitude, longitude, date, elevation = 0, method }) {
   const coords = new adhan.Coordinates(latitude, longitude)
 
   // 🟢 Established: Region-aware method selection
   const country = detectCountry(latitude, longitude)
   const { params, methodName } = selectMethod(country, latitude, coords)
+
+  // Ask adhan.js for unrounded (seconds-precision) times. We apply our own
+  // per-prayer ihtiyat-aware rounding below — see roundIhtiyat() docstring.
+  // This overrides whatever rounding the selected method preset specified.
+  params.rounding = adhan.Rounding.None
 
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
   const times = new adhan.PrayerTimes(coords, date, params)
@@ -735,29 +808,90 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
     )
   }
 
+  // Elevation advisory (v1.5.2). When the caller passes a non-trivial
+  // elevation (≥ 500 m, where the geometric horizon dip is > 2 min on
+  // Shuruq/Maghrib), surface a notes[] entry describing the institutional
+  // disagreement so the consumer can make an informed choice. The dip is
+  // NOT applied automatically — fajr leaves the correction off by default
+  // (matching Saudi/Umm al-Qura's jama'ah-unity stance) but documents that
+  // UAE / Malaysia JAKIM apply it. Apps wanting to apply pass the result
+  // through applyElevationCorrection(times, elevation, latitude).
+  //
+  // 500 m threshold is chosen because:
+  //   • below 200 m, the dip is < 1 min (sub-prayer-buffer noise)
+  //   • 200–500 m is 1–2 min (within institutional ihtiyati buffers)
+  //   • 500–1500 m is 2–5 min (where institutional bodies have weighed in)
+  //   • > 1500 m is > 5 min (definitely worth flagging)
+  // The threshold also tolerates phone-GPS altitude noise (typically
+  // ±10–30 m) without flickering the advisory state.
+  if (elevation >= 500) {
+    const dipMin = computeElevationDipMinutes(elevation, latitude)
+    notes.push(
+      `Elevation advisory: altitude ${Math.round(elevation)} m is above the ` +
+      `500 m threshold where the geometric horizon dip becomes practically ` +
+      `significant — sun rises ~${dipMin.toFixed(1)} min EARLIER and Maghrib ` +
+      `falls ~${dipMin.toFixed(1)} min LATER than at sea level. Institutional ` +
+      `stances differ: UAE (Burj Khalifa fatwa, IACAD Dulook DXB) and Malaysia ` +
+      `JAKIM apply this correction; Saudi Arabia / Umm al-Qura declines it for ` +
+      `jama'ah unity. Because you passed a non-zero elevation, fajr's public ` +
+      `\`prayerTimes\` wrapper has applied the correction (apply-stance default ` +
+      `when elevation is supplied). To compute sea-level times instead, call ` +
+      `again with \`elevation: 0\`. The app/user should choose based on local ` +
+      `mosque practice. See knowledge/wiki/corrections/elevation.md.`
+    )
+  }
+
+  // Per-prayer ihtiyat rounding — see roundIhtiyat() docstring above.
+  const fajr_   = roundIhtiyat(times.fajr,    'up')
+  const shuruq_ = roundIhtiyat(times.sunrise, 'down')
+  const dhuhr_  = roundIhtiyat(times.dhuhr,   'up')
+  const asr_    = roundIhtiyat(times.asr,     'up')
+  const maghrib_= roundIhtiyat(times.maghrib, 'up')
+  const isha_   = roundIhtiyat(times.isha,    'up')
+  // Sunset is the astronomical event coinciding with Maghrib's start in most
+  // methods. Round UP — same direction as Maghrib so the two fields stay
+  // consistent for methods where the only difference is a post-sunset offset
+  // (some Diyanet variants).
+  const sunset_ = roundIhtiyat(times.sunset,  'up')
+
+  // Imsak — classical fasting-yaqeen field. Computed as the astronomical
+  // (sub-minute-precision) Fajr minus IMSAK_OFFSET_MIN, then rounded DOWN
+  // for fasting-validity safety. The 10-minute default offset is the
+  // classical convention from Imsakiyya tables published in Mecca, Medina,
+  // and Cairo for over a century. Apps wanting a different offset can
+  // recompute as Fajr − N minutes downstream.
+  //
+  // 🟢 Established — universal Imsakiyya convention.
+  const IMSAK_OFFSET_MIN = 10
+  const imsakRaw = new Date(times.fajr.getTime() - IMSAK_OFFSET_MIN * 60 * 1000)
+  const imsak_   = roundIhtiyat(imsakRaw, 'down')
+
   let result = {
-    fajr:    times.fajr,
-    shuruq:  times.sunrise,
+    imsak:   imsak_,
+    fajr:    fajr_,
+    shuruq:  shuruq_,
     // `sunrise` is an English-language alias for `shuruq`, kept in sync.
     // Lets adhan.js consumers migrate to fajr without a field-rename ripple
     // through their downstream display logic. The two fields point at the
     // same Date instance — modify one or the other, never both.
-    sunrise: times.sunrise,
-    dhuhr:   times.dhuhr,
-    asr:     times.asr,
-    maghrib: times.maghrib,
-    isha:    times.isha,
+    sunrise: shuruq_,
+    dhuhr:   dhuhr_,
+    asr:     asr_,
+    maghrib: maghrib_,
+    isha:    isha_,
     // Astronomical sunset, distinct from `maghrib` for methods that apply
     // a post-sunset offset (e.g. some Diyanet variants). For most methods
     // these are identical to within a second. adhan.js exposes both, so
     // fajr does too — back-compat for adhan-migrating apps that tracked
     // them as separate fields.
-    sunset:  times.sunset,
+    sunset:  sunset_,
     method:  methodName,
     notes,
     corrections: {
       elevation: false,
       refraction: 'standard (0.833°)',
+      rounding:  'ihtiyat-aware per-prayer (Imsak/Shuruq DOWN; Fajr/Dhuhr/Asr/Maghrib/Isha/Sunset UP)',
+      imsak_offset_min: 10,
     },
   }
 
@@ -771,11 +905,35 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
 }
 
 /**
+ * Pure helper — compute the elevation horizon-dip correction in minutes.
+ *
+ * Geometric horizon dip: dip° = arccos(R / (R + h))
+ * Time conversion at latitude φ: minutes = dip° × 4 / cos(φ)
+ *
+ * Used by applyElevationCorrection (which applies it) AND by prayerTimes
+ * (which surfaces it as a `notes[]` advisory when elevation ≥ 500 m).
+ *
+ * @param {number} elevation  Meters above sea level
+ * @param {number} latitude   Degrees (for latitude correction of time offset)
+ * @returns {number} Correction magnitude in minutes (always positive)
+ */
+export function computeElevationDipMinutes(elevation, latitude = 0) {
+  if (!elevation || elevation <= 0) return 0
+  const EARTH_RADIUS_M = 6371000
+  const horizonDipDeg = Math.acos(EARTH_RADIUS_M / (EARTH_RADIUS_M + elevation)) * (180 / Math.PI)
+  return horizonDipDeg * 4 / Math.cos(latitude * Math.PI / 180)
+}
+
+/**
  * Apply elevation-based horizon correction to a set of prayer times.
  *
- * 🟡 Limited precedent: Geometry is classical; application to Islamic prayer
- * times has precedent in classical muwaqqit texts but is not adopted by any
- * major institution. See wiki/corrections/elevation.md.
+ * 🟡→🟢 Approaching established: Geometry is classical; institutional
+ * precedent includes UAE Grand Mufti's Burj Khalifa fatwa (IACAD Dulook DXB
+ * publishes floor-stratified times) and Malaysia JAKIM's systematic
+ * topographic correction. Saudi Arabia / Umm al-Qura explicitly DECLINES
+ * the correction, prioritising jama'ah unity (high-rise residents pray with
+ * their city, not their floor). fajr leaves it OFF by default; pass through
+ * this function to apply. See wiki/corrections/elevation.md.
  *
  * @param {object} times      Output from prayerTimes()
  * @param {number} elevation  Meters above sea level
@@ -785,25 +943,23 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
 export function applyElevationCorrection(times, elevation, latitude = 0) {
   if (!elevation || elevation <= 0) return times
 
-  // Geometric horizon dip: arccos(R / (R + h)) in degrees
-  // 🟡 Limited precedent — see wiki/corrections/elevation.md
-  const EARTH_RADIUS_M = 6371000
-  const horizonDipDeg = Math.acos(EARTH_RADIUS_M / (EARTH_RADIUS_M + elevation)) * (180 / Math.PI)
-
-  // Latitude correction: at latitude φ, sun crosses horizon at rate 4/cos(φ) min per degree
-  const correctionMin = horizonDipDeg * 4 / Math.cos(latitude * Math.PI / 180)
+  const correctionMin = computeElevationDipMinutes(elevation, latitude)
   const corrMs = correctionMin * 60 * 1000
 
   const adjusted = { ...times }
-  // Shuruq (sunrise) is earlier at elevation — depressed horizon
-  adjusted.shuruq  = new Date(times.shuruq.getTime()  - corrMs)
+  // Shuruq (sunrise) is earlier at elevation — depressed horizon. Re-apply
+  // ihtiyat-aware DOWN rounding so the post-correction Date stays on whole
+  // minutes (input was rounded by prayerTimes; sub-minute shift would
+  // reintroduce fractional seconds).
+  adjusted.shuruq  = roundIhtiyat(new Date(times.shuruq.getTime()  - corrMs), 'down')
   adjusted.sunrise = adjusted.shuruq    // keep alias in sync with shuruq
   // Maghrib (sunset) is later at elevation. Astronomical `sunset` shifts by
   // the same geometric amount as `maghrib` for methods where they coincide;
   // for methods with a maghrib offset we still want the astronomical sunset
-  // itself elevation-corrected, so update both.
-  adjusted.maghrib = new Date(times.maghrib.getTime() + corrMs)
-  adjusted.sunset  = new Date(times.sunset.getTime()  + corrMs)
+  // itself elevation-corrected, so update both. Re-apply UP rounding for
+  // both per the v1.5.1 ihtiyat principle.
+  adjusted.maghrib = roundIhtiyat(new Date(times.maghrib.getTime() + corrMs), 'up')
+  adjusted.sunset  = roundIhtiyat(new Date(times.sunset.getTime()  + corrMs), 'up')
   adjusted.corrections = { ...times.corrections, elevation: true, elevationCorrectionMin: +correctionMin.toFixed(2) }
 
   return adjusted

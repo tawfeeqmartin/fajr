@@ -1,6 +1,6 @@
 {
   "name": "@tawfeeqmartin/fajr",
-  "version": "1.6.0",
+  "version": "1.6.2",
   "description": "High-accuracy Islamic prayer time library combining NASA/JPL astronomical algorithms with classical Islamic scholarship",
   "main": "src/index.js",
   "types": "src/index.d.ts",

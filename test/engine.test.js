@@ -104,6 +104,31 @@ describe('prayerTimes invariants', () => {
     }
   })
 
+  it('exposes `imsak` as a Date 10 min before Fajr, rounded DOWN for fasting yaqeen (v1.5.1)', () => {
+    const result = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    expect(result.imsak).toBeInstanceOf(Date)
+    expect(Number.isFinite(result.imsak.getTime())).toBe(true)
+    // imsak must be earlier than Fajr by at least 9 minutes (default 10,
+    // with rounding-direction wiggle of up to 1 minute in either direction).
+    const gapMin = (result.fajr.getTime() - result.imsak.getTime()) / 60000
+    expect(gapMin).toBeGreaterThanOrEqual(9)
+    expect(gapMin).toBeLessThanOrEqual(11)
+    // imsak must be a whole minute (seconds=0).
+    expect(result.imsak.getUTCSeconds()).toBe(0)
+  })
+
+  it('applies ihtiyat-aware per-prayer rounding direction (v1.5.1)', () => {
+    const result = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
+    // All returned times round to whole minutes (seconds=0).
+    for (const p of ['imsak', 'fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha', 'sunset']) {
+      expect(result[p].getUTCSeconds()).toBe(0)
+    }
+    // Corrections metadata exposes the rounding policy and imsak offset.
+    expect(typeof result.corrections.rounding).toBe('string')
+    expect(result.corrections.rounding).toMatch(/ihtiyat/i)
+    expect(result.corrections.imsak_offset_min).toBe(10)
+  })
+
   it('returns a method label string', () => {
     const result = prayerTimes({ latitude: 21.42, longitude: 39.83, date: TEST_DATE })
     expect(typeof result.method).toBe('string')
@@ -130,6 +155,30 @@ describe('prayerTimes invariants', () => {
     const result = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
     expect(Array.isArray(result.notes)).toBe(true)
     expect(result.notes).toEqual([])
+  })
+
+  it('does NOT emit elevation advisory below 500 m threshold (v1.5.2)', () => {
+    // Casablanca, ~3m — no elevation note expected
+    const result = prayerTimes({ latitude: 33.5731, longitude: -7.5898, date: TEST_DATE, elevation: 3 })
+    const elevNotes = result.notes.filter(n => /^Elevation advisory/.test(n))
+    expect(elevNotes.length).toBe(0)
+  })
+
+  it('emits elevation advisory at ≥500 m with institutional context (v1.5.2)', () => {
+    // Riyadh, 612 m — advisory should fire
+    const result = prayerTimes({ latitude: 24.7136, longitude: 46.6753, date: TEST_DATE, elevation: 612 })
+    const elevNote = result.notes.find(n => /^Elevation advisory/.test(n))
+    expect(elevNote).toBeDefined()
+    // Advisory should mention the institutional disagreement explicitly
+    expect(elevNote).toMatch(/UAE|JAKIM/)
+    expect(elevNote).toMatch(/Saudi|Umm al-Qura/)
+    expect(elevNote).toMatch(/jama'ah/)
+    expect(elevNote).toMatch(/612/)
+    // High-elevation case scales up
+    const sanaa = prayerTimes({ latitude: 15.3694, longitude: 44.1910, date: TEST_DATE, elevation: 2250 })
+    const sanaaNote = sanaa.notes.find(n => /^Elevation advisory/.test(n))
+    expect(sanaaNote).toBeDefined()
+    expect(sanaaNote).toMatch(/2250/)
   })
 
   it('emits high-latitude advisory at |lat| ≥ 48.6° per Odeh 2009', () => {

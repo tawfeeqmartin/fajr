@@ -12,7 +12,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-qm-lslm-casablanca-20320-morocco",
@@ -22,7 +23,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-bab-arrahmane-casablanca-20050-morocco",
@@ -32,7 +34,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lm-masjid-ummah-rabat-10130-morocco",
@@ -42,7 +45,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lthr-marrakech-40170-morocco",
@@ -52,7 +56,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-sydy-qsm-tanger-90000-morocco",
@@ -62,7 +67,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-hjryyn-tnj-tanger-90000-morocco",
@@ -72,7 +78,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "masjid-al-falah-nador-66000-morocco",
@@ -82,7 +89,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "lmoubacharine-biljna-oujda-60020-morocco",
@@ -92,7 +100,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco",
@@ -102,7 +111,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "masjid-aamrou-bn-laas-fes-30000-morocco-1",
@@ -114,7 +124,8 @@
       "searchKeyword": "fez",
       "$searchKeyword_reason": "Mawaqit search for 'fes' returns French mosques matching 'frais'/'compagnons'; 'fez' disambiguates.",
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lhsn-ryd-llymwn-fes-30000-morocco",
@@ -126,7 +137,8 @@
       "searchKeyword": "fez",
       "$searchKeyword_reason": "Mawaqit search for 'fes' returns French mosques matching 'frais'/'compagnons'; 'fez' disambiguates.",
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-elamine-meknes-50000-morocco",
@@ -136,7 +148,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco",
@@ -146,7 +159,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1",
@@ -156,7 +170,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-imam-tarmidi-settat-26000-morocco",
@@ -166,7 +181,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lsf-sale-11000-morocco",
@@ -176,7 +192,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lqdsy-kenitra-14000-morocco",
@@ -186,7 +203,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-blkhy-safi-46000-morocco",
@@ -196,7 +214,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lrwnq-essaouira-44000-morocco",
@@ -206,7 +225,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-hl-sws-agadir-80000-morocco",
@@ -216,7 +236,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-wld-brhym-taroudant-83300-morocco",
@@ -226,7 +247,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lqds-masjid-elqods-ouarzazate-45000-morocco",
@@ -237,7 +259,8 @@
       "utcOffset": 1,
       "elevation_m": 1135,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco",
@@ -248,7 +271,8 @@
       "utcOffset": 1,
       "elevation_m": 1135,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "masjid-marzouga-lgharbia-errachidia-52202-morocco",
@@ -259,7 +283,207 @@
       "utcOffset": 1,
       "elevation_m": 1037,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
+    },
+    {
+      "slug": "jamii-ibrahim-lkhalil-taourirt-65000-morocco-1",
+      "city": "Taourirt",
+      "country": "Morocco",
+      "region": "Morocco / Eastern",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-brahimm-lkhlalil-berrchid-26100-morocco",
+      "city": "Berrechid",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (Casablanca metro)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-bd-llh-bn-ysyn-temara-12123-morocco",
+      "city": "Temara",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-zgr-sidi-kacem-16000-morocco",
+      "city": "Sidi Kacem",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-lmm-lbkhry-sidi-kacem-16000-morocco",
+      "city": "Sidi Kacem",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "masjid-lhouda-fkih-ben-salah-23200-morocco",
+      "city": "Fquih Ben Salah",
+      "country": "Morocco",
+      "region": "Morocco / Interior",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-ahel-sefrou-sefrou-31000-morocco",
+      "city": "Sefrou",
+      "country": "Morocco",
+      "region": "Morocco / Interior / Atlas-foothill",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-m-dh-bn-jbl-tl-ynt-timoulay-izdar-guelmim-81053-morocco",
+      "city": "Guelmim",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-yt-hdw-tgblt-zkwr-zagora-49000-morocco",
+      "city": "Zagora",
+      "country": "Morocco",
+      "region": "Morocco / Sahara",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-icherban-tinghir-45800-morocco",
+      "city": "Tinghir",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-alhidaya-tinghir-45800-morocco",
+      "city": "Tinghir",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-lhmry-erfoud-52200-morocco",
+      "city": "Erfoud",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation pre-Sahara",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-mwly-slymn-erfoud-52200-morocco",
+      "city": "Erfoud",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation pre-Sahara",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-universite-alakhawayn-ifrane-53000-morocco",
+      "city": "Ifrane",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "elevation_m": 1665,
+      "iconic": false,
+      "references": [
+        "Al Akhawayn University in Ifrane — flagship Moroccan English-medium liberal-arts university (founded 1995)"
+      ],
+      "corpus": "test_extended",
+      "searchKeyword": "53000 morocco",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "masjid-lryad-midelt-54350-morocco",
+      "city": "Midelt",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "elevation_m": 1488,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended",
+      "searchKeyword": "midelt 54350",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "msjd-lbrr-nzkn-86150-morocco",
+      "city": "Inezgane",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended",
+      "searchKeyword": "nzkn 86150",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "msjd-bdr-msdwr-nzkn-86350-morocco",
+      "city": "Inezgane",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended",
+      "searchKeyword": "nzkn 86350",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
     },
     {
       "slug": "mosquee-de-frais-vallon-marseille-13013-france-1",
@@ -269,7 +493,8 @@
       "timezone": "Europe/Paris",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "les-compagnons-limoges-87000-france-1",
@@ -279,7 +504,8 @@
       "timezone": "Europe/Paris",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "association-des-musulmans-des-coteaux-mulhouse",
@@ -289,7 +515,8 @@
       "timezone": "Europe/Paris",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "dar-ul-quran-london-london-nw1-1hw-united-kingdom",
@@ -299,7 +526,8 @@
       "timezone": "Europe/London",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "msjd-l-lm-lnf-nouveau-caire-4710001-egypt",
@@ -309,7 +537,8 @@
       "timezone": "Africa/Cairo",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "msjd-sydy-qwysm-tunis-1006-tunisia",
@@ -319,7 +548,8 @@
       "timezone": "Africa/Tunis",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "masjid-abi-bakr-lsidiq-algiers-16200-algeria",
@@ -329,7 +559,8 @@
       "timezone": "Africa/Algiers",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar",
@@ -339,7 +570,8 @@
       "timezone": "Asia/Qatar",
       "utcOffset": 3,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait",
@@ -349,7 +581,8 @@
       "timezone": "Asia/Kuwait",
       "utcOffset": 3,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "jawharah-taybah-dammam-32275-saudi-arabia",
@@ -359,7 +592,8 @@
       "timezone": "Asia/Riyadh",
       "utcOffset": 3,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "attaufiq-cptiv-jakarta-dki-jakarta-10510-indonesia",
@@ -369,7 +603,8 @@
       "timezone": "Asia/Jakarta",
       "utcOffset": 7,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore",
@@ -379,7 +614,8 @@
       "timezone": "Asia/Singapore",
       "utcOffset": 8,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2",
@@ -389,7 +625,1542 @@
       "timezone": "Asia/Kuala_Lumpur",
       "utcOffset": 8,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-e-ammar-ahle-hadith-bangalore-560032-india",
+      "city": "Bangalore",
+      "country": "India",
+      "region": "Diaspora / South Asia (India)",
+      "timezone": "Asia/Kolkata",
+      "utcOffset": 5.5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-e-touheed-bangalore-560016-india",
+      "city": "Bangalore",
+      "country": "India",
+      "region": "Diaspora / South Asia (India)",
+      "timezone": "Asia/Kolkata",
+      "utcOffset": 5.5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-talha-lucknow-226021-india",
+      "city": "Lucknow",
+      "country": "India",
+      "region": "Diaspora / South Asia (India)",
+      "timezone": "Asia/Kolkata",
+      "utcOffset": 5.5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "al-towba-masjid-jaamuuq-1000-ethiopia",
+      "city": "Jaamuuq",
+      "country": "Ethiopia",
+      "region": "Diaspora / Horn of Africa (Ethiopia)",
+      "timezone": "Africa/Addis_Ababa",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "moscow-cathedral-mosque-moskva-129090-russia",
+      "city": "Moscow",
+      "country": "Russia",
+      "region": "Diaspora / Russia (European)",
+      "timezone": "Europe/Moscow",
+      "utcOffset": 3,
+      "iconic": true,
+      "references": [
+        "Moscow Cathedral Mosque (1904, rebuilt 2015) — flagship Russian Sunni mosque"
+      ],
+      "corpus": "test"
+    },
+    {
+      "slug": "memorial-mosque-moscow-moskva-121096-russia",
+      "city": "Moscow",
+      "country": "Russia",
+      "region": "Diaspora / Russia (European)",
+      "timezone": "Europe/Moscow",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mechet-tsentr-kamaz-nazran-386101-russia",
+      "city": "Nazran (Ingushetia)",
+      "country": "Russia",
+      "region": "Diaspora / Russia (North Caucasus)",
+      "timezone": "Europe/Moscow",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "386101",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "alburkent-dzhuma-mechet-alburikent-367026-russia",
+      "city": "Alburikent (Dagestan)",
+      "country": "Russia",
+      "region": "Diaspora / Russia (North Caucasus)",
+      "timezone": "Europe/Moscow",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "367026",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "masjid-fatimah-rua-monomotapa-3100-nampula-mozambique",
+      "city": "Nampula",
+      "country": "Mozambique",
+      "region": "Diaspora / Southeast Africa (Mozambique)",
+      "timezone": "Africa/Maputo",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "grande-mosquee-de-paris",
+      "city": "Paris",
+      "country": "France",
+      "region": "Diaspora / Western Europe (France)",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": true,
+      "references": [
+        "Grande Mosquée de Paris (1926) — flagship Maliki reference for French Islam, designed by Robert Fournez/Maurice Tranchant de Lunel"
+      ],
+      "corpus": "test"
+    },
+    {
+      "slug": "grande-mosquee-de-lyon-lyon-69008-france",
+      "city": "Lyon",
+      "country": "France",
+      "region": "Diaspora / Western Europe (France)",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "grande-mosquee-de-lille-lille-59000-france",
+      "city": "Lille",
+      "country": "France",
+      "region": "Diaspora / Western Europe (France)",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mosquee-quba-neudorf-strasbourg-67100-france",
+      "city": "Strasbourg",
+      "country": "France",
+      "region": "Diaspora / Western Europe (France)",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mosquee-al-fath-toulouse-31200-france",
+      "city": "Toulouse",
+      "country": "France",
+      "region": "Diaspora / Western Europe (France)",
+      "timezone": "Europe/Paris",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "al-sunnah-mosque-manchester-manchester-m8-9pb-united-kingdom",
+      "city": "Manchester",
+      "country": "United Kingdom",
+      "region": "Diaspora / Western Europe (UK)",
+      "timezone": "Europe/London",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "south-birmingham-central-masjid-birmingham-b139ls-united-kingdom",
+      "city": "Birmingham",
+      "country": "United Kingdom",
+      "region": "Diaspora / Western Europe (UK)",
+      "timezone": "Europe/London",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "markaz-quba-islamic-centre-leicester-le2-0nq-united-kingdom",
+      "city": "Leicester",
+      "country": "United Kingdom",
+      "region": "Diaspora / Western Europe (UK)",
+      "timezone": "Europe/London",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jamiyat-tablighul-islam-bradford-bd4-7hx-united-kingdom",
+      "city": "Bradford",
+      "country": "United Kingdom",
+      "region": "Diaspora / Western Europe (UK)",
+      "timezone": "Europe/London",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "berlin-mosque-berlin-10713-germany",
+      "city": "Berlin",
+      "country": "Germany",
+      "region": "Diaspora / Western Europe (Germany)",
+      "timezone": "Europe/Berlin",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "rahma-moschee-msjd-lrhm-munich-81549-germany",
+      "city": "Munich",
+      "country": "Germany",
+      "region": "Diaspora / Western Europe (Germany)",
+      "timezone": "Europe/Berlin",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "abu-hanifa-moschee-hamburg-hamburg-20537-germany",
+      "city": "Hamburg",
+      "country": "Germany",
+      "region": "Diaspora / Western Europe (Germany)",
+      "timezone": "Europe/Berlin",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "bosniakisches-kulturzentrum-frankfurt-frankfurt-60327-germany",
+      "city": "Frankfurt",
+      "country": "Germany",
+      "region": "Diaspora / Western Europe (Germany)",
+      "timezone": "Europe/Berlin",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-imam-abu-hanifa-amsterdam-amsterdam-1032-jz-netherlands",
+      "city": "Amsterdam",
+      "country": "Netherlands",
+      "region": "Diaspora / Western Europe (Netherlands)",
+      "timezone": "Europe/Amsterdam",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "pakistan-islamic-centre-rotterdam-rotterdam-3014-ed-netherlands",
+      "city": "Rotterdam",
+      "country": "Netherlands",
+      "region": "Diaspora / Western Europe (Netherlands)",
+      "timezone": "Europe/Amsterdam",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "utrecht-ulu-moskee-utrecht-3531-bx-netherlands",
+      "city": "Utrecht",
+      "country": "Netherlands",
+      "region": "Diaspora / Western Europe (Netherlands)",
+      "timezone": "Europe/Amsterdam",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mosquee-ulu-camii-bruxelles-1000-belgium",
+      "city": "Brussels",
+      "country": "Belgium",
+      "region": "Diaspora / Western Europe (Belgium)",
+      "timezone": "Europe/Brussels",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "ulu camii bruxelles",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "iccum-antwerp-2050-belgium",
+      "city": "Antwerp",
+      "country": "Belgium",
+      "region": "Diaspora / Western Europe (Belgium)",
+      "timezone": "Europe/Brussels",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-at-taqwa-madrid-28012-spain",
+      "city": "Madrid",
+      "country": "Spain",
+      "region": "Diaspora / Iberia (Spain)",
+      "timezone": "Europe/Madrid",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-lrhm-mezquita-rahma-barcelona-08014-spain",
+      "city": "Barcelona",
+      "country": "Spain",
+      "region": "Diaspora / Iberia (Spain)",
+      "timezone": "Europe/Madrid",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "gran-mezquita-de-valencia-valencia-46021-spain",
+      "city": "Valencia",
+      "country": "Spain",
+      "region": "Diaspora / Iberia (Spain)",
+      "timezone": "Europe/Madrid",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "moschea-al-manar-roma-00133-italy",
+      "city": "Rome",
+      "country": "Italy",
+      "region": "Diaspora / Southern Europe (Italy)",
+      "timezone": "Europe/Rome",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "lmrkz-lslmy-bmylnw-w-lwmbrdy-segrate-milano-20054-italy",
+      "city": "Milan",
+      "country": "Italy",
+      "region": "Diaspora / Southern Europe (Italy)",
+      "timezone": "Europe/Rome",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "comunita-islamica-fajr-milano-20139-italy",
+      "city": "Milan",
+      "country": "Italy",
+      "region": "Diaspora / Southern Europe (Italy)",
+      "timezone": "Europe/Rome",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "islamic-center-i-malmo-malmo-212-37-sweden",
+      "city": "Malmö",
+      "country": "Sweden",
+      "region": "Diaspora / Nordic (Sweden)",
+      "timezone": "Europe/Stockholm",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "stenhagensmoske-uppsala-75266-sweden",
+      "city": "Uppsala",
+      "country": "Sweden",
+      "region": "Diaspora / Nordic (Sweden) / High-latitude",
+      "timezone": "Europe/Stockholm",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "oslo-islamic-center-oslo-0190-norway",
+      "city": "Oslo",
+      "country": "Norway",
+      "region": "Diaspora / Nordic (Norway) / High-latitude",
+      "timezone": "Europe/Oslo",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "islamisches-zentrum-al-rahma-zurich-8048-switzerland",
+      "city": "Zurich",
+      "country": "Switzerland",
+      "region": "Diaspora / Western Europe (Switzerland)",
+      "timezone": "Europe/Zurich",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "fondation-culturelle-islamique-de-geneve-geneve-1209-switzerland",
+      "city": "Geneva",
+      "country": "Switzerland",
+      "region": "Diaspora / Western Europe (Switzerland)",
+      "timezone": "Europe/Zurich",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-arrahma-bale-4057-switzerland",
+      "city": "Basel",
+      "country": "Switzerland",
+      "region": "Diaspora / Western Europe (Switzerland)",
+      "timezone": "Europe/Zurich",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "muslimisches-zentrum-wien-vienna-1200-austria",
+      "city": "Vienna",
+      "country": "Austria",
+      "region": "Diaspora / Central Europe (Austria)",
+      "timezone": "Europe/Vienna",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "subul-el-salam-moschee-msjd-sbl-lslm-graz-8010-austria",
+      "city": "Graz",
+      "country": "Austria",
+      "region": "Diaspora / Central Europe (Austria)",
+      "timezone": "Europe/Vienna",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "iman-moske-odense-5240-denmark",
+      "city": "Odense",
+      "country": "Denmark",
+      "region": "Diaspora / Nordic (Denmark)",
+      "timezone": "Europe/Copenhagen",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "yunus-emre-camii-horsens-8700-denmark",
+      "city": "Horsens",
+      "country": "Denmark",
+      "region": "Diaspora / Nordic (Denmark)",
+      "timezone": "Europe/Copenhagen",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "marsden-park-masjid-sydney-2765-australia",
+      "city": "Sydney",
+      "country": "Australia",
+      "region": "Diaspora / Oceania (Australia)",
+      "timezone": "Australia/Sydney",
+      "utcOffset": 10,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "al-bayyinah-islamic-centre-melbourne-3175-australia",
+      "city": "Melbourne",
+      "country": "Australia",
+      "region": "Diaspora / Oceania (Australia)",
+      "timezone": "Australia/Melbourne",
+      "utcOffset": 10,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "moorooka-mosque-brisbane-4105-australia",
+      "city": "Brisbane",
+      "country": "Australia",
+      "region": "Diaspora / Oceania (Australia)",
+      "timezone": "Australia/Brisbane",
+      "utcOffset": 10,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "darussalam-toronto-m9v-3b5-canada",
+      "city": "Toronto",
+      "country": "Canada",
+      "region": "Diaspora / North America (Canada)",
+      "timezone": "America/Toronto",
+      "utcOffset": -4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "ottawa-main-mosque-oma-ottawa-k1y-0m1-canada",
+      "city": "Ottawa",
+      "country": "Canada",
+      "region": "Diaspora / North America (Canada)",
+      "timezone": "America/Toronto",
+      "utcOffset": -4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "iqra-laval-h7v-2v5-canada",
+      "city": "Laval",
+      "country": "Canada",
+      "region": "Diaspora / North America (Canada)",
+      "timezone": "America/Toronto",
+      "utcOffset": -4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "edmonton-blue-mosque-edmonton-t5p-0t7-canada",
+      "city": "Edmonton",
+      "country": "Canada",
+      "region": "Diaspora / North America (Canada)",
+      "timezone": "America/Edmonton",
+      "utcOffset": -6,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "assafa-islamic-center-new-york-ny-10002-united-states",
+      "city": "New York",
+      "country": "United States",
+      "region": "Diaspora / North America (USA)",
+      "timezone": "America/New_York",
+      "utcOffset": -4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mishkah-masjid-houston-77054-united-states",
+      "city": "Houston",
+      "country": "United States",
+      "region": "Diaspora / North America (USA)",
+      "timezone": "America/Chicago",
+      "utcOffset": -5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-alamin-community-center-philadelphia-19143-united-states",
+      "city": "Philadelphia",
+      "country": "United States",
+      "region": "Diaspora / North America (USA)",
+      "timezone": "America/New_York",
+      "utcOffset": -4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-johor-narathiwat-96220-thailand",
+      "city": "Narathiwat",
+      "country": "Thailand",
+      "region": "Diaspora / SE Asia minority (Thailand south)",
+      "timezone": "Asia/Bangkok",
+      "utcOffset": 7,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-jamaiyah-aljakani-naratiwas-96000-thailand",
+      "city": "Narathiwat",
+      "country": "Thailand",
+      "region": "Diaspora / SE Asia minority (Thailand south)",
+      "timezone": "Asia/Bangkok",
+      "utcOffset": 7,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-noor-seoul-seoul-05000-south-korea",
+      "city": "Seoul",
+      "country": "South Korea",
+      "region": "Diaspora / NE Asia (South Korea)",
+      "timezone": "Asia/Seoul",
+      "utcOffset": 9,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "shinkoiwa-masjid-132-0031-edogawa-tokyo-japan",
+      "city": "Tokyo",
+      "country": "Japan",
+      "region": "Diaspora / NE Asia (Japan)",
+      "timezone": "Asia/Tokyo",
+      "utcOffset": 9,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "assalam-masjid-taito-110-0016-japan",
+      "city": "Tokyo",
+      "country": "Japan",
+      "region": "Diaspora / NE Asia (Japan)",
+      "timezone": "Asia/Tokyo",
+      "utcOffset": 9,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-ur-raghmah-cape-town-7760-south-africa",
+      "city": "Cape Town",
+      "country": "South Africa",
+      "region": "Diaspora / Southern Africa (South Africa)",
+      "timezone": "Africa/Johannesburg",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mosquee-du-vendredi-de-mahajanga-ambovoalana-mahabibo-market-401-mahajanga-madagascar",
+      "city": "Mahajanga",
+      "country": "Madagascar",
+      "region": "Diaspora / Indian Ocean (Madagascar)",
+      "timezone": "Indian/Antananarivo",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "umar-bin-al-khattan-r-a-port-louis-11817-mauritius",
+      "city": "Port Louis",
+      "country": "Mauritius",
+      "region": "Diaspora / Indian Ocean (Mauritius)",
+      "timezone": "Indian/Mauritius",
+      "utcOffset": 4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-bait-ul-noor-port-louis-11817-mauritius",
+      "city": "Port Louis",
+      "country": "Mauritius",
+      "region": "Diaspora / Indian Ocean (Mauritius)",
+      "timezone": "Indian/Mauritius",
+      "utcOffset": 4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "hunain-islamic-centre-beau-bassin-rose-hill-71608-mauritius",
+      "city": "Beau Bassin-Rose Hill",
+      "country": "Mauritius",
+      "region": "Diaspora / Indian Ocean (Mauritius)",
+      "timezone": "Indian/Mauritius",
+      "utcOffset": 4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mesquita-khaled-ibn-08021290-sao-paulo-brazil",
+      "city": "São Paulo",
+      "country": "Brazil",
+      "region": "Diaspora / South America (Brazil)",
+      "timezone": "America/Sao_Paulo",
+      "utcOffset": -3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "centro-islamico-de-la-provincia-265-cordoba-argentina",
+      "city": "Córdoba",
+      "country": "Argentina",
+      "region": "Diaspora / South America (Argentina)",
+      "timezone": "America/Argentina/Cordoba",
+      "utcOffset": -3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mezquita-mar-del-plata-2577-bolivar-b7600-mar-del-plata-argentina",
+      "city": "Mar del Plata",
+      "country": "Argentina",
+      "region": "Diaspora / South America (Argentina)",
+      "timezone": "America/Argentina/Buenos_Aires",
+      "utcOffset": -3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "kollupitiya-jummah-masjid-colombo-00300-sri-lanka",
+      "city": "Colombo",
+      "country": "Sri Lanka",
+      "region": "Diaspora / South Asia (Sri Lanka)",
+      "timezone": "Asia/Colombo",
+      "utcOffset": 5.5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "muhiyaddeen-jummah-masjidh-kandy-20016-sri-lanka",
+      "city": "Kandy",
+      "country": "Sri Lanka",
+      "region": "Diaspora / South Asia (Sri Lanka)",
+      "timezone": "Asia/Colombo",
+      "utcOffset": 5.5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "aruppola-jummah-masjid-kandy-20000-sri-lanka",
+      "city": "Kandy",
+      "country": "Sri Lanka",
+      "region": "Diaspora / South Asia (Sri Lanka)",
+      "timezone": "Asia/Colombo",
+      "utcOffset": 5.5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-khatim-ul-nabiyyeen-lahore-54000-pakistan",
+      "city": "Lahore",
+      "country": "Pakistan",
+      "region": "Pakistan / Punjab",
+      "timezone": "Asia/Karachi",
+      "utcOffset": 5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-al-hameed-islamabad-44000-pakistan",
+      "city": "Islamabad",
+      "country": "Pakistan",
+      "region": "Pakistan / Capital Territory",
+      "timezone": "Asia/Karachi",
+      "utcOffset": 5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-imam-ul-ambia-islamabad-44000-pakistan",
+      "city": "Islamabad",
+      "country": "Pakistan",
+      "region": "Pakistan / Capital Territory",
+      "timezone": "Asia/Karachi",
+      "utcOffset": 5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "sara-builder-limited-mosque-dhaka-1207-bangladesh",
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "region": "Bangladesh / Dhaka Division",
+      "timezone": "Asia/Dhaka",
+      "utcOffset": 6,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "uttara-7no-sector-jame-masjid-society-uttara-dhaka-1230-bangladesh",
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "region": "Bangladesh / Dhaka Division",
+      "timezone": "Asia/Dhaka",
+      "utcOffset": 6,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mirpur-dohs-mosque-no-3-dhaka-1216-bangladesh",
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "region": "Bangladesh / Dhaka Division",
+      "timezone": "Asia/Dhaka",
+      "utcOffset": 6,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "ltawba-lmansour-7650001-egypt",
+      "city": "Cairo",
+      "country": "Egypt",
+      "region": "Egypt / Cairo metro",
+      "timezone": "Africa/Cairo",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "lmansour egypt",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "masjid-m-mohamed-mahgoub-12577-oktober-egypt",
+      "city": "6th of October",
+      "country": "Egypt",
+      "region": "Egypt / Giza governorate",
+      "timezone": "Africa/Cairo",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "12577 oktober",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "cbn-estate-utako-masjid-abuja-900108-nigeria",
+      "city": "Abuja",
+      "country": "Nigeria",
+      "region": "Nigeria / Federal Capital Territory",
+      "timezone": "Africa/Lagos",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "nigeria-air-force-base-central-mosque-abuja-900107-nigeria",
+      "city": "Abuja",
+      "country": "Nigeria",
+      "region": "Nigeria / Federal Capital Territory",
+      "timezone": "Africa/Lagos",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "maisola-mosque-abuja-901101-nigeria",
+      "city": "Abuja",
+      "country": "Nigeria",
+      "region": "Nigeria / Federal Capital Territory",
+      "timezone": "Africa/Lagos",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-hasan-al-barah-964-baghdad-iraq",
+      "city": "Baghdad",
+      "country": "Iraq",
+      "region": "Iraq / Baghdad",
+      "timezone": "Asia/Baghdad",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-lshykh-wsl-lhsny-baghdad-964-iraq",
+      "city": "Baghdad",
+      "country": "Iraq",
+      "region": "Iraq / Baghdad",
+      "timezone": "Asia/Baghdad",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jamii-lshhid-rkan-tawfiq-sliman-mosul-00964-iraq",
+      "city": "Mosul",
+      "country": "Iraq",
+      "region": "Iraq / Nineveh",
+      "timezone": "Asia/Baghdad",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "lhaj-gharib-kirkuk-00964-iraq",
+      "city": "Kirkuk",
+      "country": "Iraq",
+      "region": "Iraq / Kirkuk",
+      "timezone": "Asia/Baghdad",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mzgaewty-hjy-yaehmaed-khoeshnw-erbil-44001-iraq",
+      "city": "Erbil",
+      "country": "Iraq",
+      "region": "Iraq / Kurdistan",
+      "timezone": "Asia/Baghdad",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "omar-ibn-abd-el-aziz-alger-1600-algeria",
+      "city": "Algiers",
+      "country": "Algeria",
+      "region": "Algeria / Algiers",
+      "timezone": "Africa/Algiers",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "alger 1600",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "masjid-lmam-malik-bn-anas-oran-31000-algeria",
+      "city": "Oran",
+      "country": "Algeria",
+      "region": "Algeria / Oran",
+      "timezone": "Africa/Algiers",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-sidi-lkhdr-constantine-25000-algeria",
+      "city": "Constantine",
+      "country": "Algeria",
+      "region": "Algeria / Constantine",
+      "timezone": "Africa/Algiers",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-bn-mrzwq-lhfyd-tlmsn-tlemcen-13000-algeria",
+      "city": "Tlemcen",
+      "country": "Algeria",
+      "region": "Algeria / Tlemcen",
+      "timezone": "Africa/Algiers",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-lsalihin-setif-19000-algeria",
+      "city": "Setif",
+      "country": "Algeria",
+      "region": "Algeria / Setif",
+      "timezone": "Africa/Algiers",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-lkhwjlb-l-tyq-bhry-11111-sudan",
+      "city": "Khartoum Bahri",
+      "country": "Sudan",
+      "region": "Sudan / Khartoum State",
+      "timezone": "Africa/Khartoum",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "bhry 11111",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "masjid-imam-al-anbiyaa-jamia-kundoziha-1001-kabul-afghanistan",
+      "city": "Kabul",
+      "country": "Afghanistan",
+      "region": "Afghanistan / Kabul",
+      "timezone": "Asia/Kabul",
+      "utcOffset": 4.5,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-m-lmwmnyn-khdyj-bnt-khwyld-jeddah-23522-saudi-arabia",
+      "city": "Jeddah",
+      "country": "Saudi Arabia",
+      "region": "Saudi Arabia / Makkah Province (Hejaz coastal)",
+      "timezone": "Asia/Riyadh",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-slymn-l-yd-mk-24235-saudi-arabia",
+      "city": "Mecca",
+      "country": "Saudi Arabia",
+      "region": "Saudi Arabia / Makkah Province (Haram region)",
+      "timezone": "Asia/Riyadh",
+      "utcOffset": 3,
+      "iconic": true,
+      "references": [
+        "Saudi Ministry of Hajj and Umrah official Imsakiyya — Mecca region"
+      ],
+      "corpus": "test",
+      "searchKeyword": "mk 24235",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "jamii-lnour-blrmida-ltaif-252655-saudi-arabia",
+      "city": "Taif",
+      "country": "Saudi Arabia",
+      "region": "Saudi Arabia / Makkah Province (Taif highlands)",
+      "timezone": "Asia/Riyadh",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "252655 saudi",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "abdllah-bn-sliman-laayd-lrass-58884-saudi-arabia",
+      "city": "Ar Rass",
+      "country": "Saudi Arabia",
+      "region": "Saudi Arabia / Qassim",
+      "timezone": "Asia/Riyadh",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "lrass saudi",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "masjid-al-imam-al-qurtubi-63751-muhayil-asir-saudi-arabia",
+      "city": "Muhayil Asir",
+      "country": "Saudi Arabia",
+      "region": "Saudi Arabia / Asir highlands",
+      "timezone": "Asia/Riyadh",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "muhayil 63751",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "jamie-khalid-alharoon-77407-bajil-yemen",
+      "city": "Bajil",
+      "country": "Yemen",
+      "region": "Yemen / Al Hudaydah governorate (coastal)",
+      "timezone": "Asia/Aden",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "bajil 77407",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "anwar-akkad-mosque-damascus-00963-syria",
+      "city": "Damascus",
+      "country": "Syria",
+      "region": "Syria / Damascus",
+      "timezone": "Asia/Damascus",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jm-lkrm-damascus-963-syria",
+      "city": "Damascus",
+      "country": "Syria",
+      "region": "Syria / Damascus",
+      "timezone": "Asia/Damascus",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-lymn-aleppo-00000-syria",
+      "city": "Aleppo",
+      "country": "Syria",
+      "region": "Syria / Aleppo",
+      "timezone": "Asia/Damascus",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-attawhid-idlib-963-syria",
+      "city": "Idlib",
+      "country": "Syria",
+      "region": "Syria / Idlib",
+      "timezone": "Asia/Damascus",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jordan-mosque-msjd-lrdn-zarqa-009625-jordan",
+      "city": "Zarqa",
+      "country": "Jordan",
+      "region": "Jordan / Zarqa governorate",
+      "timezone": "Asia/Amman",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "khalid-bin-al-waleed-mosque-saad-zaghloul-street-13110-zarqa-jordan",
+      "city": "Zarqa",
+      "country": "Jordan",
+      "region": "Jordan / Zarqa governorate",
+      "timezone": "Asia/Amman",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-ltqw-trbls-trbls-1301-lebanon",
+      "city": "Tripoli",
+      "country": "Lebanon",
+      "region": "Lebanon / North governorate",
+      "timezone": "Asia/Beirut",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-lmlk-fysl-al-s-wd-msjd-lmqsd-baalbeck-1801-lebanon",
+      "city": "Baalbek",
+      "country": "Lebanon",
+      "region": "Lebanon / Beqaa valley (highland)",
+      "timezone": "Asia/Beirut",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "the-great-prophet-muhammad-mosque-al-baradah-akkar-900001-lebanon",
+      "city": "Akkar",
+      "country": "Lebanon",
+      "region": "Lebanon / Akkar (north)",
+      "timezone": "Asia/Beirut",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "akkar 900001",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "msjd-lsyd-zynb-jerusalem-97200-palestinian-territories",
+      "city": "Jerusalem",
+      "country": "Palestine",
+      "region": "Palestine / Jerusalem",
+      "timezone": "Asia/Hebron",
+      "utcOffset": 3,
+      "iconic": true,
+      "references": [
+        "Jerusalem Awqaf Department published Imsakiyya region — Al-Aqsa proximity"
+      ],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-lkhoulafa-lrachidin-jerusalem-0097415-palestinian-territories",
+      "city": "Jerusalem",
+      "country": "Palestine",
+      "region": "Palestine / Jerusalem",
+      "timezone": "Asia/Hebron",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-al-amir-mohammad-al-fatih-jerusalem-9716100-palestinian-territories",
+      "city": "Jerusalem",
+      "country": "Palestine",
+      "region": "Palestine / Jerusalem",
+      "timezone": "Asia/Hebron",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jm-lbstn-sfqs-sfax-3099-tunisia",
+      "city": "Sfax",
+      "country": "Tunisia",
+      "region": "Tunisia / Sfax (coastal south)",
+      "timezone": "Africa/Tunis",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jamii-abou-bkr-lsdyq-sfax-3042-tunisia",
+      "city": "Sfax",
+      "country": "Tunisia",
+      "region": "Tunisia / Sfax (coastal south)",
+      "timezone": "Africa/Tunis",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jm-lfth-nbl-nabeul-8000-tunisia",
+      "city": "Nabeul",
+      "country": "Tunisia",
+      "region": "Tunisia / Cap Bon (Nabeul)",
+      "timezone": "Africa/Tunis",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mousque-kharouba-bengerdane-4160-tunisia",
+      "city": "Ben Gardane",
+      "country": "Tunisia",
+      "region": "Tunisia / Médenine (deep south)",
+      "timezone": "Africa/Tunis",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "kharouba bengerdane",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "msjd-dht-lswry-benghazi-061-libya",
+      "city": "Benghazi",
+      "country": "Libya",
+      "region": "Libya / Cyrenaica (east)",
+      "timezone": "Africa/Tripoli",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-lqadssia-sirte-libya",
+      "city": "Sirte",
+      "country": "Libya",
+      "region": "Libya / Sirte (central coast)",
+      "timezone": "Africa/Tripoli",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "bilal-bn-rabah-sabratah-4513-libya",
+      "city": "Sabratha",
+      "country": "Libya",
+      "region": "Libya / Tripolitania (west coast)",
+      "timezone": "Africa/Tripoli",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "msjd-d-wb-zliten-203650-libya",
+      "city": "Zliten",
+      "country": "Libya",
+      "region": "Libya / Tripolitania",
+      "timezone": "Africa/Tripoli",
+      "utcOffset": 2,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mosquee-atata-senou-bamako-senou-91096-mali",
+      "city": "Bamako",
+      "country": "Mali",
+      "region": "Mali / Bamako Capital District",
+      "timezone": "Africa/Bamako",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-at-tawhid-bamako-223-mali",
+      "city": "Bamako",
+      "country": "Mali",
+      "region": "Mali / Bamako Capital District",
+      "timezone": "Africa/Bamako",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "sibila-missiriba-sibila-segou-41051-mali",
+      "city": "Segou",
+      "country": "Mali",
+      "region": "Mali / Segou region",
+      "timezone": "Africa/Bamako",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-tawhid-dakar-liberte-47299-senegal",
+      "city": "Dakar",
+      "country": "Senegal",
+      "region": "Senegal / Dakar (Atlantic coast)",
+      "timezone": "Africa/Dakar",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "grande-mosquee-de-khar-yalla-dakar-10328-senegal",
+      "city": "Dakar",
+      "country": "Senegal",
+      "region": "Senegal / Dakar (Atlantic coast)",
+      "timezone": "Africa/Dakar",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "mosquee-abou-darda-thies-23000-senegal",
+      "city": "Thies",
+      "country": "Senegal",
+      "region": "Senegal / Thies (interior)",
+      "timezone": "Africa/Dakar",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-ahlou-sounna-mbour-mbour-00021-senegal",
+      "city": "Mbour",
+      "country": "Senegal",
+      "region": "Senegal / Petite Côte",
+      "timezone": "Africa/Dakar",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-imam-malik-bin-anas-tevragh-zeina-4727-nouakchott-mauritania",
+      "city": "Nouakchott",
+      "country": "Mauritania",
+      "region": "Mauritania / Nouakchott (Atlantic coast)",
+      "timezone": "Africa/Nouakchott",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jm-lhd-lnbwy-nouakchott-0000-mauritania",
+      "city": "Nouakchott",
+      "country": "Mauritania",
+      "region": "Mauritania / Nouakchott (Atlantic coast)",
+      "timezone": "Africa/Nouakchott",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "grande-mosque-de-kaedi-kaedi-0000-mauritania",
+      "city": "Kaedi",
+      "country": "Mauritania",
+      "region": "Mauritania / Gorgol (Senegal River)",
+      "timezone": "Africa/Nouakchott",
+      "utcOffset": 0,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-abu-bakr-siddiq-ndjamena-526hhrv-chad",
+      "city": "N'Djamena",
+      "country": "Chad",
+      "region": "Chad / N'Djamena",
+      "timezone": "Africa/Ndjamena",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "rabbul-caalamiin-mogadishu-252-somalia",
+      "city": "Mogadishu",
+      "country": "Somalia",
+      "region": "Somalia / Banaadir (equatorial)",
+      "timezone": "Africa/Mogadishu",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-ina-weerar-hargeisa-00000-somalia",
+      "city": "Hargeisa",
+      "country": "Somalia",
+      "region": "Somaliland / Hargeisa",
+      "timezone": "Africa/Mogadishu",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-nuur-al-huda-hargeisa-252-somalia",
+      "city": "Hargeisa",
+      "country": "Somalia",
+      "region": "Somaliland / Hargeisa",
+      "timezone": "Africa/Mogadishu",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "quba-mosque-dar-es-salaam-14113-tanzania",
+      "city": "Dar es Salaam",
+      "country": "Tanzania",
+      "region": "Tanzania / Dar es Salaam (coastal southern hemisphere)",
+      "timezone": "Africa/Dar_es_Salaam",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "masjid-madina-issa-south-810-issa-town-bahrain",
+      "city": "Isa Town",
+      "country": "Bahrain",
+      "region": "Bahrain / Isa Town",
+      "timezone": "Asia/Bahrain",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
+    },
+    {
+      "slug": "jm-lsyf-manama-seef-428-bahrain",
+      "city": "Manama",
+      "country": "Bahrain",
+      "region": "Bahrain / Capital governorate",
+      "timezone": "Asia/Bahrain",
+      "utcOffset": 3,
+      "iconic": false,
+      "references": [],
+      "corpus": "test",
+      "searchKeyword": "seef bahrain",
+      "$searchKeyword_reason": "City-name search returned wrong country/city; postcode/zone-id search disambiguates."
+    },
+    {
+      "slug": "masjid-abi-al-qasim-muscat-133-oman",
+      "city": "Muscat",
+      "country": "Oman",
+      "region": "Oman / Muscat governorate",
+      "timezone": "Asia/Muscat",
+      "utcOffset": 4,
+      "iconic": false,
+      "references": [],
+      "corpus": "test"
     }
   ],
   "excluded": [
