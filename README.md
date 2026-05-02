@@ -331,6 +331,21 @@ The 24.17 → 1.55 min headline reduction looks dramatic, but **most of the gain
 
 ## Quick Start
 
+> **For downstream apps integrating fajr:** the four-step pattern below is the canonical wiring. Skipping any step disables features fajr would otherwise provide for free (elevation accuracy, location-specific advisories, ihtiyat-aware UX). See [`examples/agiftoftime/INTEGRATION.md`](examples/agiftoftime/INTEGRATION.md) for the full integration walkthrough.
+
+### The four-step downstream-app pattern
+
+Most prayer-time apps wire up only the first two fields (lat, lon) and miss the value fajr's library design provides. The canonical pattern:
+
+1. **Request `enableHighAccuracy: true`** from the browser/native geolocation API. This is what unlocks `coords.altitude` — without it, browsers may return `null` for altitude even on devices that have a GPS altitude reading.
+2. **Pass `position.coords.altitude` to `fajr.prayerTimes({...})`** as the `elevation` parameter. Apps that pass only `lat/lon` get sea-level times silently — incorrect for any user above ~500 m (Riyadh, Tehran, Atlas / pre-Sahara cities, Sana'a, Kabul, Bogotá, Mexico City, Cape Town's Table Mountain summit, etc.). At those altitudes, sun rises 2–6+ minutes earlier and Maghrib falls 2–6+ minutes later than at sea level — material to iftar timing during Ramadan.
+3. **Render `result.notes[]` to the user** with a UI toggle alongside each entry. fajr emits scholarly-grounded advisories there: high-latitude regime warnings (|lat| ≥ 48.6° per Odeh 2009), elevation advisories (≥ 500 m, v1.5.2+), and any future location-specific flags. Each entry is a complete sentence with a wiki citation suitable for direct rendering.
+4. **If the user toggles "I follow my city's time, not my floor's"** (the Saudi/jama'ah-unity stance for elevation), recompute with `elevation: 0` to get sea-level times. fajr does not pick a side between UAE/JAKIM (apply correction) and Saudi/Umm al-Qura (decline) — the user's local mosque/scholar makes the call. Your UX surfaces that choice.
+
+This is fajr's deliberate library philosophy: **surface scholarly disagreement transparently, don't resolve it silently.** Defaults are conservative; opt-in utilities cover alternative stances; `notes[]` carries institutional context. See README sections [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151) and [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152) for the principle in action.
+
+### Install + minimal call
+
 ```bash
 npm install @tawfeeqmartin/fajr
 ```
@@ -385,6 +400,60 @@ const tarabishy = fajr.tarabishyTimes({
   latitude: 64.15, longitude: -21.94, date: new Date(),  // Reykjavik
 })
 ```
+
+### Full downstream-app pattern (recommended)
+
+Wires up all four canonical steps end-to-end. Use this as the starting template for any web/mobile app integrating fajr.
+
+```js
+import { prayerTimes } from '@tawfeeqmartin/fajr'
+
+// Step 1 — Request enableHighAccuracy so the GPS returns altitude
+navigator.geolocation.getCurrentPosition(
+  position => {
+    const { latitude, longitude, altitude, altitudeAccuracy } = position.coords
+
+    // Step 2 — Pass altitude to fajr (or 0 if unreliable / unavailable)
+    // Phone GPS altitude can be very inaccurate (±100 m+ indoors); if the
+    // browser reports altitudeAccuracy worse than 200 m, treat altitude
+    // as unreliable. altitude itself can be null on Wi-Fi-only devices.
+    const elevation = (
+      altitude != null && (altitudeAccuracy == null || altitudeAccuracy < 200)
+    ) ? altitude : 0
+
+    let times = prayerTimes({ latitude, longitude, date: new Date(), elevation })
+
+    // Step 3 — Render result.notes to the user with a toggle alongside
+    // each advisory. v1.5.2 emits "Elevation advisory:" entries when
+    // elevation ≥ 500 m, describing the institutional disagreement;
+    // "High-latitude regime:" entries fire when |lat| ≥ 48.6°.
+    for (const note of times.notes) {
+      renderAdvisoryWithToggle(note, {
+        // Step 4 — On user toggle, recompute with the alternative stance
+        onToggleOff: () => {
+          // For the elevation advisory specifically, "off" means follow
+          // the Saudi/jama'ah-unity stance (decline geometric correction).
+          // Recompute with elevation: 0 to get sea-level times.
+          times = prayerTimes({ latitude, longitude, date: new Date(), elevation: 0 })
+          rerenderPrayerCard(times)
+        }
+      })
+    }
+
+    rerenderPrayerCard(times)
+  },
+  err => {
+    // Geolocation denied / unavailable — fall back to elevation: 0
+    const times = prayerTimes({ latitude: defaultLat, longitude: defaultLng, date: new Date(), elevation: 0 })
+    rerenderPrayerCard(times)
+  },
+  { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 }
+)
+```
+
+**The same shape applies to native mobile** — replace `navigator.geolocation` with the platform GPS API (CoreLocation `desiredAccuracy = .best`, Android `LocationRequest.Builder().setPriority(PRIORITY_HIGH_ACCURACY)`), but keep the four steps identical. fajr's library API is platform-agnostic.
+
+### Other API entry points
 
 ```js
 // Qibla direction
