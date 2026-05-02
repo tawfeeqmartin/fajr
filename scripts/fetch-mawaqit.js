@@ -30,12 +30,53 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 // equatorial). Mosque-published reality is the highest-quality grounding
 // signal — it's what users actually pray to.
 const MOSQUES = [
-  // ── Morocco — addresses the Habous coverage gap ──────────────────────────
+  // ── Morocco — broad geographic coverage of the Habous-method region ─────
+  // Casablanca/Rabat/Marrakech (original 5) plus 18 mosques across all major
+  // Moroccan regions: northern (Tanger, Nador), eastern (Oujda), interior
+  // (Fez, Meknes, Taza, Khouribga, Settat), Atlantic coast (Sale, Kenitra,
+  // Mohammedia, El Jadida, Safi, Essaouira, Agadir, Taroudant), and
+  // crucially the high-elevation edge-of-Sahara cities (Ouarzazate 1135m,
+  // Errachidia 1037m) — the latter two are fajr's first elevation-validated
+  // Moroccan ground truth above 500m. Closes the validation gaps documented
+  // in knowledge/wiki/regions/morocco.md.
   { slug: 'moulay-ismail-casablanca-20400-morocco',           city: 'Casablanca', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
   { slug: 'msjd-qm-lslm-casablanca-20320-morocco',            city: 'Casablanca', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
   { slug: 'mosquee-bab-arrahmane-casablanca-20050-morocco',   city: 'Casablanca', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
   { slug: 'msjd-lm-masjid-ummah-rabat-10130-morocco',         city: 'Rabat',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
   { slug: 'msjd-lthr-marrakech-40170-morocco',                city: 'Marrakech',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  // ── Northern Morocco ────────────────────────────────────────────────────
+  { slug: 'msjd-sydy-qsm-tanger-90000-morocco',               city: 'Tanger',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'msjd-hjryyn-tnj-tanger-90000-morocco',             city: 'Tanger',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'masjid-al-falah-nador-66000-morocco',              city: 'Nador',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  // Selouane (lfth-selouane-nador-62702-morocco) excluded: published times
+  // are 1 hour off from other Nador mosques — likely stale Ramadan-DST data.
+  // ── Eastern Morocco ─────────────────────────────────────────────────────
+  { slug: 'lmoubacharine-biljna-oujda-60020-morocco',         city: 'Oujda',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco', city: 'Oujda',      country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  // ── Interior / Atlas-foothill ───────────────────────────────────────────
+  { slug: 'masjid-aamrou-bn-laas-fes-30000-morocco-1',        city: 'Fes',        country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'msjd-lhsn-ryd-llymwn-fes-30000-morocco',           city: 'Fes',        country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'mosquee-elamine-meknes-50000-morocco',             city: 'Meknes',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco',     city: 'Taza',       country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1',    city: 'Khouribga',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'mosquee-imam-tarmidi-settat-26000-morocco',        city: 'Settat',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  // ── Atlantic coast (north + central) ────────────────────────────────────
+  { slug: 'msjd-lsf-sale-11000-morocco',                      city: 'Sale',       country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'msjd-lqdsy-kenitra-14000-morocco',                 city: 'Kenitra',    country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  // Mohammedia (msjd-lrdwn-mohammedia-28810-morocco) excluded: published
+  // times +60 min off all other Moroccan mosques — likely a misconfigured
+  // mosque using UTC+2 for display.
+  // El Jadida (masjid-makka-el-jadida-20000-morocco) excluded: published
+  // times -60 min off — likely stale Ramadan-DST data (UTC+0).
+  { slug: 'msjd-blkhy-safi-46000-morocco',                    city: 'Safi',       country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'msjd-lrwnq-essaouira-44000-morocco',               city: 'Essaouira',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  // ── Atlantic south ──────────────────────────────────────────────────────
+  { slug: 'msjd-hl-sws-agadir-80000-morocco',                 city: 'Agadir',     country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  { slug: 'msjd-wld-brhym-taroudant-83300-morocco',           city: 'Taroudant',  country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 },
+  // ── HIGH-ELEVATION test cells (the big Morocco coverage gap) ────────────
+  { slug: 'msjd-lqds-masjid-elqods-ouarzazate-45000-morocco', city: 'Ouarzazate', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 }, // 1135m
+  { slug: 'msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco',     city: 'Ouarzazate', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 }, // 1135m
+  { slug: 'masjid-marzouga-lgharbia-errachidia-52202-morocco',city: 'Errachidia', country: 'Morocco', timezone: 'Africa/Casablanca', utcOffset: 1 }, // 1037m
   // ── France / UK — Mawaqit's home turf ────────────────────────────────────
   { slug: 'mosquee-de-frais-vallon-marseille-13013-france-1', city: 'Marseille',  country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },
   { slug: 'les-compagnons-limoges-87000-france-1',            city: 'Limoges',    country: 'France',  timezone: 'Europe/Paris',      utcOffset: 2 },

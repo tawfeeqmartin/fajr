@@ -1,0 +1,577 @@
+[
+  {
+    "city": "Casablanca",
+    "country": "Morocco",
+    "latitude": 33.5769322,
+    "longitude": -7.5473133,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque moulay-ismail-casablanca-20400-morocco (\u0645\u0648\u0644\u0627\u064a \u0625\u0633\u0645\u0627\u0639\u064a\u0644-\u0633\u064a\u062f\u064a \u0645\u0648\u0645\u0646 \u0627\u0644\u062f\u0627\u0631 \u0627\u0644\u0628\u064a\u0636\u0627\u0621)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0648\u0644\u0627\u064a \u0625\u0633\u0645\u0627\u0639\u064a\u0644-\u0633\u064a\u062f\u064a \u0645\u0648\u0645\u0646 \u0627\u0644\u062f\u0627\u0631 \u0627\u0644\u0628\u064a\u0636\u0627\u0621)",
+    "source_url": "https://mawaqit.net/en/m/moulay-ismail-casablanca-20400-morocco",
+    "source_fetched": "2026-05-02T13:50:25.717Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:04",
+        "sunrise": "06:41",
+        "dhuhr": "13:33",
+        "asr": "17:09",
+        "maghrib": "20:19",
+        "isha": "21:40"
+      }
+    ]
+  },
+  {
+    "city": "Casablanca",
+    "country": "Morocco",
+    "latitude": 33.584595812835,
+    "longitude": -7.582797480365,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-qm-lslm-casablanca-20320-morocco (\u0645\u0633\u062c\u062f \u0627\u0642\u0627\u0645\u0629 \u0627\u0644\u0633\u0644\u0627\u0645)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0642\u0627\u0645\u0629 \u0627\u0644\u0633\u0644\u0627\u0645)",
+    "source_url": "https://mawaqit.net/en/m/msjd-qm-lslm-casablanca-20320-morocco",
+    "source_fetched": "2026-05-02T13:50:25.761Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:04",
+        "sunrise": "06:41",
+        "dhuhr": "13:32",
+        "asr": "17:10",
+        "maghrib": "20:19",
+        "isha": "21:40"
+      }
+    ]
+  },
+  {
+    "city": "Casablanca",
+    "country": "Morocco",
+    "latitude": 33.564414864453,
+    "longitude": -7.624730634625,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque mosquee-bab-arrahmane-casablanca-20050-morocco (\u0645\u0633\u062c\u062f \u0628\u0627\u0628 \u0627\u0644\u0631\u062d\u0645\u0646)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0628\u0627\u0628 \u0627\u0644\u0631\u062d\u0645\u0646)",
+    "source_url": "https://mawaqit.net/en/m/mosquee-bab-arrahmane-casablanca-20050-morocco",
+    "source_fetched": "2026-05-02T13:50:25.809Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:03",
+        "sunrise": "06:38",
+        "dhuhr": "13:33",
+        "asr": "17:10",
+        "maghrib": "20:19",
+        "isha": "21:41"
+      }
+    ]
+  },
+  {
+    "city": "Rabat",
+    "country": "Morocco",
+    "latitude": 33.9850372,
+    "longitude": -6.8802134,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lm-masjid-ummah-rabat-10130-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0623\u0645\u0629   Masjid Ummah)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0623\u0645\u0629   Masjid Ummah)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lm-masjid-ummah-rabat-10130-morocco",
+    "source_fetched": "2026-05-02T13:50:25.861Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:57",
+        "sunrise": "06:37",
+        "dhuhr": "13:30",
+        "asr": "17:07",
+        "maghrib": "20:16",
+        "isha": "21:39"
+      }
+    ]
+  },
+  {
+    "city": "Marrakech",
+    "country": "Morocco",
+    "latitude": 31.679100362266,
+    "longitude": -8.0564385652542,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lthr-marrakech-40170-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0637\u0627\u0647\u0631)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0637\u0627\u0647\u0631)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lthr-marrakech-40170-morocco",
+    "source_fetched": "2026-05-02T13:50:25.913Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:12",
+        "sunrise": "06:46",
+        "dhuhr": "13:34",
+        "asr": "17:09",
+        "maghrib": "20:19",
+        "isha": "21:37"
+      }
+    ]
+  },
+  {
+    "city": "Tanger",
+    "country": "Morocco",
+    "latitude": 35.71710988766,
+    "longitude": -5.9391403198242,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-sydy-qsm-tanger-90000-morocco (\u0645\u0633\u062c\u062f \u0633\u064a\u062f\u064a \u0642\u0627\u0633\u0645)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0633\u064a\u062f\u064a \u0642\u0627\u0633\u0645)",
+    "source_url": "https://mawaqit.net/en/m/msjd-sydy-qsm-tanger-90000-morocco",
+    "source_fetched": "2026-05-02T13:50:25.958Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:50",
+        "sunrise": "06:31",
+        "dhuhr": "13:26",
+        "asr": "17:05",
+        "maghrib": "20:15",
+        "isha": "21:41"
+      }
+    ]
+  },
+  {
+    "city": "Tanger",
+    "country": "Morocco",
+    "latitude": 35.709997862345,
+    "longitude": -5.9379440370914,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-hjryyn-tnj-tanger-90000-morocco (\u0645\u0633\u062c\u062f \u062d\u062c\u0631\u064a\u064a\u0646 - \u0637\u0646\u062c\u0629 -)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u062d\u062c\u0631\u064a\u064a\u0646 - \u0637\u0646\u062c\u0629 -)",
+    "source_url": "https://mawaqit.net/en/m/msjd-hjryyn-tnj-tanger-90000-morocco",
+    "source_fetched": "2026-05-02T13:50:26.003Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:47",
+        "sunrise": "06:31",
+        "dhuhr": "13:26",
+        "asr": "17:05",
+        "maghrib": "20:15",
+        "isha": "21:41"
+      }
+    ]
+  },
+  {
+    "city": "Nador",
+    "country": "Morocco",
+    "latitude": 35.0127095,
+    "longitude": -3.0075642,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque masjid-al-falah-nador-66000-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0641\u0644\u0627\u062d-\u0627\u0644\u0639\u0631\u0648\u064a)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0641\u0644\u0627\u062d-\u0627\u0644\u0639\u0631\u0648\u064a)",
+    "source_url": "https://mawaqit.net/en/m/masjid-al-falah-nador-66000-morocco",
+    "source_fetched": "2026-05-02T13:50:26.052Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:38",
+        "sunrise": "06:20",
+        "dhuhr": "13:14",
+        "asr": "16:53",
+        "maghrib": "20:02",
+        "isha": "21:27"
+      }
+    ]
+  },
+  {
+    "city": "Oujda",
+    "country": "Morocco",
+    "latitude": 34.694115,
+    "longitude": -1.871251,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque lmoubacharine-biljna-oujda-60020-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0645\u0628\u0634\u0631\u064a\u0646 \u0628\u0627\u0644\u062c\u0646\u0629)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0645\u0628\u0634\u0631\u064a\u0646 \u0628\u0627\u0644\u062c\u0646\u0629)",
+    "source_url": "https://mawaqit.net/en/m/lmoubacharine-biljna-oujda-60020-morocco",
+    "source_fetched": "2026-05-02T13:50:26.928Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:37",
+        "sunrise": "06:11",
+        "dhuhr": "13:10",
+        "asr": "16:49",
+        "maghrib": "20:00",
+        "isha": "21:21"
+      }
+    ]
+  },
+  {
+    "city": "Oujda",
+    "country": "Morocco",
+    "latitude": 34.685734110176,
+    "longitude": -1.9380569458008,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco (\u0645\u0633\u062c\u062f \u062c\u0639\u0641\u0631 \u0628\u0646 \u0623\u0628\u064a \u0637\u0627\u0644\u0628)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u062c\u0639\u0641\u0631 \u0628\u0646 \u0623\u0628\u064a \u0637\u0627\u0644\u0628)",
+    "source_url": "https://mawaqit.net/en/m/mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco",
+    "source_fetched": "2026-05-02T13:50:26.974Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:36",
+        "sunrise": "06:12",
+        "dhuhr": "13:10",
+        "asr": "16:49",
+        "maghrib": "20:00",
+        "isha": "21:22"
+      }
+    ]
+  },
+  {
+    "city": "Meknes",
+    "country": "Morocco",
+    "latitude": 33.855360556333,
+    "longitude": -5.5076386034489,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque mosquee-elamine-meknes-50000-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0627\u0645\u064a\u0646)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0627\u0645\u064a\u0646)",
+    "source_url": "https://mawaqit.net/en/m/mosquee-elamine-meknes-50000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.517Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:55",
+        "sunrise": "06:32",
+        "dhuhr": "13:24",
+        "asr": "17:02",
+        "maghrib": "20:12",
+        "isha": "21:33"
+      }
+    ]
+  },
+  {
+    "city": "Taza",
+    "country": "Morocco",
+    "latitude": 34.234300769507,
+    "longitude": -3.9853626433363,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco (\u0645\u0633\u062c\u062f \u0639\u0645\u0631 \u0628\u0646 \u0627\u0644\u062e\u0637\u0627\u0628 \u0627\u0644\u0642\u062f\u06331 \u062a\u0627\u0632\u0629)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0639\u0645\u0631 \u0628\u0646 \u0627\u0644\u062e\u0637\u0627\u0628 \u0627\u0644\u0642\u062f\u06331 \u062a\u0627\u0632\u0629)",
+    "source_url": "https://mawaqit.net/en/m/msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.564Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:48",
+        "sunrise": "06:26",
+        "dhuhr": "13:18",
+        "asr": "16:57",
+        "maghrib": "20:08",
+        "isha": "21:28"
+      }
+    ]
+  },
+  {
+    "city": "Khouribga",
+    "country": "Morocco",
+    "latitude": 32.8852709,
+    "longitude": -6.9293021,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1 (\u0645\u0633\u062c\u062f \u0639\u0645\u0631 \u0628\u0646 \u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0639\u0645\u0631 \u0628\u0646 \u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632)",
+    "source_url": "https://mawaqit.net/en/m/msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1",
+    "source_fetched": "2026-05-02T13:50:27.607Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:03",
+        "sunrise": "06:40",
+        "dhuhr": "13:30",
+        "asr": "17:02",
+        "maghrib": "20:17",
+        "isha": "21:36"
+      }
+    ]
+  },
+  {
+    "city": "Settat",
+    "country": "Morocco",
+    "latitude": 32.4263764,
+    "longitude": -7.1029495,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque mosquee-imam-tarmidi-settat-26000-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0625\u0645\u0627\u0645 \u0627\u0644\u062a\u0631\u0645\u0630\u064a)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0625\u0645\u0627\u0645 \u0627\u0644\u062a\u0631\u0645\u0630\u064a)",
+    "source_url": "https://mawaqit.net/en/m/mosquee-imam-tarmidi-settat-26000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.649Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:05",
+        "sunrise": "06:41",
+        "dhuhr": "13:32",
+        "asr": "17:08",
+        "maghrib": "20:17",
+        "isha": "21:38"
+      }
+    ]
+  },
+  {
+    "city": "Sale",
+    "country": "Morocco",
+    "latitude": 34.039054103975,
+    "longitude": -6.8191775528504,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lsf-sale-11000-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0635\u0641)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0635\u0641)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lsf-sale-11000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.692Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:00",
+        "sunrise": "06:37",
+        "dhuhr": "13:29",
+        "asr": "17:08",
+        "maghrib": "20:17",
+        "isha": "21:39"
+      }
+    ]
+  },
+  {
+    "city": "Kenitra",
+    "country": "Morocco",
+    "latitude": 34.2604969,
+    "longitude": -6.5970867,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lqdsy-kenitra-14000-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0642\u0627\u062f\u0633\u064a\u0629)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0642\u0627\u062f\u0633\u064a\u0629)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lqdsy-kenitra-14000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.735Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:57",
+        "sunrise": "06:33",
+        "dhuhr": "13:28",
+        "asr": "17:07",
+        "maghrib": "20:16",
+        "isha": "21:38"
+      }
+    ]
+  },
+  {
+    "city": "Safi",
+    "country": "Morocco",
+    "latitude": 32.2911738,
+    "longitude": -9.2182913,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-blkhy-safi-46000-morocco (\u0645\u0633\u062c\u062f \u0628\u0644\u0643\u0627\u0647\u064a\u0629)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0628\u0644\u0643\u0627\u0647\u064a\u0629)",
+    "source_url": "https://mawaqit.net/en/m/msjd-blkhy-safi-46000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.782Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:14",
+        "sunrise": "06:50",
+        "dhuhr": "13:39",
+        "asr": "17:13",
+        "maghrib": "20:23",
+        "isha": "21:43"
+      }
+    ]
+  },
+  {
+    "city": "Essaouira",
+    "country": "Morocco",
+    "latitude": 31.499814352006,
+    "longitude": -9.7537740134921,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lrwnq-essaouira-44000-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0631\u0648\u0646\u0642 - \u0627\u0644\u0635\u0648\u064a\u0631\u0629)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0631\u0648\u0646\u0642 - \u0627\u0644\u0635\u0648\u064a\u0631\u0629)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lrwnq-essaouira-44000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.828Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:19",
+        "sunrise": "06:51",
+        "dhuhr": "13:41",
+        "asr": "17:15",
+        "maghrib": "20:23",
+        "isha": "21:43"
+      }
+    ]
+  },
+  {
+    "city": "Agadir",
+    "country": "Morocco",
+    "latitude": 30.401197382564,
+    "longitude": -9.51966692427,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-hl-sws-agadir-80000-morocco (\u0645\u0633\u062c\u062f \u0627\u0647\u0644 \u0633\u0648\u0633)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0647\u0644 \u0633\u0648\u0633)",
+    "source_url": "https://mawaqit.net/en/m/msjd-hl-sws-agadir-80000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.866Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:21",
+        "sunrise": "06:54",
+        "dhuhr": "13:41",
+        "asr": "17:13",
+        "maghrib": "20:22",
+        "isha": "21:39"
+      }
+    ]
+  },
+  {
+    "city": "Taroudant",
+    "country": "Morocco",
+    "latitude": 30.637214070976,
+    "longitude": -8.4753702046711,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-wld-brhym-taroudant-83300-morocco (\u0645\u0633\u062c\u062f \u0627\u0648\u0644\u0627\u062f \u0628\u0631\u0627\u0647\u064a\u0645)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0648\u0644\u0627\u062f \u0628\u0631\u0627\u0647\u064a\u0645)",
+    "source_url": "https://mawaqit.net/en/m/msjd-wld-brhym-taroudant-83300-morocco",
+    "source_fetched": "2026-05-02T13:50:27.914Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:17",
+        "sunrise": "06:47",
+        "dhuhr": "13:37",
+        "asr": "17:10",
+        "maghrib": "20:19",
+        "isha": "21:37"
+      }
+    ]
+  },
+  {
+    "city": "Ouarzazate",
+    "country": "Morocco",
+    "latitude": 30.9271876,
+    "longitude": -6.8948922,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-lqds-masjid-elqods-ouarzazate-45000-morocco (\u0645\u0633\u062c\u062f \u0627\u0644\u0642\u062f\u0633 | Masjid Elqods)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0627\u0644\u0642\u062f\u0633 | Masjid Elqods)",
+    "source_url": "https://mawaqit.net/en/m/msjd-lqds-masjid-elqods-ouarzazate-45000-morocco",
+    "source_fetched": "2026-05-02T13:50:27.956Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:09",
+        "sunrise": "06:43",
+        "dhuhr": "13:30",
+        "asr": "17:03",
+        "maghrib": "20:14",
+        "isha": "21:30"
+      }
+    ]
+  },
+  {
+    "city": "Ouarzazate",
+    "country": "Morocco",
+    "latitude": 30.9223131,
+    "longitude": -6.893414,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco (\u0645\u0633\u062c\u062f \u0633\u064a\u062f\u064a \u062f\u0627\u0648\u062f \u0648\u0631\u0632\u0627\u0632\u0627\u062a)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0633\u064a\u062f\u064a \u062f\u0627\u0648\u062f \u0648\u0631\u0632\u0627\u0632\u0627\u062a)",
+    "source_url": "https://mawaqit.net/en/m/msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco",
+    "source_fetched": "2026-05-02T13:50:28.030Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:08",
+        "sunrise": "06:36",
+        "dhuhr": "13:30",
+        "asr": "17:03",
+        "maghrib": "20:14",
+        "isha": "21:31"
+      }
+    ]
+  },
+  {
+    "city": "Errachidia",
+    "country": "Morocco",
+    "latitude": 31.0801676,
+    "longitude": -4.013361,
+    "elevation": 0,
+    "timezone": "Africa/Casablanca",
+    "method": "mosque-published",
+    "source": "Mawaqit mosque masjid-marzouga-lgharbia-errachidia-52202-morocco (\u0645\u0633\u062c\u062f \u0645\u0631\u0632\u0648\u0643\u0629 \u0627\u0644\u063a\u0631\u0628\u064a\u0629)",
+    "source_institution": "Mawaqit (mosque-published)",
+    "source_method": "Mosque-published (\u0645\u0633\u062c\u062f \u0645\u0631\u0632\u0648\u0643\u0629 \u0627\u0644\u063a\u0631\u0628\u064a\u0629)",
+    "source_url": "https://mawaqit.net/en/m/masjid-marzouga-lgharbia-errachidia-52202-morocco",
+    "source_fetched": "2026-05-02T13:50:28.073Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:58",
+        "sunrise": "06:31",
+        "dhuhr": "13:19",
+        "asr": "16:51",
+        "maghrib": "20:03",
+        "isha": "21:20"
+      }
+    ]
+  }
+]

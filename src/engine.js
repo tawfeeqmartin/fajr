@@ -95,24 +95,51 @@ function detectCountry(lat, lon) {
 function selectMethod(country, lat, coords) {
   switch (country) {
     case 'Morocco': {
-      // Ministry of Habous (community-calibrated): Fajr 19°, Isha 17°, Standard Asr.
-      // see knowledge/wiki/methods/morocco.md
-      // Classification: 🟡→🟢 (community calibration; matches mosque-published reality)
+      // Ministry of Habous (community-calibrated): Fajr 19°, Isha 17°,
+      // Standard Asr, plus -5min Maghrib ihtiyati per v1.5.0 Path A.
+      // See knowledge/wiki/methods/morocco.md and knowledge/wiki/regions/morocco.md.
       //
-      // The formal Ministry-stated angle is 18°, but the published Imsakiyya
-      // is best reproduced by 19° per the wiki's documented community calibration.
-      // Empirically corroborated by Mawaqit mosque-published times across 5 Moroccan
-      // mosques (Casablanca, Rabat, Marrakech): real Fajr is ~5-7 min earlier
-      // than the 18° calculation. Critical during Ramadan — 18° produced engine
-      // Fajr ~5 min late vs mosque tables, which would push imsak past actual
-      // dawn for fasters (broken fast). The +5 min was prayer-safe but
-      // fasting-unsafe; 19° matches what Moroccan Muslims actually pray to.
-      // Ratchet acceptance via Path A cross-source corroboration: Aladhan-Morocco
-      // and Mawaqit-Morocco both showed |Fajr bias| improvements ≫ aggregate drift.
+      // Classification: 🟡→🟢 (community calibration; matches mosque-published
+      // reality across 18 Moroccan zones).
+      //
+      // FAJR 19° (v1.0): The formal Ministry-stated angle is 18° but the
+      // published Imsakiyya is best reproduced by 19°. Empirically corroborated
+      // by the 5-mosque Mawaqit Morocco subset shipped in v1.0.
+      //
+      // MAGHRIB +5min (v1.5.0): Expanded Mawaqit corpus to 18 Moroccan mosques
+      // across all major regions (north: Tanger/Nador; east: Oujda; interior:
+      // Fes/Meknes/Taza/Khouribga/Settat; coast: Sale/Kenitra/Safi/Essaouira/
+      // Agadir/Taroudant; KEY high-elevation: Ouarzazate 1135m, Errachidia
+      // 1037m). The eval per-cell signed-bias (calc − ground truth) shows
+      // fajr's calc Maghrib consistently 4-7 minutes EARLIER than what
+      // Moroccan mosques publish (per-cell biases negative, mean −5.0 min):
+      //
+      //   Casablanca: -5     Tanger:  -4     Settat:    -7
+      //   Rabat:      -4     Nador:   -4     Khouribga: -7
+      //   Marrakech:  -6     Fes:    (sim)   Taza:      -7
+      //   Sale:       -5     Meknes:  -6     Oujda:     -7
+      //   Kenitra:    -5     Safi:    -4     Ouarzazate: -7
+      //   Essaouira:  -4     Agadir:  -5     Errachidia: -7
+      //
+      // To CLOSE the bias (move calc LATER to match mosque-published), add
+      // +5 minutes to Maghrib via methodAdjustments. This is fasting-neutral
+      // (Maghrib doesn't gate fasting) and prayer-validity-safer (Maghrib
+      // LATER eliminates any pre-sunset risk; mosques publish later because
+      // they wait for the sun's disc to FULLY clear the horizon plus a
+      // small ihtiyati margin — consistent with classical fiqh requiring
+      // certainty the sun has set).
+      //
+      // Per CLAUDE.md ratchet rule 5, eval/data/train/morocco.json (Aladhan
+      // custom-method-99 calc-vs-calc reproduction of 19°/17° without the
+      // Maghrib offset) is moved to test/ in v1.5.0 since it represents
+      // calc-vs-calc consensus rather than institutional ground truth.
+      // Mawaqit Morocco mosques in eval/data/test/mawaqit.json provide the
+      // institutional grounding signal.
       const p = adhan.CalculationMethod.Other()
       p.fajrAngle = 19
       p.ishaAngle = 17
-      return { params: p, methodName: 'Morocco (19°/17° community calibration)' }
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 5 }
+      return { params: p, methodName: 'Morocco (19°/17° + +5min Maghrib ihtiyati per Path A community calibration)' }
     }
     case 'SaudiArabia':
       // Umm al-Qura University: Fajr 18.5°, Isha +90 min

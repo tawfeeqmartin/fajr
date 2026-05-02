@@ -88,11 +88,13 @@ describe('prayerTimes invariants', () => {
     const result = prayerTimes({ latitude: 33.97, longitude: -6.85, date: TEST_DATE })
     expect(result.sunset).toBeInstanceOf(Date)
     expect(Number.isFinite(result.sunset.getTime())).toBe(true)
-    // For the standard methods used here, sunset and maghrib are typically
-    // identical or differ by < 1 second; only some method-specific offsets
-    // (e.g. certain Diyanet variants) produce a meaningful gap.
+    // `sunset` is the astronomical sunset; `maghrib` is the prayer-time
+    // value, which may include an institutional ihtiyati offset (Morocco
+    // +5min, Diyanet +7min, JAKIM +1min, etc.). The two should be within
+    // ~15 minutes of each other for any sane method — anything larger
+    // would indicate a unit / DST bug.
     const gapMs = Math.abs(result.sunset.getTime() - result.maghrib.getTime())
-    expect(gapMs).toBeLessThan(60_000)
+    expect(gapMs).toBeLessThan(15 * 60 * 1000)
   })
 
   it('returns prayers in chronological order for a typical mid-latitude location', () => {

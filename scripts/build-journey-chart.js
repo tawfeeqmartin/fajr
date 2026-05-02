@@ -41,6 +41,7 @@ const MILESTONES = [
   { tag: 'v1.4.3', tsPrefix: '2026-05-02T09:4', label: 'v1.4.3', change: 'eval elevation-policy fix (train −32% to 0.70)' },
   { tag: 'v1.4.4', tsPrefix: '2026-05-02T09:56', label: 'v1.4.4', change: 'JAKIM Isha +1min Path A (train 0.70 → 0.68)' },
   { tag: 'v1.4.5', tsPrefix: '2026-05-02T10:04', label: 'v1.4.5', change: 'Diyanet Maghrib/Isha −1min Path A + corpus curation (train 0.68 → 0.67)' },
+  { tag: 'v1.5.0', tsPrefix: '2026-05-02T13:58:54', label: 'v1.5.0', change: 'Morocco Maghrib +5min Path A + 23-mosque Mawaqit-Morocco corpus (clean −0.07)' },
 ]
 
 function loadRuns() {
