@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Tashkent",
+    "country": "Uzbekistan",
+    "iso": "UZ",
+    "latitude": 41.2995,
+    "longitude": 69.2401,
+    "elevation": 455,
+    "timezone": "Asia/Tashkent",
+    "method": "14",
+    "methodLabel": "Moonsighting Committee",
+    "source": "Aladhan API (api.aladhan.com) — Moonsighting Committee (Aladhan method 14)",
+    "sourceFetched": "2026-05-02T00:24:20.031Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:47",
+        "sunrise": "05:20",
+        "dhuhr": "12:20",
+        "asr": "16:12",
+        "maghrib": "19:21",
+        "isha": "20:47"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:45",
+        "sunrise": "05:19",
+        "dhuhr": "12:20",
+        "asr": "16:12",
+        "maghrib": "19:22",
+        "isha": "20:49"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:43",
+        "sunrise": "05:17",
+        "dhuhr": "12:20",
+        "asr": "16:12",
+        "maghrib": "19:23",
+        "isha": "20:50"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:42",
+        "sunrise": "05:16",
+        "dhuhr": "12:20",
+        "asr": "16:12",
+        "maghrib": "19:24",
+        "isha": "20:52"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:40",
+        "sunrise": "05:15",
+        "dhuhr": "12:20",
+        "asr": "16:13",
+        "maghrib": "19:25",
+        "isha": "20:53"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:38",
+        "sunrise": "05:14",
+        "dhuhr": "12:20",
+        "asr": "16:13",
+        "maghrib": "19:26",
+        "isha": "20:55"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:37",
+        "sunrise": "05:12",
+        "dhuhr": "12:20",
+        "asr": "16:13",
+        "maghrib": "19:27",
+        "isha": "20:56"
+      }
+    ]
+  }
+]

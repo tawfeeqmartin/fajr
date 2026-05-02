@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Podgorica",
+    "country": "Montenegro",
+    "iso": "ME",
+    "latitude": 42.4304,
+    "longitude": 19.2594,
+    "elevation": 53,
+    "timezone": "Europe/Podgorica",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:27:36.405Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:47",
+        "sunrise": "05:37",
+        "dhuhr": "12:40",
+        "asr": "16:33",
+        "maghrib": "19:43",
+        "isha": "21:26"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:45",
+        "sunrise": "05:36",
+        "dhuhr": "12:40",
+        "asr": "16:33",
+        "maghrib": "19:45",
+        "isha": "21:28"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:43",
+        "sunrise": "05:34",
+        "dhuhr": "12:40",
+        "asr": "16:34",
+        "maghrib": "19:46",
+        "isha": "21:30"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:42",
+        "sunrise": "05:33",
+        "dhuhr": "12:40",
+        "asr": "16:34",
+        "maghrib": "19:47",
+        "isha": "21:31"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:40",
+        "sunrise": "05:32",
+        "dhuhr": "12:40",
+        "asr": "16:34",
+        "maghrib": "19:48",
+        "isha": "21:33"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:38",
+        "sunrise": "05:31",
+        "dhuhr": "12:40",
+        "asr": "16:35",
+        "maghrib": "19:49",
+        "isha": "21:35"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:36",
+        "sunrise": "05:29",
+        "dhuhr": "12:39",
+        "asr": "16:35",
+        "maghrib": "19:50",
+        "isha": "21:36"
+      }
+    ]
+  }
+]

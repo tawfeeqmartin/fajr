@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Libreville",
+    "country": "Gabon",
+    "iso": "GA",
+    "latitude": 0.4162,
+    "longitude": 9.4673,
+    "elevation": 35,
+    "timezone": "Africa/Libreville",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:18:46.499Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:04",
+        "sunrise": "06:15",
+        "dhuhr": "12:19",
+        "asr": "15:40",
+        "maghrib": "18:23",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:04",
+        "sunrise": "06:15",
+        "dhuhr": "12:19",
+        "asr": "15:41",
+        "maghrib": "18:23",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:19",
+        "asr": "15:41",
+        "maghrib": "18:23",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:19",
+        "asr": "15:41",
+        "maghrib": "18:23",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:19",
+        "asr": "15:41",
+        "maghrib": "18:23",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:19",
+        "asr": "15:41",
+        "maghrib": "18:23",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:19",
+        "asr": "15:41",
+        "maghrib": "18:23",
+        "isha": "19:30"
+      }
+    ]
+  }
+]

@@ -29,19 +29,48 @@ import * as adhan from 'adhan'
  * @returns {string|null}
  */
 function detectCountry(lat, lon) {
+  // ─── ORDER MATTERS ─────────────────────────────────────────────────────
+  // Smaller / more specific countries are listed FIRST. The function early-
+  // returns on the first match, so a small country whose bbox sits inside a
+  // larger one's bbox would never match if listed second. The Gulf region
+  // is the main case: Bahrain/Qatar/Kuwait/Oman/UAE bboxes all overlap with
+  // Saudi Arabia's, so they must be checked before SaudiArabia.
+  // ──────────────────────────────────────────────────────────────────────
+
   if (lat >= 27   && lat <= 36.5 && lon >= -14  && lon <= -1)   return 'Morocco'
+
+  // Gulf — small countries first, before SaudiArabia bbox catches them.
+  // Within the Gulf cluster, the order is: smallest islands → coastal small
+  // states → UAE → Oman (UAE's bbox is a subset of Oman's broader lat range,
+  // so UAE must be checked first for Dubai-area coords to dispatch correctly).
+  if (lat >= 25.5 && lat <= 26.5 && lon >= 50.4 && lon <= 50.85) return 'Bahrain'
+  if (lat >= 24   && lat <= 26.5 && lon >= 50.5 && lon <= 51.7) return 'Qatar'
+  if (lat >= 28.5 && lat <= 30.2 && lon >= 46.5 && lon <= 48.5) return 'Kuwait'
+  if (lat >= 22   && lat <= 26.5 && lon >= 51   && lon <= 56.5) return 'UAE'
+  if (lat >= 16   && lat <= 26.5 && lon >= 51.7 && lon <= 60)   return 'Oman'
+  if (lat >= 12   && lat <= 19   && lon >= 42   && lon <= 54)   return 'Yemen'
+  if (lat >= 25   && lat <= 39   && lon >= 44   && lon <= 63)   return 'Iran'
+
   if (lat >= 16   && lat <= 33   && lon >= 34   && lon <= 56)   return 'SaudiArabia'
   if (lat >= 35   && lat <= 43   && lon >= 25   && lon <= 45)   return 'Turkey'
   if (lat >= 21   && lat <= 32   && lon >= 24   && lon <= 38)   return 'Egypt'
   if (lat >= 49   && lat <= 62   && lon >= -9   && lon <= 2.5)  return 'UK'
+
+  // Equatorial SE Asia — small countries first, before Malaysia bbox
+  if (lat >= 4    && lat <= 5.1  && lon >= 114  && lon <= 115.5) return 'Brunei'
+  if (lat >= 1.15 && lat <= 1.5  && lon >= 103.6 && lon <= 104.05) return 'Singapore'
   if (lat >= 0.5  && lat <= 8    && lon >= 99   && lon <= 120)  return 'Malaysia'
+
   if (lat >= 24   && lat <= 50   && lon >= -125 && lon <= -66)  return 'USA'
   if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
   if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
   if (lat >= -6   && lat <= 2    && lon >= -82  && lon <= -74)  return 'Ecuador'
   if (lat >= -11  && lat <= 6    && lon >= 95   && lon <= 141)  return 'Indonesia'
   if (lat >= 23   && lat <= 37   && lon >= 60   && lon <= 75)   return 'Pakistan'
-  if (lat >= 22   && lat <= 26.5 && lon >= 51   && lon <= 56.5) return 'UAE'
+
+  // Southern Africa — only one in this geographic range
+  if (lat >= -34.85 && lat <= -22 && lon >= 16  && lon <= 33)   return 'SouthAfrica'
+
   if (lat >= 42   && lat <= 51.5 && lon >= -5   && lon <= 8.5)  return 'France'
   if (lat >= 41.5 && lat <= 60   && lon >= -95  && lon <= -52)  return 'Canada'
   // Finland and Iceland must be checked before Norway: their bounding boxes
@@ -121,6 +150,42 @@ function selectMethod(country, lat, coords) {
     case 'UAE': {
       // Dubai / UAE: Umm al-Qura (Gulf region uses this or Kuwait; Aladhan method 4)
       return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura (UAE)' }
+    }
+    case 'Qatar': {
+      // Qatar Calendar House: Fajr 18°, Isha = Maghrib + 90 min (Aladhan method 9)
+      return { params: adhan.CalculationMethod.Qatar(), methodName: 'Qatar Calendar House' }
+    }
+    case 'Kuwait':
+    case 'Bahrain':
+    case 'Oman':
+    case 'Yemen': {
+      // Kuwait Ministry of Awqaf method, Fajr 18°, Isha 17.5° — recognised regional
+      // default for the lower Gulf per knowledge/wiki/methods (Kuwait regions:
+      // KW, BH, QA, AE, OM, YE). UAE and Qatar override above with their own
+      // institutional methods (Umm al-Qura and Qatar Calendar House respectively);
+      // the rest fall through to Kuwait. Aladhan method 8.
+      return { params: adhan.CalculationMethod.Kuwait(), methodName: `Kuwait (Ministry of Awqaf, ${country})` }
+    }
+    case 'Iran': {
+      // Tehran Institute of Geophysics: Fajr 17.7°, Maghrib +4.5min, Isha 14°
+      // (Aladhan method 7). 🟢 Established — official Iranian institutional method
+      // adopted across Iran. See knowledge/wiki/methods/ for the Tehran method
+      // entry once added.
+      return { params: adhan.CalculationMethod.Tehran(), methodName: 'Tehran (Institute of Geophysics)' }
+    }
+    case 'SouthAfrica': {
+      // South Africa follows MWL per the major SA bodies (SANHA / MJC); the
+      // MWL regions list in methods.js explicitly includes ZA. 🟢 Established.
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South Africa)' }
+    }
+    case 'Brunei': {
+      // JAKIM / MUIS-equivalent (Fajr 20°, Isha 18°) — equatorial standard
+      // shared across MY/SG/BN/ID per methods.js. 🟢 Established.
+      return { params: adhan.CalculationMethod.Singapore(), methodName: 'JAKIM/Singapore (Brunei)' }
+    }
+    case 'Singapore': {
+      // MUIS (Majlis Ugama Islam Singapura): Fajr 20°, Isha 18°. Aladhan method 10.
+      return { params: adhan.CalculationMethod.Singapore(), methodName: 'MUIS (Singapore)' }
     }
     case 'France': {
       // UOIF: Fajr 12°, Isha 12° — high-latitude accommodation for Europe

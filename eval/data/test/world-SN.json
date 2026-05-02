@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Dakar",
+    "country": "Senegal",
+    "iso": "SN",
+    "latitude": 14.7167,
+    "longitude": -17.4677,
+    "elevation": 22,
+    "timezone": "Africa/Dakar",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:22:28.816Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:32",
+        "sunrise": "06:47",
+        "dhuhr": "13:07",
+        "asr": "16:16",
+        "maghrib": "19:27",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:31",
+        "sunrise": "06:46",
+        "dhuhr": "13:07",
+        "asr": "16:16",
+        "maghrib": "19:27",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:31",
+        "sunrise": "06:46",
+        "dhuhr": "13:07",
+        "asr": "16:17",
+        "maghrib": "19:28",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:30",
+        "sunrise": "06:45",
+        "dhuhr": "13:07",
+        "asr": "16:17",
+        "maghrib": "19:28",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:29",
+        "sunrise": "06:45",
+        "dhuhr": "13:06",
+        "asr": "16:18",
+        "maghrib": "19:28",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:29",
+        "sunrise": "06:45",
+        "dhuhr": "13:06",
+        "asr": "16:19",
+        "maghrib": "19:28",
+        "isha": "20:40"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:28",
+        "sunrise": "06:44",
+        "dhuhr": "13:06",
+        "asr": "16:19",
+        "maghrib": "19:29",
+        "isha": "20:40"
+      }
+    ]
+  }
+]

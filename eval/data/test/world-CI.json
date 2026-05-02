@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Yamoussoukro",
+    "country": "Côte d'Ivoire",
+    "iso": "CI",
+    "latitude": 6.8276,
+    "longitude": -5.2893,
+    "elevation": 217,
+    "timezone": "Africa/Abidjan",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:18:20.591Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:55",
+        "sunrise": "06:07",
+        "dhuhr": "12:18",
+        "asr": "15:36",
+        "maghrib": "18:29",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:54",
+        "sunrise": "06:07",
+        "dhuhr": "12:18",
+        "asr": "15:36",
+        "maghrib": "18:29",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:54",
+        "sunrise": "06:07",
+        "dhuhr": "12:18",
+        "asr": "15:37",
+        "maghrib": "18:29",
+        "isha": "19:38"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:54",
+        "sunrise": "06:06",
+        "dhuhr": "12:18",
+        "asr": "15:37",
+        "maghrib": "18:29",
+        "isha": "19:38"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:53",
+        "sunrise": "06:06",
+        "dhuhr": "12:18",
+        "asr": "15:37",
+        "maghrib": "18:29",
+        "isha": "19:38"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:53",
+        "sunrise": "06:06",
+        "dhuhr": "12:18",
+        "asr": "15:37",
+        "maghrib": "18:30",
+        "isha": "19:38"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:53",
+        "sunrise": "06:06",
+        "dhuhr": "12:18",
+        "asr": "15:38",
+        "maghrib": "18:30",
+        "isha": "19:38"
+      }
+    ]
+  }
+]

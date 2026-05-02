@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Warsaw",
+    "country": "Poland",
+    "iso": "PL",
+    "latitude": 52.2297,
+    "longitude": 21.0122,
+    "elevation": 113,
+    "timezone": "Europe/Warsaw",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:28:10.550Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "02:28",
+        "sunrise": "05:04",
+        "dhuhr": "12:33",
+        "asr": "16:36",
+        "maghrib": "20:03",
+        "isha": "22:27"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "02:24",
+        "sunrise": "05:02",
+        "dhuhr": "12:33",
+        "asr": "16:37",
+        "maghrib": "20:04",
+        "isha": "22:30"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "02:20",
+        "sunrise": "05:00",
+        "dhuhr": "12:33",
+        "asr": "16:37",
+        "maghrib": "20:06",
+        "isha": "22:34"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "02:19",
+        "sunrise": "04:58",
+        "dhuhr": "12:33",
+        "asr": "16:38",
+        "maghrib": "20:08",
+        "isha": "22:37"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "02:18",
+        "sunrise": "04:57",
+        "dhuhr": "12:33",
+        "asr": "16:39",
+        "maghrib": "20:09",
+        "isha": "22:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "02:18",
+        "sunrise": "04:55",
+        "dhuhr": "12:33",
+        "asr": "16:40",
+        "maghrib": "20:11",
+        "isha": "22:39"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "02:17",
+        "sunrise": "04:53",
+        "dhuhr": "12:32",
+        "asr": "16:40",
+        "maghrib": "20:13",
+        "isha": "22:40"
+      }
+    ]
+  }
+]

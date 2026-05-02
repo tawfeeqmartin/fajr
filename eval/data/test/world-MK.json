@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Skopje",
+    "country": "North Macedonia",
+    "iso": "MK",
+    "latitude": 41.9981,
+    "longitude": 21.4254,
+    "elevation": 240,
+    "timezone": "Europe/Skopje",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:27:02.191Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:41",
+        "sunrise": "05:29",
+        "dhuhr": "12:31",
+        "asr": "16:24",
+        "maghrib": "19:34",
+        "isha": "21:16"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:39",
+        "sunrise": "05:28",
+        "dhuhr": "12:31",
+        "asr": "16:24",
+        "maghrib": "19:35",
+        "isha": "21:17"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:37",
+        "sunrise": "05:27",
+        "dhuhr": "12:31",
+        "asr": "16:24",
+        "maghrib": "19:36",
+        "isha": "21:19"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:35",
+        "sunrise": "05:26",
+        "dhuhr": "12:31",
+        "asr": "16:25",
+        "maghrib": "19:37",
+        "isha": "21:20"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:33",
+        "sunrise": "05:24",
+        "dhuhr": "12:31",
+        "asr": "16:25",
+        "maghrib": "19:38",
+        "isha": "21:22"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:31",
+        "sunrise": "05:23",
+        "dhuhr": "12:31",
+        "asr": "16:25",
+        "maghrib": "19:39",
+        "isha": "21:24"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:30",
+        "sunrise": "05:22",
+        "dhuhr": "12:31",
+        "asr": "16:26",
+        "maghrib": "19:40",
+        "isha": "21:25"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Georgetown",
+    "country": "Guyana",
+    "iso": "GY",
+    "latitude": 6.8013,
+    "longitude": -58.1551,
+    "elevation": 9,
+    "timezone": "America/Guyana",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:19:20.545Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:26",
+        "sunrise": "05:39",
+        "dhuhr": "11:50",
+        "asr": "15:07",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:26",
+        "sunrise": "05:38",
+        "dhuhr": "11:49",
+        "asr": "15:08",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:26",
+        "sunrise": "05:38",
+        "dhuhr": "11:49",
+        "asr": "15:08",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:25",
+        "sunrise": "05:38",
+        "dhuhr": "11:49",
+        "asr": "15:08",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:25",
+        "sunrise": "05:38",
+        "dhuhr": "11:49",
+        "asr": "15:09",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:24",
+        "sunrise": "05:37",
+        "dhuhr": "11:49",
+        "asr": "15:09",
+        "maghrib": "18:01",
+        "isha": "19:10"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:24",
+        "sunrise": "05:37",
+        "dhuhr": "11:49",
+        "asr": "15:09",
+        "maghrib": "18:01",
+        "isha": "19:10"
+      }
+    ]
+  }
+]

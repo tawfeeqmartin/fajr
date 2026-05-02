@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Nairobi",
+    "country": "Kenya",
+    "iso": "KE",
+    "latitude": -1.2921,
+    "longitude": 36.8219,
+    "elevation": 1795,
+    "timezone": "Africa/Nairobi",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:36:30.733Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:10",
+        "sunrise": "06:28",
+        "dhuhr": "12:30",
+        "asr": "15:51",
+        "maghrib": "18:32",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:10",
+        "sunrise": "06:28",
+        "dhuhr": "12:30",
+        "asr": "15:52",
+        "maghrib": "18:32",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:10",
+        "sunrise": "06:28",
+        "dhuhr": "12:30",
+        "asr": "15:52",
+        "maghrib": "18:31",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:10",
+        "sunrise": "06:27",
+        "dhuhr": "12:29",
+        "asr": "15:52",
+        "maghrib": "18:31",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:09",
+        "sunrise": "06:27",
+        "dhuhr": "12:29",
+        "asr": "15:52",
+        "maghrib": "18:31",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:09",
+        "sunrise": "06:27",
+        "dhuhr": "12:29",
+        "asr": "15:52",
+        "maghrib": "18:31",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:09",
+        "sunrise": "06:27",
+        "dhuhr": "12:29",
+        "asr": "15:52",
+        "maghrib": "18:31",
+        "isha": "19:41"
+      }
+    ]
+  }
+]

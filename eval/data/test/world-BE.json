@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Brussels",
+    "country": "Belgium",
+    "iso": "BE",
+    "latitude": 50.8503,
+    "longitude": 4.3517,
+    "elevation": 13,
+    "timezone": "Europe/Brussels",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:25:19.555Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:49",
+        "sunrise": "06:15",
+        "dhuhr": "13:40",
+        "asr": "17:41",
+        "maghrib": "21:05",
+        "isha": "23:20"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:46",
+        "sunrise": "06:13",
+        "dhuhr": "13:39",
+        "asr": "17:42",
+        "maghrib": "21:07",
+        "isha": "23:23"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:43",
+        "sunrise": "06:11",
+        "dhuhr": "13:39",
+        "asr": "17:43",
+        "maghrib": "21:08",
+        "isha": "23:26"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:39",
+        "sunrise": "06:10",
+        "dhuhr": "13:39",
+        "asr": "17:43",
+        "maghrib": "21:10",
+        "isha": "23:29"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:36",
+        "sunrise": "06:08",
+        "dhuhr": "13:39",
+        "asr": "17:44",
+        "maghrib": "21:11",
+        "isha": "23:32"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:32",
+        "sunrise": "06:06",
+        "dhuhr": "13:39",
+        "asr": "17:45",
+        "maghrib": "21:13",
+        "isha": "23:35"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:28",
+        "sunrise": "06:05",
+        "dhuhr": "13:39",
+        "asr": "17:45",
+        "maghrib": "21:14",
+        "isha": "23:38"
+      }
+    ]
+  }
+]

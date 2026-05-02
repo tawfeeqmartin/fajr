@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Dodoma",
+    "country": "Tanzania",
+    "iso": "TZ",
+    "latitude": -6.1722,
+    "longitude": 35.7395,
+    "elevation": 1135,
+    "timezone": "Africa/Dar_es_Salaam",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:36:39.289Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:20",
+        "sunrise": "06:37",
+        "dhuhr": "12:34",
+        "asr": "15:56",
+        "maghrib": "18:31",
+        "isha": "19:40"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:20",
+        "sunrise": "06:37",
+        "dhuhr": "12:34",
+        "asr": "15:56",
+        "maghrib": "18:30",
+        "isha": "19:40"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:20",
+        "sunrise": "06:37",
+        "dhuhr": "12:34",
+        "asr": "15:56",
+        "maghrib": "18:30",
+        "isha": "19:40"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:20",
+        "sunrise": "06:37",
+        "dhuhr": "12:34",
+        "asr": "15:56",
+        "maghrib": "18:30",
+        "isha": "19:40"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:19",
+        "sunrise": "06:38",
+        "dhuhr": "12:34",
+        "asr": "15:56",
+        "maghrib": "18:30",
+        "isha": "19:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:19",
+        "sunrise": "06:38",
+        "dhuhr": "12:34",
+        "asr": "15:56",
+        "maghrib": "18:30",
+        "isha": "19:39"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:19",
+        "sunrise": "06:38",
+        "dhuhr": "12:34",
+        "asr": "15:56",
+        "maghrib": "18:29",
+        "isha": "19:39"
+      }
+    ]
+  }
+]

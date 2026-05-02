@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Lilongwe",
+    "country": "Malawi",
+    "iso": "MW",
+    "latitude": -13.9626,
+    "longitude": 33.7741,
+    "elevation": 1050,
+    "timezone": "Africa/Blantyre",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:39:21.958Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:35",
+        "sunrise": "05:54",
+        "dhuhr": "11:42",
+        "asr": "15:02",
+        "maghrib": "17:30",
+        "isha": "18:40"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:35",
+        "sunrise": "05:54",
+        "dhuhr": "11:42",
+        "asr": "15:02",
+        "maghrib": "17:29",
+        "isha": "18:40"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:35",
+        "sunrise": "05:54",
+        "dhuhr": "11:42",
+        "asr": "15:01",
+        "maghrib": "17:29",
+        "isha": "18:40"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:35",
+        "sunrise": "05:55",
+        "dhuhr": "11:42",
+        "asr": "15:01",
+        "maghrib": "17:28",
+        "isha": "18:40"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:35",
+        "sunrise": "05:55",
+        "dhuhr": "11:42",
+        "asr": "15:01",
+        "maghrib": "17:28",
+        "isha": "18:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:35",
+        "sunrise": "05:55",
+        "dhuhr": "11:41",
+        "asr": "15:01",
+        "maghrib": "17:28",
+        "isha": "18:39"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:36",
+        "sunrise": "05:55",
+        "dhuhr": "11:41",
+        "asr": "15:01",
+        "maghrib": "17:27",
+        "isha": "18:39"
+      }
+    ]
+  }
+]

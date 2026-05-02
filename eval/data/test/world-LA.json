@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Vientiane",
+    "country": "Laos",
+    "iso": "LA",
+    "latitude": 17.9757,
+    "longitude": 102.6331,
+    "elevation": 174,
+    "timezone": "Asia/Vientiane",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:31:46.259Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:26",
+        "sunrise": "05:43",
+        "dhuhr": "12:06",
+        "asr": "15:19",
+        "maghrib": "18:31",
+        "isha": "19:43"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:25",
+        "sunrise": "05:42",
+        "dhuhr": "12:06",
+        "asr": "15:19",
+        "maghrib": "18:31",
+        "isha": "19:43"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:25",
+        "sunrise": "05:42",
+        "dhuhr": "12:06",
+        "asr": "15:18",
+        "maghrib": "18:31",
+        "isha": "19:44"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:24",
+        "sunrise": "05:41",
+        "dhuhr": "12:06",
+        "asr": "15:18",
+        "maghrib": "18:32",
+        "isha": "19:44"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:23",
+        "sunrise": "05:41",
+        "dhuhr": "12:06",
+        "asr": "15:17",
+        "maghrib": "18:32",
+        "isha": "19:45"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:23",
+        "sunrise": "05:40",
+        "dhuhr": "12:06",
+        "asr": "15:17",
+        "maghrib": "18:32",
+        "isha": "19:45"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:22",
+        "sunrise": "05:40",
+        "dhuhr": "12:06",
+        "asr": "15:16",
+        "maghrib": "18:33",
+        "isha": "19:46"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Riyadh",
+    "country": "Saudi Arabia",
+    "iso": "SA",
+    "latitude": 24.7136,
+    "longitude": 46.6753,
+    "elevation": 612,
+    "timezone": "Asia/Riyadh",
+    "method": "4",
+    "methodLabel": "Umm al-Qura",
+    "source": "Aladhan API (api.aladhan.com) — Umm al-Qura (Aladhan method 4)",
+    "sourceFetched": "2026-05-02T00:22:20.178Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:54",
+        "sunrise": "05:18",
+        "dhuhr": "11:50",
+        "asr": "15:17",
+        "maghrib": "18:23",
+        "isha": "19:53"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:53",
+        "sunrise": "05:17",
+        "dhuhr": "11:50",
+        "asr": "15:17",
+        "maghrib": "18:24",
+        "isha": "19:54"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:52",
+        "sunrise": "05:16",
+        "dhuhr": "11:50",
+        "asr": "15:17",
+        "maghrib": "18:24",
+        "isha": "19:54"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:51",
+        "sunrise": "05:15",
+        "dhuhr": "11:50",
+        "asr": "15:16",
+        "maghrib": "18:25",
+        "isha": "19:55"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:50",
+        "sunrise": "05:15",
+        "dhuhr": "11:50",
+        "asr": "15:16",
+        "maghrib": "18:25",
+        "isha": "19:55"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:49",
+        "sunrise": "05:14",
+        "dhuhr": "11:50",
+        "asr": "15:16",
+        "maghrib": "18:26",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:48",
+        "sunrise": "05:14",
+        "dhuhr": "11:50",
+        "asr": "15:16",
+        "maghrib": "18:26",
+        "isha": "19:56"
+      }
+    ]
+  }
+]

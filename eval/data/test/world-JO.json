@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Amman",
+    "country": "Jordan",
+    "iso": "JO",
+    "latitude": 31.9454,
+    "longitude": 35.9284,
+    "elevation": 757,
+    "timezone": "Asia/Amman",
+    "method": "22",
+    "methodLabel": "Jordan (Awqaf)",
+    "source": "Aladhan API (api.aladhan.com) — Jordan (Awqaf) (Aladhan method 22)",
+    "sourceFetched": "2026-05-02T00:19:54.554Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:20",
+        "sunrise": "05:50",
+        "dhuhr": "12:38",
+        "asr": "16:12",
+        "maghrib": "19:20",
+        "isha": "20:37"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:19",
+        "sunrise": "05:49",
+        "dhuhr": "12:38",
+        "asr": "16:12",
+        "maghrib": "19:21",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:18",
+        "sunrise": "05:48",
+        "dhuhr": "12:38",
+        "asr": "16:12",
+        "maghrib": "19:22",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:17",
+        "sunrise": "05:47",
+        "dhuhr": "12:38",
+        "asr": "16:12",
+        "maghrib": "19:22",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:16",
+        "sunrise": "05:46",
+        "dhuhr": "12:38",
+        "asr": "16:12",
+        "maghrib": "19:23",
+        "isha": "20:40"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:14",
+        "sunrise": "05:45",
+        "dhuhr": "12:38",
+        "asr": "16:12",
+        "maghrib": "19:24",
+        "isha": "20:41"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:13",
+        "sunrise": "05:45",
+        "dhuhr": "12:38",
+        "asr": "16:12",
+        "maghrib": "19:24",
+        "isha": "20:41"
+      }
+    ]
+  }
+]

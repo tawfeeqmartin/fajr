@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Brasília",
+    "country": "Brazil",
+    "iso": "BR",
+    "latitude": -15.8267,
+    "longitude": -47.9218,
+    "elevation": 1172,
+    "timezone": "America/Sao_Paulo",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:33:40.125Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:10",
+        "sunrise": "06:23",
+        "dhuhr": "12:09",
+        "asr": "15:28",
+        "maghrib": "17:54",
+        "isha": "19:03"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:10",
+        "sunrise": "06:23",
+        "dhuhr": "12:09",
+        "asr": "15:27",
+        "maghrib": "17:54",
+        "isha": "19:03"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:10",
+        "sunrise": "06:23",
+        "dhuhr": "12:08",
+        "asr": "15:27",
+        "maghrib": "17:53",
+        "isha": "19:03"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:10",
+        "sunrise": "06:24",
+        "dhuhr": "12:08",
+        "asr": "15:27",
+        "maghrib": "17:53",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:10",
+        "sunrise": "06:24",
+        "dhuhr": "12:08",
+        "asr": "15:26",
+        "maghrib": "17:52",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:10",
+        "sunrise": "06:24",
+        "dhuhr": "12:08",
+        "asr": "15:26",
+        "maghrib": "17:52",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:11",
+        "sunrise": "06:25",
+        "dhuhr": "12:08",
+        "asr": "15:26",
+        "maghrib": "17:52",
+        "isha": "19:01"
+      }
+    ]
+  }
+]

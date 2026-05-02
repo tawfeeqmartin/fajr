@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Brazzaville",
+    "country": "Republic of the Congo",
+    "iso": "CG",
+    "latitude": -4.2634,
+    "longitude": 15.2429,
+    "elevation": 313,
+    "timezone": "Africa/Brazzaville",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:37:56.143Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:46",
+        "sunrise": "05:57",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:55",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:46",
+        "sunrise": "05:57",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:55",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:46",
+        "sunrise": "05:57",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:54",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:46",
+        "sunrise": "05:57",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:54",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:46",
+        "sunrise": "05:57",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:54",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:45",
+        "sunrise": "05:57",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:54",
+        "isha": "19:02"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:45",
+        "sunrise": "05:57",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:54",
+        "isha": "19:01"
+      }
+    ]
+  }
+]

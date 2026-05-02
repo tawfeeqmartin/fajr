@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Washington D.C.",
+    "country": "United States",
+    "iso": "US",
+    "latitude": 38.9072,
+    "longitude": -77.0369,
+    "elevation": 7,
+    "timezone": "America/New_York",
+    "method": "2",
+    "methodLabel": "ISNA",
+    "source": "Aladhan API (api.aladhan.com) — ISNA (Aladhan method 2)",
+    "sourceFetched": "2026-05-02T00:24:36.996Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:47",
+        "sunrise": "06:09",
+        "dhuhr": "13:05",
+        "asr": "16:54",
+        "maghrib": "20:02",
+        "isha": "21:24"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:45",
+        "sunrise": "06:08",
+        "dhuhr": "13:05",
+        "asr": "16:54",
+        "maghrib": "20:03",
+        "isha": "21:25"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:44",
+        "sunrise": "06:07",
+        "dhuhr": "13:05",
+        "asr": "16:54",
+        "maghrib": "20:03",
+        "isha": "21:27"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:43",
+        "sunrise": "06:06",
+        "dhuhr": "13:05",
+        "asr": "16:55",
+        "maghrib": "20:04",
+        "isha": "21:28"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:41",
+        "sunrise": "06:05",
+        "dhuhr": "13:05",
+        "asr": "16:55",
+        "maghrib": "20:05",
+        "isha": "21:29"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:40",
+        "sunrise": "06:04",
+        "dhuhr": "13:05",
+        "asr": "16:55",
+        "maghrib": "20:06",
+        "isha": "21:30"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:38",
+        "sunrise": "06:02",
+        "dhuhr": "13:05",
+        "asr": "16:55",
+        "maghrib": "20:07",
+        "isha": "21:32"
+      }
+    ]
+  }
+]

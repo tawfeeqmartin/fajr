@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Asmara",
+    "country": "Eritrea",
+    "iso": "ER",
+    "latitude": 15.3229,
+    "longitude": 38.9251,
+    "elevation": 2325,
+    "timezone": "Africa/Asmara",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:36:22.233Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:39",
+        "sunrise": "06:01",
+        "dhuhr": "12:21",
+        "asr": "15:29",
+        "maghrib": "18:42",
+        "isha": "19:55"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:38",
+        "sunrise": "06:00",
+        "dhuhr": "12:21",
+        "asr": "15:30",
+        "maghrib": "18:42",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:37",
+        "sunrise": "06:00",
+        "dhuhr": "12:21",
+        "asr": "15:30",
+        "maghrib": "18:43",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:37",
+        "sunrise": "05:59",
+        "dhuhr": "12:21",
+        "asr": "15:31",
+        "maghrib": "18:43",
+        "isha": "19:57"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:36",
+        "sunrise": "05:59",
+        "dhuhr": "12:21",
+        "asr": "15:32",
+        "maghrib": "18:43",
+        "isha": "19:57"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:35",
+        "sunrise": "05:58",
+        "dhuhr": "12:21",
+        "asr": "15:32",
+        "maghrib": "18:44",
+        "isha": "19:57"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:35",
+        "sunrise": "05:58",
+        "dhuhr": "12:21",
+        "asr": "15:33",
+        "maghrib": "18:44",
+        "isha": "19:58"
+      }
+    ]
+  }
+]

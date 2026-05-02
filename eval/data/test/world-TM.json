@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Ashgabat",
+    "country": "Turkmenistan",
+    "iso": "TM",
+    "latitude": 37.9601,
+    "longitude": 58.3261,
+    "elevation": 219,
+    "timezone": "Asia/Ashgabat",
+    "method": "14",
+    "methodLabel": "Moonsighting Committee",
+    "source": "Aladhan API (api.aladhan.com) — Moonsighting Committee (Aladhan method 14)",
+    "sourceFetched": "2026-05-02T00:23:54.553Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:43",
+        "sunrise": "06:10",
+        "dhuhr": "13:04",
+        "asr": "16:51",
+        "maghrib": "19:58",
+        "isha": "21:19"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:42",
+        "sunrise": "06:09",
+        "dhuhr": "13:04",
+        "asr": "16:51",
+        "maghrib": "19:59",
+        "isha": "21:20"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:40",
+        "sunrise": "06:08",
+        "dhuhr": "13:03",
+        "asr": "16:51",
+        "maghrib": "20:00",
+        "isha": "21:21"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:39",
+        "sunrise": "06:07",
+        "dhuhr": "13:03",
+        "asr": "16:52",
+        "maghrib": "20:01",
+        "isha": "21:22"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:37",
+        "sunrise": "06:06",
+        "dhuhr": "13:03",
+        "asr": "16:52",
+        "maghrib": "20:02",
+        "isha": "21:24"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:36",
+        "sunrise": "06:04",
+        "dhuhr": "13:03",
+        "asr": "16:52",
+        "maghrib": "20:03",
+        "isha": "21:25"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:35",
+        "sunrise": "06:03",
+        "dhuhr": "13:03",
+        "asr": "16:52",
+        "maghrib": "20:03",
+        "isha": "21:26"
+      }
+    ]
+  }
+]

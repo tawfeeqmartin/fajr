@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Asunción",
+    "country": "Paraguay",
+    "iso": "PY",
+    "latitude": -25.2637,
+    "longitude": -57.5759,
+    "elevation": 43,
+    "timezone": "America/Asuncion",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:34:48.484Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:55",
+        "sunrise": "06:13",
+        "dhuhr": "11:47",
+        "asr": "14:58",
+        "maghrib": "17:21",
+        "isha": "18:34"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:56",
+        "sunrise": "06:14",
+        "dhuhr": "11:47",
+        "asr": "14:58",
+        "maghrib": "17:20",
+        "isha": "18:34"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:56",
+        "sunrise": "06:14",
+        "dhuhr": "11:47",
+        "asr": "14:57",
+        "maghrib": "17:20",
+        "isha": "18:33"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:57",
+        "sunrise": "06:15",
+        "dhuhr": "11:47",
+        "asr": "14:57",
+        "maghrib": "17:19",
+        "isha": "18:33"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:57",
+        "sunrise": "06:15",
+        "dhuhr": "11:47",
+        "asr": "14:56",
+        "maghrib": "17:18",
+        "isha": "18:32"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:57",
+        "sunrise": "06:16",
+        "dhuhr": "11:47",
+        "asr": "14:56",
+        "maghrib": "17:18",
+        "isha": "18:32"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:58",
+        "sunrise": "06:16",
+        "dhuhr": "11:47",
+        "asr": "14:55",
+        "maghrib": "17:17",
+        "isha": "18:31"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Guatemala City",
+    "country": "Guatemala",
+    "iso": "GT",
+    "latitude": 14.6349,
+    "longitude": -90.5069,
+    "elevation": 1500,
+    "timezone": "America/Guatemala",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:35:14.127Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:24",
+        "sunrise": "05:39",
+        "dhuhr": "11:59",
+        "asr": "15:08",
+        "maghrib": "18:19",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:23",
+        "sunrise": "05:38",
+        "dhuhr": "11:59",
+        "asr": "15:09",
+        "maghrib": "18:19",
+        "isha": "19:30"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:23",
+        "sunrise": "05:38",
+        "dhuhr": "11:59",
+        "asr": "15:09",
+        "maghrib": "18:20",
+        "isha": "19:31"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:22",
+        "sunrise": "05:38",
+        "dhuhr": "11:59",
+        "asr": "15:10",
+        "maghrib": "18:20",
+        "isha": "19:31"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:22",
+        "sunrise": "05:37",
+        "dhuhr": "11:59",
+        "asr": "15:10",
+        "maghrib": "18:20",
+        "isha": "19:31"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:21",
+        "sunrise": "05:37",
+        "dhuhr": "11:59",
+        "asr": "15:11",
+        "maghrib": "18:20",
+        "isha": "19:32"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:21",
+        "sunrise": "05:36",
+        "dhuhr": "11:59",
+        "asr": "15:11",
+        "maghrib": "18:21",
+        "isha": "19:32"
+      }
+    ]
+  }
+]

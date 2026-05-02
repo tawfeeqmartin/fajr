@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Addis Ababa",
+    "country": "Ethiopia",
+    "iso": "ET",
+    "latitude": 9.0302,
+    "longitude": 38.7407,
+    "elevation": 2355,
+    "timezone": "Africa/Addis_Ababa",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:36:13.768Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:49",
+        "sunrise": "06:09",
+        "dhuhr": "12:22",
+        "asr": "15:38",
+        "maghrib": "18:36",
+        "isha": "19:46"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:49",
+        "sunrise": "06:08",
+        "dhuhr": "12:22",
+        "asr": "15:38",
+        "maghrib": "18:36",
+        "isha": "19:47"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:48",
+        "sunrise": "06:08",
+        "dhuhr": "12:22",
+        "asr": "15:39",
+        "maghrib": "18:36",
+        "isha": "19:47"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:48",
+        "sunrise": "06:08",
+        "dhuhr": "12:22",
+        "asr": "15:39",
+        "maghrib": "18:36",
+        "isha": "19:47"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:48",
+        "sunrise": "06:07",
+        "dhuhr": "12:22",
+        "asr": "15:39",
+        "maghrib": "18:36",
+        "isha": "19:47"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:47",
+        "sunrise": "06:07",
+        "dhuhr": "12:22",
+        "asr": "15:40",
+        "maghrib": "18:36",
+        "isha": "19:48"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:47",
+        "sunrise": "06:07",
+        "dhuhr": "12:22",
+        "asr": "15:40",
+        "maghrib": "18:36",
+        "isha": "19:48"
+      }
+    ]
+  }
+]

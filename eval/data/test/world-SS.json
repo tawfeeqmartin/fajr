@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Juba",
+    "country": "South Sudan",
+    "iso": "SS",
+    "latitude": 4.8517,
+    "longitude": 31.5825,
+    "elevation": 458,
+    "timezone": "Africa/Juba",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:39:48.046Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:24",
+        "sunrise": "06:42",
+        "dhuhr": "12:51",
+        "asr": "16:10",
+        "maghrib": "18:59",
+        "isha": "20:09"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:23",
+        "sunrise": "06:42",
+        "dhuhr": "12:51",
+        "asr": "16:10",
+        "maghrib": "19:00",
+        "isha": "20:09"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:23",
+        "sunrise": "06:41",
+        "dhuhr": "12:50",
+        "asr": "16:10",
+        "maghrib": "19:00",
+        "isha": "20:10"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:23",
+        "sunrise": "06:41",
+        "dhuhr": "12:50",
+        "asr": "16:11",
+        "maghrib": "19:00",
+        "isha": "20:10"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:22",
+        "sunrise": "06:41",
+        "dhuhr": "12:50",
+        "asr": "16:11",
+        "maghrib": "19:00",
+        "isha": "20:10"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:22",
+        "sunrise": "06:41",
+        "dhuhr": "12:50",
+        "asr": "16:11",
+        "maghrib": "19:00",
+        "isha": "20:10"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:22",
+        "sunrise": "06:41",
+        "dhuhr": "12:50",
+        "asr": "16:11",
+        "maghrib": "19:00",
+        "isha": "20:10"
+      }
+    ]
+  }
+]

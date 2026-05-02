@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Baghdad",
+    "country": "Iraq",
+    "iso": "IQ",
+    "latitude": 33.3152,
+    "longitude": 44.3661,
+    "elevation": 34,
+    "timezone": "Asia/Baghdad",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:19:46.032Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:34",
+        "sunrise": "06:14",
+        "dhuhr": "13:00",
+        "asr": "16:41",
+        "maghrib": "19:46",
+        "isha": "21:14"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:33",
+        "sunrise": "06:13",
+        "dhuhr": "12:59",
+        "asr": "16:41",
+        "maghrib": "19:46",
+        "isha": "21:15"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:31",
+        "sunrise": "06:12",
+        "dhuhr": "12:59",
+        "asr": "16:41",
+        "maghrib": "19:47",
+        "isha": "21:16"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:30",
+        "sunrise": "06:11",
+        "dhuhr": "12:59",
+        "asr": "16:41",
+        "maghrib": "19:48",
+        "isha": "21:17"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:29",
+        "sunrise": "06:10",
+        "dhuhr": "12:59",
+        "asr": "16:41",
+        "maghrib": "19:49",
+        "isha": "21:19"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:27",
+        "sunrise": "06:09",
+        "dhuhr": "12:59",
+        "asr": "16:41",
+        "maghrib": "19:49",
+        "isha": "21:20"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:26",
+        "sunrise": "06:08",
+        "dhuhr": "12:59",
+        "asr": "16:41",
+        "maghrib": "19:50",
+        "isha": "21:21"
+      }
+    ]
+  }
+]

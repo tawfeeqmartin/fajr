@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Vilnius",
+    "country": "Lithuania",
+    "iso": "LT",
+    "latitude": 54.6872,
+    "longitude": 25.2797,
+    "elevation": 112,
+    "timezone": "Europe/Vilnius",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:28:19.093Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "02:01",
+        "sunrise": "04:38",
+        "dhuhr": "12:16",
+        "asr": "16:21",
+        "maghrib": "19:54",
+        "isha": "22:23"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "02:00",
+        "sunrise": "04:36",
+        "dhuhr": "12:16",
+        "asr": "16:22",
+        "maghrib": "19:56",
+        "isha": "22:24"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "01:59",
+        "sunrise": "04:34",
+        "dhuhr": "12:16",
+        "asr": "16:23",
+        "maghrib": "19:58",
+        "isha": "22:24"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "01:59",
+        "sunrise": "04:32",
+        "dhuhr": "12:16",
+        "asr": "16:24",
+        "maghrib": "20:00",
+        "isha": "22:25"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "01:58",
+        "sunrise": "04:30",
+        "dhuhr": "12:16",
+        "asr": "16:24",
+        "maghrib": "20:02",
+        "isha": "22:26"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "01:57",
+        "sunrise": "04:28",
+        "dhuhr": "12:15",
+        "asr": "16:25",
+        "maghrib": "20:04",
+        "isha": "22:27"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "01:56",
+        "sunrise": "04:26",
+        "dhuhr": "12:15",
+        "asr": "16:26",
+        "maghrib": "20:06",
+        "isha": "22:27"
+      }
+    ]
+  }
+]

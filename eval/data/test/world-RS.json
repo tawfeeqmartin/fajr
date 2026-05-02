@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Belgrade",
+    "country": "Serbia",
+    "iso": "RS",
+    "latitude": 44.7866,
+    "longitude": 20.4489,
+    "elevation": 117,
+    "timezone": "Europe/Belgrade",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:26:45.052Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:30",
+        "sunrise": "05:27",
+        "dhuhr": "12:35",
+        "asr": "16:31",
+        "maghrib": "19:44",
+        "isha": "21:34"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:28",
+        "sunrise": "05:26",
+        "dhuhr": "12:35",
+        "asr": "16:31",
+        "maghrib": "19:45",
+        "isha": "21:35"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:26",
+        "sunrise": "05:24",
+        "dhuhr": "12:35",
+        "asr": "16:32",
+        "maghrib": "19:46",
+        "isha": "21:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:24",
+        "sunrise": "05:23",
+        "dhuhr": "12:35",
+        "asr": "16:32",
+        "maghrib": "19:48",
+        "isha": "21:39"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:21",
+        "sunrise": "05:21",
+        "dhuhr": "12:35",
+        "asr": "16:32",
+        "maghrib": "19:49",
+        "isha": "21:41"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:19",
+        "sunrise": "05:20",
+        "dhuhr": "12:35",
+        "asr": "16:33",
+        "maghrib": "19:50",
+        "isha": "21:43"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:17",
+        "sunrise": "05:19",
+        "dhuhr": "12:35",
+        "asr": "16:33",
+        "maghrib": "19:51",
+        "isha": "21:45"
+      }
+    ]
+  }
+]

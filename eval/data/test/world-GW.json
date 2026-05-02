@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Bissau",
+    "country": "Guinea-Bissau",
+    "iso": "GW",
+    "latitude": 11.8636,
+    "longitude": -15.5977,
+    "elevation": 12,
+    "timezone": "Africa/Bissau",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:19:12.046Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:29",
+        "sunrise": "06:43",
+        "dhuhr": "12:59",
+        "asr": "16:12",
+        "maghrib": "19:16",
+        "isha": "20:26"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:28",
+        "sunrise": "06:42",
+        "dhuhr": "12:59",
+        "asr": "16:13",
+        "maghrib": "19:16",
+        "isha": "20:26"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:28",
+        "sunrise": "06:42",
+        "dhuhr": "12:59",
+        "asr": "16:13",
+        "maghrib": "19:17",
+        "isha": "20:26"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:27",
+        "sunrise": "06:42",
+        "dhuhr": "12:59",
+        "asr": "16:14",
+        "maghrib": "19:17",
+        "isha": "20:27"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:27",
+        "sunrise": "06:41",
+        "dhuhr": "12:59",
+        "asr": "16:14",
+        "maghrib": "19:17",
+        "isha": "20:27"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:26",
+        "sunrise": "06:41",
+        "dhuhr": "12:59",
+        "asr": "16:15",
+        "maghrib": "19:17",
+        "isha": "20:27"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:26",
+        "sunrise": "06:41",
+        "dhuhr": "12:59",
+        "asr": "16:15",
+        "maghrib": "19:17",
+        "isha": "20:28"
+      }
+    ]
+  }
+]

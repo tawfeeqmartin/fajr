@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Port Moresby",
+    "country": "Papua New Guinea",
+    "iso": "PG",
+    "latitude": -9.4438,
+    "longitude": 147.1803,
+    "elevation": 49,
+    "timezone": "Pacific/Port_Moresby",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:36:05.273Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:08",
+        "asr": "15:30",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:08",
+        "asr": "15:30",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:03",
+        "sunrise": "06:15",
+        "dhuhr": "12:08",
+        "asr": "15:30",
+        "maghrib": "18:01",
+        "isha": "19:09"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:03",
+        "sunrise": "06:16",
+        "dhuhr": "12:08",
+        "asr": "15:30",
+        "maghrib": "18:00",
+        "isha": "19:08"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:03",
+        "sunrise": "06:16",
+        "dhuhr": "12:08",
+        "asr": "15:30",
+        "maghrib": "18:00",
+        "isha": "19:08"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:03",
+        "sunrise": "06:16",
+        "dhuhr": "12:08",
+        "asr": "15:30",
+        "maghrib": "18:00",
+        "isha": "19:08"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:04",
+        "sunrise": "06:16",
+        "dhuhr": "12:08",
+        "asr": "15:29",
+        "maghrib": "18:00",
+        "isha": "19:08"
+      }
+    ]
+  }
+]

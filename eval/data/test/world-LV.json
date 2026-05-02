@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Riga",
+    "country": "Latvia",
+    "iso": "LV",
+    "latitude": 56.9496,
+    "longitude": 24.1052,
+    "elevation": 7,
+    "timezone": "Europe/Riga",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:28:27.600Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:02",
+        "sunrise": "05:34",
+        "dhuhr": "13:21",
+        "asr": "17:28",
+        "maghrib": "21:08",
+        "isha": "23:32"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:01",
+        "sunrise": "05:32",
+        "dhuhr": "13:20",
+        "asr": "17:29",
+        "maghrib": "21:10",
+        "isha": "23:32"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:00",
+        "sunrise": "05:29",
+        "dhuhr": "13:20",
+        "asr": "17:30",
+        "maghrib": "21:12",
+        "isha": "23:33"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "02:59",
+        "sunrise": "05:27",
+        "dhuhr": "13:20",
+        "asr": "17:31",
+        "maghrib": "21:15",
+        "isha": "23:34"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "02:58",
+        "sunrise": "05:25",
+        "dhuhr": "13:20",
+        "asr": "17:32",
+        "maghrib": "21:17",
+        "isha": "23:35"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "02:57",
+        "sunrise": "05:23",
+        "dhuhr": "13:20",
+        "asr": "17:33",
+        "maghrib": "21:19",
+        "isha": "23:36"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "02:57",
+        "sunrise": "05:20",
+        "dhuhr": "13:20",
+        "asr": "17:33",
+        "maghrib": "21:21",
+        "isha": "23:37"
+      }
+    ]
+  }
+]

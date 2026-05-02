@@ -1,0 +1,80 @@
+[
+  {
+    "city": "La Paz",
+    "country": "Bolivia",
+    "iso": "BO",
+    "latitude": -16.4897,
+    "longitude": -68.1193,
+    "elevation": 3640,
+    "timezone": "America/La_Paz",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:34:39.948Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:31",
+        "sunrise": "06:45",
+        "dhuhr": "12:29",
+        "asr": "15:48",
+        "maghrib": "18:14",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:31",
+        "sunrise": "06:45",
+        "dhuhr": "12:29",
+        "asr": "15:48",
+        "maghrib": "18:14",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:31",
+        "sunrise": "06:45",
+        "dhuhr": "12:29",
+        "asr": "15:47",
+        "maghrib": "18:13",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:31",
+        "sunrise": "06:45",
+        "dhuhr": "12:29",
+        "asr": "15:47",
+        "maghrib": "18:13",
+        "isha": "19:22"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:32",
+        "sunrise": "06:46",
+        "dhuhr": "12:29",
+        "asr": "15:47",
+        "maghrib": "18:12",
+        "isha": "19:22"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:32",
+        "sunrise": "06:46",
+        "dhuhr": "12:29",
+        "asr": "15:46",
+        "maghrib": "18:12",
+        "isha": "19:22"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:32",
+        "sunrise": "06:46",
+        "dhuhr": "12:29",
+        "asr": "15:46",
+        "maghrib": "18:12",
+        "isha": "19:22"
+      }
+    ]
+  }
+]

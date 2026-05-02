@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Victoria",
+    "country": "Seychelles",
+    "iso": "SC",
+    "latitude": -4.6191,
+    "longitude": 55.4513,
+    "elevation": 5,
+    "timezone": "Indian/Mahe",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:39:13.414Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:59",
+        "sunrise": "06:17",
+        "dhuhr": "12:15",
+        "asr": "15:37",
+        "maghrib": "18:14",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:59",
+        "sunrise": "06:17",
+        "dhuhr": "12:15",
+        "asr": "15:37",
+        "maghrib": "18:13",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:59",
+        "sunrise": "06:17",
+        "dhuhr": "12:15",
+        "asr": "15:37",
+        "maghrib": "18:13",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:59",
+        "sunrise": "06:17",
+        "dhuhr": "12:15",
+        "asr": "15:37",
+        "maghrib": "18:13",
+        "isha": "19:22"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:59",
+        "sunrise": "06:17",
+        "dhuhr": "12:15",
+        "asr": "15:37",
+        "maghrib": "18:13",
+        "isha": "19:22"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:59",
+        "sunrise": "06:17",
+        "dhuhr": "12:15",
+        "asr": "15:37",
+        "maghrib": "18:13",
+        "isha": "19:22"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:59",
+        "sunrise": "06:17",
+        "dhuhr": "12:15",
+        "asr": "15:37",
+        "maghrib": "18:12",
+        "isha": "19:22"
+      }
+    ]
+  }
+]

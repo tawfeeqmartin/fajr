@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Moroni",
+    "country": "Comoros",
+    "iso": "KM",
+    "latitude": -11.7172,
+    "longitude": 43.2473,
+    "elevation": 29,
+    "timezone": "Indian/Comoro",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:18:11.902Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:55",
+        "sunrise": "06:14",
+        "dhuhr": "12:04",
+        "asr": "15:25",
+        "maghrib": "17:54",
+        "isha": "19:05"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:55",
+        "sunrise": "06:14",
+        "dhuhr": "12:04",
+        "asr": "15:25",
+        "maghrib": "17:54",
+        "isha": "19:04"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:55",
+        "sunrise": "06:14",
+        "dhuhr": "12:04",
+        "asr": "15:25",
+        "maghrib": "17:54",
+        "isha": "19:04"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:55",
+        "sunrise": "06:14",
+        "dhuhr": "12:04",
+        "asr": "15:24",
+        "maghrib": "17:53",
+        "isha": "19:04"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:55",
+        "sunrise": "06:14",
+        "dhuhr": "12:04",
+        "asr": "15:24",
+        "maghrib": "17:53",
+        "isha": "19:04"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:55",
+        "sunrise": "06:14",
+        "dhuhr": "12:04",
+        "asr": "15:24",
+        "maghrib": "17:53",
+        "isha": "19:03"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:55",
+        "sunrise": "06:15",
+        "dhuhr": "12:04",
+        "asr": "15:24",
+        "maghrib": "17:52",
+        "isha": "19:03"
+      }
+    ]
+  }
+]

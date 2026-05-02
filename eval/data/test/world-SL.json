@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Freetown",
+    "country": "Sierra Leone",
+    "iso": "SL",
+    "latitude": 8.4657,
+    "longitude": -13.2317,
+    "elevation": 26,
+    "timezone": "Africa/Freetown",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:22:37.402Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:24",
+        "sunrise": "06:37",
+        "dhuhr": "12:50",
+        "asr": "16:06",
+        "maghrib": "19:03",
+        "isha": "20:11"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:24",
+        "sunrise": "06:37",
+        "dhuhr": "12:50",
+        "asr": "16:07",
+        "maghrib": "19:03",
+        "isha": "20:12"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:24",
+        "sunrise": "06:36",
+        "dhuhr": "12:50",
+        "asr": "16:07",
+        "maghrib": "19:03",
+        "isha": "20:12"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:23",
+        "sunrise": "06:36",
+        "dhuhr": "12:50",
+        "asr": "16:07",
+        "maghrib": "19:03",
+        "isha": "20:12"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:23",
+        "sunrise": "06:36",
+        "dhuhr": "12:50",
+        "asr": "16:08",
+        "maghrib": "19:03",
+        "isha": "20:12"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:22",
+        "sunrise": "06:36",
+        "dhuhr": "12:49",
+        "asr": "16:08",
+        "maghrib": "19:03",
+        "isha": "20:12"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:22",
+        "sunrise": "06:35",
+        "dhuhr": "12:49",
+        "asr": "16:08",
+        "maghrib": "19:03",
+        "isha": "20:13"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Abu Dhabi",
+    "country": "United Arab Emirates",
+    "iso": "AE",
+    "latitude": 24.4539,
+    "longitude": 54.3773,
+    "elevation": 27,
+    "timezone": "Asia/Dubai",
+    "method": "15",
+    "methodLabel": "Dubai",
+    "source": "Aladhan API (api.aladhan.com) — Dubai (Aladhan method 15)",
+    "sourceFetched": "2026-05-02T00:24:11.550Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:18",
+        "sunrise": "05:47",
+        "dhuhr": "12:19",
+        "asr": "15:46",
+        "maghrib": "18:52",
+        "isha": "20:03"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:17",
+        "sunrise": "05:46",
+        "dhuhr": "12:19",
+        "asr": "15:46",
+        "maghrib": "18:53",
+        "isha": "20:04"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:17",
+        "sunrise": "05:46",
+        "dhuhr": "12:19",
+        "asr": "15:45",
+        "maghrib": "18:53",
+        "isha": "20:04"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:16",
+        "sunrise": "05:45",
+        "dhuhr": "12:19",
+        "asr": "15:45",
+        "maghrib": "18:54",
+        "isha": "20:05"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:14",
+        "sunrise": "05:44",
+        "dhuhr": "12:19",
+        "asr": "15:45",
+        "maghrib": "18:54",
+        "isha": "20:05"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:14",
+        "sunrise": "05:44",
+        "dhuhr": "12:19",
+        "asr": "15:45",
+        "maghrib": "18:55",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:13",
+        "sunrise": "05:43",
+        "dhuhr": "12:19",
+        "asr": "15:44",
+        "maghrib": "18:55",
+        "isha": "20:06"
+      }
+    ]
+  }
+]

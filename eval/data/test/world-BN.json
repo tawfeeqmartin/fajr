@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Bandar Seri Begawan",
+    "country": "Brunei Darussalam",
+    "iso": "BN",
+    "latitude": 4.9031,
+    "longitude": 114.9398,
+    "elevation": 1,
+    "timezone": "Asia/Brunei",
+    "method": "16",
+    "methodLabel": "JAKIM",
+    "source": "Aladhan API (api.aladhan.com) — JAKIM (Aladhan method 16)",
+    "sourceFetched": "2026-05-02T00:17:37.688Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:56",
+        "sunrise": "06:08",
+        "dhuhr": "12:20",
+        "asr": "15:36",
+        "maghrib": "18:29",
+        "isha": "19:39"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:55",
+        "sunrise": "06:08",
+        "dhuhr": "12:20",
+        "asr": "15:37",
+        "maghrib": "18:29",
+        "isha": "19:39"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:55",
+        "sunrise": "06:08",
+        "dhuhr": "12:20",
+        "asr": "15:37",
+        "maghrib": "18:29",
+        "isha": "19:39"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:55",
+        "sunrise": "06:08",
+        "dhuhr": "12:20",
+        "asr": "15:37",
+        "maghrib": "18:29",
+        "isha": "19:39"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:54",
+        "sunrise": "06:08",
+        "dhuhr": "12:20",
+        "asr": "15:37",
+        "maghrib": "18:29",
+        "isha": "19:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:54",
+        "sunrise": "06:07",
+        "dhuhr": "12:20",
+        "asr": "15:38",
+        "maghrib": "18:29",
+        "isha": "19:40"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:54",
+        "sunrise": "06:07",
+        "dhuhr": "12:20",
+        "asr": "15:38",
+        "maghrib": "18:29",
+        "isha": "19:40"
+      }
+    ]
+  }
+]

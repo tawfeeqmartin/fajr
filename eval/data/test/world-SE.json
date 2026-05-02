@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Stockholm",
+    "country": "Sweden",
+    "iso": "SE",
+    "latitude": 59.3293,
+    "longitude": 18.0686,
+    "elevation": 28,
+    "timezone": "Europe/Stockholm",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:28:53.419Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "02:22",
+        "sunrise": "04:47",
+        "dhuhr": "12:45",
+        "asr": "16:55",
+        "maghrib": "20:44",
+        "isha": "23:01"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "02:21",
+        "sunrise": "04:44",
+        "dhuhr": "12:45",
+        "asr": "16:56",
+        "maghrib": "20:46",
+        "isha": "23:02"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "02:20",
+        "sunrise": "04:42",
+        "dhuhr": "12:45",
+        "asr": "16:57",
+        "maghrib": "20:48",
+        "isha": "23:03"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "02:19",
+        "sunrise": "04:39",
+        "dhuhr": "12:44",
+        "asr": "16:58",
+        "maghrib": "20:51",
+        "isha": "23:04"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "02:18",
+        "sunrise": "04:37",
+        "dhuhr": "12:44",
+        "asr": "16:59",
+        "maghrib": "20:53",
+        "isha": "23:05"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "02:17",
+        "sunrise": "04:34",
+        "dhuhr": "12:44",
+        "asr": "17:00",
+        "maghrib": "20:56",
+        "isha": "23:06"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "02:16",
+        "sunrise": "04:32",
+        "dhuhr": "12:44",
+        "asr": "17:01",
+        "maghrib": "20:58",
+        "isha": "23:06"
+      }
+    ]
+  }
+]

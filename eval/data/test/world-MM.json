@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Naypyidaw",
+    "country": "Myanmar",
+    "iso": "MM",
+    "latitude": 19.7633,
+    "longitude": 96.0785,
+    "elevation": 115,
+    "timezone": "Asia/Yangon",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:31:55.779Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:19",
+        "sunrise": "05:37",
+        "dhuhr": "12:03",
+        "asr": "15:19",
+        "maghrib": "18:29",
+        "isha": "19:42"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:18",
+        "sunrise": "05:36",
+        "dhuhr": "12:03",
+        "asr": "15:19",
+        "maghrib": "18:29",
+        "isha": "19:43"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:17",
+        "sunrise": "05:35",
+        "dhuhr": "12:02",
+        "asr": "15:19",
+        "maghrib": "18:30",
+        "isha": "19:43"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:17",
+        "sunrise": "05:35",
+        "dhuhr": "12:02",
+        "asr": "15:18",
+        "maghrib": "18:30",
+        "isha": "19:44"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:16",
+        "sunrise": "05:34",
+        "dhuhr": "12:02",
+        "asr": "15:18",
+        "maghrib": "18:31",
+        "isha": "19:44"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:15",
+        "sunrise": "05:34",
+        "dhuhr": "12:02",
+        "asr": "15:17",
+        "maghrib": "18:31",
+        "isha": "19:45"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:14",
+        "sunrise": "05:33",
+        "dhuhr": "12:02",
+        "asr": "15:17",
+        "maghrib": "18:31",
+        "isha": "19:45"
+      }
+    ]
+  }
+]

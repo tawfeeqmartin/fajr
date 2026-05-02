@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Tbilisi",
+    "country": "Georgia",
+    "iso": "GE",
+    "latitude": 41.7151,
+    "longitude": 44.8271,
+    "elevation": 480,
+    "timezone": "Asia/Tbilisi",
+    "method": "12",
+    "methodLabel": "Diyanet",
+    "source": "Aladhan API (api.aladhan.com) — Diyanet (Aladhan method 12)",
+    "sourceFetched": "2026-05-02T00:30:11.198Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:49",
+        "sunrise": "06:56",
+        "dhuhr": "13:58",
+        "asr": "17:50",
+        "maghrib": "21:00",
+        "isha": "22:07"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:47",
+        "sunrise": "06:55",
+        "dhuhr": "13:58",
+        "asr": "17:50",
+        "maghrib": "21:01",
+        "isha": "22:08"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:46",
+        "sunrise": "06:54",
+        "dhuhr": "13:57",
+        "asr": "17:50",
+        "maghrib": "21:02",
+        "isha": "22:10"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:44",
+        "sunrise": "06:53",
+        "dhuhr": "13:57",
+        "asr": "17:51",
+        "maghrib": "21:03",
+        "isha": "22:11"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:43",
+        "sunrise": "06:51",
+        "dhuhr": "13:57",
+        "asr": "17:51",
+        "maghrib": "21:04",
+        "isha": "22:13"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:41",
+        "sunrise": "06:50",
+        "dhuhr": "13:57",
+        "asr": "17:51",
+        "maghrib": "21:05",
+        "isha": "22:14"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:40",
+        "sunrise": "06:49",
+        "dhuhr": "13:57",
+        "asr": "17:52",
+        "maghrib": "21:06",
+        "isha": "22:15"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Yerevan",
+    "country": "Armenia",
+    "iso": "AM",
+    "latitude": 40.1792,
+    "longitude": 44.4991,
+    "elevation": 989,
+    "timezone": "Asia/Yerevan",
+    "method": "12",
+    "methodLabel": "Diyanet",
+    "source": "Aladhan API (api.aladhan.com) — Diyanet (Aladhan method 12)",
+    "sourceFetched": "2026-05-02T00:30:19.745Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:56",
+        "sunrise": "07:01",
+        "dhuhr": "13:59",
+        "asr": "17:49",
+        "maghrib": "20:58",
+        "isha": "22:03"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:54",
+        "sunrise": "07:00",
+        "dhuhr": "13:59",
+        "asr": "17:49",
+        "maghrib": "20:59",
+        "isha": "22:04"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:53",
+        "sunrise": "06:59",
+        "dhuhr": "13:59",
+        "asr": "17:50",
+        "maghrib": "21:00",
+        "isha": "22:06"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:51",
+        "sunrise": "06:57",
+        "dhuhr": "13:59",
+        "asr": "17:50",
+        "maghrib": "21:01",
+        "isha": "22:07"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:50",
+        "sunrise": "06:56",
+        "dhuhr": "13:59",
+        "asr": "17:50",
+        "maghrib": "21:02",
+        "isha": "22:08"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:48",
+        "sunrise": "06:55",
+        "dhuhr": "13:59",
+        "asr": "17:51",
+        "maghrib": "21:03",
+        "isha": "22:09"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:47",
+        "sunrise": "06:54",
+        "dhuhr": "13:58",
+        "asr": "17:51",
+        "maghrib": "21:04",
+        "isha": "22:11"
+      }
+    ]
+  }
+]

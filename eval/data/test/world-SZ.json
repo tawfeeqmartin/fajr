@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Mbabane",
+    "country": "Eswatini",
+    "iso": "SZ",
+    "latitude": -26.3054,
+    "longitude": 31.1367,
+    "elevation": 1243,
+    "timezone": "Africa/Mbabane",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:39:39.108Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:01",
+        "sunrise": "06:20",
+        "dhuhr": "11:52",
+        "asr": "15:03",
+        "maghrib": "17:25",
+        "isha": "18:39"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:02",
+        "sunrise": "06:20",
+        "dhuhr": "11:52",
+        "asr": "15:02",
+        "maghrib": "17:24",
+        "isha": "18:38"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:02",
+        "sunrise": "06:21",
+        "dhuhr": "11:52",
+        "asr": "15:02",
+        "maghrib": "17:23",
+        "isha": "18:38"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:02",
+        "sunrise": "06:21",
+        "dhuhr": "11:52",
+        "asr": "15:01",
+        "maghrib": "17:23",
+        "isha": "18:37"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:03",
+        "sunrise": "06:22",
+        "dhuhr": "11:52",
+        "asr": "15:01",
+        "maghrib": "17:22",
+        "isha": "18:37"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:03",
+        "sunrise": "06:22",
+        "dhuhr": "11:52",
+        "asr": "15:00",
+        "maghrib": "17:21",
+        "isha": "18:36"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:04",
+        "sunrise": "06:23",
+        "dhuhr": "11:52",
+        "asr": "14:59",
+        "maghrib": "17:21",
+        "isha": "18:35"
+      }
+    ]
+  }
+]

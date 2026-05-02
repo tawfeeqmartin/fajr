@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Kigali",
+    "country": "Rwanda",
+    "iso": "RW",
+    "latitude": -1.9579,
+    "longitude": 30.1127,
+    "elevation": 1567,
+    "timezone": "Africa/Kigali",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:36:47.807Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:38",
+        "sunrise": "05:55",
+        "dhuhr": "11:57",
+        "asr": "15:18",
+        "maghrib": "17:58",
+        "isha": "19:07"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:38",
+        "sunrise": "05:55",
+        "dhuhr": "11:56",
+        "asr": "15:18",
+        "maghrib": "17:58",
+        "isha": "19:07"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:37",
+        "sunrise": "05:55",
+        "dhuhr": "11:56",
+        "asr": "15:19",
+        "maghrib": "17:58",
+        "isha": "19:07"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:37",
+        "sunrise": "05:55",
+        "dhuhr": "11:56",
+        "asr": "15:19",
+        "maghrib": "17:57",
+        "isha": "19:07"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:37",
+        "sunrise": "05:55",
+        "dhuhr": "11:56",
+        "asr": "15:19",
+        "maghrib": "17:57",
+        "isha": "19:07"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:37",
+        "sunrise": "05:55",
+        "dhuhr": "11:56",
+        "asr": "15:19",
+        "maghrib": "17:57",
+        "isha": "19:07"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:37",
+        "sunrise": "05:55",
+        "dhuhr": "11:56",
+        "asr": "15:19",
+        "maghrib": "17:57",
+        "isha": "19:07"
+      }
+    ]
+  }
+]

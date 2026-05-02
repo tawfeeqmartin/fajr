@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Budapest",
+    "country": "Hungary",
+    "iso": "HU",
+    "latitude": 47.4979,
+    "longitude": 19.0402,
+    "elevation": 96,
+    "timezone": "Europe/Budapest",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:27:44.949Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:18",
+        "sunrise": "05:26",
+        "dhuhr": "12:41",
+        "asr": "16:39",
+        "maghrib": "19:57",
+        "isha": "21:56"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:16",
+        "sunrise": "05:24",
+        "dhuhr": "12:41",
+        "asr": "16:40",
+        "maghrib": "19:58",
+        "isha": "21:58"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:13",
+        "sunrise": "05:23",
+        "dhuhr": "12:41",
+        "asr": "16:40",
+        "maghrib": "19:59",
+        "isha": "22:00"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:11",
+        "sunrise": "05:21",
+        "dhuhr": "12:41",
+        "asr": "16:41",
+        "maghrib": "20:01",
+        "isha": "22:02"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:08",
+        "sunrise": "05:20",
+        "dhuhr": "12:40",
+        "asr": "16:41",
+        "maghrib": "20:02",
+        "isha": "22:05"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:06",
+        "sunrise": "05:18",
+        "dhuhr": "12:40",
+        "asr": "16:42",
+        "maghrib": "20:03",
+        "isha": "22:07"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:03",
+        "sunrise": "05:17",
+        "dhuhr": "12:40",
+        "asr": "16:42",
+        "maghrib": "20:05",
+        "isha": "22:09"
+      }
+    ]
+  }
+]

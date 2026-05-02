@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Tunis",
+    "country": "Tunisia",
+    "iso": "TN",
+    "latitude": 36.8065,
+    "longitude": 10.1815,
+    "elevation": 4,
+    "timezone": "Africa/Tunis",
+    "method": "17",
+    "methodLabel": "Tunisia",
+    "source": "Aladhan API (api.aladhan.com) — Tunisia (Aladhan method 17)",
+    "sourceFetched": "2026-05-02T00:23:37.508Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:35",
+        "sunrise": "05:25",
+        "dhuhr": "12:16",
+        "asr": "16:02",
+        "maghrib": "19:08",
+        "isha": "20:46"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:33",
+        "sunrise": "05:23",
+        "dhuhr": "12:16",
+        "asr": "16:02",
+        "maghrib": "19:09",
+        "isha": "20:47"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:32",
+        "sunrise": "05:22",
+        "dhuhr": "12:16",
+        "asr": "16:03",
+        "maghrib": "19:10",
+        "isha": "20:48"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:30",
+        "sunrise": "05:21",
+        "dhuhr": "12:16",
+        "asr": "16:03",
+        "maghrib": "19:11",
+        "isha": "20:50"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:29",
+        "sunrise": "05:20",
+        "dhuhr": "12:16",
+        "asr": "16:03",
+        "maghrib": "19:12",
+        "isha": "20:51"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:27",
+        "sunrise": "05:19",
+        "dhuhr": "12:16",
+        "asr": "16:03",
+        "maghrib": "19:13",
+        "isha": "20:52"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:26",
+        "sunrise": "05:18",
+        "dhuhr": "12:16",
+        "asr": "16:03",
+        "maghrib": "19:14",
+        "isha": "20:54"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Kuwait City",
+    "country": "Kuwait",
+    "iso": "KW",
+    "latitude": 29.3759,
+    "longitude": 47.9774,
+    "elevation": 13,
+    "timezone": "Asia/Kuwait",
+    "method": "8",
+    "methodLabel": "Kuwait",
+    "source": "Aladhan API (api.aladhan.com) — Kuwait (Aladhan method 8)",
+    "sourceFetched": "2026-05-02T00:20:11.501Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:31",
+        "sunrise": "05:06",
+        "dhuhr": "11:45",
+        "asr": "15:20",
+        "maghrib": "18:25",
+        "isha": "19:55"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:30",
+        "sunrise": "05:05",
+        "dhuhr": "11:45",
+        "asr": "15:20",
+        "maghrib": "18:26",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:29",
+        "sunrise": "05:04",
+        "dhuhr": "11:45",
+        "asr": "15:20",
+        "maghrib": "18:26",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:28",
+        "sunrise": "05:03",
+        "dhuhr": "11:45",
+        "asr": "15:20",
+        "maghrib": "18:27",
+        "isha": "19:57"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:27",
+        "sunrise": "05:02",
+        "dhuhr": "11:45",
+        "asr": "15:20",
+        "maghrib": "18:27",
+        "isha": "19:57"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:26",
+        "sunrise": "05:02",
+        "dhuhr": "11:45",
+        "asr": "15:20",
+        "maghrib": "18:28",
+        "isha": "19:58"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:25",
+        "sunrise": "05:01",
+        "dhuhr": "11:45",
+        "asr": "15:20",
+        "maghrib": "18:29",
+        "isha": "19:59"
+      }
+    ]
+  }
+]

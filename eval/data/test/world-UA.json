@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Kyiv",
+    "country": "Ukraine",
+    "iso": "UA",
+    "latitude": 50.4501,
+    "longitude": 30.5234,
+    "elevation": 179,
+    "timezone": "Europe/Kyiv",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:29:45.538Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:09",
+        "sunrise": "05:32",
+        "dhuhr": "12:55",
+        "asr": "16:56",
+        "maghrib": "20:19",
+        "isha": "22:32"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:05",
+        "sunrise": "05:30",
+        "dhuhr": "12:55",
+        "asr": "16:57",
+        "maghrib": "20:20",
+        "isha": "22:35"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:02",
+        "sunrise": "05:28",
+        "dhuhr": "12:55",
+        "asr": "16:58",
+        "maghrib": "20:22",
+        "isha": "22:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "02:59",
+        "sunrise": "05:26",
+        "dhuhr": "12:55",
+        "asr": "16:58",
+        "maghrib": "20:24",
+        "isha": "22:40"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "02:56",
+        "sunrise": "05:25",
+        "dhuhr": "12:55",
+        "asr": "16:59",
+        "maghrib": "20:25",
+        "isha": "22:43"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "02:52",
+        "sunrise": "05:23",
+        "dhuhr": "12:54",
+        "asr": "16:59",
+        "maghrib": "20:27",
+        "isha": "22:46"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "02:49",
+        "sunrise": "05:21",
+        "dhuhr": "12:54",
+        "asr": "17:00",
+        "maghrib": "20:28",
+        "isha": "22:49"
+      }
+    ]
+  }
+]

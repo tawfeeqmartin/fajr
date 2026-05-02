@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Ottawa",
+    "country": "Canada",
+    "iso": "CA",
+    "latitude": 45.4215,
+    "longitude": -75.6972,
+    "elevation": 70,
+    "timezone": "America/Toronto",
+    "method": "2",
+    "methodLabel": "ISNA",
+    "source": "Aladhan API (api.aladhan.com) — ISNA (Aladhan method 2)",
+    "sourceFetched": "2026-05-02T00:24:45.567Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:14",
+        "sunrise": "05:50",
+        "dhuhr": "13:00",
+        "asr": "16:56",
+        "maghrib": "20:10",
+        "isha": "21:46"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:12",
+        "sunrise": "05:48",
+        "dhuhr": "13:00",
+        "asr": "16:57",
+        "maghrib": "20:12",
+        "isha": "21:48"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:10",
+        "sunrise": "05:47",
+        "dhuhr": "13:00",
+        "asr": "16:57",
+        "maghrib": "20:13",
+        "isha": "21:50"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:08",
+        "sunrise": "05:45",
+        "dhuhr": "12:59",
+        "asr": "16:58",
+        "maghrib": "20:14",
+        "isha": "21:52"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:06",
+        "sunrise": "05:44",
+        "dhuhr": "12:59",
+        "asr": "16:58",
+        "maghrib": "20:15",
+        "isha": "21:54"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:04",
+        "sunrise": "05:43",
+        "dhuhr": "12:59",
+        "asr": "16:59",
+        "maghrib": "20:17",
+        "isha": "21:55"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:02",
+        "sunrise": "05:41",
+        "dhuhr": "12:59",
+        "asr": "16:59",
+        "maghrib": "20:18",
+        "isha": "21:57"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Baku",
+    "country": "Azerbaijan",
+    "iso": "AZ",
+    "latitude": 40.4093,
+    "longitude": 49.8671,
+    "elevation": 28,
+    "timezone": "Asia/Baku",
+    "method": "12",
+    "methodLabel": "Diyanet",
+    "source": "Aladhan API (api.aladhan.com) — Diyanet (Aladhan method 12)",
+    "sourceFetched": "2026-05-02T00:14:30.332Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:33",
+        "sunrise": "06:39",
+        "dhuhr": "13:38",
+        "asr": "17:28",
+        "maghrib": "20:37",
+        "isha": "21:42"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:32",
+        "sunrise": "06:38",
+        "dhuhr": "13:37",
+        "asr": "17:28",
+        "maghrib": "20:38",
+        "isha": "21:44"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:30",
+        "sunrise": "06:37",
+        "dhuhr": "13:37",
+        "asr": "17:29",
+        "maghrib": "20:39",
+        "isha": "21:45"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:29",
+        "sunrise": "06:35",
+        "dhuhr": "13:37",
+        "asr": "17:29",
+        "maghrib": "20:40",
+        "isha": "21:46"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:28",
+        "sunrise": "06:34",
+        "dhuhr": "13:37",
+        "asr": "17:29",
+        "maghrib": "20:41",
+        "isha": "21:48"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:26",
+        "sunrise": "06:33",
+        "dhuhr": "13:37",
+        "asr": "17:29",
+        "maghrib": "20:42",
+        "isha": "21:49"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:25",
+        "sunrise": "06:32",
+        "dhuhr": "13:37",
+        "asr": "17:30",
+        "maghrib": "20:43",
+        "isha": "21:50"
+      }
+    ]
+  }
+]

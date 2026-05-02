@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Gaborone",
+    "country": "Botswana",
+    "iso": "BW",
+    "latitude": -24.6282,
+    "longitude": 25.9231,
+    "elevation": 1014,
+    "timezone": "Africa/Gaborone",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:37:22.015Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:21",
+        "sunrise": "06:38",
+        "dhuhr": "12:13",
+        "asr": "15:25",
+        "maghrib": "17:48",
+        "isha": "19:01"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:21",
+        "sunrise": "06:39",
+        "dhuhr": "12:13",
+        "asr": "15:25",
+        "maghrib": "17:47",
+        "isha": "19:00"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:22",
+        "sunrise": "06:39",
+        "dhuhr": "12:13",
+        "asr": "15:24",
+        "maghrib": "17:47",
+        "isha": "19:00"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:22",
+        "sunrise": "06:40",
+        "dhuhr": "12:13",
+        "asr": "15:24",
+        "maghrib": "17:46",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:22",
+        "sunrise": "06:40",
+        "dhuhr": "12:13",
+        "asr": "15:23",
+        "maghrib": "17:45",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:23",
+        "sunrise": "06:41",
+        "dhuhr": "12:13",
+        "asr": "15:23",
+        "maghrib": "17:45",
+        "isha": "18:58"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:23",
+        "sunrise": "06:41",
+        "dhuhr": "12:13",
+        "asr": "15:22",
+        "maghrib": "17:44",
+        "isha": "18:58"
+      }
+    ]
+  }
+]

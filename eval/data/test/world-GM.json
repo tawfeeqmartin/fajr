@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Banjul",
+    "country": "Gambia",
+    "iso": "GM",
+    "latitude": 13.4549,
+    "longitude": -16.579,
+    "elevation": 5,
+    "timezone": "Africa/Banjul",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:18:54.986Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:30",
+        "sunrise": "06:45",
+        "dhuhr": "13:03",
+        "asr": "16:14",
+        "maghrib": "19:22",
+        "isha": "20:32"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:30",
+        "sunrise": "06:44",
+        "dhuhr": "13:03",
+        "asr": "16:15",
+        "maghrib": "19:22",
+        "isha": "20:33"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:29",
+        "sunrise": "06:44",
+        "dhuhr": "13:03",
+        "asr": "16:15",
+        "maghrib": "19:22",
+        "isha": "20:33"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:29",
+        "sunrise": "06:43",
+        "dhuhr": "13:03",
+        "asr": "16:16",
+        "maghrib": "19:23",
+        "isha": "20:33"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:28",
+        "sunrise": "06:43",
+        "dhuhr": "13:03",
+        "asr": "16:16",
+        "maghrib": "19:23",
+        "isha": "20:34"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:28",
+        "sunrise": "06:43",
+        "dhuhr": "13:03",
+        "asr": "16:17",
+        "maghrib": "19:23",
+        "isha": "20:34"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:27",
+        "sunrise": "06:42",
+        "dhuhr": "13:03",
+        "asr": "16:17",
+        "maghrib": "19:23",
+        "isha": "20:34"
+      }
+    ]
+  }
+]

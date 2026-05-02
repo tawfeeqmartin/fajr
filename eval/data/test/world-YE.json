@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Sanaa",
+    "country": "Yemen",
+    "iso": "YE",
+    "latitude": 15.3694,
+    "longitude": 44.191,
+    "elevation": 2253,
+    "timezone": "Asia/Aden",
+    "method": "8",
+    "methodLabel": "Kuwait",
+    "source": "Aladhan API (api.aladhan.com) — Kuwait (Aladhan method 8)",
+    "sourceFetched": "2026-05-02T01:01:39.609Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:17",
+        "sunrise": "05:39",
+        "dhuhr": "12:00",
+        "asr": "15:08",
+        "maghrib": "18:21",
+        "isha": "19:51"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:17",
+        "sunrise": "05:39",
+        "dhuhr": "12:00",
+        "asr": "15:09",
+        "maghrib": "18:21",
+        "isha": "19:51"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:16",
+        "sunrise": "05:38",
+        "dhuhr": "12:00",
+        "asr": "15:09",
+        "maghrib": "18:22",
+        "isha": "19:52"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:16",
+        "sunrise": "05:38",
+        "dhuhr": "12:00",
+        "asr": "15:10",
+        "maghrib": "18:22",
+        "isha": "19:52"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:15",
+        "sunrise": "05:38",
+        "dhuhr": "12:00",
+        "asr": "15:11",
+        "maghrib": "18:22",
+        "isha": "19:52"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:14",
+        "sunrise": "05:37",
+        "dhuhr": "12:00",
+        "asr": "15:11",
+        "maghrib": "18:23",
+        "isha": "19:53"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:14",
+        "sunrise": "05:37",
+        "dhuhr": "12:00",
+        "asr": "15:12",
+        "maghrib": "18:23",
+        "isha": "19:53"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Kathmandu",
+    "country": "Nepal",
+    "iso": "NP",
+    "latitude": 27.7172,
+    "longitude": 85.324,
+    "elevation": 1400,
+    "timezone": "Asia/Kathmandu",
+    "method": "1",
+    "methodLabel": "Karachi",
+    "source": "Aladhan API (api.aladhan.com) — Karachi (Aladhan method 1)",
+    "sourceFetched": "2026-05-02T00:32:22.508Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:59",
+        "sunrise": "05:24",
+        "dhuhr": "12:01",
+        "asr": "15:33",
+        "maghrib": "18:38",
+        "isha": "20:03"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:58",
+        "sunrise": "05:23",
+        "dhuhr": "12:01",
+        "asr": "15:33",
+        "maghrib": "18:39",
+        "isha": "20:03"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:57",
+        "sunrise": "05:22",
+        "dhuhr": "12:01",
+        "asr": "15:33",
+        "maghrib": "18:39",
+        "isha": "20:04"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:56",
+        "sunrise": "05:21",
+        "dhuhr": "12:00",
+        "asr": "15:33",
+        "maghrib": "18:40",
+        "isha": "20:05"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:55",
+        "sunrise": "05:21",
+        "dhuhr": "12:00",
+        "asr": "15:32",
+        "maghrib": "18:40",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:54",
+        "sunrise": "05:20",
+        "dhuhr": "12:00",
+        "asr": "15:32",
+        "maghrib": "18:41",
+        "isha": "20:07"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:53",
+        "sunrise": "05:19",
+        "dhuhr": "12:00",
+        "asr": "15:32",
+        "maghrib": "18:41",
+        "isha": "20:07"
+      }
+    ]
+  }
+]

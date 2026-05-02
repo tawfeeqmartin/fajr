@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Singapore",
+    "country": "Singapore",
+    "iso": "SG",
+    "latitude": 1.3521,
+    "longitude": 103.8198,
+    "elevation": 15,
+    "timezone": "Asia/Singapore",
+    "method": "10",
+    "methodLabel": "Singapore (MUIS)",
+    "source": "Aladhan API (api.aladhan.com) — Singapore (MUIS) (Aladhan method 10)",
+    "sourceFetched": "2026-05-02T00:30:53.800Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:45",
+        "sunrise": "06:57",
+        "dhuhr": "13:02",
+        "asr": "16:23",
+        "maghrib": "19:07",
+        "isha": "20:37"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:45",
+        "sunrise": "06:57",
+        "dhuhr": "13:02",
+        "asr": "16:23",
+        "maghrib": "19:07",
+        "isha": "20:37"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:45",
+        "sunrise": "06:57",
+        "dhuhr": "13:02",
+        "asr": "16:23",
+        "maghrib": "19:07",
+        "isha": "20:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:45",
+        "sunrise": "06:56",
+        "dhuhr": "13:01",
+        "asr": "16:23",
+        "maghrib": "19:06",
+        "isha": "20:36"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:45",
+        "sunrise": "06:56",
+        "dhuhr": "13:01",
+        "asr": "16:23",
+        "maghrib": "19:06",
+        "isha": "20:36"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:44",
+        "sunrise": "06:56",
+        "dhuhr": "13:01",
+        "asr": "16:24",
+        "maghrib": "19:06",
+        "isha": "20:36"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:44",
+        "sunrise": "06:56",
+        "dhuhr": "13:01",
+        "asr": "16:24",
+        "maghrib": "19:06",
+        "isha": "20:36"
+      }
+    ]
+  }
+]

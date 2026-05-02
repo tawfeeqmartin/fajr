@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Paris",
+    "country": "France",
+    "iso": "FR",
+    "latitude": 48.8566,
+    "longitude": 2.3522,
+    "elevation": 35,
+    "timezone": "Europe/Paris",
+    "method": "11",
+    "methodLabel": "UOIF",
+    "source": "Aladhan API (api.aladhan.com) — UOIF (Aladhan method 11)",
+    "sourceFetched": "2026-05-02T00:25:02.545Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:54",
+        "sunrise": "06:29",
+        "dhuhr": "13:48",
+        "asr": "17:47",
+        "maghrib": "21:07",
+        "isha": "23:22"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:50",
+        "sunrise": "06:27",
+        "dhuhr": "13:47",
+        "asr": "17:48",
+        "maghrib": "21:09",
+        "isha": "23:24"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:47",
+        "sunrise": "06:26",
+        "dhuhr": "13:47",
+        "asr": "17:49",
+        "maghrib": "21:10",
+        "isha": "23:27"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:44",
+        "sunrise": "06:24",
+        "dhuhr": "13:47",
+        "asr": "17:49",
+        "maghrib": "21:11",
+        "isha": "23:30"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:40",
+        "sunrise": "06:22",
+        "dhuhr": "13:47",
+        "asr": "17:50",
+        "maghrib": "21:13",
+        "isha": "23:32"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:37",
+        "sunrise": "06:21",
+        "dhuhr": "13:47",
+        "asr": "17:50",
+        "maghrib": "21:14",
+        "isha": "23:35"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:33",
+        "sunrise": "06:19",
+        "dhuhr": "13:47",
+        "asr": "17:51",
+        "maghrib": "21:16",
+        "isha": "23:38"
+      }
+    ]
+  }
+]

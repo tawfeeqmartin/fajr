@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Manila",
+    "country": "Philippines",
+    "iso": "PH",
+    "latitude": 14.5995,
+    "longitude": 120.9842,
+    "elevation": 16,
+    "timezone": "Asia/Manila",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:31:19.629Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:18",
+        "sunrise": "05:33",
+        "dhuhr": "11:53",
+        "asr": "15:02",
+        "maghrib": "18:13",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:18",
+        "sunrise": "05:33",
+        "dhuhr": "11:53",
+        "asr": "15:03",
+        "maghrib": "18:13",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:17",
+        "sunrise": "05:32",
+        "dhuhr": "11:53",
+        "asr": "15:03",
+        "maghrib": "18:14",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:17",
+        "sunrise": "05:32",
+        "dhuhr": "11:53",
+        "asr": "15:04",
+        "maghrib": "18:14",
+        "isha": "19:25"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:16",
+        "sunrise": "05:32",
+        "dhuhr": "11:53",
+        "asr": "15:04",
+        "maghrib": "18:14",
+        "isha": "19:25"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:15",
+        "sunrise": "05:31",
+        "dhuhr": "11:53",
+        "asr": "15:05",
+        "maghrib": "18:14",
+        "isha": "19:26"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:15",
+        "sunrise": "05:31",
+        "dhuhr": "11:53",
+        "asr": "15:06",
+        "maghrib": "18:15",
+        "isha": "19:26"
+      }
+    ]
+  }
+]

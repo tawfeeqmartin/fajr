@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Taipei",
+    "country": "Taiwan",
+    "iso": "TW",
+    "latitude": 25.033,
+    "longitude": 121.5654,
+    "elevation": 9,
+    "timezone": "Asia/Taipei",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:32:57.000Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:56",
+        "sunrise": "05:18",
+        "dhuhr": "11:51",
+        "asr": "15:18",
+        "maghrib": "18:24",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:55",
+        "sunrise": "05:17",
+        "dhuhr": "11:51",
+        "asr": "15:18",
+        "maghrib": "18:25",
+        "isha": "19:42"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:54",
+        "sunrise": "05:16",
+        "dhuhr": "11:51",
+        "asr": "15:18",
+        "maghrib": "18:25",
+        "isha": "19:42"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:53",
+        "sunrise": "05:16",
+        "dhuhr": "11:50",
+        "asr": "15:17",
+        "maghrib": "18:26",
+        "isha": "19:43"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:52",
+        "sunrise": "05:15",
+        "dhuhr": "11:50",
+        "asr": "15:17",
+        "maghrib": "18:26",
+        "isha": "19:44"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:51",
+        "sunrise": "05:14",
+        "dhuhr": "11:50",
+        "asr": "15:17",
+        "maghrib": "18:27",
+        "isha": "19:45"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:51",
+        "sunrise": "05:14",
+        "dhuhr": "11:50",
+        "asr": "15:17",
+        "maghrib": "18:27",
+        "isha": "19:45"
+      }
+    ]
+  }
+]

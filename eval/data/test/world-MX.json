@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Mexico City",
+    "country": "Mexico",
+    "iso": "MX",
+    "latitude": 19.4326,
+    "longitude": -99.1332,
+    "elevation": 2240,
+    "timezone": "America/Mexico_City",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:35:05.615Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:50",
+        "sunrise": "07:08",
+        "dhuhr": "13:33",
+        "asr": "16:50",
+        "maghrib": "20:00",
+        "isha": "21:13"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:49",
+        "sunrise": "07:07",
+        "dhuhr": "13:33",
+        "asr": "16:49",
+        "maghrib": "20:00",
+        "isha": "21:13"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:48",
+        "sunrise": "07:06",
+        "dhuhr": "13:33",
+        "asr": "16:49",
+        "maghrib": "20:00",
+        "isha": "21:14"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:48",
+        "sunrise": "07:06",
+        "dhuhr": "13:33",
+        "asr": "16:48",
+        "maghrib": "20:01",
+        "isha": "21:14"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:47",
+        "sunrise": "07:05",
+        "dhuhr": "13:33",
+        "asr": "16:48",
+        "maghrib": "20:01",
+        "isha": "21:15"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:46",
+        "sunrise": "07:05",
+        "dhuhr": "13:33",
+        "asr": "16:48",
+        "maghrib": "20:02",
+        "isha": "21:15"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:46",
+        "sunrise": "07:04",
+        "dhuhr": "13:33",
+        "asr": "16:47",
+        "maghrib": "20:02",
+        "isha": "21:16"
+      }
+    ]
+  }
+]

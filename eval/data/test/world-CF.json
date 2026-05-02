@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Bangui",
+    "country": "Central African Republic",
+    "iso": "CF",
+    "latitude": 4.3947,
+    "longitude": 18.5582,
+    "elevation": 369,
+    "timezone": "Africa/Bangui",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:38:04.854Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:23",
+        "sunrise": "05:34",
+        "dhuhr": "11:43",
+        "asr": "15:02",
+        "maghrib": "17:51",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:22",
+        "sunrise": "05:34",
+        "dhuhr": "11:43",
+        "asr": "15:02",
+        "maghrib": "17:51",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:22",
+        "sunrise": "05:34",
+        "dhuhr": "11:43",
+        "asr": "15:03",
+        "maghrib": "17:51",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:22",
+        "sunrise": "05:34",
+        "dhuhr": "11:42",
+        "asr": "15:03",
+        "maghrib": "17:51",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:21",
+        "sunrise": "05:34",
+        "dhuhr": "11:42",
+        "asr": "15:03",
+        "maghrib": "17:51",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:21",
+        "sunrise": "05:34",
+        "dhuhr": "11:42",
+        "asr": "15:03",
+        "maghrib": "17:51",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:21",
+        "sunrise": "05:33",
+        "dhuhr": "11:42",
+        "asr": "15:04",
+        "maghrib": "17:51",
+        "isha": "18:59"
+      }
+    ]
+  }
+]

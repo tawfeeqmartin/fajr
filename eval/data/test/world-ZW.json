@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Harare",
+    "country": "Zimbabwe",
+    "iso": "ZW",
+    "latitude": -17.8252,
+    "longitude": 31.0335,
+    "elevation": 1483,
+    "timezone": "Africa/Harare",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:37:13.522Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:55",
+        "sunrise": "06:09",
+        "dhuhr": "11:53",
+        "asr": "15:11",
+        "maghrib": "17:36",
+        "isha": "18:46"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:56",
+        "sunrise": "06:10",
+        "dhuhr": "11:53",
+        "asr": "15:10",
+        "maghrib": "17:36",
+        "isha": "18:46"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:56",
+        "sunrise": "06:10",
+        "dhuhr": "11:53",
+        "asr": "15:10",
+        "maghrib": "17:35",
+        "isha": "18:45"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:56",
+        "sunrise": "06:10",
+        "dhuhr": "11:53",
+        "asr": "15:10",
+        "maghrib": "17:35",
+        "isha": "18:45"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:56",
+        "sunrise": "06:11",
+        "dhuhr": "11:52",
+        "asr": "15:09",
+        "maghrib": "17:34",
+        "isha": "18:44"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:56",
+        "sunrise": "06:11",
+        "dhuhr": "11:52",
+        "asr": "15:09",
+        "maghrib": "17:34",
+        "isha": "18:44"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:57",
+        "sunrise": "06:11",
+        "dhuhr": "11:52",
+        "asr": "15:09",
+        "maghrib": "17:33",
+        "isha": "18:44"
+      }
+    ]
+  }
+]

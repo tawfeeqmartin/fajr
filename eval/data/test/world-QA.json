@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Doha",
+    "country": "Qatar",
+    "iso": "QA",
+    "latitude": 25.2854,
+    "longitude": 51.531,
+    "elevation": 10,
+    "timezone": "Asia/Qatar",
+    "method": "9",
+    "methodLabel": "Qatar",
+    "source": "Aladhan API (api.aladhan.com) — Qatar (Aladhan method 9)",
+    "sourceFetched": "2026-05-02T01:01:48.178Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:35",
+        "sunrise": "04:57",
+        "dhuhr": "11:31",
+        "asr": "14:59",
+        "maghrib": "18:05",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:34",
+        "sunrise": "04:57",
+        "dhuhr": "11:31",
+        "asr": "14:59",
+        "maghrib": "18:05",
+        "isha": "19:25"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:33",
+        "sunrise": "04:56",
+        "dhuhr": "11:31",
+        "asr": "14:58",
+        "maghrib": "18:06",
+        "isha": "19:26"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:33",
+        "sunrise": "04:55",
+        "dhuhr": "11:31",
+        "asr": "14:58",
+        "maghrib": "18:06",
+        "isha": "19:27"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:32",
+        "sunrise": "04:55",
+        "dhuhr": "11:31",
+        "asr": "14:58",
+        "maghrib": "18:07",
+        "isha": "19:27"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:31",
+        "sunrise": "04:54",
+        "dhuhr": "11:30",
+        "asr": "14:58",
+        "maghrib": "18:07",
+        "isha": "19:28"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:30",
+        "sunrise": "04:53",
+        "dhuhr": "11:30",
+        "asr": "14:58",
+        "maghrib": "18:08",
+        "isha": "19:29"
+      }
+    ]
+  }
+]

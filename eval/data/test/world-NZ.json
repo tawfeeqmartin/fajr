@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Wellington",
+    "country": "New Zealand",
+    "iso": "NZ",
+    "latitude": -41.2865,
+    "longitude": 174.7762,
+    "elevation": 13,
+    "timezone": "Pacific/Auckland",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:30:36.700Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:35",
+        "sunrise": "07:08",
+        "dhuhr": "12:18",
+        "asr": "15:05",
+        "maghrib": "17:27",
+        "isha": "18:55"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:36",
+        "sunrise": "07:09",
+        "dhuhr": "12:18",
+        "asr": "15:04",
+        "maghrib": "17:26",
+        "isha": "18:54"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:36",
+        "sunrise": "07:10",
+        "dhuhr": "12:18",
+        "asr": "15:03",
+        "maghrib": "17:24",
+        "isha": "18:53"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:37",
+        "sunrise": "07:12",
+        "dhuhr": "12:18",
+        "asr": "15:02",
+        "maghrib": "17:23",
+        "isha": "18:52"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:38",
+        "sunrise": "07:13",
+        "dhuhr": "12:18",
+        "asr": "15:01",
+        "maghrib": "17:22",
+        "isha": "18:51"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:39",
+        "sunrise": "07:14",
+        "dhuhr": "12:17",
+        "asr": "15:00",
+        "maghrib": "17:21",
+        "isha": "18:50"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:40",
+        "sunrise": "07:15",
+        "dhuhr": "12:17",
+        "asr": "14:59",
+        "maghrib": "17:20",
+        "isha": "18:49"
+      }
+    ]
+  }
+]

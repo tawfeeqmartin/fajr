@@ -52,6 +52,12 @@ const PRAYERS = Object.keys(WEIGHTS)
 // Data loading + normalization
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Hardcoded fallback offsets for the legacy fixture set. These are used
+// only if the dynamic Intl-based resolution below fails (e.g. running on
+// a stripped-down Node without ICU data). All values are non-DST baseline
+// offsets — the dynamic resolver below correctly handles DST and fractional-
+// hour zones (Tehran +3:30, Kabul +4:30, Mumbai +5:30, etc.) that this
+// table cannot represent.
 const UTC_OFFSETS = {
   'Africa/Casablanca':    1,
   'Africa/Cairo':         2,
@@ -77,6 +83,52 @@ const UTC_OFFSETS = {
   'America/Toronto':     -4,
   'Arctic/Longyearbyen':  2,
   'Asia/Singapore':       8,
+}
+
+/**
+ * Compute the UTC offset (in hours, possibly fractional) for a given IANA
+ * timezone on a given date. Handles DST correctly via Intl.DateTimeFormat.
+ * Falls back to the static UTC_OFFSETS table on error.
+ *
+ * Why this exists: the original eval was written when the corpus only
+ * covered ~24 cities, all in integer-offset zones during non-DST months,
+ * so a hardcoded table sufficed. The world-coverage expansion (145
+ * countries) brought in fractional zones (Tehran +3:30, Kabul +4:30,
+ * Mumbai +5:30, Caracas −4:30 historically) and DST-active zones not in
+ * the table, causing systematic 100-min biases. This function makes the
+ * eval correct for any IANA timezone.
+ *
+ * @param {string} tzName  IANA timezone name (e.g. 'Asia/Tehran')
+ * @param {string} dateStr ISO date 'YYYY-MM-DD' for the day to compute
+ * @returns {number} hours offset from UTC, e.g. 3.5 for Tehran on a non-DST day
+ */
+function computeUtcOffsetHours(tzName, dateStr) {
+  if (!tzName) return 0
+  try {
+    const sample = new Date(dateStr + 'T12:00:00Z')
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tzName,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    })
+    const parts = fmt.formatToParts(sample).reduce(
+      (o, p) => { o[p.type] = p.value; return o }, {}
+    )
+    // The "local" wall-clock time in the target zone, expressed as if it
+    // were UTC. Subtract the sample's true UTC ms to get the offset.
+    const localAsUtc = Date.UTC(
+      parseInt(parts.year),
+      parseInt(parts.month) - 1,
+      parseInt(parts.day),
+      parseInt(parts.hour) % 24,
+      parseInt(parts.minute),
+      0,
+    )
+    const offsetHours = (localAsUtc - sample.getTime()) / 3600000
+    return offsetHours
+  } catch (_e) {
+    return UTC_OFFSETS[tzName] ?? 0
+  }
 }
 
 // If a fixture lacks the structured source_institution field, try to derive a
@@ -118,8 +170,11 @@ function normalizeEntries(raw) {
       continue
     }
 
-    const utcOffset = UTC_OFFSETS[item.timezone] ?? 0
     for (const day of item.dates) {
+      // Compute offset per-date so DST transitions on a multi-day fixture
+      // resolve correctly (the offset for Anchorage on 2026-03-09 differs
+      // from 2026-03-08 by 1 hour).
+      const utcOffset = computeUtcOffsetHours(item.timezone, day.date)
       flat.push({
         source:             item.source,
         source_institution: sourceInstitution,
@@ -170,7 +225,12 @@ function loadGroundTruth(dir) {
 function parseTimeHHMM(hhmmStr, dateStr, utcOffset = 0) {
   const [h, m] = hhmmStr.split(':').map(Number)
   const d = new Date(dateStr + 'T00:00:00Z')
-  d.setUTCHours(h - utcOffset, m, 0, 0)
+  // Use total minutes so fractional-hour offsets (Tehran +3:30,
+  // Mumbai +5:30, Kabul +4:30, Caracas −4:30, etc.) resolve correctly.
+  // setUTCHours(h, ...) with fractional h would truncate, losing the
+  // 30-min component for these zones.
+  const totalMin = h * 60 + m - utcOffset * 60
+  d.setUTCMinutes(totalMin)
   return d
 }
 

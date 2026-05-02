@@ -36,6 +36,16 @@ describe('region-aware method auto-selection', () => {
     [25.20,  55.27,  /Umm al-Qura|UAE/i,         'Dubai'],
     [48.86,  2.35,   /UOIF|12/i,                 'Paris'],
     [24.86,  67.00,  /Karachi/i,                 'Karachi'],
+    // v1.4 — gap-region coverage additions
+    [35.69,  51.39,  /Tehran/i,                  'Tehran'],
+    [15.36,  44.19,  /Kuwait.*Yemen/i,           'Sanaa'],
+    [25.29,  51.53,  /Qatar Calendar House/i,    'Doha'],
+    [29.38,  47.99,  /Kuwait.*Kuwait/i,          'Kuwait City'],
+    [26.23,  50.58,  /Kuwait.*Bahrain/i,         'Manama'],
+    [23.59,  58.41,  /Kuwait.*Oman/i,            'Muscat'],
+    [-33.92, 18.42,  /MWL.*South Africa/i,       'Cape Town'],
+    [4.90,   114.94, /JAKIM|Singapore.*Brunei/i, 'Bandar Seri Begawan'],
+    [1.35,   103.82, /MUIS|Singapore/i,          'Singapore'],
   ])('coordinates (%f, %f) → method matches /%s/ — %s', (lat, lng, pattern, _city) => {
     const result = prayerTimes({ latitude: lat, longitude: lng, date: TEST_DATE })
     expect(result.method).toMatch(pattern)

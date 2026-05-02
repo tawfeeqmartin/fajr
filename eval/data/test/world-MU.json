@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Port Louis",
+    "country": "Mauritius",
+    "iso": "MU",
+    "latitude": -20.1609,
+    "longitude": 57.5012,
+    "elevation": 6,
+    "timezone": "Indian/Mauritius",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:39:04.896Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:05",
+        "sunrise": "06:26",
+        "dhuhr": "12:07",
+        "asr": "15:23",
+        "maghrib": "17:47",
+        "isha": "19:00"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:05",
+        "sunrise": "06:27",
+        "dhuhr": "12:07",
+        "asr": "15:23",
+        "maghrib": "17:47",
+        "isha": "19:00"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:05",
+        "sunrise": "06:27",
+        "dhuhr": "12:07",
+        "asr": "15:22",
+        "maghrib": "17:46",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:06",
+        "sunrise": "06:27",
+        "dhuhr": "12:07",
+        "asr": "15:22",
+        "maghrib": "17:46",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:06",
+        "sunrise": "06:28",
+        "dhuhr": "12:07",
+        "asr": "15:22",
+        "maghrib": "17:45",
+        "isha": "18:59"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:06",
+        "sunrise": "06:28",
+        "dhuhr": "12:07",
+        "asr": "15:21",
+        "maghrib": "17:45",
+        "isha": "18:58"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:06",
+        "sunrise": "06:29",
+        "dhuhr": "12:06",
+        "asr": "15:21",
+        "maghrib": "17:44",
+        "isha": "18:58"
+      }
+    ]
+  }
+]

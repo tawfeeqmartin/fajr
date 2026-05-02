@@ -1,0 +1,80 @@
+[
+  {
+    "city": "London",
+    "country": "United Kingdom",
+    "iso": "GB",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "elevation": 11,
+    "timezone": "Europe/London",
+    "method": "14",
+    "methodLabel": "Moonsighting Committee",
+    "source": "Aladhan API (api.aladhan.com) — Moonsighting Committee (Aladhan method 14)",
+    "sourceFetched": "2026-05-02T00:24:54.047Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:24",
+        "sunrise": "05:31",
+        "dhuhr": "12:58",
+        "asr": "17:00",
+        "maghrib": "20:25",
+        "isha": "22:22"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:20",
+        "sunrise": "05:29",
+        "dhuhr": "12:57",
+        "asr": "17:01",
+        "maghrib": "20:27",
+        "isha": "22:25"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:17",
+        "sunrise": "05:27",
+        "dhuhr": "12:57",
+        "asr": "17:01",
+        "maghrib": "20:28",
+        "isha": "22:28"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:14",
+        "sunrise": "05:25",
+        "dhuhr": "12:57",
+        "asr": "17:02",
+        "maghrib": "20:30",
+        "isha": "22:31"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:11",
+        "sunrise": "05:24",
+        "dhuhr": "12:57",
+        "asr": "17:03",
+        "maghrib": "20:31",
+        "isha": "22:33"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:08",
+        "sunrise": "05:22",
+        "dhuhr": "12:57",
+        "asr": "17:03",
+        "maghrib": "20:33",
+        "isha": "22:36"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:05",
+        "sunrise": "05:20",
+        "dhuhr": "12:57",
+        "asr": "17:04",
+        "maghrib": "20:35",
+        "isha": "22:39"
+      }
+    ]
+  }
+]

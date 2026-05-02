@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "iso": "ID",
+    "latitude": -6.2088,
+    "longitude": 106.8456,
+    "elevation": 8,
+    "timezone": "Asia/Jakarta",
+    "method": "19",
+    "methodLabel": "KEMENAG Indonesia",
+    "source": "Aladhan API (api.aladhan.com) — KEMENAG Indonesia (Aladhan method 19)",
+    "sourceFetched": "2026-05-02T00:19:29.041Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:42",
+        "sunrise": "05:53",
+        "dhuhr": "11:50",
+        "asr": "15:12",
+        "maghrib": "17:46",
+        "isha": "18:53"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:42",
+        "sunrise": "05:53",
+        "dhuhr": "11:50",
+        "asr": "15:12",
+        "maghrib": "17:46",
+        "isha": "18:53"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:41",
+        "sunrise": "05:53",
+        "dhuhr": "11:49",
+        "asr": "15:12",
+        "maghrib": "17:46",
+        "isha": "18:53"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:41",
+        "sunrise": "05:53",
+        "dhuhr": "11:49",
+        "asr": "15:12",
+        "maghrib": "17:46",
+        "isha": "18:53"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:41",
+        "sunrise": "05:53",
+        "dhuhr": "11:49",
+        "asr": "15:12",
+        "maghrib": "17:45",
+        "isha": "18:53"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:41",
+        "sunrise": "05:53",
+        "dhuhr": "11:49",
+        "asr": "15:12",
+        "maghrib": "17:45",
+        "isha": "18:53"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:41",
+        "sunrise": "05:53",
+        "dhuhr": "11:49",
+        "asr": "15:12",
+        "maghrib": "17:45",
+        "isha": "18:53"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Muscat",
+    "country": "Oman",
+    "iso": "OM",
+    "latitude": 23.5859,
+    "longitude": 58.4059,
+    "elevation": 6,
+    "timezone": "Asia/Muscat",
+    "method": "8",
+    "methodLabel": "Kuwait",
+    "source": "Aladhan API (api.aladhan.com) — Kuwait (Aladhan method 8)",
+    "sourceFetched": "2026-05-02T00:21:45.561Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:04",
+        "sunrise": "05:32",
+        "dhuhr": "12:03",
+        "asr": "15:28",
+        "maghrib": "18:35",
+        "isha": "20:05"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:03",
+        "sunrise": "05:32",
+        "dhuhr": "12:03",
+        "asr": "15:28",
+        "maghrib": "18:35",
+        "isha": "20:05"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:02",
+        "sunrise": "05:31",
+        "dhuhr": "12:03",
+        "asr": "15:28",
+        "maghrib": "18:36",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:02",
+        "sunrise": "05:30",
+        "dhuhr": "12:03",
+        "asr": "15:27",
+        "maghrib": "18:36",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:01",
+        "sunrise": "05:30",
+        "dhuhr": "12:03",
+        "asr": "15:27",
+        "maghrib": "18:37",
+        "isha": "20:07"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:00",
+        "sunrise": "05:29",
+        "dhuhr": "12:03",
+        "asr": "15:27",
+        "maghrib": "18:37",
+        "isha": "20:07"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:59",
+        "sunrise": "05:28",
+        "dhuhr": "12:03",
+        "asr": "15:27",
+        "maghrib": "18:38",
+        "isha": "20:08"
+      }
+    ]
+  }
+]

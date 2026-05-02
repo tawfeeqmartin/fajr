@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Tallinn",
+    "country": "Estonia",
+    "iso": "EE",
+    "latitude": 59.437,
+    "longitude": 24.7536,
+    "elevation": 9,
+    "timezone": "Europe/Tallinn",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:28:36.346Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "02:55",
+        "sunrise": "05:20",
+        "dhuhr": "13:18",
+        "asr": "17:28",
+        "maghrib": "21:17",
+        "isha": "23:34"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "02:54",
+        "sunrise": "05:17",
+        "dhuhr": "13:18",
+        "asr": "17:29",
+        "maghrib": "21:20",
+        "isha": "23:35"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "02:53",
+        "sunrise": "05:15",
+        "dhuhr": "13:18",
+        "asr": "17:30",
+        "maghrib": "21:22",
+        "isha": "23:36"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "02:52",
+        "sunrise": "05:12",
+        "dhuhr": "13:18",
+        "asr": "17:31",
+        "maghrib": "21:25",
+        "isha": "23:37"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "02:51",
+        "sunrise": "05:09",
+        "dhuhr": "13:18",
+        "asr": "17:32",
+        "maghrib": "21:27",
+        "isha": "23:38"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "02:50",
+        "sunrise": "05:07",
+        "dhuhr": "13:18",
+        "asr": "17:33",
+        "maghrib": "21:29",
+        "isha": "23:39"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "02:49",
+        "sunrise": "05:04",
+        "dhuhr": "13:17",
+        "asr": "17:34",
+        "maghrib": "21:32",
+        "isha": "23:40"
+      }
+    ]
+  }
+]

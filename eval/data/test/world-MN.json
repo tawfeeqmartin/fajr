@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Ulaanbaatar",
+    "country": "Mongolia",
+    "iso": "MN",
+    "latitude": 47.8864,
+    "longitude": 106.9057,
+    "elevation": 1310,
+    "timezone": "Asia/Ulaanbaatar",
+    "method": "14",
+    "methodLabel": "Moonsighting Committee",
+    "source": "Aladhan API (api.aladhan.com) — Moonsighting Committee (Aladhan method 14)",
+    "sourceFetched": "2026-05-02T00:32:39.801Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:43",
+        "sunrise": "06:34",
+        "dhuhr": "13:49",
+        "asr": "17:48",
+        "maghrib": "21:06",
+        "isha": "22:49"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:40",
+        "sunrise": "06:32",
+        "dhuhr": "13:49",
+        "asr": "17:48",
+        "maghrib": "21:07",
+        "isha": "22:51"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:38",
+        "sunrise": "06:31",
+        "dhuhr": "13:49",
+        "asr": "17:49",
+        "maghrib": "21:09",
+        "isha": "22:53"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:36",
+        "sunrise": "06:29",
+        "dhuhr": "13:49",
+        "asr": "17:49",
+        "maghrib": "21:10",
+        "isha": "22:55"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:33",
+        "sunrise": "06:27",
+        "dhuhr": "13:49",
+        "asr": "17:50",
+        "maghrib": "21:11",
+        "isha": "22:57"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:31",
+        "sunrise": "06:26",
+        "dhuhr": "13:49",
+        "asr": "17:51",
+        "maghrib": "21:13",
+        "isha": "22:59"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:29",
+        "sunrise": "06:24",
+        "dhuhr": "13:49",
+        "asr": "17:51",
+        "maghrib": "21:14",
+        "isha": "23:01"
+      }
+    ]
+  }
+]

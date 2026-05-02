@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Windhoek",
+    "country": "Namibia",
+    "iso": "NA",
+    "latitude": -22.5594,
+    "longitude": 17.0832,
+    "elevation": 1654,
+    "timezone": "Africa/Windhoek",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:37:30.545Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:55",
+        "sunrise": "06:11",
+        "dhuhr": "11:49",
+        "asr": "15:03",
+        "maghrib": "17:26",
+        "isha": "18:38"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:55",
+        "sunrise": "06:11",
+        "dhuhr": "11:49",
+        "asr": "15:02",
+        "maghrib": "17:25",
+        "isha": "18:37"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:55",
+        "sunrise": "06:12",
+        "dhuhr": "11:48",
+        "asr": "15:02",
+        "maghrib": "17:25",
+        "isha": "18:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:56",
+        "sunrise": "06:12",
+        "dhuhr": "11:48",
+        "asr": "15:01",
+        "maghrib": "17:24",
+        "isha": "18:36"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:56",
+        "sunrise": "06:13",
+        "dhuhr": "11:48",
+        "asr": "15:01",
+        "maghrib": "17:24",
+        "isha": "18:36"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:56",
+        "sunrise": "06:13",
+        "dhuhr": "11:48",
+        "asr": "15:00",
+        "maghrib": "17:23",
+        "isha": "18:35"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:57",
+        "sunrise": "06:14",
+        "dhuhr": "11:48",
+        "asr": "15:00",
+        "maghrib": "17:22",
+        "isha": "18:35"
+      }
+    ]
+  }
+]

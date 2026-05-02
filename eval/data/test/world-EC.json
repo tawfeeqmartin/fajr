@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Quito",
+    "country": "Ecuador",
+    "iso": "EC",
+    "latitude": -0.1807,
+    "longitude": -78.4678,
+    "elevation": 2850,
+    "timezone": "America/Guayaquil",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:34:31.423Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:56",
+        "sunrise": "06:08",
+        "dhuhr": "12:11",
+        "asr": "15:32",
+        "maghrib": "18:14",
+        "isha": "19:21"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:56",
+        "sunrise": "06:07",
+        "dhuhr": "12:11",
+        "asr": "15:32",
+        "maghrib": "18:14",
+        "isha": "19:21"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:56",
+        "sunrise": "06:07",
+        "dhuhr": "12:11",
+        "asr": "15:32",
+        "maghrib": "18:14",
+        "isha": "19:21"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:56",
+        "sunrise": "06:07",
+        "dhuhr": "12:11",
+        "asr": "15:33",
+        "maghrib": "18:14",
+        "isha": "19:21"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:55",
+        "sunrise": "06:07",
+        "dhuhr": "12:10",
+        "asr": "15:33",
+        "maghrib": "18:14",
+        "isha": "19:21"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:55",
+        "sunrise": "06:07",
+        "dhuhr": "12:10",
+        "asr": "15:33",
+        "maghrib": "18:14",
+        "isha": "19:21"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:55",
+        "sunrise": "06:07",
+        "dhuhr": "12:10",
+        "asr": "15:33",
+        "maghrib": "18:14",
+        "isha": "19:21"
+      }
+    ]
+  }
+]

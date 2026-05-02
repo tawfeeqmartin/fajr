@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Bangkok",
+    "country": "Thailand",
+    "iso": "TH",
+    "latitude": 13.7563,
+    "longitude": 100.5018,
+    "elevation": 1,
+    "timezone": "Asia/Bangkok",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:31:10.985Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:42",
+        "sunrise": "05:56",
+        "dhuhr": "12:15",
+        "asr": "15:25",
+        "maghrib": "18:34",
+        "isha": "19:44"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:41",
+        "sunrise": "05:56",
+        "dhuhr": "12:15",
+        "asr": "15:26",
+        "maghrib": "18:34",
+        "isha": "19:45"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:40",
+        "sunrise": "05:55",
+        "dhuhr": "12:15",
+        "asr": "15:26",
+        "maghrib": "18:34",
+        "isha": "19:45"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:40",
+        "sunrise": "05:55",
+        "dhuhr": "12:15",
+        "asr": "15:27",
+        "maghrib": "18:35",
+        "isha": "19:45"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:39",
+        "sunrise": "05:55",
+        "dhuhr": "12:15",
+        "asr": "15:27",
+        "maghrib": "18:35",
+        "isha": "19:46"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:39",
+        "sunrise": "05:54",
+        "dhuhr": "12:15",
+        "asr": "15:28",
+        "maghrib": "18:35",
+        "isha": "19:46"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:38",
+        "sunrise": "05:54",
+        "dhuhr": "12:14",
+        "asr": "15:29",
+        "maghrib": "18:35",
+        "isha": "19:46"
+      }
+    ]
+  }
+]

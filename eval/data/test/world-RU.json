@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Moscow",
+    "country": "Russia",
+    "iso": "RU",
+    "latitude": 55.7558,
+    "longitude": 37.6173,
+    "elevation": 156,
+    "timezone": "Europe/Moscow",
+    "method": "13",
+    "methodLabel": "Russia",
+    "source": "Aladhan API (api.aladhan.com) — Russia (Aladhan method 13)",
+    "sourceFetched": "2026-05-02T00:29:37.021Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:10",
+        "sunrise": "05:38",
+        "dhuhr": "13:32",
+        "asr": "17:37",
+        "maghrib": "21:16",
+        "isha": "23:35"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:09",
+        "sunrise": "05:36",
+        "dhuhr": "13:31",
+        "asr": "17:38",
+        "maghrib": "21:18",
+        "isha": "23:36"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:08",
+        "sunrise": "05:34",
+        "dhuhr": "13:31",
+        "asr": "17:39",
+        "maghrib": "21:20",
+        "isha": "23:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:07",
+        "sunrise": "05:31",
+        "dhuhr": "13:31",
+        "asr": "17:39",
+        "maghrib": "21:22",
+        "isha": "23:38"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:07",
+        "sunrise": "05:29",
+        "dhuhr": "13:31",
+        "asr": "17:40",
+        "maghrib": "21:24",
+        "isha": "23:38"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:06",
+        "sunrise": "05:27",
+        "dhuhr": "13:31",
+        "asr": "17:41",
+        "maghrib": "21:26",
+        "isha": "23:39"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:05",
+        "sunrise": "05:25",
+        "dhuhr": "13:31",
+        "asr": "17:42",
+        "maghrib": "21:28",
+        "isha": "23:40"
+      }
+    ]
+  }
+]

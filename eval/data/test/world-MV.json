@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Malé",
+    "country": "Maldives",
+    "iso": "MV",
+    "latitude": 4.1755,
+    "longitude": 73.5093,
+    "elevation": 2,
+    "timezone": "Indian/Maldives",
+    "method": "1",
+    "methodLabel": "Karachi",
+    "source": "Aladhan API (api.aladhan.com) — Karachi (Aladhan method 1)",
+    "sourceFetched": "2026-05-02T00:20:45.723Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:43",
+        "sunrise": "05:55",
+        "dhuhr": "12:03",
+        "asr": "15:23",
+        "maghrib": "18:11",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:43",
+        "sunrise": "05:55",
+        "dhuhr": "12:03",
+        "asr": "15:23",
+        "maghrib": "18:11",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:43",
+        "sunrise": "05:55",
+        "dhuhr": "12:03",
+        "asr": "15:23",
+        "maghrib": "18:11",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:42",
+        "sunrise": "05:54",
+        "dhuhr": "12:03",
+        "asr": "15:23",
+        "maghrib": "18:11",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:42",
+        "sunrise": "05:54",
+        "dhuhr": "12:03",
+        "asr": "15:24",
+        "maghrib": "18:11",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:42",
+        "sunrise": "05:54",
+        "dhuhr": "12:03",
+        "asr": "15:24",
+        "maghrib": "18:11",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:41",
+        "sunrise": "05:54",
+        "dhuhr": "12:02",
+        "asr": "15:24",
+        "maghrib": "18:11",
+        "isha": "19:24"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Nouakchott",
+    "country": "Mauritania",
+    "iso": "MR",
+    "latitude": 18.0735,
+    "longitude": -15.9582,
+    "elevation": 8,
+    "timezone": "Africa/Nouakchott",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:21:02.952Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:20",
+        "sunrise": "06:37",
+        "dhuhr": "13:01",
+        "asr": "16:14",
+        "maghrib": "19:25",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:19",
+        "sunrise": "06:36",
+        "dhuhr": "13:01",
+        "asr": "16:13",
+        "maghrib": "19:26",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:18",
+        "sunrise": "06:36",
+        "dhuhr": "13:01",
+        "asr": "16:13",
+        "maghrib": "19:26",
+        "isha": "20:38"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:18",
+        "sunrise": "06:35",
+        "dhuhr": "13:01",
+        "asr": "16:12",
+        "maghrib": "19:26",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:17",
+        "sunrise": "06:35",
+        "dhuhr": "13:00",
+        "asr": "16:12",
+        "maghrib": "19:27",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:17",
+        "sunrise": "06:34",
+        "dhuhr": "13:00",
+        "asr": "16:12",
+        "maghrib": "19:27",
+        "isha": "20:40"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:16",
+        "sunrise": "06:34",
+        "dhuhr": "13:00",
+        "asr": "16:11",
+        "maghrib": "19:27",
+        "isha": "20:40"
+      }
+    ]
+  }
+]

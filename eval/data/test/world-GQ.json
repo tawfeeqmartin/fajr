@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Malabo",
+    "country": "Equatorial Guinea",
+    "iso": "GQ",
+    "latitude": 3.7523,
+    "longitude": 8.7742,
+    "elevation": 32,
+    "timezone": "Africa/Malabo",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:38:13.349Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:03",
+        "sunrise": "06:14",
+        "dhuhr": "12:22",
+        "asr": "15:42",
+        "maghrib": "18:29",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:02",
+        "sunrise": "06:14",
+        "dhuhr": "12:22",
+        "asr": "15:42",
+        "maghrib": "18:29",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:02",
+        "sunrise": "06:14",
+        "dhuhr": "12:22",
+        "asr": "15:42",
+        "maghrib": "18:29",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:02",
+        "sunrise": "06:14",
+        "dhuhr": "12:22",
+        "asr": "15:42",
+        "maghrib": "18:29",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:01",
+        "sunrise": "06:14",
+        "dhuhr": "12:22",
+        "asr": "15:43",
+        "maghrib": "18:29",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:01",
+        "sunrise": "06:13",
+        "dhuhr": "12:21",
+        "asr": "15:43",
+        "maghrib": "18:29",
+        "isha": "19:38"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:01",
+        "sunrise": "06:13",
+        "dhuhr": "12:21",
+        "asr": "15:43",
+        "maghrib": "18:30",
+        "isha": "19:38"
+      }
+    ]
+  }
+]

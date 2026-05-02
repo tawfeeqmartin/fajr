@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Porto-Novo",
+    "country": "Benin",
+    "iso": "BJ",
+    "latitude": 6.4969,
+    "longitude": 2.6283,
+    "elevation": 12,
+    "timezone": "Africa/Porto-Novo",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:17:29.158Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:24",
+        "sunrise": "06:36",
+        "dhuhr": "12:46",
+        "asr": "16:04",
+        "maghrib": "18:57",
+        "isha": "20:05"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:23",
+        "sunrise": "06:36",
+        "dhuhr": "12:46",
+        "asr": "16:05",
+        "maghrib": "18:57",
+        "isha": "20:05"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:23",
+        "sunrise": "06:35",
+        "dhuhr": "12:46",
+        "asr": "16:05",
+        "maghrib": "18:57",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:23",
+        "sunrise": "06:35",
+        "dhuhr": "12:46",
+        "asr": "16:05",
+        "maghrib": "18:57",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:22",
+        "sunrise": "06:35",
+        "dhuhr": "12:46",
+        "asr": "16:06",
+        "maghrib": "18:57",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:22",
+        "sunrise": "06:35",
+        "dhuhr": "12:46",
+        "asr": "16:06",
+        "maghrib": "18:57",
+        "isha": "20:06"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:22",
+        "sunrise": "06:34",
+        "dhuhr": "12:46",
+        "asr": "16:06",
+        "maghrib": "18:58",
+        "isha": "20:06"
+      }
+    ]
+  }
+]

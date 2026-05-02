@@ -1,0 +1,80 @@
+[
+  {
+    "city": "New Delhi",
+    "country": "India",
+    "iso": "IN",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "elevation": 216,
+    "timezone": "Asia/Kolkata",
+    "method": "1",
+    "methodLabel": "Karachi",
+    "source": "Aladhan API (api.aladhan.com) — Karachi (Aladhan method 1)",
+    "sourceFetched": "2026-05-02T00:32:05.178Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:15",
+        "sunrise": "05:40",
+        "dhuhr": "12:18",
+        "asr": "15:52",
+        "maghrib": "18:57",
+        "isha": "20:22"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:14",
+        "sunrise": "05:39",
+        "dhuhr": "12:18",
+        "asr": "15:52",
+        "maghrib": "18:57",
+        "isha": "20:23"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:12",
+        "sunrise": "05:38",
+        "dhuhr": "12:18",
+        "asr": "15:52",
+        "maghrib": "18:58",
+        "isha": "20:24"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:11",
+        "sunrise": "05:38",
+        "dhuhr": "12:18",
+        "asr": "15:52",
+        "maghrib": "18:59",
+        "isha": "20:25"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:10",
+        "sunrise": "05:37",
+        "dhuhr": "12:18",
+        "asr": "15:51",
+        "maghrib": "18:59",
+        "isha": "20:26"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:09",
+        "sunrise": "05:36",
+        "dhuhr": "12:18",
+        "asr": "15:51",
+        "maghrib": "19:00",
+        "isha": "20:27"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:08",
+        "sunrise": "05:35",
+        "dhuhr": "12:18",
+        "asr": "15:51",
+        "maghrib": "19:00",
+        "isha": "20:27"
+      }
+    ]
+  }
+]

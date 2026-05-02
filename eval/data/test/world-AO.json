@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Luanda",
+    "country": "Angola",
+    "iso": "AO",
+    "latitude": -8.839,
+    "longitude": 13.2894,
+    "elevation": 6,
+    "timezone": "Africa/Luanda",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:37:39.103Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:58",
+        "sunrise": "06:10",
+        "dhuhr": "12:04",
+        "asr": "15:26",
+        "maghrib": "17:57",
+        "isha": "19:05"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:58",
+        "sunrise": "06:10",
+        "dhuhr": "12:04",
+        "asr": "15:25",
+        "maghrib": "17:57",
+        "isha": "19:05"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:58",
+        "sunrise": "06:10",
+        "dhuhr": "12:04",
+        "asr": "15:25",
+        "maghrib": "17:57",
+        "isha": "19:05"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:58",
+        "sunrise": "06:10",
+        "dhuhr": "12:04",
+        "asr": "15:25",
+        "maghrib": "17:57",
+        "isha": "19:04"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:58",
+        "sunrise": "06:11",
+        "dhuhr": "12:03",
+        "asr": "15:25",
+        "maghrib": "17:56",
+        "isha": "19:04"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:58",
+        "sunrise": "06:11",
+        "dhuhr": "12:03",
+        "asr": "15:25",
+        "maghrib": "17:56",
+        "isha": "19:04"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:58",
+        "sunrise": "06:11",
+        "dhuhr": "12:03",
+        "asr": "15:25",
+        "maghrib": "17:56",
+        "isha": "19:04"
+      }
+    ]
+  }
+]

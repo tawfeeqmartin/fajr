@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Mogadishu",
+    "country": "Somalia",
+    "iso": "SO",
+    "latitude": 2.0469,
+    "longitude": 45.3182,
+    "elevation": 9,
+    "timezone": "Africa/Mogadishu",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:22:46.136Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:32",
+        "sunrise": "05:50",
+        "dhuhr": "11:56",
+        "asr": "15:16",
+        "maghrib": "18:01",
+        "isha": "19:11"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:32",
+        "sunrise": "05:50",
+        "dhuhr": "11:56",
+        "asr": "15:17",
+        "maghrib": "18:01",
+        "isha": "19:11"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:32",
+        "sunrise": "05:50",
+        "dhuhr": "11:56",
+        "asr": "15:17",
+        "maghrib": "18:01",
+        "isha": "19:11"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:32",
+        "sunrise": "05:50",
+        "dhuhr": "11:55",
+        "asr": "15:17",
+        "maghrib": "18:01",
+        "isha": "19:11"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:31",
+        "sunrise": "05:49",
+        "dhuhr": "11:55",
+        "asr": "15:17",
+        "maghrib": "18:01",
+        "isha": "19:11"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:31",
+        "sunrise": "05:49",
+        "dhuhr": "11:55",
+        "asr": "15:17",
+        "maghrib": "18:01",
+        "isha": "19:11"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:31",
+        "sunrise": "05:49",
+        "dhuhr": "11:55",
+        "asr": "15:17",
+        "maghrib": "18:01",
+        "isha": "19:11"
+      }
+    ]
+  }
+]

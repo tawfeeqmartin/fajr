@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Niamey",
+    "country": "Niger",
+    "iso": "NE",
+    "latitude": 13.5117,
+    "longitude": 2.1251,
+    "elevation": 207,
+    "timezone": "Africa/Niamey",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:21:28.420Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:15",
+        "sunrise": "06:30",
+        "dhuhr": "12:48",
+        "asr": "15:59",
+        "maghrib": "19:07",
+        "isha": "20:17"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:15",
+        "sunrise": "06:29",
+        "dhuhr": "12:48",
+        "asr": "16:00",
+        "maghrib": "19:08",
+        "isha": "20:18"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:14",
+        "sunrise": "06:29",
+        "dhuhr": "12:48",
+        "asr": "16:00",
+        "maghrib": "19:08",
+        "isha": "20:18"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:14",
+        "sunrise": "06:29",
+        "dhuhr": "12:48",
+        "asr": "16:01",
+        "maghrib": "19:08",
+        "isha": "20:18"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:13",
+        "sunrise": "06:28",
+        "dhuhr": "12:48",
+        "asr": "16:01",
+        "maghrib": "19:08",
+        "isha": "20:19"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:13",
+        "sunrise": "06:28",
+        "dhuhr": "12:48",
+        "asr": "16:02",
+        "maghrib": "19:08",
+        "isha": "20:19"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:12",
+        "sunrise": "06:28",
+        "dhuhr": "12:48",
+        "asr": "16:02",
+        "maghrib": "19:09",
+        "isha": "20:20"
+      }
+    ]
+  }
+]

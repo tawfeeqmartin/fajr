@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Bucharest",
+    "country": "Romania",
+    "iso": "RO",
+    "latitude": 44.4268,
+    "longitude": 26.1025,
+    "elevation": 96,
+    "timezone": "Europe/Bucharest",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:26:36.454Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:09",
+        "sunrise": "06:05",
+        "dhuhr": "13:13",
+        "asr": "17:08",
+        "maghrib": "20:21",
+        "isha": "22:09"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:07",
+        "sunrise": "06:04",
+        "dhuhr": "13:12",
+        "asr": "17:08",
+        "maghrib": "20:22",
+        "isha": "22:11"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:05",
+        "sunrise": "06:02",
+        "dhuhr": "13:12",
+        "asr": "17:09",
+        "maghrib": "20:23",
+        "isha": "22:13"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:03",
+        "sunrise": "06:01",
+        "dhuhr": "13:12",
+        "asr": "17:09",
+        "maghrib": "20:24",
+        "isha": "22:14"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:01",
+        "sunrise": "06:00",
+        "dhuhr": "13:12",
+        "asr": "17:09",
+        "maghrib": "20:25",
+        "isha": "22:16"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:59",
+        "sunrise": "05:58",
+        "dhuhr": "13:12",
+        "asr": "17:10",
+        "maghrib": "20:27",
+        "isha": "22:18"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:57",
+        "sunrise": "05:57",
+        "dhuhr": "13:12",
+        "asr": "17:10",
+        "maghrib": "20:28",
+        "isha": "22:20"
+      }
+    ]
+  }
+]

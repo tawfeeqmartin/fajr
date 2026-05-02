@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Kingston",
+    "country": "Jamaica",
+    "iso": "JM",
+    "latitude": 17.9712,
+    "longitude": -76.7936,
+    "elevation": 9,
+    "timezone": "America/Jamaica",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:35:48.243Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:23",
+        "sunrise": "05:40",
+        "dhuhr": "12:04",
+        "asr": "15:17",
+        "maghrib": "18:28",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:23",
+        "sunrise": "05:39",
+        "dhuhr": "12:04",
+        "asr": "15:16",
+        "maghrib": "18:29",
+        "isha": "19:41"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:22",
+        "sunrise": "05:39",
+        "dhuhr": "12:04",
+        "asr": "15:16",
+        "maghrib": "18:29",
+        "isha": "19:42"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:21",
+        "sunrise": "05:38",
+        "dhuhr": "12:04",
+        "asr": "15:16",
+        "maghrib": "18:29",
+        "isha": "19:42"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:21",
+        "sunrise": "05:38",
+        "dhuhr": "12:04",
+        "asr": "15:15",
+        "maghrib": "18:30",
+        "isha": "19:43"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:20",
+        "sunrise": "05:38",
+        "dhuhr": "12:04",
+        "asr": "15:15",
+        "maghrib": "18:30",
+        "isha": "19:43"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:19",
+        "sunrise": "05:37",
+        "dhuhr": "12:04",
+        "asr": "15:14",
+        "maghrib": "18:30",
+        "isha": "19:44"
+      }
+    ]
+  }
+]

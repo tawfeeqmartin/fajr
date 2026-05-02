@@ -1,0 +1,80 @@
+[
+  {
+    "city": "São Tomé",
+    "country": "São Tomé and Príncipe",
+    "iso": "ST",
+    "latitude": 0.3302,
+    "longitude": 6.7333,
+    "elevation": 13,
+    "timezone": "Africa/Sao_Tome",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:38:21.936Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:15",
+        "sunrise": "05:26",
+        "dhuhr": "11:30",
+        "asr": "14:51",
+        "maghrib": "17:34",
+        "isha": "18:41"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:15",
+        "sunrise": "05:26",
+        "dhuhr": "11:30",
+        "asr": "14:51",
+        "maghrib": "17:34",
+        "isha": "18:41"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:15",
+        "sunrise": "05:26",
+        "dhuhr": "11:30",
+        "asr": "14:52",
+        "maghrib": "17:34",
+        "isha": "18:41"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:14",
+        "sunrise": "05:26",
+        "dhuhr": "11:30",
+        "asr": "14:52",
+        "maghrib": "17:34",
+        "isha": "18:41"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:14",
+        "sunrise": "05:26",
+        "dhuhr": "11:30",
+        "asr": "14:52",
+        "maghrib": "17:34",
+        "isha": "18:41"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:14",
+        "sunrise": "05:26",
+        "dhuhr": "11:30",
+        "asr": "14:52",
+        "maghrib": "17:33",
+        "isha": "18:41"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:14",
+        "sunrise": "05:26",
+        "dhuhr": "11:30",
+        "asr": "14:52",
+        "maghrib": "17:33",
+        "isha": "18:41"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Gitega",
+    "country": "Burundi",
+    "iso": "BI",
+    "latitude": -3.4271,
+    "longitude": 29.9246,
+    "elevation": 1745,
+    "timezone": "Africa/Bujumbura",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:36:56.366Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:40",
+        "sunrise": "05:58",
+        "dhuhr": "11:57",
+        "asr": "15:19",
+        "maghrib": "17:57",
+        "isha": "19:06"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:40",
+        "sunrise": "05:58",
+        "dhuhr": "11:57",
+        "asr": "15:19",
+        "maghrib": "17:57",
+        "isha": "19:06"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:40",
+        "sunrise": "05:58",
+        "dhuhr": "11:57",
+        "asr": "15:19",
+        "maghrib": "17:57",
+        "isha": "19:06"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:40",
+        "sunrise": "05:58",
+        "dhuhr": "11:57",
+        "asr": "15:19",
+        "maghrib": "17:56",
+        "isha": "19:06"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:40",
+        "sunrise": "05:58",
+        "dhuhr": "11:57",
+        "asr": "15:20",
+        "maghrib": "17:56",
+        "isha": "19:06"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:40",
+        "sunrise": "05:58",
+        "dhuhr": "11:57",
+        "asr": "15:20",
+        "maghrib": "17:56",
+        "isha": "19:06"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:39",
+        "sunrise": "05:58",
+        "dhuhr": "11:57",
+        "asr": "15:20",
+        "maghrib": "17:56",
+        "isha": "19:06"
+      }
+    ]
+  }
+]

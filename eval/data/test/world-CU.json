@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Havana",
+    "country": "Cuba",
+    "iso": "CU",
+    "latitude": 23.1136,
+    "longitude": -82.3666,
+    "elevation": 59,
+    "timezone": "America/Havana",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:35:22.678Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:35",
+        "sunrise": "06:56",
+        "dhuhr": "13:26",
+        "asr": "16:50",
+        "maghrib": "19:57",
+        "isha": "21:13"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:35",
+        "sunrise": "06:55",
+        "dhuhr": "13:26",
+        "asr": "16:50",
+        "maghrib": "19:58",
+        "isha": "21:14"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:34",
+        "sunrise": "06:54",
+        "dhuhr": "13:26",
+        "asr": "16:50",
+        "maghrib": "19:58",
+        "isha": "21:14"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:33",
+        "sunrise": "06:54",
+        "dhuhr": "13:26",
+        "asr": "16:49",
+        "maghrib": "19:59",
+        "isha": "21:15"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:32",
+        "sunrise": "06:53",
+        "dhuhr": "13:26",
+        "asr": "16:49",
+        "maghrib": "19:59",
+        "isha": "21:16"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:31",
+        "sunrise": "06:53",
+        "dhuhr": "13:26",
+        "asr": "16:49",
+        "maghrib": "20:00",
+        "isha": "21:16"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:30",
+        "sunrise": "06:52",
+        "dhuhr": "13:26",
+        "asr": "16:49",
+        "maghrib": "20:00",
+        "isha": "21:17"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Paramaribo",
+    "country": "Suriname",
+    "iso": "SR",
+    "latitude": 5.852,
+    "longitude": -55.2038,
+    "elevation": 5,
+    "timezone": "America/Paramaribo",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:23:03.396Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:16",
+        "sunrise": "06:28",
+        "dhuhr": "12:38",
+        "asr": "15:56",
+        "maghrib": "18:48",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:15",
+        "sunrise": "06:28",
+        "dhuhr": "12:38",
+        "asr": "15:57",
+        "maghrib": "18:48",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:15",
+        "sunrise": "06:27",
+        "dhuhr": "12:38",
+        "asr": "15:57",
+        "maghrib": "18:48",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:15",
+        "sunrise": "06:27",
+        "dhuhr": "12:37",
+        "asr": "15:57",
+        "maghrib": "18:48",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:14",
+        "sunrise": "06:27",
+        "dhuhr": "12:37",
+        "asr": "15:57",
+        "maghrib": "18:48",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:14",
+        "sunrise": "06:27",
+        "dhuhr": "12:37",
+        "asr": "15:58",
+        "maghrib": "18:48",
+        "isha": "19:56"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:14",
+        "sunrise": "06:27",
+        "dhuhr": "12:37",
+        "asr": "15:58",
+        "maghrib": "18:48",
+        "isha": "19:57"
+      }
+    ]
+  }
+]

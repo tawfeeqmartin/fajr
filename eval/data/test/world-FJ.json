@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Suva",
+    "country": "Fiji",
+    "iso": "FJ",
+    "latitude": -18.1248,
+    "longitude": 178.4501,
+    "elevation": 6,
+    "timezone": "Pacific/Fiji",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:35:56.770Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:06",
+        "sunrise": "06:20",
+        "dhuhr": "12:03",
+        "asr": "15:21",
+        "maghrib": "17:46",
+        "isha": "18:56"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:06",
+        "sunrise": "06:20",
+        "dhuhr": "12:03",
+        "asr": "15:21",
+        "maghrib": "17:46",
+        "isha": "18:56"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:06",
+        "sunrise": "06:21",
+        "dhuhr": "12:03",
+        "asr": "15:20",
+        "maghrib": "17:45",
+        "isha": "18:55"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:06",
+        "sunrise": "06:21",
+        "dhuhr": "12:03",
+        "asr": "15:20",
+        "maghrib": "17:45",
+        "isha": "18:55"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:07",
+        "sunrise": "06:21",
+        "dhuhr": "12:03",
+        "asr": "15:20",
+        "maghrib": "17:44",
+        "isha": "18:55"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:07",
+        "sunrise": "06:22",
+        "dhuhr": "12:03",
+        "asr": "15:20",
+        "maghrib": "17:44",
+        "isha": "18:54"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:07",
+        "sunrise": "06:22",
+        "dhuhr": "12:03",
+        "asr": "15:19",
+        "maghrib": "17:43",
+        "isha": "18:54"
+      }
+    ]
+  }
+]

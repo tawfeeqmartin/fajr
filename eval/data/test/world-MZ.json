@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Maputo",
+    "country": "Mozambique",
+    "iso": "MZ",
+    "latitude": -25.9692,
+    "longitude": 32.5732,
+    "elevation": 47,
+    "timezone": "Africa/Maputo",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:21:19.940Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:55",
+        "sunrise": "06:14",
+        "dhuhr": "11:47",
+        "asr": "14:57",
+        "maghrib": "17:20",
+        "isha": "18:33"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:56",
+        "sunrise": "06:14",
+        "dhuhr": "11:47",
+        "asr": "14:57",
+        "maghrib": "17:19",
+        "isha": "18:33"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:56",
+        "sunrise": "06:15",
+        "dhuhr": "11:47",
+        "asr": "14:56",
+        "maghrib": "17:18",
+        "isha": "18:32"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:56",
+        "sunrise": "06:15",
+        "dhuhr": "11:46",
+        "asr": "14:56",
+        "maghrib": "17:17",
+        "isha": "18:32"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:57",
+        "sunrise": "06:16",
+        "dhuhr": "11:46",
+        "asr": "14:55",
+        "maghrib": "17:17",
+        "isha": "18:31"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:57",
+        "sunrise": "06:16",
+        "dhuhr": "11:46",
+        "asr": "14:55",
+        "maghrib": "17:16",
+        "isha": "18:31"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:58",
+        "sunrise": "06:17",
+        "dhuhr": "11:46",
+        "asr": "14:54",
+        "maghrib": "17:16",
+        "isha": "18:30"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Phnom Penh",
+    "country": "Cambodia",
+    "iso": "KH",
+    "latitude": 11.5564,
+    "longitude": 104.9282,
+    "elevation": 12,
+    "timezone": "Asia/Phnom_Penh",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:31:37.642Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:27",
+        "sunrise": "05:41",
+        "dhuhr": "11:57",
+        "asr": "15:10",
+        "maghrib": "18:14",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:27",
+        "sunrise": "05:41",
+        "dhuhr": "11:57",
+        "asr": "15:11",
+        "maghrib": "18:14",
+        "isha": "19:23"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:26",
+        "sunrise": "05:40",
+        "dhuhr": "11:57",
+        "asr": "15:11",
+        "maghrib": "18:14",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:26",
+        "sunrise": "05:40",
+        "dhuhr": "11:57",
+        "asr": "15:12",
+        "maghrib": "18:14",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:25",
+        "sunrise": "05:40",
+        "dhuhr": "11:57",
+        "asr": "15:12",
+        "maghrib": "18:14",
+        "isha": "19:24"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:25",
+        "sunrise": "05:39",
+        "dhuhr": "11:57",
+        "asr": "15:13",
+        "maghrib": "18:15",
+        "isha": "19:25"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:24",
+        "sunrise": "05:39",
+        "dhuhr": "11:57",
+        "asr": "15:13",
+        "maghrib": "18:15",
+        "isha": "19:25"
+      }
+    ]
+  }
+]

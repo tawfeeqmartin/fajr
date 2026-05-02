@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Dublin",
+    "country": "Ireland",
+    "iso": "IE",
+    "latitude": 53.3498,
+    "longitude": -6.2603,
+    "elevation": 20,
+    "timezone": "Europe/Dublin",
+    "method": "14",
+    "methodLabel": "Moonsighting Committee",
+    "source": "Aladhan API (api.aladhan.com) — Moonsighting Committee (Aladhan method 14)",
+    "sourceFetched": "2026-05-02T00:29:28.440Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:30",
+        "sunrise": "05:49",
+        "dhuhr": "13:22",
+        "asr": "17:26",
+        "maghrib": "20:56",
+        "isha": "23:03"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:27",
+        "sunrise": "05:47",
+        "dhuhr": "13:22",
+        "asr": "17:27",
+        "maghrib": "20:58",
+        "isha": "23:06"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:25",
+        "sunrise": "05:45",
+        "dhuhr": "13:22",
+        "asr": "17:28",
+        "maghrib": "20:59",
+        "isha": "23:10"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:24",
+        "sunrise": "05:43",
+        "dhuhr": "13:22",
+        "asr": "17:29",
+        "maghrib": "21:01",
+        "isha": "23:12"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:23",
+        "sunrise": "05:41",
+        "dhuhr": "13:22",
+        "asr": "17:29",
+        "maghrib": "21:03",
+        "isha": "23:12"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:22",
+        "sunrise": "05:40",
+        "dhuhr": "13:22",
+        "asr": "17:30",
+        "maghrib": "21:05",
+        "isha": "23:13"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:21",
+        "sunrise": "05:38",
+        "dhuhr": "13:22",
+        "asr": "17:31",
+        "maghrib": "21:06",
+        "isha": "23:14"
+      }
+    ]
+  }
+]

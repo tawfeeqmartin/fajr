@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Hanoi",
+    "country": "Vietnam",
+    "iso": "VN",
+    "latitude": 21.0285,
+    "longitude": 105.8542,
+    "elevation": 16,
+    "timezone": "Asia/Ho_Chi_Minh",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:31:28.297Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:07",
+        "sunrise": "05:26",
+        "dhuhr": "11:54",
+        "asr": "15:13",
+        "maghrib": "18:22",
+        "isha": "19:36"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:06",
+        "sunrise": "05:25",
+        "dhuhr": "11:53",
+        "asr": "15:13",
+        "maghrib": "18:22",
+        "isha": "19:36"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:06",
+        "sunrise": "05:25",
+        "dhuhr": "11:53",
+        "asr": "15:12",
+        "maghrib": "18:22",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:05",
+        "sunrise": "05:24",
+        "dhuhr": "11:53",
+        "asr": "15:12",
+        "maghrib": "18:23",
+        "isha": "19:37"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:04",
+        "sunrise": "05:23",
+        "dhuhr": "11:53",
+        "asr": "15:12",
+        "maghrib": "18:23",
+        "isha": "19:38"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:03",
+        "sunrise": "05:23",
+        "dhuhr": "11:53",
+        "asr": "15:11",
+        "maghrib": "18:24",
+        "isha": "19:38"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:03",
+        "sunrise": "05:22",
+        "dhuhr": "11:53",
+        "asr": "15:11",
+        "maghrib": "18:24",
+        "isha": "19:39"
+      }
+    ]
+  }
+]

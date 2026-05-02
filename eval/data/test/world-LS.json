@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Maseru",
+    "country": "Lesotho",
+    "iso": "LS",
+    "latitude": -29.3151,
+    "longitude": 27.4869,
+    "elevation": 1620,
+    "timezone": "Africa/Maseru",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:39:30.461Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:18",
+        "sunrise": "06:38",
+        "dhuhr": "12:07",
+        "asr": "15:14",
+        "maghrib": "17:35",
+        "isha": "18:51"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:18",
+        "sunrise": "06:39",
+        "dhuhr": "12:07",
+        "asr": "15:13",
+        "maghrib": "17:34",
+        "isha": "18:51"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:19",
+        "sunrise": "06:40",
+        "dhuhr": "12:07",
+        "asr": "15:12",
+        "maghrib": "17:34",
+        "isha": "18:50"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:19",
+        "sunrise": "06:40",
+        "dhuhr": "12:07",
+        "asr": "15:12",
+        "maghrib": "17:33",
+        "isha": "18:49"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:20",
+        "sunrise": "06:41",
+        "dhuhr": "12:07",
+        "asr": "15:11",
+        "maghrib": "17:32",
+        "isha": "18:49"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:20",
+        "sunrise": "06:42",
+        "dhuhr": "12:07",
+        "asr": "15:11",
+        "maghrib": "17:31",
+        "isha": "18:48"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:21",
+        "sunrise": "06:42",
+        "dhuhr": "12:07",
+        "asr": "15:10",
+        "maghrib": "17:31",
+        "isha": "18:47"
+      }
+    ]
+  }
+]

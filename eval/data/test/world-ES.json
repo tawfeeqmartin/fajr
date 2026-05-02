@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Madrid",
+    "country": "Spain",
+    "iso": "ES",
+    "latitude": 40.4168,
+    "longitude": -3.7038,
+    "elevation": 667,
+    "timezone": "Europe/Madrid",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:25:45.080Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:28",
+        "sunrise": "07:13",
+        "dhuhr": "14:12",
+        "asr": "18:02",
+        "maghrib": "21:11",
+        "isha": "22:49"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:27",
+        "sunrise": "07:12",
+        "dhuhr": "14:12",
+        "asr": "18:03",
+        "maghrib": "21:12",
+        "isha": "22:51"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:25",
+        "sunrise": "07:11",
+        "dhuhr": "14:12",
+        "asr": "18:03",
+        "maghrib": "21:13",
+        "isha": "22:52"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:23",
+        "sunrise": "07:09",
+        "dhuhr": "14:12",
+        "asr": "18:03",
+        "maghrib": "21:14",
+        "isha": "22:54"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:22",
+        "sunrise": "07:08",
+        "dhuhr": "14:11",
+        "asr": "18:04",
+        "maghrib": "21:15",
+        "isha": "22:55"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:20",
+        "sunrise": "07:07",
+        "dhuhr": "14:11",
+        "asr": "18:04",
+        "maghrib": "21:16",
+        "isha": "22:57"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:18",
+        "sunrise": "07:06",
+        "dhuhr": "14:11",
+        "asr": "18:04",
+        "maghrib": "21:17",
+        "isha": "22:58"
+      }
+    ]
+  }
+]

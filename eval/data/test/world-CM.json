@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Yaoundé",
+    "country": "Cameroon",
+    "iso": "CM",
+    "latitude": 3.848,
+    "longitude": 11.5021,
+    "elevation": 726,
+    "timezone": "Africa/Douala",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:17:54.876Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:52",
+        "sunrise": "06:03",
+        "dhuhr": "12:11",
+        "asr": "15:31",
+        "maghrib": "18:19",
+        "isha": "19:26"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:51",
+        "sunrise": "06:03",
+        "dhuhr": "12:11",
+        "asr": "15:31",
+        "maghrib": "18:19",
+        "isha": "19:26"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:51",
+        "sunrise": "06:03",
+        "dhuhr": "12:11",
+        "asr": "15:31",
+        "maghrib": "18:19",
+        "isha": "19:26"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:51",
+        "sunrise": "06:03",
+        "dhuhr": "12:11",
+        "asr": "15:31",
+        "maghrib": "18:19",
+        "isha": "19:27"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:50",
+        "sunrise": "06:03",
+        "dhuhr": "12:11",
+        "asr": "15:32",
+        "maghrib": "18:19",
+        "isha": "19:27"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:50",
+        "sunrise": "06:02",
+        "dhuhr": "12:11",
+        "asr": "15:32",
+        "maghrib": "18:19",
+        "isha": "19:27"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:50",
+        "sunrise": "06:02",
+        "dhuhr": "12:10",
+        "asr": "15:32",
+        "maghrib": "18:19",
+        "isha": "19:27"
+      }
+    ]
+  }
+]

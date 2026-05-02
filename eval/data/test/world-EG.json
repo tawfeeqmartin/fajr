@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Cairo",
+    "country": "Egypt",
+    "iso": "EG",
+    "latitude": 30.0444,
+    "longitude": 31.2357,
+    "elevation": 23,
+    "timezone": "Africa/Cairo",
+    "method": "5",
+    "methodLabel": "Egyptian",
+    "source": "Aladhan API (api.aladhan.com) — Egyptian (Aladhan method 5)",
+    "sourceFetched": "2026-05-02T00:18:37.998Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:36",
+        "sunrise": "06:12",
+        "dhuhr": "12:52",
+        "asr": "16:28",
+        "maghrib": "19:33",
+        "isha": "20:57"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:35",
+        "sunrise": "06:11",
+        "dhuhr": "12:52",
+        "asr": "16:28",
+        "maghrib": "19:34",
+        "isha": "20:58"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:34",
+        "sunrise": "06:10",
+        "dhuhr": "12:52",
+        "asr": "16:28",
+        "maghrib": "19:34",
+        "isha": "20:59"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:33",
+        "sunrise": "06:09",
+        "dhuhr": "12:52",
+        "asr": "16:28",
+        "maghrib": "19:35",
+        "isha": "21:00"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:32",
+        "sunrise": "06:08",
+        "dhuhr": "12:52",
+        "asr": "16:28",
+        "maghrib": "19:35",
+        "isha": "21:01"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:31",
+        "sunrise": "06:07",
+        "dhuhr": "12:52",
+        "asr": "16:28",
+        "maghrib": "19:36",
+        "isha": "21:02"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:30",
+        "sunrise": "06:07",
+        "dhuhr": "12:52",
+        "asr": "16:28",
+        "maghrib": "19:37",
+        "isha": "21:03"
+      }
+    ]
+  }
+]

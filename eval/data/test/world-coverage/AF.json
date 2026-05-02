@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Kabul",
+    "country": "Afghanistan",
+    "iso": "AF",
+    "latitude": 34.5553,
+    "longitude": 69.2075,
+    "elevation": 1791,
+    "timezone": "Asia/Kabul",
+    "method": "1",
+    "methodLabel": "Karachi",
+    "source": "Aladhan API (api.aladhan.com) — Karachi (Aladhan method 1)",
+    "sourceFetched": "2026-05-02T00:14:04.669Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:29",
+        "sunrise": "05:03",
+        "dhuhr": "11:50",
+        "asr": "15:33",
+        "maghrib": "18:38",
+        "isha": "20:12"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:28",
+        "sunrise": "05:02",
+        "dhuhr": "11:50",
+        "asr": "15:33",
+        "maghrib": "18:39",
+        "isha": "20:13"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:27",
+        "sunrise": "05:01",
+        "dhuhr": "11:50",
+        "asr": "15:33",
+        "maghrib": "18:40",
+        "isha": "20:14"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:25",
+        "sunrise": "05:00",
+        "dhuhr": "11:50",
+        "asr": "15:33",
+        "maghrib": "18:41",
+        "isha": "20:15"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:24",
+        "sunrise": "04:59",
+        "dhuhr": "11:50",
+        "asr": "15:33",
+        "maghrib": "18:41",
+        "isha": "20:16"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:23",
+        "sunrise": "04:58",
+        "dhuhr": "11:50",
+        "asr": "15:33",
+        "maghrib": "18:42",
+        "isha": "20:17"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:21",
+        "sunrise": "04:57",
+        "dhuhr": "11:50",
+        "asr": "15:34",
+        "maghrib": "18:43",
+        "isha": "20:19"
+      }
+    ]
+  }
+]

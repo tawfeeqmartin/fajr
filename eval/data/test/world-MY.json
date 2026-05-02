@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Kuala Lumpur",
+    "country": "Malaysia",
+    "iso": "MY",
+    "latitude": 3.139,
+    "longitude": 101.6869,
+    "elevation": 22,
+    "timezone": "Asia/Kuala_Lumpur",
+    "method": "16",
+    "methodLabel": "JAKIM",
+    "source": "Aladhan API (api.aladhan.com) — JAKIM (Aladhan method 16)",
+    "sourceFetched": "2026-05-02T00:31:02.372Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:51",
+        "sunrise": "07:03",
+        "dhuhr": "13:13",
+        "asr": "16:30",
+        "maghrib": "19:20",
+        "isha": "20:30"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:51",
+        "sunrise": "07:03",
+        "dhuhr": "13:13",
+        "asr": "16:31",
+        "maghrib": "19:20",
+        "isha": "20:30"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:50",
+        "sunrise": "07:03",
+        "dhuhr": "13:13",
+        "asr": "16:31",
+        "maghrib": "19:20",
+        "isha": "20:30"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:50",
+        "sunrise": "07:03",
+        "dhuhr": "13:13",
+        "asr": "16:31",
+        "maghrib": "19:20",
+        "isha": "20:30"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:50",
+        "sunrise": "07:03",
+        "dhuhr": "13:13",
+        "asr": "16:31",
+        "maghrib": "19:20",
+        "isha": "20:30"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:50",
+        "sunrise": "07:03",
+        "dhuhr": "13:13",
+        "asr": "16:31",
+        "maghrib": "19:20",
+        "isha": "20:30"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:49",
+        "sunrise": "07:02",
+        "dhuhr": "13:13",
+        "asr": "16:32",
+        "maghrib": "19:20",
+        "isha": "20:30"
+      }
+    ]
+  }
+]

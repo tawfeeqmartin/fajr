@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Helsinki",
+    "country": "Finland",
+    "iso": "FI",
+    "latitude": 60.1699,
+    "longitude": 24.9384,
+    "elevation": 26,
+    "timezone": "Europe/Helsinki",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:28:44.893Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "02:53",
+        "sunrise": "05:15",
+        "dhuhr": "13:17",
+        "asr": "17:28",
+        "maghrib": "21:21",
+        "isha": "23:35"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "02:52",
+        "sunrise": "05:12",
+        "dhuhr": "13:17",
+        "asr": "17:29",
+        "maghrib": "21:23",
+        "isha": "23:36"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "02:51",
+        "sunrise": "05:10",
+        "dhuhr": "13:17",
+        "asr": "17:30",
+        "maghrib": "21:26",
+        "isha": "23:37"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "02:49",
+        "sunrise": "05:07",
+        "dhuhr": "13:17",
+        "asr": "17:31",
+        "maghrib": "21:28",
+        "isha": "23:38"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "02:48",
+        "sunrise": "05:04",
+        "dhuhr": "13:17",
+        "asr": "17:32",
+        "maghrib": "21:31",
+        "isha": "23:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "02:47",
+        "sunrise": "05:02",
+        "dhuhr": "13:17",
+        "asr": "17:33",
+        "maghrib": "21:33",
+        "isha": "23:40"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "02:46",
+        "sunrise": "04:59",
+        "dhuhr": "13:17",
+        "asr": "17:34",
+        "maghrib": "21:36",
+        "isha": "23:41"
+      }
+    ]
+  }
+]

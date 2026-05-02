@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Beijing",
+    "country": "China",
+    "iso": "CN",
+    "latitude": 39.9042,
+    "longitude": 116.4074,
+    "elevation": 44,
+    "timezone": "Asia/Shanghai",
+    "method": "14",
+    "methodLabel": "Moonsighting Committee",
+    "source": "Aladhan API (api.aladhan.com) — Moonsighting Committee (Aladhan method 14)",
+    "sourceFetched": "2026-05-02T00:32:48.466Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "03:44",
+        "sunrise": "05:14",
+        "dhuhr": "12:11",
+        "asr": "16:01",
+        "maghrib": "19:09",
+        "isha": "20:33"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "03:42",
+        "sunrise": "05:13",
+        "dhuhr": "12:11",
+        "asr": "16:01",
+        "maghrib": "19:10",
+        "isha": "20:35"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "03:41",
+        "sunrise": "05:12",
+        "dhuhr": "12:11",
+        "asr": "16:02",
+        "maghrib": "19:11",
+        "isha": "20:36"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "03:39",
+        "sunrise": "05:10",
+        "dhuhr": "12:11",
+        "asr": "16:02",
+        "maghrib": "19:12",
+        "isha": "20:37"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "03:38",
+        "sunrise": "05:09",
+        "dhuhr": "12:11",
+        "asr": "16:02",
+        "maghrib": "19:13",
+        "isha": "20:39"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "03:36",
+        "sunrise": "05:08",
+        "dhuhr": "12:11",
+        "asr": "16:02",
+        "maghrib": "19:14",
+        "isha": "20:40"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "03:35",
+        "sunrise": "05:07",
+        "dhuhr": "12:11",
+        "asr": "16:03",
+        "maghrib": "19:15",
+        "isha": "20:41"
+      }
+    ]
+  }
+]

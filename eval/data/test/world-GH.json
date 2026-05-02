@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Accra",
+    "country": "Ghana",
+    "iso": "GH",
+    "latitude": 5.6037,
+    "longitude": -0.187,
+    "elevation": 61,
+    "timezone": "Africa/Accra",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:38:39.160Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:36",
+        "sunrise": "05:48",
+        "dhuhr": "11:58",
+        "asr": "15:16",
+        "maghrib": "18:07",
+        "isha": "19:15"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:36",
+        "sunrise": "05:48",
+        "dhuhr": "11:58",
+        "asr": "15:17",
+        "maghrib": "18:07",
+        "isha": "19:15"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:35",
+        "sunrise": "05:48",
+        "dhuhr": "11:58",
+        "asr": "15:17",
+        "maghrib": "18:07",
+        "isha": "19:16"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:35",
+        "sunrise": "05:47",
+        "dhuhr": "11:57",
+        "asr": "15:17",
+        "maghrib": "18:08",
+        "isha": "19:16"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:35",
+        "sunrise": "05:47",
+        "dhuhr": "11:57",
+        "asr": "15:18",
+        "maghrib": "18:08",
+        "isha": "19:16"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:34",
+        "sunrise": "05:47",
+        "dhuhr": "11:57",
+        "asr": "15:18",
+        "maghrib": "18:08",
+        "isha": "19:16"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:34",
+        "sunrise": "05:47",
+        "dhuhr": "11:57",
+        "asr": "15:18",
+        "maghrib": "18:08",
+        "isha": "19:16"
+      }
+    ]
+  }
+]

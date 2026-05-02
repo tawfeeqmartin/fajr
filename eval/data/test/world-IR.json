@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Tehran",
+    "country": "Iran",
+    "iso": "IR",
+    "latitude": 35.6892,
+    "longitude": 51.389,
+    "elevation": 1191,
+    "timezone": "Asia/Tehran",
+    "method": "6",
+    "methodLabel": "Tehran (Institute of Geophysics)",
+    "source": "Aladhan API (api.aladhan.com) — Tehran (Institute of Geophysics) (Aladhan method 6)",
+    "sourceFetched": "2026-05-02T01:01:31.037Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "04:54",
+        "sunrise": "06:12",
+        "dhuhr": "13:01",
+        "asr": "16:46",
+        "maghrib": "19:52",
+        "isha": "21:09"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "04:53",
+        "sunrise": "06:11",
+        "dhuhr": "13:01",
+        "asr": "16:46",
+        "maghrib": "19:52",
+        "isha": "21:10"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "04:52",
+        "sunrise": "06:10",
+        "dhuhr": "13:01",
+        "asr": "16:46",
+        "maghrib": "19:53",
+        "isha": "21:11"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "04:50",
+        "sunrise": "06:09",
+        "dhuhr": "13:01",
+        "asr": "16:46",
+        "maghrib": "19:54",
+        "isha": "21:12"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "04:49",
+        "sunrise": "06:08",
+        "dhuhr": "13:01",
+        "asr": "16:46",
+        "maghrib": "19:55",
+        "isha": "21:14"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "04:48",
+        "sunrise": "06:07",
+        "dhuhr": "13:01",
+        "asr": "16:46",
+        "maghrib": "19:56",
+        "isha": "21:15"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "04:47",
+        "sunrise": "06:06",
+        "dhuhr": "13:01",
+        "asr": "16:47",
+        "maghrib": "19:57",
+        "isha": "21:16"
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Monrovia",
+    "country": "Liberia",
+    "iso": "LR",
+    "latitude": 6.3008,
+    "longitude": -10.7972,
+    "elevation": 16,
+    "timezone": "Africa/Monrovia",
+    "method": "3",
+    "methodLabel": "MWL",
+    "source": "Aladhan API (api.aladhan.com) — MWL (Aladhan method 3)",
+    "sourceFetched": "2026-05-02T00:38:47.688Z",
+    "dates": [
+      {
+        "date": "2026-05-02",
+        "fajr": "05:18",
+        "sunrise": "06:30",
+        "dhuhr": "12:40",
+        "asr": "15:58",
+        "maghrib": "18:51",
+        "isha": "19:59"
+      },
+      {
+        "date": "2026-05-03",
+        "fajr": "05:17",
+        "sunrise": "06:30",
+        "dhuhr": "12:40",
+        "asr": "15:59",
+        "maghrib": "18:51",
+        "isha": "19:59"
+      },
+      {
+        "date": "2026-05-04",
+        "fajr": "05:17",
+        "sunrise": "06:29",
+        "dhuhr": "12:40",
+        "asr": "15:59",
+        "maghrib": "18:51",
+        "isha": "19:59"
+      },
+      {
+        "date": "2026-05-05",
+        "fajr": "05:17",
+        "sunrise": "06:29",
+        "dhuhr": "12:40",
+        "asr": "15:59",
+        "maghrib": "18:51",
+        "isha": "19:59"
+      },
+      {
+        "date": "2026-05-06",
+        "fajr": "05:16",
+        "sunrise": "06:29",
+        "dhuhr": "12:40",
+        "asr": "16:00",
+        "maghrib": "18:51",
+        "isha": "19:59"
+      },
+      {
+        "date": "2026-05-07",
+        "fajr": "05:16",
+        "sunrise": "06:29",
+        "dhuhr": "12:40",
+        "asr": "16:00",
+        "maghrib": "18:51",
+        "isha": "19:59"
+      },
+      {
+        "date": "2026-05-08",
+        "fajr": "05:16",
+        "sunrise": "06:28",
+        "dhuhr": "12:40",
+        "asr": "16:00",
+        "maghrib": "18:51",
+        "isha": "20:00"
+      }
+    ]
+  }
+]
