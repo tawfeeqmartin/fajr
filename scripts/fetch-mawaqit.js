@@ -64,16 +64,34 @@ async function searchAndPick(slug, keyword) {
   return found
 }
 
-// Filter out entries whose Fajr is implausibly early (<03:30) — these are
-// usually mosques with a misconfigured timezone (e.g. UTC+0 instead of UTC+1
-// during Moroccan summer). They mislead the eval if blindly included.
+// Filter out entries whose Fajr is implausibly early or whose times look
+// like a tz misconfig. The original Moroccan-only floor of 03:30 was
+// inappropriate for higher-latitude / higher-UTC-offset cells (Moscow May
+// Fajr 02:10 is correct; Tokyo 03:13 is correct). Accept any Fajr from
+// 01:30 to 06:30 — captures every legitimate latitude/season we care about.
+// Also require the prayer-array shape to be sane (sunrise after fajr,
+// dhuhr after sunrise, etc.) to catch the Türkiye-style "dhuhr 05:54"
+// data corruption we excluded in PR #5.
 function looksReasonable(times, expectedFajrHour = 5) {
   if (!times || times.length < 6) return false
-  const [fajr] = times
-  const [h, m] = fajr.split(':').map(Number)
-  if (Number.isNaN(h)) return false
-  // Accept Fajr between 03:30 and 06:30
-  return h >= 3 && h <= 6 && (h !== 3 || m >= 30)
+  const [fajr, sunrise, dhuhr, asr, maghrib, isha] = times
+  function toMin(s) {
+    if (!s || typeof s !== 'string') return NaN
+    const [h, m] = s.split(':').map(Number)
+    if (Number.isNaN(h) || Number.isNaN(m)) return NaN
+    return h * 60 + m
+  }
+  const [fM, sM, dM, aM, mM, iM] = [fajr, sunrise, dhuhr, asr, maghrib, isha].map(toMin)
+  if ([fM, sM, dM, aM, mM, iM].some(Number.isNaN)) return false
+  // Fajr in 01:30..06:30. Maghrib later than sunrise. Dhuhr later than sunrise.
+  // Maghrib later than dhuhr. (We tolerate Isha < Maghrib for high-lat
+  // cases where Isha rolls past midnight — those need separate handling
+  // but aren't a tz-misconfig signature.)
+  if (fM < 90 || fM > 6 * 60 + 30) return false
+  if (sM <= fM) return false
+  if (dM <= sM) return false
+  if (mM <= dM) return false
+  return true
 }
 
 async function fetchMosque(m) {
