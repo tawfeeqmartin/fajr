@@ -1,0 +1,167 @@
+# بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+# Bismillah ir-Rahman ir-Rahim
+#
+# Layer 1 — Automated lint per CLAUDE.md "Code Review Pipeline".
+#
+# Runs on every push and PR. Deterministic, fast (~5s), blocks merge on
+# failure. Catches the convention drift that humans + AI reviewers
+# shouldn't have to police: Bismillah headers, scholarly classification
+# tags on correction blocks, wiki citations, and the no-hardcoded-angles
+# rule for engine.js.
+#
+# Layer 2 (AI code review on every open PR) is implemented as a
+# RemoteTrigger cloud routine — see CLAUDE.md "Code Review Pipeline →
+# Layer 2".
+
+name: Lint
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  bismillah:
+    name: Bismillah header on every .js/.sh file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Bismillah headers
+        run: |
+          set -e
+          missing=()
+          while IFS= read -r f; do
+            if ! head -3 "$f" | grep -q 'بِسْمِ ٱللَّهِ'; then
+              missing+=("$f")
+            fi
+          done < <(find src eval scripts test -name "*.js" -not -path "*/node_modules/*" 2>/dev/null
+                   find . -name "*.sh" -not -path "*/node_modules/*" -not -path "./.git/*" 2>/dev/null)
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing Bismillah header in ${#missing[@]} file(s):"
+            for f in "${missing[@]}"; do echo "  - $f"; done
+            echo ""
+            echo "Per CLAUDE.md 'Bismillah Convention': every .js and .sh source"
+            echo "file must begin with the two-line Bismillah header. Adapt comment"
+            echo "syntax to the language. For shell scripts with a shebang, place"
+            echo "Bismillah immediately after the shebang."
+            exit 1
+          fi
+          echo "✓ All .js and .sh files have Bismillah headers"
+
+  scholarly-classification:
+    name: Scholarly classification on engine corrections
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify classification tags + wiki citations on src/engine.js correction blocks
+        run: |
+          set -e
+          # Each `case '<Country>':` block in selectMethod() introduces a
+          # method/correction. CLAUDE.md "Scholarly oversight classification"
+          # requires every correction to carry a 🟢/🟡/🔴 tag AND a wiki
+          # citation. This check scans each case block for both markers.
+          ENGINE=src/engine.js
+          if [ ! -f "$ENGINE" ]; then
+            echo "$ENGINE not found"; exit 1
+          fi
+
+          # Extract case-block ranges (start line of each `case 'X':` to next
+          # case or end of selectMethod). For each block, verify it contains
+          # at least one classification glyph (🟢 / 🟡 / 🔴) AND at least one
+          # `knowledge/wiki/` reference.
+          python3 - <<'PY'
+          import re, sys, pathlib
+          path = pathlib.Path("src/engine.js")
+          src = path.read_text(encoding="utf-8")
+          # Find selectMethod's body
+          m = re.search(r"function selectMethod\([^)]*\)\s*\{", src)
+          if not m:
+              print("✓ src/engine.js has no selectMethod() — skipping classification check")
+              sys.exit(0)
+          start = m.end()
+          # Brace-match to end of function
+          depth = 1
+          i = start
+          while i < len(src) and depth > 0:
+              c = src[i]
+              if c == "{": depth += 1
+              elif c == "}": depth -= 1
+              i += 1
+          body = src[start:i-1]
+
+          # Split into case blocks.
+          cases = re.findall(
+              r"case ['\"]([^'\"]+)['\"]\s*:\s*(?:\{)?(.*?)(?=\n\s*case ['\"]|\n\s*default\s*:|\Z)",
+              body, flags=re.DOTALL,
+          )
+          missing_class = []
+          missing_wiki  = []
+          for name, block in cases:
+              has_class = bool(re.search(r"🟢|🟡|🔴|Established|Limited precedent|Novel", block))
+              has_wiki  = "knowledge/wiki/" in block or "wiki/" in block
+              if not has_class:
+                  missing_class.append(name)
+              if not has_wiki:
+                  missing_wiki.append(name)
+
+          # Phase 1: warn-only (master has 19/24 incomplete cases as of v1.5.0,
+          # backfill is tracked in a separate issue). Phase 2: flip to fail
+          # once master is clean. The warnings still surface in CI logs and
+          # appear as GitHub Actions warning annotations on PRs.
+          for n in missing_class:
+              print(f"::warning file=src/engine.js::case '{n}' missing 🟢/🟡/🔴 classification tag")
+          for n in missing_wiki:
+              print(f"::warning file=src/engine.js::case '{n}' missing knowledge/wiki/ citation")
+          total_compliant = len(cases) - len(set(missing_class) | set(missing_wiki))
+          print(f"✓ {total_compliant}/{len(cases)} method cases fully compliant ({len(missing_class)} need classification, {len(missing_wiki)} need wiki citation)")
+          if missing_class or missing_wiki:
+              print("")
+              print("Per CLAUDE.md 'Scholarly oversight classification': every correction")
+              print("in src/engine.js should carry a 🟢/🟡/🔴 tag AND a wiki citation.")
+              print("This check is currently WARN-ONLY (Phase 1) — see canonical shape")
+              print("in the Morocco / Turkey / Iran / Norway / Iceland cases. Phase 2")
+              print("will flip to fail once master is clean.")
+          PY
+
+  no-hardcoded-angles:
+    name: No hardcoded twilight angles outside src/methods.js
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for stray angle hardcoding
+        run: |
+          set -e
+          # Twilight angles (fajrAngle, ishaAngle) should only appear in
+          # src/engine.js (where method dispatch lives) and src/methods.js
+          # (when that file is added). They should NOT appear in tests, eval,
+          # scripts, or anywhere outside src/. This catches drift where a
+          # contributor copy-pastes an angle into the wrong layer.
+          OFFENDERS=$(grep -rn "fajrAngle\|ishaAngle" \
+            --include="*.js" \
+            --exclude-dir=node_modules \
+            --exclude-dir=.git \
+            . 2>/dev/null | \
+            grep -v "^./src/engine.js:" | \
+            grep -v "^./src/methods.js:" || true)
+          if [ -n "$OFFENDERS" ]; then
+            echo "::error::Hardcoded fajrAngle/ishaAngle outside src/engine.js / src/methods.js:"
+            echo "$OFFENDERS"
+            echo ""
+            echo "Per CLAUDE.md Layer 1 lint rules: twilight angles must live"
+            echo "in src/methods.js or src/engine.js's selectMethod(), not"
+            echo "scattered through tests / eval / scripts."
+            exit 1
+          fi
+          echo "✓ No stray angle hardcoding outside src/"
+
+  test:
+    name: Tests must still pass
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm test
