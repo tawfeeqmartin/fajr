@@ -12,7 +12,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-qm-lslm-casablanca-20320-morocco",
@@ -22,7 +23,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-bab-arrahmane-casablanca-20050-morocco",
@@ -32,7 +34,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lm-masjid-ummah-rabat-10130-morocco",
@@ -42,7 +45,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lthr-marrakech-40170-morocco",
@@ -52,7 +56,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-sydy-qsm-tanger-90000-morocco",
@@ -62,7 +67,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-hjryyn-tnj-tanger-90000-morocco",
@@ -72,7 +78,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "masjid-al-falah-nador-66000-morocco",
@@ -82,7 +89,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "lmoubacharine-biljna-oujda-60020-morocco",
@@ -92,7 +100,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco",
@@ -102,7 +111,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "masjid-aamrou-bn-laas-fes-30000-morocco-1",
@@ -114,7 +124,8 @@
       "searchKeyword": "fez",
       "$searchKeyword_reason": "Mawaqit search for 'fes' returns French mosques matching 'frais'/'compagnons'; 'fez' disambiguates.",
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lhsn-ryd-llymwn-fes-30000-morocco",
@@ -126,7 +137,8 @@
       "searchKeyword": "fez",
       "$searchKeyword_reason": "Mawaqit search for 'fes' returns French mosques matching 'frais'/'compagnons'; 'fez' disambiguates.",
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-elamine-meknes-50000-morocco",
@@ -136,7 +148,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco",
@@ -146,7 +159,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1",
@@ -156,7 +170,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "mosquee-imam-tarmidi-settat-26000-morocco",
@@ -166,7 +181,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lsf-sale-11000-morocco",
@@ -176,7 +192,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lqdsy-kenitra-14000-morocco",
@@ -186,7 +203,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-blkhy-safi-46000-morocco",
@@ -196,7 +214,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lrwnq-essaouira-44000-morocco",
@@ -206,7 +225,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-hl-sws-agadir-80000-morocco",
@@ -216,7 +236,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-wld-brhym-taroudant-83300-morocco",
@@ -226,7 +247,8 @@
       "timezone": "Africa/Casablanca",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-lqds-masjid-elqods-ouarzazate-45000-morocco",
@@ -237,7 +259,8 @@
       "utcOffset": 1,
       "elevation_m": 1135,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco",
@@ -248,7 +271,8 @@
       "utcOffset": 1,
       "elevation_m": 1135,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
     },
     {
       "slug": "masjid-marzouga-lgharbia-errachidia-52202-morocco",
@@ -259,7 +283,199 @@
       "utcOffset": 1,
       "elevation_m": 1037,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "train"
+    },
+    {
+      "slug": "jamii-ibrahim-lkhalil-taourirt-65000-morocco-1",
+      "city": "Taourirt",
+      "country": "Morocco",
+      "region": "Morocco / Eastern",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-brahimm-lkhlalil-berrchid-26100-morocco",
+      "city": "Berrechid",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (Casablanca metro)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-bd-llh-bn-ysyn-temara-12123-morocco",
+      "city": "Temara",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-zgr-sidi-kacem-16000-morocco",
+      "city": "Sidi Kacem",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-lmm-lbkhry-sidi-kacem-16000-morocco",
+      "city": "Sidi Kacem",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (capital region)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "masjid-lhouda-fkih-ben-salah-23200-morocco",
+      "city": "Fquih Ben Salah",
+      "country": "Morocco",
+      "region": "Morocco / Interior",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-ahel-sefrou-sefrou-31000-morocco",
+      "city": "Sefrou",
+      "country": "Morocco",
+      "region": "Morocco / Interior / Atlas-foothill",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-m-dh-bn-jbl-tl-ynt-timoulay-izdar-guelmim-81053-morocco",
+      "city": "Guelmim",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-yt-hdw-tgblt-zkwr-zagora-49000-morocco",
+      "city": "Zagora",
+      "country": "Morocco",
+      "region": "Morocco / Sahara",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-icherban-tinghir-45800-morocco",
+      "city": "Tinghir",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-alhidaya-tinghir-45800-morocco",
+      "city": "Tinghir",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-lhmry-erfoud-52200-morocco",
+      "city": "Erfoud",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation pre-Sahara",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-mwly-slymn-erfoud-52200-morocco",
+      "city": "Erfoud",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation pre-Sahara",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "mosquee-universite-alakhawayn-ifrane-53000-morocco",
+      "city": "Ifrane",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "elevation_m": 1665,
+      "iconic": false,
+      "references": [
+        "Al Akhawayn University in Ifrane — flagship Moroccan English-medium liberal-arts university (founded 1995)"
+      ],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "masjid-lryad-midelt-54350-morocco",
+      "city": "Midelt",
+      "country": "Morocco",
+      "region": "Morocco / High-elevation Atlas",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "elevation_m": 1488,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-lbrr-nzkn-86150-morocco",
+      "city": "Inezgane",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
+    },
+    {
+      "slug": "msjd-bdr-msdwr-nzkn-86350-morocco",
+      "city": "Inezgane",
+      "country": "Morocco",
+      "region": "Morocco / Atlantic Coast (south)",
+      "timezone": "Africa/Casablanca",
+      "utcOffset": 1,
+      "iconic": false,
+      "references": [],
+      "corpus": "test_extended"
     },
     {
       "slug": "mosquee-de-frais-vallon-marseille-13013-france-1",
@@ -269,7 +485,8 @@
       "timezone": "Europe/Paris",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "les-compagnons-limoges-87000-france-1",
@@ -279,7 +496,8 @@
       "timezone": "Europe/Paris",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "association-des-musulmans-des-coteaux-mulhouse",
@@ -289,7 +507,8 @@
       "timezone": "Europe/Paris",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "dar-ul-quran-london-london-nw1-1hw-united-kingdom",
@@ -299,7 +518,8 @@
       "timezone": "Europe/London",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "msjd-l-lm-lnf-nouveau-caire-4710001-egypt",
@@ -309,7 +529,8 @@
       "timezone": "Africa/Cairo",
       "utcOffset": 2,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "msjd-sydy-qwysm-tunis-1006-tunisia",
@@ -319,7 +540,8 @@
       "timezone": "Africa/Tunis",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "masjid-abi-bakr-lsidiq-algiers-16200-algeria",
@@ -329,7 +551,8 @@
       "timezone": "Africa/Algiers",
       "utcOffset": 1,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar",
@@ -339,7 +562,8 @@
       "timezone": "Asia/Qatar",
       "utcOffset": 3,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait",
@@ -349,7 +573,8 @@
       "timezone": "Asia/Kuwait",
       "utcOffset": 3,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "jawharah-taybah-dammam-32275-saudi-arabia",
@@ -359,7 +584,8 @@
       "timezone": "Asia/Riyadh",
       "utcOffset": 3,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "attaufiq-cptiv-jakarta-dki-jakarta-10510-indonesia",
@@ -369,7 +595,8 @@
       "timezone": "Asia/Jakarta",
       "utcOffset": 7,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore",
@@ -379,7 +606,8 @@
       "timezone": "Asia/Singapore",
       "utcOffset": 8,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     },
     {
       "slug": "surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2",
@@ -389,7 +617,8 @@
       "timezone": "Asia/Kuala_Lumpur",
       "utcOffset": 8,
       "iconic": false,
-      "references": []
+      "references": [],
+      "corpus": "test"
     }
   ],
   "excluded": [

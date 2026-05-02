@@ -117,25 +117,51 @@ async function main() {
     process.exit(1)
   }
 
-  // Split fixtures by corpus partition. Per the v1.5.0 corpus restructure,
-  // Moroccan Mawaqit fixtures form the institutional Path A train signal
-  // (eval/data/train/mawaqit-morocco.json) — the engine's Maghrib +5min
-  // calibration is gated against them. All other Mawaqit fixtures are
-  // holdout-only (eval/data/test/mawaqit.json) — reported but not gating.
-  const moroccan = fixtures.filter(f => f.country === 'Morocco')
-  const other    = fixtures.filter(f => f.country !== 'Morocco')
+  // Split fixtures by registry-tagged corpus partition:
+  //   • corpus=train          → eval/data/train/mawaqit-morocco.json
+  //                             (the v1.5.0 Path A calibration anchor — 25
+  //                             original Moroccan mosques calibrated against
+  //                             when the +5min Maghrib offset was shipped)
+  //   • corpus=test_extended  → eval/data/test/mawaqit-morocco-extended.json
+  //                             (Moroccan mosques added post-v1.5.0 — kept
+  //                             in holdout so the train ratchet stays clean
+  //                             against the calibrated baseline; future
+  //                             calibrations targeting these regions can
+  //                             promote them to train)
+  //   • corpus=test (default) → eval/data/test/mawaqit.json
+  //                             (non-Moroccan Mawaqit mosques — pure
+  //                             holdout coverage)
+  const fxBySlug = new Map()
+  for (const f of fixtures) {
+    const m = (f.source || '').match(/Mawaqit mosque (\S+)/)
+    if (m) fxBySlug.set(m[1], f)
+  }
+  const train = [], ext = [], test = []
+  for (const m of MOSQUES) {
+    const f = fxBySlug.get(m.slug)
+    if (!f) continue
+    const corpus = m.corpus || 'test'
+    if (corpus === 'train')              train.push(f)
+    else if (corpus === 'test_extended') ext.push(f)
+    else                                  test.push(f)
+  }
 
   const trainPath = join(__dirname, '..', 'eval', 'data', 'train', 'mawaqit-morocco.json')
+  const extPath   = join(__dirname, '..', 'eval', 'data', 'test',  'mawaqit-morocco-extended.json')
   const testPath  = join(__dirname, '..', 'eval', 'data', 'test',  'mawaqit.json')
   mkdirSync(dirname(trainPath), { recursive: true })
   mkdirSync(dirname(testPath),  { recursive: true })
 
-  if (moroccan.length > 0) {
-    writeFileSync(trainPath, JSON.stringify(moroccan, null, 2))
-    console.log(`→ wrote ${trainPath} (${moroccan.length} Moroccan mosques — train Path A signal)`)
+  if (train.length > 0) {
+    writeFileSync(trainPath, JSON.stringify(train, null, 2))
+    console.log(`→ wrote ${trainPath} (${train.length} Moroccan mosques — train v1.5.0 Path A anchor)`)
   }
-  writeFileSync(testPath, JSON.stringify(other, null, 2))
-  console.log(`→ wrote ${testPath} (${other.length} non-Morocco mosques — holdout)`)
+  if (ext.length > 0) {
+    writeFileSync(extPath, JSON.stringify(ext, null, 2))
+    console.log(`→ wrote ${extPath} (${ext.length} Moroccan mosques — extended holdout)`)
+  }
+  writeFileSync(testPath, JSON.stringify(test, null, 2))
+  console.log(`→ wrote ${testPath} (${test.length} non-Morocco mosques — holdout)`)
   console.log('Note: Mawaqit fixtures are single-day snapshots. Re-run daily to refresh.')
 }
 
