@@ -24,6 +24,25 @@ const MONTH_NAMES = [
   'Ramadan', 'Shawwal', "Dhu al-Qi'dah", 'Dhu al-Hijjah',
 ]
 
+// Voweled Arabic Hijri month names with full diacritics (sukūn, fatḥa,
+// kasra, shadda) matching AlAdhan API responses, IslamicFinder, IACAD,
+// and printed mosque calendars. Resolves issue #62 — every downstream
+// Islamic app shipping its own copy of these strings can now drop them.
+const MONTH_NAMES_AR = [
+  'مُحَرَّم',
+  'صَفَر',
+  'رَبِيع الأَوَّل',
+  'رَبِيع الآخِر',
+  'جُمَادَى الأُولَى',
+  'جُمَادَى الآخِرَة',
+  'رَجَب',
+  'شَعْبَان',
+  'رَمَضَان',
+  'شَوَّال',
+  'ذُو الْقَعْدَة',
+  'ذُو الْحِجَّة',
+]
+
 /**
  * Convert a Gregorian date to Hijri.
  *
@@ -34,7 +53,7 @@ const MONTH_NAMES = [
  * @param {Date}   date
  * @param {object} [opts={}]
  * @param {string} [opts.convention='umm-al-qura']  'umm-al-qura' | 'tabular' | 'observational'
- * @returns {{ year: number, month: number, day: number, monthName: string }}
+ * @returns {{ year: number, month: number, day: number, monthName: string, monthNameAr: string }}
  */
 export function hijri(date, opts = {}) {
   const convention = opts.convention ?? 'umm-al-qura'
@@ -58,6 +77,7 @@ export function hijri(date, opts = {}) {
     month,
     day,
     monthName: MONTH_NAMES[month - 1],
+    monthNameAr: MONTH_NAMES_AR[month - 1],
   }
 }
 
@@ -71,7 +91,7 @@ export function hijri(date, opts = {}) {
  * used by Islamic institutions worldwide.
  *
  * @param {Date} date
- * @returns {{ year: number, month: number, day: number, monthName: string }}
+ * @returns {{ year: number, month: number, day: number, monthName: string, monthNameAr: string }}
  */
 function _hijriTabular(date) {
   const jd = _gregorianToJD(
@@ -85,6 +105,7 @@ function _hijriTabular(date) {
     month,
     day,
     monthName: MONTH_NAMES[month - 1],
+    monthNameAr: MONTH_NAMES_AR[month - 1],
   }
 }
 
