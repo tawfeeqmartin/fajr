@@ -972,9 +972,34 @@ function selectMethod(country, lat, coords) {
       // gain finer-grained per-zone calibration data. Sub-minute Maghrib
       // bias remains within the atmospheric refraction noise floor
       // documented in Young (2006); see knowledge/wiki/astronomy/refraction.md.
+      //
+      // DHUHR +2 / ASR +1 (v1.7.16 — this commit): The same waktu
+      // ihtiyati 2-minute pattern documented by Razali & Hisham 2021 /
+      // Nurul Asikin 2016 applies systematically across all five
+      // prayers in JAKIM's institutional convention — not only
+      // Fajr/Isha. Per-cell signed-bias (calc − ground truth) shows
+      // uniform calc-earlier residuals across all 3 zones:
+      //
+      //   Kuala Lumpur Dhuhr bias: -1.00 min,  Asr bias: -1.00 min
+      //   Shah Alam    Dhuhr bias: -0.50 min,  Asr bias: -1.00 min
+      //   George Town  Dhuhr bias: -0.80 min,  Asr bias: -0.90 min
+      //                                  mean: -0.77, mean: -0.97
+      //
+      // adhan.js's Singapore() preset already includes dhuhr +1, so
+      // the residual -0.77 is on top of the +1 already applied.
+      // Setting dhuhr to 2 (overrides the default +1, adding 1 more
+      // cumulative minute) closes the bias to +0.23 mean — within
+      // ihtiyat-safe tolerance. The +1 asr offset closes asr from
+      // -0.97 to +0.03, also within tolerance.
+      //
+      // Both directions are prayer-validity-safer (Dhuhr LATER =
+      // unambiguously post-zenith; Asr LATER = beyond shadow-length
+      // boundary) and aligned with JAKIM's documented 2-min waktu
+      // ihtiyati per zone. Same Path A precedent class as the
+      // existing Fajr +8 and Isha +1 offsets.
       const p = adhan.CalculationMethod.Singapore()
-      p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8, isha: 1 }
-      return { params: p, methodName: 'JAKIM (20°/18° + 8min Fajr / 1min Isha ihtiyati per Path A community calibration)' }
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8, dhuhr: 2, asr: 1, isha: 1 }
+      return { params: p, methodName: 'JAKIM (20°/18° + 8min Fajr / +2min Dhuhr / +1min Asr+Isha ihtiyati per Path A community calibration)' }
     }
     case 'UnitedStates':
     case 'USA':
