@@ -98,9 +98,11 @@ function detectCountry(lat, lon) {
   // claimed countryISO is SY. Tighten Lebanon's lon eastern from 36.65 to
   // 36.6 — Damascus 36.28 is still in 36.6 — tighten to 36.2. Beirut LB
   // is at 35.50 so still covered.
-  if (lat >= 32.3 && lat <= 37.4 && lon >= 35.7 && lon <= 42.4) return 'Syria'
+  // v1.7.19 (#75): Syria's lat upper bound tightened from 37.4 to 37.05 — the
+  // previous bbox swallowed Gaziantep TR (37.07, 37.38) and Şanlıurfa TR
+  // (37.16, 38.79). Aleppo SY (36.20) and Idlib SY (35.93) still inside.
+  if (lat >= 32.3 && lat <= 37.05 && lon >= 35.7 && lon <= 42.4) return 'Syria'
   if (lat >= 29   && lat <= 37.4 && lon >= 38.8 && lon <= 48.6) return 'Iraq'
-
   // ─── Caucasus — small, must precede Iran (lat 38-39 overlap) + Turkey ──
   // v1.7.5: Georgia's southern bbox tightened from 41.05 to 41.5 to avoid
   // swallowing Russia's Ingushetia/Chechnya/Dagestan (lat 43.2 wait is
@@ -111,12 +113,37 @@ function detectCountry(lat, lon) {
   if (lat >= 38.4 && lat <= 41.9 && lon >= 44.8 && lon <= 50.4) return 'Azerbaijan'
   if (lat >= 38.84 && lat <= 41.30 && lon >= 43.45 && lon <= 46.62) return 'Armenia'
 
+  // v1.7.19 (#75): Türkiye coverage in two strips, AFTER Caucasus to avoid
+  // Yerevan AM (40.18, 44.51) and Iğdır TR (39.92, 44.05) overlap. Engine
+  // canonical name is 'Turkey' (English) per ISO_TO_ENGINE_COUNTRY_LOCAL —
+  // selectMethod has both case 'Turkey' and case 'Türkiye'.
+  //   Eastern: lat 37.05-42.10, lon 26.0-44.5  — Edirne, Istanbul, Ankara,
+  //            Gaziantep (37.07, 37.38), Van (38.50, 43.40).
+  //   Western: lat 36.0-37.05, lon 26.0-35.7  — Antalya, Mersin, Adana.
+  // Hatay province (~36.20°N, lon 36.0-36.5) is in Syria's bbox; Hatay TR
+  // cities route to Syria today and can be carved out later via
+  // BBOX_OVERRIDES. Iğdır TR (39.92, 44.05) routes to Armenia today (also
+  // a pre-existing limitation — Armenia's bbox covers it).
+  if (lat >= 37.05 && lat <= 42.10 && lon >= 26.0 && lon <= 44.5) return 'Turkey'
+  if (lat >= 36.00 && lat <= 37.05 && lon >= 26.0 && lon <= 35.7) return 'Turkey'
+
   // v1.7.5 Reviewer C #3: Egypt BEFORE SaudiArabia. Saudi's lon 34-56
   // swallowed Egyptian Sinai (Sharm el-Sheikh 27.92, 34.33 → UmmAlQura
   // method). Reorder Egypt first; Saudi's western lon tightened to 35.0 so
   // the Egyptian Sinai/Red Sea coast at lon 32-35 stays Egypt. Saudi's
   // westernmost city Tabuk is at lon 36.57 — still inside.
-  if (lat >= 21   && lat <= 32   && lon >= 24   && lon <= 38)   return 'Egypt'
+  // v1.7.19 (#75): Egypt lat-min tightened from 21 to 22. Egypt's southern
+  // border with Sudan is the 22°N parallel (1899 Anglo-Egyptian agreement).
+  // Wadi Halfa SD (21.81) was falsely caught by Egypt under the lon-31.34
+  // overlap (Sudan's bbox 9.5-22 / 21.8-38.6 includes it). Aswan EG (24.09)
+  // and Abu Simbel EG (22.34) still inside.
+  if (lat >= 22   && lat <= 32   && lon >= 24   && lon <= 38)   return 'Egypt'
+  // v1.7.19 (#75): Sudan's Red Sea coast (Port Sudan 19.62, 37.22) sits
+  // inside Saudi Arabia's bbox 16-33 / 35-56. Adding an early Sudan check
+  // before Saudi prevents the misroute. The existing Sudan check in the
+  // sub-Saharan Africa block (~line 270) becomes a no-op for these coords
+  // but stays for inland Sudanese coords west of lon 35.
+  if (lat >= 9.5  && lat <= 22   && lon >= 21.8 && lon <= 38.6) return 'Sudan'
   // v1.7.5 Reviewer C #4 + earlier #47: SaudiArabia BEFORE Iran. Iran's bbox
   // 25-39 / 44-63 overlapped Saudi NE (Hafar al-Batin 28.43, 45.97 → Iran/
   // Tehran method) AND swallowed Saudi Eastern Province (Dammam 26.39,
@@ -235,9 +262,16 @@ function detectCountry(lat, lon) {
   // BE (51.22, 4.40) was caught by France. France's actual northern border
   // with Belgium is at lat ~51.0; Lille FR (50.63) and Calais FR (50.95)
   // still inside. Antwerp 51.22 now falls through to Belgium's bbox.
-  if (lat >= 42   && lat <= 51.0 && lon >= -5   && lon <= 8.5)  return 'France'
-  if (lat >= 49.50 && lat <= 51.50 && lon >= 2.55 && lon <= 6.41) return 'Belgium'
+  // v1.7.19 (#75): Netherlands BEFORE Belgium AND BEFORE France — Eindhoven
+  // NL (51.44, 5.45) was caught by Belgium (lat-max 51.50), and Maastricht
+  // NL (50.85, 5.69) was caught by France (lat-max 51.0). NL's tighter
+  // bbox now claims the overlap zone first. Antwerp BE (51.22, 4.40) sits
+  // in NL's bbox but Belgium-after-NL still fails to catch it because NL's
+  // lon-min 3.36 includes 4.40 — added explicit BBOX_OVERRIDE for Antwerp
+  // in build-city-registry.js to disambiguate via Pass-A registry lookup.
   if (lat >= 50.75 && lat <= 53.58 && lon >= 3.36 && lon <= 7.23) return 'Netherlands'
+  if (lat >= 49.50 && lat <= 51.50 && lon >= 2.55 && lon <= 6.41) return 'Belgium'
+  if (lat >= 42   && lat <= 51.0 && lon >= -5   && lon <= 8.5)  return 'France'
   // v1.7.5 #47: Denmark BEFORE Sweden, with Denmark's eastern lon
   // tightened from 15.20 to 12.7 (the Øresund strait). Malmö SE (55.60,
   // 13.00) was caught by Denmark — now excluded (lon 13.00 > 12.7).
@@ -430,7 +464,12 @@ function detectCountry(lat, lon) {
   if (lat >= 8.54 && lat <= 23.39 && lon >= 104.0 && lon <= 109.47) return 'Vietnam'
   if (lat >= 13.91 && lat <= 22.51 && lon >= 100.10 && lon <= 107.70) return 'Laos'
   if (lat >= 5.6  && lat <= 20.5 && lon >= 97.3 && lon <= 105.7) return 'Thailand'
-  if (lat >= 0.5  && lat <= 8    && lon >= 99   && lon <= 120)  return 'Malaysia'
+  // v1.7.19 (#75): Malaysia's lat-min tightened from 0.5 to 1.0 — Pekanbaru
+  // ID (0.51, 101.45) was caught by Malaysia and routed to JAKIM. Tightening
+  // to 1.0 excludes northern Sumatra; Johor Bahru MY (1.49) and southernmost
+  // Peninsular Malaysia mainland still inside. Singapore is already
+  // captured by its earlier explicit check.
+  if (lat >= 1.0  && lat <= 8    && lon >= 99   && lon <= 120)  return 'Malaysia'
   if (lat >= 9.6  && lat <= 28.5 && lon >= 92.2 && lon <= 101.2) return 'Myanmar'
   if (lat >= 4.6  && lat <= 21.1 && lon >= 116.9 && lon <= 126.6) return 'Philippines'
 
@@ -466,8 +505,19 @@ function detectCountry(lat, lon) {
   // Reorder Afghanistan first (smaller bbox 29.4-38.5 / 60.5-74.95).
   // Pakistan still catches Karachi (24.86, 67.00) and Lahore (31.55, 74.34)
   // since they're below Afghanistan's lat min 29.4.
-  if (lat >= 29.4 && lat <= 38.5 && lon >= 60.5 && lon <= 74.95) return 'Afghanistan'
-  if (lat >= 23.7 && lat <= 37   && lon >= 60   && lon <= 74.5) return 'Pakistan'
+  // v1.7.19 (#75): Sialkot PK (32.49, 74.52) was caught by Afghanistan
+  // because Afghanistan's lon range extends to 74.95 (Wakhan Corridor edge).
+  // Solution: split Afghanistan into main (lat 29.4-37, lon 60.5-71.5) +
+  // Wakhan corridor (lat 36.5-38.5, lon 71.5-74.95). The lat-71.5 split
+  // excludes the Pakistan zone east of Afghan main. Pakistan check goes
+  // last with lon-max extended to 75.0. Verified:
+  //   Sialkot PK (32.49, 74.52)  → Pakistan ✓ (Wakhan lat range excludes it)
+  //   Kandahar AF (31.61, 65.71) → Afghanistan main ✓
+  //   Kabul AF    (34.55, 69.21) → Afghanistan main ✓
+  //   Lahore PK   (31.55, 74.34) → Pakistan ✓
+  if (lat >= 29.4 && lat <= 37   && lon >= 60.5 && lon <= 71.5) return 'Afghanistan' // main
+  if (lat >= 36.5 && lat <= 38.5 && lon >= 71.5 && lon <= 74.95) return 'Afghanistan' // Wakhan
+  if (lat >= 23.7 && lat <= 37   && lon >= 60   && lon <= 75.0) return 'Pakistan'
   // v1.7.5: Bangladesh BEFORE India — Kolkata IN (22.57, 88.36) was in
   // Bangladesh's bbox 20.5-26.6 / 88-92.7. Already first. But Kolkata's
   // countryISO=IN means we need INDIA. Fix: tighten Bangladesh's western
@@ -707,7 +757,7 @@ const COUNTRY_BBOX_TABLE = {
   UK:           [[49, 62, -9, 2.5]],
   Ireland:      [[51.42, 55.39, -10.69, -5.83]],
   India:        [[6.5, 35.5, 68, 97.4]],
-  Pakistan:     [[23.7, 37, 60, 74.5]],
+  Pakistan:     [[23.7, 37, 60, 75.0]],
   China:        [[18.16, 53.56, 73.50, 134.77]],
   Italy:        [[35.49, 47.09, 6.62, 18.51]],
   Austria:      [[46.37, 49.02, 9.53, 17.16]],
@@ -775,6 +825,15 @@ const COUNTRY_BBOX_TABLE = {
   Mayotte:      [[-13.00, -12.65, 45.00, 45.30]],
   WesternSahara:[[20.7, 27.66, -17.1, -8.67]],
   Reunion:      [[-21.40, -20.85, 55.21, 55.84]],
+  // v1.7.19 (#75): Pass-B coverage for engine bbox-table fixes — these
+  // countries already had detectCountry if-chain entries but missing
+  // COUNTRY_BBOX_TABLE rows blocked Pass-B fallback for cities that
+  // claim them via city-row _engineCountry. Names match
+  // ISO_TO_ENGINE_COUNTRY_LOCAL keys ('Turkey' English, not 'Türkiye').
+  Turkey:       [[36.0, 42.10, 26.0, 44.5]],
+  Indonesia:    [[-11, 6.1, 95, 141]],
+  Netherlands:  [[50.75, 53.58, 3.36, 7.23]],
+  Sudan:        [[9.5, 22, 21.8, 38.6]],
 }
 
 function countryBboxContains(country, lat, lon) {

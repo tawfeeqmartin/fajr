@@ -576,9 +576,9 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Cordoba',    nameLocal: 'Córdoba', countryISO: 'ES', adminRegion: 'Andalusia', lat: 37.8882, lon: -4.7794, elevation: 120, timezone: 'Europe/Madrid', population: 322000 },
 
   // ─── v1.7.18 Tier A — Europe: Netherlands / Belgium ─────────────────────
-  // NOTE: Eindhoven NL skipped — Belgium's COUNTRY_BBOX_TABLE northern edge
-  // (lat 51.50) catches Eindhoven (51.44) as Belgium. Needs engine-side
-  // Belgium bbox tightening before it can be registered.
+  // v1.7.19 (#75): Eindhoven NL added now that detectCountry routes
+  // Netherlands BEFORE Belgium in the overlap zone.
+  { name: 'Eindhoven',  countryISO: 'NL', adminRegion: 'North Brabant', lat: 51.4416, lon: 5.4697, elevation: 17, timezone: 'Europe/Amsterdam', population: 246000 },
   { name: 'Ghent',      nameLocal: 'Gent', countryISO: 'BE', adminRegion: 'East Flanders', lat: 51.0543, lon: 3.7174, elevation: 6, timezone: 'Europe/Brussels', population: 263000 },
   { name: 'Liege',      nameLocal: 'Liège', countryISO: 'BE', adminRegion: 'Liège Province', lat: 50.6326, lon: 5.5797, elevation: 70, timezone: 'Europe/Brussels', population: 197000 },
 
@@ -602,6 +602,23 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Foz do Iguacu', nameLocal: 'Foz do Iguaçu', countryISO: 'BR', adminRegion: 'Paraná', lat: -25.5478, lon: -54.5882, elevation: 192, timezone: 'America/Sao_Paulo', population: 258000 },
   { name: 'Curitiba',   countryISO: 'BR', adminRegion: 'Paraná', lat: -25.4284, lon: -49.2733, elevation: 935, timezone: 'America/Sao_Paulo', population: 1773000 },
   { name: 'Maracaibo',  countryISO: 'VE', adminRegion: 'Zulia', lat: 10.6666, lon: -71.6168, elevation: 6, timezone: 'America/Caracas', population: 1574000 },
+
+  // ─── v1.7.19 (#75) — Engine bbox-table fixes unlock 5 deferred cities ───
+  // Sialkot PK was caught by Afghanistan (Wakhan corridor lon-edge); fixed
+  // by splitting Afghanistan bbox + Pakistan-after-Afghanistan ordering.
+  // Pekanbaru ID was caught by Malaysia (lat 0.51 in MY's 0.5-8 range);
+  // fixed by tightening Malaysia lat-min from 0.5 to 1.0 (Sumatra excluded).
+  // Gaziantep TR was caught by Syria (lat 37.07 in SY's 32.3-37.4 range);
+  // fixed by tightening Syria lat-max to 37.05 + adding Türkiye check.
+  // Port Sudan SD was caught by SaudiArabia (lon 37.22 in SA's 34-56 range);
+  // fixed by adding early Sudan check before Saudi.
+  // Manado ID was already correctly routed; included for completeness as
+  // it was on the v1.7.18 deferred list.
+  { name: 'Sialkot',    countryISO: 'PK', adminRegion: 'Punjab', lat: 32.4945, lon: 74.5229, elevation: 256, timezone: 'Asia/Karachi', population: 656000 },
+  { name: 'Pekanbaru',  countryISO: 'ID', adminRegion: 'Riau', lat: 0.5074, lon: 101.4477, elevation: 12, timezone: 'Asia/Jakarta', population: 1138000 },
+  { name: 'Manado',     countryISO: 'ID', adminRegion: 'North Sulawesi', lat: 1.4748, lon: 124.8421, elevation: 5, timezone: 'Asia/Makassar', population: 451000 },
+  { name: 'Gaziantep',  nameLocal: 'Gaziantep', countryISO: 'TR', adminRegion: 'Gaziantep Province', lat: 37.0662, lon: 37.3833, elevation: 855, timezone: 'Europe/Istanbul', population: 2070000 },
+  { name: 'Port Sudan', nameLocal: 'بور سودان', countryISO: 'SD', adminRegion: 'Red Sea State', lat: 19.6158, lon: 37.2164, elevation: 6, timezone: 'Africa/Khartoum', population: 489000 },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -963,12 +980,23 @@ const BBOX_OVERRIDES = {
   'Birmingham|GB':      [52.40, 52.58, -2.10, -1.65],
 
   // Luton GB (213K, lat 51.88) vs London GB (9.65M, lat 51.51).
-  'Luton|GB':           [51.82, 51.94, -0.50, -0.30],
+  // v1.7.19: tightened eastern lon-max from -0.30 to -0.36 — Luton's
+  // actual eastern extent ends ~ -0.36 (Wigmore borough); -0.30 reached
+  // into NW London suburbs (Borehamwood/Edgware) and the post-v1.7.19
+  // PRNG sample shift drew a London-bbox sample at (51.8874, -0.3269)
+  // that fell into Luton's old eastern edge.
+  'Luton|GB':           [51.82, 51.94, -0.50, -0.36],
 
   // Dire Dawa ET (lat 9.59, lon 41.86) vs Jaamuuq ET (lat 9.78, lon 41.65).
   // Both Ethiopia. Tighten Dire Dawa to keep lat 9.50-9.65 / lon 41.78-41.92
   // so Jaamuuq (lat 9.78) is outside.
   'Dire Dawa|ET':       [9.50, 9.68, 41.78, 41.95],
+
+  // v1.7.19 (#75): Sialkot PK (32.49, 74.52) vs Gujranwala PK (32.19, 74.19).
+  // Both Pakistan. Default formula bboxes overlap on lat 32.29-32.49 / lon
+  // 74.32-74.49. Tighten Sialkot to its own metro extent, leaving Gujranwala
+  // unambiguous below.
+  'Sialkot|PK':         [32.40, 32.60, 74.45, 74.65],
 
   // v1.7.18: Manama BH (lat 26.23) vs Isa Town BH (lat 26.18). Isa Town
   // has tight 0.03° bbox at 26.16-26.19 / 50.53-50.56. Pre-existing
