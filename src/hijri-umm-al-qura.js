@@ -19,9 +19,11 @@
  * See knowledge/wiki/corrections/hijri-umm-al-qura.md
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-const TABLE = require('./data/umm-al-qura-tabular.json')
+// Imported as a JS module (not JSON) to avoid require()/createRequire,
+// which fails in browsers loaded via esm.sh / unenv polyfill (see #55).
+// The .js wrapper is auto-generated from src/data/umm-al-qura-tabular.json
+// at maintainer-time; consumers always get a clean ESM import path.
+import TABLE from './data/umm-al-qura-tabular.js'
 
 const TABLE_MIN_STR = '1900-04-30'
 const TABLE_MAX_STR = '2077-11-17'  // sentinel — first day NOT covered
