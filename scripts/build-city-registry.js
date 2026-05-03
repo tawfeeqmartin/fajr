@@ -119,6 +119,9 @@ const ISO_TO_ENGINE_COUNTRY = {
   'ZM': 'Zambia',   'AO': 'Angola',   'ZA': 'SouthAfrica',
   'FR': 'France',   'CA': 'Canada',   'FI': 'Finland', 'IS': 'Iceland',
   'NO': 'Norway',
+  // v1.7.8 (#54) Tier 2: new country additions
+  'HK': 'HongKong', 'CY': 'Cyprus',   'YT': 'Mayotte', 'EH': 'WesternSahara',
+  'RE': 'Reunion',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -216,6 +219,12 @@ const COUNTRY_DEFAULT_METHOD = {
   'Thailand':      'MWL',
   'Myanmar':       'MWL',
   'Philippines':   'MWL',
+  // v1.7.8 (#54) Tier 2 — new countries
+  'HongKong':      'Karachi',
+  'Cyprus':        'Diyanet',
+  'Mayotte':       'Egyptian',
+  'WesternSahara': 'Morocco',
+  'Reunion':       'UOIF',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -430,6 +439,24 @@ const MUSLIM_POPULATION_CENTERS = [
 
   // ─── New Zealand non-capital ──────────────────────────────────────────────
   { name: 'Auckland',   countryISO: 'NZ', adminRegion: 'Auckland Region', lat: -36.8485, lon: 174.7633, elevation: 14, timezone: 'Pacific/Auckland', population: 1657000 },
+
+  // ─── v1.7.8 (#54) Tier 2: new country anchors — primary city per country ─
+  { name: 'Hong Kong',  countryISO: 'HK', lat: 22.3193, lon: 114.1694, elevation: 50, timezone: 'Asia/Hong_Kong', population: 7482000 },
+  { name: 'Nicosia',    countryISO: 'CY', lat: 35.1856, lon: 33.3823, elevation: 220, timezone: 'Asia/Nicosia', population: 326000 },
+  { name: 'Mamoudzou',  countryISO: 'YT', lat: -12.7806, lon: 45.2278, elevation: 14, timezone: 'Indian/Mayotte', population: 71000 },
+  { name: 'Laayoune',   countryISO: 'EH', adminRegion: 'Laâyoune-Sakia El Hamra', lat: 27.1418, lon: -13.1875, elevation: 64, timezone: 'Africa/El_Aaiun', population: 217000, nameLocal: 'العيون' },
+  { name: 'Saint-Denis', countryISO: 'RE', adminRegion: 'Réunion', lat: -20.8823, lon: 55.4504, elevation: 20, timezone: 'Indian/Reunion', population: 153000 },
+
+  // ─── v1.7.8 (#54) Tier 4: highest-priority city adds ─────────────────────
+  { name: 'Osaka',      countryISO: 'JP', adminRegion: 'Osaka Prefecture', lat: 34.6937, lon: 135.5023, elevation: 24, timezone: 'Asia/Tokyo', population: 2691000 },
+  { name: 'Shanghai',   countryISO: 'CN', adminRegion: 'Shanghai', lat: 31.2304, lon: 121.4737, elevation: 4, timezone: 'Asia/Shanghai', population: 26320000 },
+  { name: 'Bilbao',     countryISO: 'ES', adminRegion: 'Basque Country', lat: 43.2630, lon: -2.9350, elevation: 19, timezone: 'Europe/Madrid', population: 346000 },
+  { name: 'Sharm el-Sheikh', countryISO: 'EG', adminRegion: 'South Sinai Governorate', lat: 27.9158, lon: 34.3299, elevation: 4, timezone: 'Africa/Cairo', population: 73000, nameLocal: 'شرم الشيخ' },
+  { name: 'Hafar Al-Batin', countryISO: 'SA', adminRegion: 'Eastern Province', lat: 28.4337, lon: 45.9601, elevation: 380, timezone: 'Asia/Riyadh', population: 391000, nameLocal: 'حفر الباطن' },
+  { name: 'Hebron',     countryISO: 'PS', adminRegion: 'Hebron Governorate', lat: 31.5326, lon: 35.0998, elevation: 930, timezone: 'Asia/Hebron', population: 215000, nameLocal: 'الخليل' },
+  { name: 'Gaza',       countryISO: 'PS', adminRegion: 'Gaza Strip', lat: 31.5017, lon: 34.4668, elevation: 14, timezone: 'Asia/Hebron', population: 590000, nameLocal: 'غزة' },
+  { name: 'Belfast',    countryISO: 'GB', adminRegion: 'Northern Ireland', lat: 54.5973, lon: -5.9301, elevation: 6, timezone: 'Europe/London', population: 345000 },
+  { name: 'Niagara Falls', countryISO: 'CA', adminRegion: 'Ontario', lat: 43.0896, lon: -79.0849, elevation: 167, timezone: 'America/Toronto', population: 88000 },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -498,14 +525,18 @@ const MAWAQIT_SUPPLEMENT = {
   'Jeddah|Saudi Arabia':     { lat: 21.4858, lon: 39.1925, elevation: 12, timezone: 'Asia/Riyadh', population: 4781000, countryISO: 'SA' },
   'Jerusalem|Palestine':     { lat: 31.7683, lon: 35.2137, elevation: 754, timezone: 'Asia/Hebron', population: 936000, countryISO: 'PS' },
   'Kabul|Afghanistan':       { lat: 34.5553, lon: 69.2075, elevation: 1791, timezone: 'Asia/Kabul', population: 4434000, countryISO: 'AF' },
-  'Kaedi|Mauritania':        { lat: 16.1500, lon: -13.5042, elevation: 12, timezone: 'Africa/Nouakchott', population: 55000, countryISO: 'MR' },
+  // v1.7.8 Tier 5 (Reviewer A geometry): Kaédi center moved ~600m east into
+  // Mauritanian bank of the Senegal River. Original (-13.5042) sat on the
+  // Senegalese side; corrected to -13.4980.
+  'Kaedi|Mauritania':        { lat: 16.1500, lon: -13.4980, elevation: 12, timezone: 'Africa/Nouakchott', population: 55000, countryISO: 'MR' },
   'Kandy|Sri Lanka':         { lat: 7.2906, lon: 80.6337,  elevation: 500, timezone: 'Asia/Colombo', population: 152000, countryISO: 'LK' },
   'Kenitra|Morocco':         { lat: 34.2610, lon: -6.5802, elevation: 15, timezone: 'Africa/Casablanca', population: 431000, countryISO: 'MA' },
   'Khartoum Bahri|Sudan':    { lat: 15.6333, lon: 32.5333, elevation: 380, timezone: 'Africa/Khartoum', population: 700000, countryISO: 'SD' },
   'Khouribga|Morocco':       { lat: 32.8810, lon: -6.9063, elevation: 786, timezone: 'Africa/Casablanca', population: 196000, countryISO: 'MA' },
   'Kirkuk|Iraq':             { lat: 35.4681, lon: 44.3922, elevation: 348, timezone: 'Asia/Baghdad', population: 850000, countryISO: 'IQ' },
   'Kuala Lumpur|Malaysia':   { lat: 3.1390, lon: 101.6869, elevation: 22, timezone: 'Asia/Kuala_Lumpur', population: 1809000, countryISO: 'MY' },
-  'Kuwait|Kuwait':           { lat: 29.3759, lon: 47.9774, elevation: 13, timezone: 'Asia/Kuwait', population: 4137000, countryISO: 'KW' },
+  // v1.7.8: Kuwait Mawaqit-supplement removed — duplicate of Kuwait City
+  // (capitals row from world-cities.json).
   'Lahore|Pakistan':         { lat: 31.5497, lon: 74.3436, elevation: 217, timezone: 'Asia/Karachi', population: 13096000, countryISO: 'PK' },
   'Laval|Canada':            { lat: 45.6066, lon: -73.7124, elevation: 39, timezone: 'America/Toronto', population: 438000, countryISO: 'CA' },
   'Leicester|United Kingdom': { lat: 52.6369, lon: -1.1398, elevation: 67, timezone: 'Europe/London', population: 368000, countryISO: 'GB' },
@@ -571,7 +602,9 @@ const MAWAQIT_SUPPLEMENT = {
   'Sydney|Australia':        { lat: -33.8688, lon: 151.2093, elevation: 3, timezone: 'Australia/Sydney', population: 5312000, countryISO: 'AU' },
   'São Paulo|Brazil':        { lat: -23.5505, lon: -46.6333, elevation: 760, timezone: 'America/Sao_Paulo', population: 12325000, countryISO: 'BR' },
   'Taif|Saudi Arabia':       { lat: 21.2703, lon: 40.4158, elevation: 1879, timezone: 'Asia/Riyadh', population: 688000, countryISO: 'SA' },
-  'Tanger|Morocco':          { lat: 35.7595, lon: -5.8340, elevation: 18, timezone: 'Africa/Casablanca', population: 947000, countryISO: 'MA' },
+  // v1.7.8: Tanger Mawaqit-supplement removed — Mawaqit "Tanger" entries
+  // route via the canonical Tangier row in MUSLIM_POPULATION_CENTERS.
+  // Removing this supplement causes a benign warning at build time.
   'Taourirt|Morocco':        { lat: 34.4115, lon: -2.8975, elevation: 425, timezone: 'Africa/Casablanca', population: 80000, countryISO: 'MA' },
   'Taroudant|Morocco':       { lat: 30.4727, lon: -8.8769, elevation: 250, timezone: 'Africa/Casablanca', population: 80000, countryISO: 'MA' },
   'Taza|Morocco':            { lat: 34.2138, lon: -4.0099, elevation: 525, timezone: 'Africa/Casablanca', population: 149000, countryISO: 'MA' },
@@ -645,6 +678,96 @@ const BBOX_OVERRIDES = {
   // engine-level countryISO check (added in v1.7.5) prevents Dearborn from
   // matching when detectCountry(Windsor)=Canada.
   'Dearborn|US':        [42.22, 42.40, -83.28, -83.08],
+
+  // ─── v1.7.8 (#54): systematic registry bbox-shrink ─────────────────────
+  // Each entry resolves a specific bbox-internal failure documented in
+  // autoresearch/proposals/v1.7.8-146-fail-deep-dive.md.
+  '6th of October|EG':  [29.90, 30.00, 30.88, 30.97],
+  'Cairo|EG':           [29.84, 30.24, 31.22, 31.56],
+  'Beau Bassin-Rose Hill|MU': [-20.30, -20.20, 57.42, 57.55],
+  'Port Louis|MU':      [-20.20, -20.06, 57.40, 57.60],
+  'Islamabad|PK':       [33.60, 33.85, 72.85, 73.20],
+  'Rawalpindi|PK':      [33.30, 33.60, 72.80, 73.20],
+  'Lahore|PK':          [31.25, 31.85, 74.04, 74.50],
+  'Temara|MA':          [33.85, 33.99, -7.00, -6.86],
+  'Sale|MA':            [34.04, 34.14, -6.90, -6.78],
+  'Rabat|MA':           [33.97, 34.04, -6.90, -6.78],
+  'Khartoum Bahri|SD':  [15.61, 15.72, 32.50, 32.62],
+  'Khartoum|SD':        [15.40, 15.60, 32.50, 32.66],
+  'Omdurman|SD':        [15.50, 15.78, 32.30, 32.50],
+  'Sharjah|AE':         [25.35, 25.65, 55.42, 55.72],
+  'Dubai|AE':           [24.90, 25.35, 55.05, 55.50],
+  'Inezgane|MA':        [30.32, 30.39, -9.58, -9.49],
+  'Agadir|MA':          [30.40, 30.58, -9.75, -9.45],
+  'Zarqa|JO':           [32.05, 32.27, 35.94, 36.24],
+  'Amman|JO':           [31.85, 32.00, 35.83, 36.00],
+  'Berrechid|MA':       [33.20, 33.34, -7.65, -7.49],
+  'Casablanca|MA':      [33.40, 33.78, -7.78, -7.39],
+  'Brussels|BE':        [50.65, 51.05, 4.15, 4.55],
+  'Antwerp|BE':         [51.06, 51.42, 4.20, 4.60],
+  'Brazzaville|CG':     [-4.36, -4.16, 15.14, 15.25],
+  'Akkar|LB':           [34.53, 34.69, 36.05, 36.30],
+  'Utrecht|NL':         [51.94, 52.16, 4.97, 5.27],
+  'Rotterdam|NL':       [51.72, 52.00, 4.28, 4.68],
+  'The Hague|NL':       [52.00, 52.18, 4.20, 4.40],
+  'Mississauga|CA':     [43.43, 43.74, -79.79, -79.55],
+  'Toronto|CA':         [43.45, 43.85, -79.55, -79.18],
+  'Montreal|CA':        [45.40, 45.70, -73.95, -73.50],
+  'Laval|CA':           [45.55, 45.75, -73.86, -73.59],
+  'Alburikent (Dagestan)|RU': [42.92, 42.94, 47.50, 47.52],
+  'Isa Town|BH':        [26.16, 26.19, 50.53, 50.56],
+  'Jerusalem|IL':       [31.6683, 31.80, 35.1137, 35.3137],
+  'Jerusalem|PS':       [31.65, 31.80, 35.0137, 35.4137],
+  'Doha|QA':            [25.05, 25.50, 51.40, 51.65],
+  'Lomé|TG':            [6.10, 6.30, 1.10, 1.40],
+  'Freetown|SL':        [8.39, 8.55, -13.27, -13.13],
+  'Podgorica|ME':       [42.40, 42.50, 19.20, 19.40],
+  'Detroit|US':         [42.18, 42.46, -83.08, -82.92],
+  'Fes|MA':             [33.94, 34.28, -5.30, -4.85],
+  'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.45],
+  'Singapore|SG':       [1.16, 1.44, 103.6, 104.05],
+  'Johor Bahru|MY':     [1.45, 1.6927, 103.5414, 103.9414],
+  'Kuala Lumpur|MY':    [2.939, 3.339, 101.50, 101.99],
+  'Basel|CH':           [47.41, 47.65, 7.44, 7.74],
+  'Mulhouse|FR':        [47.65, 47.90, 7.19, 7.49],
+
+  // v1.7.8 Tier 2: tighten new-country anchor bboxes to fit within their
+  // own COUNTRY_BBOX_TABLE entries (avoid cross-border samples).
+  'Hong Kong|HK':       [22.16, 22.55, 113.85, 114.43],
+  'Saint-Denis|RE':     [-20.95, -20.85, 55.40, 55.55],
+  'Mamoudzou|YT':       [-12.81, -12.74, 45.20, 45.27],
+  'Laayoune|EH':        [27.10, 27.20, -13.25, -13.13],
+  'Nicosia|CY':         [35.13, 35.24, 33.32, 33.45],
+
+  // v1.7.8 Tier 4: tighten new-city bboxes to avoid sibling overlaps.
+  'Hebron|PS':          [31.50, 31.60, 35.05, 35.16],
+
+  // Montreal (CA) — formulaic 0.30 bbox extends north into Laval.
+  'Montreal|CA':        [45.40, 45.55, -73.95, -73.40],
+
+  // Johannesburg (ZA) — formulaic 0.40 bbox extends north into Pretoria.
+  'Johannesburg|ZA':    [-26.40, -25.95, 27.95, 28.20],
+  'Pretoria|ZA':        [-25.85, -25.65, 28.10, 28.30],
+
+  // Niagara Falls — small city, tight bbox.
+  'Niagara Falls|CA':   [43.05, 43.13, -79.13, -79.04],
+
+  // v1.7.8 polish: Temara bbox vs Rabat — push Temara north below Rabat south.
+  'Temara|MA':          [33.85, 33.96, -7.00, -6.86],
+
+  // Geneva — formulaic 0.20 bbox extends west of Switzerland's lon 6.0.
+  'Geneva|CH':          [46.10, 46.30, 6.05, 6.25],
+
+  // Montevideo — formulaic 0.20 bbox extends south of Uruguay's lat-min.
+  'Montevideo|UY':      [-34.95, -34.85, -56.27, -56.05],
+
+  // Kinshasa — push west lon east so Brazzaville's bbox doesn't shadow.
+  'Kinshasa|CD':        [-4.55, -4.30, 15.20, 15.45],
+
+  // v1.7.8 Tier 5 polish — Kaédi MR center moved ~600m east into Mauritanian
+  // bank (correction from Reviewer A geometry report). Population-radius
+  // formulaic bbox is reasonable; we override only to shift the lat/lon
+  // baseline implicitly via the supplement entry update further down.
 }
 
 function bboxOverrideFor(name, iso) {
