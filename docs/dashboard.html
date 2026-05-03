@@ -31,10 +31,11 @@
 
   <div class="note" style="background:#fff8e6;border-left-color:#c8881a;">
     <strong>Snapshot:</strong> the metrics on this page are from the v1.0 milestone
-    (Experiment 7) and are <em>not live</em>. fajr now evaluates against six independent
-    sources (Aladhan, Diyanet, JAKIM via waktusolat, Mawaqit, praytimes.org, muslimsalat)
-    with a multi-layer ratchet — current train WMAE is <strong>1.25 min</strong> and
-    holdout WMAE is <strong>6.15 min</strong> across <strong>240 train + 211 holdout</strong>
+    (Experiment 7) and are <em>not live</em>. fajr now evaluates against four institutional
+    train sources (Aladhan, Diyanet, JAKIM via waktusolat, Mawaqit-Morocco) plus six
+    holdout sources (Aladhan, KEMENAG, MUIS, Mawaqit, praytimes.org, muslimsalat) with
+    a multi-layer ratchet — current train WMAE is <strong>1.07 min</strong> and
+    holdout WMAE is <strong>3.62 min</strong> across <strong>215 train + 2,980 holdout</strong>
     entries. The auto-generated live progress lives at
     <a href="progress.md"><code>docs/progress.md</code></a>, regenerated on every
     <code>npm run build:charts</code>.
@@ -64,5 +65,9 @@
       <tr><td>Exp 7</td><td><strong>1.55</strong></td><td>Elevation validation (USNO)</td></tr>
     </tbody>
   </table>
+
+  <p style="font-size:0.8rem; color:#666; margin-top:2rem;">
+    Last refreshed: 2026-05-03 (v1.7.9 docs regen sweep — live numbers re-pulled from current <code>runs.jsonl</code>).
+  </p>
 </body>
 </html>

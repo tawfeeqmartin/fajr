@@ -4,7 +4,9 @@
 
 *Independent Research, 2026*
 
-> **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, and the live per-source breakdown — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
+> **Last refreshed:** 2026-05-03 (v1.7.9 docs regen sweep). Headline numbers below now reflect the post-v1.7.6 state — auto-elevation Maghrib bug fixed (issue #50), Umm al-Qura Hijri (issue #48), bbox false-positives fixed (issue #47), Maldives/Sri Lanka explicit Shafi Asr (issue #26). Pre-v1.7.6 baselines have been retired. The 1.55-min v1.0 milestone WMAE in Section 7 is preserved as a *historical* milestone; the live current WMAE is reported in [`docs/progress.md`](progress.md).
+>
+> **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration; 4 train institutions + 6 holdout institutions), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, the v1.7.x city registry (375 cities) and offline `nearestCity` lookup — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
 
 ---
 
@@ -299,7 +301,9 @@ The dominant improvement occurred at Experiment 3 (−19.08 min), confirming tha
 | Maghrib | 0.44 | Refraction well modeled |
 | Isha   | 1.21 | Angle sensitivity; some method ambiguity |
 
-**Weighted WMAE: 1.55 minutes**
+**Weighted WMAE: 1.55 minutes** (v1.0 milestone — Aladhan-only calc-vs-calc consistency check across 18 cities)
+
+> **v1.7.9 update — post-v1.0 multi-source eval (live):** train WMAE 1.07 min (215 entries across Aladhan / Diyanet / JAKIM / Mawaqit-Morocco institutional sources); holdout WMAE 3.62 min (2,980 entries across Aladhan / KEMENAG / MUIS / Mawaqit / praytimes.org / muslimsalat). Per-prayer signed bias (train, calc − ground truth) is Fajr −0.25, Shuruq −0.33, Dhuhr +0.27, Asr +1.22, Maghrib +0.49, Isha +0.71 min — see [`docs/progress.md`](progress.md) for the live breakdown, regenerated each `npm run build:charts`. The post-v1.0 corpus is materially larger and more institutionally diverse than the v1.0 18-city Aladhan-only set, so the *number* is not directly comparable to the 1.55-min v1.0 milestone — but the methodology has hardened (Path A cross-source corroboration, per-source / per-prayer bias guards, train/holdout separation).
 
 ### 7.3 Per-City Accuracy
 
@@ -388,7 +392,9 @@ Islamic prayer time computation is a domain where astronomical precision meets f
 
 5. **The muwaqqit tradition** provides both methodological precedent (precision computation in service of worship) and ethical framing (the astronomer serves the community, not the reverse).
 
-Future work should address: (1) integration of actual atmospheric data (temperature, pressure) for real-time refraction correction; (2) formal fiqh consultation for high-latitude method selection; (3) validation against additional reference sources beyond USNO; (4) extension of AutoResearch to regional method databases.
+Future work should address: (1) integration of actual atmospheric data (temperature, pressure) for real-time refraction correction; (2) formal fiqh consultation for high-latitude method selection; (3) further expansion of the institutional-reference corpus beyond the current 4 train + 6 holdout sources (target: native national-awqaf APIs for Indonesia/Saudi/Egypt/Pakistan, see [`docs/calibration-recipe.md`](calibration-recipe.md)); (4) extension of AutoResearch to regional method databases including the v1.7.x city-method-overrides for sub-national jurisdictions (Lucknow / Kerala / Bangsamoro shipped v1.7.2).
+
+**Post-v1.0 evolution (v1.1–v1.7.7).** Subsequent releases tightened both the engine and its review pipeline: a multi-source ratchet replaced the single-Aladhan baseline (v1.2–v1.5), Path A cross-source corroboration was formalised in `eval/compare.js` (v1.4.x), country-level method dispatch expanded from ~12 to >100 countries (v1.6.x), explicit `madhab = Shafi` was set for Maldives and Sri Lanka per [issue #26](https://github.com/tawfeeqmartin/fajr/issues/26) (v1.7.1), a 375-city offline registry was added with `detectLocation` (v1.7.0–v1.7.3), Umm al-Qura Hijri replaced an over-correcting Kuwaiti algorithm per [issue #48](https://github.com/tawfeeqmartin/fajr/issues/48) (v1.7.6), and a silent auto-elevation bug that was inflating Maghrib bias was diagnosed and fixed per [issue #50](https://github.com/tawfeeqmartin/fajr/issues/50) (v1.7.6). The v1.7.9 docs-regen sweep refreshed all numeric claims in this paper to the post-v1.7.6 baseline.
 
 *Bismillah al-Rahman al-Rahim.*
 
