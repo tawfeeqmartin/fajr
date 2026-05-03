@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 38 cities across 12 institutional-train countries plus a 163-country Aladhan-routed holdout corpus. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.7.4.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `detectLocation`, `nearestCity`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. Cross-runtime: works in Node, browser, React Native, Capacitor, Electron, Tauri, JavaScriptCore. Native Swift / Kotlin / C# / Rust ports are on the roadmap (issue #44). **v1.7.3 adds `nearestCity(lat, lon)`** — a kNN-fuzzy *display-only* lookup that always returns a city + haversine distance in km, for downstream apps that want to render "near \<City\> (\<distance\> km)" labels when the user's GPS resolves outside any registered city's bbox. The strict `detectLocation` containment continues to drive prayer-time dispatch unchanged. **v1.7.0 ships city-aware location resolution**: a bundled 375-city registry powers automatic city detection, city-registry elevation surfacing (no more silent sea-level for Mexico City / Cape Town / Riyadh users), and city-level institutional method overrides for 12 cities where intra-country *ikhtilaf* matters (Mosul → Karachi via Sunni-Awqaf, Najaf/Karbala/Basra → Tehran via Twelver Shia hawza, Sarajevo/Mostar/Banja Luka/Pristina → Diyanet via Bosnian Rijaset / BIK, Bradford → MoonsightingCommittee via BCOM, Beirut → Egyptian via Dar al-Fatwa, Tabriz → Tehran, Dearborn → ISNA). Apps gain a `location` field on every `prayerTimes` return value with city/country/timezone/method-source plus a public `detectLocation(lat, lon)` for standalone resolution — see [City-aware location resolution (v1.7.0)](#city-aware-location-resolution-v170). v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection (163 by v1.6.2). v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.7.6.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `detectLocation`, `nearestCity`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. Cross-runtime: works in Node, browser, React Native, Capacitor, Electron, Tauri, JavaScriptCore. Native Swift / Kotlin / C# / Rust ports are on the roadmap (issue #44). **v1.7.6 switches `hijri()` to default to the Umm al-Qura tabular calendar** (Saudi Arabia's official calendar — matches AlAdhan, IslamicFinder, IACAD, Microsoft) — fixing 6 of 16 reference-mismatched dates from issue #48 (3 Eid boundaries plus 3 single-day-off dates), with the legacy Kuwaiti tabular preserved as opt-in via `{ convention: 'tabular' }`; year coverage 1318–1500 AH (1900-04-30 → 2077-11-16 Gregorian). Out-of-range dates throw `RangeError` so callers can fall back deliberately rather than getting silently-wrong results. v1.7.6 also disclosed the Maghrib-shift magnitude in the city-registry elevation `notes[]` entry so downstream UIs can surface "Maghrib +X.X min later vs sea-level" alongside the institutional split (resolves #50). **v1.7.5 adds a systematic city-registry validation script** ([`scripts/validate-city-registry.js`](scripts/validate-city-registry.js), wired into CI as a fail-class budget gate) plus 8 country-bbox fixes (Toronto/Cairo/KL/Singapore from issue #47, plus Saudi/Sinai overlap, Saudi-NE/Iran, Sharjah/Dubai, Dearborn/Windsor); fail-class issue count dropped 519 → 146 (72% reduction). **v1.7.3 adds `nearestCity(lat, lon)`** — a kNN-fuzzy *display-only* lookup that always returns a city + haversine distance in km, for downstream apps that want to render "near \<City\> (\<distance\> km)" labels when the user's GPS resolves outside any registered city's bbox. The strict `detectLocation` containment continues to drive prayer-time dispatch unchanged. **v1.7.0 ships city-aware location resolution**: a bundled 375-city registry powers automatic city detection, city-registry elevation surfacing (no more silent sea-level for Mexico City / Cape Town / Riyadh users), and city-level institutional method overrides for 12 cities where intra-country *ikhtilaf* matters (Mosul → Karachi via Sunni-Awqaf, Najaf/Karbala/Basra → Tehran via Twelver Shia hawza, Sarajevo/Mostar/Banja Luka/Pristina → Diyanet via Bosnian Rijaset / BIK, Bradford → MoonsightingCommittee via BCOM, Beirut → Egyptian via Dar al-Fatwa, Tabriz → Tehran, Dearborn → ISNA). Apps gain a `location` field on every `prayerTimes` return value with city/country/timezone/method-source plus a public `detectLocation(lat, lon)` for standalone resolution — see [City-aware location resolution (v1.7.0)](#city-aware-location-resolution-v170). v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection (163 by v1.6.2). v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`. Per-release narrative is in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -21,7 +21,7 @@ It is the prayer **most affected by the open questions this library addresses**:
 - **Elevation effects** on the horizon — a mosque at 2,000m sees dawn earlier than one in a valley
 - **Light pollution** distorting the visual threshold in urban areas
 
-While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus astronomical Sunrise / Sunset distinct from Maghrib, single-call `dayTimes()` for the 9-field bundle (six prayers + sunrise + sunset + midnight + qiyam start), Qibla direction (great-circle), Hijri calendar (Kuwaiti tabular algorithm), three-criterion hilal (crescent) visibility prediction (Odeh 2004 + Yallop 1997 + Shaukat 2002 computed side-by-side, with `criteriaAgree` flagging borderline ikhtilaf — see [`scripts/validate-hilal.js`](scripts/validate-hilal.js)), night-thirds calculation, traveler-mode metadata (qasr / jam' permissibility by madhab — fajr does not determine traveler status, that's left to the user), and opt-in scholarly corrections: `applyElevationCorrection` (geometric horizon-dip per Burj Khalifa fatwa / Malaysia JAKIM), `applyTayakkunBuffer` (Aabed-2015 5-min Fajr buffer for naked-eye certainty), and `tarabishyTimes` (Tarabishy-2014 45° latitude-truncation alternative to the default high-latitude rule). Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
+While named after one prayer, **fajr handles all six prayer times** — Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha — plus astronomical Sunrise / Sunset distinct from Maghrib, single-call `dayTimes()` for the 9-field bundle (six prayers + sunrise + sunset + midnight + qiyam start), Qibla direction (great-circle), Hijri calendar (Umm al-Qura tabular by default since v1.7.6; Kuwaiti tabular opt-in via `{ convention: 'tabular' }`), three-criterion hilal (crescent) visibility prediction (Odeh 2004 + Yallop 1997 + Shaukat 2002 computed side-by-side, with `criteriaAgree` flagging borderline ikhtilaf — see [`scripts/validate-hilal.js`](scripts/validate-hilal.js)), night-thirds calculation, traveler-mode metadata (qasr / jam' permissibility by madhab — fajr does not determine traveler status, that's left to the user), and opt-in scholarly corrections: `applyElevationCorrection` (geometric horizon-dip per Burj Khalifa fatwa / Malaysia JAKIM), `applyTayakkunBuffer` (Aabed-2015 5-min Fajr buffer for naked-eye certainty), and `tarabishyTimes` (Tarabishy-2014 45° latitude-truncation alternative to the default high-latitude rule). Just as `adhan.js` is named after the call to prayer but calculates all prayer times, `fajr` is named after the prayer that makes precision matter most.
 
 The name also grounds the project in the Islamic tradition: each day begins at Fajr, and the precision of that moment is what this library is trying to improve.
 
@@ -49,7 +49,7 @@ The Islamic prayer-time space has two well-established tools that anchor the des
 | **Public mosque-validated audit framework** | closed (no public WMAE-vs-mosque-published numbers; no per-cell ratchet) | unit tests only (correctness vs self-consistency, not vs mosque-published reality) | ✅ — public `eval/` runs WMAE per source (Mawaqit / Diyanet / JAKIM / KEMENAG / MUIS / Aladhan / praytimes.org) with per-cell ratchet rules in `eval/compare.js` |
 | **Scholarly classification + wiki** | method definitions in `/v1/methods` carry no classification tags | none | ✅ — every correction tagged 🟢 / 🟡→🟢 / 🟡 / 🔴 with wiki citation in `knowledge/wiki/`; 🔴 corrections gated on human review per CLAUDE.md |
 | **Geocoding (address → coord)** | ✅ — `/v1/timingsByCity`, `/v1/timingsByAddress` | ❌ | ❌ — deferred to caller |
-| **Hijri calendar** | ✅ tabular (Umm al-Qura) | ❌ | ✅ Kuwaiti tabular |
+| **Hijri calendar** | ✅ tabular (Umm al-Qura) | ❌ | ✅ tabular (Umm al-Qura by default since v1.7.6 — matches AlAdhan; Kuwaiti tabular preserved as opt-in via `{ convention: 'tabular' }`) |
 | **Qibla** | ✅ | ✅ | ✅ |
 | **Imsak field** | ✅ — returned in `/v1/timings` response | ❌ | ✅ — explicit, rounded DOWN per fasting ihtiyat |
 | **Bundle size** | N/A (REST API) | 16 KB minified / 44 KB raw (v4.4.3) | ~107 KB raw source (v1.6.2; no minified bundle published yet — likely ~50 KB minified once shipped) |
@@ -488,6 +488,93 @@ For coordinates very far from any city (deep ocean, polar research stations), `d
 
 Classification: 🟢 Established — pure lookup, no shar'i ruling involved.
 
+### City registry validation in CI (v1.7.5)
+
+The 375-city registry that powers `detectLocation` and `nearestCity` is hand-curated. v1.7.5 adds [`scripts/validate-city-registry.js`](scripts/validate-city-registry.js) — a deterministic validator that exhaustively cross-checks every row against three failure classes:
+
+| Class | What it catches |
+|---|---|
+| `country-claim` | Cities whose `countryISO` doesn't agree with the engine's `detectCountry` verdict for the same coordinate (e.g. a "Toronto / US" row leaking via a too-generous USA bbox) |
+| `cross-border` | Cities whose registered bbox extends across an international border (e.g. Johor Bahru's bbox crossing the Causeway into Singapore) |
+| `bbox-internal` | Cities whose bbox overlaps another city's bbox in the same country in a way that lets either resolve incorrectly (e.g. Shah Alam covering downtown KL) |
+
+Run locally:
+
+```bash
+npm run validate:registry
+```
+
+The CI pipeline ([`.github/workflows/lint.yml`](.github/workflows/lint.yml)) caps the FAIL-class count at a budget (currently 180; v1.7.5 baseline 146); future PRs that push the count above the budget fail the lint job. Future ratchet-style work should ratchet the budget *down* over time.
+
+**v1.7.5 fixes** — eight `detectCountry` reorderings and six `BBOX_OVERRIDES` table entries:
+
+- The four issue #47 false positives (Toronto → USA, Cairo → "Giza", KL → "Shah Alam", Singapore → "Johor Bahru") all FIXED.
+- 8 of Reviewer C's 23 catalogued bug classes FIXED (Saudi/Sinai overlap, Saudi-NE/Iran overlap, Mexico/USA, Vientiane/Phnom Penh/Hanoi/Asunción/Montevideo dispatch, Sharjah/Dubai, Dearborn/Windsor); the remaining 14 are deferred to v1.7.6+ as separate sub-national-bbox work.
+- 9 country-claim regressions exposed by the validator (Vientiane, Phnom Penh, Hanoi, Asunción, Montevideo, Mbabane, Gitega, Bangui, Luanda, Brazzaville, Niamey) all FIXED.
+
+72% reduction in FAIL-class issues (519 → 146). The remaining 146 are a mix of sibling-city overlaps (Beau Bassin/Port Louis class), country-bbox edge cases (Lomé just below Togo's lat min), and validator-strictness false positives where the engine's Pass-B logic resolves correctly but the validator inspects raw city-name resolution. See [`autoresearch/logs/2026-05-03-00-04-v1.7.5-city-registry-validation.md`](autoresearch/logs/2026-05-03-00-04-v1.7.5-city-registry-validation.md) for the full disposition matrix.
+
+Classification: 🟢 Established — pure engine bbox / lookup logic; no shar'i ruling involved. For coords whose attribution changes (e.g. Hafar al-Batin: Iran/Tehran → Saudi/UmmAlQura), the new dispatch matches the local mosque practice.
+
+### Hijri calendar conventions (v1.7.6)
+
+Prior to v1.7.6, `fajr.hijri()` used the Kuwaiti arithmetic (tabular) calendar. While that algorithm is a textbook standard, it diverges from the **Umm al-Qura calendar** used by AlAdhan, IslamicFinder, IACAD's Dulook DXB app, Microsoft Windows, and Saudi Arabia's official publishing channels — by 0–1 days routinely and by a full month at Eid boundaries. agiftoftime-agent's 16-date audit (issue #48) found ~38% mismatch against AlAdhan as the de-facto reference; affected dates included Eid al-Fitr 1444, Eid al-Fitr 1446, Eid al-Adha 1445, plus four single-day-off cases that materially affect Hijri-date display in Islamic apps.
+
+**v1.7.6 switches the default to Umm al-Qura tabular**, which mechanically matches AlAdhan/IslamicFinder/Saudi-official for all 16 audit dates (16/16). The Kuwaiti tabular path is preserved for backwards-compat:
+
+```js
+import { hijri } from '@tawfeeqmartin/fajr'
+
+// Default — Umm al-Qura (matches AlAdhan / IslamicFinder / Saudi)
+const today = hijri(new Date())
+// → { year: 1447, month: 11, day: 15, monthName: "Dhu al-Qi'dah" }
+
+// Backwards-compat — Kuwaiti arithmetic (v1.7.5-and-earlier default)
+const tabular = hijri(new Date(), { convention: 'tabular' })
+```
+
+**Coverage:** 1318–1500 AH (1900-04-30 → 2077-11-16 Gregorian). The data ships as a 31 KB JSON file at [`src/data/umm-al-qura-tabular.json`](src/data/umm-al-qura-tabular.json), pre-computed from the `umalqura/umalqura` MIT package and cross-validated against the .NET BCL Umm al-Qura calendar (which is itself validated against ummulqura.org.sa).
+
+**Out-of-range behaviour:** dates outside the table's coverage throw a `RangeError` rather than silently extrapolating with the wrong algorithm. To handle pre-1900 historical dates or post-2077 forward-projection, fall back to `{ convention: 'tabular' }` deliberately:
+
+```js
+function hijriSafe(date) {
+  try {
+    return hijri(date)  // umm-al-qura
+  } catch (e) {
+    if (e instanceof RangeError) return hijri(date, { convention: 'tabular' })
+    throw e
+  }
+}
+```
+
+A future `{ convention: 'observational' }` (a full-fidelity hilal-sighting-aware Hijri calendar) is planned for v1.9.x. Calling it currently throws `NotImplementedError` with a pointer to `hilalVisibility` for sighting-prediction needs.
+
+Classification: 🟡→🟢 *Approaching established* — Umm al-Qura is Saudi Arabia's official calendar with decades of government publication and is the consensus across the digital Islamic ecosystem (AlAdhan / IslamicFinder / IACAD / Microsoft / Apple iOS / glibc). Not pure 🟢 because Diyanet (Türkiye), JAKIM (Malaysia), and regional moonsighting committees legitimately diverge by ±1 day — Umm al-Qura is the digital-ecosystem consensus, not the scholarly consensus of the full ummah. The previous Kuwaiti tabular default was 🟢 in isolation but indefensible as fajr's chosen default given the ecosystem divergence.
+
+### Elevation note magnitude (v1.7.6)
+
+The city-registry elevation auto-resolution note (added in v1.7.0 phase 2) originally surfaced the institutional split (UAE/JAKIM apply, Saudi/Umm al-Qura declines) without telling the user *how much* the elevation was actually shifting their prayer times. v1.7.6 widens the note to include the computed dip magnitude in minutes, so downstream UIs can render the institutional choice next to the actual stake. Resolves issue #50.
+
+**Before v1.7.6:**
+```
+"Elevation auto-resolved from city registry: Riyadh, 612m. Saudi/Umm al-Qura
+ institutionally declines this correction; UAE (Burj Khalifa) + Malaysia
+ JAKIM apply it. To match Saudi convention, pass elevation: 0."
+```
+
+**v1.7.6+:**
+```
+"Elevation auto-resolved from city registry: Riyadh, 612m → Maghrib +2.7 min
+ later, Shuruq -2.7 min earlier vs sea-level. Saudi/Umm al-Qura institutionally
+ declines this correction; UAE (Burj Khalifa) + Malaysia JAKIM apply it. To
+ match Saudi convention, pass elevation: 0."
+```
+
+The magnitude is computed via the same `computeElevationDipMinutes(elevation, latitude)` already used by `applyElevationCorrection`. This is presentation-only — no engine math changed. The advisory still fires only on the auto-resolution path (caller-silent elevation, city has registered elevation); caller-explicit `elevation: N` paths get no note (the caller already knows what they passed). See [Elevation advisory at significant altitude (v1.5.2)](#elevation-advisory-at-significant-altitude-v152) for the institutional-disagreement framing this builds on.
+
+Classification: 🟢 Established — presentation refinement of an existing 🟡→🟢 advisory; no new astronomical claim.
+
 ---
 
 ## Historical Results (Experiment 1–7 narrative)
@@ -633,8 +720,12 @@ const qibla = fajr.qibla({ latitude: 33.9716, longitude: -6.8498 })
 // Night thirds
 const night = fajr.nightThirds({ date, latitude, longitude })
 
-// Hijri date
-const hijri = fajr.hijri(new Date())
+// Hijri date — defaults to Umm al-Qura since v1.7.6 (matches AlAdhan / IslamicFinder /
+// IACAD / Microsoft). For backwards-compat with v1.7.5-and-earlier output, pass
+// `{ convention: 'tabular' }`. Coverage: 1318–1500 AH. Out-of-range throws RangeError.
+// See README → "Hijri calendar conventions (v1.7.6)".
+const today = fajr.hijri(new Date())
+const tabular = fajr.hijri(new Date(), { convention: 'tabular' })
 
 // Hilal (lunar crescent) visibility — three criteria computed in parallel.
 // Note: hilal sighting decisions are ultimately a matter of fiqh; this
@@ -763,7 +854,7 @@ fajr v1.0 makes the following stability promises. **Stable** surfaces will not c
 | `applyTayakkunBuffer` | `(times, mins=5) → times` (opt-in Fajr buffer per Aabed 2015) | v1.3 |
 | `tarabishyTimes` | `(params, thresholdLat=45) → prayerTimes shape` (opt-in 45°-truncation per Tarabishy 2014) | v1.3 |
 | `qibla` | `({ latitude, longitude }) → { bearing, magneticDeclination, trueBearing }` | v1.0 |
-| `hijri` | `(Date) → { year, month, day, monthName }` | v1.0 |
+| `hijri` | `(Date, opts?) → { year, month, day, monthName }` — `opts.convention ∈ 'umm-al-qura' \| 'tabular' \| 'observational'`; default `'umm-al-qura'` since v1.7.6 (was `'tabular'`); throws `RangeError` outside 1318–1500 AH for `'umm-al-qura'`; throws `NotImplementedError` for `'observational'` (planned v1.9.x). | v1.0; convention parameter v1.7.6 |
 | `hilalVisibility` | `({ year, month, latitude, longitude }) → { visible, code, V, yallop, shaukat, criteriaAgree, … }` | v1.0 |
 | `nightThirds` | `({ date, latitude, longitude })` *or* `({ maghrib, fajr })` → `{ firstThird, secondThird, lastThird, midnight }` | v1.0 |
 | `travelerMode` | `({ times, madhab? }) → { qasr, jam, … }` | v1.0 |
