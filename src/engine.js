@@ -13,6 +13,7 @@
  */
 
 import * as adhan from 'adhan'
+import citiesRegistry from './data/cities.json' with { type: 'json' }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPERIMENT 1: Regional method auto-selection
@@ -710,6 +711,223 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.NorthAmerica(), methodName: 'ISNA (default)' }
     }
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPERIMENT 1.5: City-aware location resolver (v1.7.0 phase 1)
+// 🟢 Established — city-level institutional dispatch is documented Islamic
+// authority practice (Diyanet's per-province ezan vakti, Ministry of Habous's
+// per-zone Imsakiyya, JAKIM's per-zone waktu solat). The pure-lookup shape —
+// coordinate → (city, country, timezone, method, source) — extends
+// detectCountry's bbox approach without changing any astronomy.
+// see knowledge/wiki/api/detectLocation.md (proposed; phase 3 publishes)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Country → default method-name string.
+ *
+ * Mirrors the cases of `selectMethod()` above but returns just the method NAME
+ * (a string) rather than the full adhan.CalculationParameters object. This is
+ * what `detectLocation` surfaces to apps as `recommendedMethod`. Apps then
+ * pass the same string back into `prayerTimes({ method })` (or compose with
+ * their own selector) to obtain the actual calculation.
+ *
+ * Kept in lockstep with `selectMethod()` — when adding a new country there,
+ * update this table too.
+ *
+ * @param {string|null} country
+ * @returns {string}  Method name; defaults to 'ISNA' (the engine's fallback).
+ */
+function methodForCountry(country) {
+  switch (country) {
+    case 'Morocco':            return 'Morocco'
+    case 'SaudiArabia':        return 'UmmAlQura'
+    case 'Turkey':             return 'Diyanet'
+    case 'Egypt':              return 'Egyptian'
+    case 'UK':                 return 'MoonsightingCommittee'
+    case 'Malaysia':           return 'JAKIM'
+    case 'USA':                return 'ISNA'
+    case 'Bolivia':            return 'MWL'
+    case 'Colombia':           return 'MWL'
+    case 'Ecuador':            return 'MWL'
+    case 'Indonesia':          return 'JAKIM'
+    case 'Pakistan':           return 'Karachi'
+    case 'UAE':                return 'UmmAlQura'
+    case 'Qatar':              return 'Qatar'
+    case 'Kuwait':             return 'Kuwait'
+    case 'Bahrain':            return 'Kuwait'
+    case 'Oman':               return 'Kuwait'
+    case 'Yemen':              return 'Kuwait'
+    case 'Iran':               return 'Tehran'
+    case 'SouthAfrica':        return 'MWL'
+    case 'Brunei':             return 'JAKIM'
+    case 'Singapore':          return 'MUIS'
+    case 'France':             return 'UOIF'
+    case 'Canada':             return 'ISNA'
+    case 'Norway':             return 'MWL'
+    case 'Iceland':            return 'MWL'
+    case 'Finland':            return 'MWL'
+    case 'Tunisia':            return 'Tunisia'
+    case 'Algeria':            return 'Algeria'
+    case 'Libya':              return 'Egyptian'
+    case 'Mauritania':         return 'MWL'
+    case 'Palestine':          return 'Egyptian'
+    case 'Lebanon':            return 'Egyptian'
+    case 'Jordan':             return 'Jordan'
+    case 'Syria':              return 'Egyptian'
+    case 'Iraq':               return 'Egyptian'
+    case 'Georgia':            return 'Diyanet'
+    case 'Azerbaijan':         return 'Tehran'
+    case 'Tajikistan':         return 'MWL'
+    case 'Turkmenistan':       return 'MWL'
+    case 'Kyrgyzstan':         return 'MWL'
+    case 'Uzbekistan':         return 'MWL'
+    case 'Kazakhstan':         return 'MWL'
+    case 'Albania':            return 'Diyanet'
+    case 'Kosovo':             return 'Diyanet'
+    case 'Bosnia':             return 'Diyanet'
+    case 'Djibouti':           return 'MWL'
+    case 'Eritrea':            return 'MWL'
+    case 'Somalia':            return 'MWL'
+    case 'SouthSudan':         return 'MWL'
+    case 'Ethiopia':           return 'MWL'
+    case 'Sudan':              return 'Egyptian'
+    case 'Gambia':             return 'MWL'
+    case 'Senegal':            return 'MWL'
+    case 'SierraLeone':        return 'MWL'
+    case 'Guinea':             return 'MWL'
+    case 'CoteDIvoire':        return 'MWL'
+    case 'Ghana':              return 'MWL'
+    case 'BurkinaFaso':        return 'MWL'
+    case 'Mali':               return 'MWL'
+    case 'Niger':              return 'MWL'
+    case 'Nigeria':            return 'MWL'
+    case 'Chad':               return 'MWL'
+    case 'Cameroon':           return 'MWL'
+    case 'Comoros':            return 'MWL'
+    case 'Madagascar':         return 'MWL'
+    case 'Kenya':              return 'MWL'
+    case 'Tanzania':           return 'MWL'
+    case 'Mozambique':         return 'MWL'
+    case 'Maldives':           return 'Karachi'
+    case 'SriLanka':           return 'Karachi'
+    case 'Bangladesh':         return 'Karachi'
+    case 'Afghanistan':        return 'Karachi'
+    case 'India':              return 'Karachi'
+    case 'Cambodia':           return 'MUIS'
+    case 'Thailand':           return 'MWL'
+    case 'Myanmar':            return 'MWL'
+    case 'Philippines':        return 'MWL'
+    default:                   return 'ISNA'
+  }
+}
+
+/**
+ * Resolve a coordinate to its city, country, timezone, recommended method,
+ * and institutional source.
+ *
+ * Pure / referentially transparent for a given (lat, lon, fallbackElevation)
+ * — no astronomical computation, no I/O, no caching. Lookup cost is O(N) over
+ * the city registry (~375 rows at v1.7.0 phase 1); the registry is sorted
+ * with the smallest bboxes first, so a metropolitan-area match short-circuits
+ * the linear scan early.
+ *
+ * Returns:
+ *   {
+ *     city:              City | null,         // null when no bbox matches
+ *     country:           string | null,       // detectCountry(lat, lon)
+ *     timezone:          string,              // city.timezone || 'UTC'
+ *     elevation:         number,              // city.elevation ?? fallbackElevation
+ *     recommendedMethod: string,              // city.methodOverride || methodForCountry(country)
+ *     methodSource:      'city-institutional' | 'country-default' | 'fallback',
+ *     altMethods?:       AltMethod[],         // present only when the city has documented alternatives
+ *     source:            { type, slug?, institution?, from? }
+ *   }
+ *
+ * 🟢 Established — pure lookup, no shar'i ruling involved.
+ *
+ * NOTE FOR PHASE 1: This function is NOT yet exported from src/index.js.
+ * Phase 2 wires it into prayerTimes silently (city-aware method dispatch);
+ * phase 3 exposes it publicly with full TypeScript types in src/index.d.ts.
+ *
+ * @param {number} latitude
+ * @param {number} longitude
+ * @param {number} [fallbackElevation=0]  Used when the matched city has no
+ *                                         elevation field, AND when no city
+ *                                         matches. In meters.
+ * @returns {object}  Location record (shape documented above).
+ */
+export function detectLocation(latitude, longitude, fallbackElevation = 0) {
+  // ── 1. City lookup — linear scan, smallest bbox first (registry is pre-sorted)
+  let matchedCity = null
+  const list = (citiesRegistry && citiesRegistry.cities) || []
+  for (let i = 0; i < list.length; i++) {
+    const c = list[i]
+    const [latMin, latMax, lonMin, lonMax] = c.bbox
+    if (latitude >= latMin && latitude <= latMax &&
+        longitude >= lonMin && longitude <= lonMax) {
+      matchedCity = c
+      break
+    }
+  }
+
+  // ── 2. Country layer — re-use the existing country bbox table.
+  const country = detectCountry(latitude, longitude)
+
+  // ── 3. Timezone — prefer city, then UTC fallback. (We do not synthesise
+  //      a country-level timezone fallback because Russia/USA/Canada/China
+  //      have multiple zones; UTC is honest when no city matched.)
+  const timezone = (matchedCity && matchedCity.timezone) || 'UTC'
+
+  // ── 4. Elevation — city's elevation if known, else caller's fallback.
+  const elevation = (matchedCity && matchedCity.elevation != null)
+    ? matchedCity.elevation
+    : fallbackElevation
+
+  // ── 5. Method dispatch — city-level override > country default > 'ISNA'
+  let recommendedMethod, methodSource
+  if (matchedCity && matchedCity.methodOverride) {
+    recommendedMethod = matchedCity.methodOverride
+    methodSource = 'city-institutional'
+  } else if (country) {
+    recommendedMethod = methodForCountry(country)
+    methodSource = 'country-default'
+  } else {
+    recommendedMethod = 'ISNA'  // engine fallback (matches selectMethod default)
+    methodSource = 'fallback'
+  }
+
+  // ── 6. Source provenance — prefer the city's recorded source. When no
+  //      city matched but a country did, the source is 'inherited' from the
+  //      country. When neither matched, source is 'fallback'.
+  let source
+  if (matchedCity) {
+    source = matchedCity.source || { type: 'inherited', from: country || matchedCity.countryISO }
+  } else if (country) {
+    source = { type: 'inherited', from: country }
+  } else {
+    source = { type: 'fallback' }
+  }
+
+  // ── 7. altMethods — only include when present on the city, to avoid
+  //      filling the response with empty arrays for the >95% of cities
+  //      with no documented alternative. Apps doing existence checks should
+  //      use `altMethods != null` rather than `altMethods.length > 0`.
+  const altMethods = (matchedCity && matchedCity.altMethods && matchedCity.altMethods.length)
+    ? matchedCity.altMethods.slice()
+    : undefined
+
+  const out = {
+    city: matchedCity || null,
+    country,
+    timezone,
+    elevation,
+    recommendedMethod,
+    methodSource,
+    source,
+  }
+  if (altMethods) out.altMethods = altMethods
+  return out
 }
 
 /**
