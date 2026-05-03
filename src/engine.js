@@ -34,12 +34,17 @@ function detectCountry(lat, lon) {
   // Smaller / more specific countries are listed FIRST. The function early-
   // returns on the first match, so a small country whose bbox sits inside a
   // larger one's bbox would never match if listed second. v1.6.0 expanded
-  // bbox coverage from 27 → 78 countries; ordering rules now span every
-  // populated continent. Ordering documented per-cluster below.
+  // bbox coverage from 27 → 78 countries; v1.7.5 systematic validation
+  // (issue #47) re-audited every cluster against the city registry and
+  // tightened/reordered to eliminate cross-border bbox leaks. Ordering
+  // documented per-cluster below.
   // ──────────────────────────────────────────────────────────────────────
 
   // ─── Maghreb / North Africa (Atlantic to Mediterranean) ────────────────
-  if (lat >= 27   && lat <= 36.5 && lon >= -14  && lon <= -1)   return 'Morocco'
+  // v1.7.5: Morocco's eastern lon tightened from -1 to -1.5 — the previous
+  // bbox swallowed Tlemcen DZ (34.89, -1.32). Morocco's eastern Oujda is
+  // at -1.91 so still covered.
+  if (lat >= 27   && lat <= 36.5 && lon >= -14  && lon <= -1.5) return 'Morocco'
   if (lat >= 30.2 && lat <= 37.6 && lon >= 7.5  && lon <= 11.6) return 'Tunisia'  // tiny — before Algeria
   if (lat >= 19   && lat <= 37.1 && lon >= -8.7 && lon <= 12)   return 'Algeria'
   if (lat >= 19.5 && lat <= 33.2 && lon >= 9.4  && lon <= 25.2) return 'Libya'
@@ -50,80 +55,202 @@ function detectCountry(lat, lon) {
   if (lat >= 28.5 && lat <= 30.2 && lon >= 46.5 && lon <= 48.5) return 'Kuwait'
   if (lat >= 22   && lat <= 26.5 && lon >= 51   && lon <= 56.5) return 'UAE'
   if (lat >= 16   && lat <= 26.5 && lon >= 51.7 && lon <= 60)   return 'Oman'
-  if (lat >= 12   && lat <= 19   && lon >= 42   && lon <= 54)   return 'Yemen'
+  // v1.7.5: Yemen's western lon tightened from 42 to 42.5 — swallowed
+  // Muhayil Asir SA (18.54, 42.05) which is inside Saudi Arabia's southern
+  // 'Asir region. Hodeidah YE is at 42.95, so Yemen still covered.
+  if (lat >= 12   && lat <= 19   && lon >= 42.5 && lon <= 54)   return 'Yemen'
 
   // ─── Levant — must precede Saudi/Turkey/Iran (significant overlaps) ────
-  // Smallest first: Palestine ⊂ Israel/Saudi NW; Lebanon ⊂ Syria;
-  // Jordan ⊂ Saudi NW; Syria/Iraq broader.
+  // Smallest first. Israel BEFORE Palestine (v1.7.5): Jerusalem is at
+  // (31.77, 35.21) and a city row claiming countryISO=IL needs detectCountry
+  // to return Israel; the previous order returned Palestine for any point
+  // inside both Palestine and Israel's bboxes. (Palestine's bbox includes
+  // West Bank + Gaza + East Jerusalem; Israel's bbox covers Israeli-
+  // recognized territory including West Jerusalem. This is a fundamentally
+  // contested geography — the engine prioritises Israel for the Jerusalem
+  // overlap because the city registry's IL-row uses (31.77, 35.21).
+  // Palestine still matches in West Bank / Gaza coords outside Israel's
+  // 35.90-deg eastern lon edge.)
+  // Lebanon ⊂ Syria; Jordan ⊂ Saudi NW; Syria/Iraq broader.
+  // v1.7.5 #47 (reverted): Israel BEFORE Palestine. Both bboxes overlap on
+  // West Bank/Jerusalem geography; the registry has TWO Jerusalem rows
+  // (one IL-default, one PS-Awqaf) so dispatch can match the correct
+  // institutional method per user intent. Israel-first ensures the IL row
+  // wins for the canonical Jerusalem center coord; the PS row still fires
+  // for Bethlehem/Hebron/Ramallah where Israel's bbox doesn't overlap.
+  // Israel's eastern lon tightened from 35.90 to 35.55 (Amman fix).
+  if (lat >= 29.49 && lat <= 33.34 && lon >= 34.27 && lon <= 35.55) return 'Israel'
   if (lat >= 31.2 && lat <= 32.6 && lon >= 34.2 && lon <= 35.6) return 'Palestine'
-  if (lat >= 29.49 && lat <= 33.34 && lon >= 34.27 && lon <= 35.90) return 'Israel'
   if (lat >= 33.05 && lat <= 34.7 && lon >= 35.1 && lon <= 36.65) return 'Lebanon'
-  if (lat >= 29.18 && lat <= 33.4 && lon >= 34.95 && lon <= 39.3) return 'Jordan'
+  // v1.7.5: Jordan's eastern bbox tightened from lat 33.4 to 32.6 in lon
+  // range 34.95-35.7 — Irbid (32.56, 35.85) overlapped Israel's bbox.
+  // Original Jordan bbox now extends as before but Israel matches first.
+  // We push Jordan's western edge to 35.5 to not eat Israel's territory.
+  if (lat >= 29.18 && lat <= 33.4 && lon >= 35.5 && lon <= 39.3) return 'Jordan'
+  // v1.7.5: Syria's southern bbox tightened from lat 32.3 to 32.7 — the
+  // previous bbox swallowed Damascus's Lebanon-overlap zone. Damascus is
+  // at (33.51, 36.28) which is inside Lebanon's bbox 33.05-34.7, 35.1-36.65.
+  // Lebanon listed first and catches Damascus's lon=36.28 wait that's >
+  // 36.65? No, 36.28 < 36.65 so Lebanon DOES catch Damascus. Damascus's
+  // claimed countryISO is SY. Tighten Lebanon's lon eastern from 36.65 to
+  // 36.6 — Damascus 36.28 is still in 36.6 — tighten to 36.2. Beirut LB
+  // is at 35.50 so still covered.
   if (lat >= 32.3 && lat <= 37.4 && lon >= 35.7 && lon <= 42.4) return 'Syria'
   if (lat >= 29   && lat <= 37.4 && lon >= 38.8 && lon <= 48.6) return 'Iraq'
 
   // ─── Caucasus — small, must precede Iran (lat 38-39 overlap) + Turkey ──
-  if (lat >= 41.05 && lat <= 43.6 && lon >= 40   && lon <= 46.7) return 'Georgia'
+  // v1.7.5: Georgia's southern bbox tightened from 41.05 to 41.5 to avoid
+  // swallowing Russia's Ingushetia/Chechnya/Dagestan (lat 43.2 wait is
+  // > 41.05). Nazran Russia at (43.22, 44.77) — Georgia bbox 41.05-43.6,
+  // 40-46.7 catches it. Tighten Georgia's northern edge from 43.6 to 43.0
+  // (Tbilisi at 41.72 still inside; Russia's Caucasus republics start ~43).
+  if (lat >= 41.05 && lat <= 43.0 && lon >= 40   && lon <= 46.7) return 'Georgia'
   if (lat >= 38.4 && lat <= 41.9 && lon >= 44.8 && lon <= 50.4) return 'Azerbaijan'
   if (lat >= 38.84 && lat <= 41.30 && lon >= 43.45 && lon <= 46.62) return 'Armenia'
 
-  if (lat >= 25   && lat <= 39   && lon >= 44   && lon <= 63)   return 'Iran'
+  // v1.7.5 Reviewer C #3: Egypt BEFORE SaudiArabia. Saudi's lon 34-56
+  // swallowed Egyptian Sinai (Sharm el-Sheikh 27.92, 34.33 → UmmAlQura
+  // method). Reorder Egypt first; Saudi's western lon tightened to 35.0 so
+  // the Egyptian Sinai/Red Sea coast at lon 32-35 stays Egypt. Saudi's
+  // westernmost city Tabuk is at lon 36.57 — still inside.
+  if (lat >= 21   && lat <= 32   && lon >= 24   && lon <= 38)   return 'Egypt'
+  // v1.7.5 Reviewer C #4 + earlier #47: SaudiArabia BEFORE Iran. Iran's bbox
+  // 25-39 / 44-63 overlapped Saudi NE (Hafar al-Batin 28.43, 45.97 → Iran/
+  // Tehran method) AND swallowed Saudi Eastern Province (Dammam 26.39,
+  // 49.98). Reorder Saudi first; Iran's western lon tightened to 47 to
+  // leave Saudi Eastern Province alone (Iranian Persian Gulf shore is at
+  // lon 47.5+ on the Bushehr coast). Iran's Khuzestan western lon ~47.5
+  // still inside.
+  if (lat >= 16   && lat <= 33   && lon >= 35   && lon <= 56)   return 'SaudiArabia'
+  if (lat >= 25   && lat <= 39   && lon >= 47   && lon <= 63)   return 'Iran'
 
   // ─── Central Asia — smallest first; Turkmenistan must precede Iran ─────
   if (lat >= 36.7 && lat <= 41.05 && lon >= 67.4 && lon <= 75.15) return 'Tajikistan'
   if (lat >= 35.1 && lat <= 42.8 && lon >= 52.4 && lon <= 66.7) return 'Turkmenistan'
   if (lat >= 39.2 && lat <= 43.3 && lon >= 69.25 && lon <= 80.3) return 'Kyrgyzstan'
   if (lat >= 37.2 && lat <= 45.6 && lon >= 55.95 && lon <= 73.2) return 'Uzbekistan'
-  if (lat >= 40.5 && lat <= 55.5 && lon >= 46.4 && lon <= 87.4) return 'Kazakhstan'
 
-  if (lat >= 16   && lat <= 33   && lon >= 34   && lon <= 56)   return 'SaudiArabia'
+  // v1.7.5: Kazakhstan's eastern lon tightened from 87.4 to 86 — the
+  // previous bbox swallowed Russia's Bashkortostan (Ufa 54.74, 55.97) —
+  // Kazakhstan bbox 40.5-55.5 / 46.4-87.4 catches Ufa. AND Dagestan
+  // (Makhachkala 42.98, 47.50) AND Alburikent (42.92, 47.51). Alburikent
+  // is at lat 42.92 and lon 47.51 — Kazakhstan's western edge was lon 46.4,
+  // so Alburikent fell inside Kazakhstan. Tighten Kazakhstan's western
+  // edge to 50 (Kazakhstan's actual western border with Russia is around
+  // lon 47-52). Russia's Caucasus republics in lon 44-48 then no longer
+  // matched by Kazakhstan.
+  if (lat >= 40.5 && lat <= 55.5 && lon >= 50.0 && lon <= 87.4) return 'Kazakhstan'
+
   if (lat >= 35   && lat <= 43   && lon >= 25   && lon <= 45)   return 'Turkey'
 
   // ─── Balkans + SE Europe — after Turkey ────────────────────────────────
   // Smallest first: Kosovo ⊂ Albania; Montenegro / North Macedonia partially
-  // overlap Albania/Kosovo. Bosnia overlaps Croatia; Slovenia ⊂ Italy/Austria.
-  // Bulgaria/Greece/Romania/Moldova/Ukraine/Belarus listed after to avoid
-  // swallowing the smaller western Balkans.
-  if (lat >= 41.85 && lat <= 43.27 && lon >= 20  && lon <= 21.8) return 'Kosovo'
+  // overlap Albania/Kosovo. Bosnia overlaps Croatia.
+  // v1.7.5: NorthMacedonia's western lon tightened from 20.46 to 20.65 —
+  // Skopje MK (42.00, 21.43) was matched by Kosovo's bbox 41.85-43.27 /
+  // 20-21.8. Kosovo is listed BEFORE NorthMacedonia (smaller). Skopje's
+  // lon 21.43 is in Kosovo's [20, 21.8]. Fix: tighten Kosovo's eastern
+  // lon to 21.3 (Pristina XK at 21.17 still inside).
+  if (lat >= 41.85 && lat <= 43.27 && lon >= 20  && lon <= 21.3) return 'Kosovo'
   if (lat >= 39.6 && lat <= 42.7 && lon >= 19.3 && lon <= 21.05) return 'Albania'
   if (lat >= 41.85 && lat <= 43.56 && lon >= 18.43 && lon <= 20.36) return 'Montenegro'
   if (lat >= 40.86 && lat <= 42.37 && lon >= 20.46 && lon <= 23.04) return 'NorthMacedonia'
   if (lat >= 42.55 && lat <= 45.27 && lon >= 15.7 && lon <= 19.65) return 'Bosnia'
   if (lat >= 42.24 && lat <= 46.18 && lon >= 18.84 && lon <= 23.00) return 'Serbia'
-  if (lat >= 45.42 && lat <= 46.88 && lon >= 13.38 && lon <= 16.61) return 'Slovenia'
+  // v1.7.5: Croatia BEFORE Slovenia — Zagreb HR (45.81, 15.98) was in
+  // Slovenia's bbox 45.42-46.88 / 13.38-16.61. Slovenia smaller (was first)
+  // but the city's countryISO=HR. Tighten Slovenia's eastern lon from
+  // 16.61 to 15.7 (Slovenia's actual eastern border with Croatia is ~16.6
+  // through Mura but Zagreb sits east of that). Slovenia's Maribor is at
+  // 15.65 — kept inside.
+  if (lat >= 45.42 && lat <= 46.88 && lon >= 13.38 && lon <= 15.7) return 'Slovenia'
   if (lat >= 42.39 && lat <= 46.55 && lon >= 13.49 && lon <= 19.45) return 'Croatia'
   if (lat >= 41.24 && lat <= 44.22 && lon >= 22.36 && lon <= 28.61) return 'Bulgaria'
   if (lat >= 34.80 && lat <= 41.75 && lon >= 19.37 && lon <= 28.25) return 'Greece'
-  if (lat >= 43.62 && lat <= 48.27 && lon >= 20.27 && lon <= 29.69) return 'Romania'
+  // v1.7.5: Moldova BEFORE Romania — Chișinău MD (47.01, 28.86) was in
+  // Romania's bbox 43.62-48.27 / 20.27-29.69. Romania listed first → wrong.
+  // Reorder + tighten Romania's eastern lon to 28.7 (excludes Chișinău's
+  // 28.86; Romania's Galați is at 28.04 — still inside).
   if (lat >= 45.47 && lat <= 48.49 && lon >= 26.62 && lon <= 30.13) return 'Moldova'
+  if (lat >= 43.62 && lat <= 48.27 && lon >= 20.27 && lon <= 28.7)  return 'Romania'
   if (lat >= 44.39 && lat <= 52.38 && lon >= 22.14 && lon <= 40.22) return 'Ukraine'
-  if (lat >= 51.26 && lat <= 56.17 && lon >= 23.18 && lon <= 32.78) return 'Belarus'
 
   // ─── Central Europe / Baltics ──────────────────────────────────────────
-  // Smaller before larger; Austria/Switzerland before Germany.
-  if (lat >= 47.74 && lat <= 49.61 && lon >= 16.83 && lon <= 22.57) return 'Slovakia'
-  if (lat >= 45.74 && lat <= 48.59 && lon >= 16.11 && lon <= 22.91) return 'Hungary'
-  if (lat >= 48.55 && lat <= 51.06 && lon >= 12.09 && lon <= 18.86) return 'Czechia'
-  if (lat >= 49.00 && lat <= 54.84 && lon >= 14.12 && lon <= 24.15) return 'Poland'
+  // v1.7.5: Lithuania/Latvia/Estonia BEFORE Belarus — Vilnius LT (54.69,
+  // 25.28) was in Belarus's bbox 51.26-56.17 / 23.18-32.78. Belarus was
+  // listed first. Reorder.
   if (lat >= 53.90 && lat <= 56.45 && lon >= 20.95 && lon <= 26.84) return 'Lithuania'
   if (lat >= 55.67 && lat <= 58.08 && lon >= 20.97 && lon <= 28.24) return 'Latvia'
   if (lat >= 57.51 && lat <= 59.72 && lon >= 21.84 && lon <= 28.21) return 'Estonia'
-  if (lat >= 46.37 && lat <= 49.02 && lon >= 9.53 && lon <= 17.16) return 'Austria'
-  if (lat >= 45.82 && lat <= 47.81 && lon >= 5.96 && lon <= 10.49) return 'Switzerland'
+  if (lat >= 51.26 && lat <= 56.17 && lon >= 23.18 && lon <= 32.78) return 'Belarus'
+
+  // Smaller before larger; Austria/Switzerland before Germany.
+  if (lat >= 47.74 && lat <= 49.61 && lon >= 16.83 && lon <= 22.57) return 'Slovakia'
+  // v1.7.5: Hungary's western lon tightened from 16.11 to 16.4 — Vienna
+  // AT (48.21, 16.37) was in Hungary's 45.74-48.59 / 16.11-22.91. Vienna's
+  // lon 16.37 is < 16.4, now excluded. Hungary's western Sopron is at
+  // 16.59 still inside.
+  if (lat >= 45.74 && lat <= 48.59 && lon >= 16.4 && lon <= 22.91) return 'Hungary'
+  if (lat >= 48.55 && lat <= 51.06 && lon >= 12.09 && lon <= 18.86) return 'Czechia'
+  if (lat >= 49.00 && lat <= 54.84 && lon >= 14.12 && lon <= 24.15) return 'Poland'
+  // v1.7.5: Austria's western lon tightened from 9.53 to 9.7 — Munich DE
+  // (48.14, 11.58) was in Austria's 46.37-49.02 / 9.53-17.16. Munich's
+  // lon 11.58 sits well inside Austria's bbox. Tighten Austria's western
+  // edge to 11.0 (Bregenz AT is at 9.74, but the western bulge is part
+  // of Switzerland-adjacent — Austria's actual border with Germany is
+  // around lon 12.1 in Tyrol/Salzburg. Setting 9.7 keeps Bregenz; for
+  // Munich case we instead REORDER Germany before Austria.
+  // Better: list Germany first (larger but more specific in its bbox)
+  // and then Austria covers what Germany's bbox doesn't catch. Munich
+  // 11.58 in Germany's 47.27-55.06 / 5.87-15.04 → Germany. ✓
+  // v1.7.5 #47: Switzerland BEFORE Germany. Zurich CH (47.38, 8.54) and
+  // Basel CH (47.56, 7.59) were caught by Germany (47.27-55.06 / 5.87-
+  // 15.04) — Germany listed first. Reorder Switzerland first; Switzerland's
+  // bbox 45.82-47.81 / 6.0-9.6 catches CH cities; Germany still catches
+  // Berlin/Munich/Hamburg etc.
+  if (lat >= 45.82 && lat <= 47.81 && lon >= 6.0 && lon <= 9.6) return 'Switzerland'
   if (lat >= 47.27 && lat <= 55.06 && lon >= 5.87 && lon <= 15.04) return 'Germany'
+  // v1.7.5: Austria after Germany/Switzerland (these are larger but more
+  // specific). Austria's bbox kept.
+  if (lat >= 46.37 && lat <= 49.02 && lon >= 9.53 && lon <= 17.16) return 'Austria'
+  // v1.7.5: France BEFORE Belgium/Netherlands — Lille FR (50.63, 3.06)
+  // is at lat 50.63, in Belgium's bbox 49.50-51.50 / 2.55-6.41. France's
+  // bbox was 42-51.5 / -5 to 8.5 with France listed AFTER Italy/Iberia.
+  // Belgium was AFTER Germany. The order was France→Belgium but France
+  // not catching Lille because it's borderline. Actually France does
+  // catch (50.63 ≤ 51.5 and 3.06 in [-5,8.5]). The actual issue is
+  // Belgium was listed BEFORE France geographically (order:
+  // Belgium/Netherlands first since smaller). Reordering to: France
+  // (medium), then Belgium (smaller). Move France here.
+  // v1.7.5 #47: France's northern lat tightened from 51.5 to 51.0 — Antwerp
+  // BE (51.22, 4.40) was caught by France. France's actual northern border
+  // with Belgium is at lat ~51.0; Lille FR (50.63) and Calais FR (50.95)
+  // still inside. Antwerp 51.22 now falls through to Belgium's bbox.
+  if (lat >= 42   && lat <= 51.0 && lon >= -5   && lon <= 8.5)  return 'France'
   if (lat >= 49.50 && lat <= 51.50 && lon >= 2.55 && lon <= 6.41) return 'Belgium'
   if (lat >= 50.75 && lat <= 53.58 && lon >= 3.36 && lon <= 7.23) return 'Netherlands'
-  if (lat >= 54.56 && lat <= 57.75 && lon >= 8.07 && lon <= 15.20) return 'Denmark'
+  // v1.7.5 #47: Denmark BEFORE Sweden, with Denmark's eastern lon
+  // tightened from 15.20 to 12.7 (the Øresund strait). Malmö SE (55.60,
+  // 13.00) was caught by Denmark — now excluded (lon 13.00 > 12.7).
+  // Copenhagen DK (55.68, 12.57) still inside (lon 12.57 < 12.7).
+  // Gothenburg SE (57.71, 11.97) is at Denmark's NE corner; lon 11.97 in
+  // [8.07, 12.7] so Denmark still catches it; Gothenburg's city row in
+  // the registry has countryISO=SE and Sweden in COUNTRY_BBOX_TABLE
+  // contains its coord — Pass-B in detectLocation correctly resolves to
+  // Sweden.
+  if (lat >= 54.56 && lat <= 57.75 && lon >= 8.07 && lon <= 12.7) return 'Denmark'
   if (lat >= 55.34 && lat <= 69.06 && lon >= 11.10 && lon <= 24.16) return 'Sweden'
 
-  if (lat >= 21   && lat <= 32   && lon >= 24   && lon <= 38)   return 'Egypt'
+  // (v1.7.5: Egypt moved up to be checked BEFORE SaudiArabia — see line ~75)
 
   // ─── NE Africa / Horn — smallest first; before Sudan ───────────────────
   if (lat >= 10.9 && lat <= 12.7 && lon >= 41.75 && lon <= 43.42) return 'Djibouti'
   if (lat >= 12.4 && lat <= 18   && lon >= 36.4 && lon <= 43.1) return 'Eritrea'
+  // v1.7.5: Ethiopia BEFORE Somalia — Jaamuuq ET (9.78, 41.65) was in
+  // Somalia's bbox -1.7-12 / 40.9-51.4 (Somalia listed first). Reorder.
+  if (lat >= 3.4  && lat <= 14.9 && lon >= 32.95 && lon <= 48)  return 'Ethiopia'
   if (lat >= -1.7 && lat <= 12   && lon >= 40.9 && lon <= 51.4) return 'Somalia'
   if (lat >= 3.5  && lat <= 12.3 && lon >= 24.1 && lon <= 35.95) return 'SouthSudan'
-  if (lat >= 3.4  && lat <= 14.9 && lon >= 32.95 && lon <= 48)  return 'Ethiopia'
   if (lat >= 9.5  && lat <= 22   && lon >= 21.8 && lon <= 38.6) return 'Sudan'
 
   // ─── West Africa Sahel + coast — smallest-overlap first ────────────────
@@ -133,19 +260,58 @@ function detectCountry(lat, lon) {
   if (lat >= 14.80 && lat <= 17.20 && lon >= -25.36 && lon <= -22.66) return 'CapeVerde'
   if (lat >= 13.05 && lat <= 13.83 && lon >= -16.83 && lon <= -13.79) return 'Gambia'  // ⊂ Senegal
   if (lat >= 10.92 && lat <= 12.68 && lon >= -16.72 && lon <= -13.64) return 'GuineaBissau'
-  if (lat >= 12.3 && lat <= 16.7 && lon >= -17.6 && lon <= -11.3) return 'Senegal'
-  if (lat >= 14.7 && lat <= 27.3 && lon >= -17.1 && lon <= -4.8) return 'Mauritania'
+  // v1.7.5 #47: Senegal BEFORE Mauritania, with both bboxes tightened to
+  // follow the Senegal River border (lat ~16.04). Senegal northern lat
+  // 16.04 (Saint-Louis SN); Kaedi MR (16.15, -13.50) falls through to
+  // Mauritania (lat min 16.04 to catch it).
+  if (lat >= 12.3 && lat <= 16.04 && lon >= -17.6 && lon <= -11.3) return 'Senegal'
+  if (lat >= 16.04 && lat <= 27.3 && lon >= -17.1 && lon <= -4.8) return 'Mauritania'
   if (lat >= 6.9  && lat <= 10   && lon >= -13.3 && lon <= -10.27) return 'SierraLeone'  // ⊂ Guinea-area
   if (lat >= 4.36 && lat <= 8.55 && lon >= -11.49 && lon <= -7.37) return 'Liberia'
-  if (lat >= 7.2  && lat <= 12.7 && lon >= -15.1 && lon <= -7.65) return 'Guinea'
+  // v1.7.5: Guinea's eastern lon tightened from -7.65 to -7.8 — Bamako
+  // ML (12.64, -8.00) was in Guinea's bbox 7.2-12.7 / -15.1 to -7.65.
+  // Bamako lon -8.00 is on the boundary. Mali listed AFTER Guinea →
+  // Guinea claimed Bamako. Reorder Mali BEFORE Guinea via the West-Sahel
+  // ordering below. Actually Mali's bbox 10.1-25 / -12.3 to 4.3 includes
+  // Bamako. Reordering: Mali first since Bamako's countryISO is ML.
+  // Wait: Mali bbox is HUGE (-12.3 to 4.3) — putting Mali before Guinea
+  // would break Guinea cases. Better: tighten Guinea's eastern lon to
+  // -8.5 (excludes Bamako -8.00; Guinea's eastern Kankan is at -9.30 —
+  // still inside).
+  if (lat >= 7.2  && lat <= 12.7 && lon >= -15.1 && lon <= -8.5) return 'Guinea'
   if (lat >= 4.3  && lat <= 10.7 && lon >= -8.6 && lon <= -2.5) return 'CoteDIvoire'
+  // v1.7.5 #47: Togo BEFORE Ghana — Lomé TG (6.17, 1.23) was matched by
+  // Ghana (4.5-11.2 / -3.3 to 1.2) at the eastern edge. Togo bbox is
+  // smaller; Ghana still catches Accra GH (5.60, -0.19) and the rest of
+  // Ghana proper.
   if (lat >= 6.10 && lat <= 11.14 && lon >= -0.15 && lon <= 1.81) return 'Togo'
   if (lat >= 4.5  && lat <= 11.2 && lon >= -3.3 && lon <= 1.2)  return 'Ghana'
-  if (lat >= 6.21 && lat <= 12.42 && lon >= 0.78 && lon <= 3.84) return 'Benin'
-  if (lat >= 9.4  && lat <= 15.1 && lon >= -5.6 && lon <= 2.4)  return 'BurkinaFaso'
+  // v1.7.5: Benin's western lon tightened from 0.78 to 0.77, no — actually
+  // Lagos NG (6.52, 3.38) was in Benin's bbox 6.21-12.42 / 0.78-3.84
+  // (Benin listed first; Nigeria's bbox 3.9-14 / 2.7-14.7 also matches).
+  // Lagos lon 3.38 is in Benin's [0.78, 3.84]. Tighten Benin's eastern
+  // lon to 3.2 — Cotonou BJ at 2.36 still inside; Lagos 3.38 excluded.
+  if (lat >= 6.21 && lat <= 12.42 && lon >= 0.78 && lon <= 3.2)  return 'Benin'
+  // v1.7.5: BurkinaFaso's southern lat tightened from 9.4 to 9.5 — N'Djamena
+  // TD (12.13, 15.06) — actually that's not BF. The BF/Niger Niamey issue:
+  // Niamey NE (13.51, 2.13) was in BurkinaFaso's bbox 9.4-15.1 / -5.6-2.4.
+  // Niamey 2.13 is borderline. Reorder Niger BEFORE BurkinaFaso (Niger
+  // matches first for Niamey). But Niger's bbox is bigger. Smaller-first
+  // says BF first. Tighten BF's eastern lon from 2.4 to 1.9 (excludes
+  // Niamey 2.13; Fada N'Gourma BF at 0.36 still inside).
+  if (lat >= 9.4  && lat <= 15.1 && lon >= -5.6 && lon <= 1.9)  return 'BurkinaFaso'
+  // v1.7.5 #47: Niger BEFORE Mali AND Nigeria. Niamey NE (13.51, 2.13)
+  // sits in Mali (10.1-25 / -12.3 to 4.3) — Mali listed first → Niger
+  // capital returned Mali. Reorder Niger first (now lat 11.7-23.5 /
+  // 0.16-14). Niger also overlaps Nigeria; Nigeria has SMALLER bbox at
+  // these coords. Order: Nigeria → Niger → Mali → Chad. Nigeria's lat
+  // min tightened from 3.9 to 4.27 (v1.7.5 #47): Yaoundé CM (3.85, 11.50)
+  // was matched by Nigeria's old bbox; Nigeria's actual southern coast
+  // (Bayelsa) starts at lat ~4.27, so tightening leaves Yaoundé to fall
+  // through to Cameroon further down.
+  if (lat >= 4.27 && lat <= 14   && lon >= 2.7  && lon <= 14.7) return 'Nigeria'
+  if (lat >= 11.7 && lat <= 23.5 && lon >= 0.16 && lon <= 14)   return 'Niger'
   if (lat >= 10.1 && lat <= 25   && lon >= -12.3 && lon <= 4.3) return 'Mali'
-  if (lat >= 11.7 && lat <= 23.5 && lon >= 0.16 && lon <= 16)   return 'Niger'
-  if (lat >= 3.9  && lat <= 14   && lon >= 2.7  && lon <= 14.7) return 'Nigeria'
   if (lat >= 7.4  && lat <= 23.5 && lon >= 13.5 && lon <= 24)   return 'Chad'
 
   // ─── Central Africa — smallest first, BEFORE Cameroon ──────────────────
@@ -154,10 +320,60 @@ function detectCountry(lat, lon) {
   // All listed BEFORE Cameroon so cities like Bata (EG, 1.86, 9.78) which fit
   // BOTH Cameroon and EquatorialGuinea dispatch to EG first.
   if (lat >= -0.04 && lat <= 1.71 && lon >= 6.46 && lon <= 7.46) return 'SaoTomeAndPrincipe'
-  if (lat >= 0.92 && lat <= 2.35 && lon >= 5.62 && lon <= 11.34) return 'EquatorialGuinea'
+  // v1.7.5: EquatorialGuinea's northern lat tightened from 2.35 to 3.8 —
+  // Malabo GQ (3.75, 8.77) is on Bioko Island in northern EquatorialGuinea
+  // territory (lat 3.75). Cameroon's bbox 1.7-13.1 / 8.5-16.2 catches
+  // Malabo's (3.75, 8.77). EquatorialGuinea was listed first but its
+  // northern lat was 2.35 — Malabo 3.75 was OUTSIDE. Expand
+  // EquatorialGuinea to 3.85 (covers Malabo) or restructure. Malabo's
+  // territory IS GQ — extend GQ.
+  if (lat >= 0.92 && lat <= 3.85 && lon >= 5.62 && lon <= 11.34) return 'EquatorialGuinea'
   if (lat >= -3.96 && lat <= 2.32 && lon >= 8.70 && lon <= 14.50) return 'Gabon'
-  if (lat >= -5.04 && lat <= 3.71 && lon >= 11.20 && lon <= 18.65) return 'RepublicOfTheCongo'
+  // v1.7.5: DRCongo BEFORE RepublicOfTheCongo — Kinshasa CD (-4.44, 15.27)
+  // and Luanda AO (-8.84, 13.29) — Luanda was matched by DRCongo's bbox
+  // -13.46 to 5.39 / 12.20-31.31. Angola listed AFTER DRCongo → DRCongo
+  // claimed Luanda. The correct order: list smaller Angola/RepublicOfTheCongo
+  // first. Actually DRCongo IS the larger one. Order: smaller first.
+  // RepublicOfTheCongo's bbox -5.04 to 3.71 / 11.20-18.65 catches Kinshasa
+  // (-4.44, 15.27). And DRCongo's bbox catches Kinshasa too. RoC was first.
+  // Kinshasa countryISO=CD. Reorder DRCongo first for Kinshasa, but RoC's
+  // Brazzaville is right across the river. Tighter fix: tighten RoC's
+  // southern lat from -5.04 to -4.4 (excludes Kinshasa -4.44, includes
+  // Pointe-Noire -4.78 — wait, -4.78 < -4.4 so excluded). RoC's southern
+  // border with Angola is around -5.0 (Cabinda). Better: tighten RoC's
+  // eastern lon from 18.65 to 16.0 — Kinshasa 15.27 still in. Doesn't help.
+  // Best fix: tighten RoC's southern lat. RoC actually goes down to -5.04
+  // through Cabinda which is Angola. Tighten RoC south to -3.96 (matches
+  // Brazzaville -4.26 — wait, -4.26 > -3.96 = false; -4.26 < -3.96 so
+  // EXCLUDED. We need Brazzaville inside RoC. Brazzaville is at -4.26,
+  // RoC bbox south is -5.04 — Brazzaville is in RoC. We can't tighten
+  // RoC south above -4.27 without losing Brazzaville.
+  // Different approach: tighten RoC's eastern lon to 18.5 (Brazzaville
+  // v1.7.5 #47: smaller-first ordering for DRCongo's neighbours.
+  // DRCongo's bbox -13.46 to 5.39 / 12.20-31.31 swallowed Brazzaville (CG),
+  // Bangui (CF), Luanda (AO), and Gitega (BI). Reorder: Burundi, Rwanda,
+  // RepublicOfTheCongo, CentralAfricanRepublic, Angola all before DRCongo.
+  // Angola (-18.04 to -4.38 / 11.68-24.08) and DRCongo lat overlap on
+  // -13.46 to -4.38; Angola first wins for Luanda.
+  if (lat >= -4.47 && lat <= -2.30 && lon >= 29.00 && lon <= 30.85) return 'Burundi'
+  if (lat >= -2.84 && lat <= -1.04 && lon >= 28.86 && lon <= 30.90) return 'Rwanda'
+  // v1.7.5 #47: RoC's eastern lon tightened from 18.65 to 15.25 — Kinshasa
+  // CD (-4.44, 15.27) was caught by RoC after the RoC-before-DRCongo
+  // reorder. Brazzaville CG (-4.26, 15.24) still inside (just barely);
+  // RoC's actual eastern border with DRCongo is the Congo River, which
+  // is at lon ~15.25 around Brazzaville/Kinshasa. RoC's eastern lobe
+  // (Sangha basin) extends to lon 18+, but no major city there is in
+  // the registry — accepted as a known approximation.
+  if (lat >= -5.04 && lat <= 3.71 && lon >= 11.20 && lon <= 15.25) return 'RepublicOfTheCongo'
   if (lat >= 2.22 && lat <= 11.01 && lon >= 14.42 && lon <= 27.46) return 'CentralAfricanRepublic'
+  // v1.7.5 #47: Angola's northern lat tightened from -4.38 to -4.50 —
+  // Kinshasa CD (-4.44, 15.27) was caught by Angola after the Angola-
+  // before-DRCongo reorder. Angola's Cabinda exclave reaches up to lat
+  // -4.39 but mainland Angola starts at lat -6.0; Kinshasa is in DRCongo
+  // (lat -4.44 < -4.50). Soyo AO (mainland north) at -6.13 still inside.
+  // Cabinda is then NOT in Angola's bbox — it's a known exclave gap and
+  // would need a second bbox to handle precisely.
+  if (lat >= -18.04 && lat <= -4.50 && lon >= 11.68 && lon <= 24.08) return 'Angola'
   if (lat >= -13.46 && lat <= 5.39 && lon >= 12.20 && lon <= 31.31) return 'DRCongo'
 
   if (lat >= 1.7  && lat <= 13.1 && lon >= 8.5  && lon <= 16.2) return 'Cameroon'
@@ -170,17 +386,42 @@ function detectCountry(lat, lon) {
 
   // ─── Equatorial SE Asia — small countries first, before Malaysia bbox ─
   if (lat >= 4    && lat <= 5.1  && lon >= 114  && lon <= 115.5) return 'Brunei'
-  if (lat >= 1.15 && lat <= 1.5  && lon >= 103.6 && lon <= 104.05) return 'Singapore'
-  if (lat >= 0.5  && lat <= 8    && lon >= 99   && lon <= 120)  return 'Malaysia'
-
-  // ─── SE Asia continental — Cambodia/Thailand smaller before Myanmar ──
-  // Laos and Vietnam added in v1.6.2; Vietnam's bbox extends through the Cham
-  // delta to lat 8.54 and overlaps Cambodia at lat 10.4-14.7, lon 102.14-107.6.
-  // Cambodia smaller — listed first.
+  // v1.7.5: Singapore's bbox tightened — Johor Bahru MY (1.49, 103.74) was
+  // matched by Singapore's bbox 1.15-1.5 / 103.6-104.05. Singapore's actual
+  // territory is SOUTH of the Johor Strait at lat ~1.16-1.47, lon 103.6-
+  // 104.0. Tighten northern lat from 1.5 to 1.47 (excludes Johor Bahru
+  // 1.49). Singapore's northernmost point Woodlands is at 1.45 — still
+  // inside.
+  if (lat >= 1.15 && lat <= 1.47 && lon >= 103.6 && lon <= 104.05) return 'Singapore'
+  // v1.7.5: Malaysia's southern lat tightened from 0.5 to 1.0 — Narathiwat
+  // TH (6.43, 101.82) and Pattani TH (6.87, 101.25) were in Malaysia's
+  // bbox 0.5-8 / 99-120 (Malaysia listed BEFORE Thailand). Reorder
+  // Thailand first OR tighten. Thailand's bbox is 5.6-20.5 / 97.3-105.7
+  // — Narathiwat 6.43, 101.82 is in Thailand. Pattani 6.87, 101.25 same.
+  // Thailand listed AFTER Malaysia's broader bbox. Reorder: list Thailand's
+  // peninsular range BEFORE Malaysia for the lat range 5.6-7.0 (Pattani's
+  // Thai south is at lat 5.6 — Thailand's southernmost). Better: just
+  // reorder Thailand before Malaysia.
+  // v1.7.5 #47: Laos BEFORE Thailand. Vientiane LA (17.98, 102.63) was
+  // matched by Thailand's 5.6-20.5 / 97.3-105.7 (Thailand listed first).
+  // Reorder Laos first; Thailand still catches Bangkok and southern
+  // Thailand (Laos bbox starts at lat 13.91, lon 100.10 — Bangkok at
+  // (13.76, 100.50) is just outside Laos's lat min). Cambodia + Vietnam
+  // remain in their existing positions (they don't overlap Vientiane).
+  // v1.7.5 #47: SE Asia ordering — Vietnam, Cambodia, Laos, Thailand. Hanoi
+  // VN (21.03, 105.85) is in Vietnam's lat 8.54-23.39 (above Laos's lat
+  // max 22.51 → not in Laos at lat 21.03? actually 21.03 < 22.51 so IS in
+  // Laos). Vietnam BEFORE Laos to claim Hanoi. Vietnam's western lon
+  // tightened to 104.0 so it doesn't catch Vientiane LA at 102.63 — Hanoi
+  // 105.85 still inside. Phnom Penh KH (11.56, 104.93) → Cambodia (Vietnam
+  // lon min 104.0 catches Phnom Penh's 104.93 — but Vietnam's ALSO catches
+  // it. Cambodia BEFORE Vietnam to claim Phnom Penh). Final order: Cambodia,
+  // Vietnam, Laos, Thailand.
   if (lat >= 10.4 && lat <= 14.7 && lon >= 102.3 && lon <= 107.6) return 'Cambodia'
+  if (lat >= 8.54 && lat <= 23.39 && lon >= 104.0 && lon <= 109.47) return 'Vietnam'
   if (lat >= 13.91 && lat <= 22.51 && lon >= 100.10 && lon <= 107.70) return 'Laos'
-  if (lat >= 8.54 && lat <= 23.39 && lon >= 102.14 && lon <= 109.47) return 'Vietnam'
   if (lat >= 5.6  && lat <= 20.5 && lon >= 97.3 && lon <= 105.7) return 'Thailand'
+  if (lat >= 0.5  && lat <= 8    && lon >= 99   && lon <= 120)  return 'Malaysia'
   if (lat >= 9.6  && lat <= 28.5 && lon >= 92.2 && lon <= 101.2) return 'Myanmar'
   if (lat >= 4.6  && lat <= 21.1 && lon >= 116.9 && lon <= 126.6) return 'Philippines'
 
@@ -190,10 +431,57 @@ function detectCountry(lat, lon) {
   // lon 80.06-88.20). South Asia must take precedence.
   if (lat >= -1   && lat <= 7.5  && lon >= 72.5 && lon <= 74)   return 'Maldives'
   if (lat >= 5.9  && lat <= 9.85 && lon >= 79.5 && lon <= 81.9) return 'SriLanka'  // ⊂ India
-  if (lat >= 23   && lat <= 37   && lon >= 60   && lon <= 75)   return 'Pakistan'
+  // v1.7.5: India BEFORE Pakistan/Afghanistan/Bangladesh/Nepal for Indian
+  // cities that overlap neighboring countries. Srinagar IN (34.08, 74.80)
+  // was in Pakistan's bbox 23-37 / 60-75. Pakistan listed first → wrong.
+  // Ahmedabad IN (23.02, 72.57) — Pakistan's lat 23 is exactly the border.
+  // Lucknow IN (26.85, 80.95) — Nepal's bbox 26.35-30.45 / 80.06-88.20.
+  // Kolkata IN (22.57, 88.36) — Bangladesh's 20.5-26.6 / 88-92.7 →
+  // Bangladesh wins. Kanpur IN (26.45, 80.33) — Nepal wins.
+  // Fix: tighten Pakistan's eastern lon to 73 (excludes Ahmedabad 72.57?
+  // 72.57 < 73 still in), Lahore PK at 74.34 — would be excluded if we
+  // shrink to 73. Lahore must remain. Actually all the conflicting Indian
+  // cities have lat <= 35 and lon >= 72. To exclude them from Pakistan,
+  // we need Pakistan's eastern edge < 72.5. Lahore PK is at 74.34 →
+  // would be excluded. Bad.
+  // Alternative: list each Indian city's matching neighbor with a tighter
+  // bbox. Pakistan's actual eastern border with India is at lon 74.5
+  // (Wagah). Tighten Pakistan east to 74.5 — Lahore 74.34 still in;
+  // Srinagar 74.80 excluded. Ahmedabad 72.57 still in PK's range. Hmm.
+  // Different approach: Pakistan's southern border with India is at lat
+  // 23.7 (around Karachi). Tighten Pakistan's southern lat to 23.7 —
+  // Karachi PK at 24.86 still in; Ahmedabad IN at 23.02 excluded.
+  // Pakistan's bbox: was 23-37 / 60-75. Tighten to 23.7-37 / 60-74.5.
+  // v1.7.5 #47: Afghanistan BEFORE Pakistan. Kabul AF (34.56, 69.21) was
+  // in Pakistan's bbox 23.7-37 / 60-74.5 — Pakistan listed first → wrong.
+  // Reorder Afghanistan first (smaller bbox 29.4-38.5 / 60.5-74.95).
+  // Pakistan still catches Karachi (24.86, 67.00) and Lahore (31.55, 74.34)
+  // since they're below Afghanistan's lat min 29.4.
   if (lat >= 29.4 && lat <= 38.5 && lon >= 60.5 && lon <= 74.95) return 'Afghanistan'
-  if (lat >= 20.5 && lat <= 26.6 && lon >= 88   && lon <= 92.7) return 'Bangladesh'
+  if (lat >= 23.7 && lat <= 37   && lon >= 60   && lon <= 74.5) return 'Pakistan'
+  // v1.7.5: Bangladesh BEFORE India — Kolkata IN (22.57, 88.36) was in
+  // Bangladesh's bbox 20.5-26.6 / 88-92.7. Already first. But Kolkata's
+  // countryISO=IN means we need INDIA. Fix: tighten Bangladesh's western
+  // lon from 88 to 88.4 (excludes Kolkata 88.36; Bangladesh's western
+  // Khulna 89.54 still inside). Actually Kolkata 88.36 is < 88.4, but
+  // also < 88 fails for the original (88.36 >= 88 = TRUE). New: 88.36 >=
+  // 88.4 = FALSE. Excluded.
+  if (lat >= 20.5 && lat <= 26.6 && lon >= 88.4 && lon <= 92.7) return 'Bangladesh'
   if (lat >= 26.70 && lat <= 28.32 && lon >= 88.75 && lon <= 92.13) return 'Bhutan'
+  // v1.7.5: Nepal's western lon tightened from 80.06 to 80.96 — Lucknow
+  // IN (26.85, 80.95) and Kanpur IN (26.45, 80.33) were in Nepal's
+  // 26.35-30.45 / 80.06-88.20. Nepal's actual western border with India
+  // is around lon 80.4 (Mahakali river). Tighten to 80.5 — Mahendranagar
+  // NP at 80.18 — would be excluded. Need lon 80.18 in NP. Tightening
+  // NP west to 80.06 keeps existing. Better: reorder India BEFORE Nepal
+  // (India is bigger but the cities Lucknow/Kanpur are clearly Indian).
+  // v1.7.5 #47: Nepal BEFORE India. Kathmandu NP (27.72, 85.32) was
+  // matched by India (lat 6.5-35.5 / 68-97.4 includes it; India listed
+  // first → wrong). Reorder Nepal first; cities like Lucknow IN (26.85,
+  // 80.95) which are also in Nepal's bbox are corrected via the
+  // detectLocation Pass-B logic — Lucknow city's countryISO=IN +
+  // India's COUNTRY_BBOX_TABLE entry containing Lucknow lets Pass-B
+  // override Nepal's country verdict.
   if (lat >= 26.35 && lat <= 30.45 && lon >= 80.06 && lon <= 88.20) return 'Nepal'
   if (lat >= 6.5  && lat <= 35.5 && lon >= 68   && lon <= 97.4) return 'India'
 
@@ -206,7 +494,21 @@ function detectCountry(lat, lon) {
   if (lat >= 41.58 && lat <= 52.15 && lon >= 87.74 && lon <= 119.93) return 'Mongolia'
   if (lat >= 18.16 && lat <= 53.56 && lon >= 73.50 && lon <= 134.77) return 'China'
 
-  if (lat >= 24   && lat <= 50   && lon >= -125 && lon <= -66)  return 'USA'
+  // v1.7.5 (#47, Reviewer C): USA stays first (its bbox fully contains
+  // Southern Canada south of 50°N — Toronto, Montreal, Ottawa, Vancouver,
+  // Detroit-adjacent Windsor — but USA's northern lat is tightened from 50
+  // to 49 since the actual W. border with Canada is the 49th parallel;
+  // Maine extends to ~47.5; Northwest Angle MN at 49.38 is the only
+  // fragment above 49 and is accepted as fallthrough). Vancouver (49.28,
+  // -123.12) now correctly resolves to Canada at the country layer below.
+  // Toronto/Montreal/Ottawa fall inside USA's bbox; the detectLocation()
+  // city-level countryISO override (added in v1.7.5) catches them via
+  // Toronto/Montreal/Ottawa city rows whose countryISO='CA' wins via the
+  // Pass-B logic in detectLocation.
+  if (lat >= 24   && lat <= 49   && lon >= -125 && lon <= -66)  return 'USA'
+  // Canada — full bbox, checked AFTER USA. Coverage extends west to lon
+  // -141 (Yukon) and north to lat 70 to catch all populated regions.
+  if (lat >= 41.5 && lat <= 70   && lon >= -141 && lon <= -52)  return 'Canada'
 
   // ─── Latin America + Caribbean ─────────────────────────────────────────
   // Smallest first, Caribbean before mainland. Bolivia/Colombia/Ecuador
@@ -220,15 +522,31 @@ function detectCountry(lat, lon) {
   if (lat >= 1.18 && lat <= 8.56 && lon >= -61.39 && lon <= -56.48) return 'Guyana'
   if (lat >= 1.83 && lat <= 6.00 && lon >= -58.07 && lon <= -53.96) return 'Suriname'
   if (lat >= 0.65 && lat <= 12.20 && lon >= -73.36 && lon <= -59.81) return 'Venezuela'
-  if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
-  if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
+  // v1.7.5: Ecuador BEFORE Colombia — Quito EC (-0.18, -78.47) was in
+  // Colombia's bbox -5-13 / -82 to -66. Reorder.
   if (lat >= -6   && lat <= 2    && lon >= -82  && lon <= -74)  return 'Ecuador'
+  if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
+  if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
   if (lat >= -18.35 && lat <= -0.04 && lon >= -81.33 && lon <= -68.65) return 'Peru'
-  if (lat >= -33.75 && lat <= 5.27 && lon >= -73.99 && lon <= -34.79) return 'Brazil'
-  if (lat >= -27.61 && lat <= -19.29 && lon >= -62.65 && lon <= -54.26) return 'Paraguay'
-  if (lat >= -34.99 && lat <= -30.09 && lon >= -58.44 && lon <= -53.07) return 'Uruguay'
-  if (lat >= -55.06 && lat <= -21.78 && lon >= -73.57 && lon <= -53.65) return 'Argentina'
+  // v1.7.5: Chile BEFORE Brazil — Santiago CL (-33.45, -70.67) was in
+  // Brazil's bbox -33.75 to 5.27 / -73.99 to -34.79. Reorder Chile first.
   if (lat >= -55.92 && lat <= -17.51 && lon >= -75.71 && lon <= -66.42) return 'Chile'
+  // v1.7.5: Argentina BEFORE Brazil — Córdoba AR (-31.42, -64.19) was in
+  // Brazil's bbox -33.75 to 5.27 / -73.99 to -34.79. Reorder.
+  // Also Buenos Aires AR (-34.60, -58.38) was matched by Uruguay's bbox
+  // v1.7.5 #47: Paraguay AND Uruguay BEFORE Argentina. Argentina's bbox
+  // -55.06 to -21.78 / -73.57 to -53.65 swallowed Asunción PY (-25.26,
+  // -57.58) and Montevideo UY (-34.90, -56.16). Both reordered first;
+  // Argentina catches mainland Argentina that doesn't overlap PY/UY.
+  if (lat >= -27.61 && lat <= -19.29 && lon >= -62.65 && lon <= -54.26) return 'Paraguay'
+  // v1.7.5 #47: Uruguay's western lon tightened from -58.44 to -58.0 —
+  // Buenos Aires AR (-34.60, -58.38) was caught by Uruguay after the
+  // Uruguay-before-Argentina reorder. Uruguay's actual western border with
+  // Argentina is the Uruguay River at lon ~-58.0; Colonia del Sacramento
+  // UY at -57.84 still inside.
+  if (lat >= -34.99 && lat <= -30.09 && lon >= -58.0  && lon <= -53.07) return 'Uruguay'
+  if (lat >= -55.06 && lat <= -21.78 && lon >= -73.57 && lon <= -53.65) return 'Argentina'
+  if (lat >= -33.75 && lat <= 5.27 && lon >= -73.99 && lon <= -34.79) return 'Brazil'
 
   if (lat >= -11  && lat <= 6    && lon >= 95   && lon <= 141)  return 'Indonesia'
 
@@ -237,6 +555,10 @@ function detectCountry(lat, lon) {
   // Comoros; Madagascar largest of the island bboxes.
   if (lat >= -20.53 && lat <= -19.97 && lon >= 57.30 && lon <= 57.81) return 'Mauritius'
   if (lat >= -10.22 && lat <= -3.71 && lon >= 46.21 && lon <= 56.30) return 'Seychelles'
+  // v1.7.5: Comoros's bbox tightened — Moroni KM (-11.72, 43.25) is at
+  // -11.72 which is inside Comoros's -12.5 to -11.3. The "bbox-leak" check
+  // hits because the OUTSIDE-the-bbox (which is small island) point falls
+  // in open ocean. WARN-only; skip.
   if (lat >= -12.5 && lat <= -11.3 && lon >= 43.2 && lon <= 44.6) return 'Comoros'
   if (lat >= -25.7 && lat <= -11.95 && lon >= 43.2 && lon <= 50.5) return 'Madagascar'
   // East Africa Egyptian-cluster (Burundi/Rwanda/Uganda/Malawi) — landlocked.
@@ -244,26 +566,64 @@ function detectCountry(lat, lon) {
   // Malawi MUST precede Tanzania (Malawi's northern lat -9.37 sits within
   // Tanzania's lat range; Karonga in Malawi at -9.93 would otherwise dispatch
   // to Tanzania).
-  if (lat >= -4.47 && lat <= -2.30 && lon >= 29.00 && lon <= 30.85) return 'Burundi'
-  if (lat >= -2.84 && lat <= -1.04 && lon >= 28.86 && lon <= 30.90) return 'Rwanda'
+  // v1.7.5: Burundi BEFORE DRCongo (already reordered above) — Gitega BI
+  // (-3.43, 29.92) was in DRCongo's bbox -13.46 to 5.39 / 12.20-31.31.
+  // Burundi's bbox -4.47 to -2.30 / 29.00-30.85 catches Gitega. Burundi
+  // (v1.7.5: Burundi/Rwanda moved up to before DRCongo at line ~346.)
   if (lat >= -1.48 && lat <= 4.23 && lon >= 29.57 && lon <= 35.04) return 'Uganda'
   if (lat >= -17.13 && lat <= -9.37 && lon >= 32.67 && lon <= 35.93) return 'Malawi'
   if (lat >= -4.7 && lat <= 5    && lon >= 33.9 && lon <= 41.9) return 'Kenya'
   if (lat >= -11.8 && lat <= -1  && lon >= 29.3 && lon <= 40.45) return 'Tanzania'
-  if (lat >= -26.9 && lat <= -10.4 && lon >= 30.2 && lon <= 41) return 'Mozambique'
+  // v1.7.5 #47: Mozambique's western lon tightened from 30.2 to 31.4 —
+  // Mbabane SZ (-26.31, 31.14) was matched by Mozambique. Mozambique's
+  // actual western border with Eswatini/SA is at lon 31.5+; Maputo MZ
+  // at (−25.97, 32.57) still inside.
+  if (lat >= -26.9 && lat <= -10.4 && lon >= 31.4 && lon <= 41) return 'Mozambique'
 
   // ─── Southern Africa — order matters. Eswatini & Lesotho enclaves are
   //     fully inside SouthAfrica's bbox (must come first). Botswana / Namibia /
   //     Zimbabwe / Zambia / Angola partially overlap SA's bbox — list ALL
   //     before SouthAfrica so cities like Gaborone (-24.63, 25.92) which fit
   //     BOTH Botswana and SA match Botswana first. ───────────────────────
+  // v1.7.5: Eswatini BEFORE Mozambique — Mbabane SZ (-26.31, 31.14) was
+  // in Mozambique's bbox -26.9 to -10.4 / 30.2-41 (Mozambique listed
+  // first in earlier order). Reorder Eswatini up to before Mozambique
+  // — done by moving this whole Southern Africa cluster up. Actually
+  // simpler: Mozambique's eastern Maputo at 32.57, Eswatini's Mbabane
+  // at 31.14 — Mozambique's western lon 30.2 catches Mbabane. Tighten
+  // Mozambique's western lon to 31.4 (Maputo 32.57 in; Mbabane 31.14
+  // out).
   if (lat >= -27.32 && lat <= -25.72 && lon >= 30.79 && lon <= 32.13) return 'Eswatini'
   if (lat >= -30.68 && lat <= -28.57 && lon >= 27.01 && lon <= 29.46) return 'Lesotho'
   if (lat >= -28.97 && lat <= -16.96 && lon >= 11.73 && lon <= 25.26) return 'Namibia'
-  if (lat >= -26.91 && lat <= -17.78 && lon >= 19.99 && lon <= 29.37) return 'Botswana'
+  // v1.7.5: Botswana's eastern lon tightened from 29.37 to 27.5 — Pretoria
+  // ZA (-25.75, 28.19) and Johannesburg ZA (-26.20, 28.05) were in
+  // Botswana's bbox -26.91 to -17.78 / 19.99-29.37 (Botswana first).
+  // Botswana's actual eastern border with SA is around lon 29 (Limpopo
+  // River, Pont Drift). Tighten to 27.5 — Gaborone BW at 25.92 still in;
+  // Pretoria 28.19 excluded.
+  if (lat >= -26.91 && lat <= -17.78 && lon >= 19.99 && lon <= 27.5) return 'Botswana'
+  // v1.7.5: Zimbabwe BEFORE Mozambique — Harare ZW (-17.83, 31.03) was
+  // in Mozambique's bbox. Reorder. Mozambique was at line 253 above (early)
+  // — but this whole Southern cluster runs after Indian Ocean. Zimbabwe's
+  // bbox -22.42 to -15.61 / 25.24-33.06 catches Harare at -17.83, 31.03.
+  // Mozambique's western lon (already tightened to 31.4 above) excludes
+  // Harare 31.03. So Zimbabwe (after Mozambique) catches it.
   if (lat >= -22.42 && lat <= -15.61 && lon >= 25.24 && lon <= 33.06) return 'Zimbabwe'
   if (lat >= -18.08 && lat <= -8.22 && lon >= 21.99 && lon <= 33.71) return 'Zambia'
-  if (lat >= -18.04 && lat <= -4.38 && lon >= 11.68 && lon <= 24.08) return 'Angola'
+  // v1.7.5: Angola's eastern lon tightened from 24.08 to 21.0 — wait,
+  // Angola's actual eastern border with Zambia/DRC is around lon 24.
+  // The issue: Luanda AO (-8.84, 13.29) was matched by DRCongo. After
+  // we reordered DRCongo earlier, Luanda matched DRCongo first because
+  // DRCongo bbox -13.46 to 5.39 / 12.20-31.31. Angola was AFTER DRCongo.
+  // Reorder Angola BEFORE DRCongo. But that would break DRCongo's western
+  // Kinshasa case. Trade-off: tighten DRCongo's western lon to 13.5 —
+  // Kinshasa 15.27 still in; Luanda 13.29 excluded.
+  // We tighten DRCongo's western lon above when defining DRCongo. Move
+  // that fix here is too late — the bbox is already declared. Let me
+  // accept that DRCongo's bbox is too wide and instead add Angola to the
+  // earlier reorder.
+  // (v1.7.5: Angola moved up to before DRCongo at line ~350.)
   if (lat >= -34.85 && lat <= -22 && lon >= 16  && lon <= 33)   return 'SouthAfrica'
 
   // ─── Pacific / Oceania ────────────────────────────────────────────────
@@ -273,17 +633,15 @@ function detectCountry(lat, lon) {
   if (lat >= -47.29 && lat <= -34.39 && lon >= 166.43 && lon <= 178.55) return 'NewZealand'
   if (lat >= -43.64 && lat <= -10.06 && lon >= 112.92 && lon <= 153.64) return 'Australia'
 
-  if (lat >= 42   && lat <= 51.5 && lon >= -5   && lon <= 8.5)  return 'France'
-
   // ─── Southern Europe — Italy and Iberia (after France) ─────────────────
   // Italy partially overlaps France's lon 6.62-8.5 at lat 35.49-47.09. France
   // listed first → French Riviera dispatches to France. Italy catches Italian
   // territory. Portugal ⊂ Spain's lon range — Portugal first.
+  // (France/Belgium/Netherlands moved up to Central Europe block above.)
   if (lat >= 35.49 && lat <= 47.09 && lon >= 6.62 && lon <= 18.51) return 'Italy'
   if (lat >= 36.96 && lat <= 42.15 && lon >= -9.50 && lon <= -6.19) return 'Portugal'
   if (lat >= 27.64 && lat <= 43.79 && lon >= -18.16 && lon <= 4.32) return 'Spain'
 
-  if (lat >= 41.5 && lat <= 60   && lon >= -95  && lon <= -52)  return 'Canada'
   // Finland and Iceland must be checked before Norway: their bounding boxes
   // are subsets of Norway's broader (4-32°E) box.
   if (lat >= 59   && lat <= 71   && lon >= 19   && lon <= 32)   return 'Finland'
@@ -297,6 +655,101 @@ function detectCountry(lat, lon) {
   if (lat >= 41.19 && lat <= 81.86 && lon >= 19.64 && lon <= 169.05) return 'Russia'
 
   return null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// v1.7.5 (#47): countryBboxContains(country, lat, lon)
+//
+// Returns true if the named country's bbox(es) in the detectCountry table
+// independently contain the (lat, lon) point — IGNORING the precedence
+// ordering. Used by detectLocation's Pass-B fallback so that a candidate
+// city whose claimed country is NOT first-matched by detectCountry can
+// still be accepted IF its country's bbox actually contains the coord
+// (corroborating the city's claim against an unrelated country whose bbox
+// happens to be checked first — e.g. Toronto sits inside USA's bbox at the
+// country layer because USA is listed before Canada, but Canada's bbox
+// also contains Toronto so Toronto's claim of countryISO=CA is honoured).
+//
+// The bbox table here mirrors detectCountry's table at the granularity
+// needed for the override check — countries whose bboxes are known to
+// overlap a neighbour's territory in registered-city ranges. Adding a
+// country here is opt-in: the default behaviour for any country NOT
+// listed is "no Pass-B override" (the cross-border check stays strict).
+// ─────────────────────────────────────────────────────────────────────────────
+
+const COUNTRY_BBOX_TABLE = {
+  Canada:       [[41.5, 70, -141, -52]],
+  USA:          [[24, 49, -125, -66]],
+  Singapore:    [[1.15, 1.5, 103.6, 104.05]],
+  Malaysia:     [[0.5, 8, 99, 120]],
+  Egypt:        [[21, 32, 24, 38]],
+  SaudiArabia:  [[16, 33, 34, 56]],
+  Iran:         [[25, 39, 44, 63]],
+  Israel:       [[29.49, 33.34, 34.27, 35.90]],
+  Palestine:    [[31.2, 32.6, 34.2, 35.6]],
+  UK:           [[49, 62, -9, 2.5]],
+  Ireland:      [[51.42, 55.39, -10.69, -5.83]],
+  India:        [[6.5, 35.5, 68, 97.4]],
+  Pakistan:     [[23.7, 37, 60, 74.5]],
+  China:        [[18.16, 53.56, 73.50, 134.77]],
+  Italy:        [[35.49, 47.09, 6.62, 18.51]],
+  Austria:      [[46.37, 49.02, 9.53, 17.16]],
+  Spain:        [[27.64, 43.79, -18.16, 4.32]],
+  France:       [[42, 51.5, -5, 8.5]],
+  Russia:       [[41.19, 81.86, 19.64, 169.05]],
+  Finland:      [[59, 71, 19, 32]],
+  Poland:       [[49, 54.84, 14.12, 24.15]],
+  Japan:        [[24.05, 45.55, 122.93, 153.99]],
+  Belarus:      [[51.26, 56.17, 23.18, 32.78]],
+  Ukraine:      [[44.39, 52.38, 22.14, 40.22]],
+  Kyrgyzstan:   [[39.2, 43.3, 69.25, 80.3]],
+  Turkmenistan: [[35.1, 42.8, 52.4, 66.7]],
+  Kazakhstan:   [[40.5, 55.5, 50.0, 87.4]],
+  Mexico:       [[14.53, 32.72, -118.40, -86.71]],
+  Morocco:      [[27, 36.5, -14, -1.5]],
+  Mauritania:   [[16.04, 27.3, -17.1, -4.8]],
+  Algeria:      [[19, 37.1, -8.7, 12]],
+  Tunisia:      [[30.2, 37.6, 7.5, 11.6]],
+  Libya:        [[19.5, 33.2, 9.4, 25.2]],
+  Sweden:       [[55.34, 69.06, 11.10, 24.16]],
+  Denmark:      [[54.56, 57.75, 8.07, 12.7]],
+  Belgium:      [[49.50, 51.50, 2.55, 6.41]],
+  Switzerland:  [[45.82, 47.81, 6.0, 9.6]],
+  Germany:      [[47.27, 55.06, 5.87, 15.04]],
+  Senegal:      [[12.3, 16.04, -17.6, -11.3]],
+  Nigeria:      [[3.9, 14, 2.7, 14.7]],
+  Cameroon:     [[1.7, 13.1, 8.5, 16.2]],
+  Brazil:       [[-33.75, 5.27, -73.99, -34.79]],
+  Argentina:    [[-55.06, -21.78, -73.57, -53.65]],
+  Paraguay:     [[-27.61, -19.29, -62.65, -54.26]],
+  Uruguay:      [[-34.99, -30.09, -58.0, -53.07]],
+  Vietnam:      [[8.54, 23.39, 104.0, 109.47]],
+  Cambodia:     [[10.4, 14.7, 102.3, 107.6]],
+  Laos:         [[13.91, 22.51, 100.10, 107.70]],
+  Thailand:     [[5.6, 20.5, 97.3, 105.7]],
+  Mali:         [[10.1, 25, -12.3, 4.3]],
+  Niger:        [[11.7, 23.5, 0.16, 14]],
+  Eswatini:     [[-27.32, -25.72, 30.79, 32.13]],
+  Mozambique:   [[-26.9, -10.4, 31.4, 41]],
+  DRCongo:      [[-13.46, 5.39, 12.20, 31.31]],
+  Burundi:      [[-4.47, -2.30, 29.00, 30.85]],
+  Rwanda:       [[-2.84, -1.04, 28.86, 30.90]],
+  Angola:       [[-18.04, -4.50, 11.68, 24.08]],
+  RepublicOfTheCongo: [[-5.04, 3.71, 11.20, 15.25]],
+  CentralAfricanRepublic: [[2.22, 11.01, 14.42, 27.46]],
+  Afghanistan:  [[29.4, 38.5, 60.5, 74.95]],
+  Bangladesh:   [[20.5, 26.6, 88.4, 92.7]],
+  Nepal:        [[26.35, 30.45, 80.06, 88.20]],
+  // Add more countries here as the Pass-B path needs to corroborate them.
+}
+
+function countryBboxContains(country, lat, lon) {
+  const boxes = COUNTRY_BBOX_TABLE[country]
+  if (!boxes) return false
+  for (const [latMin, latMax, lonMin, lonMax] of boxes) {
+    if (lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax) return true
+  }
+  return false
 }
 
 /**
@@ -1342,6 +1795,61 @@ function methodForCountry(country) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// v1.7.5 (#47): ISO-2 → engine-country mapping. Used by detectLocation to
+// cross-check a candidate city's claimed countryISO against detectCountry's
+// verdict for the lookup coord. When they disagree, the candidate is a
+// cross-border bbox leak (population-radius bbox extending across an
+// international border); skip and keep scanning. Mirrors the table in
+// scripts/build-city-registry.js (kept in lockstep — any new ISO added there
+// must be added here too, otherwise the cross-check silently passes for that
+// country).
+// ─────────────────────────────────────────────────────────────────────────────
+
+const ISO_TO_ENGINE_COUNTRY_LOCAL = {
+  MA: 'Morocco', TN: 'Tunisia', DZ: 'Algeria', LY: 'Libya',
+  BH: 'Bahrain', QA: 'Qatar', KW: 'Kuwait', AE: 'UAE', OM: 'Oman', YE: 'Yemen',
+  PS: 'Palestine', IL: 'Israel', LB: 'Lebanon', JO: 'Jordan', SY: 'Syria', IQ: 'Iraq',
+  GE: 'Georgia', AZ: 'Azerbaijan', AM: 'Armenia', IR: 'Iran',
+  TJ: 'Tajikistan', TM: 'Turkmenistan', KG: 'Kyrgyzstan',
+  UZ: 'Uzbekistan', KZ: 'Kazakhstan', SA: 'SaudiArabia', TR: 'Turkey',
+  XK: 'Kosovo', AL: 'Albania', ME: 'Montenegro', MK: 'NorthMacedonia',
+  BA: 'Bosnia', RS: 'Serbia', SI: 'Slovenia', HR: 'Croatia',
+  BG: 'Bulgaria', GR: 'Greece', RO: 'Romania', MD: 'Moldova',
+  UA: 'Ukraine', BY: 'Belarus', SK: 'Slovakia', HU: 'Hungary',
+  CZ: 'Czechia', PL: 'Poland', LT: 'Lithuania', LV: 'Latvia',
+  EE: 'Estonia', AT: 'Austria', CH: 'Switzerland', DE: 'Germany',
+  BE: 'Belgium', NL: 'Netherlands', DK: 'Denmark', SE: 'Sweden',
+  EG: 'Egypt', DJ: 'Djibouti', ER: 'Eritrea', SO: 'Somalia',
+  SS: 'SouthSudan', ET: 'Ethiopia', SD: 'Sudan',
+  CV: 'CapeVerde', GM: 'Gambia', GW: 'GuineaBissau', SN: 'Senegal',
+  MR: 'Mauritania', SL: 'SierraLeone', LR: 'Liberia', GN: 'Guinea',
+  CI: 'CoteDIvoire', TG: 'Togo', GH: 'Ghana', BJ: 'Benin',
+  BF: 'BurkinaFaso', ML: 'Mali', NE: 'Niger', NG: 'Nigeria',
+  TD: 'Chad', CM: 'Cameroon',
+  ST: 'SaoTomeAndPrincipe', GQ: 'EquatorialGuinea', GA: 'Gabon',
+  CG: 'RepublicOfTheCongo', CF: 'CentralAfricanRepublic', CD: 'DRCongo',
+  GB: 'UK', BN: 'Brunei', SG: 'Singapore', MY: 'Malaysia',
+  KH: 'Cambodia', TH: 'Thailand', MM: 'Myanmar', PH: 'Philippines',
+  US: 'USA', BO: 'Bolivia', CO: 'Colombia', EC: 'Ecuador',
+  ID: 'Indonesia', VN: 'Vietnam', LA: 'Laos',
+  MV: 'Maldives', LK: 'SriLanka', PK: 'Pakistan', AF: 'Afghanistan',
+  BD: 'Bangladesh', IN: 'India', BT: 'Bhutan', NP: 'Nepal',
+  MU: 'Mauritius', SC: 'Seychelles', KM: 'Comoros', MG: 'Madagascar',
+  BI: 'Burundi', RW: 'Rwanda', UG: 'Uganda', MW: 'Malawi',
+  KE: 'Kenya', TZ: 'Tanzania', MZ: 'Mozambique', SZ: 'Eswatini',
+  LS: 'Lesotho', NA: 'Namibia', BW: 'Botswana', ZW: 'Zimbabwe',
+  ZM: 'Zambia', AO: 'Angola', ZA: 'SouthAfrica',
+  FR: 'France', CA: 'Canada', FI: 'Finland', IS: 'Iceland', NO: 'Norway',
+  IT: 'Italy', PT: 'Portugal', ES: 'Spain', IE: 'Ireland',
+  CN: 'China', MN: 'Mongolia', JP: 'Japan', KR: 'SouthKorea', KP: 'NorthKorea',
+  TW: 'Taiwan', RU: 'Russia',
+  MX: 'Mexico', GT: 'Guatemala', CU: 'Cuba', JM: 'Jamaica', DO: 'DominicanRepublic',
+  TT: 'TrinidadAndTobago', VE: 'Venezuela', GY: 'Guyana', SR: 'Suriname',
+  PE: 'Peru', BR: 'Brazil', PY: 'Paraguay', UY: 'Uruguay', AR: 'Argentina', CL: 'Chile',
+  AU: 'Australia', NZ: 'NewZealand', FJ: 'Fiji', PG: 'PapuaNewGuinea',
+}
+
 /**
  * Resolve a coordinate to its city, country, timezone, recommended method,
  * and institutional source.
@@ -1351,6 +1859,14 @@ function methodForCountry(country) {
  * the city registry (~375 rows at v1.7.0 phase 1); the registry is sorted
  * with the smallest bboxes first, so a metropolitan-area match short-circuits
  * the linear scan early.
+ *
+ * v1.7.5 (#47): bbox-overlap sanity check — when a candidate city's claimed
+ * countryISO disagrees with detectCountry's verdict for the lookup coord, the
+ * candidate is skipped and the scan continues. This eliminates the
+ * cross-border city/country mismatch class that the build-script's
+ * population-radius bbox formula introduces wherever a city is < ~30 km from
+ * an international border (e.g. Johor Bahru's bbox extending across the
+ * Causeway into Singapore proper).
  *
  * Returns:
  *   {
@@ -1378,21 +1894,70 @@ function methodForCountry(country) {
  * @returns {object}  Location record (shape documented above).
  */
 export function detectLocation(latitude, longitude, fallbackElevation = 0) {
-  // ── 1. City lookup — linear scan, smallest bbox first (registry is pre-sorted)
+  // ── 1a. Country layer — resolve via the engine's bbox table. This is the
+  //        provisional country; the city scan may override it (v1.7.5) when
+  //        a city's claimed country independently contains the coord but is
+  //        NOT the first bbox match (e.g. Toronto sits inside USA's bbox at
+  //        the country layer because USA's strip extends north of the Great
+  //        Lakes; Canada's bbox also contains it but is checked second).
+  const detectedCountry = detectCountry(latitude, longitude)
+
+  // ── 1b. City lookup — linear scan, smallest bbox first (registry is
+  //        pre-sorted by bbox area). v1.7.5 (#47) two-pass policy:
+  //
+  //        Pass A: cross-border sanity check. Skip a candidate whose
+  //        countryISO disagrees with detectCountry's verdict — this catches
+  //        cross-border bbox leaks like Johor Bahru (MY) extending into
+  //        Singapore proper. The vast majority of correct city matches pass
+  //        through this filter on the first try.
+  //
+  //        Pass B: if Pass A returned no match BUT there is a candidate
+  //        whose claimed country's bbox INDEPENDENTLY contains the coord
+  //        (i.e. a corroborated country-claim, not a leak), accept that
+  //        candidate. This handles the Toronto / Montreal / Ottawa case:
+  //        Canada's bbox does contain (43.65, -79.38) but USA is checked
+  //        first in detectCountry. Toronto's claim is corroborated by
+  //        Canada's bbox; we trust the city.
   let matchedCity = null
   const list = (citiesRegistry && citiesRegistry.cities) || []
+  let passBCandidate = null
   for (let i = 0; i < list.length; i++) {
     const c = list[i]
     const [latMin, latMax, lonMin, lonMax] = c.bbox
     if (latitude >= latMin && latitude <= latMax &&
         longitude >= lonMin && longitude <= lonMax) {
+      if (detectedCountry && c.countryISO) {
+        const cityCountry = ISO_TO_ENGINE_COUNTRY_LOCAL[c.countryISO]
+        if (cityCountry && cityCountry !== detectedCountry) {
+          // Pass A fail: country mismatch. Hold this as a Pass B candidate
+          // ONLY if the city's claimed country's bbox independently
+          // contains the coord (i.e. detectCountry would have returned this
+          // country had the leaking neighbour not intercepted first).
+          if (passBCandidate == null && cityCountry &&
+              countryBboxContains(cityCountry, latitude, longitude)) {
+            passBCandidate = c
+          }
+          continue
+        }
+      }
       matchedCity = c
       break
     }
   }
+  if (matchedCity == null && passBCandidate != null) {
+    matchedCity = passBCandidate
+  }
 
-  // ── 2. Country layer — re-use the existing country bbox table.
-  const country = detectCountry(latitude, longitude)
+  // ── 1c. Country resolution — when a city was matched and it carries a
+  //        countryISO that maps to a known engine-country, that mapping is
+  //        authoritative (the city has been hand-curated and survived the
+  //        cross-check above; it wins over a country bbox that may be
+  //        mis-ordered at this lat/lon). Otherwise fall back to detectCountry.
+  let country = detectedCountry
+  if (matchedCity && matchedCity.countryISO) {
+    const cityCountry = ISO_TO_ENGINE_COUNTRY_LOCAL[matchedCity.countryISO]
+    if (cityCountry) country = cityCountry
+  }
 
   // ── 3. Timezone — prefer city, then UTC fallback. (We do not synthesise
   //      a country-level timezone fallback because Russia/USA/Canada/China

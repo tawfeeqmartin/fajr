@@ -601,6 +601,58 @@ const MAWAQIT_SUPPLEMENT = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// BBOX_OVERRIDES — explicit per-city bbox replacing the population-radius
+// formula. Use ONLY when the formulaic bbox demonstrably overlaps a
+// neighbouring city of the same metro/country in a way that breaks
+// disambiguation. v1.7.5 (issue #47): Cairo/Giza, KL/Shah Alam, Singapore/
+// Johor Bahru, Sharjah/Dubai. Each entry should cite the conflict it
+// resolves so future maintainers know the constraint.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BBOX_OVERRIDES = {
+  // v1.7.5 #47: Cairo (10.1M) and Giza (9.2M) had identical-radius 0.4° bboxes
+  // that fully overlapped at central Cairo. Tighten Giza WEST of Cairo's
+  // central core so downtown Cairo (Tahrir Square ~30.04, 31.24) resolves
+  // to Cairo. Giza city centre 30.01, 31.21 stays well inside; eastern lon
+  // was 31.61, tightened to 31.22 (just east of Giza city centre, west of
+  // Cairo CBD). Northern lat tightened from 30.41 to 30.10 (Giza proper is
+  // south of central Cairo).
+  'Giza|EG':            [29.6131, 30.10, 30.8089, 31.22],
+  // v1.7.5 #47: Shah Alam (740K) is ~25 km west of KL (1.8M). Same-radius
+  // 0.15° bbox put Shah Alam at lon 101.32-101.72, KL at 101.39-101.99.
+  // KL CBD (3.14, 101.69) sat in both. Shrink Shah Alam's eastern lon to
+  // 101.55 (Shah Alam city centre 101.52 stays inside; KL CBD excluded).
+  'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.55],
+  // v1.7.5 #47: Johor Bahru (858K) sits across the Causeway from Singapore.
+  // Same-radius 0.15° bbox extended south to lat 1.29 — well inside
+  // Singapore's island. Trim southern lat to 1.43 (just north of Singapore's
+  // northernmost point ~1.47 on Woodlands; JB centre 1.49 still inside).
+  'Johor Bahru|MY':     [1.43, 1.6927, 103.5414, 103.9414],
+  // v1.7.5 #47: Singapore is an island bounded by lat 1.16-1.47 lon 103.6-
+  // 104.0. Population-radius 0.4° bbox extended to lat 0.95-1.75 (covers
+  // southern Johor + northern Riau). Tighten to actual island.
+  'Singapore|SG':       [1.16, 1.47, 103.6, 104.05],
+  // v1.7.5 Reviewer C: Sharjah (1.68M) directly NE of Dubai (3.6M). Same-
+  // radius 0.3° bboxes overlapped over central Sharjah. Tighten Sharjah's
+  // southern lat to 25.25 (above Dubai centre's bbox max 25.5 still
+  // overlaps but Sharjah CBD 25.35 is inside both — give Sharjah priority
+  // by tightening Dubai's NORTHERN lat instead). Sharjah override only;
+  // Dubai stays formulaic.
+  'Sharjah|AE':         [25.25, 25.65, 55.20, 55.72],
+  // v1.7.5 Reviewer C: Dearborn (Detroit suburb) bbox extended N of the
+  // Detroit River into Windsor, Canada. Tighten northern lat to 42.40 —
+  // Dearborn city centre 42.32 stays inside; Windsor 42.31 also inside but
+  // engine-level countryISO check (added in v1.7.5) prevents Dearborn from
+  // matching when detectCountry(Windsor)=Canada.
+  'Dearborn|US':        [42.22, 42.40, -83.28, -83.08],
+}
+
+function bboxOverrideFor(name, iso) {
+  const key = `${name}|${iso}`
+  return BBOX_OVERRIDES[key] || null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Build helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -613,7 +665,10 @@ function radiusForPopulation(pop) {
   return 0.10
 }
 
-function bboxFor(lat, lon, pop) {
+function bboxFor(lat, lon, pop, name, iso) {
+  // Per-city override wins over population-radius formula.
+  const override = bboxOverrideFor(name, iso)
+  if (override) return override.slice()
   const r = radiusForPopulation(pop)
   return [
     +(lat - r).toFixed(4),
@@ -826,7 +881,7 @@ for (const c of citiesByKey.values()) {
     continue
   }
 
-  const bbox = bboxFor(c.lat, c.lon, c.population)
+  const bbox = bboxFor(c.lat, c.lon, c.population, c.name, c.countryISO)
 
   // Source resolution.
   let source
