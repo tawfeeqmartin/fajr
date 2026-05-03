@@ -189,6 +189,56 @@ export function detectLocation(
 ): Location
 
 // ─────────────────────────────────────────────────────────────────────────────
+// nearestCity — kNN-fuzzy display-only city lookup (v1.7.3)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Result of `nearestCity(lat, lon)`. The `city` field is always non-null —
+ *  the registry covers every populated continent so no input produces a null
+ *  match. For coordinates very far from any city (open ocean, deep
+ *  Antarctica), `distanceKm` will be in the thousands; apps may want to
+ *  suppress the label above some threshold to avoid showing
+ *  "near Christchurch (3,400 km)" on a polar research station. */
+export interface NearestCityResult {
+  /** Closest city in the bundled registry. Always populated — never null. */
+  city: City
+  /** Great-circle (haversine) distance in km from (lat, lon) to `city.lat / city.lon`. */
+  distanceKm: number
+}
+
+/** kNN-fuzzy display-label lookup: return the closest city in the bundled
+ *  registry to (lat, lon), with the haversine distance in km.
+ *
+ *  **DISPLAY-ONLY.** For prayer-time dispatch (method override + elevation),
+ *  use `detectLocation` instead — it uses bbox-precise containment and
+ *  returns `city: null` honestly when the coordinate is outside any
+ *  registered city. `nearestCity` always returns a city; using it to drive
+ *  computation would silently apply a possibly-distant city's institutional
+ *  method to a user who is not actually in that city.
+ *
+ *  Typical pairing:
+ *  ```
+ *  const loc  = detectLocation(lat, lon)
+ *  const near = loc.city ? null : nearestCity(lat, lon)
+ *  const label = loc.city
+ *    ? loc.city.name
+ *    : `near ${near.city.name} (${near.distanceKm.toFixed(1)} km)`
+ *  ```
+ *
+ *  Privacy: fajr never logs, persists, or transmits the coordinates you
+ *  pass it. The lookup happens entirely locally via the bundled city
+ *  registry.
+ *
+ *  🟢 Established — pure lookup, no shar'i ruling involved.
+ *
+ *  @param latitude
+ *  @param longitude
+ */
+export function nearestCity(
+  latitude: number,
+  longitude: number,
+): NearestCityResult
+
+// ─────────────────────────────────────────────────────────────────────────────
 // prayerTimes
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -568,6 +618,7 @@ declare const fajr: {
   dayTimes:                 typeof dayTimes
   tarabishyTimes:           typeof tarabishyTimes
   detectLocation:           typeof detectLocation
+  nearestCity:              typeof nearestCity
   applyElevationCorrection: typeof applyElevationCorrection
   applyTayakkunBuffer:      typeof applyTayakkunBuffer
   qibla:                    typeof qibla

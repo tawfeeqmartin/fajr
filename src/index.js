@@ -12,6 +12,7 @@ import {
   applyElevationCorrection,
   applyTayakkunBuffer,
   detectLocation as _detectLocation,
+  nearestCity as _nearestCity,
 } from './engine.js'
 import { qibla } from './qibla.js'
 import { hijri } from './hijri.js'
@@ -136,11 +137,49 @@ function detectLocation(latitude, longitude, fallbackElevation = 0) {
   return _detectLocation(latitude, longitude, fallbackElevation)
 }
 
+/**
+ * kNN-fuzzy display-label lookup (v1.7.3).
+ *
+ * Resolves a (lat, lon) coordinate to the geographically nearest city in the
+ * bundled 375-city registry, with the haversine distance in km. Always returns
+ * a city — never null. The intent is letting downstream apps render a
+ * human-readable "near <City> (<distance> km)" label when the user's GPS
+ * resolves outside any registered city's bbox (so `detectLocation` returned
+ * `city: null`).
+ *
+ * **DISPLAY-ONLY contract.** This function MUST NOT be used to drive prayer-
+ * time dispatch. The method override + elevation lookup continues to use
+ * `detectLocation`'s bbox-precise containment, which is honest about
+ * uncertainty (returns `city: null` when no bbox matches) rather than
+ * snapping to a possibly-distant neighbour. Use `detectLocation` for
+ * computation; use `nearestCity` for UI labels only.
+ *
+ * Typical pairing:
+ *
+ *   const loc  = detectLocation(lat, lon)      // bbox-precise
+ *   const near = loc.city ? null : nearestCity(lat, lon)  // fallback label
+ *   const label = loc.city
+ *     ? loc.city.name
+ *     : `near ${near.city.name} (${near.distanceKm.toFixed(1)} km)`
+ *
+ * Privacy: fajr never logs, persists, or transmits the coordinates you pass.
+ *
+ * Classification: 🟢 Established — pure lookup, no shar'i ruling involved.
+ *
+ * @param {number} latitude
+ * @param {number} longitude
+ * @returns {{ city: object, distanceKm: number }}
+ */
+function nearestCity(latitude, longitude) {
+  return _nearestCity(latitude, longitude)
+}
+
 export default {
   prayerTimes,
   dayTimes,
   tarabishyTimes,
   detectLocation,
+  nearestCity,
   applyElevationCorrection,
   applyTayakkunBuffer,
   qibla,
@@ -155,6 +194,7 @@ export {
   dayTimes,
   tarabishyTimes,
   detectLocation,
+  nearestCity,
   applyElevationCorrection,
   applyTayakkunBuffer,
   qibla,

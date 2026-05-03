@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 38 cities across 12 institutional-train countries plus a 163-country Aladhan-routed holdout corpus. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.7.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `detectLocation`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. **v1.7.0 ships city-aware location resolution**: a bundled 375-city registry powers automatic city detection, city-registry elevation surfacing (no more silent sea-level for Mexico City / Cape Town / Riyadh users), and city-level institutional method overrides for 12 cities where intra-country *ikhtilaf* matters (Mosul → Karachi via Sunni-Awqaf, Najaf/Karbala/Basra → Tehran via Twelver Shia hawza, Sarajevo/Mostar/Banja Luka/Pristina → Diyanet via Bosnian Rijaset / BIK, Bradford → MoonsightingCommittee via BCOM, Beirut → Egyptian via Dar al-Fatwa, Tabriz → Tehran, Dearborn → ISNA). Apps gain a `location` field on every `prayerTimes` return value with city/country/timezone/method-source plus a public `detectLocation(lat, lon)` for standalone resolution — see [City-aware location resolution (v1.7.0)](#city-aware-location-resolution-v170). v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection (163 by v1.6.2). v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.7.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `detectLocation`, `nearestCity`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. **v1.7.3 adds `nearestCity(lat, lon)`** — a kNN-fuzzy *display-only* lookup that always returns a city + haversine distance in km, for downstream apps that want to render "near \<City\> (\<distance\> km)" labels when the user's GPS resolves outside any registered city's bbox. The strict `detectLocation` containment continues to drive prayer-time dispatch unchanged. **v1.7.0 ships city-aware location resolution**: a bundled 375-city registry powers automatic city detection, city-registry elevation surfacing (no more silent sea-level for Mexico City / Cape Town / Riyadh users), and city-level institutional method overrides for 12 cities where intra-country *ikhtilaf* matters (Mosul → Karachi via Sunni-Awqaf, Najaf/Karbala/Basra → Tehran via Twelver Shia hawza, Sarajevo/Mostar/Banja Luka/Pristina → Diyanet via Bosnian Rijaset / BIK, Bradford → MoonsightingCommittee via BCOM, Beirut → Egyptian via Dar al-Fatwa, Tabriz → Tehran, Dearborn → ISNA). Apps gain a `location` field on every `prayerTimes` return value with city/country/timezone/method-source plus a public `detectLocation(lat, lon)` for standalone resolution — see [City-aware location resolution (v1.7.0)](#city-aware-location-resolution-v170). v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection (163 by v1.6.2). v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -420,6 +420,43 @@ console.log(loc.source.institution)   // (mawaqit-typed source — slug populate
 
 The principle behind v1.7.0 is the same one driving the rest of fajr's library design: **surface scholarly disagreement transparently, don't resolve it silently.** The 12 method-override cities each carry an institutional citation that a reviewer can audit; each surfaces minority alternatives via `altMethods`; the engine's choice is reported via `location.methodSource` so apps can show users *why* a particular method was selected and offer them the alternative.
 
+### Nearest-city display label (v1.7.3)
+
+`detectLocation(lat, lon)` is bbox-precise — it returns `city: null` honestly when the user's GPS resolves outside any of the 375 registered cities. That's the right answer for *computation* (apps should never silently apply a possibly-distant city's institutional method to a user who is not in that city), but it leaves apps without a label when they want to render "near \<City\>" in their UI.
+
+v1.7.3 introduces a separate, deliberately-narrower function for that:
+
+```js
+import { nearestCity } from '@tawfeeqmartin/fajr'
+
+const r = nearestCity(-27.4, 153.0)
+// → { city: { name: 'Brisbane', countryISO: 'AU', ... }, distanceKm: 7.8 }
+```
+
+`nearestCity` is **kNN-fuzzy** — a linear haversine scan over the 375-row registry that always returns a city, never null. It is **DISPLAY-ONLY**. The two functions are deliberately separate:
+
+| Function | Resolution | Returns null? | Used for |
+|---|---|---|---|
+| `detectLocation(lat, lon)` | Bbox-precise containment | Yes — when outside every registered bbox | Method override, elevation, prayer-time dispatch |
+| `nearestCity(lat, lon)` | kNN haversine (always-nearest) | No — always returns a city | UI label only, never affects dispatch |
+
+Recipe — try `detectLocation` first, fall back to `nearestCity` for the label:
+
+```js
+import { detectLocation, nearestCity } from '@tawfeeqmartin/fajr'
+
+const loc = detectLocation(lat, lon)
+const label = loc.city
+  ? loc.city.name
+  : `near ${nearestCity(lat, lon).city.name} (${nearestCity(lat, lon).distanceKm.toFixed(1)} km)`
+```
+
+This separation is load-bearing: a user 80 km outside any registered city gets the honest "near Brisbane (78 km)" UI label *and* fajr's prayer-time computation continues to use the country-default dispatch (not Brisbane's institutional override). The display-only contract is what keeps the dispatch path's accuracy promise intact while still giving downstream apps a graceful label.
+
+For coordinates very far from any city (deep ocean, polar research stations), `distanceKm` will be in the thousands — apps may want to suppress the label above some threshold (e.g. 200 km) to avoid showing "near Christchurch (3,400 km)" in the Antarctic.
+
+Classification: 🟢 Established — pure lookup, no shar'i ruling involved.
+
 ---
 
 ## Historical Results (Experiment 1–7 narrative)
@@ -637,6 +674,7 @@ fajr v1.0 makes the following stability promises. **Stable** surfaces will not c
 | `prayerTimes` | `({ latitude, longitude, date, elevation?, method? }) → { fajr, shuruq, sunrise, dhuhr, asr, maghrib, sunset, isha, method, notes, corrections, location }` | v1.0 (`sunrise` alias added v1.0.1; `sunset` and `notes` added v1.1+; `location` added v1.7) |
 | `dayTimes` | `({ latitude, longitude, date, elevation?, method? }) → prayerTimes shape ∪ { midnight, qiyam }` | v1.1 |
 | `detectLocation` | `(latitude, longitude, fallbackElevation?) → { city, country, timezone, elevation, recommendedMethod, methodSource, altMethods?, source }` | v1.7 |
+| `nearestCity` | `(latitude, longitude) → { city, distanceKm }` (kNN-fuzzy display-only label; never null) | v1.7.3 |
 | `applyElevationCorrection` | `(times, elevation, latitude?) → times` (opt-in geometric horizon-dip) | v1.0 |
 | `applyTayakkunBuffer` | `(times, mins=5) → times` (opt-in Fajr buffer per Aabed 2015) | v1.3 |
 | `tarabishyTimes` | `(params, thresholdLat=45) → prayerTimes shape` (opt-in 45°-truncation per Tarabishy 2014) | v1.3 |
