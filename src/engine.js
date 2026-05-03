@@ -183,6 +183,19 @@ function detectCountry(lat, lon) {
   if (lat >= 9.6  && lat <= 28.5 && lon >= 92.2 && lon <= 101.2) return 'Myanmar'
   if (lat >= 4.6  && lat <= 21.1 && lon >= 116.9 && lon <= 126.6) return 'Philippines'
 
+  // ─── South Asia — smallest first; India bbox huge so last in cluster ──
+  // Listed BEFORE East Asia: China's bbox (lat 18-53, lon 73-134) overlaps
+  // Bhutan (lat 26.70-28.32, lon 88.75-92.13) and Nepal (lat 26.35-30.45,
+  // lon 80.06-88.20). South Asia must take precedence.
+  if (lat >= -1   && lat <= 7.5  && lon >= 72.5 && lon <= 74)   return 'Maldives'
+  if (lat >= 5.9  && lat <= 9.85 && lon >= 79.5 && lon <= 81.9) return 'SriLanka'  // ⊂ India
+  if (lat >= 23   && lat <= 37   && lon >= 60   && lon <= 75)   return 'Pakistan'
+  if (lat >= 29.4 && lat <= 38.5 && lon >= 60.5 && lon <= 74.95) return 'Afghanistan'
+  if (lat >= 20.5 && lat <= 26.6 && lon >= 88   && lon <= 92.7) return 'Bangladesh'
+  if (lat >= 26.70 && lat <= 28.32 && lon >= 88.75 && lon <= 92.13) return 'Bhutan'
+  if (lat >= 26.35 && lat <= 30.45 && lon >= 80.06 && lon <= 88.20) return 'Nepal'
+  if (lat >= 6.5  && lat <= 35.5 && lon >= 68   && lon <= 97.4) return 'India'
+
   // ─── East Asia — Taiwan / Korea / Japan / Mongolia / China (huge) ─────
   // Smaller first: Taiwan tiny; KP/KR; Japan; Mongolia largeish; China huge.
   if (lat >= 21.90 && lat <= 25.30 && lon >= 119.31 && lon <= 122.00) return 'Taiwan'
@@ -217,18 +230,6 @@ function detectCountry(lat, lon) {
   if (lat >= -55.92 && lat <= -17.51 && lon >= -75.71 && lon <= -66.42) return 'Chile'
 
   if (lat >= -11  && lat <= 6    && lon >= 95   && lon <= 141)  return 'Indonesia'
-
-  // ─── South Asia — smallest first; India bbox huge so last in cluster ──
-  if (lat >= -1   && lat <= 7.5  && lon >= 72.5 && lon <= 74)   return 'Maldives'
-  if (lat >= 5.9  && lat <= 9.85 && lon >= 79.5 && lon <= 81.9) return 'SriLanka'  // ⊂ India
-  if (lat >= 23   && lat <= 37   && lon >= 60   && lon <= 75)   return 'Pakistan'
-  if (lat >= 29.4 && lat <= 38.5 && lon >= 60.5 && lon <= 74.95) return 'Afghanistan'
-  if (lat >= 20.5 && lat <= 26.6 && lon >= 88   && lon <= 92.7) return 'Bangladesh'
-  // Bhutan (26.70-28.32, 88.75-92.13) and Nepal (26.35-30.45, 80.06-88.20)
-  // sit inside India's huge bbox — list both BEFORE India.
-  if (lat >= 26.70 && lat <= 28.32 && lon >= 88.75 && lon <= 92.13) return 'Bhutan'
-  if (lat >= 26.35 && lat <= 30.45 && lon >= 80.06 && lon <= 88.20) return 'Nepal'
-  if (lat >= 6.5  && lat <= 35.5 && lon >= 68   && lon <= 97.4) return 'India'
 
   // ─── Indian Ocean / Swahili Coast — before SouthAfrica ─────────────────
   // Smallest first: Mauritius is a tiny island; Seychelles archipelago;
