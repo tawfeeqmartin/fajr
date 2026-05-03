@@ -108,6 +108,22 @@ export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-d
  *    (sea level) silently — the safest default. */
 export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zero'
 
+/** Madhab dispatched for a given location. Affects Asr shadow-length
+ *  formula (Shafi'i: 1×, Hanafi: 2×) which can shift Asr by 30-60 minutes. */
+export type Madhab = 'shafii' | 'hanafi'
+
+/** How `prayerTimes` chose the madhab for a given coordinate. v1.7.21+ (#81).
+ *
+ *  - `'caller-explicit'`: caller will pass an explicit madhab override
+ *    (planned for v1.8.x via #40 — not yet supported in v1.7.x).
+ *  - `'method-implied'`: the dispatched method preset bakes in the madhab
+ *    (Karachi → Hanafi by default, MWL → Shafi'i; KarachiShafi composes
+ *    Karachi + Shafi'i for Maldives / Sri Lanka / Lucknow / Kochi).
+ *
+ *  Future v1.8.x will add `'caller-explicit'` once the override surface
+ *  in #40 lands. Until then, the value is always `'method-implied'`. */
+export type MadhabSource = 'caller-explicit' | 'method-implied'
+
 /** The location field on `prayerTimes` / `dayTimes` return values (v1.7.0+).
  *  Always populated. Apps can use this to display "you are in <city>"
  *  without an additional `detectLocation` call. */
@@ -124,10 +140,29 @@ export interface PrayerTimesLocation {
   timezone:        string
   /** Effective elevation in metres used by the engine on this call. */
   elevation:       number
+  /** Madhab implicit in the dispatched method (v1.7.21+, #81). 'shafii' for
+   *  Shafi'i 1× shadow Asr; 'hanafi' for Hanafi 2× shadow Asr. */
+  madhab:          Madhab
   /** How the method was chosen — see MethodSource above. */
   methodSource:    MethodSource
+  /** How the madhab was chosen — see MadhabSource above. v1.7.21+ (#81). */
+  madhabSource:    MadhabSource
   /** How the elevation was chosen — see ElevationSource above. */
   elevationSource: ElevationSource
+}
+
+/** Summary of what was actually applied for this call (v1.7.21+, #81).
+ *  Apps surface a single canonical "what we did" badge from this without
+ *  re-deriving from method/madhab/elevation fields scattered through the
+ *  result. */
+export interface AppliedDispatch {
+  /** The method actually used (verbose label, same string as `result.method`). */
+  method:        string
+  /** The madhab actually used. */
+  madhab:        Madhab
+  /** Elevation correction in minutes that fajr applied (or would apply at the
+   *  given effective elevation). 0 at sea level / when correction declined. */
+  elevationMin:  number
 }
 
 /** Standalone Location record returned by `detectLocation`. Distinct from
@@ -330,14 +365,24 @@ export interface PrayerTimesResult {
   }
   /** City + country + timezone + sourcing metadata for this call (v1.7.0+).
    *  Always populated. Apps can use this to display "you are in <city>"
-   *  without an additional `detectLocation` call. `methodSource` and
-   *  `elevationSource` report HOW the engine chose its inputs for this
-   *  call — useful for "Why is my Fajr at this time?" explanatory UX.
+   *  without an additional `detectLocation` call. `methodSource` /
+   *  `madhabSource` / `elevationSource` report HOW the engine chose its
+   *  inputs for this call — useful for "Why is my Fajr at this time?"
+   *  explanatory UX and "verify your madhab" verification prompts.
    *
    *  When no city in the bundled registry matches the coordinate, `city`
    *  is null. When outside all known country bboxes (open ocean,
    *  Antarctica), `country` is also null and `methodSource === 'fallback'`. */
   location: PrayerTimesLocation
+  /** Summary of what was actually applied for this call (v1.7.21+, #81).
+   *  Apps surface a single canonical "what we did" badge from this. */
+  applied:    AppliedDispatch
+  /** Turn-key user-facing copy framing the auto-dispatched values as
+   *  "best guess" and recommending verification (v1.7.21+, #81). Apps
+   *  can render verbatim in long-press / "Why this time?" sheets, or
+   *  ignore it. Saves every consumer rewriting the same disclaimer
+   *  text and keeps framing consistent across the ecosystem. */
+  disclaimer: string
 }
 
 export function prayerTimes(params: PrayerTimesParams): PrayerTimesResult
