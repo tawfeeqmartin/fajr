@@ -107,6 +107,8 @@ const ISO_TO_ENGINE_COUNTRY = {
   TT: 'TrinidadAndTobago', VE: 'Venezuela', GY: 'Guyana', SR: 'Suriname',
   PE: 'Peru', BR: 'Brazil', PY: 'Paraguay', UY: 'Uruguay', AR: 'Argentina', CL: 'Chile',
   AU: 'Australia', NZ: 'NewZealand', FJ: 'Fiji', PG: 'PapuaNewGuinea',
+  // v1.7.8 (#54) Tier 2 — new country additions
+  HK: 'HongKong', CY: 'Cyprus', YT: 'Mayotte', EH: 'WesternSahara', RE: 'Reunion',
 }
 
 function isoToEngineCountry(iso) {

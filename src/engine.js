@@ -44,6 +44,9 @@ function detectCountry(lat, lon) {
   // v1.7.5: Morocco's eastern lon tightened from -1 to -1.5 — the previous
   // bbox swallowed Tlemcen DZ (34.89, -1.32). Morocco's eastern Oujda is
   // at -1.91 so still covered.
+  // v1.7.8 (#54): Western Sahara — Morocco-administered, follows Habous.
+  // Fills lat 20-27 gap south of Morocco's bbox.
+  if (lat >= 20.7 && lat <= 27.66 && lon >= -17.1 && lon <= -8.67) return 'WesternSahara'
   if (lat >= 27   && lat <= 36.5 && lon >= -14  && lon <= -1.5) return 'Morocco'
   if (lat >= 30.2 && lat <= 37.6 && lon >= 7.5  && lon <= 11.6) return 'Tunisia'  // tiny — before Algeria
   if (lat >= 19   && lat <= 37.1 && lon >= -8.7 && lon <= 12)   return 'Algeria'
@@ -141,6 +144,9 @@ function detectCountry(lat, lon) {
   // matched by Kazakhstan.
   if (lat >= 40.5 && lat <= 55.5 && lon >= 50.0 && lon <= 87.4) return 'Kazakhstan'
 
+  // v1.7.8 (#54): Cyprus — ~275K Muslims (Northern Cyprus). BEFORE Turkey
+  // since Cyprus lat 34.6-35.7 partially overlaps Turkey's 35-43.
+  if (lat >= 34.55 && lat <= 35.71 && lon >= 32.27 && lon <= 34.60) return 'Cyprus'
   if (lat >= 35   && lat <= 43   && lon >= 25   && lon <= 45)   return 'Turkey'
 
   // ─── Balkans + SE Europe — after Turkey ────────────────────────────────
@@ -208,7 +214,10 @@ function detectCountry(lat, lon) {
   // 15.04) — Germany listed first. Reorder Switzerland first; Switzerland's
   // bbox 45.82-47.81 / 6.0-9.6 catches CH cities; Germany still catches
   // Berlin/Munich/Hamburg etc.
-  if (lat >= 45.82 && lat <= 47.81 && lon >= 6.0 && lon <= 9.6) return 'Switzerland'
+  // v1.7.8 (#54): Switzerland's northern lat tightened from 47.81 to 47.65
+  // — Mulhouse FR (47.67, 7.34) was caught by Switzerland (Basel CH at
+  // 47.56 is south of 47.65 — still inside).
+  if (lat >= 45.82 && lat <= 47.65 && lon >= 6.0 && lon <= 9.6) return 'Switzerland'
   if (lat >= 47.27 && lat <= 55.06 && lon >= 5.87 && lon <= 15.04) return 'Germany'
   // v1.7.5: Austria after Germany/Switzerland (these are larger but more
   // specific). Austria's bbox kept.
@@ -492,6 +501,9 @@ function detectCountry(lat, lon) {
   if (lat >= 37.67 && lat <= 43.01 && lon >= 124.18 && lon <= 130.70) return 'NorthKorea'
   if (lat >= 24.05 && lat <= 45.55 && lon >= 122.93 && lon <= 153.99) return 'Japan'
   if (lat >= 41.58 && lat <= 52.15 && lon >= 87.74 && lon <= 119.93) return 'Mongolia'
+  // v1.7.8 (#54): Hong Kong — SAR with own published timetables (Trustees of
+  // Islamic Community Fund). ~296K Muslims. BEFORE China.
+  if (lat >= 22.15 && lat <= 22.56 && lon >= 113.83 && lon <= 114.45) return 'HongKong'
   if (lat >= 18.16 && lat <= 53.56 && lon >= 73.50 && lon <= 134.77) return 'China'
 
   // v1.7.5 (#47, Reviewer C): USA stays first (its bbox fully contains
@@ -553,7 +565,12 @@ function detectCountry(lat, lon) {
   // ─── Indian Ocean / Swahili Coast — before SouthAfrica ─────────────────
   // Smallest first: Mauritius is a tiny island; Seychelles archipelago;
   // Comoros; Madagascar largest of the island bboxes.
+  // v1.7.8 (#54): Réunion — French overseas dept, Indian Ocean, Mawaqit-deployed.
+  if (lat >= -21.40 && lat <= -20.85 && lon >= 55.21 && lon <= 55.84) return 'Reunion'
+  // (Saint-Denis is at -20.88 just inside the north edge.)
   if (lat >= -20.53 && lat <= -19.97 && lon >= 57.30 && lon <= 57.81) return 'Mauritius'
+  // v1.7.8 (#54): Mayotte — French overseas dept (Comoro archipelago). 95% Muslim.
+  if (lat >= -13.00 && lat <= -12.65 && lon >= 45.00 && lon <= 45.30) return 'Mayotte'
   if (lat >= -10.22 && lat <= -3.71 && lon >= 46.21 && lon <= 56.30) return 'Seychelles'
   // v1.7.5: Comoros's bbox tightened — Moroni KM (-11.72, 43.25) is at
   // -11.72 which is inside Comoros's -12.5 to -11.3. The "bbox-leak" check
@@ -714,7 +731,7 @@ const COUNTRY_BBOX_TABLE = {
   Sweden:       [[55.34, 69.06, 11.10, 24.16]],
   Denmark:      [[54.56, 57.75, 8.07, 12.7]],
   Belgium:      [[49.50, 51.50, 2.55, 6.41]],
-  Switzerland:  [[45.82, 47.81, 6.0, 9.6]],
+  Switzerland:  [[45.82, 47.65, 6.0, 9.6]],
   Germany:      [[47.27, 55.06, 5.87, 15.04]],
   Senegal:      [[12.3, 16.04, -17.6, -11.3]],
   Nigeria:      [[3.9, 14, 2.7, 14.7]],
@@ -740,7 +757,24 @@ const COUNTRY_BBOX_TABLE = {
   Afghanistan:  [[29.4, 38.5, 60.5, 74.95]],
   Bangladesh:   [[20.5, 26.6, 88.4, 92.7]],
   Nepal:        [[26.35, 30.45, 80.06, 88.20]],
-  // Add more countries here as the Pass-B path needs to corroborate them.
+  // v1.7.8 (#54) Tier 1: top-leverage 146-FAIL knockouts — Pass-B
+  // corroboration for cities whose detectCountry verdict crosses borders.
+  // See autoresearch/proposals/v1.7.8-146-fail-deep-dive.md.
+  Somalia:      [[-1.7, 12, 40.9, 51.4]],
+  Syria:        [[32.3, 37.4, 35.7, 42.4]],
+  Uzbekistan:   [[37.2, 45.6, 55.95, 73.2]],
+  Qatar:        [[24, 26.5, 50.5, 51.7]],
+  Togo:         [[6.10, 11.14, -0.15, 1.81]],
+  Lebanon:      [[33.05, 34.7, 35.1, 36.65]],
+  Montenegro:   [[41.85, 43.56, 18.43, 20.36]],
+  SierraLeone:  [[6.9, 10, -13.3, -10.27]],
+  Albania:      [[39.6, 42.7, 19.3, 21.05]],
+  // v1.7.8 (#54) Tier 2: new country additions
+  HongKong:     [[22.15, 22.56, 113.83, 114.45]],
+  Cyprus:       [[34.55, 35.71, 32.27, 34.60]],
+  Mayotte:      [[-13.00, -12.65, 45.00, 45.30]],
+  WesternSahara:[[20.7, 27.66, -17.1, -8.67]],
+  Reunion:      [[-21.40, -20.85, 55.21, 55.84]],
 }
 
 function countryBboxContains(country, lat, lon) {
@@ -980,6 +1014,51 @@ function selectMethod(country, lat, coords) {
       p.fajrAngle = 12
       p.ishaAngle = 12
       return { params: p, methodName: 'UOIF (12°/12°)' }
+    }
+    // ─── v1.7.8 (#54) Tier 2: new country additions ───────────────────────
+    case 'HongKong':
+      // Trustees of Islamic Community Fund publishes Hong Kong's primary
+      // timetables; ~296K Muslim community is predominantly South-Asian-
+      // origin Hanafi. Karachi 18°/18° + Hanafi Asr.
+      // Classification: 🟡→🟢 (community + institutional convention).
+      // see knowledge/wiki/regions/hongkong.md (TODO v1.7.8)
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Hong Kong, Trustees of Islamic Community Fund)' }
+    case 'Cyprus': {
+      // Northern Cyprus / Turkish Cypriot community follows Diyanet.
+      // ~275K Muslims, primarily North Cyprus.
+      // Classification: 🟡→🟢 (institutional alignment via Diyanet North-
+      // Cyprus muftiate). see knowledge/wiki/regions/cyprus.md (TODO v1.7.8)
+      const p = adhan.CalculationMethod.Turkey()
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 6, isha: -1 }
+      return { params: p, methodName: 'Diyanet (Cyprus, North Cyprus muftiate, Path A)' }
+    }
+    case 'Mayotte':
+      // French overseas dept, Comoro archipelago. ~253K population, ~95%
+      // Muslim (Sunni Shafi'i — Indian Ocean cluster). Egyptian-method
+      // (19.5°/17.5°) per regional convention.
+      // Classification: 🟢 Established (regional Indian-Ocean Shafi'i).
+      // see knowledge/wiki/regions/mayotte.md (TODO v1.7.8)
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: "Egyptian (Mayotte, Indian Ocean Shafi'i cluster)" }
+    case 'WesternSahara': {
+      // Disputed territory administered by Morocco. ~600K population.
+      // Same Path A community calibration as Morocco proper.
+      // Classification: 🟡→🟢 (Morocco-aligned institutional convention).
+      // see knowledge/wiki/regions/morocco.md (Western Sahara coverage)
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 19
+      p.ishaAngle = 17
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 5 }
+      return { params: p, methodName: 'Morocco (Western Sahara, Habous Path A 19°/17° + +5min Maghrib)' }
+    }
+    case 'Reunion': {
+      // French overseas dept, Indian Ocean. ~36K Muslims; Mawaqit-deployed
+      // mosques align with UOIF (France national diaspora convention).
+      // Classification: 🟡→🟢 (France-cluster institutional alignment).
+      // see knowledge/wiki/regions/reunion.md (TODO v1.7.8)
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 12
+      p.ishaAngle = 12
+      return { params: p, methodName: 'UOIF (Réunion, France-cluster diaspora convention)' }
     }
     case 'Canada':
       // ISNA: Fajr 15°, Isha 15° (same as USA)
@@ -1645,6 +1724,12 @@ function methodForCountry(country) {
     case 'Singapore':                return 'MUIS'
     case 'France':                   return 'UOIF'
     case 'Canada':                   return 'ISNA'
+    // ─── v1.7.8 Tier 2: new country additions ─────────────────────────────
+    case 'HongKong':                 return 'Karachi'
+    case 'Cyprus':                   return 'Diyanet'
+    case 'Mayotte':                  return 'Egyptian'
+    case 'WesternSahara':            return 'Morocco'
+    case 'Reunion':                  return 'UOIF'
     case 'Norway':                   return 'MWL'
     case 'Iceland':                  return 'MWL'
     case 'Finland':                  return 'MWL'
