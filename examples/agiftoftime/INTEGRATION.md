@@ -3,6 +3,203 @@
 > **Audience:** an engineering agent working inside the agiftoftime.app repo. This doc lives in the fajr repo because fajr defines the API surface; copy or link it, don't fork.
 >
 > **Goal:** wire `@tawfeeqmartin/fajr` into agiftoftime so the two compose — agiftoftime gets accurate region-aware prayer times, hilal visibility, and signed-bias provenance; fajr gets a real production showcase. The user-facing change is small (subtler method labels, an opt-in provenance panel, and a Ramadan/Eid hilal banner) — the engine change underneath is significant.
+>
+> **Doc currency.** Last full overhaul: v1.5.2. New-in-v1.6.x-to-v1.7.6 changes are catalogued in the [What's new since v1.5.2](#whats-new-since-v152-) section below — read that first if you've already wired Tier 1 against v1.5.2 and need to know what to wire up next. Per-release detail: [CHANGELOG.md](../../CHANGELOG.md).
+
+## What's new since v1.5.2 — quick index
+
+| Release | Date | Headline | Affects integration? |
+|---|---|---|---|
+| **v1.6.0** | 2026-05-02 | Country dispatch 27 → 78 countries via bbox | No code change — auto-dispatch silently improves |
+| **v1.6.2** | 2026-05-02 | Country dispatch 78 → 163 countries | No code change — silently improves |
+| **v1.6.3 / v1.6.5** | 2026-05-02 | Internal alias normalization + publish hotfixes | No |
+| **v1.7.0** | 2026-05-02 | City-aware location resolution + 12 city-method overrides + auto-elevation + new `location` field on every prayerTimes return + standalone `detectLocation(lat, lon)` API | **Yes** — Tier 2 provenance UX should now display `location.city.name` + `location.city.source.institution`, and apps should drop their own reverse-geocode call if they had one |
+| **v1.7.1** | 2026-05-02 | Maldives + Sri Lanka explicit Shafi Asr | No code change |
+| **v1.7.2** | 2026-05-02 | 4 new city-method overrides (Lucknow, Kochi, Cotabato, Marawi) | No code change — silently improves |
+| **v1.7.3** | 2026-05-02 | New `nearestCity(lat, lon)` kNN-fuzzy display-only label fallback | **Yes** — apps that show a "near \<City\>" label when GPS resolves outside any registered city should wire it up; see recipe below |
+| **v1.7.4** | 2026-05-02 | Cross-runtime compatibility documentation; no engine change | No code change; informs deployment choice |
+| **v1.7.5** | 2026-05-03 | Systematic city-registry validation script + 8 country-bbox fixes (Toronto/Cairo/KL/Singapore false positives from issue #47, plus 4 deeper #47 dispatch fixes) | No code change — silently improves dispatch correctness |
+| **v1.7.6** | 2026-05-03 | `hijri()` defaults to Umm al-Qura tabular calendar (matches AlAdhan); Maghrib elevation note now discloses magnitude in minutes | **Yes** — apps replacing AlAdhan's hijri call gain bit-for-bit parity (was off by up to a month at Eid before); existing fajr-hijri callers may see ±1 day shifts on some dates |
+
+Below: per-feature integration recipes for each release that requires app-side code changes.
+
+### v1.6.x — silent country-dispatch expansion (no app changes)
+
+`prayerTimes()` now auto-dispatches the right institutional method for 163 countries (up from 27 in v1.5.x). Existing call-sites that pass `{ latitude, longitude, date }` get the more-correct method automatically. No agiftoftime code change. See `times.method` for the human-readable label fajr selected — render it in the method-caption UI per Tier 2.
+
+### v1.7.0 — city-aware location resolution
+
+The big one. v1.7.0 promotes location resolution from country-level to **city-level** and adds two new public surfaces:
+
+**1. New `location` field on every `prayerTimes()` / `dayTimes()` return value.** Always populated. Carries `city`, `country`, `timezone`, `elevation`, `methodSource`, `elevationSource`. Apps can drop any in-house reverse-geocode lookup they had wired up:
+
+```js
+const times = prayerTimes({ latitude, longitude, date: new Date() })
+// times.location = {
+//   city: { name: 'Mosul', countryISO: 'IQ', elevation: 223,
+//           methodOverride: 'Karachi',
+//           source: { institution: 'Iraqi Sunni Endowment Office (Diwan al-Waqf al-Sunni)',
+//                     url: '…', method: '…' },
+//           altMethods: [{ method: 'Egyptian', source: 'Aladhan world-default for Iraq' }],
+//           ... },
+//   country: 'Iraq',
+//   timezone: 'Asia/Baghdad',
+//   elevation: 223,
+//   methodSource: 'city-institutional',     // | 'caller-explicit' | 'country-default' | 'fallback'
+//   elevationSource: 'city-registry',       // | 'caller-explicit' | 'default-zero'
+// }
+
+// agiftoftime UI recipe — render city + country + provenance source
+const cityLabel = times.location.city ? times.location.city.name : `near ${nearestCity(lat, lon).city.name}`
+const countryLabel = times.location.country ?? 'Unknown region'
+const methodProvenance = times.location.city?.source?.institution ?? times.method
+```
+
+**2. New `detectLocation(lat, lon, fallbackElevation?)` standalone export** — pure lookup, no astronomy, for callers that want the city/country/method/elevation resolution without computing prayer times:
+
+```js
+import { detectLocation } from '@tawfeeqmartin/fajr'
+
+const loc = detectLocation(36.34, 43.13)
+// → {
+//     city: { name: 'Mosul', ... },
+//     country: 'Iraq',
+//     timezone: 'Asia/Baghdad',
+//     elevation: 223,
+//     recommendedMethod: 'Karachi',
+//     methodSource: 'city-institutional',
+//     altMethods: [...],
+//     source: { institution: 'Iraqi Sunni Endowment Office', ... }
+//   }
+//
+// city is null when coord is outside every registered city's bbox — by design.
+// Use nearestCity() (v1.7.3) for a display-only label fallback.
+```
+
+**3. 12 city-level institutional method overrides.** Each surfaces `altMethods` so the long-press provenance sheet (Tier 2) can render the disagreement rather than hide it:
+
+| City | Country | Method | Institutional source | Tier-2 sheet shows |
+|---|---|---|---|---|
+| Mosul | Iraq | Karachi (18°/18°) | Iraqi Sunni Endowment Office | Egyptian alt as Aladhan world-default |
+| Najaf, Karbala, Basra | Iraq | Tehran (17.7°/14°) | Sistani / hawza | Egyptian alt as Aladhan world-default |
+| Sarajevo, Mostar, Banja Luka | Bosnia | Diyanet (18°/17°) | Rijaset BiH | MWL alt as country default |
+| Pristina | Kosovo | Diyanet | Bashkësia Islame e Kosovës | MWL alt |
+| Bradford | UK | MoonsightingCommittee | Bradford Council of Mosques (BCOM) | MWL alt |
+| Beirut | Lebanon | Egyptian (19.5°/17.5°) | Dar al-Fatwa al-Lubnaniyya | none |
+| Tabriz | Iran | Tehran | Tehran Institute of Geophysics | none |
+| Dearborn | USA | ISNA | Dearborn Sunni convention | Tehran-style Twelver Shia minority via altMethods |
+| (v1.7.2 additions) Lucknow | India | Karachi | Indian-Sunni convention | none |
+| (v1.7.2) Kochi | India | Karachi | Kerala Sunni convention | none |
+| (v1.7.2) Cotabato, Marawi | Philippines | Karachi | Bangsamoro convention | none |
+
+**4. Auto-elevation from city registry.** When the caller omits `elevation`, fajr now resolves it from the city's registered elevation (Mexico City 2240m, Cape Town 25m, Riyadh 612m, etc.) and applies `applyElevationCorrection` inline. Caller-explicit `elevation: 0` still wins (Saudi/jama'ah-unity opt-out). The v1.5.2 ≥500m advisory continues to fire alongside the new auto-elevation note. Practical implication for agiftoftime: **stop passing `elevation: 0` defensively**. Just omit elevation, and the city registry will provide one when known. Pass it through only if you have a real GPS-altitude reading from `navigator.geolocation`.
+
+### v1.7.3 — `nearestCity` display-only label fallback
+
+`detectLocation` returns `city: null` honestly when GPS is outside every registered bbox — that's the right answer for *prayer-time computation* (don't silently apply a 100km-distant city's institutional override) but leaves apps without a UI label.
+
+`nearestCity(lat, lon)` is the kNN-fuzzy companion: linear haversine scan, always returns a city + distance, **DISPLAY-ONLY**:
+
+```js
+import { detectLocation, nearestCity } from '@tawfeeqmartin/fajr'
+
+function locationLabel(lat, lon) {
+  const loc = detectLocation(lat, lon)
+  if (loc.city) return loc.city.name             // exact match
+  const near = nearestCity(lat, lon)             // always returns
+  if (near.distanceKm > 200) return null         // too far — suppress label
+  return `near ${near.city.name} (${near.distanceKm.toFixed(0)} km)`
+}
+```
+
+Use `nearestCity` ONLY for display. The dispatch path (`prayerTimes` → method override + elevation) is already correctly using bbox-precise `detectLocation`; never feed `nearestCity`'s result back into method/elevation selection.
+
+### v1.7.4 — cross-runtime compatibility (no API change)
+
+v1.7.4 documents that fajr works in React Native, Capacitor, Electron, Tauri, JSC, Bun, Cloudflare Workers, etc. without code changes — useful when planning agiftoftime's deployment target mix. fajr currently ships ESM-only; an IIFE bundle for embedding in non-ESM environments (JSC for pure-Swift apps) is tracked in [issue #46](https://github.com/tawfeeqmartin/fajr/issues/46). Native ports (Swift/Kotlin/C#/Rust) on the post-v1.8.0 roadmap ([issue #44](https://github.com/tawfeeqmartin/fajr/issues/44)).
+
+### v1.7.5 — city registry validation in CI (no API change)
+
+v1.7.5 added [`scripts/validate-city-registry.js`](../../scripts/validate-city-registry.js) plus 8 `detectCountry` reorderings + 6 `BBOX_OVERRIDES` table entries. The four issue #47 false positives (Toronto → USA, Cairo → "Giza", KL → "Shah Alam", Singapore → "Johor Bahru") all FIXED. Fail-class issue count dropped 519 → 146 (72%). For agiftoftime: **silent dispatch correctness improvement**, no code change needed. Apps that were observing wrong attribution at the four hot-spot coords will now see the correct city + country.
+
+### v1.7.6 — hijri Umm al-Qura default + elevation note magnitude
+
+Two independent changes shipped together:
+
+**A. `hijri()` now defaults to Umm al-Qura tabular** (Saudi Arabia's official calendar — matches AlAdhan, IslamicFinder, IACAD's Dulook DXB app, Microsoft Windows). Prior to v1.7.6, `hijri()` used the Kuwaiti arithmetic calendar, which diverges from Umm al-Qura by 0–1 days routinely and by a full month at Eid boundaries. agiftoftime-agent's 16-date audit (issue #48) found ~38% mismatch against AlAdhan; the Eid al-Fitr 1444/1446 + Eid al-Adha 1445 mismatches are particularly material because they affect Eid prayer scheduling.
+
+**Recipe — swapping AlAdhan's hijri to fajr.hijri:**
+
+```js
+// Before — AlAdhan REST (server dependency, network round-trip)
+const r = await fetch(`https://api.aladhan.com/v1/gToH/${dd}-${mm}-${yyyy}`)
+const { data: { hijri: { year, month: { number: month }, day } } } = await r.json()
+const monthName = MONTH_NAMES[month - 1]
+
+// After — fajr (offline, ESM-friendly, identical output for 16/16 audit dates)
+import { hijri } from '@tawfeeqmartin/fajr'
+const { year, month, day, monthName } = hijri(new Date(yyyy, mm - 1, dd))
+//                                        // → { year: 1447, month: 11, day: 15,
+//                                        //     monthName: "Dhu al-Qi'dah" }
+```
+
+If you need the v1.7.5-and-earlier Kuwaiti tabular output for any reason (legacy data parity, a specific scholarly tradition that follows it), it's preserved as opt-in:
+
+```js
+const tabular = hijri(new Date(), { convention: 'tabular' })
+```
+
+**Coverage:** 1318–1500 AH (1900-04-30 → 2077-11-16 Gregorian). Out-of-range throws `RangeError`. Wrap with a tabular fallback if your app shows historical (pre-1900) or far-future (post-2077) dates:
+
+```js
+function hijriSafe(date) {
+  try { return hijri(date) }
+  catch (e) {
+    if (e instanceof RangeError) return hijri(date, { convention: 'tabular' })
+    throw e
+  }
+}
+```
+
+**B. Maghrib elevation note now discloses magnitude.** The auto-resolution `notes[]` entry that fires when fajr derives elevation from the city registry now includes the actual minute-shift, so the long-press provenance sheet can show the institutional choice next to its real cost:
+
+```text
+Before v1.7.6:
+  "Elevation auto-resolved from city registry: Riyadh, 612m. Saudi/Umm al-Qura
+   institutionally declines this correction; UAE (Burj Khalifa) + Malaysia
+   JAKIM apply it. To match Saudi convention, pass elevation: 0."
+
+v1.7.6+:
+  "Elevation auto-resolved from city registry: Riyadh, 612m → Maghrib +2.7 min
+   later, Shuruq -2.7 min earlier vs sea-level. Saudi/Umm al-Qura institutionally
+   declines this correction; UAE (Burj Khalifa) + Malaysia JAKIM apply it. To
+   match Saudi convention, pass elevation: 0."
+```
+
+**Recipe — render the elevation note magnitude in the long-press provenance sheet:**
+
+```jsx
+// Tier-2 long-press sheet (sketch)
+<ProvenanceRow label="Elevation">
+  <span>{location.elevation}m</span>
+  {/* NEW v1.7.6 — find the elevation note (always exactly one when fired) */}
+  {(() => {
+    const elevNote = times.notes.find(n => n.startsWith('Elevation auto-resolved'))
+    if (!elevNote) return null
+    // The note already contains the magnitude — surface it verbatim, the
+    // copy is intentionally non-AI-generated and Islamic-principle-balanced.
+    return <p className="advisory">{elevNote}</p>
+  })()}
+  <Toggle
+    label="Apply elevation correction"
+    onToggleOff={() => recompute({ ...params, elevation: 0 })}
+  />
+</ProvenanceRow>
+```
+
+The advisory text is intentionally written to be rendered verbatim — it states the magnitude, names the institutions on both sides (UAE/JAKIM apply, Saudi/Umm al-Qura declines), and tells the user how to switch sides. Don't paraphrase it; render it as-is.
+
+---
 
 ## Why integrate
 
@@ -77,14 +274,28 @@ const day = dayTimes({ latitude, longitude, date })
 ```js
 import {
   qibla, hijri, hilalVisibility, nightThirds, travelerMode,
+  detectLocation, nearestCity,                     // v1.7.0 / v1.7.3
   applyElevationCorrection, applyTayakkunBuffer, tarabishyTimes,
 } from '@tawfeeqmartin/fajr'
 
 const bearing = qibla({ latitude, longitude })
 //   → { bearing: 97.4, ... }   bearing in degrees from true north
 
+// v1.7.6: defaults to Umm al-Qura — matches AlAdhan / IslamicFinder / IACAD /
+// Microsoft. Pass { convention: 'tabular' } for backwards-compat with v1.7.5 output.
+// Coverage: 1318-1500 AH; out-of-range throws RangeError.
 const date = hijri(new Date())
-//   → { year: 1446, month: 9, day: 15, monthName: 'Ramadan' }
+//   → { year: 1447, month: 11, day: 15, monthName: "Dhu al-Qi'dah" }
+
+// v1.7.0 — drop your reverse-geocode call; fajr resolves city + country + tz
+// + institutional-method-source from a bundled 375-city registry, all locally.
+const loc = detectLocation(latitude, longitude)
+//   → { city: { name, source: { institution, ... }, altMethods, ... } | null,
+//        country, timezone, elevation, recommendedMethod, methodSource, ... }
+
+// v1.7.3 — display-only label fallback when detectLocation.city is null
+const near = nearestCity(latitude, longitude)
+//   → { city: { name, ... }, distanceKm: 12.4 }
 
 const visibility = hilalVisibility({ year: 1446, month: 10, latitude, longitude })
 // (see Tier 3 below for the full result shape)
@@ -192,17 +403,31 @@ The point is to surface fajr's distinctive layer **without breaking agiftoftime'
 
 ### 2a. Method label under the date/location
 
-Wherever agiftoftime currently shows the city + date, add a small caption with the method:
+Wherever agiftoftime currently shows the city + date, add a small caption with the method. **Since v1.7.0, also pull the city / country / timezone / institutional source straight from `times.location` — no extra reverse-geocode call needed.**
 
-```html
-<header class="prayer-header">
-  <h1>13 Ramadan 1446 · Friday</h1>
-  <p class="location">Casablanca, Morocco</p>
-  <p class="method">Habous (19°/17°) — community-calibrated</p>
-</header>
+```jsx
+// times.location populated since v1.7.0
+const cityLabel = times.location.city
+  ? times.location.city.name
+  : `near ${nearestCity(lat, lon).city.name} (${nearestCity(lat, lon).distanceKm.toFixed(0)} km)`
+const countryLabel = times.location.country ?? 'Unknown region'
+const institutionLabel = times.location.city?.source?.institution
+
+return (
+  <header className="prayer-header">
+    <h1>13 Ramadan 1446 · Friday</h1>
+    <p className="location">{cityLabel}, {countryLabel}</p>
+    <p className="method">
+      {times.method}
+      {institutionLabel && <small> — via {institutionLabel}</small>}
+    </p>
+  </header>
+)
 ```
 
 Pull `times.method` from the fajr return value. Style it as small caption text, ~70% opacity. Most users won't look; the curious will see *why* the times are what they are.
+
+For Mosul / Najaf / Karbala / Basra / Sarajevo / Mostar / Banja Luka / Pristina / Bradford / Beirut / Tabriz / Dearborn / Lucknow / Kochi / Cotabato / Marawi (the 16 city-level method-override cities since v1.7.0 + v1.7.2), `times.location.city.source.institution` will name the specific authority that the method follows — e.g. "Iraqi Sunni Endowment Office" for Mosul, "Office of Grand Ayatollah al-Sistani" for Najaf. Render it next to or under the method label so users in those cities see *why* the engine picked this method instead of the country default.
 
 ### 2b. Long-press a prayer time → "Why this time?" sheet
 
