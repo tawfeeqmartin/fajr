@@ -24,14 +24,25 @@ Iraq has substantial intra-country ikhtilaf and no single uniform national timet
 - **Sunni–Shi'a method split** (the dominant ikhtilaf): Sunni Karachi/Egyptian vs. Shi'a Tehran/Jafari Maghrib timing.
 - **Within Shi'a:** Marjaʿiyya Najaf follows the disappearance-of-redness Maghrib convention; Marjaʿiyya Qom (in Iran) follows the same convention.
 
+## City-level overrides (active in fajr v1.7.x)
+- **Mosul** → Karachi 18°/18° + Hanafi Asr (Sunni Endowment, Nineveh)
+- **Najaf** → Tehran (Sistani hawza, Twelver Shia)
+- **Karbala** → Tehran (Imam Husayn / Abbas custodial offices)
+- **Basra** → Tehran (Twelver Shia Imsakiyya via maraji' offices)
+
 ## Open questions
-- v1.7.0 follow-up: city-level overrides for Najaf, Karbala, Basra, Kufa to switch them to Tehran method (per v1.6.0 classification-audit log).
-- The current default Egyptian routing is the Aladhan world-default fallback, not a precise-match institutional choice. Primary-source verification needed.
+- **KRG (Sulaymaniyah, Erbil) — research not yet conclusive (v1.7.2 status):** Kurdistan Regional Government Ministry of Endowment and Religious Affairs (https://gov.krd/moera-ar/) exists, but no publicly accessible primary-source prayer-time methodology documented. Kurdish Sunni community is overwhelmingly Shafi'i (distinct from Iraqi Arab Sunni Hanafi). Third-party apps (IslamicFinder, Pray Times) default Erbil/Sulaymaniyah to Karachi 18°/18° but do not cite KRG institutional sources. **No override shipped in v1.7.2.** Tracking: deeper data-hunt needed (Wayback Machine, mosque Imsakiyya samples, KRG Ministry direct contact). If future research locates a Diwan al-Awqaf KRG primary source, override candidate is Karachi 18°/18° + Shafi Asr (mirroring the Kerala/Maldives/Sri Lanka pattern).
+- The current default Egyptian routing is the Aladhan world-default fallback, not a precise-match institutional choice. Primary-source verification needed for non-overridden Iraqi cities.
 
 ## Sources
 - Sunni Endowment Office: https://sunniaffairs.gov.iq/
 - Shi'a Endowment Office: https://shia-affairs.gov.iq/
+- Office of Sayyid Sistani (Najaf): https://www.sistani.org/
+- Imam Husayn Holy Shrine (Karbala): https://imamhussain.org/
+- Kurdistan Regional Government Ministry of Endowment and Religious Affairs: https://gov.krd/moera-ar/ (KRG primary-source prayer-time methodology pending verification)
 - Aladhan API regional-default routing for `IQ`: https://aladhan.com/calculation-methods
+- Kurdistan-prayer-times-js community library (community-published, not institutional): https://github.com/ahmadsoran/kurdistan-prayer-times-js
 
 ## Last reviewed
 - 2026-05-02 by fajr-agent (initial creation per v1.6.0 audit log)
+- 2026-05-03 by fajr-agent (v1.7.2 — added KRG research status; no override shipped pending primary source)

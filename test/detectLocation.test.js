@@ -28,7 +28,7 @@ import { detectLocation } from '../src/engine.js'
 // City-method-override cities — verify each of the 12 dispatches correctly
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('detectLocation — city-method-override dispatch (12 cities)', () => {
+describe('detectLocation — city-method-override dispatch (16 cities)', () => {
   const overrides = [
     // [name, lat, lon, expectedCity, expectedMethod, expectedAltMethodCount]
     ['Mosul',      36.3489,  43.1577, 'Mosul',      'Karachi',              1],
@@ -43,6 +43,11 @@ describe('detectLocation — city-method-override dispatch (12 cities)', () => {
     ['Beirut',     33.8938,  35.5018, 'Beirut',     'Egyptian',             1],
     ['Tabriz',     38.0667,  46.2993, 'Tabriz',     'Tehran',               1],
     ['Dearborn',   42.3223, -83.1763, 'Dearborn',   'ISNA',                 1],
+    // v1.7.2 additions — KRG/Lucknow/Kerala/Pattani/Bangsamoro research
+    ['Lucknow',    26.8467,  80.9462, 'Lucknow',    'Karachi',              1],
+    ['Kochi',       9.9312,  76.2673, 'Kochi',      'KarachiShafi',         1],
+    ['Cotabato',    7.2178, 124.2451, 'Cotabato',   'MWL',                  1],
+    ['Marawi',      7.9988, 124.2937, 'Marawi',     'MWL',                  1],
   ]
 
   it.each(overrides)(

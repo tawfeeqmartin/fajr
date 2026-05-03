@@ -672,6 +672,8 @@ function institutionForMethod(method) {
     case 'Qatar':   return 'Qatar Calendar House'
     case 'MoonsightingCommittee': return 'Moonsighting Committee Worldwide'
     case 'Karachi': return 'University of Islamic Sciences, Karachi'
+    case 'KarachiShafi': return 'University of Islamic Sciences, Karachi (Shafi Asr)'
+    case 'MWL':     return 'Muslim World League'
     case 'ISNA':    return 'Islamic Society of North America'
     case 'UOIF':    return 'Union des organisations islamiques de France'
     default: return null
