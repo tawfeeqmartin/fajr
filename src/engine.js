@@ -13,7 +13,6 @@
  */
 
 import * as adhan from 'adhan'
-import citiesRegistry from './data/cities.json' with { type: 'json' }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPERIMENT 1: Regional method auto-selection
@@ -65,6 +64,7 @@ function detectCountry(lat, lon) {
   // ─── Caucasus — small, must precede Iran (lat 38-39 overlap) + Turkey ──
   if (lat >= 41.05 && lat <= 43.6 && lon >= 40   && lon <= 46.7) return 'Georgia'
   if (lat >= 38.4 && lat <= 41.9 && lon >= 44.8 && lon <= 50.4) return 'Azerbaijan'
+  if (lat >= 38.84 && lat <= 41.30 && lon >= 43.45 && lon <= 46.62) return 'Armenia'
 
   if (lat >= 25   && lat <= 39   && lon >= 44   && lon <= 63)   return 'Iran'
 
@@ -78,10 +78,42 @@ function detectCountry(lat, lon) {
   if (lat >= 16   && lat <= 33   && lon >= 34   && lon <= 56)   return 'SaudiArabia'
   if (lat >= 35   && lat <= 43   && lon >= 25   && lon <= 45)   return 'Turkey'
 
-  // ─── Balkans (Diyanet-aligned) — after Turkey ──────────────────────────
+  // ─── Balkans + SE Europe — after Turkey ────────────────────────────────
+  // Smallest first: Kosovo ⊂ Albania; Montenegro / North Macedonia partially
+  // overlap Albania/Kosovo. Bosnia overlaps Croatia; Slovenia ⊂ Italy/Austria.
+  // Bulgaria/Greece/Romania/Moldova/Ukraine/Belarus listed after to avoid
+  // swallowing the smaller western Balkans.
   if (lat >= 41.85 && lat <= 43.27 && lon >= 20  && lon <= 21.8) return 'Kosovo'
   if (lat >= 39.6 && lat <= 42.7 && lon >= 19.3 && lon <= 21.05) return 'Albania'
+  if (lat >= 41.85 && lat <= 43.56 && lon >= 18.43 && lon <= 20.36) return 'Montenegro'
+  if (lat >= 40.86 && lat <= 42.37 && lon >= 20.46 && lon <= 23.04) return 'NorthMacedonia'
   if (lat >= 42.55 && lat <= 45.27 && lon >= 15.7 && lon <= 19.65) return 'Bosnia'
+  if (lat >= 42.24 && lat <= 46.18 && lon >= 18.84 && lon <= 23.00) return 'Serbia'
+  if (lat >= 45.42 && lat <= 46.88 && lon >= 13.38 && lon <= 16.61) return 'Slovenia'
+  if (lat >= 42.39 && lat <= 46.55 && lon >= 13.49 && lon <= 19.45) return 'Croatia'
+  if (lat >= 41.24 && lat <= 44.22 && lon >= 22.36 && lon <= 28.61) return 'Bulgaria'
+  if (lat >= 34.80 && lat <= 41.75 && lon >= 19.37 && lon <= 28.25) return 'Greece'
+  if (lat >= 43.62 && lat <= 48.27 && lon >= 20.27 && lon <= 29.69) return 'Romania'
+  if (lat >= 45.47 && lat <= 48.49 && lon >= 26.62 && lon <= 30.13) return 'Moldova'
+  if (lat >= 44.39 && lat <= 52.38 && lon >= 22.14 && lon <= 40.22) return 'Ukraine'
+  if (lat >= 51.26 && lat <= 56.17 && lon >= 23.18 && lon <= 32.78) return 'Belarus'
+
+  // ─── Central Europe / Baltics ──────────────────────────────────────────
+  // Smaller before larger; Austria/Switzerland before Germany.
+  if (lat >= 47.74 && lat <= 49.61 && lon >= 16.83 && lon <= 22.57) return 'Slovakia'
+  if (lat >= 45.74 && lat <= 48.59 && lon >= 16.11 && lon <= 22.91) return 'Hungary'
+  if (lat >= 48.55 && lat <= 51.06 && lon >= 12.09 && lon <= 18.86) return 'Czechia'
+  if (lat >= 49.00 && lat <= 54.84 && lon >= 14.12 && lon <= 24.15) return 'Poland'
+  if (lat >= 53.90 && lat <= 56.45 && lon >= 20.95 && lon <= 26.84) return 'Lithuania'
+  if (lat >= 55.67 && lat <= 58.08 && lon >= 20.97 && lon <= 28.24) return 'Latvia'
+  if (lat >= 57.51 && lat <= 59.72 && lon >= 21.84 && lon <= 28.21) return 'Estonia'
+  if (lat >= 46.37 && lat <= 49.02 && lon >= 9.53 && lon <= 17.16) return 'Austria'
+  if (lat >= 45.82 && lat <= 47.81 && lon >= 5.96 && lon <= 10.49) return 'Switzerland'
+  if (lat >= 47.27 && lat <= 55.06 && lon >= 5.87 && lon <= 15.04) return 'Germany'
+  if (lat >= 49.50 && lat <= 51.50 && lon >= 2.55 && lon <= 6.41) return 'Belgium'
+  if (lat >= 50.75 && lat <= 53.58 && lon >= 3.36 && lon <= 7.23) return 'Netherlands'
+  if (lat >= 54.56 && lat <= 57.75 && lon >= 8.07 && lon <= 15.20) return 'Denmark'
+  if (lat >= 55.34 && lat <= 69.06 && lon >= 11.10 && lon <= 24.16) return 'Sweden'
 
   if (lat >= 21   && lat <= 32   && lon >= 24   && lon <= 38)   return 'Egypt'
 
@@ -94,20 +126,45 @@ function detectCountry(lat, lon) {
   if (lat >= 9.5  && lat <= 22   && lon >= 21.8 && lon <= 38.6) return 'Sudan'
 
   // ─── West Africa Sahel + coast — smallest-overlap first ────────────────
+  // CapeVerde: Atlantic islands, no continental overlap. GuineaBissau ⊂ Senegal
+  // lat range. Liberia ⊂ Guinea/CoteDIvoire area. Togo ⊂ Ghana area. Benin
+  // partially overlaps Nigeria/Niger/BurkinaFaso edges.
+  if (lat >= 14.80 && lat <= 17.20 && lon >= -25.36 && lon <= -22.66) return 'CapeVerde'
   if (lat >= 13.05 && lat <= 13.83 && lon >= -16.83 && lon <= -13.79) return 'Gambia'  // ⊂ Senegal
+  if (lat >= 10.92 && lat <= 12.68 && lon >= -16.72 && lon <= -13.64) return 'GuineaBissau'
   if (lat >= 12.3 && lat <= 16.7 && lon >= -17.6 && lon <= -11.3) return 'Senegal'
   if (lat >= 14.7 && lat <= 27.3 && lon >= -17.1 && lon <= -4.8) return 'Mauritania'
   if (lat >= 6.9  && lat <= 10   && lon >= -13.3 && lon <= -10.27) return 'SierraLeone'  // ⊂ Guinea-area
+  if (lat >= 4.36 && lat <= 8.55 && lon >= -11.49 && lon <= -7.37) return 'Liberia'
   if (lat >= 7.2  && lat <= 12.7 && lon >= -15.1 && lon <= -7.65) return 'Guinea'
   if (lat >= 4.3  && lat <= 10.7 && lon >= -8.6 && lon <= -2.5) return 'CoteDIvoire'
+  if (lat >= 6.10 && lat <= 11.14 && lon >= -0.15 && lon <= 1.81) return 'Togo'
   if (lat >= 4.5  && lat <= 11.2 && lon >= -3.3 && lon <= 1.2)  return 'Ghana'
+  if (lat >= 6.21 && lat <= 12.42 && lon >= 0.78 && lon <= 3.84) return 'Benin'
   if (lat >= 9.4  && lat <= 15.1 && lon >= -5.6 && lon <= 2.4)  return 'BurkinaFaso'
   if (lat >= 10.1 && lat <= 25   && lon >= -12.3 && lon <= 4.3) return 'Mali'
   if (lat >= 11.7 && lat <= 23.5 && lon >= 0.16 && lon <= 16)   return 'Niger'
   if (lat >= 3.9  && lat <= 14   && lon >= 2.7  && lon <= 14.7) return 'Nigeria'
   if (lat >= 7.4  && lat <= 23.5 && lon >= 13.5 && lon <= 24)   return 'Chad'
+
+  // ─── Central Africa — smallest first, BEFORE Cameroon ──────────────────
+  // SaoTome island ⊂ Atlantic; EquatorialGuinea tiny mainland + Bioko ⊂ Cameroon
+  // bbox; Gabon, RepublicOfTheCongo, CAR, DRCongo partially overlap Cameroon.
+  // All listed BEFORE Cameroon so cities like Bata (EG, 1.86, 9.78) which fit
+  // BOTH Cameroon and EquatorialGuinea dispatch to EG first.
+  if (lat >= -0.04 && lat <= 1.71 && lon >= 6.46 && lon <= 7.46) return 'SaoTomeAndPrincipe'
+  if (lat >= 0.92 && lat <= 2.35 && lon >= 5.62 && lon <= 11.34) return 'EquatorialGuinea'
+  if (lat >= -3.96 && lat <= 2.32 && lon >= 8.70 && lon <= 14.50) return 'Gabon'
+  if (lat >= -5.04 && lat <= 3.71 && lon >= 11.20 && lon <= 18.65) return 'RepublicOfTheCongo'
+  if (lat >= 2.22 && lat <= 11.01 && lon >= 14.42 && lon <= 27.46) return 'CentralAfricanRepublic'
+  if (lat >= -13.46 && lat <= 5.39 && lon >= 12.20 && lon <= 31.31) return 'DRCongo'
+
   if (lat >= 1.7  && lat <= 13.1 && lon >= 8.5  && lon <= 16.2) return 'Cameroon'
 
+  // ─── Ireland (smaller, before broader UK; UK exists at lat 49-62, lon -9-2.5).
+  // Ireland fits inside UK's lat range; lon -10.69 extends west of UK's -9.
+  // Cities like Dublin (53.35, -6.26) fit BOTH — Ireland MUST precede UK.
+  if (lat >= 51.42 && lat <= 55.39 && lon >= -10.69 && lon <= -5.83) return 'Ireland'
   if (lat >= 49   && lat <= 62   && lon >= -9   && lon <= 2.5)  return 'UK'
 
   // ─── Equatorial SE Asia — small countries first, before Malaysia bbox ─
@@ -116,42 +173,128 @@ function detectCountry(lat, lon) {
   if (lat >= 0.5  && lat <= 8    && lon >= 99   && lon <= 120)  return 'Malaysia'
 
   // ─── SE Asia continental — Cambodia/Thailand smaller before Myanmar ──
+  // Laos and Vietnam added in v1.6.2; Vietnam's bbox extends through the Cham
+  // delta to lat 8.54 and overlaps Cambodia at lat 10.4-14.7, lon 102.14-107.6.
+  // Cambodia smaller — listed first.
   if (lat >= 10.4 && lat <= 14.7 && lon >= 102.3 && lon <= 107.6) return 'Cambodia'
+  if (lat >= 13.91 && lat <= 22.51 && lon >= 100.10 && lon <= 107.70) return 'Laos'
+  if (lat >= 8.54 && lat <= 23.39 && lon >= 102.14 && lon <= 109.47) return 'Vietnam'
   if (lat >= 5.6  && lat <= 20.5 && lon >= 97.3 && lon <= 105.7) return 'Thailand'
   if (lat >= 9.6  && lat <= 28.5 && lon >= 92.2 && lon <= 101.2) return 'Myanmar'
   if (lat >= 4.6  && lat <= 21.1 && lon >= 116.9 && lon <= 126.6) return 'Philippines'
 
-  if (lat >= 24   && lat <= 50   && lon >= -125 && lon <= -66)  return 'USA'
-  if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
-  if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
-  if (lat >= -6   && lat <= 2    && lon >= -82  && lon <= -74)  return 'Ecuador'
-  if (lat >= -11  && lat <= 6    && lon >= 95   && lon <= 141)  return 'Indonesia'
-
   // ─── South Asia — smallest first; India bbox huge so last in cluster ──
+  // Listed BEFORE East Asia: China's bbox (lat 18-53, lon 73-134) overlaps
+  // Bhutan (lat 26.70-28.32, lon 88.75-92.13) and Nepal (lat 26.35-30.45,
+  // lon 80.06-88.20). South Asia must take precedence.
   if (lat >= -1   && lat <= 7.5  && lon >= 72.5 && lon <= 74)   return 'Maldives'
   if (lat >= 5.9  && lat <= 9.85 && lon >= 79.5 && lon <= 81.9) return 'SriLanka'  // ⊂ India
   if (lat >= 23   && lat <= 37   && lon >= 60   && lon <= 75)   return 'Pakistan'
   if (lat >= 29.4 && lat <= 38.5 && lon >= 60.5 && lon <= 74.95) return 'Afghanistan'
   if (lat >= 20.5 && lat <= 26.6 && lon >= 88   && lon <= 92.7) return 'Bangladesh'
+  if (lat >= 26.70 && lat <= 28.32 && lon >= 88.75 && lon <= 92.13) return 'Bhutan'
+  if (lat >= 26.35 && lat <= 30.45 && lon >= 80.06 && lon <= 88.20) return 'Nepal'
   if (lat >= 6.5  && lat <= 35.5 && lon >= 68   && lon <= 97.4) return 'India'
 
+  // ─── East Asia — Taiwan / Korea / Japan / Mongolia / China (huge) ─────
+  // Smaller first: Taiwan tiny; KP/KR; Japan; Mongolia largeish; China huge.
+  if (lat >= 21.90 && lat <= 25.30 && lon >= 119.31 && lon <= 122.00) return 'Taiwan'
+  if (lat >= 33.11 && lat <= 38.62 && lon >= 124.61 && lon <= 131.87) return 'SouthKorea'
+  if (lat >= 37.67 && lat <= 43.01 && lon >= 124.18 && lon <= 130.70) return 'NorthKorea'
+  if (lat >= 24.05 && lat <= 45.55 && lon >= 122.93 && lon <= 153.99) return 'Japan'
+  if (lat >= 41.58 && lat <= 52.15 && lon >= 87.74 && lon <= 119.93) return 'Mongolia'
+  if (lat >= 18.16 && lat <= 53.56 && lon >= 73.50 && lon <= 134.77) return 'China'
+
+  if (lat >= 24   && lat <= 50   && lon >= -125 && lon <= -66)  return 'USA'
+
+  // ─── Latin America + Caribbean ─────────────────────────────────────────
+  // Smallest first, Caribbean before mainland. Bolivia/Colombia/Ecuador
+  // existed pre-v1.6.2 — kept in original positions for stability.
+  if (lat >= 17.70 && lat <= 18.53 && lon >= -78.37 && lon <= -76.18) return 'Jamaica'
+  if (lat >= 17.47 && lat <= 19.93 && lon >= -72.00 && lon <= -68.32) return 'DominicanRepublic'
+  if (lat >= 19.83 && lat <= 23.20 && lon >= -84.95 && lon <= -74.13) return 'Cuba'
+  if (lat >= 10.04 && lat <= 11.36 && lon >= -61.93 && lon <= -60.50) return 'TrinidadAndTobago'
+  if (lat >= 13.74 && lat <= 17.82 && lon >= -92.23 && lon <= -88.23) return 'Guatemala'
+  if (lat >= 14.53 && lat <= 32.72 && lon >= -118.40 && lon <= -86.71) return 'Mexico'
+  if (lat >= 1.18 && lat <= 8.56 && lon >= -61.39 && lon <= -56.48) return 'Guyana'
+  if (lat >= 1.83 && lat <= 6.00 && lon >= -58.07 && lon <= -53.96) return 'Suriname'
+  if (lat >= 0.65 && lat <= 12.20 && lon >= -73.36 && lon <= -59.81) return 'Venezuela'
+  if (lat >= -24  && lat <= -9   && lon >= -70  && lon <= -57)  return 'Bolivia'
+  if (lat >= -5   && lat <= 13   && lon >= -82  && lon <= -66)  return 'Colombia'
+  if (lat >= -6   && lat <= 2    && lon >= -82  && lon <= -74)  return 'Ecuador'
+  if (lat >= -18.35 && lat <= -0.04 && lon >= -81.33 && lon <= -68.65) return 'Peru'
+  if (lat >= -33.75 && lat <= 5.27 && lon >= -73.99 && lon <= -34.79) return 'Brazil'
+  if (lat >= -27.61 && lat <= -19.29 && lon >= -62.65 && lon <= -54.26) return 'Paraguay'
+  if (lat >= -34.99 && lat <= -30.09 && lon >= -58.44 && lon <= -53.07) return 'Uruguay'
+  if (lat >= -55.06 && lat <= -21.78 && lon >= -73.57 && lon <= -53.65) return 'Argentina'
+  if (lat >= -55.92 && lat <= -17.51 && lon >= -75.71 && lon <= -66.42) return 'Chile'
+
+  if (lat >= -11  && lat <= 6    && lon >= 95   && lon <= 141)  return 'Indonesia'
+
   // ─── Indian Ocean / Swahili Coast — before SouthAfrica ─────────────────
+  // Smallest first: Mauritius is a tiny island; Seychelles archipelago;
+  // Comoros; Madagascar largest of the island bboxes.
+  if (lat >= -20.53 && lat <= -19.97 && lon >= 57.30 && lon <= 57.81) return 'Mauritius'
+  if (lat >= -10.22 && lat <= -3.71 && lon >= 46.21 && lon <= 56.30) return 'Seychelles'
   if (lat >= -12.5 && lat <= -11.3 && lon >= 43.2 && lon <= 44.6) return 'Comoros'
   if (lat >= -25.7 && lat <= -11.95 && lon >= 43.2 && lon <= 50.5) return 'Madagascar'
+  // East Africa Egyptian-cluster (Burundi/Rwanda/Uganda/Malawi) — landlocked.
+  // Smallest first to avoid Ethiopia/Sudan/Tanzania bbox swallowing them.
+  // Malawi MUST precede Tanzania (Malawi's northern lat -9.37 sits within
+  // Tanzania's lat range; Karonga in Malawi at -9.93 would otherwise dispatch
+  // to Tanzania).
+  if (lat >= -4.47 && lat <= -2.30 && lon >= 29.00 && lon <= 30.85) return 'Burundi'
+  if (lat >= -2.84 && lat <= -1.04 && lon >= 28.86 && lon <= 30.90) return 'Rwanda'
+  if (lat >= -1.48 && lat <= 4.23 && lon >= 29.57 && lon <= 35.04) return 'Uganda'
+  if (lat >= -17.13 && lat <= -9.37 && lon >= 32.67 && lon <= 35.93) return 'Malawi'
   if (lat >= -4.7 && lat <= 5    && lon >= 33.9 && lon <= 41.9) return 'Kenya'
   if (lat >= -11.8 && lat <= -1  && lon >= 29.3 && lon <= 40.45) return 'Tanzania'
   if (lat >= -26.9 && lat <= -10.4 && lon >= 30.2 && lon <= 41) return 'Mozambique'
 
-  // Southern Africa — only one in this geographic range
+  // ─── Southern Africa — order matters. Eswatini & Lesotho enclaves are
+  //     fully inside SouthAfrica's bbox (must come first). Botswana / Namibia /
+  //     Zimbabwe / Zambia / Angola partially overlap SA's bbox — list ALL
+  //     before SouthAfrica so cities like Gaborone (-24.63, 25.92) which fit
+  //     BOTH Botswana and SA match Botswana first. ───────────────────────
+  if (lat >= -27.32 && lat <= -25.72 && lon >= 30.79 && lon <= 32.13) return 'Eswatini'
+  if (lat >= -30.68 && lat <= -28.57 && lon >= 27.01 && lon <= 29.46) return 'Lesotho'
+  if (lat >= -28.97 && lat <= -16.96 && lon >= 11.73 && lon <= 25.26) return 'Namibia'
+  if (lat >= -26.91 && lat <= -17.78 && lon >= 19.99 && lon <= 29.37) return 'Botswana'
+  if (lat >= -22.42 && lat <= -15.61 && lon >= 25.24 && lon <= 33.06) return 'Zimbabwe'
+  if (lat >= -18.08 && lat <= -8.22 && lon >= 21.99 && lon <= 33.71) return 'Zambia'
+  if (lat >= -18.04 && lat <= -4.38 && lon >= 11.68 && lon <= 24.08) return 'Angola'
   if (lat >= -34.85 && lat <= -22 && lon >= 16  && lon <= 33)   return 'SouthAfrica'
 
+  // ─── Pacific / Oceania ────────────────────────────────────────────────
+  // Fiji tiny; PNG before Australia (Australia's bbox is huge).
+  if (lat >= -19.20 && lat <= -16.15 && lon >= 177.13 && lon <= 180.26) return 'Fiji'
+  if (lat >= -11.66 && lat <= -1.32 && lon >= 140.84 && lon <= 155.96) return 'PapuaNewGuinea'
+  if (lat >= -47.29 && lat <= -34.39 && lon >= 166.43 && lon <= 178.55) return 'NewZealand'
+  if (lat >= -43.64 && lat <= -10.06 && lon >= 112.92 && lon <= 153.64) return 'Australia'
+
   if (lat >= 42   && lat <= 51.5 && lon >= -5   && lon <= 8.5)  return 'France'
+
+  // ─── Southern Europe — Italy and Iberia (after France) ─────────────────
+  // Italy partially overlaps France's lon 6.62-8.5 at lat 35.49-47.09. France
+  // listed first → French Riviera dispatches to France. Italy catches Italian
+  // territory. Portugal ⊂ Spain's lon range — Portugal first.
+  if (lat >= 35.49 && lat <= 47.09 && lon >= 6.62 && lon <= 18.51) return 'Italy'
+  if (lat >= 36.96 && lat <= 42.15 && lon >= -9.50 && lon <= -6.19) return 'Portugal'
+  if (lat >= 27.64 && lat <= 43.79 && lon >= -18.16 && lon <= 4.32) return 'Spain'
+
   if (lat >= 41.5 && lat <= 60   && lon >= -95  && lon <= -52)  return 'Canada'
   // Finland and Iceland must be checked before Norway: their bounding boxes
   // are subsets of Norway's broader (4-32°E) box.
   if (lat >= 59   && lat <= 71   && lon >= 19   && lon <= 32)   return 'Finland'
   if (lat >= 62   && lat <= 68   && lon >= -26  && lon <= -12)  return 'Iceland'
   if (lat >= 56   && lat <= 72   && lon >= 4    && lon <= 32)   return 'Norway'
+
+  // ─── Russia: huge bbox (lat 41-82, lon 19-169). Listed near end to avoid
+  //     swamping Caucasus / Central Asia / Eastern Europe / Mongolia /
+  //     Finland / Norway / Sweden which have smaller / different bboxes
+  //     listed earlier and take precedence. ────────────────────────────────
+  if (lat >= 41.19 && lat <= 81.86 && lon >= 19.64 && lon <= 169.05) return 'Russia'
+
   return null
 }
 
@@ -218,6 +361,7 @@ function selectMethod(country, lat, coords) {
     case 'SaudiArabia':
       // Umm al-Qura University: Fajr 18.5°, Isha +90 min
       return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura' }
+    case 'Türkiye':
     case 'Turkey': {
       // Diyanet İşleri Başkanlığı: Fajr 18°, Isha 17° + adhan's preset
       // adjustments {sunrise:-7, dhuhr:5, asr:4, maghrib:7, isha:0}.
@@ -248,6 +392,7 @@ function selectMethod(country, lat, coords) {
     case 'Egypt':
       // Egyptian General Authority of Survey: Fajr 19.5°, Isha 17.5°
       return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (19.5°/17.5°)' }
+    case 'UnitedKingdom':
     case 'UK':
       // Moonsighting Committee: Fajr 18°, Isha 18° with seasonal (Shafaq) adjustment
       // 🟢 Established — UK Muslim community predominantly follows Moonsighting Committee
@@ -316,6 +461,7 @@ function selectMethod(country, lat, coords) {
       p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8, isha: 1 }
       return { params: p, methodName: 'JAKIM (20°/18° + 8min Fajr / 1min Isha ihtiyati per Path A community calibration)' }
     }
+    case 'UnitedStates':
     case 'USA':
       // ISNA: Fajr 15°, Isha 15°
       return { params: adhan.CalculationMethod.NorthAmerica(), methodName: 'ISNA (NorthAmerica)' }
@@ -332,6 +478,7 @@ function selectMethod(country, lat, coords) {
       // University of Islamic Sciences, Karachi: Fajr 18°, Isha 18°, Hanafi Asr
       return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (18°/18°)' }
     }
+    case 'UnitedArabEmirates':
     case 'UAE': {
       // Dubai / UAE: Umm al-Qura (Gulf region uses this or Kuwait; Aladhan method 4)
       return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura (UAE)' }
@@ -363,6 +510,7 @@ function selectMethod(country, lat, coords) {
       // MWL regions list in methods.js explicitly includes ZA. 🟢 Established.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South Africa)' }
     }
+    case 'BruneiDarussalam':
     case 'Brunei': {
       // JAKIM / MUIS-equivalent (Fajr 20°, Isha 18°) — equatorial standard
       // shared across MY/SG/BN/ID per methods.js. 🟢 Established.
@@ -551,6 +699,7 @@ function selectMethod(country, lat, coords) {
       // is correctly applied via the Diyanet method.
       // Classification: 🟢 Established.
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Kosovo BIK, Turkish institutional)' }
+    case 'BosniaandHerzegovina':
     case 'Bosnia':
       // Rijaset / Islamska Zajednica u BiH (Sunni Hanafi ~51%): Diyanet
       // 18°/17° closest published match to traditional Takvim. Hanafi Asr
@@ -602,6 +751,7 @@ function selectMethod(country, lat, coords) {
     case 'Guinea':
       // ~89% Sunni Maliki: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Guinea default)' }
+    case "Côted'Ivoire":
     case 'CoteDIvoire':
       // ~42% Muslim, Sunni Maliki: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: "MWL (Côte d'Ivoire default)" }
@@ -701,6 +851,245 @@ function selectMethod(country, lat, coords) {
       // default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Philippines, Aladhan world default)' }
 
+    // ──────────────────────────────────────────────────────────────────────
+    // v1.6.2 GAP-CLOSING — 85 new countries
+    //
+    // Each case maps a country to its institutional calculation method.
+    // Method choices are sourced from the Aladhan API's per-country defaults
+    // (https://api.aladhan.com/v1/methods), institutional citations (ECFR for
+    // Europe, ITL/arabeyes for SE Asia and Caucasus, JUM/CIOG/ASJA for Hanafi
+    // diaspora, DUMR for Russia, CIL for Portugal). Where Aladhan defaults to
+    // MWL and no stronger institutional override exists, MWL is the documented
+    // multi-app default. Classification per case below.
+    // ──────────────────────────────────────────────────────────────────────
+
+    // ─── Levant: Israel ──────────────────────────────────────────────────
+    case 'Israel':
+      // Awqaf-Jerusalem Egyptian convention via Northern Branch / Islamic
+      // Movement; Aladhan default. Multi-method country (separate Awqaf
+      // institutions). Classification: 🟡 Aladhan-aligned.
+      // see knowledge/wiki/regions/israel.md (TODO)
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Israel, Awqaf-Jerusalem convention)' }
+
+    // ─── Caucasus: Armenia ───────────────────────────────────────────────
+    case 'Armenia':
+      // Diyanet 18°/17° per Aladhan default — small Muslim minority,
+      // historically Hanafi via Ottoman heritage; Yerevan Blue Mosque is
+      // Iranian-funded Shia (institutional outlier). Classification: 🟡.
+      // see knowledge/wiki/regions/armenia.md (TODO)
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Armenia, Aladhan world default)' }
+
+    // ─── Russia: bespoke 16°/15° preset (Aladhan method 14 / DUMR) ──────
+    case 'Russia': {
+      // Spiritual Administration of Muslims of Russia (DUMR): Fajr 16°, Isha
+      // 15°. The lower angles accommodate Russia's high latitudes (Moscow
+      // 55.7°N, St Petersburg 59.9°N) where 18°/18° fails for several months
+      // a year. Aladhan method 14. Classification: 🟢 Established.
+      // see knowledge/wiki/regions/russia.md (TODO)
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 16
+      p.ishaAngle = 15
+      p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
+      return { params: p, methodName: 'Russia (DUMR, 16°/15° + TwilightAngle)' }
+    }
+
+    // ─── Balkans + SE Europe ─────────────────────────────────────────────
+    case 'Bulgaria':
+      // Glavno Muftiystvo (Sofia Chief Mufti's Office): historically Diyanet-
+      // aligned via Ottoman Hanafi heritage. ~10% Muslim. Aladhan method 13.
+      // Classification: 🟡→🟢. see knowledge/wiki/regions/bulgaria.md (TODO)
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Bulgaria, Hanafi via Ottoman heritage)' }
+    case 'Greece':
+      // Western Thrace muftiates (Komotini, Xanthi, Didymoteicho): Diyanet-
+      // aligned per Treaty of Lausanne 1923 Greek-Turkish bilateral framework.
+      // Athens Muslim community separate but no national preset. Aladhan
+      // default Diyanet. Classification: 🟡→🟢.
+      // see knowledge/wiki/regions/greece.md (TODO)
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Greece, Western Thrace muftiate convention)' }
+    case 'Montenegro':
+    case 'NorthMacedonia':
+    case 'Serbia':
+    case 'Croatia':
+    case 'Slovenia':
+    case 'Romania':
+    case 'Moldova':
+    case 'Ukraine':
+    case 'Belarus':
+      // Aladhan-aligned MWL European default. Several of these have Hanafi
+      // heritage (Sandžak Bosniaks in RS/ME/MK; Lipka Tatars in BY; Crimean
+      // Tatars in UA; Dobruja Tatars in RO) for which Diyanet would be
+      // institution-aligned, but Aladhan's per-country default is MWL across
+      // this cluster. v1.6.3 may revisit. Classification: 🟡.
+      // see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, Aladhan world default)` }
+
+    // ─── Western & Central Europe ────────────────────────────────────────
+    case 'Ireland':
+      // ICCI: Moonsighting Committee per Aladhan world default for Ireland
+      // (high-latitude Shafaq-general adjustment). Classification: 🟡.
+      // see knowledge/wiki/regions/ireland.md (TODO)
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Ireland, Aladhan world default)' }
+    case 'Portugal': {
+      // Comunidade Islâmica de Lisboa (CIL): Fajr 18°, Isha = Maghrib + 77 min,
+      // Maghrib offset +3 min. Aladhan method 21. Classification: 🟢 Established.
+      // see knowledge/wiki/regions/portugal.md (TODO)
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18
+      p.ishaInterval = 77
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 3 }
+      return { params: p, methodName: 'CIL Lisboa (18° / +77min Isha / +3min Maghrib)' }
+    }
+    case 'Italy':
+    case 'Spain':
+    case 'Germany':
+    case 'Austria':
+    case 'Switzerland':
+    case 'Belgium':
+    case 'Netherlands':
+    case 'Denmark':
+    case 'Sweden':
+    case 'Czechia':
+    case 'Slovakia':
+    case 'Hungary':
+    case 'Poland':
+    case 'Lithuania':
+    case 'Latvia':
+    case 'Estonia':
+      // ECFR / national-association MWL convention across European
+      // institutions. High-latitude TwilightAngle auto-applied at lat>55 for
+      // Sweden/Estonia/Latvia/Northern PL/DE/DK callers. Classification: 🟡→🟢
+      // (multi-institution corroboration: ECFR endorses MWL 18°/17° as the
+      // predominant European method).
+      // see knowledge/wiki/regions/europe.md (TODO)
+      if (lat > 55) {
+        const p = adhan.CalculationMethod.MuslimWorldLeague()
+        p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
+        return { params: p, methodName: `MWL + TwilightAngle (${country}, ECFR-aligned high-lat)` }
+      }
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, ECFR European default)` }
+
+    // ─── Sub-Saharan Africa: West/Central + Southern (MWL cluster) ───────
+    case 'CapeVerde':
+    case 'GuineaBissau':
+    case 'Liberia':
+    case 'Togo':
+    case 'Benin':
+    case 'EquatorialGuinea':
+    case 'SaoTomeAndPrincipe':
+    case 'Gabon':
+    case 'RepublicOfTheCongo':
+    case 'CentralAfricanRepublic':
+    case 'DRCongo':
+    case 'Angola':
+    case 'Zambia':
+    case 'Zimbabwe':
+    case 'Namibia':
+    case 'Botswana':
+    case 'Lesotho':
+    case 'Eswatini':
+      // Aladhan-aligned MWL Sub-Saharan default. Most have small Muslim
+      // minorities (~0.5-15%), no national institutional preset. West African
+      // cluster is Maliki-dominant (Tijaniyya/Mouridiyya orders); Southern
+      // African cluster is Indian-origin Hanafi-heavy (Karachi institutionally
+      // aligned but Aladhan defaults MWL — flagged for v1.6.3+).
+      // Classification: 🟡. see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, Aladhan world default)` }
+
+    // ─── East Africa Egyptian-cluster ────────────────────────────────────
+    case 'Burundi':
+    case 'Malawi':
+    case 'Rwanda':
+    case 'Seychelles':
+    case 'Uganda':
+      // East-African Egyptian-method cluster per Aladhan world coverage.
+      // Most have Sunni Shafi'i Muslim populations (~3-15%).
+      // Classification: 🟡. see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: `Egyptian (${country}, East-Africa cluster)` }
+    case 'Mauritius':
+      // Aladhan defaults Egyptian; institution (JUM, Hanafi-Deobandi) would
+      // canonically use Karachi. Aladhan-aligned for v1.6.2 ratchet alignment.
+      // Classification: 🟡 (deviation flagged for v1.6.3).
+      // see knowledge/wiki/regions/mauritius.md (TODO)
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (Mauritius, Aladhan world default; JUM-Hanafi institutional alignment would suggest Karachi — flagged for v1.6.3)' }
+
+    // ─── East Asia & Pacific ─────────────────────────────────────────────
+    case 'China':
+      // China Islamic Association: no national preset. Aladhan defaults
+      // Moonsighting Committee for Shafaq-general high-latitude Xinjiang/Inner
+      // Mongolia support. Classification: 🟡.
+      // see knowledge/wiki/regions/china.md (TODO)
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (China, Aladhan world default)' }
+    case 'Mongolia':
+      // Kazakh community (~3%, Bayan-Ölgii). Aladhan defaults Moonsighting.
+      // Classification: 🟡. see knowledge/wiki/regions/mongolia.md (TODO)
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee (Mongolia, Aladhan world default)' }
+    case 'Japan':
+    case 'SouthKorea':
+    case 'NorthKorea':
+    case 'Taiwan':
+    case 'Vietnam':
+      // Aladhan-aligned MWL East-Asia default. Very small Muslim communities;
+      // no national institutional preset. Classification: 🟡.
+      // see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, Aladhan world default)` }
+    case 'Laos':
+      // Lao Cham/Tai Muslim community small; no national institution. Aladhan
+      // defaults MWL. SE Asia 20°/18° (Singapore method) is regionally
+      // institution-aligned via Cambodia/Thailand but ratchet alignment
+      // privileges Aladhan-default MWL. Classification: 🟡 (deviation flagged
+      // for v1.6.3 if SE-Asia institutional alignment preferred).
+      // see knowledge/wiki/regions/laos.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Laos, Aladhan world default)' }
+
+    // ─── Australia / NZ / Pacific ────────────────────────────────────────
+    case 'Australia':
+    case 'NewZealand':
+      // AFIC / FIANZ MWL convention. Classification: 🟢 Established.
+      // see knowledge/wiki/regions/australia.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, AFIC/FIANZ convention)` }
+    case 'Fiji':
+    case 'PapuaNewGuinea':
+      // Aladhan-aligned MWL Pacific default. Fiji has Indian-origin Hanafi-
+      // majority Muslim community (Karachi institution-aligned, deviation
+      // flagged for v1.6.3). Classification: 🟡.
+      // see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, Aladhan world default)` }
+
+    // ─── South Asia: Bhutan, Nepal ───────────────────────────────────────
+    case 'Bhutan':
+    case 'Nepal':
+      // Karachi 18°/18° via South Asian regional Hanafi convention (Indian-
+      // origin Muslim communities). Aladhan-aligned. Classification: 🟢.
+      // see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.Karachi(), methodName: `Karachi (${country}, South-Asia Hanafi regional)` }
+
+    // ─── Latin America + Caribbean ───────────────────────────────────────
+    case 'Mexico':
+    case 'Guatemala':
+    case 'Cuba':
+    case 'Jamaica':
+    case 'DominicanRepublic':
+    case 'Brazil':
+    case 'Argentina':
+    case 'Chile':
+    case 'Peru':
+    case 'Paraguay':
+    case 'Uruguay':
+    case 'Venezuela':
+      // Aladhan-aligned MWL Latin-America default. Small Muslim communities,
+      // mostly Lebanese/Syrian-origin Sunni (Latin America) and Indian-origin
+      // Hanafi (Caribbean). Classification: 🟡.
+      // see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, Aladhan world default)` }
+    case 'Guyana':
+    case 'Suriname':
+    case 'TrinidadAndTobago':
+      // Aladhan-aligned MWL Caribbean default. Indian-origin Hanafi-majority
+      // Muslim community (Karachi institution-aligned: CIOG / SIV / ASJA),
+      // but Aladhan defaults MWL. Classification: 🟡 (deviation flagged for
+      // v1.6.3). see knowledge/wiki/regions/<country>.md (TODO)
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: `MWL (${country}, Aladhan world default; Indian-origin Hanafi communities would canonically use Karachi — flagged for v1.6.3)` }
+
     default: {
       // Fallback: high-latitude auto-detect (lat > 55°)
       if (lat > 55) {
@@ -711,223 +1100,6 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.NorthAmerica(), methodName: 'ISNA (default)' }
     }
   }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// EXPERIMENT 1.5: City-aware location resolver (v1.7.0 phase 1)
-// 🟢 Established — city-level institutional dispatch is documented Islamic
-// authority practice (Diyanet's per-province ezan vakti, Ministry of Habous's
-// per-zone Imsakiyya, JAKIM's per-zone waktu solat). The pure-lookup shape —
-// coordinate → (city, country, timezone, method, source) — extends
-// detectCountry's bbox approach without changing any astronomy.
-// see knowledge/wiki/api/detectLocation.md (proposed; phase 3 publishes)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Country → default method-name string.
- *
- * Mirrors the cases of `selectMethod()` above but returns just the method NAME
- * (a string) rather than the full adhan.CalculationParameters object. This is
- * what `detectLocation` surfaces to apps as `recommendedMethod`. Apps then
- * pass the same string back into `prayerTimes({ method })` (or compose with
- * their own selector) to obtain the actual calculation.
- *
- * Kept in lockstep with `selectMethod()` — when adding a new country there,
- * update this table too.
- *
- * @param {string|null} country
- * @returns {string}  Method name; defaults to 'ISNA' (the engine's fallback).
- */
-function methodForCountry(country) {
-  switch (country) {
-    case 'Morocco':            return 'Morocco'
-    case 'SaudiArabia':        return 'UmmAlQura'
-    case 'Turkey':             return 'Diyanet'
-    case 'Egypt':              return 'Egyptian'
-    case 'UK':                 return 'MoonsightingCommittee'
-    case 'Malaysia':           return 'JAKIM'
-    case 'USA':                return 'ISNA'
-    case 'Bolivia':            return 'MWL'
-    case 'Colombia':           return 'MWL'
-    case 'Ecuador':            return 'MWL'
-    case 'Indonesia':          return 'JAKIM'
-    case 'Pakistan':           return 'Karachi'
-    case 'UAE':                return 'UmmAlQura'
-    case 'Qatar':              return 'Qatar'
-    case 'Kuwait':             return 'Kuwait'
-    case 'Bahrain':            return 'Kuwait'
-    case 'Oman':               return 'Kuwait'
-    case 'Yemen':              return 'Kuwait'
-    case 'Iran':               return 'Tehran'
-    case 'SouthAfrica':        return 'MWL'
-    case 'Brunei':             return 'JAKIM'
-    case 'Singapore':          return 'MUIS'
-    case 'France':             return 'UOIF'
-    case 'Canada':             return 'ISNA'
-    case 'Norway':             return 'MWL'
-    case 'Iceland':            return 'MWL'
-    case 'Finland':            return 'MWL'
-    case 'Tunisia':            return 'Tunisia'
-    case 'Algeria':            return 'Algeria'
-    case 'Libya':              return 'Egyptian'
-    case 'Mauritania':         return 'MWL'
-    case 'Palestine':          return 'Egyptian'
-    case 'Lebanon':            return 'Egyptian'
-    case 'Jordan':             return 'Jordan'
-    case 'Syria':              return 'Egyptian'
-    case 'Iraq':               return 'Egyptian'
-    case 'Georgia':            return 'Diyanet'
-    case 'Azerbaijan':         return 'Tehran'
-    case 'Tajikistan':         return 'MWL'
-    case 'Turkmenistan':       return 'MWL'
-    case 'Kyrgyzstan':         return 'MWL'
-    case 'Uzbekistan':         return 'MWL'
-    case 'Kazakhstan':         return 'MWL'
-    case 'Albania':            return 'Diyanet'
-    case 'Kosovo':             return 'Diyanet'
-    case 'Bosnia':             return 'Diyanet'
-    case 'Djibouti':           return 'MWL'
-    case 'Eritrea':            return 'MWL'
-    case 'Somalia':            return 'MWL'
-    case 'SouthSudan':         return 'MWL'
-    case 'Ethiopia':           return 'MWL'
-    case 'Sudan':              return 'Egyptian'
-    case 'Gambia':             return 'MWL'
-    case 'Senegal':            return 'MWL'
-    case 'SierraLeone':        return 'MWL'
-    case 'Guinea':             return 'MWL'
-    case 'CoteDIvoire':        return 'MWL'
-    case 'Ghana':              return 'MWL'
-    case 'BurkinaFaso':        return 'MWL'
-    case 'Mali':               return 'MWL'
-    case 'Niger':              return 'MWL'
-    case 'Nigeria':            return 'MWL'
-    case 'Chad':               return 'MWL'
-    case 'Cameroon':           return 'MWL'
-    case 'Comoros':            return 'MWL'
-    case 'Madagascar':         return 'MWL'
-    case 'Kenya':              return 'MWL'
-    case 'Tanzania':           return 'MWL'
-    case 'Mozambique':         return 'MWL'
-    case 'Maldives':           return 'Karachi'
-    case 'SriLanka':           return 'Karachi'
-    case 'Bangladesh':         return 'Karachi'
-    case 'Afghanistan':        return 'Karachi'
-    case 'India':              return 'Karachi'
-    case 'Cambodia':           return 'MUIS'
-    case 'Thailand':           return 'MWL'
-    case 'Myanmar':            return 'MWL'
-    case 'Philippines':        return 'MWL'
-    default:                   return 'ISNA'
-  }
-}
-
-/**
- * Resolve a coordinate to its city, country, timezone, recommended method,
- * and institutional source.
- *
- * Pure / referentially transparent for a given (lat, lon, fallbackElevation)
- * — no astronomical computation, no I/O, no caching. Lookup cost is O(N) over
- * the city registry (~375 rows at v1.7.0 phase 1); the registry is sorted
- * with the smallest bboxes first, so a metropolitan-area match short-circuits
- * the linear scan early.
- *
- * Returns:
- *   {
- *     city:              City | null,         // null when no bbox matches
- *     country:           string | null,       // detectCountry(lat, lon)
- *     timezone:          string,              // city.timezone || 'UTC'
- *     elevation:         number,              // city.elevation ?? fallbackElevation
- *     recommendedMethod: string,              // city.methodOverride || methodForCountry(country)
- *     methodSource:      'city-institutional' | 'country-default' | 'fallback',
- *     altMethods?:       AltMethod[],         // present only when the city has documented alternatives
- *     source:            { type, slug?, institution?, from? }
- *   }
- *
- * 🟢 Established — pure lookup, no shar'i ruling involved.
- *
- * NOTE FOR PHASE 1: This function is NOT yet exported from src/index.js.
- * Phase 2 wires it into prayerTimes silently (city-aware method dispatch);
- * phase 3 exposes it publicly with full TypeScript types in src/index.d.ts.
- *
- * @param {number} latitude
- * @param {number} longitude
- * @param {number} [fallbackElevation=0]  Used when the matched city has no
- *                                         elevation field, AND when no city
- *                                         matches. In meters.
- * @returns {object}  Location record (shape documented above).
- */
-export function detectLocation(latitude, longitude, fallbackElevation = 0) {
-  // ── 1. City lookup — linear scan, smallest bbox first (registry is pre-sorted)
-  let matchedCity = null
-  const list = (citiesRegistry && citiesRegistry.cities) || []
-  for (let i = 0; i < list.length; i++) {
-    const c = list[i]
-    const [latMin, latMax, lonMin, lonMax] = c.bbox
-    if (latitude >= latMin && latitude <= latMax &&
-        longitude >= lonMin && longitude <= lonMax) {
-      matchedCity = c
-      break
-    }
-  }
-
-  // ── 2. Country layer — re-use the existing country bbox table.
-  const country = detectCountry(latitude, longitude)
-
-  // ── 3. Timezone — prefer city, then UTC fallback. (We do not synthesise
-  //      a country-level timezone fallback because Russia/USA/Canada/China
-  //      have multiple zones; UTC is honest when no city matched.)
-  const timezone = (matchedCity && matchedCity.timezone) || 'UTC'
-
-  // ── 4. Elevation — city's elevation if known, else caller's fallback.
-  const elevation = (matchedCity && matchedCity.elevation != null)
-    ? matchedCity.elevation
-    : fallbackElevation
-
-  // ── 5. Method dispatch — city-level override > country default > 'ISNA'
-  let recommendedMethod, methodSource
-  if (matchedCity && matchedCity.methodOverride) {
-    recommendedMethod = matchedCity.methodOverride
-    methodSource = 'city-institutional'
-  } else if (country) {
-    recommendedMethod = methodForCountry(country)
-    methodSource = 'country-default'
-  } else {
-    recommendedMethod = 'ISNA'  // engine fallback (matches selectMethod default)
-    methodSource = 'fallback'
-  }
-
-  // ── 6. Source provenance — prefer the city's recorded source. When no
-  //      city matched but a country did, the source is 'inherited' from the
-  //      country. When neither matched, source is 'fallback'.
-  let source
-  if (matchedCity) {
-    source = matchedCity.source || { type: 'inherited', from: country || matchedCity.countryISO }
-  } else if (country) {
-    source = { type: 'inherited', from: country }
-  } else {
-    source = { type: 'fallback' }
-  }
-
-  // ── 7. altMethods — only include when present on the city, to avoid
-  //      filling the response with empty arrays for the >95% of cities
-  //      with no documented alternative. Apps doing existence checks should
-  //      use `altMethods != null` rather than `altMethods.length > 0`.
-  const altMethods = (matchedCity && matchedCity.altMethods && matchedCity.altMethods.length)
-    ? matchedCity.altMethods.slice()
-    : undefined
-
-  const out = {
-    city: matchedCity || null,
-    country,
-    timezone,
-    elevation,
-    recommendedMethod,
-    methodSource,
-    source,
-  }
-  if (altMethods) out.altMethods = altMethods
-  return out
 }
 
 /**
