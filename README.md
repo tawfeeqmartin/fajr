@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 38 cities across 12 institutional-train countries plus a 163-country Aladhan-routed holdout corpus. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.7.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `detectLocation`, `nearestCity`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. **v1.7.3 adds `nearestCity(lat, lon)`** — a kNN-fuzzy *display-only* lookup that always returns a city + haversine distance in km, for downstream apps that want to render "near \<City\> (\<distance\> km)" labels when the user's GPS resolves outside any registered city's bbox. The strict `detectLocation` containment continues to drive prayer-time dispatch unchanged. **v1.7.0 ships city-aware location resolution**: a bundled 375-city registry powers automatic city detection, city-registry elevation surfacing (no more silent sea-level for Mexico City / Cape Town / Riyadh users), and city-level institutional method overrides for 12 cities where intra-country *ikhtilaf* matters (Mosul → Karachi via Sunni-Awqaf, Najaf/Karbala/Basra → Tehran via Twelver Shia hawza, Sarajevo/Mostar/Banja Luka/Pristina → Diyanet via Bosnian Rijaset / BIK, Bradford → MoonsightingCommittee via BCOM, Beirut → Egyptian via Dar al-Fatwa, Tabriz → Tehran, Dearborn → ISNA). Apps gain a `location` field on every `prayerTimes` return value with city/country/timezone/method-source plus a public `detectLocation(lat, lon)` for standalone resolution — see [City-aware location resolution (v1.7.0)](#city-aware-location-resolution-v170). v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection (163 by v1.6.2). v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.7.4.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `detectLocation`, `nearestCity`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. Cross-runtime: works in Node, browser, React Native, Capacitor, Electron, Tauri, JavaScriptCore. Native Swift / Kotlin / C# / Rust ports are on the roadmap (issue #44). **v1.7.3 adds `nearestCity(lat, lon)`** — a kNN-fuzzy *display-only* lookup that always returns a city + haversine distance in km, for downstream apps that want to render "near \<City\> (\<distance\> km)" labels when the user's GPS resolves outside any registered city's bbox. The strict `detectLocation` containment continues to drive prayer-time dispatch unchanged. **v1.7.0 ships city-aware location resolution**: a bundled 375-city registry powers automatic city detection, city-registry elevation surfacing (no more silent sea-level for Mexico City / Cape Town / Riyadh users), and city-level institutional method overrides for 12 cities where intra-country *ikhtilaf* matters (Mosul → Karachi via Sunni-Awqaf, Najaf/Karbala/Basra → Tehran via Twelver Shia hawza, Sarajevo/Mostar/Banja Luka/Pristina → Diyanet via Bosnian Rijaset / BIK, Bradford → MoonsightingCommittee via BCOM, Beirut → Egyptian via Dar al-Fatwa, Tabriz → Tehran, Dearborn → ISNA). Apps gain a `location` field on every `prayerTimes` return value with city/country/timezone/method-source plus a public `detectLocation(lat, lon)` for standalone resolution — see [City-aware location resolution (v1.7.0)](#city-aware-location-resolution-v170). v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection (163 by v1.6.2). v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -62,6 +62,37 @@ The Islamic prayer-time space has two well-established tools that anchor the des
 - **Choose fajr** when you want adhan-js's offline + speed *plus* (a) GPS-aware regional dispatch, (b) calibrations validated against mosque-published reality with per-cell WMAE you can audit, (c) three-criterion hilal visibility, and (d) per-prayer ihtiyat-aware presentation with an explicit imsak field for fasting.
 
 fajr does not replace adhan-js — it builds on it. The two libraries can coexist: an app could ship adhan-js for a default "give me the textbook number" path and fajr where transparent provenance matters. AlAdhan's API service is complementary to both library options when an app explicitly wants server-side computation. And every fajr claim above can be checked against [`autoresearch/proposals/positioning-fact-check.md`](autoresearch/proposals/positioning-fact-check.md), which documents the methodology, evidence, and remaining caveats.
+
+---
+
+## Runtime compatibility
+
+fajr is offline-first JavaScript with a single runtime dependency (`adhan ^4.4.3`). It works in any modern JS runtime:
+
+| Runtime | Status | How |
+|---|---|---|
+| **Node.js** ≥ 18 | ✅ tested | `npm install @tawfeeqmartin/fajr` |
+| **Browser ESM** | ✅ tested via esm.sh | `import * as fajr from 'https://esm.sh/@tawfeeqmartin/fajr'` |
+| **React Native** ≥ 0.74 | ✅ compatible | `npm install` — works in both dev and Hermes-prod modes |
+| **Expo** ≥ 51 | ✅ compatible | `npx expo install @tawfeeqmartin/fajr` |
+| **Capacitor** ≥ 6 | ✅ compatible | `npm install` — runs in WebView, no native bridge needed |
+| **Cordova / PhoneGap** | ✅ compatible | `npm install`, then bundle |
+| **Electron** ≥ 30 | ✅ compatible | renderer or main process |
+| **Tauri** ≥ 2 | ✅ compatible | bundled in webview/sidecar |
+| **NativeScript** ≥ 8 | ✅ compatible | `npm install` |
+| **JavaScriptCore (iOS / macOS embedded)** | ⚠️ via JSContext.evaluateScript | for pure-Swift apps wanting JS engine |
+| **Cloudflare Workers / Vercel Edge / Deno** | ✅ pure JS, no Node primitives | works as-is |
+| **Bun** | ✅ tested | `bun add @tawfeeqmartin/fajr` |
+
+The library uses pure ESM. No `fs`, `child_process`, `net`, or other runtime-specific primitives — fajr is fully offline at runtime, so no `fetch` or `http` either. The bundle is portable.
+
+### Native iOS / Android / Windows apps
+
+For pure-native apps written in Swift / Kotlin / C# / Rust (no JS runtime), the cleanest options today:
+
+- **React Native or Capacitor** — write the app in JS-on-native-shell, use fajr directly. Most cross-platform mobile apps in 2026 ship this way.
+- **JavaScriptCore embedding** — iOS / macOS apps that want pure-Swift UI but offload prayer-time logic to JS via Apple's built-in JavaScriptCore. ~5 KB of Swift glue, minimal overhead.
+- **Native ports (roadmap)** — `fajr-swift` / `fajr-kotlin` / `fajr-csharp` / `fajr-rust` are on the roadmap (see [issue #44](https://github.com/tawfeeqmartin/fajr/issues/44)). Premium native apps that need custom Metal / Vulkan / DirectX shaders + maximum-performance integration will benefit most. ETA: post-v1.8.0, agent-driven scaffold against the algorithm-spec doc.
 
 ---
 
@@ -660,6 +691,57 @@ const travelerTimes = fajr.travelerMode({ ...coords, madhab: 'hanafi' })
 ```
 
 TypeScript declarations ship with the package (`src/index.d.ts`); `import` from `@tawfeeqmartin/fajr` gets full type coverage out of the box.
+
+### Cross-runtime recipes
+
+fajr's library API is platform-agnostic — the same import works across every runtime listed in the [Runtime compatibility](#runtime-compatibility) table. Recipes for the less-obvious targets:
+
+#### React Native / Expo
+
+```js
+import { prayerTimes, detectLocation } from '@tawfeeqmartin/fajr'
+
+// In a component
+const times = prayerTimes({ latitude: 21.4225, longitude: 39.8262, date: new Date() })
+// → renders Mecca's prayer times. Works identically on iOS + Android.
+```
+
+#### Capacitor (hybrid mobile)
+
+```js
+// In your Capacitor web layer (TypeScript)
+import { detectLocation, prayerTimes } from '@tawfeeqmartin/fajr'
+
+// Bridge GPS coords from native via @capacitor/geolocation
+import { Geolocation } from '@capacitor/geolocation'
+
+const pos = await Geolocation.getCurrentPosition()
+const times = prayerTimes({
+  latitude: pos.coords.latitude,
+  longitude: pos.coords.longitude,
+  // elevation auto-applied from city registry; pass explicit 0 to opt out
+})
+```
+
+#### JavaScriptCore (pure Swift app, iOS / macOS)
+
+```swift
+import JavaScriptCore
+
+let context = JSContext()!
+let bundleURL = Bundle.main.url(forResource: "fajr.umd", withExtension: "js")!  // bundled fajr build
+let source = try String(contentsOf: bundleURL)
+context.evaluateScript(source)
+
+let times = context.evaluateScript("""
+  fajr.prayerTimes({
+    latitude: 21.4225,
+    longitude: 39.8262,
+    date: new Date()
+  })
+""")
+// times is a JSValue; .toDictionary() gives [String: Any] for Swift consumption
+```
 
 ---
 
