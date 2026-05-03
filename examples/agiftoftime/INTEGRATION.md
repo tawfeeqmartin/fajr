@@ -25,6 +25,7 @@
 | **v1.7.16** | 2026-05-03 | First **Karpathy autoresearch ratchet session** — train WMAE 1.07 → 0.98 (broke 1-min barrier) via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations | **Maybe** — Casablanca / Rabat / Marrakech Dhuhr shifts +5 min (matches mosque reality); Kuala Lumpur / Selangor / Penang Dhuhr +2 min, Asr +1 min. Other regions unchanged. |
 | **v1.7.18** | 2026-05-03 | City registry expansion 387 → 471 (+84 cities; Boston, SF, Stuttgart, Naples, Patna, Kuala-Lumpur etc.) | No code change — `nearestCity()` now resolves 84 additional metros |
 | **v1.7.19** | 2026-05-03 | Engine bbox-table fixes (#75) — 6 deferred cities (Sialkot, Pekanbaru, Manado, Eindhoven, Gaziantep, Port Sudan) + 2 bonus latent FAILs (Maastricht, Wadi Halfa) now route correctly. Registry 471 → 477. | No code change — silently improves dispatch correctness |
+| **v1.7.20** | 2026-05-03 | New exports: `prayerNames` constant + `prayerName(prayer, lang)` helper (multi-language: en/ar/tr/id/ur, voweled Arabic per #62 convention) + `qibla()` now returns `cardinal` (16-point abbr) + `cardinalDescription` fields. Resolves #63 Proposals 1+4. | **Yes** — apps vendoring local prayer-name strings can drop them and import `prayerNames`/`prayerName` from fajr; apps showing a compass-direction label for qibla can drop their own bearing→cardinal logic. Both additive, no breaking changes. |
 
 Below: per-feature integration recipes for each release that requires app-side code changes.
 

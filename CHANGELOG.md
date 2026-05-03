@@ -24,6 +24,46 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.20] — 2026-05-03
+
+### Added
+
+- **`prayerNames` constant + `prayerName(prayer, lang)` helper** in
+  [`src/locale.js`](src/locale.js) — multi-language prayer-name strings
+  (English / Arabic / Turkish / Indonesian / Urdu) so every consuming app
+  inherits a single canonical set instead of vendoring its own. Arabic forms
+  are voweled per the v1.7.13 `monthNameAr` (#62) convention. Falls back to
+  English for unknown locales. Resolves [#63](https://github.com/tawfeeqmartin/fajr/issues/63)
+  Proposal 1.
+- **`qibla()` cardinal + cardinalDescription fields** — qibla() now returns
+  `cardinal` (16-point compass abbreviation, e.g. `'WNW'`) and
+  `cardinalDescription` (human-readable expansion, e.g. `'West-northwest'`)
+  alongside the existing `bearing` / `magneticDeclination` / `trueBearing`
+  fields. Resolves [#63](https://github.com/tawfeeqmartin/fajr/issues/63)
+  Proposal 4.
+
+### Honest caveats
+
+- Pure additive change; no breaking API surface. Existing
+  `prayerTimes()` / `qibla()` consumers continue to receive the same fields
+  unchanged, just with two new optional fields appearing on every `qibla()`
+  result.
+- Bundle-size delta: ~1.5 KB raw for the locale strings + ~0.3 KB for the
+  cardinal table. Acceptable.
+- **#63 Proposals 2, 3, 5 (rakah counts, prayer windows, method short label)
+  are NOT shipped in this release.** They depend on the user-override
+  surface area tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+  and ship in v1.8.x. Per the suggested ship sequence in #63 itself.
+
+### Cross-references
+
+- Resolves Proposals 1 + 4 of [#63](https://github.com/tawfeeqmartin/fajr/issues/63)
+  (downstream-app metadata bundle from agot-agent)
+- Parallel pattern to [#62](https://github.com/tawfeeqmartin/fajr/issues/62)
+  Arabic month names (v1.7.13)
+
+---
+
 ## [1.7.19] — 2026-05-03
 
 ### Fixed

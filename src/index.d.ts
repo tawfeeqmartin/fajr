@@ -408,6 +408,13 @@ export interface QiblaParams {
   longitude: number
 }
 
+/** 16-point compass abbreviation. v1.7.20+ (#63 Proposal 4). */
+export type CardinalAbbr =
+  | 'N'   | 'NNE' | 'NE'  | 'ENE'
+  | 'E'   | 'ESE' | 'SE'  | 'SSE'
+  | 'S'   | 'SSW' | 'SW'  | 'WSW'
+  | 'W'   | 'WNW' | 'NW'  | 'NNW'
+
 export interface QiblaResult {
   /** Great-circle bearing toward the Kaaba, in degrees from true north [0, 360). */
   bearing:             number
@@ -417,9 +424,37 @@ export interface QiblaResult {
   /** Bearing adjusted for magnetic declination, in degrees [0, 360).
    *  Equal to `bearing` while `magneticDeclination` is unintegrated. */
   trueBearing:         number
+  /** 16-point compass abbreviation matching `bearing` (e.g. 'WNW' at 280°).
+   *  Added in v1.7.20 (#63 Proposal 4). */
+  cardinal:            CardinalAbbr
+  /** Human-readable expansion of `cardinal` (e.g. 'West-northwest').
+   *  Added in v1.7.20 (#63 Proposal 4). */
+  cardinalDescription: string
 }
 
 export function qibla(params: QiblaParams): QiblaResult
+
+// ─────────────────────────────────────────────────────────────────────────────
+// locale — prayer names in multiple languages (#63 Proposal 1, v1.7.20+)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Prayer-key strings, matching the keys returned by `prayerTimes()` plus
+ *  `imsak` (Ramadan-fasting boundary). */
+export type PrayerKey =
+  | 'fajr' | 'shuruq' | 'dhuhr' | 'asr' | 'maghrib' | 'isha' | 'imsak'
+
+/** Locale codes currently shipped. Adding a new locale requires a PR adding
+ *  the strings — fall through to English when the requested code is unknown. */
+export type LocaleCode = 'en' | 'ar' | 'tr' | 'id' | 'ur'
+
+/** Lookup table — keyed by prayer key, then by locale code. */
+export const prayerNames: Record<PrayerKey, Record<LocaleCode, string>>
+
+/**
+ * Look up a prayer name in the requested locale. Falls back to English when
+ * the locale isn't shipped.
+ */
+export function prayerName(prayer: PrayerKey, lang?: LocaleCode | string): string
 
 // ─────────────────────────────────────────────────────────────────────────────
 // hijri
@@ -649,6 +684,8 @@ declare const fajr: {
   hilalVisibility:          typeof hilalVisibility
   nightThirds:              typeof nightThirds
   travelerMode:             typeof travelerMode
+  prayerNames:              typeof prayerNames
+  prayerName:               typeof prayerName
 }
 
 export default fajr

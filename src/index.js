@@ -19,6 +19,7 @@ import { hijri } from './hijri.js'
 import { hilalVisibility } from './hilal.js'
 import { nightThirds } from './night.js'
 import { travelerMode } from './traveler.js'
+import { prayerNames, prayerName } from './locale.js'
 
 /**
  * Calculate prayer times with all applicable corrections.
@@ -187,6 +188,8 @@ export default {
   hilalVisibility,
   nightThirds,
   travelerMode,
+  prayerNames,
+  prayerName,
 }
 
 export {
@@ -202,4 +205,6 @@ export {
   hilalVisibility,
   nightThirds,
   travelerMode,
+  prayerNames,
+  prayerName,
 }
