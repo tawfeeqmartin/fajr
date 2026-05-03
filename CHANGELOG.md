@@ -24,6 +24,150 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.18] — 2026-05-03
+
+### Added
+
+- **City registry expansion: 387 → 471 cities (+84 cities)** in
+  `src/data/cities.json`. Targets under-represented Muslim metros and
+  diaspora hubs across 6 region clusters: Asia non-capitals (32 cities —
+  Pakistan / India / Iran / Saudi / UAE / Egypt / Central Asia), Indonesia
+  provincial capitals (10), Türkiye top-population provinces (7), Africa (5),
+  Europe diaspora (18 — Leeds, Stuttgart, Naples, Sevilla, Cordoba, Grozny),
+  Americas (12 — Boston, San Francisco, Seattle, Foz do Iguaçu, Maracaibo).
+- **12 new `BBOX_OVERRIDES`** for sibling-metro disambiguation: Ajman ↔
+  Sharjah, Düsseldorf ↔ Cologne, Coventry ↔ Birmingham, Luton ↔ London,
+  Dammam ↔ Khobar, Trabzon clear of Georgia, Kinshasa clear of Brazzaville,
+  etc.
+- **Track E redo verification audit** archived as
+  `autoresearch/proposals/v1.7.18-city-verification-audit.md`. Tier
+  distribution on the v1.7.15 baseline (387 cities): 167 verified (43.2%) /
+  1 approaching / 218 partial / 1 unverified (Jerusalem-PS, intentional
+  duplicate). Mosque-anchor coverage 40.6% + override coverage 3.9% =
+  43.4% institutional anchors. Identifies 6 priority region clusters for
+  the next Mawaqit corpus expansion (S Asia HIGHEST, then SE Asia, W
+  Africa, S Africa, E Africa, Iran/Caucasus).
+- **Research-papers survey** archived as
+  `autoresearch/proposals/research-papers-survey-2026-05.md` — 22 papers
+  (2014-2025), 12 actionable items, 3 candidate validation sets.
+  Notable finding: Faid 2024 Nature-Sci-Reports validates fajr's existing
+  Aabed-2015 Fajr 18° position (dark-sky 17.49° matches institutional 18°;
+  urban 11.5° is artificial light at night, not calculation error).
+
+### Changed
+
+- **Jerusalem-PS row bbox** retargeted to West Bank east-of-Jerusalem
+  (Eizariya / Abu Dis / Ma'ale Adumim) to clear 4 prior validation FAILs
+  without disturbing Jerusalem-IL routing.
+
+### Validation
+
+- `npm run validate:registry` → **0 FAIL-class issues** on 471 cities
+  (2 acceptable WARN-class bbox-overlap-cross-country pairs).
+
+### Honest caveats
+
+- Six high-population cities were **intentionally NOT added** in this
+  release because they sit at `src/engine.js#detectCountry` country-bbox
+  edges and would route to the wrong country: Sialkot PK (caught by
+  Afghanistan), Pekanbaru / Manado ID (caught by Malaysia), Eindhoven NL
+  (caught by Belgium), Gaziantep TR (caught by Syria), Port Sudan SD
+  (Sudan absent from `COUNTRY_BBOX_TABLE`, caught by Saudi Arabia).
+  Engine bbox-table fixes are tracked in
+  [#75](https://github.com/tawfeeqmartin/fajr/issues/75); these cities
+  will be registered in a follow-up release once the engine fix lands.
+- This is a **routing-coverage release, not a calculation release**.
+  Per-source WMAE numbers stay exactly where v1.7.16 left them
+  (train 0.9757, holdout 3.62). No engine.js / eval / API changes.
+
+### No prayer-time changes
+
+`prayerTimes()` for any previously-registered city produces identical
+output to v1.7.16. Only `nearestCity()` and `detectLocation()` resolution
+changes for the 84 newly-registered metros.
+
+### Cross-references
+
+- PR: [#73](https://github.com/tawfeeqmartin/fajr/pull/73)
+- Tracking: [#75](https://github.com/tawfeeqmartin/fajr/issues/75)
+  (deferred 6 cities awaiting engine bbox-table fixes)
+- Autoresearch log: `autoresearch/logs/2026-05-03-10-45-v1.7.18-city-registry-expansion.md`
+- Verification audit: `autoresearch/proposals/v1.7.18-city-verification-audit.md`
+
+---
+
+## [1.7.16] — 2026-05-03
+
+### Added
+
+- **First Karpathy autoresearch ratchet session — train WMAE breaks the
+  1-minute barrier** (1.0668 → 0.9757, **-9%**). Two Path A community
+  calibrations, both ratchet-PASS (train strictly decreases, no per-region
+  regression, no ihtiyat-unsafe drift):
+
+  1. **Morocco Dhuhr +5 min** — Path A extension of the v1.5.0 Morocco
+     Maghrib +5 precedent. Closes -4.80 min systematic bias across 25
+     Mawaqit Morocco fixtures. Same scholarly-fixture-matching methodology,
+     same scope (Morocco-bounded). Mawaqit per-source WMAE 1.5171 → 0.8829
+     (-41.8%).
+  2. **JAKIM Dhuhr +2 / Asr +1** — Path A for Malaysia's JAKIM-via-
+     waktusolat.app fixtures. Dhuhr bias -0.77 closes; Asr bias -0.97
+     closes (Asr +1 preserves the ihtiyat-rounds-UP direction). JAKIM
+     per-source WMAE 0.5786 → 0.4548 (-21.4%).
+
+- **Per-source unchanged-source flatness**: Aladhan (1.2231) and Diyanet
+  (0.5024) per-source WMAE stay **exactly flat** before vs after — confirming
+  the Path A offsets are correctly region-bounded and don't leak into
+  unrelated sources.
+
+### Agent self-restraint — 5 flagged items NOT auto-fixed
+
+The autoresearch agent surfaced 5 issues it deliberately deferred because
+they need human scholarly judgment per the ihtiyat-safety rules. Each gets
+its own tracking issue so flags don't become a black hole:
+
+- **Cairo / Alexandria Fajr & Isha** — fixture says "Egyptian" but
+  empirically matches MWL. Tracking: [#69](https://github.com/tawfeeqmartin/fajr/issues/69).
+- **London Maghrib/Dhuhr Path A trade-off** — AlAdhan-UK and Mawaqit-London
+  disagree on MoonsightingCommittee +5/+3 offsets. Tracking:
+  [#70](https://github.com/tawfeeqmartin/fajr/issues/70).
+- **Diyanet Asr +1.0 systematic** — fixable but in ihtiyat-unsafe direction
+  (closing it would shift Asr earlier). Agent correctly refused. Tracking:
+  [#71](https://github.com/tawfeeqmartin/fajr/issues/71).
+- **AlAdhan Asr +1.5 to +2.5 systematic across 11+ cities** — likely
+  adhan-js vs AlAdhan formula divergence. Tracking:
+  [#72](https://github.com/tawfeeqmartin/fajr/issues/72).
+- **Pakistan / Bangladesh / Türkiye / Albania Asr school dispatch** —
+  Hanafi-majority on Standard-school. Folds into existing
+  [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+  override-parameter umbrella.
+
+### Honest caveats
+
+- Cities using **Mawaqit-published times as their reference** will see
+  prayer times shift 1-5 min:
+  - Casablanca / Rabat / Marrakech **Dhuhr**: +5 min (matches mosque reality)
+  - Kuala Lumpur / Selangor / Penang **Dhuhr**: +2 min
+  - Kuala Lumpur / Selangor / Penang **Asr**: +1 min
+- Cities using **AlAdhan or Diyanet as reference**: no change (per-source
+  flatness verified).
+- **Holdout WMAE 3.62 vs train 0.98** is ~4x — intentional. Holdout is
+  weighted toward harder cases: polar latitudes that break twilight
+  calculation (Longyearbyen 78°N, Oslo 60°N), elevation outliers (La Paz
+  3640m), third-party aggregator stress data (muslimsalat.com 26 min WMAE).
+  Holdout moved the same direction as train (3.66 → 3.62) — that's the
+  no-overfit signal.
+
+### Cross-references
+
+- PR: [#67](https://github.com/tawfeeqmartin/fajr/pull/67)
+- Announcement: [agot#22](https://github.com/tawfeeqmartin/agiftoftime/issues/22)
+- Autoresearch logs:
+  `autoresearch/logs/2026-05-03-17-30-iteration-1-morocco-dhuhr-path-a.md`,
+  `autoresearch/logs/2026-05-03-17-36-iteration-2-jakim-dhuhr-asr-extension.md`
+
+---
+
 ## [1.7.15] — 2026-05-03
 
 ### Changed
