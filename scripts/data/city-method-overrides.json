@@ -1,0 +1,150 @@
+{
+  "_comment": "City-level institutional method overrides for fajr v1.7.0+. Each entry documents an intra-country ikhtilaf where one or more cities follow a different institutional convention than the country default returned by selectMethod(). Citations link to the institutional published source where possible; when no live URL exists the institution and locally-verifiable artefact (e.g. published Imsakiyya, mosque-published timetable, regional council) is named instead so a reviewer can audit. Per CLAUDE.md feedback_aggressive_data_hunt: Wikipedia is not authoritative for fiqh; institutional citations only. Per feedback_surface_disagreement: ALL of these cities also list altMethods (the country default plus any other documented minority) so apps can render the disagreement rather than presenting a single answer.",
+  "_schema": "Record<cityKey, { country, lat, lon, methodOverride, altMethods, citation, reasoning }>. cityKey is the English/Latin transliteration. methodOverride is a string method name resolvable by selectMethod (e.g. 'Karachi', 'Tehran', 'Diyanet', 'Egyptian', 'MoonsightingCommittee'). altMethods entries follow the schema { method, source, populationShare? } where populationShare is omitted when no credible quantitative estimate exists.",
+  "_classification_note": "All 12 entries below are 🟢 Established or 🟡→🟢 Approaching established. No 🔴 Novel overrides. Each citation is to a real institutional publisher whose timetables can be verified against the city's Mawaqit / WaktuSolat / equivalent regional registry.",
+  "_version": "1.7.0",
+
+  "Mosul": {
+    "country": "Iraq",
+    "lat": 36.34,
+    "lon": 43.13,
+    "methodOverride": "Karachi",
+    "altMethods": [
+      { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
+    ],
+    "citation": "Iraqi Sunni Endowment Office (Diwan al-Waqf al-Sunni) — https://sunni.gov.iq/ (institutional publisher of timetables for Sunni-majority northern Iraq, including Nineveh governorate)",
+    "reasoning": "Mosul (Nineveh) is a majority Sunni Hanafi region administered by the Iraqi Sunni Endowment Office. The Diwan's published Imsakiyya for the Sunni governorates aligns with the Karachi 18°/18° + Hanafi-Asr cluster used across the South Asian / Iraqi Sunni Hanafi tradition, distinct from the Egyptian 19.5°/17.5° Aladhan-default that the engine returns for Iraq writ-large (which itself is a multi-method country with significant Shia-majority south)."
+  },
+
+  "Najaf": {
+    "country": "Iraq",
+    "lat": 32.00,
+    "lon": 44.32,
+    "methodOverride": "Tehran",
+    "altMethods": [
+      { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
+    ],
+    "citation": "Office of Grand Ayatollah Sayyid Ali al-Sistani — https://www.sistani.org/ (Najaf hawza published Imsakiyya); cross-referenced with Astan Quds Razavi-style Twelver Shia Imsakiyya conventions",
+    "reasoning": "Najaf is the Shia hawza centre — the global Twelver Shia scholarly seat. The maraji' offices (Sistani, Najafi-style) publish Imsakiyya following Tehran-style angles (Fajr 17.7°, Isha 14°, Maghrib +4.5min) consistent with the Jafari fiqh treatment of Maghrib as starting at the disappearance of redness in the eastern sky rather than at sunset itself."
+  },
+
+  "Karbala": {
+    "country": "Iraq",
+    "lat": 32.61,
+    "lon": 44.02,
+    "methodOverride": "Tehran",
+    "altMethods": [
+      { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
+    ],
+    "citation": "Astan al-Husayniyya / Astan al-Abbasiyya custodial offices, Karbala — https://imamhussain.org/ (Holy Karbala custodial offices publish Imsakiyya for ziyarat); cross-referenced with the Office of Sayyid Sistani Najaf",
+    "reasoning": "Karbala is the second principal Shia ziyarat centre; the custodial offices of the Imam Husayn and Abbas shrines publish daily Imsakiyya following Twelver Shia (Tehran-style) timing conventions, identical in shape to Najaf."
+  },
+
+  "Basra": {
+    "country": "Iraq",
+    "lat": 30.50,
+    "lon": 47.82,
+    "methodOverride": "Tehran",
+    "altMethods": [
+      { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
+    ],
+    "citation": "Basra-area Twelver Shia mosque-published timetables (Imam Ali, Imam Husayn mosques, Basra) following the Sistani-office Imsakiyya convention",
+    "reasoning": "Basra and the southern Iraqi governorates are Shia-majority and follow the Twelver maraji' Imsakiyya. Same Tehran-method dispatch as Najaf/Karbala."
+  },
+
+  "Sarajevo": {
+    "country": "Bosnia",
+    "lat": 43.86,
+    "lon": 18.41,
+    "methodOverride": "Diyanet",
+    "altMethods": [
+      { "method": "MWL", "source": "Aladhan world-default for Bosnia and Herzegovina" }
+    ],
+    "citation": "Rijaset Islamske Zajednice u Bosni i Hercegovini — https://rijaset.ba/ (publishes the official Takvim for the Bosnian Islamic Community), specifically the annual Vakat Takvim aligned with Diyanet İşleri Başkanlığı methodology",
+    "reasoning": "The Rijaset (Bosnian Islamic Community) Takvim follows Hanafi convention with Diyanet-aligned 18°/17° angles plus the Diyanet methodAdjustments preset. The Aladhan world-default of MWL does not match published Bosnian Takvim. Note: although the engine already returns 'Diyanet (Bosnia Rijaset, Hanafi Takvim)' for the Bosnia country case, this override is included for explicit traceability per user spec."
+  },
+
+  "Mostar": {
+    "country": "Bosnia",
+    "lat": 43.34,
+    "lon": 17.81,
+    "methodOverride": "Diyanet",
+    "altMethods": [
+      { "method": "MWL", "source": "Aladhan world-default for Bosnia and Herzegovina" }
+    ],
+    "citation": "Rijaset Islamske Zajednice u BiH (Mufti's Office of Mostar / Hercegovački muftijstvo) — https://rijaset.ba/ — same Vakat Takvim as Sarajevo",
+    "reasoning": "Mostar follows the same Rijaset Takvim as Sarajevo. Diyanet-aligned Hanafi convention."
+  },
+
+  "BanjaLuka": {
+    "country": "Bosnia",
+    "lat": 44.77,
+    "lon": 17.19,
+    "methodOverride": "Diyanet",
+    "altMethods": [
+      { "method": "MWL", "source": "Aladhan world-default for Bosnia and Herzegovina" }
+    ],
+    "citation": "Rijaset Islamske Zajednice u BiH (Banjalučko muftijstvo) — https://rijaset.ba/ — same Vakat Takvim as Sarajevo, applies to Republika Srpska Muslim community",
+    "reasoning": "Banja Luka's Muslim community (within Republika Srpska) is administered by the Banja Luka Muftiate under the Rijaset and follows the same Vakat Takvim convention."
+  },
+
+  "Pristina": {
+    "country": "Kosovo",
+    "lat": 42.66,
+    "lon": 21.17,
+    "methodOverride": "Diyanet",
+    "altMethods": [
+      { "method": "MWL", "source": "Aladhan world-default for Kosovo (XK)" }
+    ],
+    "citation": "Bashkësia Islame e Kosovës (BIK) — https://bislame.net/ (Islamic Community of Kosovo, publisher of Takvimi for the Kosovan Muslim community); BIK has institutional ties with Diyanet and follows Diyanet-aligned Hanafi 18°/17° convention",
+    "reasoning": "BIK Takvimi follows the Diyanet convention via Turkish institutional ties (Hanafi tradition, 18°/17° angles, Diyanet methodAdjustments preset). The Aladhan default for Kosovo is MWL, which does not match BIK published times. Although the engine already routes Kosovo to Diyanet country-level, this override is included for explicit traceability."
+  },
+
+  "Bradford": {
+    "country": "UK",
+    "lat": 53.79,
+    "lon": -1.75,
+    "methodOverride": "MoonsightingCommittee",
+    "altMethods": [
+      { "method": "Karachi", "source": "South-Asian-origin diaspora Hanafi-Deobandi convention; some Bradford mosques (notably Deobandi-affiliated) follow Karachi 18°/18° directly" }
+    ],
+    "citation": "Bradford Council of Mosques (BCOM) — long-standing publisher of unified prayer-time tables for Bradford-area mosques following the Moonsighting Committee Worldwide methodology (predecessor of MoonsightingCommittee.org Khalid Shaukat-aligned tables)",
+    "reasoning": "Bradford has the highest Muslim-population density of any UK city outside London, predominantly South Asian (Pakistani) origin. The BCOM-coordinated unified timetable follows the Moonsighting Committee Worldwide convention (which is the same engine method used as the UK country default), but explicit per-city traceability is needed because Deobandi-affiliated mosques may instead follow Karachi 18°/18° directly. Override confirms MCM as the BCOM-coordinated default while altMethods surfaces the Karachi minority."
+  },
+
+  "Beirut": {
+    "country": "Lebanon",
+    "lat": 33.89,
+    "lon": 35.50,
+    "methodOverride": "Egyptian",
+    "altMethods": [
+      { "method": "Tehran", "source": "Higher Islamic Shia Council of Lebanon (al-Majlis al-Islami al-Shi'i al-A'la) — published Twelver Shia Imsakiyya for southern suburbs (Dahieh) and eastern Bekaa communities" }
+    ],
+    "citation": "Dar al-Fatwa al-Lubnaniyya (the Sunni religious authority of Lebanon) — https://darelfatwa.gov.lb/ — publisher of the Beirut-area Sunni Imsakiyya following Egyptian 19.5°/17.5° regional convention",
+    "reasoning": "Lebanon is a multi-method country (Sunni Dar al-Fatwa following Egyptian; Twelver Shia Higher Council following Tehran-style). Beirut proper is Sunni-majority via Dar al-Fatwa; the country-default in selectMethod is already Egyptian, but this override is included for explicit traceability and to surface the documented Tehran minority via altMethods (Higher Shia Council Imsakiyya for Dahieh and Bekaa Shia communities)."
+  },
+
+  "Tabriz": {
+    "country": "Iran",
+    "lat": 38.07,
+    "lon": 46.30,
+    "methodOverride": "Tehran",
+    "altMethods": [
+      { "method": "Diyanet", "source": "Iranian Azeri Sunni Hanafi minority — Sunni mosques in northwestern Iran (West Azerbaijan, Ardabil Sunni neighbourhoods) follow Diyanet-aligned Hanafi convention via Turkish religious presence" }
+    ],
+    "citation": "Tehran Institute of Geophysics (regional default for all of Iran) — https://earthquake.ut.ac.ir/ (publisher of national prayer-time data); cross-referenced with East Azerbaijan Friday Prayer Office",
+    "reasoning": "Tabriz (East Azerbaijan) is overwhelmingly Iranian Azeri Twelver Shia and follows the Tehran Institute of Geophysics regional default — same as the Iran country case. Override included for explicit traceability because Tabriz has a small Sunni Hanafi minority (cross-border with Azerbaijan and Turkey) for whom the altMethods Diyanet entry surfaces the alternative."
+  },
+
+  "DearbornDetroit": {
+    "country": "USA",
+    "lat": 42.32,
+    "lon": -83.18,
+    "methodOverride": "ISNA",
+    "altMethods": [
+      { "method": "Tehran", "source": "Iraqi-Lebanese Shia diaspora — Islamic Center of America (Dearborn) and other Najaf-Karbala diaspora institutions follow Tehran-style timing for the Twelver Shia community" }
+    ],
+    "citation": "Islamic Center of America (Dearborn) — https://icofa.com/ — historically the largest Shia mosque in North America, serves the Lebanese / Iraqi Shia diaspora; Sunni-majority Detroit/Dearborn area follows ISNA via the broader US convention (e.g. Islamic Center of Detroit, Muslim Community of the Western Suburbs)",
+    "reasoning": "Detroit/Dearborn has the largest Arab-American population in the United States with significant Shia (Lebanese-Iraqi) and Sunni communities. Country-default for the US is ISNA (NorthAmerica method). Override pins the Sunni-majority default explicitly while altMethods surfaces the Tehran-style timing followed by Twelver Shia institutions like the Islamic Center of America. Pinpointed at Dearborn coordinates so detectLocation matches the ICOA neighbourhood specifically."
+  }
+}
