@@ -550,6 +550,23 @@ function hijriSafe(date) {
 
 A future `{ convention: 'observational' }` (a full-fidelity hilal-sighting-aware Hijri calendar) is planned for v1.9.x. Calling it currently throws `NotImplementedError` with a pointer to `hilalVisibility` for sighting-prediction needs.
 
+**v1.7.13 — Arabic month names native.** Every downstream Islamic app that shows hijri dates to Arabic-reading users used to ship its own copy of the 12 month names. As of v1.7.13, `hijri()` returns `monthNameAr` alongside the existing English `monthName`, with full diacritics matching AlAdhan / IslamicFinder / IACAD / printed mosque calendars. Resolves [#62](https://github.com/tawfeeqmartin/fajr/issues/62); zero API breakage (purely additive field).
+
+```js
+import { hijri } from '@tawfeeqmartin/fajr'
+
+const today = hijri(new Date('2026-05-02T00:00:00Z'))
+// → {
+//     year: 1447,
+//     month: 11,
+//     day: 15,
+//     monthName: "Dhu al-Qi'dah",     // existing — English
+//     monthNameAr: 'ذُو الْقَعْدَة',   // NEW v1.7.13 — voweled Arabic
+//   }
+```
+
+The 12 strings — مُحَرَّم, صَفَر, رَبِيع الأَوَّل, رَبِيع الآخِر, جُمَادَى الأُولَى, جُمَادَى الآخِرَة, رَجَب, شَعْبَان, رَمَضَان, شَوَّال, ذُو الْقَعْدَة, ذُو الْحِجَّة — are present on both the default Umm al-Qura path and the legacy `{ convention: 'tabular' }` path.
+
 Classification: 🟡→🟢 *Approaching established* — Umm al-Qura is Saudi Arabia's official calendar with decades of government publication and is the consensus across the digital Islamic ecosystem (AlAdhan / IslamicFinder / IACAD / Microsoft / Apple iOS / glibc). Not pure 🟢 because Diyanet (Türkiye), JAKIM (Malaysia), and regional moonsighting committees legitimately diverge by ±1 day — Umm al-Qura is the digital-ecosystem consensus, not the scholarly consensus of the full ummah. The previous Kuwaiti tabular default was 🟢 in isolation but indefensible as fajr's chosen default given the ecosystem divergence.
 
 ### Elevation note magnitude (v1.7.6)

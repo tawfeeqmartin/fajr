@@ -24,6 +24,30 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.13] — 2026-05-02
+
+### Added
+
+- **`hijri()` now returns `monthNameAr`** (Arabic month name with full
+  diacritics — sukūn, fatḥa, kasra, shadda) alongside the existing English
+  `monthName`. Voweled per AlAdhan / IslamicFinder convention. The 12 strings
+  — مُحَرَّم, صَفَر, رَبِيع الأَوَّل, رَبِيع الآخِر, جُمَادَى الأُولَى,
+  جُمَادَى الآخِرَة, رَجَب, شَعْبَان, رَمَضَان, شَوَّال, ذُو الْقَعْدَة,
+  ذُو الْحِجَّة — let downstream Islamic apps drop their locally-vendored
+  arrays and inherit consistent voweling. Present on both the default
+  Umm al-Qura path and the legacy `{ convention: 'tabular' }` path.
+  Resolves [#62](https://github.com/tawfeeqmartin/fajr/issues/62).
+- `HijriResult.monthNameAr: string` added to `src/index.d.ts`.
+
+### Honest caveats
+
+- Pure additive change; no breaking API surface. All existing consumers
+  continue to receive the same `year` / `month` / `day` / `monthName` fields
+  unchanged. The new field appears alongside.
+- Bundle-size delta: ~600 bytes for the 12 voweled Arabic strings.
+
+---
+
 ## [1.7.7] — 2026-05-03
 
 ### Changed

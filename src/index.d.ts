@@ -447,6 +447,13 @@ export interface HijriResult {
   /** 1–30 */
   day:       number
   monthName: HijriMonthName
+  /** Arabic month name with full diacritics (sukūn, fatḥa, kasra, shadda),
+   *  matching AlAdhan / IslamicFinder / IACAD / printed mosque calendars
+   *  (v1.7.13+). The 12 Arabic strings — مُحَرَّم, صَفَر, رَبِيع الأَوَّل,
+   *  رَبِيع الآخِر, جُمَادَى الأُولَى, جُمَادَى الآخِرَة, رَجَب, شَعْبَان,
+   *  رَمَضَان, شَوَّال, ذُو الْقَعْدَة, ذُو الْحِجَّة — let downstream apps
+   *  drop their locally-vendored arrays and inherit consistent voweling. */
+  monthNameAr: string
 }
 
 /** Convert a Gregorian Date to the Hijri calendar.
