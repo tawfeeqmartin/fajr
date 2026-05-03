@@ -12,6 +12,32 @@ const KAABA_LNG = 39.8262
 const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
 
+// 16-point compass — abbreviation + human-readable description.
+// Boundaries computed at every 22.5° (360 / 16). See bearingToCardinal16 below.
+const CARDINAL_16 = [
+  { abbr: 'N',   description: 'North' },
+  { abbr: 'NNE', description: 'North-northeast' },
+  { abbr: 'NE',  description: 'Northeast' },
+  { abbr: 'ENE', description: 'East-northeast' },
+  { abbr: 'E',   description: 'East' },
+  { abbr: 'ESE', description: 'East-southeast' },
+  { abbr: 'SE',  description: 'Southeast' },
+  { abbr: 'SSE', description: 'South-southeast' },
+  { abbr: 'S',   description: 'South' },
+  { abbr: 'SSW', description: 'South-southwest' },
+  { abbr: 'SW',  description: 'Southwest' },
+  { abbr: 'WSW', description: 'West-southwest' },
+  { abbr: 'W',   description: 'West' },
+  { abbr: 'WNW', description: 'West-northwest' },
+  { abbr: 'NW',  description: 'Northwest' },
+  { abbr: 'NNW', description: 'North-northwest' },
+]
+
+function bearingToCardinal16(bearing) {
+  const normalised = ((bearing % 360) + 360) % 360
+  return CARDINAL_16[Math.round(normalised / 22.5) % 16]
+}
+
 /**
  * Calculate Qibla bearing from a location.
  *
@@ -21,7 +47,7 @@ const RAD_TO_DEG = 180 / Math.PI
  * @param {object} params
  * @param {number} params.latitude
  * @param {number} params.longitude
- * @returns {object} { bearing, magneticDeclination, trueBearing }
+ * @returns {object} { bearing, magneticDeclination, trueBearing, cardinal, cardinalDescription }
  */
 export function qibla({ latitude, longitude }) {
   const lat1 = latitude * DEG_TO_RAD
@@ -37,10 +63,14 @@ export function qibla({ latitude, longitude }) {
   // Magnetic declination placeholder — full model requires WMM2024 data
   // TODO: integrate NOAA World Magnetic Model
   const magneticDeclination = 0
+  const trueBearing = ((bearing + magneticDeclination + 360) % 360)
+  const card = bearingToCardinal16(bearing)
 
   return {
     bearing: Math.round(bearing * 10) / 10,
     magneticDeclination,
-    trueBearing: Math.round(((bearing + magneticDeclination + 360) % 360) * 10) / 10,
+    trueBearing: Math.round(trueBearing * 10) / 10,
+    cardinal: card.abbr,
+    cardinalDescription: card.description,
   }
 }
