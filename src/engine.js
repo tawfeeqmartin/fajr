@@ -216,6 +216,7 @@ function selectMethod(country, lat, coords) {
     case 'SaudiArabia':
       // Umm al-Qura University: Fajr 18.5°, Isha +90 min
       return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura' }
+    case 'Türkiye':
     case 'Turkey': {
       // Diyanet İşleri Başkanlığı: Fajr 18°, Isha 17° + adhan's preset
       // adjustments {sunrise:-7, dhuhr:5, asr:4, maghrib:7, isha:0}.
@@ -246,6 +247,7 @@ function selectMethod(country, lat, coords) {
     case 'Egypt':
       // Egyptian General Authority of Survey: Fajr 19.5°, Isha 17.5°
       return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (19.5°/17.5°)' }
+    case 'UnitedKingdom':
     case 'UK':
       // Moonsighting Committee: Fajr 18°, Isha 18° with seasonal (Shafaq) adjustment
       // 🟢 Established — UK Muslim community predominantly follows Moonsighting Committee
@@ -314,6 +316,7 @@ function selectMethod(country, lat, coords) {
       p.methodAdjustments = { ...(p.methodAdjustments || {}), fajr: 8, isha: 1 }
       return { params: p, methodName: 'JAKIM (20°/18° + 8min Fajr / 1min Isha ihtiyati per Path A community calibration)' }
     }
+    case 'UnitedStates':
     case 'USA':
       // ISNA: Fajr 15°, Isha 15°
       return { params: adhan.CalculationMethod.NorthAmerica(), methodName: 'ISNA (NorthAmerica)' }
@@ -330,6 +333,7 @@ function selectMethod(country, lat, coords) {
       // University of Islamic Sciences, Karachi: Fajr 18°, Isha 18°, Hanafi Asr
       return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (18°/18°)' }
     }
+    case 'UnitedArabEmirates':
     case 'UAE': {
       // Dubai / UAE: Umm al-Qura (Gulf region uses this or Kuwait; Aladhan method 4)
       return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura (UAE)' }
@@ -361,6 +365,7 @@ function selectMethod(country, lat, coords) {
       // MWL regions list in methods.js explicitly includes ZA. 🟢 Established.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (South Africa)' }
     }
+    case 'BruneiDarussalam':
     case 'Brunei': {
       // JAKIM / MUIS-equivalent (Fajr 20°, Isha 18°) — equatorial standard
       // shared across MY/SG/BN/ID per methods.js. 🟢 Established.
@@ -549,6 +554,7 @@ function selectMethod(country, lat, coords) {
       // is correctly applied via the Diyanet method.
       // Classification: 🟢 Established.
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Kosovo BIK, Turkish institutional)' }
+    case 'BosniaandHerzegovina':
     case 'Bosnia':
       // Rijaset / Islamska Zajednica u BiH (Sunni Hanafi ~51%): Diyanet
       // 18°/17° closest published match to traditional Takvim. Hanafi Asr
@@ -600,6 +606,7 @@ function selectMethod(country, lat, coords) {
     case 'Guinea':
       // ~89% Sunni Maliki: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Guinea default)' }
+    case "Côted'Ivoire":
     case 'CoteDIvoire':
       // ~42% Muslim, Sunni Maliki: MWL default. Classification: 🟡.
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: "MWL (Côte d'Ivoire default)" }
