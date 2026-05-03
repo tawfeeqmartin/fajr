@@ -725,11 +725,13 @@ const times = prayerTimes({
 
 #### JavaScriptCore (pure Swift app, iOS / macOS)
 
+> **Note (v1.7.4):** fajr currently ships ESM-only — there's no UMD/IIFE bundle published yet. To embed in a Swift app via JSC today, you'd need to either bundle the source files yourself with esbuild/rollup (`bundle.format = 'iife'`) or wait for the UMD bundle tracked in [issue #46](https://github.com/tawfeeqmartin/fajr/issues/46). The recipe below assumes an IIFE bundle exposing `fajr.prayerTimes` etc. on the global. Long-term, the native [fajr-swift port (issue #44)](https://github.com/tawfeeqmartin/fajr/issues/44) eliminates the JSC overhead entirely.
+
 ```swift
 import JavaScriptCore
 
 let context = JSContext()!
-let bundleURL = Bundle.main.url(forResource: "fajr.umd", withExtension: "js")!  // bundled fajr build
+let bundleURL = Bundle.main.url(forResource: "fajr.iife", withExtension: "js")!  // self-bundled IIFE — see note above
 let source = try String(contentsOf: bundleURL)
 context.evaluateScript(source)
 
