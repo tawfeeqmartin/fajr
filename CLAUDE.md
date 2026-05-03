@@ -349,6 +349,35 @@ Separate from the daily Layer 2 + Layer 3 routines: when the user invokes `/ultr
 
 ---
 
+## Documentation Regen Rule (self-enforced, v1.7.x → CI-gated v1.8.x)
+
+**Rule:** if a PR modifies any of `src/hijri.js`, `src/hijri-umm-al-qura.js`, `src/hilal.js`, `src/lunar.js`, `src/engine.js`, or anything under `src/data/` — that PR MUST also commit the regenerated `docs/charts/*.svg` and any `docs/*.md` whose content is derived from those modules. The reverse is also enforced: if a release ships engine semantics, the docs must reflect that release's behaviour, not the previous release's.
+
+**Why:** the v1.7.7-era docs/paper.md / docs/calibration-recipe.md / docs/dashboard.html accidentally cited pre-v1.7.6 numbers (auto-elevation Maghrib bug + Kuwaiti hijri 38% wrong) for ~2 days after the v1.7.6 fix shipped, which agot-agent's #57 audit caught. The risk is reputational: a paper reviewer or contributor pulling fajr today should NOT see pre-fix baselines and draw wrong conclusions about library accuracy.
+
+**Sources of truth:**
+
+| Module changed | Docs to regenerate |
+|---|---|
+| `src/lunar.js` | `npm run validate:lunar-jpl`, `npm run validate:solar-jpl` (regenerates `docs/lunar-jpl-validation.md` + `docs/solar-jpl-validation.md`) |
+| `src/hijri-umm-al-qura.js`, `src/hijri.js` | `npm run build:hilal-map -- --year 1446 --month 9` and `--year 1447 --month 9`, `npm run build:hilal-year -- --year 1446` and `--year 1447`, `npm run analyze:hilal-historical` |
+| `src/hilal.js`, criterion tunings | `npm run build:criterion-isolines`, `npm run analyze:hilal-historical` |
+| `src/engine.js`, `src/data/cities.json`, `src/data/city-method-overrides.json` | `npm run build:charts` (refreshes `docs/charts/*.svg` + `docs/progress.md`); audit `docs/paper.md`, `docs/calibration-recipe.md`, `docs/DASHBOARD.md`, `docs/dashboard.html` for stale numeric claims |
+
+**Convenience umbrella:** `npm run regenerate-docs` (added in v1.7.11) runs every script in dependency order. Use it after any engine change before opening the PR.
+
+**Enforcement modes:**
+
+- **v1.7.x (current — self-enforced):** every release agent and PR author manually runs `npm run regenerate-docs` after engine changes and commits the resulting diff alongside the source change. The Layer 1 lint job does NOT yet check this — agents are expected to honor it. If a release ships without the docs regen, file a `chore: docs regen sweep` PR within 1 working day of the release tag (this PR — v1.7.9 / v1.7.11 — is the canonical example, addressing #57).
+- **v1.8.x (planned — CI-gated):** Layer 1 lint will fail any PR that touches the modules in the table above without also touching at least one downstream doc artifact. The check will allow-list pure refactor PRs that explicitly assert "no behavior change" via a `[skip-docs-regen]` PR title prefix.
+
+**What is regenerated automatically vs hand-curated:**
+
+- **Automatic:** `docs/charts/*.svg`, `docs/progress.md`, `docs/lunar-jpl-validation.md`, `docs/solar-jpl-validation.md`, `docs/hilal-historical-analysis.md`. These are deterministic outputs of scripts; never hand-edit them.
+- **Hand-curated:** `docs/paper.md`, `docs/calibration-recipe.md`, `docs/DASHBOARD.md`, `docs/dashboard.html`. These contain prose that requires human/agent judgment to update — but their *numeric claims* must be reconciled against the latest `eval/results/runs.jsonl` after every release. Add a `Last refreshed: YYYY-MM-DD` line at the top of each.
+
+---
+
 ## Continuous Research & Documentation Custodianship (RemoteTrigger `trig_01DbgkRPvVVMmo9FjDFJQ54C`)
 
 Separate from the per-PR review pipeline above. Runs **weekly, Mondays 06:00 UTC**. Cares about the project as a whole rather than any single PR — the role explicitly cares that *every Muslim everywhere in the world is accurately served by fajr and not put at risk by wrong data we might have supplied*.
