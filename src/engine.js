@@ -2442,8 +2442,12 @@ export function prayerTimes(params) {
   // paths get NO note (they already know what they passed). The default-zero
   // elevation fallback also gets no note (it's the engine's silent default).
   if (elevationSource === 'city-registry') {
+    const dipMin = computeElevationDipMinutes(loc.city.elevation, latitude)
     notes.push(
-      `Elevation auto-resolved from city registry: ${loc.city.name}, ${loc.city.elevation}m`
+      `Elevation auto-resolved from city registry: ${loc.city.name}, ${loc.city.elevation}m` +
+      ` → Maghrib +${dipMin.toFixed(1)} min later, Shuruq -${dipMin.toFixed(1)} min earlier vs sea-level.` +
+      ` Saudi/Umm al-Qura institutionally declines this correction; UAE (Burj Khalifa) + Malaysia JAKIM apply it.` +
+      ` To match Saudi convention, pass elevation: 0.`
     )
   }
   if (methodSource === 'city-institutional') {

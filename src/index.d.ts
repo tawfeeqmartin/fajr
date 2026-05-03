@@ -430,6 +430,16 @@ export type HijriMonthName =
   | 'Jumada al-Awwal' | 'Jumada al-Thani' | 'Rajab' | "Sha'ban"
   | 'Ramadan' | 'Shawwal' | "Dhu al-Qi'dah" | 'Dhu al-Hijjah'
 
+/** Hijri calendar convention. 'umm-al-qura' is the default (Saudi Arabia's
+ *  official calendar, used by AlAdhan, IslamicFinder, IACAD, Microsoft).
+ *  'tabular' returns the Kuwaiti arithmetic calendar (v1.7.5-and-earlier default).
+ *  'observational' is planned for v1.9.x; throws NotImplementedError currently. */
+export type HijriConvention = 'umm-al-qura' | 'tabular' | 'observational'
+
+export interface HijriOptions {
+  convention?: HijriConvention
+}
+
 export interface HijriResult {
   year:      number
   /** 1–12 */
@@ -439,9 +449,15 @@ export interface HijriResult {
   monthName: HijriMonthName
 }
 
-/** Convert a Gregorian Date to the Hijri calendar (tabular Kuwaiti algorithm).
- *  🟢 Established — standard tabular Hijri used by Islamic institutions worldwide. */
-export function hijri(date: Date): HijriResult
+/** Convert a Gregorian Date to the Hijri calendar.
+ *  Default convention: 'umm-al-qura' (Saudi Arabia's official Umm al-Qura calendar,
+ *  used by AlAdhan, IslamicFinder, IACAD, Microsoft).
+ *  Pass { convention: 'tabular' } to use the Kuwaiti arithmetic calendar
+ *  (v1.7.5-and-earlier default).
+ *  🟡→🟢 Approaching established — Umm al-Qura is Saudi Arabia's official calendar,
+ *  used by AlAdhan, IslamicFinder, IACAD, Microsoft. Kuwaiti tabular preserved via
+ *  { convention: "tabular" }. */
+export function hijri(date: Date, opts?: HijriOptions): HijriResult
 
 // ─────────────────────────────────────────────────────────────────────────────
 // hilalVisibility — three-criterion lunar crescent visibility prediction
