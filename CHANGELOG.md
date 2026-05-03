@@ -24,6 +24,56 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.15] — 2026-05-03
+
+### Changed
+
+- **README status banner replaced** with the v1.x public-beta framing
+  recommended by agot-agent in [#65](https://github.com/tawfeeqmartin/fajr/issues/65).
+  Previous banner had grown into a multi-paragraph release-narrative that
+  duplicated the CHANGELOG; new banner is a 2-sentence stability + reporting
+  contract that points at CHANGELOG.md and CALIBRATION.md for detail.
+- **`docs/progress.md` and other narrative content** continues unchanged —
+  this release only changes the headline framing, not the underlying
+  accuracy claims.
+
+### Added
+
+- **[CALIBRATION.md](CALIBRATION.md)** at the repo root — fajr's structured
+  transparency document. Covers (a) the 9 reference sources fajr benchmarks
+  against (Mawaqit / Diyanet / JAKIM / KEMENAG / MUIS / AlAdhan /
+  IslamicFinder / praytimes.org / muslimsalat.com), (b) per-region accuracy
+  with current train (1.07 min) and holdout (3.66 min) WMAE, (c) method
+  dispatch per region with institutional citations (78 country cases + 16
+  city-level overrides, all 🟢 or 🟡→🟢 classified), (d) madhab dispatch per
+  region with the v1.7.1 Maldives/Sri-Lanka Shafi'i fix and the documented
+  Pakistan/Bangladesh/Türkiye/Albania population-mismatch pending v1.8.0
+  override design, (e) known deviations from reference sources with
+  rationale (elevation auto-application, Hijri UAQ default, per-prayer
+  rounding, Morocco Maghrib +5, Diyanet -1, JAKIM Isha +1, plus the
+  Cairo/Alexandria + London Path A candidates currently shipping as
+  documented residuals), (f) open work + roadmap, (g) scholarly review
+  status (no formal review yet — practice 4 from #65 on the v1.8.0+
+  roadmap), and (h) the versioning + stability promise that the README
+  banner refers to.
+- Resolves [#65](https://github.com/tawfeeqmartin/fajr/issues/65) practices 1
+  + 2. Practices 3 (minimum-scope agents per #49), 4 (formal scholarly
+  review), and 5 (cross-repo doc rename) are scoped for v1.8.0+.
+
+### No code change
+
+This is a pure documentation release. No `src/*` files modified; eval WMAE
+unchanged. Bumped to allow npm to surface the doc improvements via
+`npm view @tawfeeqmartin/fajr readme` and to pin a checkpoint version that
+downstream consumers (notably agiftoftime) can pin against.
+
+### Cross-references
+
+- Issue: [#65](https://github.com/tawfeeqmartin/fajr/issues/65)
+- PR: pending — see branch `chore/v1.7.15-public-beta-framing-and-calibration-md`
+
+---
+
 ## [1.7.13] — 2026-05-02
 
 ### Added
@@ -742,6 +792,7 @@ Documentation-only release. No `src/*` files modified.
 
 ---
 
+[1.7.15]: https://github.com/tawfeeqmartin/fajr/releases/tag/v1.7.15
 [1.7.7]: https://github.com/tawfeeqmartin/fajr/releases/tag/v1.7.7
 [1.7.6]: https://github.com/tawfeeqmartin/fajr/releases/tag/v1.7.6
 [1.7.5]: https://github.com/tawfeeqmartin/fajr/releases/tag/v1.7.5
