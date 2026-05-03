@@ -801,11 +801,12 @@ function selectMethod(country, lat, coords) {
   switch (country) {
     case 'Morocco': {
       // Ministry of Habous (community-calibrated): Fajr 19°, Isha 17°,
-      // Standard Asr, plus -5min Maghrib ihtiyati per v1.5.0 Path A.
+      // Standard Asr, plus +5min Maghrib ihtiyati per v1.5.0 Path A and
+      // +5min Dhuhr ihtiyati per v1.7.16 Path A.
       // See knowledge/wiki/methods/morocco.md and knowledge/wiki/regions/morocco.md.
       //
       // Classification: 🟡→🟢 (community calibration; matches mosque-published
-      // reality across 18 Moroccan zones).
+      // reality across 18+ Moroccan zones).
       //
       // FAJR 19° (v1.0): The formal Ministry-stated angle is 18° but the
       // published Imsakiyya is best reproduced by 19°. Empirically corroborated
@@ -834,6 +835,32 @@ function selectMethod(country, lat, coords) {
       // small ihtiyati margin — consistent with classical fiqh requiring
       // certainty the sun has set).
       //
+      // DHUHR +5min (v1.7.16 — this commit): The same Mawaqit corpus shows
+      // fajr's calc Dhuhr is consistently 4-6 minutes EARLIER than what
+      // Moroccan mosques publish (per-cell biases negative, mean −4.80 min
+      // across 25 fixture cells, range [-4, -6]):
+      //
+      //   Casablanca: -5     Tanger:    -5     Settat:    -6
+      //   Rabat:      -5     Nador:     -4     Khouribga: -5
+      //   Marrakech:  -4     Oujda:     -5     Taza:      -5
+      //   Sale:       -4     Fes:       -4/-5  Ouarzazate: -5
+      //   Kenitra:    -4     Meknes:    -4     Errachidia: -5
+      //   Safi:       -5     Essaouira: -5     Agadir:    -5
+      //   Taroudant:  -6
+      //
+      // The bias is uniform across all 25 cells (no outliers, no per-region
+      // variance > 1 min). This is a Habous Path A signature: the institution
+      // adds ~5 min to Dhuhr as zawal-ihtiyati — ensuring prayer starts
+      // unambiguously AFTER the sun crosses the meridian, per classical
+      // Maliki/Sunni jurisprudence requiring certainty (yaqeen) that solar
+      // zenith has passed before initiating Dhuhr.
+      //
+      // The change is prayer-validity-safer (Dhuhr LATER = unambiguously
+      // post-zenith) and aligns calc with published Mawaqit reality
+      // across all 18 cities. Same Path A precedent class as v1.5.0
+      // Maghrib +5; same scholarly classification (🟡→🟢 Approaching
+      // established).
+      //
       // Per CLAUDE.md ratchet rule 5, eval/data/train/morocco.json (Aladhan
       // custom-method-99 calc-vs-calc reproduction of 19°/17° without the
       // Maghrib offset) is moved to test/ in v1.5.0 since it represents
@@ -843,8 +870,8 @@ function selectMethod(country, lat, coords) {
       const p = adhan.CalculationMethod.Other()
       p.fajrAngle = 19
       p.ishaAngle = 17
-      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 5 }
-      return { params: p, methodName: 'Morocco (19°/17° + +5min Maghrib ihtiyati per Path A community calibration)' }
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), dhuhr: 5, maghrib: 5 }
+      return { params: p, methodName: 'Morocco (19°/17° + +5min Dhuhr/+5min Maghrib ihtiyati per Path A community calibration)' }
     }
     case 'SaudiArabia':
       // Umm al-Qura University: Fajr 18.5°, Isha +90 min
