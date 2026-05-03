@@ -5,6 +5,190 @@
 // changes require a major version bump. See README "API stability".
 
 // ─────────────────────────────────────────────────────────────────────────────
+// detectLocation — city-aware location resolver (v1.7.0)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A documented alternative method for cities with intra-locality ikhtilaf
+ *  (legitimate scholarly disagreement). Only present on cities where
+ *  multiple institutional positions are documented. Apps that want to surface
+ *  the disagreement to users render these as "see also" chips alongside
+ *  `recommendedMethod`. */
+export interface AltMethod {
+  /** Method name resolvable by the engine's dispatcher (e.g. `'Tehran'`,
+   *  `'Karachi'`, `'Egyptian'`). */
+  method: string
+  /** Free-form string explaining the institutional source / convention
+   *  (e.g. "Higher Islamic Shia Council of Lebanon (al-Majlis al-Islami
+   *  al-Shi'i al-A'la) — published Twelver Shia Imsakiyya..."). */
+  source: string
+  /** Optional rough share of the local Muslim population that follows this
+   *  alternative. Surface only when a credible quantitative estimate exists;
+   *  the field is omitted otherwise to avoid implied precision. */
+  populationShare?: number
+}
+
+/** Provenance of the city's primary recommended method. */
+export interface CitySource {
+  /** `'mawaqit'` = a Mawaqit-registered mosque publishes for this city.
+   *  `'national-authority'` = the country's named institution publishes
+   *  (Diyanet, JAKIM, KEMENAG, MUIS, Habous, Awqaf, etc.).
+   *  `'aladhan'` = no specific institutional publisher; coverage via the
+   *  multi-app consensus method (typically MWL-via-Aladhan-default).
+   *  `'inherited'` = no city-level source; the city inherits its country's. */
+  type: 'mawaqit' | 'national-authority' | 'aladhan' | 'inherited' | 'fallback'
+  /** Mawaqit slug when type === 'mawaqit', e.g. 'al-azhar-mosque-cairo-egypt'. */
+  slug?: string
+  /** Institution name when type === 'national-authority' or 'mawaqit'.
+   *  E.g. 'Diyanet İşleri Başkanlığı', 'JAKIM', 'Dar al-Fatwa al-Lubnaniyya'. */
+  institution?: string
+  /** When type === 'inherited', the country key the city inherits from. */
+  from?: string
+}
+
+export interface City {
+  /** English/Latin transliteration. Stable across versions; used as display name. */
+  name:         string
+  /** Local-script form when meaningfully distinct (Arabic, Cyrillic, etc.).
+   *  Optional — only included where the local script differs from `name`. */
+  nameLocal?:   string
+  /** ISO 3166-1 alpha-2. */
+  countryISO:   string
+  /** State / province / governorate / mintaqah. Free-form; not a stable enum. */
+  adminRegion?: string
+  /** Geographic centre, decimal degrees. */
+  lat:          number
+  lon:          number
+  /** Bounding box for fast lookup: [latMin, latMax, lonMin, lonMax]. */
+  bbox:         [number, number, number, number]
+  /** Optional. Inhabitants of the city proper, latest reasonably-sourced figure. */
+  population?:  number
+  /** Optional. Mean elevation of the city centre in metres above sea level —
+   *  surfaced to apps that want to recommend `applyElevationCorrection`. */
+  elevation?:   number
+  /** Optional. IANA timezone for this city. Falls through to country-level
+   *  when absent — relevant for Russia, USA, China, etc. */
+  timezone?:    string
+  /** Optional city-level institutional method override. Resolvable by the
+   *  engine's method dispatcher (e.g. `'Karachi'`, `'Tehran'`, `'Diyanet'`).
+   *  When set, `prayerTimes` uses this in preference to the country default
+   *  (the city is following an institutional convention that diverges from
+   *  the country writ-large). When unset, the country default applies. */
+  methodOverride?: string
+  /** Optional documented alternative methods — surfaces the intra-city
+   *  ikhtilaf rather than hiding it behind the recommended method. Only
+   *  present when at least one alternative is documented. */
+  altMethods?: AltMethod[]
+  /** Provenance for the city's primary recommended method. */
+  source?:     CitySource
+}
+
+/** How `prayerTimes` chose the calculation method for a given coordinate.
+ *
+ *  - `'caller-explicit'`: the caller passed `method:` in the params object;
+ *    fajr honoured it without consulting the city or country tables.
+ *  - `'city-institutional'`: the matched city in the registry has a
+ *    `methodOverride` field; fajr used that (e.g. Mosul → Karachi via
+ *    Sunni-Awqaf convention, even though Iraq's country default is Egyptian).
+ *  - `'country-default'`: no city-level override; fajr used the country's
+ *    default method per the bbox dispatch table.
+ *  - `'fallback'`: outside any registered city AND outside any country bbox;
+ *    fajr used ISNA (the engine's universal fallback). */
+export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-default' | 'fallback'
+
+/** How `prayerTimes` chose the elevation for a given coordinate.
+ *
+ *  - `'caller-explicit'`: the caller passed `elevation:` in the params object
+ *    (any value, including 0). Apps following the Saudi/jama'ah-unity stance
+ *    should pass `elevation: 0` to opt out of geometric horizon-dip correction.
+ *  - `'city-registry'`: the matched city in the registry has an `elevation`
+ *    field; fajr used that and applied `applyElevationCorrection` inline so
+ *    the returned times are already-corrected.
+ *  - `'default-zero'`: no city matched (or the matched city had no elevation
+ *    field), and the caller did not pass elevation. fajr fell through to 0
+ *    (sea level) silently — the safest default. */
+export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zero'
+
+/** The location field on `prayerTimes` / `dayTimes` return values (v1.7.0+).
+ *  Always populated. Apps can use this to display "you are in <city>"
+ *  without an additional `detectLocation` call. */
+export interface PrayerTimesLocation {
+  /** Matched city, or null when no city in the bundled registry matched. */
+  city:            City | null
+  /** Country key from the engine's bbox table (e.g. 'SaudiArabia',
+   *  'UnitedKingdom'). null when outside all known country bboxes. */
+  country:         string | null
+  /** IANA timezone identifier. Resolution order: city.timezone → 'UTC'.
+   *  We do not synthesise a country-level timezone fallback because
+   *  Russia/USA/Canada/China have multiple zones; UTC is honest when no
+   *  city matched. */
+  timezone:        string
+  /** Effective elevation in metres used by the engine on this call. */
+  elevation:       number
+  /** How the method was chosen — see MethodSource above. */
+  methodSource:    MethodSource
+  /** How the elevation was chosen — see ElevationSource above. */
+  elevationSource: ElevationSource
+}
+
+/** Standalone Location record returned by `detectLocation`. Distinct from
+ *  `PrayerTimesLocation` which only carries the fields relevant to
+ *  prayer-time computation; `Location` includes `recommendedMethod`,
+ *  `altMethods`, and `source` for apps that want full city provenance
+ *  (e.g. to render the institutional source name in a UI provenance sheet). */
+export interface Location {
+  /** Matched city, or null when no city in the bundled registry matched.
+   *  NEVER returns a wrong-city default — `null` is the honest signal. */
+  city:              City | null
+  /** Country key from the engine's bbox table. null when outside all known
+   *  country bboxes (open ocean, Antarctica). */
+  country:           string | null
+  /** IANA timezone identifier; falls through to 'UTC' when no city matched. */
+  timezone:          string
+  /** Effective elevation in metres. Resolution order:
+   *  city.elevation → fallbackElevation parameter (default 0). */
+  elevation:         number
+  /** Recommended calculation method as a string resolvable by the engine
+   *  dispatcher. Resolution order:
+   *  city.methodOverride → countryDefault → 'ISNA'. */
+  recommendedMethod: string
+  /** How the recommended method was chosen — see MethodSource above. */
+  methodSource:      MethodSource
+  /** Documented alternative methods for this city (intra-city ikhtilaf).
+   *  Only present when the matched city has at least one alternative.
+   *  Apps doing existence checks should use `altMethods != null` rather
+   *  than `altMethods.length > 0`. */
+  altMethods?:       AltMethod[]
+  /** Provenance of the recommended method. */
+  source:            CitySource
+}
+
+/** Resolve a coordinate to its city, country, timezone, recommended method,
+ *  and institutional source.
+ *
+ *  Pure / referentially transparent for a given (lat, lon, fallbackElevation):
+ *  no astronomical computation, no I/O, no caching. Apps that already
+ *  call `prayerTimes` get the same resolution surfaced via the
+ *  `location` field on its return value — most apps will never need to
+ *  call `detectLocation` directly.
+ *
+ *  Privacy: fajr never logs, persists, or transmits the coordinates you
+ *  pass it. The city resolution happens entirely locally via the bundled
+ *  city registry. No telemetry, no analytics, no remote calls.
+ *
+ *  🟢 Established — pure lookup, no shar'i ruling involved.
+ *
+ *  @param latitude
+ *  @param longitude
+ *  @param fallbackElevation Used when the matched city has no elevation
+ *                           field AND when no city matches. Default 0.
+ */
+export function detectLocation(
+  latitude: number,
+  longitude: number,
+  fallbackElevation?: number,
+): Location
+
+// ─────────────────────────────────────────────────────────────────────────────
 // prayerTimes
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -12,11 +196,27 @@ export interface PrayerTimesParams {
   latitude: number
   longitude: number
   date: Date
-  /** Meters above sea level. Default 0. Currently informational; elevation
-   *  correction is opt-in via `applyElevationCorrection`. */
+  /** Meters above sea level. When omitted (or set to `undefined`), fajr
+   *  auto-resolves elevation from the bundled city registry — apps that
+   *  want city-registry elevation should NOT pass this parameter. To opt
+   *  out of elevation correction (e.g. Saudi/jama'ah-unity stance), pass
+   *  `elevation: 0` explicitly — the engine then treats this as caller-
+   *  explicit sea-level and skips the geometric horizon-dip correction.
+   *  Apps that already have a GPS-supplied altitude should pass it through;
+   *  the engine then applies `applyElevationCorrection` to the returned
+   *  times automatically (since v1.5.2). */
   elevation?: number
-  /** Override the auto-detected method. Currently the auto-detection is
-   *  authoritative; this parameter is reserved for future explicit overrides. */
+  /** Override the auto-detected method. Pass a method-name string
+   *  resolvable by the engine's `methodFromString` dispatcher (e.g.
+   *  `'UmmAlQura'`, `'Diyanet'`, `'Karachi'`, `'Tehran'`, `'Egyptian'`,
+   *  `'MoonsightingCommittee'`, `'JAKIM'`, `'MUIS'`, `'ISNA'`, `'MWL'`,
+   *  `'UOIF'`, `'CIL'`, `'DUMR'`, `'Morocco'`, `'Tunisia'`, `'Algeria'`,
+   *  `'Jordan'`). When omitted, the engine resolves the method from the
+   *  bundled city registry's `methodOverride` (if present), then falls
+   *  through to the country default, then to ISNA. Caller-explicit method
+   *  takes priority over both city-institutional and country-default
+   *  resolution; the resulting `location.methodSource` is then
+   *  `'caller-explicit'`. */
   method?: string
 }
 
@@ -78,6 +278,16 @@ export interface PrayerTimesResult {
     /** Present if elevation correction was applied via `applyElevationCorrection`. */
     elevationCorrectionMin?: number
   }
+  /** City + country + timezone + sourcing metadata for this call (v1.7.0+).
+   *  Always populated. Apps can use this to display "you are in <city>"
+   *  without an additional `detectLocation` call. `methodSource` and
+   *  `elevationSource` report HOW the engine chose its inputs for this
+   *  call — useful for "Why is my Fajr at this time?" explanatory UX.
+   *
+   *  When no city in the bundled registry matches the coordinate, `city`
+   *  is null. When outside all known country bboxes (open ocean,
+   *  Antarctica), `country` is also null and `methodSource === 'fallback'`. */
+  location: PrayerTimesLocation
 }
 
 export function prayerTimes(params: PrayerTimesParams): PrayerTimesResult
@@ -357,6 +567,7 @@ declare const fajr: {
   prayerTimes:              typeof prayerTimes
   dayTimes:                 typeof dayTimes
   tarabishyTimes:           typeof tarabishyTimes
+  detectLocation:           typeof detectLocation
   applyElevationCorrection: typeof applyElevationCorrection
   applyTayakkunBuffer:      typeof applyTayakkunBuffer
   qibla:                    typeof qibla

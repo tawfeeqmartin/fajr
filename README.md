@@ -6,7 +6,7 @@
 
 > **A region-aware auto-configuration layer over [`adhan.js`](https://github.com/batoulapps/adhan-js), plus an evolving accuracy-research framework.** Fajr picks the right calculation method for your coordinates automatically, ships a small set of community-calibrated regional adjustments not in adhan's defaults (Morocco 19°/17°, France UOIF 12°/12°, high-latitude rule selection), adds **hilal (lunar crescent) visibility prediction via three criteria computed side-by-side — Odeh (2004), Yallop (1997), and Shaukat (2002)** (adhan is solar-only — fajr ships its own Meeus-based lunar position stack, validated 5/5 astronomically defensible against documented Hijri month transitions, with `criteriaAgree` flagging borderline ikhtilaf cases when any of the three disagrees), and runs an autoresearch loop that validates engine changes against multiple independent reference layers — mosque-published times (Mawaqit), institutional tables (Diyanet, JAKIM), and regional-method consensus (Aladhan, praytimes.org). Currently spans 38 cities across 12 institutional-train countries plus a 163-country Aladhan-routed holdout corpus. The eval framework, plus the hilal/lunar implementation, is where most of fajr's distinctive engineering lives today.
 
-> **Status — v1.6.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection. v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
+> **Status — v1.7.** Public API surfaces (`prayerTimes`, `dayTimes`, `tarabishyTimes`, `detectLocation`, `applyElevationCorrection`, `applyTayakkunBuffer`, `hilalVisibility`, `qibla`, `hijri`, `nightThirds`, `travelerMode`) are stable; breaking changes will require a major version bump. **v1.7.0 ships city-aware location resolution**: a bundled 375-city registry powers automatic city detection, city-registry elevation surfacing (no more silent sea-level for Mexico City / Cape Town / Riyadh users), and city-level institutional method overrides for 12 cities where intra-country *ikhtilaf* matters (Mosul → Karachi via Sunni-Awqaf, Najaf/Karbala/Basra → Tehran via Twelver Shia hawza, Sarajevo/Mostar/Banja Luka/Pristina → Diyanet via Bosnian Rijaset / BIK, Bradford → MoonsightingCommittee via BCOM, Beirut → Egyptian via Dar al-Fatwa, Tabriz → Tehran, Dearborn → ISNA). Apps gain a `location` field on every `prayerTimes` return value with city/country/timezone/method-source plus a public `detectLocation(lat, lon)` for standalone resolution — see [City-aware location resolution (v1.7.0)](#city-aware-location-resolution-v170). v1.6.0 expanded country dispatch from 27 to 78 countries with bbox-based method selection (163 by v1.6.2). v1.5.2 added an **elevation advisory** at altitudes ≥ 500 m surfacing the UAE/JAKIM-vs-Saudi institutional disagreement so apps can present the user with an informed choice — see [Elevation advisory at significant altitude](#elevation-advisory-at-significant-altitude-v152). v1.5.1 introduced **per-prayer ihtiyat-aware minute rounding** (every displayed minute is on the prayer-validity-safe side of actual reality, by construction) and an explicit **`imsak`** field for fasting-yaqeen — see the principle table in [Per-prayer ihtiyat-aware minute rounding](#per-prayer-ihtiyat-aware-minute-rounding-v151). v1.5.0 shipped the Morocco Maghrib +5min Path A across 23 mosques. v1.3 added the Aabed-2015 tayakkun buffer and Tarabishy-2014 latitude-truncation method as opt-in alternatives, plus a `notes: string[]` field on `prayerTimes` output that surfaces scholarly-grounded location-specific advisories (currently the Odeh-2009 high-latitude regime warning at \|lat\| ≥ 48.6°). See [API stability](#api-stability) below. Live numbers and per-source breakdown are auto-generated in [`docs/progress.md`](docs/progress.md) on every `npm run build:charts`.
 
 ---
 
@@ -356,6 +356,70 @@ These are **rounding directions** for the displayed whole minute — the underly
 
 **Dual-ihtiyat resolution.** Fasting and prayer-validity have *different* safe directions for Fajr — fasters want Fajr earlier (so they stop eating before actual dawn); prayers want Fajr later (so prayer is performed inside the valid window). The classical resolution from every printed Imsakiyya in Mecca, Medina, and Cairo for over a century is **two columns**: an *imsak* (إمساك, "abstaining") column for fast-stop, and a *Fajr* column for prayer-start. fajr's API exposes both as separate fields. Imsak defaults to Fajr − 10 min (the universal Imsakiyya convention), rounded DOWN for fasting safety. Apps wanting a different imsak buffer can recompute downstream — the offset and rounding policy are reported in `result.corrections.imsak_offset_min` and `result.corrections.rounding`.
 
+### City-aware location resolution (v1.7.0)
+
+Most prayer-time libraries resolve method selection at the country level. fajr v1.7.0 ships a **bundled 375-city registry** that lifts resolution to the city — surfacing intra-country *ikhtilaf* (Mosul Hanafi vs. Najaf Twelver Shia, Sarajevo Diyanet vs. country MWL default), exposing per-city elevation automatically (Mexico City, Riyadh, Cape Town stop being silently sea-level), and giving apps a single `location` field with full provenance.
+
+The new public surface:
+
+- **`location` field on every `prayerTimes()` / `dayTimes()` return value** — always populated, carries `{ city, country, timezone, elevation, methodSource, elevationSource }`. `methodSource ∈ 'caller-explicit' | 'city-institutional' | 'country-default' | 'fallback'`; `elevationSource ∈ 'caller-explicit' | 'city-registry' | 'default-zero'`. Apps can render "you are in Cape Town" without a separate reverse-geocode call, and explain "Why is my Fajr at this time?" by surfacing the source enums.
+- **`detectLocation(lat, lon, fallbackElevation?)` standalone export** — pure lookup, no astronomy. Returns the same shape plus `recommendedMethod`, `altMethods` (documented alternatives where intra-city ikhtilaf is recorded), and `source` (institutional provenance). Returns `city: null` honestly when no city in the registry matches — never a wrong-city default.
+
+**12 city-level institutional method overrides** ship with the registry. Each cites its institutional source so reviewers can audit; each surfaces alternative methods via `altMethods` so apps can render the disagreement rather than hiding it:
+
+| City | Country | Method | Institutional source |
+|---|---|---|---|
+| Mosul | Iraq | Karachi (18°/18°) | Iraqi Sunni Endowment Office (Diwan al-Waqf al-Sunni) |
+| Najaf | Iraq | Tehran (17.7°/14°) | Office of Grand Ayatollah al-Sistani — Najaf hawza |
+| Karbala | Iraq | Tehran | Astan al-Husayniyya / Astan al-Abbasiyya custodial offices |
+| Basra | Iraq | Tehran | Twelver Shia mosque-published timetables (Sistani-aligned) |
+| Sarajevo | Bosnia | Diyanet (18°/17°) | Rijaset Islamske Zajednice u BiH (Vakat Takvim) |
+| Mostar | Bosnia | Diyanet | Rijaset BiH — Hercegovački muftijstvo |
+| Banja Luka | Bosnia | Diyanet | Rijaset BiH — Banjalučko muftijstvo (Republika Srpska) |
+| Pristina | Kosovo | Diyanet | Bashkësia Islame e Kosovës (BIK) Takvimi |
+| Bradford | UK | MoonsightingCommittee | Bradford Council of Mosques (BCOM) coordinated tables |
+| Beirut | Lebanon | Egyptian (19.5°/17.5°) | Dar al-Fatwa al-Lubnaniyya |
+| Tabriz | Iran | Tehran | Tehran Institute of Geophysics (regional default) |
+| Dearborn | USA | ISNA (15°/15°) | Dearborn Sunni convention; Tehran-style Twelver Shia minority surfaced via altMethods |
+
+Of the 12, four (Mosul, Najaf, Karbala, Basra) change clock-time materially compared to the pre-v1.7.0 country-default — Mosul shifts Fajr +8min (Karachi 18° dawn arrives ~8min later than Egyptian 19.5°), Najaf/Karbala/Basra shift Isha by –17 to –18min (Tehran 14° vs. Egyptian 17.5° angle for end of twilight). The other eight produce identical times because the city's `methodOverride` matches the country default already; the change is observable only via `location.methodSource` flipping from `country-default` to `city-institutional` and the new "Method auto-resolved" entry in `notes[]`. Full citations, reasoning, and alt-method documentation live in [`scripts/data/city-method-overrides.json`](scripts/data/city-method-overrides.json) (one record per city, every entry carries an institutional citation per the proposal's "no override without verified source" rule).
+
+**Auto-elevation behavior.** When you omit `elevation` from `prayerTimes()`, fajr now uses the city's registered elevation if known and applies `applyElevationCorrection` inline so the returned times are already-corrected. Mexico City users get times computed for 2,240m elevation by default; Cape Town users get 25m; Riyadh users get 612m (the v1.5.2 ≥500m advisory still fires alongside the auto-elevation note). To opt out — for instance to follow the Saudi/jama'ah-unity stance that declines geometric elevation correction — pass `elevation: 0` explicitly; fajr then treats this as caller-explicit sea-level and produces sea-level times. Caller-explicit elevation always wins over the city-registry elevation; the `location.elevationSource` field reports which path produced the value.
+
+**Auto-method behavior.** When you omit `method`, fajr resolves through `caller-explicit > city-institutional > country-default > fallback`. Pass an explicit `method: 'Egyptian'` (or any method-name string) and the city/country dispatch is bypassed entirely; `location.methodSource` becomes `'caller-explicit'` and the auto-method `notes[]` entry is suppressed.
+
+**Bundle size impact: +~95 KB** for [`src/data/cities.json`](src/data/cities.json) (375 cities, full registry shape with bbox / population / elevation / timezone / institutional source). The runtime cost is one linear scan over the 375 rows per `prayerTimes` call (registry pre-sorted with smallest bboxes first; metropolitan-area matches short-circuit early). For a downstream library shipping fajr, expect ~95 KB of registry data on top of fajr's own ~115 KB engine source — comparable to the size of the bundled adhan.js (`16 KB` minified) but added once rather than per-call.
+
+> **Privacy assertion.** fajr never logs, persists, or transmits the coordinates you pass it. The city resolution happens entirely locally via the bundled `src/data/cities.json` registry. No telemetry, no analytics, no remote calls. The only network traffic fajr is involved in is the `npm install` itself; everything else is a local function call.
+
+```js
+import { prayerTimes, detectLocation } from '@tawfeeqmartin/fajr'
+
+// Get prayer times — automatically uses city's elevation + institutional method if applicable
+const times = prayerTimes({ latitude: 36.34, longitude: 43.13, date: new Date() })
+// times.location = {
+//   city: { name: 'Mosul', countryISO: 'IQ', elevation: 223, methodOverride: 'Karachi', ... },
+//   country: 'Iraq',
+//   timezone: 'Asia/Baghdad',
+//   elevation: 223,
+//   methodSource: 'city-institutional',
+//   elevationSource: 'city-registry',
+// }
+// times.method  → 'Karachi (18°/18°)'
+// times.notes   → includes "Method auto-resolved from city institutional override:
+//                          Mosul → Karachi (Iraqi Sunni Endowment Office)"
+
+// Or just resolve location without computing prayer times
+const loc = detectLocation(36.34, 43.13)
+console.log(loc.city.name)            // 'Mosul'
+console.log(loc.recommendedMethod)    // 'Karachi'
+console.log(loc.methodSource)         // 'city-institutional'
+console.log(loc.altMethods)           // [{ method: 'Egyptian', source: 'Aladhan world-default for Iraq' }]
+console.log(loc.source.institution)   // (mawaqit-typed source — slug populated)
+```
+
+The principle behind v1.7.0 is the same one driving the rest of fajr's library design: **surface scholarly disagreement transparently, don't resolve it silently.** The 12 method-override cities each carry an institutional citation that a reviewer can audit; each surfaces minority alternatives via `altMethods`; the engine's choice is reported via `location.methodSource` so apps can show users *why* a particular method was selected and offer them the alternative.
+
 ---
 
 ## Historical Results (Experiment 1–7 narrative)
@@ -570,8 +634,9 @@ fajr v1.0 makes the following stability promises. **Stable** surfaces will not c
 
 | API | Signature | Since |
 |---|---|---|
-| `prayerTimes` | `({ latitude, longitude, date, elevation? }) → { fajr, shuruq, sunrise, dhuhr, asr, maghrib, sunset, isha, method, notes, corrections }` | v1.0 (`sunrise` alias added v1.0.1; `sunset` and `notes` added v1.1+) |
-| `dayTimes` | `({ latitude, longitude, date, elevation? }) → prayerTimes shape ∪ { midnight, qiyam }` | v1.1 |
+| `prayerTimes` | `({ latitude, longitude, date, elevation?, method? }) → { fajr, shuruq, sunrise, dhuhr, asr, maghrib, sunset, isha, method, notes, corrections, location }` | v1.0 (`sunrise` alias added v1.0.1; `sunset` and `notes` added v1.1+; `location` added v1.7) |
+| `dayTimes` | `({ latitude, longitude, date, elevation?, method? }) → prayerTimes shape ∪ { midnight, qiyam }` | v1.1 |
+| `detectLocation` | `(latitude, longitude, fallbackElevation?) → { city, country, timezone, elevation, recommendedMethod, methodSource, altMethods?, source }` | v1.7 |
 | `applyElevationCorrection` | `(times, elevation, latitude?) → times` (opt-in geometric horizon-dip) | v1.0 |
 | `applyTayakkunBuffer` | `(times, mins=5) → times` (opt-in Fajr buffer per Aabed 2015) | v1.3 |
 | `tarabishyTimes` | `(params, thresholdLat=45) → prayerTimes shape` (opt-in 45°-truncation per Tarabishy 2014) | v1.3 |

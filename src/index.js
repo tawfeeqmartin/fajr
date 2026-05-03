@@ -7,7 +7,12 @@
  * Internal implementation lives in engine.js and the other src/ modules.
  */
 
-import { prayerTimes as _prayerTimes, applyElevationCorrection, applyTayakkunBuffer } from './engine.js'
+import {
+  prayerTimes as _prayerTimes,
+  applyElevationCorrection,
+  applyTayakkunBuffer,
+  detectLocation as _detectLocation,
+} from './engine.js'
 import { qibla } from './qibla.js'
 import { hijri } from './hijri.js'
 import { hilalVisibility } from './hilal.js'
@@ -95,10 +100,47 @@ function tarabishyTimes(params, thresholdLat = 45) {
   return result
 }
 
+/**
+ * Resolve a coordinate to its city, country, timezone, recommended method,
+ * and institutional source.
+ *
+ * Pure / referentially transparent for a given (lat, lon, fallbackElevation):
+ * no astronomical computation, no I/O, no caching. Apps can call this
+ * independently of `prayerTimes` to display "you are in <city>" without
+ * computing prayer times. The same resolution is also performed silently
+ * inside `prayerTimes` and surfaced via the `location` field on its return
+ * value, so most callers will never need to invoke this directly.
+ *
+ * Returns `city: null` honestly when no city in the bundled registry matches —
+ * never a wrong-city default. The country fallback (via the existing
+ * `detectCountry` bbox table) still populates `country` and
+ * `recommendedMethod`. When neither matches (open ocean, Antarctica), all of
+ * city/country/recommendedMethod fall through to safe defaults
+ * (`null`/`null`/`'ISNA'`) so apps can display a graceful "location unknown"
+ * state.
+ *
+ * Privacy: the (lat, lon) you pass is not logged, persisted, or transmitted
+ * anywhere. The city resolution happens entirely locally via the bundled
+ * `src/data/cities.json` registry.
+ *
+ * Classification: 🟢 Established — pure lookup, no shar'i ruling involved.
+ *
+ * @param {number} latitude
+ * @param {number} longitude
+ * @param {number} [fallbackElevation=0]  Used when the matched city has no
+ *                                         elevation field, AND when no city
+ *                                         matches. In meters.
+ * @returns {object}  Location record. See TypeScript types in src/index.d.ts.
+ */
+function detectLocation(latitude, longitude, fallbackElevation = 0) {
+  return _detectLocation(latitude, longitude, fallbackElevation)
+}
+
 export default {
   prayerTimes,
   dayTimes,
   tarabishyTimes,
+  detectLocation,
   applyElevationCorrection,
   applyTayakkunBuffer,
   qibla,
@@ -112,6 +154,7 @@ export {
   prayerTimes,
   dayTimes,
   tarabishyTimes,
+  detectLocation,
   applyElevationCorrection,
   applyTayakkunBuffer,
   qibla,
