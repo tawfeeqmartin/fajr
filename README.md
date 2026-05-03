@@ -27,6 +27,41 @@ The name also grounds the project in the Islamic tradition: each day begins at F
 
 ---
 
+## How fajr fits — vs AlAdhan and adhan-js
+
+The Islamic prayer-time space has two well-established tools that anchor the design space:
+
+- **[AlAdhan](https://aladhan.com/prayer-times-api)** — REST API. Throw it a city name or coordinate; get times back. Comprehensive method catalogue, address-string input, qibla, hijri, auto-method dispatch. Trade-off: every lookup is a network round-trip, and your app inherits AlAdhan's uptime + free-tier rate limits.
+
+- **[adhan-js](https://github.com/batoulapps/adhan-js)** — pure JavaScript library. Local computation, fully offline, fast, lightweight. Trade-off: you pick the calculation method by hand, no GPS-aware dispatch, no hilal/lunar features, no field-validated calibrations against mosque-published reality, no provenance/notes layer. It's the textbook formula, faithfully implemented.
+
+**fajr is what adhan-js becomes when you add region awareness, scholarly calibration, hilal, and transparency — while keeping the offline contract.** `adhan` is fajr's only runtime dependency; improvements upstream flow through.
+
+|  | AlAdhan API | adhan-js | **fajr** |
+|---|---|---|---|
+| **Type** | REST API | JS library | JS library |
+| **Offline** | ❌ — needs network | ✅ | ✅ (same contract as adhan-js) |
+| **Auto method by GPS** | partial (`?method=auto`) | ❌ — manual | ✅ — 78 countries today via bbox dispatch (→ 163 in v1.6.2 proposal) |
+| **Path A community calibrations** | ❌ | ❌ | ✅ — Morocco Maghrib +5 min, JAKIM Fajr +8 / Isha +1, Diyanet ±1, all validated against mosque-published Mawaqit / institutional tables |
+| **Hilal (3 criteria side-by-side)** | single criterion | ❌ — solar only | ✅ — Yallop 1997 + Odeh 2004 + Shaukat 2002; `criteriaAgree` flags ikhtilaf |
+| **Per-prayer ihtiyat rounding** | ❌ | round-to-nearest | ✅ — every displayed minute on the shar'i-safe side; explicit `imsak` field for fasting yaqeen |
+| **Elevation advisory** | parameter only | ❌ | ✅ — auto-applied + UAE/JAKIM-vs-Saudi institutional split surfaced via `notes[]` |
+| **Public audit / eval framework** | closed | ❌ | ✅ — `eval/` runs WMAE per source (Mawaqit / Diyanet / JAKIM / KEMENAG / MUIS / Aladhan / praytimes.org) with per-cell ratchet rules |
+| **Scholarly classification + wiki** | ❌ | ❌ | ✅ — every correction tagged 🟢 / 🟡→🟢 / 🟡 / 🔴 with wiki citation; 🔴 corrections gated on human review |
+| **Geocoding (address → coord)** | ✅ | ❌ | ❌ — deferred to caller |
+| **Bundle size** | N/A (API) | ~30 KB | ~50 KB today (~130 KB with v1.7.0 city registry) |
+| **API key / rate limits** | free-tier limits | none | none |
+
+**Choosing between them:**
+
+- **Choose AlAdhan** when you need address-string input, you don't mind a network call per query, and you don't need transparent provenance about which calibration ran or why.
+- **Choose adhan-js** when you want rock-solid textbook formulas with zero opinion layered on top.
+- **Choose fajr** when you want adhan-js's offline + speed *plus* community-validated calibration against mosque-published reality, three-criterion hilal, ihtiyat-aware presentation, and a public audit trail you can hold the library accountable to.
+
+fajr does not replace adhan-js — it builds on it. The two libraries can coexist: an app could ship adhan-js for one use case and fajr for another. AlAdhan's API service is complementary to both library options when an app explicitly wants server-side computation.
+
+---
+
 ## Architecture
 
 ```
