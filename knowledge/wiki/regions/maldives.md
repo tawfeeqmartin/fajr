@@ -7,29 +7,29 @@
 - **Madhab:** Sunni Shafi'i (overwhelmingly)
 
 ## Calculation method (as implemented in fajr)
-- **adhan.js method:** `Karachi` (18°/18°)
+- **adhan.js method:** `Karachi` (18°/18°) with explicit `madhab = Madhab.Shafi`
 - **Fajr angle:** 18°
 - **Isha angle:** 18°
-- **Asr school:** Hanafi (2× shadow) — *via the Karachi preset, which sets Hanafi Asr; this is a known mismatch since Maldives is Shafi'i*
+- **Asr school:** Standard (Shafi, 1× shadow length) — set explicitly in `selectMethod()` since v1.7.1
 - **Special offsets:** none
-- **Classification:** 🟢 Established (Aladhan world default for Malé)
+- **Classification:** 🟡→🟢 Approaching established (Aladhan world default + multi-app convention; Ministry of Islamic Affairs primary-source citation pending)
 
 ## Why this method
-The Aladhan API's default for Malé is "Karachi" (method 1), and IslamicFinder/Muslim Pro multi-app consensus aligns with the same 18°/18° angle pair — note that the engine.js comment notes "Maldives Ministry of Islamic Affairs: Umm al-Qura per IslamicFinder/MuslimPro Malé default" but the **shipped code uses `Karachi`**. This is a comment-vs-code drift to flag for the engine team.
+The Aladhan API's default for Malé is method 1 (`Karachi`, "University of Islamic Sciences, Karachi"), with `school=STANDARD` (Shafi Asr) — verified via `https://api.aladhan.com/v1/timingsByCity?city=Male&country=Maldives` on 2026-05-02. IslamicFinder/Muslim Pro multi-app consensus aligns with the same 18°/18° angle pair + Shafi Asr.
 
-**Asr school caveat:** The Karachi method preset includes Hanafi Asr (2× shadow) but Maldives is overwhelmingly Shafi'i (Standard Asr, 1× shadow). This produces an Asr time ~30–60 minutes later than the Maldivian institutional convention. A future refinement should switch Maldives to `Other` with explicit `fajrAngle = 18°, ishaAngle = 18°, madhab = Standard` if Maldivian institutional Imsakiyya confirms Standard Asr.
+**v1.7.1 fix (issue #26):** Earlier versions of this page and the engine.js comment mentioned "Umm al-Qura per IslamicFinder/MuslimPro Malé default" — that was incorrect; the actual Aladhan default is Karachi-angles, not Umm al-Qura. Both have been reconciled. The wiki claim that "Karachi preset includes Hanafi Asr (2× shadow)" was also incorrect — adhan-js's `CalculationMethod.Karachi()` returns `Madhab.Shafi` by default. The v1.7.1 fix sets madhab explicitly to defend against any future change in the upstream default.
 
 ## Known points of ikhtilaf within the country
 - None known at the institutional level — Maldives is religiously homogeneous.
 
-## Open questions
-- **Engine.js comment-vs-code drift** — the engine.js comment mentions "Umm al-Qura per IslamicFinder/MuslimPro Malé default" but the shipped routing is `Karachi`. Either the comment or the code needs correction. Recommend: verify against the Maldives Ministry of Islamic Affairs published Imsakiyya, then update both comment and code consistently.
-- **Asr school mismatch** — Karachi preset is Hanafi Asr; Maldives is Shafi'i (Standard Asr). Needs verification + fix.
+## Resolution log
+- **2026-05-02 (v1.7.1)** — Asr-school open question resolved. adhan-js's `CalculationMethod.Karachi()` already defaults to `Madhab.Shafi`, so no behavior change for Malé Asr; the v1.7.1 fix made the Shafi madhab explicit in the dispatch and corrected the comment-vs-code drift. Aladhan default for Malé verified as method 1 (Karachi) + Standard Asr (Shafi).
 
 ## Sources
 - Maldives Ministry of Islamic Affairs: https://www.islamicaffairs.gov.mv/
-- Aladhan API regional-default routing for `MV`
-- Multi-app convention (Muslim Pro Malé)
+- Aladhan API regional-default routing for `MV` — verified 2026-05-02: `method=1 (Karachi, 18°/18°)`, `school=STANDARD (Shafi)`
+- Multi-app convention (Muslim Pro Malé, IslamicFinder)
 
 ## Last reviewed
+- 2026-05-02 by fajr-agent (v1.7.1 — Asr-school resolution per issue #26)
 - 2026-05-02 by fajr-agent (initial creation per v1.6.0 audit log)

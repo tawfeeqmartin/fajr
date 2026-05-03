@@ -806,14 +806,41 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'MWL (Mozambique default)' }
 
     // ─── South Asia non-Pakistan ──────────────────────────────────────────
-    case 'Maldives':
-      // Maldives Ministry of Islamic Affairs: Umm al-Qura per IslamicFinder/
-      // MuslimPro Malé default. ~100% Sunni Shafi'i. Classification: 🟢.
-      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Maldives, Aladhan world default)' }
-    case 'SriLanka':
-      // All Ceylon Jamiyyathul Ulama / ACJU (Sunni Shafi'i): South Asian
-      // Karachi 18°/18° regional convention. Classification: 🟡.
-      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Sri Lanka, ACJU regional)' }
+    case 'Maldives': {
+      // Maldives Ministry of Islamic Affairs (~100% Sunni Shafi'i):
+      // Karachi 18°/18° angles + Standard (Shafi) Asr. Confirmed against
+      // Aladhan world default for Malé (method=1, school=STANDARD).
+      // v1.7.1 fix (issue #26): previous comment claimed "Umm al-Qura per
+      // IslamicFinder/MuslimPro Malé default" — code/comment drift; both
+      // now reconciled. The madhab is set explicitly to defend against any
+      // future change in adhan.js's default; today's default is already
+      // Shafi but explicit intent is safer.
+      // Classification: 🟡→🟢 Approaching established (Aladhan world default
+      // + multi-app convention; Ministry of Islamic Affairs primary-source
+      // citation pending).
+      // see knowledge/wiki/regions/maldives.md
+      const p = adhan.CalculationMethod.Karachi()
+      p.madhab = adhan.Madhab.Shafi
+      return { params: p, methodName: 'Karachi 18°/18° + Shafi Asr (Maldives Ministry of Islamic Affairs)' }
+    }
+    case 'SriLanka': {
+      // Sri Lanka — All Ceylon Jamiyyathul Ulama (ACJU, Sunni Shafi'i):
+      // Karachi 18°/18° angles + Standard (Shafi) Asr. Confirmed against
+      // Aladhan world default for Colombo (method=1, school=STANDARD).
+      // v1.7.1 fix (issue #26): previous comment did not state Asr school;
+      // now made explicit. The madhab is set explicitly so future adhan.js
+      // default changes don't silently break the Shafi-majority population.
+      // ~10% of Sri Lanka's ~22M is Muslim (Moor majority Shafi'i + Memon
+      // minority Hanafi); this dispatch serves the Shafi'i majority. A
+      // future v1.7.x city-level override could route Memon-community
+      // mosques to a Hanafi-Asr variant.
+      // Classification: 🟡→🟢 Approaching established (regional convention
+      // + Aladhan default; ACJU primary-source citation pending).
+      // see knowledge/wiki/regions/srilanka.md
+      const p = adhan.CalculationMethod.Karachi()
+      p.madhab = adhan.Madhab.Shafi
+      return { params: p, methodName: 'Karachi 18°/18° + Shafi Asr (Sri Lanka ACJU)' }
+    }
     case 'Bangladesh':
       // Islamic Foundation Bangladesh: same Karachi 18°/18° as Pakistan
       // (Hanafi). ITL/arabeyes documents BD in Karachi cluster.
