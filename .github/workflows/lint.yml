@@ -165,3 +165,37 @@ jobs:
           node-version: '20'
       - run: npm ci
       - run: npm test
+
+  city-registry-validation:
+    name: City registry consistency (issue #47)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Validate src/data/cities.json against detectCountry bbox table
+        run: |
+          # Per CLAUDE.md and issue #47, every commit must keep the city
+          # registry self-consistent: each city's bbox must (a) resolve to
+          # itself for samples inside the bbox, and (b) the city's claimed
+          # countryISO must agree with detectCountry at the city centre.
+          # FAIL-class issues are budgeted (currently ~146; tracking down
+          # to 0) — the threshold below should ratchet down over time.
+          set -e
+          OUTPUT=$(node scripts/validate-city-registry.js 2>&1 || true)
+          echo "$OUTPUT" | head -25
+          FAILS=$(echo "$OUTPUT" | grep -oE "FAIL-class issues: *[0-9]+" | grep -oE "[0-9]+" | head -1)
+          BUDGET=180  # v1.7.5 baseline ~146; v1.7.6+ should ratchet down
+          if [ -z "$FAILS" ]; then
+            echo "::error::Could not parse FAIL-class count from validator output"
+            exit 1
+          fi
+          if [ "$FAILS" -gt "$BUDGET" ]; then
+            echo "::error::City registry FAIL-class count ($FAILS) exceeds budget ($BUDGET)."
+            echo "Run \`node scripts/validate-city-registry.js\` locally and either"
+            echo "fix the registry/engine OR adjust BUDGET in this workflow."
+            exit 1
+          fi
+          echo "✓ City registry: $FAILS FAIL-class issues (budget $BUDGET)"

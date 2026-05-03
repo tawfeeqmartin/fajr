@@ -276,3 +276,87 @@ describe('detectLocation — purity', () => {
     expect(after.altMethods.length).toBe(beforeAlts)
   })
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+// v1.7.5: issue #47 regression coverage — the four false positives the
+// agiftoftime-agent surfaced during a 52-coord worldwide sample. Each MUST
+// resolve to the correct city AND the correct country. These tests gate
+// every future commit; failing any indicates a regression.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('detectLocation — issue #47 regression', () => {
+  it('Toronto CBD → city=Toronto, country=Canada (was country=USA before v1.7.5)', () => {
+    const loc = detectLocation(43.65, -79.38)
+    expect(loc.city?.name).toBe('Toronto')
+    expect(loc.country).toBe('Canada')
+  })
+
+  it('Cairo Tahrir Square → city=Cairo (was city=Giza before v1.7.5)', () => {
+    const loc = detectLocation(30.04, 31.24)
+    expect(loc.city?.name).toBe('Cairo')
+    expect(loc.country).toBe('Egypt')
+  })
+
+  it('Kuala Lumpur Petronas Towers → city=Kuala Lumpur (was city=Shah Alam before v1.7.5)', () => {
+    const loc = detectLocation(3.14, 101.69)
+    expect(loc.city?.name).toBe('Kuala Lumpur')
+    expect(loc.country).toBe('Malaysia')
+  })
+
+  it('Singapore CBD → city=Singapore (was city=Johor Bahru before v1.7.5)', () => {
+    const loc = detectLocation(1.35, 103.82)
+    expect(loc.city?.name).toBe('Singapore')
+    expect(loc.country).toBe('Singapore')
+  })
+
+  // Additional v1.7.5 regression cases (Reviewer C's "definitely wrong" list).
+  it('Sharm el-Sheikh → country=Egypt with Egyptian method (was SaudiArabia/UmmAlQura)', () => {
+    const loc = detectLocation(27.92, 34.33)
+    expect(loc.country).toBe('Egypt')
+    expect(loc.recommendedMethod).toBe('Egyptian')
+  })
+
+  it('Hafar al-Batin → country=SaudiArabia (was Iran/Tehran)', () => {
+    const loc = detectLocation(28.43, 45.97)
+    expect(loc.country).toBe('SaudiArabia')
+    expect(loc.recommendedMethod).toBe('UmmAlQura')
+  })
+
+  it('Vientiane LA → country=Laos (was Thailand)', () => {
+    const loc = detectLocation(17.98, 102.63)
+    expect(loc.country).toBe('Laos')
+  })
+
+  it('Phnom Penh KH → country=Cambodia (was Thailand or Vietnam)', () => {
+    const loc = detectLocation(11.56, 104.93)
+    expect(loc.country).toBe('Cambodia')
+  })
+
+  it('Hanoi VN → country=Vietnam (was Laos)', () => {
+    const loc = detectLocation(21.03, 105.85)
+    expect(loc.country).toBe('Vietnam')
+  })
+
+  it('Asunción PY → country=Paraguay (was Argentina)', () => {
+    const loc = detectLocation(-25.26, -57.58)
+    expect(loc.country).toBe('Paraguay')
+  })
+
+  it('Montreal CA → country=Canada (was USA)', () => {
+    const loc = detectLocation(45.50, -73.57)
+    expect(loc.country).toBe('Canada')
+  })
+
+  it('Vancouver CA → country=Canada (was USA)', () => {
+    const loc = detectLocation(49.28, -123.12)
+    expect(loc.country).toBe('Canada')
+  })
+
+  it('Cross-border sanity: detectCountry==null does not break city scan', () => {
+    // Open ocean — both detectCountry and city scan should return null
+    // without throwing.
+    const loc = detectLocation(0, -150)
+    expect(loc.city).toBeNull()
+    expect(loc.country).toBeNull()
+  })
+})
