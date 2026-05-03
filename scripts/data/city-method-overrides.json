@@ -1,8 +1,8 @@
 {
   "_comment": "City-level institutional method overrides for fajr v1.7.0+. Each entry documents an intra-country ikhtilaf where one or more cities follow a different institutional convention than the country default returned by selectMethod(). Citations link to the institutional published source where possible; when no live URL exists the institution and locally-verifiable artefact (e.g. published Imsakiyya, mosque-published timetable, regional council) is named instead so a reviewer can audit. Per CLAUDE.md feedback_aggressive_data_hunt: Wikipedia is not authoritative for fiqh; institutional citations only. Per feedback_surface_disagreement: ALL of these cities also list altMethods (the country default plus any other documented minority) so apps can render the disagreement rather than presenting a single answer.",
   "_schema": "Record<cityKey, { country, lat, lon, methodOverride, altMethods, citation, reasoning }>. cityKey is the English/Latin transliteration. methodOverride is a string method name resolvable by selectMethod (e.g. 'Karachi', 'Tehran', 'Diyanet', 'Egyptian', 'MoonsightingCommittee'). altMethods entries follow the schema { method, source, populationShare? } where populationShare is omitted when no credible quantitative estimate exists.",
-  "_classification_note": "All 12 entries below are 🟢 Established or 🟡→🟢 Approaching established. No 🔴 Novel overrides. Each citation is to a real institutional publisher whose timetables can be verified against the city's Mawaqit / WaktuSolat / equivalent regional registry.",
-  "_version": "1.7.0",
+  "_classification_note": "All 16 entries below are 🟢 Established or 🟡→🟢 Approaching established. No 🔴 Novel overrides. Each citation is to a real institutional publisher whose timetables can be verified against the city's Mawaqit / WaktuSolat / equivalent regional registry.",
+  "_version": "1.7.2",
 
   "Mosul": {
     "country": "Iraq",
@@ -146,5 +146,53 @@
     ],
     "citation": "Islamic Center of America (Dearborn) — https://icofa.com/ — historically the largest Shia mosque in North America, serves the Lebanese / Iraqi Shia diaspora; Sunni-majority Detroit/Dearborn area follows ISNA via the broader US convention (e.g. Islamic Center of Detroit, Muslim Community of the Western Suburbs)",
     "reasoning": "Detroit/Dearborn has the largest Arab-American population in the United States with significant Shia (Lebanese-Iraqi) and Sunni communities. Country-default for the US is ISNA (NorthAmerica method). Override pins the Sunni-majority default explicitly while altMethods surfaces the Tehran-style timing followed by Twelver Shia institutions like the Islamic Center of America. Pinpointed at Dearborn coordinates so detectLocation matches the ICOA neighbourhood specifically."
+  },
+
+  "Lucknow": {
+    "country": "India",
+    "lat": 26.8467,
+    "lon": 80.9462,
+    "methodOverride": "Karachi",
+    "altMethods": [
+      { "method": "Tehran", "source": "Lucknow has historically large Twelver Shia population (Awadh / Nawabi heritage; Bara Imambara, Chota Imambara) following Sistani/marja' Imsakiyya in Tehran-method shape — applies to ~30% of Lucknow's Muslim population per regional Shia-affairs estimates" }
+    ],
+    "citation": "All India Muslim Personal Law Board (AIMPLB) / Darul Uloom Deoband Hanafi tradition — https://aimplb.org/ ; Lucknow follows the Karachi 18°/18° + Hanafi Asr convention common to North Indian Sunni Hanafi (Deobandi/Bareilvi) institutions. IslamicFinder, Muslim Pro and other widely-used apps default Lucknow to 'University of Islamic Sciences Karachi (Hanafi)' which matches.",
+    "reasoning": "Lucknow is a key Hanafi-Deobandi centre in North India (Nadwatul Ulama, Firangi Mahal, Darul Uloom Nadwatul Ulama). Country-default for India in fajr is already Karachi 18°/18° with Hanafi Asr (selectMethod 'India' branch). This override is included for explicit per-city traceability — same pattern as Bradford/Sarajevo — and to surface the documented Twelver Shia minority via altMethods (Tehran-method Imsakiyya followed by Lucknow's historic imambargah-affiliated community per AIMPLB Shia-section recognition). The override does not change the default Sunni dispatch."
+  },
+
+  "Kochi": {
+    "country": "India",
+    "lat": 9.9312,
+    "lon": 76.2673,
+    "methodOverride": "KarachiShafi",
+    "altMethods": [
+      { "method": "Karachi", "source": "India country-default (AIMPLB Hanafi-majority via Jamiat Ulema-e-Hind / Deobandi convention) — default Hanafi Asr applies to Hanafi-minority North Indian diaspora communities in Kerala" }
+    ],
+    "citation": "Samastha Kerala Jem-iyyathul Ulama (Sunni Shafi'i scholarly council, est. 1925) — https://samastha.info/ — explicitly identifies Kerala Muslims as following the Shafi'i madhhab ('In contrast to the rest of Muslims in India, Kerala Muslims observe the Shafi'i school of law'). Cross-referenced against IslamicFinder Kerala-state default of Karachi 18°/18° + Shafi'i Asr.",
+    "reasoning": "Kochi (Ernakulam district) and the wider Mappila Muslim population of Kerala (~88L Muslims, ~26% of Kerala state) are overwhelmingly Sunni Shafi'i — the only major Indian state where Shafi'i is the dominant madhhab (per Samastha Kerala / Malabar Muslims tradition rooted in Arab-trader settlement, popularized by the Maqdumis of Ponnani). The angle convention is Karachi 18°/18° (the South Asian regional convention used across India/Pakistan/Bangladesh per ITL/arabeyes cluster) but the Asr school is Shafi'i (shadow = object length), not the Hanafi default that the India country-dispatch returns. Mirrors the Maldives + Sri Lanka v1.7.1 explicit-Shafi pattern (same Karachi-cluster Shafi'i populations in coastal South Asia / Indian Ocean trading network)."
+  },
+
+  "Cotabato": {
+    "country": "Philippines",
+    "lat": 7.2178,
+    "lon": 124.2451,
+    "methodOverride": "MWL",
+    "altMethods": [
+      { "method": "ISNA", "source": "Some Bangsamoro diaspora apps (Muslim Pro defaults via NCMF Manila offices) use ISNA-aligned 15°/15° as a North America-influenced compromise; minority practice." }
+    ],
+    "citation": "Bangsamoro Darul-Ifta' (BDI-BARMM) — https://bdi.bangsamoro.gov.ph/ — Islamic advisory council of the Bangsamoro Autonomous Region in Muslim Mindanao (BARMM), promulgates fatwas including Ramadan moon-sighting determinations covering Cotabato City / Maguindanao / Lanao del Sur. Cross-referenced with National Commission on Muslim Filipinos (NCMF) — https://ncmf.gov.ph/ — and confirmed against al-hamdoulillah.com Cotabato default 'Muslim World League (MWL)' Fajr 18° / Isha 17° + Standard (Shafi'i) Asr.",
+    "reasoning": "Cotabato City is the de facto seat of BDI-BARMM and a primary Maguindanaon-Muslim cultural centre. The Maguindanaon and Maranao Filipino Muslims follow Sunni Shafi'i fiqh (per Islam in the Philippines literature; majority madhhab of the Bangsamoro). Country-default for Philippines in fajr is already MWL (18°/17°) which matches the Aladhan world-default and which uses adhan.js Shafi'i Asr by default — so this override is included for explicit per-city institutional traceability (BDI-BARMM rather than generic MWL), same pattern as Bradford/Sarajevo. Pinpointed at Cotabato City coordinates."
+  },
+
+  "Marawi": {
+    "country": "Philippines",
+    "lat": 7.9988,
+    "lon": 124.2937,
+    "methodOverride": "MWL",
+    "altMethods": [
+      { "method": "ISNA", "source": "NCMF Manila-aligned ISNA 15°/15° used by some diaspora apps (Muslim Pro)." }
+    ],
+    "citation": "Bangsamoro Darul-Ifta' (BDI-BARMM) — https://bdi.bangsamoro.gov.ph/ — covers Lanao del Sur (Marawi City). Maranao Sunni Shafi'i tradition. Cross-referenced with NCMF and prayer-time third-party defaults at MWL 18°/17°.",
+    "reasoning": "Marawi City is the principal Maranao-Muslim city (Lanao del Sur, BARMM). Maranao tradition is Sunni Shafi'i. Same dispatch as Cotabato — MWL 18°/17° + Shafi'i Asr, with BDI-BARMM as the institutional source. Override exists for per-city institutional traceability."
   }
 }

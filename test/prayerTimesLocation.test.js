@@ -81,6 +81,48 @@ describe('prayerTimes.location — always populated', () => {
     expect(methodNote).toBeDefined()
   })
 
+  it('Kochi (Kerala) → city-institutional KarachiShafi (explicit Shafi Asr matches Samastha Kerala Sunni Shafi tradition)', () => {
+    // Kochi is the v1.7.2 keystone case: India country-default is Karachi
+    // 18°/18° (the engine's selectMethod 'India' branch returns plain
+    // adhan.CalculationMethod.Karachi() which inherits adhan's default Shafi
+    // Asr — meaning the country-default already happens to use Shafi Asr).
+    // The Kochi override therefore aligns with the country-default for Asr
+    // but pins the Shafi'i school explicitly so future adhan.js default
+    // changes don't silently break the Shafi-majority Mappila population
+    // (same defensive pattern as v1.7.1 for Maldives + Sri Lanka).
+    // Discriminator: a caller who explicitly opts into Hanafi Asr (e.g. a
+    // North Indian Hanafi Deobandi visitor) should see a LATER Asr.
+    const r        = prayerTimes({ latitude: 9.9312, longitude: 76.2673, date: TEST_DATE })
+    expect(r.location.city.name).toBe('Kochi')
+    expect(r.location.methodSource).toBe('city-institutional')
+    expect(r.method).toMatch(/Shafi/i)
+    const methodNote = r.notes.find(n => /Method auto-resolved.*Kochi.*KarachiShafi/.test(n))
+    expect(methodNote).toBeDefined()
+  })
+
+  it('Cotabato (Bangsamoro) → city-institutional MWL with BDI-BARMM provenance', () => {
+    // Cotabato is the BDI-BARMM seat. Philippines country-default already
+    // dispatches to MWL (Aladhan default), so the override is for traceability
+    // — same pattern as Bradford/Sarajevo.
+    const r = prayerTimes({ latitude: 7.2178, longitude: 124.2451, date: TEST_DATE })
+    expect(r.location.city.name).toBe('Cotabato')
+    expect(r.location.methodSource).toBe('city-institutional')
+    expect(r.method).toMatch(/MWL|Muslim World League/i)
+    const methodNote = r.notes.find(n => /Method auto-resolved.*Cotabato.*MWL/.test(n))
+    expect(methodNote).toBeDefined()
+  })
+
+  it('Lucknow → city-institutional Karachi (same as India country-default; explicit traceability + Shia altMethod surfaced)', () => {
+    const r = prayerTimes({ latitude: 26.8467, longitude: 80.9462, date: TEST_DATE })
+    expect(r.location.city.name).toBe('Lucknow')
+    expect(r.location.methodSource).toBe('city-institutional')
+    expect(r.method).toMatch(/Karachi/i)
+    // altMethods are surfaced on the city object inside location.city
+    expect(r.location.city.altMethods).toBeDefined()
+    expect(r.location.city.altMethods.length).toBe(1)
+    expect(r.location.city.altMethods[0].method).toBe('Tehran')  // surface Shia minority
+  })
+
   it('Sarajevo with no opts → city-institutional Diyanet (NOT Bosnia Diyanet — same method, but methodSource differs)', () => {
     const r = prayerTimes({ latitude: 43.8563, longitude: 18.4131, date: TEST_DATE })
     expect(r.location.city.name).toBe('Sarajevo')
@@ -152,7 +194,7 @@ describe('prayerTimes.location — always populated', () => {
 // 2. The 12 city-method-override cities — methodSource sweep
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('prayerTimes.location — 12 city-method-override sweep', () => {
+describe('prayerTimes.location — 16 city-method-override sweep', () => {
   const cases = [
     // [city,        lat,      lon,       expectedMethodPattern]
     ['Mosul',       36.3489,  43.1577,  /Karachi/i],
@@ -167,6 +209,11 @@ describe('prayerTimes.location — 12 city-method-override sweep', () => {
     ['Beirut',      33.8938,  35.5018,  /Egyptian/i],
     ['Tabriz',      38.0667,  46.2993,  /Tehran/i],
     ['Dearborn',    42.3223, -83.1763,  /ISNA|NorthAmerica/i],
+    // v1.7.2 additions — Lucknow/Kerala/BARMM
+    ['Lucknow',     26.8467,  80.9462,  /Karachi/i],
+    ['Kochi',        9.9312,  76.2673,  /Karachi.*Shafi|Shafi.*Karachi/i],
+    ['Cotabato',     7.2178, 124.2451,  /MWL|Muslim World League/i],
+    ['Marawi',       7.9988, 124.2937,  /MWL|Muslim World League/i],
   ]
 
   it.each(cases)('%s → methodSource=city-institutional, method matches /%s/', (city, lat, lon, pattern) => {

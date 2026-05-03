@@ -1494,6 +1494,19 @@ function methodFromString(name, country, lat, _coords) {
       return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (19.5°/17.5°)' }
     case 'Karachi':
       return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (18°/18°)' }
+    case 'KarachiShafi': {
+      // Karachi 18°/18° angles + Shafi'i Asr (shadow = object length).
+      // Used by city overrides for Shafi'i-majority South Asian regions
+      // (Kerala/Mappila, South India coastal Labbay/Marakkayar) and the
+      // BARMM (Bangsamoro) Shafi'i tradition where Karachi-cluster angles
+      // are used but the Asr school is Shafi'i (not Hanafi default).
+      // Mirrors the inline Karachi-Shafi composition used in selectMethod
+      // for Maldives and Sri Lanka. Classification: 🟢 Established.
+      // see knowledge/wiki/regions/india.md, knowledge/wiki/regions/philippines.md
+      const p = adhan.CalculationMethod.Karachi()
+      p.madhab = adhan.Madhab.Shafi
+      return { params: p, methodName: 'Karachi 18°/18° + Shafi Asr' }
+    }
     case 'Tehran':
       return { params: adhan.CalculationMethod.Tehran(), methodName: 'Tehran (Institute of Geophysics)' }
     case 'Qatar':
