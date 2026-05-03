@@ -17,10 +17,13 @@ describe('#81 — location.madhab + madhabSource', () => {
     expect(r.location.madhabSource).toBe('method-implied')
   })
 
-  it('Karachi PK (Karachi preset; adhan default is Shafi 1× even though Pakistan is Hanafi-majority — flagged for #40 override)', () => {
+  it('Karachi PK (v1.7.22 #83: country→madhab dispatch correctly returns Hanafi)', () => {
+    // v1.7.21 used to return shafii/method-implied because of the adhan
+    // preset leak. v1.7.22 fixes that — Pakistan is in COUNTRY_MADHAB as
+    // 'hanafi' per University-of-Islamic-Sciences-Karachi convention.
     const r = prayerTimes({ latitude: 24.86, longitude: 67.01, date: new Date('2026-05-04') })
-    expect(r.location.madhab).toBe('shafii')
-    expect(r.location.madhabSource).toBe('method-implied')
+    expect(r.location.madhab).toBe('hanafi')
+    expect(r.location.madhabSource).toBe('country-default')
   })
 
   it('Malé MV (KarachiShafi explicit override; correctly matches population)', () => {

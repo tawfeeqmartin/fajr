@@ -112,17 +112,24 @@ export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zer
  *  formula (Shafi'i: 1×, Hanafi: 2×) which can shift Asr by 30-60 minutes. */
 export type Madhab = 'shafii' | 'hanafi'
 
-/** How `prayerTimes` chose the madhab for a given coordinate. v1.7.21+ (#81).
+/** How `prayerTimes` chose the madhab for a given coordinate. v1.7.21+ (#81),
+ *  with country-default dispatch added in v1.7.22 (#83).
  *
  *  - `'caller-explicit'`: caller will pass an explicit madhab override
  *    (planned for v1.8.x via #40 — not yet supported in v1.7.x).
- *  - `'method-implied'`: the dispatched method preset bakes in the madhab
- *    (Karachi → Hanafi by default, MWL → Shafi'i; KarachiShafi composes
- *    Karachi + Shafi'i for Maldives / Sri Lanka / Lucknow / Kochi).
+ *  - `'country-default'`: country is listed in `COUNTRY_MADHAB` and fajr
+ *    applied that institutional choice. Pakistan → Hanafi, Maldives →
+ *    Shafi'i, Türkiye → Hanafi, Indonesia → Shafi'i, etc.
+ *  - `'method-implied'`: neither caller nor country override fired; the
+ *    adhan.js method preset's default is what's reported (currently always
+ *    Shafi'i 1× shadow Asr). Mixed-madhab countries (Egypt, Saudi, Iraq,
+ *    Lebanon, Syria, Morocco, Western diaspora, etc.) intentionally fall
+ *    through to this default and surface the `disclaimer` + verification
+ *    prompt instead of forcing a single school.
  *
  *  Future v1.8.x will add `'caller-explicit'` once the override surface
- *  in #40 lands. Until then, the value is always `'method-implied'`. */
-export type MadhabSource = 'caller-explicit' | 'method-implied'
+ *  in #40 lands. */
+export type MadhabSource = 'caller-explicit' | 'country-default' | 'method-implied'
 
 /** The location field on `prayerTimes` / `dayTimes` return values (v1.7.0+).
  *  Always populated. Apps can use this to display "you are in <city>"
