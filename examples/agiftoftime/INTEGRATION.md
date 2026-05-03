@@ -4,7 +4,7 @@
 >
 > **Goal:** wire `@tawfeeqmartin/fajr` into agiftoftime so the two compose — agiftoftime gets accurate region-aware prayer times, hilal visibility, and signed-bias provenance; fajr gets a real production showcase. The user-facing change is small (subtler method labels, an opt-in provenance panel, and a Ramadan/Eid hilal banner) — the engine change underneath is significant.
 >
-> **Doc currency.** Last full overhaul: v1.5.2. New-in-v1.6.x-to-v1.7.6 changes are catalogued in the [What's new since v1.5.2](#whats-new-since-v152-) section below — read that first if you've already wired Tier 1 against v1.5.2 and need to know what to wire up next. Per-release detail: [CHANGELOG.md](../../CHANGELOG.md).
+> **Doc currency.** Last full overhaul: v1.5.2. New-in-v1.6.x-to-v1.7.19 changes are catalogued in the [What's new since v1.5.2](#whats-new-since-v152-) section below — read that first if you've already wired Tier 1 against v1.5.2 and need to know what to wire up next. Per-release detail: [CHANGELOG.md](../../CHANGELOG.md).
 
 ## What's new since v1.5.2 — quick index
 
@@ -20,6 +20,11 @@
 | **v1.7.4** | 2026-05-02 | Cross-runtime compatibility documentation; no engine change | No code change; informs deployment choice |
 | **v1.7.5** | 2026-05-03 | Systematic city-registry validation script + 8 country-bbox fixes (Toronto/Cairo/KL/Singapore false positives from issue #47, plus 4 deeper #47 dispatch fixes) | No code change — silently improves dispatch correctness |
 | **v1.7.6** | 2026-05-03 | `hijri()` defaults to Umm al-Qura tabular calendar (matches AlAdhan); Maghrib elevation note now discloses magnitude in minutes | **Yes** — apps replacing AlAdhan's hijri call gain bit-for-bit parity (was off by up to a month at Eid before); existing fajr-hijri callers may see ±1 day shifts on some dates |
+| **v1.7.7 → v1.7.13** | 2026-05-03 | Docs catch-up + browser-load fix (#55, JSON→JS module wrapper); Arabic month names native (`hijri().monthNameAr`, #62) | **Maybe** — apps using fajr through esm.sh / unenv polyfill must upgrade to v1.7.10+ (browser load was broken before); apps wanting native Arabic month names can drop their locally-vendored 12-string array |
+| **v1.7.14 / v1.7.15** | 2026-05-03 | Public-beta framing in README + CALIBRATION.md transparency doc (#65 practices 1-2) | No code change — informs how downstream apps describe fajr to users |
+| **v1.7.16** | 2026-05-03 | First **Karpathy autoresearch ratchet session** — train WMAE 1.07 → 0.98 (broke 1-min barrier) via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations | **Maybe** — Casablanca / Rabat / Marrakech Dhuhr shifts +5 min (matches mosque reality); Kuala Lumpur / Selangor / Penang Dhuhr +2 min, Asr +1 min. Other regions unchanged. |
+| **v1.7.18** | 2026-05-03 | City registry expansion 387 → 471 (+84 cities; Boston, SF, Stuttgart, Naples, Patna, Kuala-Lumpur etc.) | No code change — `nearestCity()` now resolves 84 additional metros |
+| **v1.7.19** | 2026-05-03 | Engine bbox-table fixes (#75) — 6 deferred cities (Sialkot, Pekanbaru, Manado, Eindhoven, Gaziantep, Port Sudan) + 2 bonus latent FAILs (Maastricht, Wadi Halfa) now route correctly. Registry 471 → 477. | No code change — silently improves dispatch correctness |
 
 Below: per-feature integration recipes for each release that requires app-side code changes.
 
