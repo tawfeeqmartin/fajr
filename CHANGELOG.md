@@ -24,6 +24,64 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.19] — 2026-05-03
+
+### Fixed
+
+- **6 cities deferred from v1.7.18 now resolve to the correct country**
+  via engine-side `detectCountry()` bbox-table fixes. Cities now in
+  registry: Sialkot PK, Pekanbaru ID, Manado ID, Eindhoven NL,
+  Gaziantep TR, Port Sudan SD. Total registry 471 → 477 cities (+6).
+- **Sialkot PK** (32.49, 74.52) was caught by Afghanistan; fixed via
+  Afghanistan-bbox split into main (lat 29.4-37) + Wakhan corridor
+  (lat 36.5-38.5, lon 71.5-74.95). Pakistan now safely extends to
+  lon 75.0.
+- **Pekanbaru ID** (0.51, 101.45) was caught by Malaysia; fixed by
+  tightening Malaysia lat-min from 0.5 to 1.0 (excludes northern
+  Sumatra; Johor Bahru 1.49 still inside).
+- **Eindhoven NL** (51.44, 5.45) was caught by Belgium; fixed by
+  reordering `detectCountry()` to put Netherlands BEFORE Belgium
+  AND before France. **Maastricht NL** (50.85, 5.69) — previously
+  routing to France — now also resolves to Netherlands.
+- **Gaziantep TR** (37.07, 37.38) was caught by Syria; fixed by
+  tightening Syria lat-max from 37.4 to 37.05 + adding two-strip
+  Türkiye coverage (eastern lat 37.05-42.10, western lat 36.0-37.05).
+- **Port Sudan SD** (19.62, 37.22) was caught by Saudi Arabia; fixed
+  by adding an early Sudan check between Egypt and Saudi.
+- **Wadi Halfa SD** (21.81, 31.34) — previously routing to Egypt — now
+  resolves to Sudan via Egypt lat-min tightening from 21 to 22 (1899
+  Anglo-Egyptian parallel).
+
+### Changed
+
+- `COUNTRY_BBOX_TABLE` Pass-B coverage added for Turkey, Indonesia,
+  Netherlands, Sudan. Names match `ISO_TO_ENGINE_COUNTRY_LOCAL` keys
+  (English `Turkey`, not `Türkiye` — engine canonical preserved).
+- 2 new `BBOX_OVERRIDES`: Sialkot|PK (clears Gujranwala overlap),
+  Luton|GB (eastern lon-max -0.30 → -0.36).
+
+### Honest caveats
+
+- **Pre-existing routing limitations not fixed in this release** (none
+  of these cities are in the registry yet, so no validator FAIL):
+  - Iğdır TR routes to Armenia (Armenia bbox covers it)
+  - Faizabad / Wakhan AF route to Tajikistan (Tajikistan bbox covers them)
+  - Hatay province TR cities route to Syria (Syria's lon range catches Hatay)
+  These can be addressed via `BBOX_OVERRIDES` if/when those cities are
+  added to the registry.
+- **No prayer-time changes** for previously-resolved cities. Only the
+  6 newly-registered cities + Maastricht (when added) + Wadi Halfa (when
+  added) get different country-method dispatch than they would have
+  under v1.7.18.
+
+### Cross-references
+
+- PR: [#77](https://github.com/tawfeeqmartin/fajr/pull/77)
+- Resolves: [#75](https://github.com/tawfeeqmartin/fajr/issues/75)
+- Autoresearch log: `autoresearch/logs/2026-05-03-11-30-v1.7.19-engine-bbox-fixes.md`
+
+---
+
 ## [1.7.18] — 2026-05-03
 
 ### Added
