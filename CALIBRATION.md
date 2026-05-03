@@ -1,6 +1,6 @@
 # fajr — accuracy + scholarly methodology
 
-Last refreshed: 2026-05-03 (v1.7.15)
+Last refreshed: 2026-05-03 (v1.7.19)
 
 ## What this document is
 
@@ -24,15 +24,18 @@ CALIBRATION.md is refreshed with every release. The "Last refreshed" line at
 the top of this file always reflects the most recent version on npm.
 
 > **Important caveat about the holdout corpus.** The "Holdout WMAE" number
-> reported below (currently ~3.66 min) is heavily skewed by a small number of
+> reported below (currently ~3.62 min) is heavily skewed by a small number of
 > calc-vs-calc comparison cells with known data-quality issues (date-format
 > drift, pre-fix Aladhan corruption surfaced in the v1.6.1 fix, high-latitude
-> outliers like Moscow and Oslo). The institutional-train WMAE (~1.07 min,
-> against Mawaqit / Diyanet / JAKIM mosque- and government-published reality)
-> is the headline number that drives the ratchet. Holdout numbers are
+> outliers like Longyearbyen 78°N, Oslo 60°N, Reykjavík 64°N, plus the
+> muslimsalat.com aggregator at 26 min WMAE). The institutional-train WMAE
+> (**0.98 min** as of v1.7.16, against Mawaqit / Diyanet / JAKIM mosque- and
+> government-published reality) is the headline number that drives the
+> ratchet — and **broke the 1-minute barrier in v1.7.16** via Morocco Dhuhr +5
+> + JAKIM Dhuhr +2 / Asr +1 Path A calibrations. Holdout numbers are
 > informational only — they are reported because hiding them would be
 > dishonest, but they should not be read as fajr's accuracy claim. See
-> [Per-region accuracy](#per-region-accuracy-current-post-v176) for the
+> [Per-region accuracy](#per-region-accuracy-current-post-v1719) for the
 > breakdown.
 
 ---
@@ -48,7 +51,7 @@ calibration.
 
 | Source | URL | What it provides | How fajr uses it |
 |---|---|---|---|
-| **AlAdhan API** | [aladhan.com](https://aladhan.com/prayer-times-api) | REST API exposing 24 named per-country / per-method calculations + Hijri / Imsak / Qibla. Backed by Mh-Mac Pty Ltd. | Primary calc-vs-calc reference for fajr's 163-country world holdout. Cross-checked with `scripts/fetch-aladhan-world.js`. |
+| **AlAdhan API** | [aladhan.com](https://aladhan.com/prayer-times-api) | REST API exposing 24 named per-country / per-method calculations + Hijri / Imsak / Qibla. Backed by Mh-Mac Pty Ltd. | Primary calc-vs-calc reference for fajr's 168-country world holdout. Cross-checked with `scripts/fetch-aladhan-world.js`. |
 | **IslamicFinder** | [islamicfinder.org](https://islamicfinder.org) | Multi-app cross-reference for Hijri + prayer dispatch; widely consumed by Muslim Pro and similar consumer apps. | Holdout cross-reference for hijri Umm al-Qura validation (v1.7.6 issue #48). |
 | **Mawaqit** | [mawaqit.net](https://mawaqit.net) | Mosque-published prayer times via the Mawaqit network (~8000+ mosques worldwide; ~191 in fajr's registry). The institutional ground truth for community-following. | Path A "ground truth" for v1.5.0 Morocco Maghrib +5 calibration (23 mosques across 14 cities) and the broader institutional-train regression discipline. See `eval/data/train/mawaqit-*.json`. |
 | **Diyanet İşleri Başkanlığı** (Türkiye) | [diyanet.gov.tr](https://diyanet.gov.tr) — fetched via `ezanvakti.emushaf.net` | The Türkiye government's official prayer-time publishing endpoint. | Institutional ground truth for the 3-city Türkiye train cluster (Istanbul / Ankara / Izmir). See `scripts/fetch-diyanet.js`. |
@@ -65,7 +68,7 @@ praytimes.org / muslimsalat.com) provide breadth but not arbitration.
 
 ---
 
-## Per-region accuracy (current, post-v1.7.6)
+## Per-region accuracy (current, post-v1.7.19)
 
 These numbers are from the most recent eval run on master (2026-05-03). They
 are also live in [`eval/results/runs.jsonl`](eval/results/runs.jsonl) — the
@@ -75,17 +78,31 @@ last record is always the current state.
 
 | Corpus | WMAE (min) | Entries | Notes |
 |---|---|---|---|
-| **Train** (institutional ground truth) | **1.07** | 215 | Mawaqit / Diyanet / JAKIM / KEMENAG / MUIS — drives the ratchet |
-| Holdout (calc-vs-calc + outlier cities) | 3.66 | 2980 | Informational only — heavily skewed by ~10 known-bad calc-vs-calc cells (Moscow / Oslo / Cairo-CALC / Bangalore-CALC etc.). See caveat at top of file. |
+| **Train** (institutional ground truth) | **0.98** | 215 | Mawaqit / Diyanet / JAKIM — drives the ratchet. **Broke the 1-minute barrier in v1.7.16** via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations. |
+| Holdout (calc-vs-calc + outlier cities) | 3.62 | 2980 | Informational only — heavily skewed by polar latitudes (Longyearbyen 78°N WMAE 39.9, Oslo 60°N WMAE 46.4, Reykjavík 64°N WMAE 36.2) + muslimsalat.com aggregator (26 min WMAE). See caveat at top of file. |
 
-### Per-prayer signed bias (train)
+### Per-source breakdown (v1.7.19)
+
+| Source | Train WMAE | Entries | v1.7.16 Δ |
+|---|---|---|---|
+| **Mawaqit (mosque-published)** | 0.88 | 25 | **-42%** (1.52 → 0.88 via Morocco Dhuhr +5) |
+| **JAKIM (via waktusolat)** | 0.45 | 30 | **-22%** (0.58 → 0.45 via Dhuhr +2 / Asr +1) |
+| Aladhan API | 1.22 | 130 | unchanged (region-bounded targeting) |
+| Diyanet (Türkiye) | 0.50 | 30 | unchanged (region-bounded targeting) |
+
+The flatness on Aladhan + Diyanet is the verification that v1.7.16's Path A
+offsets stayed inside their target regions — region-bounded calibrations
+should NOT move sources outside the targeted regions, and the empirical
+data confirms they don't.
+
+### Per-prayer signed bias (train, post-v1.7.19)
 
 | Prayer | MAE (min) | Signed bias (min) | Direction |
 |---|---|---|---|
 | Fajr | 1.20 | -0.25 | calc earlier than institutional — within bias tolerance |
 | Shuruq | 0.60 | -0.33 | calc earlier than institutional — within bias tolerance |
-| Dhuhr | 1.60 | +0.27 | calc later — within tolerance (Cairo/Alexandria-driven; intentional Egyptian-method dispatch decision pending review) |
-| Asr | 1.59 | +1.22 | calc later — Cairo/Alexandria Egyptian-Standard Asr drives this; Hanafi-vs-Standard Asr ikhtilaf intentionally surfaced |
+| Dhuhr | 1.03 | +1.00 | calc later — driven by Morocco/JAKIM Path A (closes mosque-published gap); within tolerance |
+| Asr | 1.53 | +1.36 | calc later — JAKIM Asr +1 Path A + Diyanet ihtiyat-unsafe direction (deferred per [#71](https://github.com/tawfeeqmartin/fajr/issues/71)); Hanafi-vs-Standard ikhtilaf intentionally surfaced |
 | Maghrib | 0.66 | +0.49 | calc later — within prayer-validity ihtiyat tolerance |
 | Isha | 0.80 | +0.71 | calc later — within prayer-validity ihtiyat tolerance |
 
@@ -193,13 +210,13 @@ country / region. Each is tagged with a scholarly classification per
 | Russia / Bulgaria / Greece / European-east cluster | MWL | 🟡 Limited precedent | Aladhan world-default fallback | (no single institutional publisher) |
 | 163-country world | varied per `COUNTRY_BBOX_TABLE` | 🟢 / 🟡→🟢 / 🟡 per region | See [`src/engine.js`](src/engine.js) `selectMethod` cases — every dispatched method has an institution noted inline | (per-country) |
 
-The full country-by-country dispatch (78 countries with explicit cases plus
-85 more in the v1.6.2 batch via `COUNTRY_BBOX_TABLE`) is in
-[`src/engine.js`](src/engine.js). The `methodName` string returned with every
-`prayerTimes()` call carries both the dispatched method label and the country
-that triggered it.
+The full country-by-country dispatch (**168 countries** in `detectCountry`'s
+if-chain after v1.7.19, plus the broader `COUNTRY_BBOX_TABLE` for Pass-B
+fallback) is in [`src/engine.js`](src/engine.js). The `methodName` string
+returned with every `prayerTimes()` call carries both the dispatched method
+label and the country that triggered it.
 
-### City-level institutional overrides (16 cities, v1.7.0+)
+### City-level institutional overrides (20 cities, v1.7.0+)
 
 For 16 cities where the country-level dispatch would miss intra-country
 *ikhtilaf*, fajr applies city-level overrides via

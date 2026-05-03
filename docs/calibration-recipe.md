@@ -1,8 +1,11 @@
 # Calibration Recipe — Path A WMAE Improvements
 
-> **Last refreshed:** 2026-05-03 (v1.7.9 docs regen sweep — current-state numbers
-> in the "What's left on the table" section refreshed to post-v1.7.6 baseline
-> after issue #50 auto-elevation fix and #48 Umm al-Qura hijri switch).
+> **Last refreshed:** 2026-05-03 (v1.7.19). Headline numbers reflect the
+> post-v1.7.16 Karpathy autoresearch ratchet baseline — train WMAE **0.98 min**
+> after Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations.
+> v1.7.18 added 84 cities to the registry; v1.7.19 fixed 6 country-edge
+> misroutings via engine bbox-table tightening. The "What's left on the table"
+> section now reflects post-v1.7.16 per-source residuals.
 >
 > A durable methodology guide for finding, validating, and shipping per-source calibration corrections that decrease train WMAE without violating the ratchet. The JAKIM offset shipped in v1.4.1 is the worked example — every step below references that change as the canonical demonstration.
 >
@@ -254,27 +257,37 @@ CORPUS CURATION SIDE-EFFECT (if applicable)
 
 ## What's left on the table — current state and priorities
 
-As of v1.7.6 (post auto-elevation Maghrib bug fix per #50 + Umm al-Qura hijri per #48), the train residuals look like this:
+As of v1.7.19 (post Karpathy autoresearch ratchet session in v1.7.16 + city
+registry expansion in v1.7.18 + engine bbox-table fixes in v1.7.19), the
+train residuals look like this:
 
 ```
-Per-source agreement (train)
-Source       | n   | WMAE | Fajr | Maghrib | Isha
-Aladhan      | 130 | 1.22 | -0.45|  +0.79  | +1.02  ← largest source count
-Mawaqit      |  25 | 1.52 | +0.64|  +0.04  | +0.28
-JAKIM        |  30 | 0.58 | -0.73|  -0.03  | -0.10
-Diyanet      |  30 | 0.50 | +0.33|  +0.10  | +0.57
+Per-source agreement (train, post-v1.7.16)
+Source       | n   | WMAE | Δ vs v1.7.15
+Aladhan      | 130 | 1.22 | unchanged (region-bounded targeting)
+Mawaqit      |  25 | 0.88 | -42% (Morocco Dhuhr +5 closed -4.80 min bias)
+JAKIM        |  30 | 0.45 | -22% (Dhuhr +2 / Asr +1 closed both biases)
+Diyanet      |  30 | 0.50 | unchanged (region-bounded targeting)
 ```
 
-Train WMAE: **1.0668** (was 0.6814 at v1.4.4, 1.0394 at v1.4.1, 1.2472 at v1.0 baseline).
+Train WMAE: **0.9757** (broke the 1-minute barrier in v1.7.16; was 1.0668 at
+v1.7.15, 0.6814 at v1.4.4, 1.0394 at v1.4.1, 1.2472 at v1.0 baseline).
 
-> **Why train WMAE rose post-v1.5.0:** the v1.7.6 fix to issue #50 corrected a silent
-> auto-elevation bug that was masking Maghrib bias against the v1.5.0 calibration target,
-> and v1.7.6's hijri switch to Umm al-Qura per #48 corrected dates the previous Kuwaiti
-> algorithm was getting wrong by 1 day on ~38% of validation samples. Both fixes are
-> reality-anchoring (the engine now matches what mosques publish), so the higher
-> WMAE-against-the-old-corpus is not a regression but a re-baseline. Asr +1.22-min bias
-> against Aladhan reflects the well-known Shafi/Hanafi shadow-formula choice rather than
-> a calibration target. See `autoresearch/logs/` for the post-v1.7.6 runs.
+> **The v1.7.16 milestone:** two Path A community calibrations, both
+> ratchet-PASS (train strictly decreases, no per-region regression, no
+> ihtiyat-unsafe drift). Morocco Dhuhr +5 extends the v1.5.0 Maghrib +5
+> precedent (same scholarly-fixture-matching methodology, same Mawaqit-Morocco
+> source, same Morocco-bounded scope). JAKIM Dhuhr +2 / Asr +1 applies the
+> same pattern to Malaysia. **Critically, Aladhan + Diyanet per-source WMAE
+> stayed exactly flat** — confirming the offsets are correctly region-bounded.
+> See `autoresearch/logs/2026-05-03-17-30-iteration-1-morocco-dhuhr-path-a.md`
+> and `2026-05-03-17-36-iteration-2-jakim-dhuhr-asr-extension.md`.
+>
+> **Asr +1.36-min signed bias** against the train aggregate reflects the
+> JAKIM Asr +1 ihtiyati addition + the well-known Shafi/Hanafi
+> shadow-formula choice + Diyanet's +1.0 ihtiyat-unsafe-direction systematic
+> (deferred per [#71](https://github.com/tawfeeqmartin/fajr/issues/71) — closing
+> it would shift Asr earlier, breaching the rounds-UP convention).
 
 Calibrations shipped so far:
 - **v1.4.1** — JAKIM Fajr +8min Path A (Razali & Hisham 2021 + Aabed 2015). Train 1.25 → 1.04.
@@ -307,7 +320,7 @@ After v1.5.0 the calibration loop has hit the same structural ceiling for fajr's
 | Malaysia | JAKIM via waktusolat.app | ✅ Already integrated. |
 | Morocco | Habous (via Mawaqit-Morocco) | ✅ Integrated v1.5.0. |
 
-Until at least one of the dead-end channels yields a fetchable endpoint, **train WMAE ≈1.07 is the steady-state floor for the post-v1.7.6 corpus** (the v1.5.0 0.80-min floor was inflated by the auto-elevation Maghrib bug; the post-#50-fix re-baseline is honest). The Mawaqit Morocco fixture refreshes daily via the `fajr · daily Mawaqit refresh` cloud routine (06:00 UTC), so per-date drift is captured automatically — but the institutional source set is what gates further calibration.
+v1.7.16 broke the **train WMAE ≈1.07 steady-state floor** by recognising that two regions (Morocco Dhuhr, JAKIM Dhuhr/Asr) had recoverable Path A bias even in the post-#50-fix re-baseline. The new floor is **0.98 min**. Further reduction requires either (a) closing the Aladhan +1.22 cohort bias — but Aladhan is calc-vs-calc, not institutional ground truth, so this needs an upstream fix in adhan-js or AlAdhan API, see [#72](https://github.com/tawfeeqmartin/fajr/issues/72) — or (b) breaking new institutional source channels from the dead-end list above. The Mawaqit Morocco fixture refreshes daily via the `fajr · daily Mawaqit refresh` cloud routine (06:00 UTC), so per-date drift is captured automatically — but the institutional source set is what gates further calibration.
 
 **Holdout signals** (2,980 entries across 6 sources — Aladhan 1263, KEMENAG 1054, MUIS 365, Mawaqit 166, praytimes.org 100, muslimsalat 32): the holdout corpus has expanded substantially through v1.6/1.7 — KEMENAG 2026 imsakiyya (Indonesia) and MUIS 2026 imsakiyya (Singapore) are the two largest additions. 60-min outliers cluster around DST transitions (Tehran in IRDT, Vilnius in EEST, etc.). These are NOT calibration opportunities — they're tz-handling refinements in `eval/eval.js`'s dynamic resolver. Address as framework improvements, not Path A corrections.
 
