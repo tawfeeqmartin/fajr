@@ -150,11 +150,16 @@ describe('prayerTimes invariants', () => {
     }
   })
 
-  it('returns empty notes array at low latitudes', () => {
-    // Casablanca — well below the high-latitude threshold
-    const result = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
+  it('emits no high-latitude or elevation-advisory notes at low-altitude low-latitude locations', () => {
+    // Casablanca — well below the high-latitude threshold, ~27m elevation.
+    // Pass elevation: 0 explicitly to suppress the v1.7.0 phase 2 auto-
+    // elevation note (the test pre-dates phase 2 and asserts the absence
+    // of high-latitude / elevation-advisory notes specifically — which
+    // is still true under phase 2 when caller-explicit elevation is used).
+    const result = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE, elevation: 0 })
     expect(Array.isArray(result.notes)).toBe(true)
-    expect(result.notes).toEqual([])
+    const advisoryNotes = result.notes.filter(n => /high-latitude|Elevation advisory/i.test(n))
+    expect(advisoryNotes).toEqual([])
   })
 
   it('does NOT emit elevation advisory below 500 m threshold (v1.5.2)', () => {
@@ -182,24 +187,32 @@ describe('prayerTimes invariants', () => {
   })
 
   it('emits high-latitude advisory at |lat| ≥ 48.6° per Odeh 2009', () => {
+    // Pass elevation: 0 to all of these so the v1.7.0 phase 2 auto-
+    // elevation note is suppressed and we can isolate the high-latitude
+    // advisory shape regardless of whether the test coord falls inside a
+    // registered city's bbox (e.g. Reykjavík has city.elevation=61m).
+    const HL_RE = /High-latitude|Odeh|48\.6/i
+
     // Reykjavik — fajr#4 case
-    const reykjavik = prayerTimes({ latitude: 64.15, longitude: -21.94, date: TEST_DATE })
-    expect(reykjavik.notes.length).toBe(1)
-    expect(reykjavik.notes[0]).toMatch(/Odeh.*2009/i)
-    expect(reykjavik.notes[0]).toMatch(/48\.6/)
+    const reykjavik = prayerTimes({ latitude: 64.15, longitude: -21.94, date: TEST_DATE, elevation: 0 })
+    const reykjavikHL = reykjavik.notes.filter(n => HL_RE.test(n))
+    expect(reykjavikHL.length).toBe(1)
+    expect(reykjavikHL[0]).toMatch(/Odeh.*2009/i)
+    expect(reykjavikHL[0]).toMatch(/48\.6/)
 
     // Symmetrical southern hemisphere — Macquarie Island at -54.5° latitude
-    const macquarie = prayerTimes({ latitude: -54.5, longitude: 158.95, date: TEST_DATE })
-    expect(macquarie.notes.length).toBe(1)
-    expect(macquarie.notes[0]).toMatch(/Odeh.*2009/i)
+    const macquarie = prayerTimes({ latitude: -54.5, longitude: 158.95, date: TEST_DATE, elevation: 0 })
+    const macquarieHL = macquarie.notes.filter(n => HL_RE.test(n))
+    expect(macquarieHL.length).toBe(1)
+    expect(macquarieHL[0]).toMatch(/Odeh.*2009/i)
 
     // Just above the threshold — should still emit
-    const edge = prayerTimes({ latitude: 48.6, longitude: 0, date: TEST_DATE })
-    expect(edge.notes.length).toBe(1)
+    const edge = prayerTimes({ latitude: 48.6, longitude: 0, date: TEST_DATE, elevation: 0 })
+    expect(edge.notes.filter(n => HL_RE.test(n)).length).toBe(1)
 
     // Just below — should not
-    const justBelow = prayerTimes({ latitude: 48.5, longitude: 0, date: TEST_DATE })
-    expect(justBelow.notes).toEqual([])
+    const justBelow = prayerTimes({ latitude: 48.5, longitude: 0, date: TEST_DATE, elevation: 0 })
+    expect(justBelow.notes.filter(n => HL_RE.test(n)).length).toBe(0)
   })
 })
 

@@ -1424,15 +1424,146 @@ export function detectLocation(latitude, longitude, fallbackElevation = 0) {
 }
 
 /**
+ * String → adhan method-params dispatcher.
+ *
+ * Mirrors the canonical method names returned by `methodForCountry()` /
+ * surfaced via `detectLocation().recommendedMethod` (e.g. 'UmmAlQura',
+ * 'Diyanet', 'Karachi', 'Tehran') and constructs the corresponding
+ * adhan.CalculationParameters bundle. Used by `prayerTimes()` for two
+ * purposes:
+ *
+ *   1. Caller-explicit `options.method` override (e.g. user prefers
+ *      'Egyptian' even though their country defaults to 'Karachi').
+ *   2. City-level institutional override (e.g. Mosul → Karachi via
+ *      `detectLocation().city.methodOverride`, even though Iraq's
+ *      country default is 'Egyptian').
+ *
+ * For the country-default path we still call `selectMethod(country, ...)`
+ * because that path carries country-specific Path A calibrations
+ * (Morocco 19°/+5min Maghrib, Türkiye Diyanet -1min Maghrib/Isha, JAKIM
+ * +8min Fajr/+1min Isha) that are NOT plain method-name strings.
+ *
+ * Method names supported here are intentionally a SUPERSET of all values
+ * `methodForCountry()` can return. Unknown names fall back to 'ISNA' with
+ * a sentinel methodName label so callers can detect the miss.
+ *
+ * Classification: 🟢 Established — pure dispatcher, no shar'i ruling.
+ *
+ * @param {string}  name     Method name (case-insensitive match against the
+ *                           canonical list).
+ * @param {string}  country  Country key from detectCountry — used only for
+ *                           the high-latitude MWL handling.
+ * @param {number}  lat      Latitude (for high-latitude MWL / fallback rule).
+ * @param {adhan.Coordinates} _coords  Reserved (currently unused; passed for
+ *                                      symmetry with selectMethod).
+ * @returns {{ params: object, methodName: string }}
+ */
+function methodFromString(name, country, lat, _coords) {
+  const key = String(name || '').trim()
+  switch (key) {
+    case 'UmmAlQura':
+      return { params: adhan.CalculationMethod.UmmAlQura(), methodName: 'Umm al-Qura' }
+    case 'Egyptian':
+      return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (19.5°/17.5°)' }
+    case 'Karachi':
+      return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (18°/18°)' }
+    case 'Tehran':
+      return { params: adhan.CalculationMethod.Tehran(), methodName: 'Tehran (Institute of Geophysics)' }
+    case 'Qatar':
+      return { params: adhan.CalculationMethod.Qatar(), methodName: 'Qatar Calendar House' }
+    case 'Kuwait':
+      return { params: adhan.CalculationMethod.Kuwait(), methodName: 'Kuwait (Ministry of Awqaf)' }
+    case 'ISNA':
+      return { params: adhan.CalculationMethod.NorthAmerica(), methodName: 'ISNA (NorthAmerica)' }
+    case 'MoonsightingCommittee':
+      return { params: adhan.CalculationMethod.MoonsightingCommittee(), methodName: 'MoonsightingCommittee' }
+    case 'JAKIM':
+    case 'MUIS':
+      return { params: adhan.CalculationMethod.Singapore(), methodName: `${key} (20°/18°)` }
+    case 'Diyanet': {
+      // Note: caller-explicit / city-override 'Diyanet' returns the BARE
+      // adhan.Turkey() preset WITHOUT the v1.4.5 ezanvakti -1min Path A
+      // calibration (which is a Türkiye-specific community calibration —
+      // see selectMethod's Türkiye case). This is the right behaviour: a
+      // Bosnia/Kosovo/Sarajevo user opting into Diyanet should get the
+      // formally-published Diyanet preset, not the Türkiye-specific
+      // community-published reality offset. Same for any non-TR country
+      // dispatched here.
+      return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (18°/17°)' }
+    }
+    case 'MWL': {
+      const p = adhan.CalculationMethod.MuslimWorldLeague()
+      if (lat > 55) {
+        p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
+        return { params: p, methodName: 'MWL + TwilightAngle (high-lat)' }
+      }
+      return { params: p, methodName: 'MWL (Muslim World League, 18°/17°)' }
+    }
+    case 'UOIF': {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 12
+      p.ishaAngle = 12
+      return { params: p, methodName: 'UOIF (12°/12°)' }
+    }
+    case 'CIL': {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18
+      p.ishaInterval = 77
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 3 }
+      return { params: p, methodName: 'CIL Lisboa (18° / +77min Isha / +3min Maghrib)' }
+    }
+    case 'DUMR': {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 16
+      p.ishaAngle = 15
+      p.highLatitudeRule = adhan.HighLatitudeRule.TwilightAngle
+      return { params: p, methodName: 'Russia (DUMR, 16°/15° + TwilightAngle)' }
+    }
+    case 'Morocco': {
+      // Path A community calibration: 19°/17° + +5min Maghrib ihtiyati.
+      // Same logic as selectMethod's Morocco branch — kept in sync.
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 19
+      p.ishaAngle = 17
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 5 }
+      return { params: p, methodName: 'Morocco (19°/17° + +5min Maghrib ihtiyati)' }
+    }
+    case 'Tunisia': {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18
+      p.ishaAngle = 18
+      return { params: p, methodName: 'Tunisia (Ministry of Religious Affairs, 18°/18°)' }
+    }
+    case 'Algeria':
+      return { params: adhan.CalculationMethod.MuslimWorldLeague(), methodName: 'Algeria (Ministry of Religious Affairs, 18°/17°)' }
+    case 'Jordan': {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18
+      p.ishaAngle = 18
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 5 }
+      return { params: p, methodName: 'Jordan (Ministry of Awqaf, 18°/18° + 5min Maghrib)' }
+    }
+    default:
+      // Unknown method name — fall back to ISNA but flag the miss in the
+      // methodName label so the caller can detect it. Same default as
+      // selectMethod's unknown-country fallthrough.
+      return { params: adhan.CalculationMethod.NorthAmerica(), methodName: `ISNA (default — unrecognised method: ${key})` }
+  }
+}
+
+/**
  * Calculate prayer times for a given location and date.
  *
  * @param {object} params
  * @param {number} params.latitude
  * @param {number} params.longitude
  * @param {Date}   params.date
- * @param {number} [params.elevation=0]  Elevation in meters above sea level
- * @param {string} [params.method]       Override auto-detected method
- * @returns {object} Prayer times with metadata
+ * @param {number} [params.elevation]   Elevation in meters above sea level.
+ *                                      When omitted, fajr auto-resolves from
+ *                                      the city registry (`detectLocation`).
+ * @param {string} [params.method]      Override auto-detected method (string
+ *                                      name resolvable by `methodFromString`).
+ * @returns {object} Prayer times with metadata, including `location` (v1.7.0).
  */
 /**
  * Per-prayer ihtiyat-aware minute rounding.
@@ -1490,20 +1621,92 @@ function roundIhtiyat(date, dir) {
   return out
 }
 
-export function prayerTimes({ latitude, longitude, date, elevation = 0, method }) {
+export function prayerTimes(params) {
+  const { latitude, longitude, date } = params
+
+  // ── v1.7.0 phase 2: city-aware caller-silent detection
+  //
+  // We need to distinguish "caller did not pass elevation" (auto-resolve from
+  // city registry) from "caller explicitly passed 0" (sea-level override).
+  // The same applies to method. Standard destructuring with default values
+  // erases that distinction (0 / undefined collapse to 0). So we inspect the
+  // raw `params` object instead.
+  //
+  // Classification: 🟢 Established — additive API surface, conservative
+  // defaults; existing call-sites passing { elevation, method } continue to
+  // hit the explicit-override branches below.
+  // see autoresearch/proposals/v1.7.0-city-aware-location.md § "API surface"
+  const callerExplicitElevation = (params.elevation !== undefined && params.elevation !== null)
+  const callerExplicitMethod    = (typeof params.method === 'string' && params.method.length > 0)
+
+  const elevationParam = callerExplicitElevation ? Number(params.elevation) : 0
+
   const coords = new adhan.Coordinates(latitude, longitude)
 
-  // 🟢 Established: Region-aware method selection
-  const country = detectCountry(latitude, longitude)
-  const { params, methodName } = selectMethod(country, latitude, coords)
+  // ── Resolve location early. detectLocation is a pure lookup — no
+  // astronomical computation — so we can compute it before method selection
+  // and use the result both for method/elevation auto-application AND for
+  // the new `location` field in the response.
+  // see knowledge/wiki/api/detectLocation.md (proposed; phase 3 publishes)
+  const loc = detectLocation(latitude, longitude, elevationParam)
+  const country = loc.country  // identical to detectCountry(latitude, longitude)
+
+  // ── Method selection: caller-explicit > city-institutional > country-default
+  //
+  // The country-default path keeps using `selectMethod()` because that path
+  // carries Path A community calibrations (Morocco 19°/+5min Maghrib, Türkiye
+  // -1min ezanvakti, JAKIM +8min Fajr) that a generic string dispatcher would
+  // erase. The city-institutional and caller-explicit paths use the new
+  // `methodFromString()` helper so the override is honoured directly.
+  let params_, methodName, methodSource
+  if (callerExplicitMethod) {
+    const r = methodFromString(params.method, country, latitude, coords)
+    params_ = r.params
+    methodName = r.methodName
+    methodSource = 'caller-explicit'
+  } else if (loc.city && loc.city.methodOverride) {
+    const r = methodFromString(loc.city.methodOverride, country, latitude, coords)
+    params_ = r.params
+    methodName = r.methodName
+    methodSource = 'city-institutional'
+  } else if (country) {
+    const r = selectMethod(country, latitude, coords)
+    params_ = r.params
+    methodName = r.methodName
+    methodSource = 'country-default'
+  } else {
+    const r = selectMethod(null, latitude, coords)  // exits via the default branch (ISNA / MWL high-lat)
+    params_ = r.params
+    methodName = r.methodName
+    methodSource = 'fallback'
+  }
 
   // Ask adhan.js for unrounded (seconds-precision) times. We apply our own
   // per-prayer ihtiyat-aware rounding below — see roundIhtiyat() docstring.
   // This overrides whatever rounding the selected method preset specified.
-  params.rounding = adhan.Rounding.None
+  params_.rounding = adhan.Rounding.None
 
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
-  const times = new adhan.PrayerTimes(coords, date, params)
+  const times = new adhan.PrayerTimes(coords, date, params_)
+
+  // ── Effective elevation: caller-explicit > city-registry > default-zero
+  //
+  // The city-registry path triggers automatic elevation correction inside
+  // this function. The caller-explicit path defers to src/index.js's wrapper
+  // (which calls applyElevationCorrection when params.elevation > 0) so the
+  // existing wrapper behaviour is unchanged for back-compat. The default-zero
+  // path applies no correction.
+  let effectiveElevation, elevationSource
+  if (callerExplicitElevation) {
+    effectiveElevation = elevationParam
+    elevationSource = 'caller-explicit'
+  } else if (loc.city && loc.city.elevation != null) {
+    effectiveElevation = loc.city.elevation
+    elevationSource = 'city-registry'
+  } else {
+    effectiveElevation = 0
+    elevationSource = 'default-zero'
+  }
 
   // Surface scholarly-grounded caveats specific to this location. Empty
   // array when no specific notes apply. Each entry is a complete sentence
@@ -1520,13 +1723,38 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
     )
   }
 
-  // Elevation advisory (v1.5.2). When the caller passes a non-trivial
-  // elevation (≥ 500 m, where the geometric horizon dip is > 2 min on
-  // Shuruq/Maghrib), surface a notes[] entry describing the institutional
-  // disagreement so the consumer can make an informed choice. The dip is
-  // NOT applied automatically — fajr leaves the correction off by default
-  // (matching Saudi/Umm al-Qura's jama'ah-unity stance) but documents that
-  // UAE / Malaysia JAKIM apply it. Apps wanting to apply pass the result
+  // ── v1.7.0 phase 2: auto-resolution notes (caller-silent paths only)
+  //
+  // When the caller is silent on elevation/method and the city registry has
+  // a value, surface what we did so the consumer can audit. Caller-explicit
+  // paths get NO note (they already know what they passed). The default-zero
+  // elevation fallback also gets no note (it's the engine's silent default).
+  if (elevationSource === 'city-registry') {
+    notes.push(
+      `Elevation auto-resolved from city registry: ${loc.city.name}, ${loc.city.elevation}m`
+    )
+  }
+  if (methodSource === 'city-institutional') {
+    const inst = loc.city && loc.city.source && loc.city.source.institution
+    notes.push(
+      `Method auto-resolved from city institutional override: ${loc.city.name} → ` +
+      `${loc.city.methodOverride}${inst ? ' (' + inst + ')' : ''}`
+    )
+    if (loc.city.altMethods && loc.city.altMethods.length) {
+      notes.push(
+        `Alternative methods follow same coords: ` +
+        loc.city.altMethods.map(a => a.method + ' (' + a.source + ')').join(', ')
+      )
+    }
+  }
+
+  // Elevation advisory (v1.5.2). When the effective elevation is ≥ 500 m
+  // (where the geometric horizon dip is > 2 min on Shuruq/Maghrib), surface
+  // a notes[] entry describing the institutional disagreement so the
+  // consumer can make an informed choice. The dip is NOT applied
+  // automatically by the engine — fajr's public wrapper applies it for
+  // caller-explicit elevation, and v1.7.0 phase 2 applies it for the
+  // city-registry path below. Apps wanting to apply manually pass the result
   // through applyElevationCorrection(times, elevation, latitude).
   //
   // 500 m threshold is chosen because:
@@ -1536,10 +1764,10 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
   //   • > 1500 m is > 5 min (definitely worth flagging)
   // The threshold also tolerates phone-GPS altitude noise (typically
   // ±10–30 m) without flickering the advisory state.
-  if (elevation >= 500) {
-    const dipMin = computeElevationDipMinutes(elevation, latitude)
+  if (effectiveElevation >= 500) {
+    const dipMin = computeElevationDipMinutes(effectiveElevation, latitude)
     notes.push(
-      `Elevation advisory: altitude ${Math.round(elevation)} m is above the ` +
+      `Elevation advisory: altitude ${Math.round(effectiveElevation)} m is above the ` +
       `500 m threshold where the geometric horizon dip becomes practically ` +
       `significant — sun rises ~${dipMin.toFixed(1)} min EARLIER and Maghrib ` +
       `falls ~${dipMin.toFixed(1)} min LATER than at sea level. Institutional ` +
@@ -1605,13 +1833,40 @@ export function prayerTimes({ latitude, longitude, date, elevation = 0, method }
       rounding:  'ihtiyat-aware per-prayer (Imsak/Shuruq DOWN; Fajr/Dhuhr/Asr/Maghrib/Isha/Sunset UP)',
       imsak_offset_min: 10,
     },
+    // ── v1.7.0 phase 2: location field
+    //
+    // ALWAYS populated. Apps can use this to display "you're in Cape Town"
+    // without a separate detectLocation() call. methodSource and
+    // elevationSource report HOW the engine arrived at its choices for this
+    // call, useful for "Why is my Fajr at this time?" UX.
+    // see autoresearch/proposals/v1.7.0-city-aware-location.md § "API surface"
+    location: {
+      city:             loc.city,
+      country:          loc.country,
+      timezone:         loc.timezone,
+      elevation:        effectiveElevation,
+      methodSource,
+      elevationSource,
+    },
   }
 
-  // NOTE: Elevation correction (applyElevationCorrection) is available as a
-  // utility but NOT activated here. Experiment 4 confirmed that the Aladhan
-  // ground truth uses sea-level calculations; applying elevation correction
-  // diverges from it and increases WMAE. Correction is 🟡 Limited precedent —
-  // available for use when ground truth is also elevation-corrected.
+  // ── v1.7.0 phase 2: auto-elevation correction for the city-registry path
+  //
+  // When the city registry supplies elevation (no caller override), apply
+  // the correction inline so the returned times are already-corrected.
+  // Caller-explicit elevation defers to src/index.js's wrapper for back-compat
+  // (the wrapper applies applyElevationCorrection when params.elevation > 0
+  // — same behaviour as before phase 2).
+  //
+  // Classification: 🟡→🟢 Approaching established (matches the existing
+  // wrapper's apply-stance for explicit elevation; UAE Grand Mufti / JAKIM
+  // institutional precedent applies). see wiki/corrections/elevation.md
+  if (elevationSource === 'city-registry' && effectiveElevation > 0) {
+    result = applyElevationCorrection(result, effectiveElevation, latitude)
+    // applyElevationCorrection mutates `corrections.elevation` and adds
+    // `corrections.elevationCorrectionMin` — `location` and `notes` survive
+    // because applyElevationCorrection spreads `times` into a new object.
+  }
 
   return result
 }
