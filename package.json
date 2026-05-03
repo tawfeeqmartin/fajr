@@ -1,6 +1,6 @@
 {
   "name": "@tawfeeqmartin/fajr",
-  "version": "1.7.10",
+  "version": "1.7.11",
   "description": "High-accuracy Islamic prayer time library combining NASA/JPL astronomical algorithms with classical Islamic scholarship",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -50,6 +50,7 @@
     "build:hilal-map": "node scripts/build-hilal-map.js",
     "build:hilal-year": "node scripts/build-hilal-year-animation.js",
     "build:charts": "node scripts/build-readme-charts.js && node scripts/build-journey-chart.js",
+    "regenerate-docs": "npm run build:charts && node scripts/build-hilal-map.js --year 1447 --month 9 && node scripts/build-hilal-map.js --year 1446 --month 9 && node scripts/build-hilal-year-animation.js --year 1446 && node scripts/build-hilal-year-animation.js --year 1447 && node scripts/build-criterion-isolines.js && node scripts/analyze-hilal-historical.js && node scripts/validate-lunar-against-jpl.js && node scripts/validate-solar-against-jpl.js",
     "extract:paper": "scripts/extract-paper-text.sh",
     "fetch:aladhan": "node scripts/fetch-aladhan.js",
     "fetch:world": "node scripts/fetch-aladhan-world.js",
