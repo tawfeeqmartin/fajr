@@ -55,6 +55,7 @@ function detectCountry(lat, lon) {
   // Smallest first: Palestine ⊂ Israel/Saudi NW; Lebanon ⊂ Syria;
   // Jordan ⊂ Saudi NW; Syria/Iraq broader.
   if (lat >= 31.2 && lat <= 32.6 && lon >= 34.2 && lon <= 35.6) return 'Palestine'
+  if (lat >= 29.49 && lat <= 33.34 && lon >= 34.27 && lon <= 35.90) return 'Israel'
   if (lat >= 33.05 && lat <= 34.7 && lon >= 35.1 && lon <= 36.65) return 'Lebanon'
   if (lat >= 29.18 && lat <= 33.4 && lon >= 34.95 && lon <= 39.3) return 'Jordan'
   if (lat >= 32.3 && lat <= 37.4 && lon >= 35.7 && lon <= 42.4) return 'Syria'
