@@ -3,10 +3,20 @@
 /**
  * Hijri (Islamic lunar) calendar conversion.
  *
- * Converts Gregorian dates to the Hijri calendar using the tabular
- * (arithmetic) calendar. Astronomical Hijri (hilal-based) is handled
- * separately in hilal.js.
+ * Default convention: 'umm-al-qura' — Saudi Arabia's official calendar,
+ * used by AlAdhan, IslamicFinder, IACAD, and Microsoft Windows.
+ *
+ * Legacy convention: 'tabular' — Kuwaiti arithmetic calendar (v1.7.5 and
+ * earlier default). Preserved for backwards-compat via { convention: 'tabular' }.
+ *
+ * 🟡→🟢 Approaching established — Umm al-Qura is Saudi Arabia's official
+ * calendar, used by AlAdhan, IslamicFinder, IACAD, Microsoft. Kuwaiti
+ * tabular preserved via { convention: "tabular" }.
+ *
+ * See knowledge/wiki/corrections/hijri-umm-al-qura.md
  */
+
+import { gregorianToHijriUAQ } from './hijri-umm-al-qura.js'
 
 const MONTH_NAMES = [
   'Muharram', 'Safar', "Rabi' al-Awwal", "Rabi' al-Thani",
@@ -15,22 +25,34 @@ const MONTH_NAMES = [
 ]
 
 /**
- * Convert a Gregorian date to Hijri using the Kuwaiti algorithm.
+ * Convert a Gregorian date to Hijri.
  *
- * 🟢 Established: Tabular Hijri calendar conversion is a standard method
- * used by Islamic institutions worldwide.
+ * 🟡→🟢 Approaching established — Umm al-Qura is Saudi Arabia's official
+ * calendar, used by AlAdhan, IslamicFinder, IACAD, Microsoft. Kuwaiti
+ * tabular preserved via { convention: "tabular" }.
  *
- * @param {Date} date
- * @returns {object} { year, month, day, monthName }
+ * @param {Date}   date
+ * @param {object} [opts={}]
+ * @param {string} [opts.convention='umm-al-qura']  'umm-al-qura' | 'tabular' | 'observational'
+ * @returns {{ year: number, month: number, day: number, monthName: string }}
  */
-export function hijri(date) {
-  const jd = gregorianToJD(
-    date.getFullYear(),
-    date.getMonth() + 1,
-    date.getDate()
-  )
-  const { year, month, day } = jdToHijri(jd)
+export function hijri(date, opts = {}) {
+  const convention = opts.convention ?? 'umm-al-qura'
 
+  if (convention === 'observational') {
+    throw new Error(
+      'NotImplementedError: convention "observational" is not yet implemented. ' +
+      'For lunar crescent sighting, see fajr.hilalVisibility(). ' +
+      'A full observational Hijri calendar is planned for v1.9.x.'
+    )
+  }
+
+  if (convention === 'tabular') {
+    return _hijriTabular(date)
+  }
+
+  // Default: 'umm-al-qura'
+  const { year, month, day } = gregorianToHijriUAQ(date)
   return {
     year,
     month,
@@ -39,7 +61,34 @@ export function hijri(date) {
   }
 }
 
-function gregorianToJD(year, month, day) {
+// ─── Internal helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Kuwaiti arithmetic Hijri calendar (v1.7.5-and-earlier default).
+ * Preserved for backwards-compat via { convention: 'tabular' }.
+ *
+ * 🟢 Established: Tabular Hijri calendar conversion is a standard method
+ * used by Islamic institutions worldwide.
+ *
+ * @param {Date} date
+ * @returns {{ year: number, month: number, day: number, monthName: string }}
+ */
+function _hijriTabular(date) {
+  const jd = _gregorianToJD(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate()
+  )
+  const { year, month, day } = _jdToHijri(jd)
+  return {
+    year,
+    month,
+    day,
+    monthName: MONTH_NAMES[month - 1],
+  }
+}
+
+function _gregorianToJD(year, month, day) {
   const a = Math.floor((14 - month) / 12)
   const y = year + 4800 - a
   const m = month + 12 * a - 3
@@ -52,7 +101,7 @@ function gregorianToJD(year, month, day) {
     32045
 }
 
-function jdToHijri(jd) {
+function _jdToHijri(jd) {
   const l = jd - 1948440 + 10632
   const n = Math.floor((l - 1) / 10631)
   const l2 = l - 10631 * n + 354
