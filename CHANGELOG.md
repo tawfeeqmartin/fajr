@@ -24,6 +24,64 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.21] — 2026-05-03
+
+### Added
+
+- **"Best guess" provenance surface on every `prayerTimes()` return** —
+  resolves [#81](https://github.com/tawfeeqmartin/fajr/issues/81). Auto-
+  dispatched values now carry explicit framing so downstream apps can
+  drive verify-this-default UX without re-deriving from scattered output
+  fields. New fields:
+  - `location.madhab: 'shafii' | 'hanafi'` — madhab implicit in the
+    dispatched method (Shafi'i = 1× shadow Asr; Hanafi = 2× shadow,
+    can shift Asr by 30-60 minutes).
+  - `location.madhabSource: 'caller-explicit' | 'method-implied'` —
+    provenance of the madhab choice. Until [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+    lands the v1.8.x override surface, the value is always
+    `'method-implied'`.
+  - `applied: { method, madhab, elevationMin }` — single canonical
+    "what we did" summary apps can surface as a badge.
+  - `disclaimer: string` — turn-key user-facing copy framing the
+    auto-dispatched values as best guess and recommending verification.
+    Apps can render verbatim in long-press / "Why this time?" sheets,
+    or ignore it.
+- **README "How to think about fajr's outputs"** section near the top
+  of the README — explicit "best-effort defaults, not religious
+  pronouncements" framing with the verify-location / check-settings /
+  consult-local-mosque guidance.
+- **Status banner updated** to call out the best-guess framing inline.
+
+### Honest caveats
+
+- Pure additive change; no breaking API surface. Existing
+  `prayerTimes()` consumers continue to receive the same fields
+  unchanged, just with three new top-level properties (`applied`,
+  `disclaimer`) and three new `location` properties (`madhab`,
+  `madhabSource`, plus the existing `methodSource` / `elevationSource`).
+- **Every country currently reports `madhab: shafii`** because adhan.js's
+  Madhab default is Shafi'i (1× shadow) for all method presets. The only
+  cases that explicitly compose Hanafi are the `KarachiShafi` overrides
+  in Maldives / Sri Lanka / Lucknow / Kochi (which redundantly enforce
+  Shafi'i). Pakistan / Bangladesh / Türkiye / Albania users following
+  Hanafi will see `madhab: shafii` in fajr's output until
+  [#40](https://github.com/tawfeeqmartin/fajr/issues/40) ships the user-
+  override surface in v1.8.x. The new `disclaimer` field flags this
+  exactly.
+- The `disclaimer` text is intentionally generic. Apps wanting a
+  region-specific disclaimer can render their own copy alongside.
+
+### Cross-references
+
+- Resolves [#81](https://github.com/tawfeeqmartin/fajr/issues/81)
+  (frame auto-dispatched values as best guess)
+- Cross-refs [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+  (madhab override umbrella — the v1.8.x mechanism that makes the
+  verification prompt actionable for users), [#65](https://github.com/tawfeeqmartin/fajr/issues/65)
+  (custodianship maturity — same trajectory of honest framing)
+
+---
+
 ## [1.7.20] — 2026-05-03
 
 ### Added

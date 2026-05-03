@@ -2718,6 +2718,24 @@ export function prayerTimes(params) {
   const imsakRaw = new Date(times.fajr.getTime() - IMSAK_OFFSET_MIN * 60 * 1000)
   const imsak_   = roundIhtiyat(imsakRaw, 'down')
 
+  // v1.7.21 (#81): expose madhab + provenance so downstream apps can frame
+  // auto-dispatched values as "best guess" rather than authoritative
+  // pronouncements. The madhab is read from the adhan params (it's set
+  // either by the method preset itself — Karachi → Hanafi, MWL → Shafi —
+  // or by an explicit case override like Maldives/SriLanka/KarachiShafi
+  // which composes Karachi + Shafi). Caller-explicit madhab override
+  // arrives in v1.8.x via #40. Until then, madhabSource is always
+  // 'method-implied'.
+  const madhab = params_.madhab === adhan.Madhab.Hanafi ? 'hanafi' : 'shafii'
+  const madhabSource = 'method-implied'
+
+  // Pre-compute the elevation correction magnitude so the `applied` object
+  // can surface it whether or not the correction actually fires (apps may
+  // want to show "0.0 min" for transparency at sea level).
+  const elevationMinPreview = effectiveElevation > 0
+    ? Math.round(computeElevationDipMinutes(effectiveElevation, latitude) * 100) / 100
+    : 0
+
   let result = {
     imsak:   imsak_,
     fajr:    fajr_,
@@ -2751,15 +2769,41 @@ export function prayerTimes(params) {
     // without a separate detectLocation() call. methodSource and
     // elevationSource report HOW the engine arrived at its choices for this
     // call, useful for "Why is my Fajr at this time?" UX.
+    // v1.7.21 (#81): added madhab + madhabSource alongside the existing
+    // method/elevation provenance so apps can drive verify-this-default UX
+    // off a single consistent shape.
     // see autoresearch/proposals/v1.7.0-city-aware-location.md § "API surface"
     location: {
       city:             loc.city,
       country:          loc.country,
       timezone:         loc.timezone,
       elevation:        effectiveElevation,
+      madhab,
       methodSource,
+      madhabSource,
       elevationSource,
     },
+    // ── v1.7.21 (#81): "best guess" framing surface
+    //
+    // `applied` summarises what was actually used for this call (after
+    // dispatch). Lets apps surface a single canonical "what we did" badge
+    // without re-deriving from method/madhab/elevation fields scattered
+    // through the result.
+    //
+    // `disclaimer` is turn-key user-facing text. Apps can render verbatim
+    // in long-press / "Why this time?" sheets, or ignore it. Saves every
+    // consumer rewriting the same disclaimer copy and keeps the framing
+    // consistent across the ecosystem.
+    applied: {
+      method:        methodName,
+      madhab,
+      elevationMin: elevationMinPreview,
+    },
+    disclaimer:
+      'Computed defaults are a best guess based on your location and country conventions. ' +
+      'Verify your location, check settings (madhab + elevation stance), and consult your ' +
+      'local mosque or scholar for edge cases. Auto-detected method: ' + methodName +
+      (loc.country ? ' (' + loc.country + ' country default).' : '.'),
   }
 
   // ── v1.7.0 phase 2: auto-elevation correction for the city-registry path
