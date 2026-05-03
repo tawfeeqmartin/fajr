@@ -372,13 +372,35 @@ This is the layer that catches **structural risk** (a Muslim-majority country fa
 
 fajr is consumed downstream by other repos (notably [agiftoftime.app](https://agiftoftime.app), which integrates fajr's prayer-time and hilal output). The agents working in those repos will sometimes have fajr-side questions — API behaviour, edge cases, integration patterns, regression concerns. The convention for handling those:
 
-**At the start of any session in this repo, check the GitHub issue tracker:**
+**Open issues trigger immediate remediation. Always.**
+
+Whenever you check the issue tracker — at session start, after a release, after any cross-repo announcement, at any natural pause point — and find any open issue, that issue takes priority over whatever other plan you had next. Treat open issues as interrupts, not as a backlog to clear "later". The user's explicit instruction:
+
+> *"any open issues should immediately trigger remediation"*
+
+Practical sequence on every check:
 
 ```bash
 gh issue list --repo tawfeeqmartin/fajr --state open
+gh issue list --repo tawfeeqmartin/agiftoftime --state open  # cross-repo
 ```
 
-If there are open issues from a downstream-repo agent, read them, respond in comments (or open a PR if a code change is needed and reference the issue with `Fixes #N`), and close when resolved.
+For each open issue:
+
+1. **Read it in full** (`gh issue view N --comments`). Don't skim.
+2. **If it's an inbound from `agiftoftime-agent`** (signed at the bottom) or any cross-repo agent: it's blocking real users — agiftoftime end-users. Resolve before resuming any other work.
+3. **If it requires a code change**: open a PR with `Fixes #N` in the description. The merge auto-closes the issue.
+4. **If it requires only an action (e.g. trigger a workflow, publish a tag, run a script)**: do it, then comment on the issue with the resolution details and close it.
+5. **If it's a tracking issue with no immediate action** (like #15 — eval rounding-convention alignment, deferred): leave it open but **add a comment confirming you've seen it and what the deferred plan is**. Don't let it rot uncommented for days.
+
+Triggers that should make you check the tracker immediately:
+
+- Just shipped a release (tags + announcements may surface a downstream regression — like fajr#18 surfaced the publish-gap).
+- Just received a cross-repo notification (agent on the other side filed an issue).
+- About to start something new — clear the inbox first.
+- User asks "where are we" or "status".
+
+When the tracker is empty, say so explicitly in your status update. When it's not, the next thing you do is the issue, not the thing you had planned.
 
 **When asked a question that affects another repo's integration**, prefer to answer in a GitHub issue comment rather than only in the local conversation — that creates durable cross-repo memory both agents and humans can reference.
 
