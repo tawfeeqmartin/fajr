@@ -1450,6 +1450,113 @@ export function detectLocation(latitude, longitude, fallbackElevation = 0) {
   return out
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// v1.7.3: nearestCity — kNN-fuzzy display-only city lookup
+//
+// Resolves a (lat, lon) coordinate to the geographically nearest city in the
+// bundled registry, with the haversine distance in km. Always returns a city —
+// never null. Exists for one purpose: letting downstream apps render a
+// human-readable "near <City> (<distance> km)" label when the user's GPS
+// resolves outside any registered city's bbox (so detectLocation returned
+// city: null).
+//
+// CRITICAL CONTRACT (the user pushed back on this explicitly):
+//   nearestCity is DISPLAY-ONLY. It MUST NOT affect prayer-time computation.
+//   The dispatch path (method override + elevation) continues to use
+//   detectLocation's strict bbox containment. nearestCity is never called
+//   from inside prayerTimes() or detectLocation(). If a future change wants
+//   to use nearestCity for "snap-to-nearest-city" method dispatch when the
+//   user is < N km from a registered city, that is a separate (v1.8.0+)
+//   design decision — and one with shar'i implications, since it would
+//   silently apply a city's institutional method to a user who is not in
+//   that city.
+//
+// see knowledge/wiki/api/detectLocation.md (proposed)
+// Classification: 🟢 Established — pure lookup, no shar'i ruling involved.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Compute great-circle distance between two (lat, lon) points in kilometres
+ * using the haversine formula. Private helper for nearestCity. Earth-radius
+ * convention: mean radius 6371 km (sufficient for display-label distances;
+ * the < 0.5% latitude-dependent flattening error is below visual resolution
+ * for "near <City>" UI).
+ *
+ * @param {number} lat1
+ * @param {number} lon1
+ * @param {number} lat2
+ * @param {number} lon2
+ * @returns {number}  distance in km
+ */
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371  // Earth mean radius, km
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) *
+            Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+/**
+ * kNN-fuzzy lookup: return the closest city in the bundled registry to
+ * (lat, lon), along with the haversine distance in km.
+ *
+ * DISPLAY-ONLY. Does NOT affect prayer-time dispatch — use `detectLocation`
+ * for that (which is bbox-precise and returns `city: null` honestly when
+ * outside any registered bbox). The two functions are deliberately separate:
+ *
+ *   detectLocation(lat, lon)  → bbox-precise; null when outside;
+ *                                drives method + elevation dispatch
+ *   nearestCity(lat, lon)     → kNN-fuzzy; never null;
+ *                                display label only
+ *
+ * Typical usage from a downstream app:
+ *
+ *   const loc = detectLocation(lat, lon)
+ *   if (loc.city) {
+ *     label = loc.city.name                                  // bbox-precise
+ *   } else {
+ *     const near = nearestCity(lat, lon)
+ *     label = `near ${near.city.name} (${near.distanceKm.toFixed(1)} km)`
+ *   }
+ *
+ * Implementation: linear scan O(n) over 375 entries; ~50 microseconds per
+ * call. No need for a k-d tree or grid bucket at this scale.
+ *
+ * Always returns a city; the registry covers every populated continent so
+ * no input — including mid-ocean or polar coordinates — produces null.
+ * For coordinates very far from any city (open ocean, deep Antarctica),
+ * `distanceKm` will be in the thousands — apps may want to suppress the
+ * label above some threshold (e.g. 200 km) to avoid showing "near
+ * Christchurch (3,400 km)" on a polar research station.
+ *
+ * Privacy: the (lat, lon) you pass is not logged, persisted, or transmitted
+ * anywhere. The lookup happens entirely locally via the bundled
+ * `src/data/cities.json` registry.
+ *
+ * Classification: 🟢 Established — pure lookup, no shar'i ruling involved.
+ *
+ * @param {number} latitude   degrees
+ * @param {number} longitude  degrees
+ * @returns {{ city: object, distanceKm: number }}  always non-null city
+ */
+export function nearestCity(latitude, longitude) {
+  const list = (citiesRegistry && citiesRegistry.cities) || []
+  let best = null
+  let bestDist = Infinity
+  for (let i = 0; i < list.length; i++) {
+    const c = list[i]
+    const d = haversineKm(latitude, longitude, c.lat, c.lon)
+    if (d < bestDist) {
+      bestDist = d
+      best = c
+    }
+  }
+  return { city: best, distanceKm: bestDist }
+}
+
 /**
  * String → adhan method-params dispatcher.
  *
