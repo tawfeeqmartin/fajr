@@ -125,6 +125,15 @@ override or source-specific 2× shadow implementation is added.
   Nurjaan and Kauthar, crediting AlAdhan as an eval reference layer, and
   clarifying that qiyam/last-third times live on `dayTimes()` / `nightThirds()`.
 
+- **Habous Morocco live validation resource captured** — adds
+  `scripts/data/habous-morocco-cities.json` and
+  `scripts/validate-habous-morocco.js` after a Moroccan user thread pointed
+  to the official Ministry of Habous city/region prayer-time portal. The
+  helper maps all 33 bundled Moroccan registry cities to official Habous
+  `ville` IDs (using explicit nearest-city mappings where Habous has no
+  separate city option) and compares live official current-day times against
+  fajr output without modifying `eval/data/`.
+
 ### Cross-references
 
 - Resolves [#83](https://github.com/tawfeeqmartin/fajr/issues/83)

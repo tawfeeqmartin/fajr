@@ -100,6 +100,37 @@ Mawaqit's coverage is structurally community / diaspora-skewed; some major Moroc
 
 **Recommended channels for these cities:** Ministry of Habous publishes regional Imsakiyya for all Moroccan governorates; manual transcription of the regional PDF would close every remaining gap. Aladhan API custom-method-99 is the calc-vs-calc fallback already in `eval/data/test/morocco.json`.
 
+### Morocco — Habous official city tables (live local validation resource)
+
+Added 2026-05-05 from a public thread by Abdelaziz Bennouna pointing to the
+official Ministry of Habous prayer-time portal:
+[`https://www.habous.gov.ma/prieres/`](https://www.habous.gov.ma/prieres/).
+This is the source Moroccan users are referring to when they say the official
+times are grouped by city/region rather than geolocated point coordinates.
+
+The live source is now saved locally as metadata, not ratchet fixtures:
+
+- [`scripts/data/habous-morocco-cities.json`](../scripts/data/habous-morocco-cities.json)
+  maps all 33 bundled Moroccan registry cities to a Habous `ville` ID, including
+  explicit nearest-official-city mappings for Sale → Rabat, Temara → Rabat, and
+  Inezgane → Agadir.
+- [`scripts/validate-habous-morocco.js`](../scripts/validate-habous-morocco.js)
+  fetches the current-day official Habous HTML endpoint
+  `https://www.habous.gov.ma/prieres/horaire-api.php?ville={id}` and compares
+  it against fajr output for the mapped registry cities.
+
+Current live check on 2026-05-05:
+
+```bash
+node scripts/validate-habous-morocco.js --allow-insecure-habous-cert --threshold-min 10
+```
+
+Result: 33/33 mapped Moroccan city rows within threshold; worst absolute delta
+was 5 minutes, with most deltas in the 0-4 minute range. This should be treated
+as a live local validation signal and future ingestion lead. It does **not**
+modify `eval/data/`; promoting Habous monthly rows into train/test fixtures
+requires a separate curated fixture PR.
+
 ### International (13 mosques across 12 cities — holdout)
 
 | City | Country | Mosque slug |
