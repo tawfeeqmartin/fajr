@@ -879,46 +879,87 @@ function countryBboxContains(country, lat, lon) {
 
 const COUNTRY_ASR_CONVENTION = {
   // ── Hanafi-convention countries (2× shadow Asr metadata)
-  Pakistan:    'hanafi',  // University of Islamic Sciences, Karachi (Hanafi)
-  Bangladesh:  'hanafi',  // Islamic Foundation Bangladesh (Hanafi)
-  Afghanistan: 'hanafi',  // Ministry of Hajj & Religious Affairs (Hanafi)
-  India:       'hanafi',  // AIMPLB / Jamiat Ulema-e-Hind (Hanafi-majority — sub-national Shafi'i overrides exist for Kerala/Lucknow via city-institutional methodOverride)
-  Turkey:      'hanafi',  // Diyanet İşleri Başkanlığı (Hanafi)
-  Albania:     'hanafi',  // KMSh Komuniteti Mysliman i Shqipërisë (Hanafi)
-  Kosovo:      'hanafi',  // Bashkësia Islame e Kosovës (Hanafi)
-  Bosnia:      'hanafi',  // Rijaset Islamske Zajednice u BiH (Hanafi)
-  NorthMacedonia: 'hanafi', // Bashkësia Fetare Islame (Hanafi)
-  Uzbekistan:  'hanafi',  // Muslim Spiritual Board of Uzbekistan (Hanafi)
-  Kazakhstan:  'hanafi',  // Spiritual Administration (Hanafi)
-  Kyrgyzstan:  'hanafi',  // Muftiate (Hanafi)
-  Tajikistan:  'hanafi',  // Council of Ulema (Hanafi)
-  Turkmenistan: 'hanafi', // Hanafi tradition
+  Pakistan:    'hanafi',  // University of Islamic Sciences, Karachi (Hanafi); Pew 2009 + Pakistan Bureau of Statistics 2023
+  Bangladesh:  'hanafi',  // Islamic Foundation Bangladesh (Hanafi); BBS Census 2022 + Pew 2009
+  Afghanistan: 'hanafi',  // Ministry of Hajj & Religious Affairs (Hanafi); ~80-85% Sunni Hanafi, ~10-15% Twelver Shi'a (Hazara — city-override candidate)
+  // India: ~204M Muslims (14.2% of 1.43B); ~140M Hanafi (Deobandi/Barelvi/Tablighi, north + central + Maharashtra)
+  // ~36M Shafi'i (Kerala Mappila, Tamil Nadu coastal Labbay/Marakkayar, parts of Karnataka coast, Lakshadweep)
+  // ~28M Twelver/Ismaili (Lucknow/Awadh/Hyderabad). Country-default 'hanafi' is aggregate-correct (~70%
+  // of Muslims when Shia inclusion is excluded); Kerala/Lucknow city-overrides handle the multi-state ikhtilaf.
+  India:       'hanafi',  // AIMPLB / Jamiat Ulema-e-Hind (Hanafi-majority); see Census 2011 + Pew 2021 + Samastha Kerala
+  Turkey:      'hanafi',  // Diyanet İşleri Başkanlığı (Hanafi); ~75-80% Sunni Hanafi per Çarkoğlu & Toprak 2007 + Pew 2014
+  Albania:     'hanafi',  // KMSh Komuniteti Mysliman i Shqipërisë (Hanafi); Ottoman institutional inheritance
+  Kosovo:      'hanafi',  // Bashkësia Islame e Kosovës (BIK) (Hanafi); ~95% Muslim per Kosovo Agency of Statistics
+  Bosnia:      'hanafi',  // Rijaset Islamske Zajednice u BiH (Hanafi); Ottoman heritage
+  NorthMacedonia: 'hanafi', // Bashkësia Fetare Islame / IVZ-RM (Hanafi)
+  Uzbekistan:  'hanafi',  // Muslim Spiritual Board of Uzbekistan (Hanafi-Maturidi Bukharan tradition)
+  Kazakhstan:  'hanafi',  // DUMK Spiritual Administration of Muslims of Kazakhstan (Hanafi)
+  Kyrgyzstan:  'hanafi',  // SAMK Muftiate of Kyrgyzstan (Hanafi)
+  Tajikistan:  'hanafi',  // Council of Ulema (Hanafi-Maturidi Bukharan inheritance; primary-source URL intermittent due to state internet policy)
+  Turkmenistan: 'hanafi', // Hanafi tradition (state muftiate primary-source URL not consistently published online)
 
   // ── Standard-Asr convention countries (1× shadow metadata).
-  // These are often Shafi'i-majority contexts, but the API intentionally
-  // reports the Asr convention, not a full legal madhhab.
-  Maldives:    'standard',  // Maldives Ministry of Islamic Affairs
-  SriLanka:    'standard',  // ACJU All Ceylon Jamiyyathul Ulama
-  Indonesia:   'standard',  // KEMENAG
-  Malaysia:    'standard',  // JAKIM
-  Singapore:   'standard',  // MUIS
-  Brunei:      'standard',  // Brunei Awqaf
-  Yemen:       'standard',  // Sunni standard-Asr convention; Zaydi minority (north)
-  Somalia:     'standard',
-  Djibouti:    'standard',
-  Comoros:     'standard',
-  Ethiopia:    'standard',
-  Eritrea:     'standard',
-  Tanzania:    'standard',
-  Kenya:       'standard',
-  Mozambique:  'standard',
+  // The label captures Asr-shadow convention, NOT the full legal madhhab. Maliki, Hanbali,
+  // and Jafari schools all use 1× shadow despite being distinct legal madhhabs from Shafi'i.
+  // The disclaimer + 'How to think about fajr's outputs' README section make this explicit.
+  Maldives:    'standard',  // Maldives Ministry of Islamic Affairs (Sunni Shafi'i)
+  SriLanka:    'standard',  // ACJU All Ceylon Jamiyyathul Ulama (Sunni Shafi'i)
+  Indonesia:   'standard',  // KEMENAG (Sunni Shafi'i — NU + Muhammadiyah both Shafi'i in Asr convention)
+  Malaysia:    'standard',  // JAKIM (Sunni Shafi'i)
+  Singapore:   'standard',  // MUIS (Sunni Shafi'i)
+  Brunei:      'standard',  // Brunei Awqaf (Shafi'i is the constitutional madhhab)
+  // Yemen: ~32M total, ~99% Muslim. Two distinct traditions, both 1× shadow but with different
+  // wider prayer-time conventions — Sunni Shafi'i (~65%, southern + central; Aden Awqaf; published
+  // via Aden mufti) and Zaydi (~35%, northern Houthi-administered; Hadawi-Zaydi tradition).
+  // Both use 1× shadow Asr; the wider Zaydi Imsakiyya differs in Fajr/Maghrib treatment but
+  // not Asr-shadow. Country-default 'standard' is shadow-correct for both populations; per-region
+  // Houthi-Aden divergence is a future #40 caller-override candidate, not a country-default split.
+  Yemen:       'standard',  // Shafi'i-majority + Zaydi minority (~35%); both use 1× shadow
+  Somalia:     'standard',  // Shafi'i tradition; Sufi Qadiri/Tijani affiliations
+  Djibouti:    'standard',  // Shafi'i tradition (Afar + Somali populations)
+  Comoros:     'standard',  // Shafi'i tradition (Comorian Sunni; Walker 2010)
+  Ethiopia:    'standard',  // Shafi'i majority (Wallo, Eastern Hararghe, Somali Region)
+  Eritrea:     'standard',  // Shafi'i among Muslims (~37% of total population; Tigre, Saho, Afar communities)
+  Tanzania:    'standard',  // Shafi'i tradition (Zanzibar ~99% Sunni Shafi'i; mainland coastal Swahili Shafi'i)
+  Kenya:       'standard',  // Shafi'i along the Swahili coast; SUPKEM federation
+  Mozambique:  'standard',  // Shafi'i along the Swahili coast (Cabo Delgado, northern provinces); CISLAMO
+
+  // ── v1.7.23 (#83 audit Track C) — Maliki Trans-Saharan + Maghreb cluster + W African + Twelver Jafari.
+  // The 'standard' label below is shadow-convention metadata, NOT a claim that any of these
+  // countries follow the Shafi'i legal madhhab. Morocco / Algeria / Tunisia / Libya / Mauritania
+  // and the West African Maliki cluster are MALIKI by legal madhhab; Iran is Twelver JAFARI;
+  // Cambodia / Thailand / Philippines (Bangsamoro / Cham) are Sunni SHAFI'I. All converge on
+  // 1× shadow Asr — that's what 'standard' captures, and what the README + disclaimer explain.
+  // Adding these surfaces the Maliki/Jafari/Cham contexts in `location.asrConvention` instead
+  // of falling through to `'method-implied'` (which is honest but undersells the strong
+  // demographic + institutional signal). See autoresearch/proposals/2026-05-05-madhab-asr-convention-grounding.md
+  // for per-country grounding paragraphs.
+  Morocco:     'standard',  // Maliki Trans-Saharan; Habous (Ministère des Habous et des Affaires islamiques) — closes the v1.7.22 cautionary-example loop from CALIBRATION.md / #88
+  Mauritania:  'standard',  // Maliki Trans-Saharan; Mauritanian Ministry of Islamic Affairs
+  Tunisia:     'standard',  // Maliki; Ministère des Affaires Religieuses Tunisie + Diwan al-Awqaf
+  Algeria:     'standard',  // Maliki; MARW Algérie (Ministère des Affaires Religieuses et des Wakfs)
+  Libya:       'standard',  // Maliki; General Authority of Endowments and Islamic Affairs
+  Senegal:     'standard',  // Maliki + Tijaniyya/Mouride/Qadiriyya Sufi; Conseil Supérieur Islamique du Sénégal
+  Mali:        'standard',  // Maliki; Haut Conseil Islamique du Mali
+  Gambia:      'standard',  // Maliki; Supreme Islamic Council of The Gambia
+  Niger:       'standard',  // Maliki Trans-Saharan
+  BurkinaFaso: 'standard',  // Maliki Trans-Saharan + Sufi Tijaniyya
+  CoteDIvoire: 'standard',  // Maliki Trans-Saharan + Sufi Tijaniyya
+  Iran:        'standard',  // Twelver Jafari 1× shadow; Tehran Institute of Geophysics. Distinct from Sunni Shafi'i; same shadow convention.
+  Cambodia:    'standard',  // Cham Muslim community (Sunni Shafi'i tradition)
+  Thailand:    'standard',  // Sheikhul Islam Thailand; Patani Malay Shafi'i (southern Thailand)
+  Philippines: 'standard',  // Bangsamoro Darul-Ifta' (BDI-BARMM; Sunni Shafi'i)
 
   // Mixed / leave-default countries (no entry):
-  //   Egypt, Iraq, SaudiArabia, UAE, Qatar, Bahrain, Kuwait, Oman, Jordan,
-  //   Lebanon, Syria, Palestine, Israel, Morocco, Algeria, Tunisia, Libya,
-  //   Sudan, Mauritania, all sub-Saharan-Africa-non-Shafi'i, all Western
-  //   diaspora countries (US, UK, France, Germany, etc. — heterogeneous)
-  // → these stay at the selected method's applied Asr-school label.
+  //   Egypt, Iraq, SaudiArabia, UAE, Qatar, Bahrain, Kuwait, Oman, Jordan, Sudan,
+  //   Lebanon, Syria, Palestine, Israel, all Western diaspora countries (US, UK,
+  //   France, Germany, Australia, Canada, etc. — heterogeneous)
+  // → these stay at the selected method's applied Asr-school label. The audit
+  // (autoresearch/proposals/2026-05-05-madhab-asr-convention-grounding.md §2.3 + §5)
+  // confirms these fall-throughs are principled — Egypt has institutional-Hanafi-vs-
+  // scholarly-Shafi'i tension, Saudi has Hanbali-legal-madhhab-vs-standard-shadow,
+  // Iraq is multi-madhab + multi-sect with city-level overrides handling the granularity,
+  // Lebanon/Syria are religiously plural, and Western diaspora is heterogeneous.
 }
 
 /**

@@ -24,6 +24,63 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.23] — 2026-05-05
+
+### Added — `COUNTRY_ASR_CONVENTION` extension (Track C scholarly grounding)
+
+15 metadata-only additions to `src/engine.js`'s `COUNTRY_ASR_CONVENTION`
+table per the audit in [`autoresearch/proposals/2026-05-05-madhab-asr-convention-grounding.md`](autoresearch/proposals/2026-05-05-madhab-asr-convention-grounding.md):
+
+- **Maghreb Maliki cluster** (5): Morocco, Mauritania, Tunisia, Algeria,
+  Libya — all `'standard'`. Closes the Morocco-Maliki cautionary-example
+  loop from CALIBRATION.md / [#88](https://github.com/tawfeeqmartin/fajr/issues/88).
+- **West African Maliki cluster** (6): Senegal, Mali, Gambia, Niger,
+  BurkinaFaso, CoteDIvoire — all `'standard'`. Maliki Trans-Saharan
+  tradition + Tijaniyya/Mouride/Qadiriyya Sufi affiliations.
+- **Twelver Jafari** (1): Iran — `'standard'` (Jafari uses 1× shadow Asr,
+  same convention as Sunni standard; pedagogical disambiguation).
+- **SE Asia Sunni Shafi'i** (3): Cambodia (Cham), Thailand (Patani Malay),
+  Philippines (BARMM/Bangsamoro) — all `'standard'`.
+
+Plus 2 inline-comment improvements:
+
+- **India**: added demographic estimate (~140M Hanafi / ~36M Shafi'i /
+  ~28M Twelver per Census of India 2011 + Pew 2021 + Samastha Kerala).
+- **Yemen**: explicit Zaydi-Shafi'i 35/65 split + 1× shadow consistency.
+
+Plus header rewrite: the `'standard'` label block now explicitly disclaims
+that the value is Asr-shadow-convention metadata only, NOT a Shafi'i legal
+madhhab claim. Maliki, Hanbali, and Jafari all use 1× shadow despite being
+distinct legal madhhabs.
+
+### Honest caveats
+
+- **Pure metadata-only change**: no `applied.asrSchool` or prayer-time
+  shift. Train WMAE 0.9757 → 0.9757 (0.00 drift). All per-region MAE
+  deltas 0.00. All per-prayer signed bias deltas 0.00. Eval+compare run
+  + verified per `feedback_eval_ratchet_before_shippable` (the rule
+  introduced after v1.7.22's PR #84 ratchet failure). The `compare.js`
+  verdict line "FAIL — wash is a rejection" applies to accuracy-improving
+  engine work; this PR is structurally outside its scope.
+- **`location.asrConvention === 'standard'`** in Morocco / Iran / etc.
+  does not mean Shafi'i. The disclaimer + README "How to think about
+  fajr's outputs" section make this explicit.
+- **No reclassifications**: the audit found zero entries in the existing
+  table that warrant reclassification. The 14 Hanafi + 15 prior `'standard'`
+  entries all defend cleanly against primary sources. v1.7.23 is purely
+  additive.
+
+### Cross-references
+
+- Audit proposal: `autoresearch/proposals/2026-05-05-madhab-asr-convention-grounding.md`
+- Autoresearch log: `autoresearch/logs/2026-05-05-08-30-v1.7.23-asr-convention-table-extension.md`
+- Builds on v1.7.22 metadata-vs-calculation split (commits `2b28e77` + `6f6ae23`,
+  resolves [#83](https://github.com/tawfeeqmartin/fajr/issues/83) / [#85](https://github.com/tawfeeqmartin/fajr/issues/85))
+- Closes pedagogically: the Morocco-Maliki cautionary example from
+  [#88](https://github.com/tawfeeqmartin/fajr/issues/88)
+
+---
+
 ## [1.7.22] — 2026-05-03
 
 ### Fixed
