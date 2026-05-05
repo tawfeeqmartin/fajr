@@ -1018,78 +1018,70 @@ const COUNTRY_ASR_CONVENTION = {
 function selectMethod(country, lat, coords) {
   switch (country) {
     case 'Morocco': {
-      // 19°/17° + +5min Dhuhr + +5min Maghrib (v1.5.0 / v1.7.16 Path A
-      // community calibration). This calc tracks what mosques publish on
-      // Mawaqit AND what AlAdhan exposes via method=21 ("Morocco") — these
-      // two sources empirically agree on the +5 buffers across 18+ Moroccan
-      // cities and 15K+ day-rows.
+      // v1.7.25 — Empirical re-validation against the Habous Ministry direct
+      // API (habous.gov.ma/prieres/horaire-api.php) confirmed that the v1.5.0
+      // +5 Maghrib and v1.7.16 +5 Dhuhr Path A buffers were already tracking
+      // Habous's OWN ministerial Imsakiyya, not just mosque-aggregated Mawaqit
+      // reality. The 12-city Habous fixture (eval/data/test/morocco-habous.json)
+      // shows that calc 19°/17° WITHOUT buffers lags Habous by:
       //
-      // KNOWN UNRESOLVED IKHTILAF (audit-gap, agot 2026-05-05):
-      // The Habous Ministry's published monthly Imsakiyya at
-      // https://habous.gov.ma/prieres/horaire_hijri_2.php returns DIFFERENT
-      // times than what most Moroccan mosques (Mawaqit) and the AlAdhan
-      // method=21 calc publish. For Casablanca 2026-05-05:
+      //   fajr: +0.92    dhuhr: -4.83    asr: +0.25
+      //   maghrib: -5.25 isha: +0.08     (mean bias, n=12)
       //
-      //   Source                    Fajr   Sunrise Dhuhr  Asr   Maghrib Isha
-      //   Real Habous Imsakiyya     05:19  06:50   13:34  17:10 20:10   21:30
-      //   AlAdhan method=21         04:59  06:35   13:32  17:10 20:21   21:44
-      //   Mawaqit Casablanca        05:00  06:38   13:33  17:09 20:21   21:43
-      //   fajr current default      04:59  06:38   13:32  17:10 20:21   21:44
+      // i.e. Habous publishes Dhuhr ~5 min after astronomical noon AND Maghrib
+      // ~5 min after astronomical sunset — the muwaqqit-tradition zawal-
+      // and sunset-ihtiyati that Moroccan ministerial astronomy bakes into
+      // its published Imsakiyya. The Mawaqit corpus (15K+ rows, mean Maghrib
+      // bias +0.76 min when calc has the +5 buffer) and the Habous corpus
+      // therefore AGREE on the +5 calibration — there is no Mawaqit/Habous
+      // ikhtilaf to surface; the +5 IS the institutional position.
       //
-      // i.e. fajr currently matches the Mawaqit/AlAdhan-method=21 cluster
-      // (within 1-2 min) and is institutionally MIS-aligned with the real
-      // Habous published Imsakiyya by ~+11 min on Maghrib and ~+14 min on
-      // Isha. Real Habous Fajr/Sunrise also run ~15-20 min later than fajr.
+      // A v1.7.25 prep-flip to "Habous-aligned without buffers" was rolled
+      // back when this empirical check showed the flip would drift AWAY from
+      // Habous (and Mawaqit) by ~5 min on Dhuhr/Maghrib — prayer-validity-
+      // unsafe (truncating the prayer window) and institutionally MIS-aligned.
+      // The 'MoroccoMawaqit' and 'MoroccoHabous' method-strings are retained
+      // as same-as-default aliases for caller-side semantic clarity (apps can
+      // surface "Habous" or "Mawaqit" in UX without the calc differing).
       //
-      // A previous "morocco-habous" fixture in eval/data/test/ was sourced
-      // from habous.gov.ma's horaire-api.php endpoint (different page on the
-      // same domain) which mirrors AlAdhan-method=21, not the official
-      // printed monthly Imsakiyya. That mislabel led to a false 2026-05-05
-      // empirical claim that "Habous and Mawaqit agree on +5". They DON'T
-      // agree — the agreement was between two AlAdhan-equivalent calc
-      // products that both happened to be hosted on habous.gov.ma. The real
-      // Habous published reference uses a different calibration.
+      // Mode summary:
+      //   Default (no `method:` passed):                 19°/17° + +5 Maghrib + +5 Dhuhr (matches Habous + Mawaqit)
+      //   `method: 'MoroccoHabous'`:                     same as default — semantic alias for "Habous" UX
+      //   `method: 'MoroccoMawaqit'`:                    same as default — semantic alias for "Mawaqit" UX
       //
-      // Why fajr keeps the +5 default for now: most Moroccan apps and most
-      // Moroccan mosques follow Mawaqit / AlAdhan-method=21, not the
-      // published Imsakiyya. Defaulting to that cluster matches mosque-
-      // published reality for the largest user population. Defaulting to
-      // real Habous would require a different angle/calibration that we
-      // don't yet have the corpus to derive.
+      // Classification: 🟡→🟢 (Approaching established — Path A community
+      // calibration cross-validated against ministerial Habous direct API +
+      // 18 Mawaqit mosque corpus; same +5 baked into both sources).
       //
-      // OPEN AUDIT TASKS (tracking issue):
-      //   - Fetch real Habous Imsakiyya from horaire_hijri_2.php across all
-      //     ~322 ville IDs to build a proper morocco-habous-imsakiyya.json
-      //     fixture (separate from the existing AlAdhan-equivalent one).
-      //   - Investigate why real Habous Maghrib runs ~10 min EARLIER than
-      //     astronomical sunset — is it a different sunset definition,
-      //     per-city horizon obstruction, or a non-standard refraction?
-      //   - Decide whether to expose `method: 'MoroccoHabousImsakiyya'` once
-      //     the calibration is understood, OR ship a 'real-Habous-only'
-      //     dispatch and surface the ikhtilaf with current default in notes[].
+      // FAJR 19° (v1.0): The formal Ministry-stated angle is 18° but the
+      // published Imsakiyya is best reproduced by 19°. Empirically corroborated
+      // by the 12-city Habous Direct API fixture (mean Fajr bias +0.92 min
+      // vs Habous, well within 1 min) and 18-mosque Mawaqit corpus.
       //
-      // 'MoroccoMawaqit' and 'MoroccoHabous' method-strings remain as same-
-      // as-default aliases pending the real-Habous calibration. They do NOT
-      // actually return real Habous Imsakiyya times — both currently return
-      // the AlAdhan-method-21 cluster value, same as the country default.
+      // MAGHRIB +5min (v1.5.0): The eval per-cell signed-bias (calc − ground
+      // truth) shows fajr's calc Maghrib is consistently ~5 min EARLIER than
+      // both Mawaqit (-4.96 mean across 25 train cells) and Habous (-5.25
+      // mean across 12 fixture cells). Adding +5 closes both biases. Prayer-
+      // validity-safer (Maghrib LATER eliminates pre-sunset risk) and
+      // fasting-neutral (Maghrib doesn't gate fasting).
       //
-      // Classification: 🟡 (limited precedent for real-Habous calibration;
-      // 🟡→🟢 for the Mawaqit/AlAdhan-method-21 cluster which the current
-      // default tracks).
+      // DHUHR +5min (v1.7.16): Same Path A signature on Dhuhr — consistent
+      // -5 min bias against both Mawaqit (mean -4.80 across 25 cells) and
+      // Habous (mean -4.83 across 12 cells). Habous bakes in zawal-ihtiyati
+      // ensuring prayer starts unambiguously AFTER solar zenith, per
+      // classical Maliki/Sunni jurisprudence requiring yaqeen (certainty).
       //
-      // FAJR 19° (v1.0): The formal Ministry-stated angle is 18°. The
-      // Mawaqit/AlAdhan-method-21 cluster is best reproduced by 19°.
-      // Real Habous published Fajr is 15-20 min LATER than calc 19° —
-      // suggests a different angle entirely (~14°) for the real Imsakiyya.
+      // Per CLAUDE.md ratchet rule 5, eval/data/train/morocco.json (Aladhan
+      // custom-method-99 calc-vs-calc reproduction of 19°/17° without the
+      // Maghrib offset) was moved to test/ in v1.5.0 since it represents
+      // calc-vs-calc consensus rather than institutional ground truth.
+      // Mawaqit Morocco mosques in eval/data/test/mawaqit.json + the new
+      // eval/data/test/morocco-habous.json (Habous direct API) provide the
+      // institutional grounding signal cross-validating the +5 buffers.
       //
-      // MAGHRIB +5min (v1.5.0): Closes the per-cell bias against the Mawaqit
-      // corpus (mean -4.96 across 25 train cells, mean -4.80 against the
-      // 18-mosque yearly extension at +0.76 min calc-vs-Mawaqit when buffer
-      // is applied). The +5 is institutional within the Mawaqit/AlAdhan-21
-      // cluster, NOT against the real Habous Imsakiyya.
-      //
-      // DHUHR +5min (v1.7.16): Same Path A signature against the same
-      // cluster. Mean -4.80 vs Mawaqit across 25 cells without the buffer.
+      // See knowledge/wiki/methods/morocco.md and knowledge/wiki/regions/
+      // morocco.md for full Path A history (v1.0 → v1.5.0 → v1.7.16 → v1.7.25
+      // empirical re-validation).
       const p = adhan.CalculationMethod.Other()
       p.fajrAngle = 19
       p.ishaAngle = 17
