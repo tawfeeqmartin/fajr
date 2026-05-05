@@ -38,6 +38,31 @@ the top of this file always reflects the most recent version on npm.
 > [Per-region accuracy](#per-region-accuracy-current-post-v1719) for the
 > breakdown.
 
+> **🟥 Audit-gap disclosure (2026-05-05) — Mawaqit fixtures are
+> single-day snapshots.** A targeted audit of the Mawaqit-anchored train +
+> test fixtures revealed that **every Mawaqit fixture in fajr's eval corpus
+> covers exactly one date** (most: 2026-05-02). The geographic breadth
+> ("23 Moroccan mosques across 14 cities") was sold without disclosing
+> the temporal sparseness — a real reputational gap per #65. The
+> calibrations tuned to those fixtures (v1.5.0 Morocco Maghrib +5,
+> v1.7.16 Morocco Dhuhr +5, v1.7.16 JAKIM Dhuhr +2 / Asr +1) are
+> **single-day calibrations extrapolated to all dates**. We do not yet
+> have empirical evidence they hold seasonally.
+>
+> **Mitigation in flight (v1.7.x+)**: each Mawaqit mosque page embeds a
+> full-year calendar inline; we're rebuilding the train corpus to cover
+> 365 days × 191 mosques = ~70K rows of seasonal mosque-published ground
+> truth, plus 1-2 years historical via Wayback Machine. After the corpus
+> lands, every existing Path A calibration gets re-validated across all
+> 4 seasons. Any seasonal drift findings + per-month/per-region
+> calibration adjustments will be tracked in the autoresearch logs.
+>
+> **The honest position until the seasonal corpus lands**: fajr's
+> single-day Mawaqit calibrations have been verified accurate FOR THAT
+> DAY. Year-round accuracy is presumed but not empirically demonstrated.
+> Apps that need verifiable year-round accuracy should pin to a
+> ratcheted version + log their own daily/weekly drift.
+
 ---
 
 ## Reference sources fajr benchmarks against
