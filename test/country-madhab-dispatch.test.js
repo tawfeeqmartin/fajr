@@ -69,14 +69,16 @@ describe('#83/#88 — standard-Asr country dispatch', () => {
 })
 
 describe('#83 — mixed/leave-default countries fall through to method-implied', () => {
+  // Mixed-madhab countries deliberately not in COUNTRY_ASR_CONVENTION because no
+  // single label is right at the country level (Egypt institutional-Hanafi vs
+  // scholarly-Shafi'i; Saudi Hanbali-legal + Eastern-Province-Shia minority;
+  // Iraq multi-sect city-level overrides; Lebanon/Syria religiously plural;
+  // Western diaspora heterogeneous). Audit confirms: 2026-05-05-madhab-asr-convention-grounding.md §2.3 + §5.
   const FALLTHROUGH_CITIES = [
     ['Cairo EG',      30.0626, 31.2497],
     ['Mecca SA',      21.4225, 39.8262],
     ['Beirut LB',     33.8938, 35.5018],
     ['Baghdad IQ',    33.3152, 44.3661],   // (Mosul/Najaf/Karbala have city overrides)
-    ['Casablanca MA', 33.5731, -7.5898],
-    ['Tunis TN',      36.8065, 10.1815],
-    ['Algiers DZ',    36.7538,  3.0588],
     ['London UK',     51.5074, -0.1278],
     ['New York US',   40.7128, -74.0060],
     ['Paris FR',      48.8566,  2.3522],
@@ -90,12 +92,54 @@ describe('#83 — mixed/leave-default countries fall through to method-implied',
       expect(r.location.madhabSource).toBe('method-implied')
     })
   }
+})
+
+describe('#83 v1.7.23 — Maliki / Jafari / Cham countries report standard with country-default source', () => {
+  // The v1.7.23 audit (Track C scholarly grounding) added 15 entries to
+  // COUNTRY_ASR_CONVENTION for countries previously falling through to
+  // method-implied. The 'standard' label captures Asr-shadow convention
+  // ONLY — Morocco/Tunisia/Algeria/Libya/Mauritania/Senegal/Mali/Gambia/
+  // Niger/BurkinaFaso/CoteDIvoire are MALIKI legal madhhab; Iran is
+  // Twelver JAFARI; Cambodia/Thailand/Philippines (Bangsamoro/Cham) are
+  // Sunni SHAFI'I. All converge on 1× shadow Asr.
+  const STANDARD_COUNTRY_DEFAULT_CITIES = [
+    ['Casablanca MA',  33.5731,  -7.5898],   // Maliki
+    ['Tunis TN',       36.8065,  10.1815],   // Maliki
+    ['Algiers DZ',     36.7538,   3.0588],   // Maliki
+    ['Tripoli LY',     32.8872,  13.1913],   // Maliki
+    ['Nouakchott MR',  18.0735, -15.9582],   // Maliki Trans-Saharan
+    ['Dakar SN',       14.6928, -17.4467],   // Maliki + Tijaniyya
+    ['Bamako ML',      12.6392,  -8.0029],   // Maliki
+    ['Banjul GM',      13.4549, -16.5790],   // Maliki
+    ['Niamey NE',      13.5117,   2.1098],   // Maliki Trans-Saharan
+    ['Ouagadougou BF', 12.3714,  -1.5197],   // Maliki Trans-Saharan
+    ['Abidjan CI',      5.3600,  -4.0083],   // Maliki Trans-Saharan
+    ['Tehran IR',      35.6892,  51.3890],   // Twelver Jafari
+    ['Phnom Penh KH',  11.5564, 104.9282],   // Cham Shafi'i
+    ['Bangkok TH',     13.7563, 100.5018],   // Patani Malay Shafi'i
+    ['Manila PH',      14.5995, 120.9842],   // BARMM / Bangsamoro Shafi'i
+  ]
+
+  for (const [name, lat, lon] of STANDARD_COUNTRY_DEFAULT_CITIES) {
+    it(`${name} → asrConvention='standard' / asrConventionSource='country-default'`, () => {
+      const r = prayerTimes({ latitude: lat, longitude: lon, date: new Date('2026-05-05') })
+      expect(r.location.asrConvention).toBe('standard')
+      expect(r.location.asrConventionSource).toBe('country-default')
+      // Legacy alias mirrors asrConvention via the standard→shafii mapping
+      expect(r.location.madhab).toBe('shafii')
+      expect(r.location.madhabSource).toBe('country-default')
+    })
+  }
 
   it('Morocco exposes standard Asr convention without claiming Shafi legal madhhab', () => {
-    const r = prayerTimes({ latitude: 33.5731, longitude: -7.5898, date: new Date('2026-05-04') })
+    // The v1.7.23 audit closed the cautionary-example loop: Morocco is now
+    // explicitly in COUNTRY_ASR_CONVENTION as 'standard' with a Maliki disclaimer.
+    // The README + disclaimer copy explain that 'standard' is shadow-convention
+    // metadata, NOT a claim about legal madhhab.
+    const r = prayerTimes({ latitude: 33.5731, longitude: -7.5898, date: new Date('2026-05-05') })
     expect(r.location.country).toBe('Morocco')
     expect(r.location.asrConvention).toBe('standard')
-    expect(r.location.asrConventionSource).toBe('method-implied')
+    expect(r.location.asrConventionSource).toBe('country-default')
     expect(r.disclaimer).toContain('Asr convention')
     expect(r.disclaimer).not.toContain('madhab + elevation')
   })
