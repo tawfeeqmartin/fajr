@@ -1,6 +1,6 @@
 # fajr — accuracy + scholarly methodology
 
-Last refreshed: 2026-05-05 (v1.7.24)
+Last refreshed: 2026-05-05 (v1.7.25)
 
 ## What this document is
 

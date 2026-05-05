@@ -12,7 +12,7 @@
     "altMethods": [
       { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
     ],
-    "citation": "Iraqi Sunni Endowment Office (Diwan al-Waqf al-Sunni) — https://sunni.gov.iq/ (institutional publisher of timetables for Sunni-majority northern Iraq, including Nineveh governorate)",
+    "citation": "Iraqi Sunni Endowment Office (Diwan al-Waqf al-Sunni) — http://sunniaffairs.gov.iq/en/ (institutional publisher of timetables for Sunni-majority northern Iraq, including Nineveh governorate)",
     "reasoning": "Mosul (Nineveh) is a majority Sunni Hanafi region administered by the Iraqi Sunni Endowment Office. The Diwan's published Imsakiyya for the Sunni governorates aligns with the Karachi 18°/18° + Hanafi-Asr cluster used across the South Asian / Iraqi Sunni Hanafi tradition, distinct from the Egyptian 19.5°/17.5° Aladhan-default that the engine returns for Iraq writ-large (which itself is a multi-method country with significant Shia-majority south)."
   },
 
@@ -132,7 +132,7 @@
     "altMethods": [
       { "method": "Diyanet", "source": "Iranian Azeri Sunni Hanafi minority — Sunni mosques in northwestern Iran (West Azerbaijan, Ardabil Sunni neighbourhoods) follow Diyanet-aligned Hanafi convention via Turkish religious presence" }
     ],
-    "citation": "Tehran Institute of Geophysics (regional default for all of Iran) — https://earthquake.ut.ac.ir/ (publisher of national prayer-time data); cross-referenced with East Azerbaijan Friday Prayer Office",
+    "citation": "Tehran Institute of Geophysics (regional default for all of Iran) — https://geophysics.ut.ac.ir/en/ (publisher of national prayer-time data); cross-referenced with East Azerbaijan Friday Prayer Office",
     "reasoning": "Tabriz (East Azerbaijan) is overwhelmingly Iranian Azeri Twelver Shia and follows the Tehran Institute of Geophysics regional default — same as the Iran country case. Override included for explicit traceability because Tabriz has a small Sunni Hanafi minority (cross-border with Azerbaijan and Turkey) for whom the altMethods Diyanet entry surfaces the alternative."
   },
 

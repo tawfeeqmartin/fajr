@@ -24,6 +24,79 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.25] — 2026-05-05
+
+### Added — Track A holdout-corpus expansion + Track D data corrections
+
+Bundled implementation of the deep-research proposals:
+- `autoresearch/proposals/2026-05-05-mosque-corpus-expansion.md` (Track A)
+- `autoresearch/proposals/2026-05-05-city-confidence-audit.md` (Track D)
+
+#### New fetcher scripts + holdout fixtures
+
+- **`scripts/fetch-indonesia-myquran.js`** + `eval/data/test/indonesia-myquran.json` —
+  Indonesia myQuran community wrapper around KEMENAG. Closes the
+  KEMENAG dead-end documented in `docs/calibration-recipe.md`. **21 cities ×
+  7 days = 147 city-days** of fresh KEMENAG data covering Java / Sumatra /
+  Kalimantan / Sulawesi / Nusa Tenggara / Maluku / Papua + metro regions.
+- **`scripts/fetch-morocco-habous.js`** + `eval/data/test/morocco-habous.json` —
+  Morocco Habous Ministry direct PHP API. **12 Moroccan cities × 1 day**
+  (Casablanca, Rabat, Marrakech, Fès, Tangier, Agadir, Meknes, Oujda,
+  Tetouan, Salé, Kenitra, Taza). HOLDOUT cross-reference for the v1.5.0
+  Mawaqit-Morocco train anchor — ministry vs mosque-published divergence.
+- **`scripts/fetch-egypt-esa.js`** + `eval/data/test/egypt-esa.json` —
+  Egypt ESA (General Authority of Survey) scraper attempt. **Stub fixture
+  only**: ESA's VIEWSTATE form turns out to be JS-rendered, so raw HTTP
+  scrape fails. Script + stub document the failure path; next-round
+  attempt should use Puppeteer/Playwright headless browser.
+
+#### Data corrections (Track D top 5)
+
+- **Mosul citation URL** in `scripts/data/city-method-overrides.json`:
+  `sunni.gov.iq/` → `sunniaffairs.gov.iq/en/` (previous URL doesn't resolve)
+- **Tabriz citation URL** in `scripts/data/city-method-overrides.json`:
+  `earthquake.ut.ac.ir/` → `geophysics.ut.ac.ir/en/` (seismology subdomain
+  was not the institutional homepage)
+- **Lisbon (PT) elevation** in `src/data/cities.json`: `2m` → `50m`
+  (3 sources confirm 45-62m city-centre)
+- **Pattani (TH) population** in `src/data/cities.json`: `144000` → `45000`
+  (correcting city-proper vs province confusion; citypopulation.de city-
+  proper is 44,353)
+- **Karbala / Najaf / Basra source.institution** in `src/data/cities.json`:
+  rewritten from "Tehran Institute of Geophysics" to
+  "Najaf hawza maraji' (Office of Sistani; Astan al-Husayniyya custodial
+  offices) — Tehran-style timing convention". Tehran Institute is the
+  Iran-side anchor, not the institutional voice for Twelver Shia Iraqi
+  cities.
+
+### Honest caveats
+
+- **Pure data + corpus expansion**: no engine code change; no dispatch
+  logic affected. Train WMAE 0.9757 unchanged (verified — new fixtures
+  are added to `eval/data/test/`, never gate the ratchet per CLAUDE.md
+  rule 2).
+- **Egypt ESA is a stub**: the script documents the JS-rendered VIEWSTATE
+  failure mode and suggests Puppeteer/Playwright next round. Track A's
+  audit estimated Effort 3 / Value 5 for this channel — the JS-rendering
+  finding pushes effort closer to 4. Cairo/Alexandria 6.5-min train
+  outlier (fajr#69) remains open until a deeper scrape lands.
+- **Morocco Habous** is a HOLDOUT cross-reference (test corpus), NOT a
+  replacement for the v1.5.0 Mawaqit-Morocco train anchor. The latter
+  (mosque-published) remains sacred per CLAUDE.md ratchet rule 5.
+
+### Cross-references
+
+- Track A audit: `autoresearch/proposals/2026-05-05-mosque-corpus-expansion.md`
+- Track D audit: `autoresearch/proposals/2026-05-05-city-confidence-audit.md`
+- Builds on v1.7.23 (#88 Track C metadata extension) + v1.7.24 (Track B
+  bbox routing corrections)
+- Pattern reference for fetchers: `scripts/fetch-aladhan.js`
+- All 4 deep-research tracks (A/B/C/D) from the 2026-05-05 push are now
+  implemented; remaining channels (Track A #2 Brunei MoRA, #5 Kazakhstan
+  KMDB; Track A #4 Egypt deeper-scrape) are queued for future rounds
+
+---
+
 ## [1.7.24] — 2026-05-05
 
 ### Fixed — bbox routing corrections (Track B audit)

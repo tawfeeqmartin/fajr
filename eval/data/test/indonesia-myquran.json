@@ -1,0 +1,1562 @@
+{
+  "source": "myQuran Indonesia KEMENAG Wrapper",
+  "source_url": "https://api.myquran.com/v2/sholat",
+  "source_fetched": "2026-05-05T17:01:35.355Z",
+  "notes": "Stress-test holdout set: 25 Indonesian cities × 7 days each. Sampled provincial capitals and high-population cities for geographic / socioeconomic diversity.",
+  "cities": [
+    {
+      "city": "Jakarta",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T16:58:57.240Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:53",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:53",
+          "asr": "15:14",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:53",
+          "asr": "15:14",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:53",
+          "asr": "15:13",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:53",
+          "asr": "15:13",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:53",
+          "asr": "15:13",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:35",
+          "sunrise": "05:50",
+          "dhuhr": "11:53",
+          "asr": "15:13",
+          "maghrib": "17:48",
+          "isha": "19:00"
+        }
+      ]
+    },
+    {
+      "city": "Bandung",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T16:59:01.195Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:34",
+          "sunrise": "05:43",
+          "dhuhr": "11:50",
+          "asr": "15:10",
+          "maghrib": "17:50",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:33",
+          "sunrise": "05:43",
+          "dhuhr": "11:50",
+          "asr": "15:10",
+          "maghrib": "17:50",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:33",
+          "sunrise": "05:43",
+          "dhuhr": "11:50",
+          "asr": "15:10",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:33",
+          "sunrise": "05:43",
+          "dhuhr": "11:50",
+          "asr": "15:10",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:33",
+          "sunrise": "05:43",
+          "dhuhr": "11:50",
+          "asr": "15:10",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:33",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:10",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:33",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:10",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        }
+      ]
+    },
+    {
+      "city": "Semarang",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T16:59:04.772Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:22",
+          "sunrise": "05:36",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:34",
+          "isha": "18:45"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:22",
+          "sunrise": "05:36",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:34",
+          "isha": "18:45"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:22",
+          "sunrise": "05:36",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:34",
+          "isha": "18:45"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:22",
+          "sunrise": "05:36",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:34",
+          "isha": "18:45"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:22",
+          "sunrise": "05:36",
+          "dhuhr": "11:38",
+          "asr": "14:59",
+          "maghrib": "17:33",
+          "isha": "18:44"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:22",
+          "sunrise": "05:36",
+          "dhuhr": "11:38",
+          "asr": "14:59",
+          "maghrib": "17:33",
+          "isha": "18:44"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:22",
+          "sunrise": "05:37",
+          "dhuhr": "11:38",
+          "asr": "14:59",
+          "maghrib": "17:33",
+          "isha": "18:44"
+        }
+      ]
+    },
+    {
+      "city": "Surabaya",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T16:59:08.344Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:14",
+          "sunrise": "05:28",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:25",
+          "isha": "18:36"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:13",
+          "sunrise": "05:28",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:25",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:13",
+          "sunrise": "05:28",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:24",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:13",
+          "sunrise": "05:28",
+          "dhuhr": "11:29",
+          "asr": "14:50",
+          "maghrib": "17:24",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:13",
+          "sunrise": "05:28",
+          "dhuhr": "11:29",
+          "asr": "14:50",
+          "maghrib": "17:24",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:13",
+          "sunrise": "05:28",
+          "dhuhr": "11:29",
+          "asr": "14:50",
+          "maghrib": "17:24",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:13",
+          "sunrise": "05:28",
+          "dhuhr": "11:29",
+          "asr": "14:50",
+          "maghrib": "17:23",
+          "isha": "18:35"
+        }
+      ]
+    },
+    {
+      "city": "Malang",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T16:59:11.834Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:25",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:24",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:24",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:24",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:23",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:23",
+          "isha": "18:35"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:30",
+          "asr": "14:50",
+          "maghrib": "17:23",
+          "isha": "18:34"
+        }
+      ]
+    },
+    {
+      "city": "Yogyakarta",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T16:59:15.319Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:23",
+          "sunrise": "05:37",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:34",
+          "isha": "18:45"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:23",
+          "sunrise": "05:37",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:34",
+          "isha": "18:44"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:23",
+          "sunrise": "05:37",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:33",
+          "isha": "18:44"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:23",
+          "sunrise": "05:38",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:33",
+          "isha": "18:44"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:23",
+          "sunrise": "05:38",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:33",
+          "isha": "18:44"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:23",
+          "sunrise": "05:38",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:32",
+          "isha": "18:44"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:23",
+          "sunrise": "05:38",
+          "dhuhr": "11:39",
+          "asr": "14:59",
+          "maghrib": "17:32",
+          "isha": "18:44"
+        }
+      ]
+    },
+    {
+      "city": "Medan (Labuhan Ali)",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T16:59:18.782Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:34",
+          "sunrise": "05:44",
+          "dhuhr": "11:51",
+          "asr": "15:11",
+          "maghrib": "17:50",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:34",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:50",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:34",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:50",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:34",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:50",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:34",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:34",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:33",
+          "sunrise": "05:44",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "18:56"
+        }
+      ]
+    },
+    {
+      "city": "Bandar Lampung",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:17.995Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:41",
+          "sunrise": "05:55",
+          "dhuhr": "12:00",
+          "asr": "15:20",
+          "maghrib": "17:57",
+          "isha": "19:07"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:41",
+          "sunrise": "05:55",
+          "dhuhr": "11:59",
+          "asr": "15:20",
+          "maghrib": "17:57",
+          "isha": "19:07"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:41",
+          "sunrise": "05:55",
+          "dhuhr": "11:59",
+          "asr": "15:20",
+          "maghrib": "17:56",
+          "isha": "19:07"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:41",
+          "sunrise": "05:55",
+          "dhuhr": "11:59",
+          "asr": "15:20",
+          "maghrib": "17:56",
+          "isha": "19:07"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:41",
+          "sunrise": "05:55",
+          "dhuhr": "11:59",
+          "asr": "15:20",
+          "maghrib": "17:56",
+          "isha": "19:07"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:41",
+          "sunrise": "05:55",
+          "dhuhr": "11:59",
+          "asr": "15:20",
+          "maghrib": "17:56",
+          "isha": "19:07"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:41",
+          "sunrise": "05:55",
+          "dhuhr": "11:59",
+          "asr": "15:20",
+          "maghrib": "17:56",
+          "isha": "19:07"
+        }
+      ]
+    },
+    {
+      "city": "Pontianak",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:21.498Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:19",
+          "sunrise": "05:33",
+          "dhuhr": "11:43",
+          "asr": "15:03",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:19",
+          "sunrise": "05:33",
+          "dhuhr": "11:43",
+          "asr": "15:03",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:19",
+          "sunrise": "05:33",
+          "dhuhr": "11:43",
+          "asr": "15:03",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:19",
+          "sunrise": "05:33",
+          "dhuhr": "11:43",
+          "asr": "15:03",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:18",
+          "sunrise": "05:33",
+          "dhuhr": "11:43",
+          "asr": "15:03",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:18",
+          "sunrise": "05:33",
+          "dhuhr": "11:43",
+          "asr": "15:03",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:18",
+          "sunrise": "05:32",
+          "dhuhr": "11:43",
+          "asr": "15:03",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        }
+      ]
+    },
+    {
+      "city": "Banjarmasin",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:25.012Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "05:02",
+          "sunrise": "06:16",
+          "dhuhr": "12:22",
+          "asr": "15:42",
+          "maghrib": "18:22",
+          "isha": "19:32"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "05:02",
+          "sunrise": "06:16",
+          "dhuhr": "12:22",
+          "asr": "15:42",
+          "maghrib": "18:22",
+          "isha": "19:32"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "05:02",
+          "sunrise": "06:16",
+          "dhuhr": "12:22",
+          "asr": "15:43",
+          "maghrib": "18:21",
+          "isha": "19:32"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "05:02",
+          "sunrise": "06:16",
+          "dhuhr": "12:22",
+          "asr": "15:43",
+          "maghrib": "18:21",
+          "isha": "19:32"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "05:01",
+          "sunrise": "06:16",
+          "dhuhr": "12:22",
+          "asr": "15:43",
+          "maghrib": "18:21",
+          "isha": "19:32"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "05:01",
+          "sunrise": "06:16",
+          "dhuhr": "12:22",
+          "asr": "15:43",
+          "maghrib": "18:21",
+          "isha": "19:32"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "05:01",
+          "sunrise": "06:16",
+          "dhuhr": "12:22",
+          "asr": "15:43",
+          "maghrib": "18:21",
+          "isha": "19:32"
+        }
+      ]
+    },
+    {
+      "city": "Samarinda",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:28.547Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:10",
+          "sunrise": "05:24",
+          "dhuhr": "11:30",
+          "asr": "14:51",
+          "maghrib": "17:30",
+          "isha": "18:40"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:10",
+          "sunrise": "05:24",
+          "dhuhr": "11:30",
+          "asr": "14:51",
+          "maghrib": "17:30",
+          "isha": "18:40"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:10",
+          "sunrise": "05:24",
+          "dhuhr": "11:30",
+          "asr": "14:51",
+          "maghrib": "17:30",
+          "isha": "18:40"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:10",
+          "sunrise": "05:24",
+          "dhuhr": "11:30",
+          "asr": "14:51",
+          "maghrib": "17:29",
+          "isha": "18:40"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:10",
+          "sunrise": "05:24",
+          "dhuhr": "11:30",
+          "asr": "14:51",
+          "maghrib": "17:29",
+          "isha": "18:40"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:09",
+          "sunrise": "05:24",
+          "dhuhr": "11:30",
+          "asr": "14:51",
+          "maghrib": "17:29",
+          "isha": "18:40"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:09",
+          "sunrise": "05:24",
+          "dhuhr": "11:30",
+          "asr": "14:51",
+          "maghrib": "17:29",
+          "isha": "18:40"
+        }
+      ]
+    },
+    {
+      "city": "Manado",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:32.129Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:16",
+          "sunrise": "05:30",
+          "dhuhr": "11:41",
+          "asr": "15:00",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:15",
+          "sunrise": "05:29",
+          "dhuhr": "11:41",
+          "asr": "15:00",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:15",
+          "sunrise": "05:29",
+          "dhuhr": "11:41",
+          "asr": "15:00",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:15",
+          "sunrise": "05:29",
+          "dhuhr": "11:41",
+          "asr": "15:01",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:15",
+          "sunrise": "05:29",
+          "dhuhr": "11:41",
+          "asr": "15:01",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:41",
+          "asr": "15:01",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:14",
+          "sunrise": "05:29",
+          "dhuhr": "11:41",
+          "asr": "15:01",
+          "maghrib": "17:46",
+          "isha": "18:57"
+        }
+      ]
+    },
+    {
+      "city": "Makassar",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:35.699Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:45",
+          "sunrise": "05:58",
+          "dhuhr": "12:03",
+          "asr": "15:23",
+          "maghrib": "18:00",
+          "isha": "19:11"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:44",
+          "sunrise": "05:58",
+          "dhuhr": "12:03",
+          "asr": "15:23",
+          "maghrib": "18:00",
+          "isha": "19:11"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:44",
+          "sunrise": "05:58",
+          "dhuhr": "12:03",
+          "asr": "15:23",
+          "maghrib": "18:00",
+          "isha": "19:11"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:44",
+          "sunrise": "05:58",
+          "dhuhr": "12:03",
+          "asr": "15:23",
+          "maghrib": "18:00",
+          "isha": "19:11"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:44",
+          "sunrise": "05:58",
+          "dhuhr": "12:03",
+          "asr": "15:23",
+          "maghrib": "18:00",
+          "isha": "19:11"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:44",
+          "sunrise": "05:58",
+          "dhuhr": "12:02",
+          "asr": "15:23",
+          "maghrib": "17:59",
+          "isha": "19:11"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:44",
+          "sunrise": "05:58",
+          "dhuhr": "12:02",
+          "asr": "15:23",
+          "maghrib": "17:59",
+          "isha": "19:10"
+        }
+      ]
+    },
+    {
+      "city": "Palu",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:39.191Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:38",
+          "sunrise": "05:52",
+          "dhuhr": "12:01",
+          "asr": "15:21",
+          "maghrib": "18:03",
+          "isha": "19:14"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:38",
+          "sunrise": "05:52",
+          "dhuhr": "12:01",
+          "asr": "15:21",
+          "maghrib": "18:03",
+          "isha": "19:14"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:38",
+          "sunrise": "05:52",
+          "dhuhr": "12:01",
+          "asr": "15:21",
+          "maghrib": "18:03",
+          "isha": "19:14"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:38",
+          "sunrise": "05:52",
+          "dhuhr": "12:01",
+          "asr": "15:21",
+          "maghrib": "18:03",
+          "isha": "19:14"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:37",
+          "sunrise": "05:52",
+          "dhuhr": "12:01",
+          "asr": "15:21",
+          "maghrib": "18:03",
+          "isha": "19:14"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:37",
+          "sunrise": "05:52",
+          "dhuhr": "12:01",
+          "asr": "15:21",
+          "maghrib": "18:03",
+          "isha": "19:14"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:37",
+          "sunrise": "05:52",
+          "dhuhr": "12:01",
+          "asr": "15:22",
+          "maghrib": "18:03",
+          "isha": "19:14"
+        }
+      ]
+    },
+    {
+      "city": "Kendari",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:42.744Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:31",
+          "sunrise": "05:45",
+          "dhuhr": "11:51",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:31",
+          "sunrise": "05:45",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:31",
+          "sunrise": "05:45",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:31",
+          "sunrise": "05:45",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:30",
+          "sunrise": "05:45",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:30",
+          "sunrise": "05:45",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:48",
+          "isha": "18:59"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:30",
+          "sunrise": "05:45",
+          "dhuhr": "11:50",
+          "asr": "15:11",
+          "maghrib": "17:48",
+          "isha": "18:59"
+        }
+      ]
+    },
+    {
+      "city": "Mataram",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:46.343Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "05:01",
+          "sunrise": "06:15",
+          "dhuhr": "12:16",
+          "asr": "15:36",
+          "maghrib": "18:10",
+          "isha": "19:21"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "05:01",
+          "sunrise": "06:15",
+          "dhuhr": "12:16",
+          "asr": "15:36",
+          "maghrib": "18:10",
+          "isha": "19:21"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "05:01",
+          "sunrise": "06:15",
+          "dhuhr": "12:16",
+          "asr": "15:36",
+          "maghrib": "18:09",
+          "isha": "19:21"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "05:01",
+          "sunrise": "06:16",
+          "dhuhr": "12:16",
+          "asr": "15:36",
+          "maghrib": "18:09",
+          "isha": "19:20"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "05:01",
+          "sunrise": "06:16",
+          "dhuhr": "12:16",
+          "asr": "15:36",
+          "maghrib": "18:09",
+          "isha": "19:20"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "05:01",
+          "sunrise": "06:16",
+          "dhuhr": "12:16",
+          "asr": "15:36",
+          "maghrib": "18:09",
+          "isha": "19:20"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "05:01",
+          "sunrise": "06:16",
+          "dhuhr": "12:16",
+          "asr": "15:36",
+          "maghrib": "18:08",
+          "isha": "19:20"
+        }
+      ]
+    },
+    {
+      "city": "Kupang",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:49.868Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:33",
+          "sunrise": "05:47",
+          "dhuhr": "11:46",
+          "asr": "15:06",
+          "maghrib": "17:38",
+          "isha": "18:50"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:33",
+          "sunrise": "05:47",
+          "dhuhr": "11:46",
+          "asr": "15:06",
+          "maghrib": "17:38",
+          "isha": "18:49"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:33",
+          "sunrise": "05:47",
+          "dhuhr": "11:46",
+          "asr": "15:06",
+          "maghrib": "17:38",
+          "isha": "18:49"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:33",
+          "sunrise": "05:47",
+          "dhuhr": "11:46",
+          "asr": "15:06",
+          "maghrib": "17:37",
+          "isha": "18:49"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:33",
+          "sunrise": "05:48",
+          "dhuhr": "11:46",
+          "asr": "15:06",
+          "maghrib": "17:37",
+          "isha": "18:49"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:33",
+          "sunrise": "05:48",
+          "dhuhr": "11:46",
+          "asr": "15:05",
+          "maghrib": "17:37",
+          "isha": "18:48"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:33",
+          "sunrise": "05:48",
+          "dhuhr": "11:46",
+          "asr": "15:05",
+          "maghrib": "17:36",
+          "isha": "18:48"
+        }
+      ]
+    },
+    {
+      "city": "Ambon",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:53.371Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "05:08",
+          "sunrise": "06:22",
+          "dhuhr": "12:28",
+          "asr": "15:48",
+          "maghrib": "18:27",
+          "isha": "19:37"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "05:08",
+          "sunrise": "06:22",
+          "dhuhr": "12:28",
+          "asr": "15:48",
+          "maghrib": "18:27",
+          "isha": "19:37"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "05:08",
+          "sunrise": "06:22",
+          "dhuhr": "12:28",
+          "asr": "15:48",
+          "maghrib": "18:27",
+          "isha": "19:37"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "05:08",
+          "sunrise": "06:22",
+          "dhuhr": "12:28",
+          "asr": "15:48",
+          "maghrib": "18:26",
+          "isha": "19:37"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "05:07",
+          "sunrise": "06:22",
+          "dhuhr": "12:27",
+          "asr": "15:48",
+          "maghrib": "18:26",
+          "isha": "19:37"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "05:07",
+          "sunrise": "06:22",
+          "dhuhr": "12:27",
+          "asr": "15:48",
+          "maghrib": "18:26",
+          "isha": "19:37"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "05:07",
+          "sunrise": "06:22",
+          "dhuhr": "12:27",
+          "asr": "15:48",
+          "maghrib": "18:26",
+          "isha": "19:37"
+        }
+      ]
+    },
+    {
+      "city": "Jayapura",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:00:56.860Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:30",
+          "sunrise": "05:44",
+          "dhuhr": "11:48",
+          "asr": "15:09",
+          "maghrib": "17:45",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:30",
+          "sunrise": "05:44",
+          "dhuhr": "11:48",
+          "asr": "15:09",
+          "maghrib": "17:45",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:30",
+          "sunrise": "05:44",
+          "dhuhr": "11:48",
+          "asr": "15:09",
+          "maghrib": "17:45",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:30",
+          "sunrise": "05:44",
+          "dhuhr": "11:48",
+          "asr": "15:09",
+          "maghrib": "17:45",
+          "isha": "18:56"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:30",
+          "sunrise": "05:44",
+          "dhuhr": "11:48",
+          "asr": "15:09",
+          "maghrib": "17:44",
+          "isha": "18:55"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:30",
+          "sunrise": "05:44",
+          "dhuhr": "11:48",
+          "asr": "15:09",
+          "maghrib": "17:44",
+          "isha": "18:55"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:30",
+          "sunrise": "05:44",
+          "dhuhr": "11:48",
+          "asr": "15:09",
+          "maghrib": "17:44",
+          "isha": "18:55"
+        }
+      ]
+    },
+    {
+      "city": "Pekanbaru",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:01:28.236Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:51",
+          "isha": "19:02"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:51",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:51",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:36",
+          "sunrise": "05:50",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        }
+      ]
+    },
+    {
+      "city": "Tangerang",
+      "country": "Indonesia",
+      "method": "kemenag",
+      "source": "myQuran Indonesia (KEMENAG wrapper)",
+      "source_institution": "KEMENAG (Kementerian Agama Republik Indonesia) via myQuran",
+      "source_url": "https://api.myquran.com/v2/sholat",
+      "source_fetched": "2026-05-05T17:01:31.772Z",
+      "dates": [
+        {
+          "date": "2026-05-01",
+          "fajr": "04:37",
+          "sunrise": "05:51",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-02",
+          "fajr": "04:37",
+          "sunrise": "05:51",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-03",
+          "fajr": "04:37",
+          "sunrise": "05:51",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-04",
+          "fajr": "04:36",
+          "sunrise": "05:51",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-05",
+          "fajr": "04:36",
+          "sunrise": "05:51",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:50",
+          "isha": "19:01"
+        },
+        {
+          "date": "2026-05-06",
+          "fajr": "04:36",
+          "sunrise": "05:51",
+          "dhuhr": "11:54",
+          "asr": "15:14",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        },
+        {
+          "date": "2026-05-07",
+          "fajr": "04:36",
+          "sunrise": "05:51",
+          "dhuhr": "11:53",
+          "asr": "15:14",
+          "maghrib": "17:49",
+          "isha": "19:00"
+        }
+      ]
+    }
+  ]
+}
