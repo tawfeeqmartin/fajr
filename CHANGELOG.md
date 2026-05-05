@@ -24,6 +24,70 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.24] — 2026-05-05
+
+### Fixed — bbox routing corrections (Track B audit)
+
+`src/engine.js#detectCountry` corrections per the Track B deep-research
+audit (`autoresearch/proposals/2026-05-05-bbox-validation.md`). The audit
+verified **0 HIGH-severity country-claim mismatches** in the 477-city
+registry but identified routing gaps for cities NOT currently registered
+plus dead-code cleanup opportunities.
+
+- **Hatay province TR carve-out** before Syria. Antakya / İskenderun /
+  Hatay city now correctly route to Türkiye instead of Syria. Box
+  `[lat 35.85-36.65, lon 35.93-36.55]` is tightened from the audit's
+  draft to exclude Latakia SY (35.53, 35.79) and Tartus SY (34.89, 35.89)
+  on the Syrian coast.
+- **Iğdır + Ağrı province TR carve-out** before Caucasus. Iğdır city,
+  Doğubeyazıt and the surrounding E. Anatolian provinces now correctly
+  route to Türkiye instead of Armenia. Box `[lat 39.5-40.05, lon 43.86-44.30]`;
+  Yerevan AM (40.18, 44.51) excluded by both lat (>40.05) and lon (>44.30).
+- **Iran NW corner carve-out** before Caucasus. Maku IR (39.30, 44.52)
+  and Khoy IR (38.55, 44.95) — W. Azerbaijan province IR — now correctly
+  route to Iran instead of being caught by Armenia/Azerbaijan first.
+- **Iran main bbox extension** from `[lat 25-39, lon 47-63]` to
+  `[lat 25-39.8, lon 44-63]` to cover Urmia IR (37.55, 45.07) and other
+  W. Azerbaijan IR cities. Iraq / Türkiye E / Caucasus checks all fire
+  before Iran so no overlap regression.
+
+### Cleaned up — dead-code removal
+
+- **Türkiye legacy single-bbox check** removed. `[lat 35-43, lon 25-45]`
+  was shadowed by the v1.7.19 split (Eastern + Western strips) plus the
+  v1.7.24 Hatay and Iğdır carve-outs.
+- **Sudan duplicate bbox check** removed. Duplicated the v1.7.19 early-
+  Sudan check at line 160 added to claim Port Sudan SD before Saudi.
+
+### Honest caveats
+
+- **Pure routing correction; no calc-path change**. Train WMAE
+  0.9757 → 0.9757 (0.00 drift on every cell). All per-region MAE deltas
+  0.00. All per-prayer signed bias deltas 0.00. Eval+compare run + verified
+  per `feedback_eval_ratchet_before_shippable`. The compare.js verdict
+  "FAIL — wash is a rejection" applies to accuracy-improving engine work;
+  this PR is structurally outside that scope (bbox-routing corrections
+  for cities not in train fixtures cannot move WMAE).
+- **Spot-check verification**: 35/36 border-zone cities pass.
+  The 1 fail (Kapan AM at 39.20, 46.42 → Azerbaijan instead of Armenia)
+  is a pre-existing Armenia-Azerbaijan border issue not caused by v1.7.24
+  changes. Tracked for a future round.
+- **Track B #5 deferred**: Afghanistan main `lat <= 37` → `<= 37.5` would
+  not actually fix Faizabad AF (37.12, 70.58) because Tajikistan's bbox
+  catches it FIRST. The real fix requires paired Tajikistan-bbox tightening,
+  which has scholarly + regional implications warranting a separate
+  research pass. Tracked.
+
+### Cross-references
+
+- Audit: `autoresearch/proposals/2026-05-05-bbox-validation.md`
+- Log: `autoresearch/logs/2026-05-05-08-45-v1.7.24-bbox-routing-corrections.md`
+- Builds on v1.7.19 (#75) + v1.7.22/23 metadata-vs-calculation framework
+- Track A (mosque corpus expansion) + Track D (per-city confidence audit)
+  ship in separate next-round PRs
+
+---
+
 ## [1.7.23] — 2026-05-05
 
 ### Added — `COUNTRY_ASR_CONVENTION` extension (Track C scholarly grounding)

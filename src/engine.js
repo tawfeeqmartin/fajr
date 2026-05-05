@@ -98,6 +98,14 @@ function detectCountry(lat, lon) {
   // claimed countryISO is SY. Tighten Lebanon's lon eastern from 36.65 to
   // 36.6 — Damascus 36.28 is still in 36.6 — tighten to 36.2. Beirut LB
   // is at 35.50 so still covered.
+  // v1.7.24 (Track B audit): Hatay province TR carve-out BEFORE Syria.
+  // Hatay (Antakya 36.20°N 36.16°E, İskenderun 36.59°N 36.17°E, Hatay city
+  // 36.40°N 36.34°E) sits inside Syria's bbox 32.3-37.05 / 35.7-42.4 and
+  // routed to Syria pre-v1.7.24. Carve-out box [35.85, 36.65, 35.93, 36.55]
+  // is tightened from Track B's draft [35.5, 36.7, 35.7, 36.5] to exclude
+  // Latakia SY (35.53, 35.79) and Tartus SY (34.89, 35.89) which sit just
+  // south/west of Hatay province.
+  if (lat >= 35.85 && lat <= 36.65 && lon >= 35.93 && lon <= 36.55) return 'Turkey'
   // v1.7.19 (#75): Syria's lat upper bound tightened from 37.4 to 37.05 — the
   // previous bbox swallowed Gaziantep TR (37.07, 37.38) and Şanlıurfa TR
   // (37.16, 38.79). Aleppo SY (36.20) and Idlib SY (35.93) still inside.
@@ -110,6 +118,24 @@ function detectCountry(lat, lon) {
   // 40-46.7 catches it. Tighten Georgia's northern edge from 43.6 to 43.0
   // (Tbilisi at 41.72 still inside; Russia's Caucasus republics start ~43).
   if (lat >= 41.05 && lat <= 43.0 && lon >= 40   && lon <= 46.7) return 'Georgia'
+  // v1.7.24 (Track B audit): TR Ağrı/Iğdır carve-out BEFORE Caucasus.
+  // Iğdır (39.92°N 44.05°E), Doğubeyazıt (39.55°N 44.08°E) and surrounding
+  // E. Anatolian provinces sit inside Armenia's bbox 38.84-41.30 / 43.45-
+  // 46.62 (and Iğdır also touches Azerbaijan's lat range 38.4-41.9). Tight
+  // box [lat 39.5-40.05, lon 43.86-44.30] covers Iğdır + Ağrı provinces only;
+  // Yerevan AM (40.18, 44.51) is at lat 40.18 > 40.05 / lon 44.51 > 44.30,
+  // so Yerevan stays Armenia. Maku/Khoy IR sit east of lon 44.30 — handled
+  // by the Iran NW carve-out below.
+  if (lat >= 39.5  && lat <= 40.05 && lon >= 43.86 && lon <= 44.30) return 'Turkey'
+  // v1.7.24 (Track B audit): Iran NW corner (W. Azerbaijan province IR)
+  // carve-out BEFORE Caucasus. Maku IR (39.30°N 44.52°E) and Khoy IR
+  // (38.55°N 44.95°E) sit inside Armenia/Azerbaijan bboxes pre-v1.7.24.
+  // Box [lat 38.0-39.78, lon 44.30-45.0] covers W. Azerbaijan IR strip;
+  // Yerevan AM (40.18) is at lat > 39.78, Doğubeyazıt TR at lon 44.08
+  // < 44.30 (handled by Iğdır carve-out above), so neither is affected.
+  // Tabriz IR (38.07, 46.29) is east of lon 45.0 → falls through to main
+  // Iran (line 167) which catches it via the v1.7.24 lat-max 39.8 bump.
+  if (lat >= 38.0  && lat <= 39.78 && lon >= 44.30 && lon <= 45.0)  return 'Iran'
   if (lat >= 38.4 && lat <= 41.9 && lon >= 44.8 && lon <= 50.4) return 'Azerbaijan'
   if (lat >= 38.84 && lat <= 41.30 && lon >= 43.45 && lon <= 46.62) return 'Armenia'
 
@@ -152,7 +178,16 @@ function detectCountry(lat, lon) {
   // lon 47.5+ on the Bushehr coast). Iran's Khuzestan western lon ~47.5
   // still inside.
   if (lat >= 16   && lat <= 33   && lon >= 35   && lon <= 56)   return 'SaudiArabia'
-  if (lat >= 25   && lat <= 39   && lon >= 47   && lon <= 63)   return 'Iran'
+  // v1.7.24 (Track B audit): Iran NW corner extension. Natural Earth shows
+  // Iran extending to lat 39.78°N (Aras River with Armenia) and lon 44.02°E
+  // (W. Azerbaijan province: Maku 39.30/44.52, Khoy 38.55/44.95). Previous
+  // bbox lat ≤ 39 / lon ≥ 47 was TOO_NARROW. Widen to lat ≤ 39.8 / lon ≥ 44.
+  // Iraq (line 105, lon 38.8-48.6) is checked before Iran → still wins for
+  // Iraqi Kurdistan overlap. Türkiye E strip (line 127, lat 37.05-42.10 /
+  // lon 26-44.5) checked before Iran → wins for E. Anatolian overlap.
+  // Caucasus (Armenia/Azerbaijan/Georgia, lines 112-115) all checked before
+  // Iran → win for the Caucasus overlap.
+  if (lat >= 25   && lat <= 39.8 && lon >= 44   && lon <= 63)   return 'Iran'
 
   // ─── Central Asia — smallest first; Turkmenistan must precede Iran ─────
   if (lat >= 36.7 && lat <= 41.05 && lon >= 67.4 && lon <= 75.15) return 'Tajikistan'
@@ -174,7 +209,11 @@ function detectCountry(lat, lon) {
   // v1.7.8 (#54): Cyprus — ~275K Muslims (Northern Cyprus). BEFORE Turkey
   // since Cyprus lat 34.6-35.7 partially overlaps Turkey's 35-43.
   if (lat >= 34.55 && lat <= 35.71 && lon >= 32.27 && lon <= 34.60) return 'Cyprus'
-  if (lat >= 35   && lat <= 43   && lon >= 25   && lon <= 45)   return 'Turkey'
+  // v1.7.24 (Track B audit): legacy single-bbox Turkey check removed. The
+  // v1.7.19 split (Eastern lat 37.05-42.10 + Western lat 36.0-37.05) at
+  // lines 132-133 plus the v1.7.24 Hatay (line 109) and Iğdır (line 119)
+  // carve-outs cover all Turkish coords correctly. The line-200 fallback
+  // was dead code shadowed by those entries.
 
   // ─── Balkans + SE Europe — after Turkey ────────────────────────────────
   // Smallest first: Kosovo ⊂ Albania; Montenegro / North Macedonia partially
@@ -294,7 +333,10 @@ function detectCountry(lat, lon) {
   if (lat >= 3.4  && lat <= 14.9 && lon >= 32.95 && lon <= 48)  return 'Ethiopia'
   if (lat >= -1.7 && lat <= 12   && lon >= 40.9 && lon <= 51.4) return 'Somalia'
   if (lat >= 3.5  && lat <= 12.3 && lon >= 24.1 && lon <= 35.95) return 'SouthSudan'
-  if (lat >= 9.5  && lat <= 22   && lon >= 21.8 && lon <= 38.6) return 'Sudan'
+  // v1.7.24 (Track B audit): duplicate Sudan check removed. The early Sudan
+  // check at line 160 (added in v1.7.19 to claim Port Sudan SD before Saudi
+  // Arabia's bbox) already matches all Sudanese coords; this late check was
+  // dead code shadowed by that entry.
 
   // ─── West Africa Sahel + coast — smallest-overlap first ────────────────
   // CapeVerde: Atlantic islands, no continental overlap. GuineaBissau ⊂ Senegal
