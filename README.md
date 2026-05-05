@@ -126,7 +126,7 @@ This is the same stance used by the reference downstream app, [A Gift of Time](h
 
 | Area | Current state |
 |---|---|
-| Repository version | `1.7.23` in `package.json`; published npm version may lag until release |
+| Repository version | `1.7.24` in `package.json`; published npm version may lag until release |
 | City/country dispatch | 477 cities, 168 countries |
 | Train eval | 215 entries, WMAE 0.9757 min |
 | Holdout eval | 2,980 entries, WMAE 3.6162 min |
