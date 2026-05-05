@@ -276,13 +276,31 @@ describe('Path A calibration regression', () => {
     expect(r.method).not.toMatch(/Path A|ihtiyati|Malaysia/i)
   })
 
-  it('Morocco — community-calibrated 19° (v1.0 Path A predecessor)', () => {
-    // The Morocco 19° community calibration is the original Path A
-    // case shipped in v1.0 — included here for completeness so future
-    // refactors don't accidentally remove it.
-    const r = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
-    expect(r.method).toMatch(/Morocco.*19/i)
-    expect(r.method).toMatch(/community.*calibration/i)
+  it('Morocco — default applies v1.5.0 + v1.7.16 Path A buffers; Mawaqit/Habous aliases match default (v1.7.25)', () => {
+    // v1.7.25: Empirical re-validation against the Habous Ministry direct API
+    // confirmed Habous itself bakes Dhuhr +5 and Maghrib +5 into its published
+    // Imsakiyya — same as Mawaqit. The v1.5.0/v1.7.16 Path A buffers are
+    // therefore the institutional position, NOT a mosque-only addition. A
+    // prep-flip to "Habous-aligned without buffers" was rolled back when the
+    // bias check showed it would drift AWAY from Habous by ~5 min on
+    // Dhuhr/Maghrib (prayer-validity-unsafe, institutionally MIS-aligned).
+    // 'MoroccoMawaqit' and 'MoroccoHabous' are retained as semantic aliases
+    // for caller UX clarity; both calc identically to the default.
+    const def = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
+    expect(def.method).toMatch(/Morocco.*19/i)
+    expect(def.method).toMatch(/ihtiyati|Path A|\+5/i)
+
+    const maw = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE, method: 'MoroccoMawaqit' })
+    expect(maw.method).toMatch(/Mawaqit-aligned/i)
+    const hab = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE, method: 'MoroccoHabous' })
+    expect(hab.method).toMatch(/Habous-aligned/i)
+
+    // Both aliases must produce the same instants as the default (no ikhtilaf;
+    // both sources empirically agree on the +5 calibration).
+    expect(maw.maghrib.getTime()).toBe(def.maghrib.getTime())
+    expect(maw.dhuhr.getTime()).toBe(def.dhuhr.getTime())
+    expect(hab.maghrib.getTime()).toBe(def.maghrib.getTime())
+    expect(hab.dhuhr.getTime()).toBe(def.dhuhr.getTime())
   })
 })
 
