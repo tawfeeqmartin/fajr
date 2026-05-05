@@ -846,19 +846,25 @@ function countryBboxContains(country, lat, lon) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// v1.7.22 (#83): country → madhab metadata.
+// v1.7.22 (#83): country → Asr-school convention metadata.
 //
 // adhan.js's method presets all default to Madhab.Shafi (1× shadow Asr).
-// For Hanafi-majority countries this leaks the wrong school through fajr's
-// location metadata even when the country-dispatch conceptually implies
-// Hanafi. The table below is consulted by prayerTimes() as user/institutional
-// metadata, not as a blanket Asr-calculation override. Calculation-facing
-// Asr school stays tied to the selected method unless a method explicitly
-// composes an Asr school (for example 'KarachiShafi') or a future caller
-// override is added via #40.
+// In this API, `madhab` is the legacy field name for the Hanafi-vs-standard
+// Asr convention surfaced to apps; it is not a full legal-madhhab taxonomy
+// (Maliki/Hanbali/Jafari are not represented in v1.7.x). For Hanafi-majority
+// countries, adhan's preset default leaks the wrong Asr-convention metadata
+// even when the country-dispatch context conceptually implies Hanafi.
 //
-// Citations live in knowledge/wiki/regions/<country>.md and the per-case
-// comments in selectMethod() (line ~931+).
+// The table below is consulted by prayerTimes() as provenance metadata, not
+// as a blanket Asr-calculation override. Calculation-facing Asr school stays
+// tied to the selected method unless a method explicitly composes an Asr
+// school (for example 'KarachiShafi') or a future caller override is added
+// via #40.
+//
+// Classification: 🟢 metadata/provenance only; no prayer-time correction.
+// Region-wiki coverage is intentionally conservative and incomplete in
+// v1.7.22; missing/stale pages are tracked for human KB compilation rather
+// than edited by autoresearch agents.
 //
 // Countries NOT listed report the selected method's implied madhab. Mixed
 // countries and heterogeneous diaspora contexts deliberately surface the
@@ -871,7 +877,7 @@ function countryBboxContains(country, lat, lon) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const COUNTRY_MADHAB = {
-  // ── Hanafi-majority countries (institutional convention)
+  // ── Hanafi-majority countries (Asr-school convention metadata)
   Pakistan:    'hanafi',  // University of Islamic Sciences, Karachi (Hanafi)
   Bangladesh:  'hanafi',  // Islamic Foundation Bangladesh (Hanafi)
   Afghanistan: 'hanafi',  // Ministry of Hajj & Religious Affairs (Hanafi)
@@ -887,7 +893,7 @@ const COUNTRY_MADHAB = {
   Tajikistan:  'hanafi',  // Council of Ulema (Hanafi)
   Turkmenistan: 'hanafi', // Hanafi tradition
 
-  // ── Shafi'i-majority countries (institutional convention)
+  // ── Shafi'i-majority countries (standard-Asr convention metadata)
   Maldives:    'shafii',  // Maldives Ministry of Islamic Affairs (Shafi'i)
   SriLanka:    'shafii',  // ACJU All Ceylon Jamiyyathul Ulama (Shafi'i)
   Indonesia:   'shafii',  // KEMENAG / Sunni Shafi'i majority
@@ -909,7 +915,7 @@ const COUNTRY_MADHAB = {
   //   Lebanon, Syria, Palestine, Israel, Morocco, Algeria, Tunisia, Libya,
   //   Sudan, Mauritania, all sub-Saharan-Africa-non-Shafi'i, all Western
   //   diaspora countries (US, UK, France, Germany, etc. — heterogeneous)
-  // → these stay at adhan's preset default (Shafi'i 1× shadow).
+  // → these stay at the selected method's applied Asr-school label.
 }
 
 /**
@@ -1141,7 +1147,9 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.Singapore(), methodName: 'JAKIM/Singapore (20°/18°)' }
     }
     case 'Pakistan': {
-      // University of Islamic Sciences, Karachi: Fajr 18°, Isha 18°, Hanafi Asr
+      // University of Islamic Sciences, Karachi: Fajr 18°, Isha 18°.
+      // Hanafi Asr convention is surfaced separately via COUNTRY_MADHAB;
+      // applied.asrSchool reports the adhan preset's actual Asr behavior.
       return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (18°/18°)' }
     }
     case 'UnitedArabEmirates':
@@ -1197,7 +1205,8 @@ function selectMethod(country, lat, coords) {
     case 'HongKong':
       // Trustees of Islamic Community Fund publishes Hong Kong's primary
       // timetables; ~296K Muslim community is predominantly South-Asian-
-      // origin Hanafi. Karachi 18°/18° + Hanafi Asr.
+      // origin Hanafi. Karachi 18°/18° angles; applied.asrSchool reports
+      // the actual adhan preset behavior.
       // Classification: 🟡→🟢 (community + institutional convention).
       // see knowledge/wiki/regions/hongkong.md (TODO v1.7.8)
       return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (Hong Kong, Trustees of Islamic Community Fund)' }
@@ -1296,7 +1305,7 @@ function selectMethod(country, lat, coords) {
     case 'Tunisia': {
       // Tunisian Ministry of Religious Affairs: Fajr 18°, Isha 18°. Aladhan
       // method 18 confirms. Tunisia is Maliki (Standard Asr) so use Other()
-      // not Karachi() (which sets Hanafi Asr).
+      // rather than a South-Asia Karachi label.
       // Classification: 🟢 Established (institutional preset).
       // see knowledge/wiki/regions/tunisia.md (TODO)
       const p = adhan.CalculationMethod.Other()
@@ -1406,15 +1415,17 @@ function selectMethod(country, lat, coords) {
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Albania KMSH, Turkish institutional)' }
     case 'Kosovo':
       // Bashkësia Islame e Kosovës / BIK (Sunni Hanafi ~96%): Diyanet
-      // 18°/17° per Turkish institutional convention. Hanafi Asr (2× shadow)
-      // is correctly applied via the Diyanet method.
+      // 18°/17° per Turkish institutional convention. Hanafi Asr convention
+      // is surfaced via COUNTRY_MADHAB; applied.asrSchool reports the
+      // selected method's actual Asr behavior.
       // Classification: 🟢 Established.
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Kosovo BIK, Turkish institutional)' }
     case 'BosniaandHerzegovina':
     case 'Bosnia':
       // Rijaset / Islamska Zajednica u BiH (Sunni Hanafi ~51%): Diyanet
       // 18°/17° closest published match to traditional Takvim. Hanafi Asr
-      // (2× shadow) correctly applied via Diyanet method. v1.6.2 follow-up:
+      // convention is surfaced via COUNTRY_MADHAB; applied.asrSchool reports
+      // the selected method's actual Asr behavior. v1.6.2 follow-up:
       // validate against Rijaset's own Takvim publication; consider custom
       // offset if needed. Classification: 🟡→🟢 (regional Diyanet convention).
       return { params: adhan.CalculationMethod.Turkey(), methodName: 'Diyanet (Bosnia Rijaset, Hanafi Takvim)' }
@@ -2656,14 +2667,16 @@ export function prayerTimes(params) {
     methodSource = 'fallback'
   }
 
-  // ── v1.7.22 (#83): country → madhab metadata
+  // ── v1.7.22 (#83): country → Asr-school convention metadata
   //
   // adhan.js's method presets default to Shafi'i 1× shadow Asr for every
   // method (Karachi, MWL, ISNA, Diyanet, etc.). For Hanafi-majority
-  // countries that leaks the wrong *metadata* through fajr's structured
-  // output, even when the country-dispatch context implies Hanafi.
+  // countries that leaks the wrong *Asr-convention metadata* through fajr's
+  // structured output, even when the country-dispatch context implies Hanafi.
+  // `location.madhab` is the legacy API name for this Hanafi-vs-standard
+  // Asr convention label; it is not a full legal-madhhab taxonomy.
   //
-  // Important split after #85: user/institutional madhab metadata is NOT
+  // Important split after #85: Asr-school convention metadata is NOT
   // automatically the Asr formula used by a published timetable. The ratchet
   // showed that blanket 2×-shadow mutation regresses current Diyanet Türkiye
   // and AlAdhan Karachi fixtures. Therefore COUNTRY_MADHAB sets
@@ -2681,7 +2694,8 @@ export function prayerTimes(params) {
   // string is the highest-priority dispatch surface; v1.8.x will add an
   // explicit caller-side Asr/madhab override per #40.
   //
-  // see knowledge/wiki/regions/<country>.md for institutional citations
+  // Region-wiki coverage is incomplete in v1.7.22; missing/stale pages are
+  // tracked for human KB compilation rather than edited by autoresearch agents.
   // Only match the explicit-composition marker '+ Shafi Asr' / '+ Hanafi Asr'
   // pattern that selectMethod / methodFromString use when they intentionally
   // override the adhan preset's madhab. Bare descriptive mentions of
@@ -2730,6 +2744,16 @@ export function prayerTimes(params) {
   // subset depending on UX. Currently emits the high-latitude note when
   // |lat| ≥ 48.6° per Odeh 2009 — see wiki/regions/iceland.md.
   const notes = []
+  if (madhabSource === 'country-default' && madhab !== appliedMadhab) {
+    const appliedAsrLabel = asrSchool === 'hanafi' ? 'Hanafi 2× shadow' : 'standard 1× shadow'
+    notes.push(
+      `Asr-school advisory: country metadata suggests ${madhab} Asr convention, ` +
+      `but this calculation used ${appliedAsrLabel} Asr from ${methodName}. ` +
+      `v1.7.22 does not silently shift Asr from metadata alone; choose a local ` +
+      `override when available. See issues #40 and #85.`
+    )
+  }
+
   if (Math.abs(latitude) >= 48.6) {
     notes.push(
       'High-latitude regime: at latitudes ≥48.6°, calculated Isha and ' +
@@ -2826,15 +2850,17 @@ export function prayerTimes(params) {
   const imsakRaw = new Date(times.fajr.getTime() - IMSAK_OFFSET_MIN * 60 * 1000)
   const imsak_   = roundIhtiyat(imsakRaw, 'down')
 
-  // v1.7.21 (#81) + v1.7.22 (#83): expose madhab + provenance so downstream
-  // apps can frame auto-dispatched values as best-guess defaults.
+  // v1.7.21 (#81) + v1.7.22 (#83): expose the Asr-school convention label
+  // + provenance so downstream apps can frame auto-dispatched values as
+  // best-guess defaults.
   //
   // madhabSource provenance:
   //   'caller-explicit' — caller passed an explicit madhab override (v1.8.x
   //     via #40 — not yet wired here)
   //   'country-default' — country listed in COUNTRY_MADHAB; fajr reports the
-  //     likely local/user madhab (Pakistan → Hanafi, Indonesia → Shafi'i).
-  //     This is metadata; it does not by itself mutate the Asr calculation.
+  //     likely local Asr-school convention (Pakistan → Hanafi, Indonesia →
+  //     standard/Shafi'i). This is metadata; it does not by itself mutate
+  //     the Asr calculation.
   //   'method-implied'  — the selected method's calculation madhab is what we
   //     report; mixed-madhab countries deliberately surface the disclaimer +
   //     verification prompt instead.

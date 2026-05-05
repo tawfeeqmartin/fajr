@@ -108,9 +108,10 @@ export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-d
  *    (sea level) silently — the safest default. */
 export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zero'
 
-/** Madhab label surfaced for a given location or calculation.
- *  For location metadata this can describe the likely local/user madhab;
- *  for applied dispatch it describes the Asr formula actually used. */
+/** Madhab / Asr-convention label surfaced for a given location or calculation.
+ *  In v1.7.x this is intentionally only the Hanafi-vs-standard Asr convention
+ *  label, not a full legal-madhhab taxonomy. For applied dispatch it describes
+ *  the Asr formula actually used. */
 export type Madhab = 'shafii' | 'hanafi'
 
 /** Asr calculation school actually applied.
@@ -125,8 +126,8 @@ export type AsrSchool = 'standard' | 'hanafi'
  *  - `'caller-explicit'`: caller will pass an explicit madhab override
  *    (planned for v1.8.x via #40 — not yet supported in v1.7.x).
  *  - `'country-default'`: country is listed in `COUNTRY_MADHAB` and fajr
- *    reports the likely local/user madhab. This is metadata; it does not by
- *    itself mutate the calculation-facing Asr school.
+ *    reports the likely local Asr-school convention. This is metadata; it
+ *    does not by itself mutate the calculation-facing Asr school.
  *  - `'method-implied'`: the selected method's calculation madhab is what is
  *    reported. Mixed-madhab countries (Egypt, Saudi, Iraq, Lebanon, Syria,
  *    Morocco, Western diaspora, etc.) intentionally fall through here and
@@ -153,9 +154,10 @@ export interface PrayerTimesLocation {
   timezone:        string
   /** Effective elevation in metres used by the engine on this call. */
   elevation:       number
-  /** Likely local/user madhab for this coordinate (v1.7.21+, #81; country
-   *  metadata added v1.7.22, #83). This may differ from `applied.madhab`
-   *  when the bundled timetable method still uses standard 1× Asr. */
+  /** Likely local Asr-school convention for this coordinate (v1.7.21+, #81;
+   *  country metadata added v1.7.22, #83). This may differ from
+   *  `applied.madhab` when the bundled timetable method still uses standard
+   *  1× Asr. This is not a full legal-madhhab taxonomy. */
   madhab:          Madhab
   /** How the method was chosen — see MethodSource above. */
   methodSource:    MethodSource

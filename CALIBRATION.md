@@ -250,15 +250,17 @@ timetables can be cross-checked.
 
 ---
 
-## Madhab metadata vs applied Asr school
+## Asr-school convention metadata vs applied Asr school
 
-The Asr school choice (Standard / Shafi'i = 1× shadow length, Hanafi = 2×)
-varies by country and community, but the *metadata* a user expects and the
-*calculation formula* used by a published timetable are not always the same
-thing. v1.7.22 therefore exposes both:
+The Asr school choice (standard 1× shadow length, often associated with
+Shafi'i/Maliki/Hanbali calculations, vs Hanafi 2× shadow) varies by country
+and community, but the *metadata* a user expects and the *calculation formula*
+used by a published timetable are not always the same thing. In v1.7.x the
+legacy `madhab` field is only this Hanafi-vs-standard Asr convention label;
+it is not a full legal-madhhab taxonomy. v1.7.22 therefore exposes both:
 
-- `location.madhab` / `location.madhabSource` — likely local/user madhab,
-  useful for downstream UX, warnings, and traveler-mode framing.
+- `location.madhab` / `location.madhabSource` — likely local Asr-school
+  convention, useful for downstream UX, warnings, and traveler-mode framing.
 - `applied.madhab` / `applied.asrSchool` — what the engine actually used for
   Asr in this calculation.
 
@@ -284,11 +286,13 @@ override lands via [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
 | India | Hanafi by country default, with Kerala Shafi'i city overrides | Standard / adhan default unless explicit composition | Metadata fixed in v1.7.22; Kochi override remains Shafi'i | AIMPLB / Samastha Kerala for Kochi |
 | Iran / Iraq (Najaf/Karbala/Basra) | Jafari/Twelver Shia context via method/provenance | Tehran method | Aligned — Twelver Shia majority in these city overrides | Tehran Institute / Sistani office |
 | Egypt / Saudi / UAE / Qatar / Kuwait / Bahrain / Oman | varies / mixed | Institution-specific selected method | No forced country madhab metadata | Country institution |
-| Morocco | Maliki | Standard Asr | Aligned — Moroccan Sunni Maliki tradition | Habous |
+| Morocco | no forced value; method-implied standard Asr | Standard Asr | Aligned with selected Habous method; API does not encode Maliki as a `madhab` value in v1.7.x | Habous |
 
 Caller-side Asr/madhab override is still tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
-Until that lands, downstream apps should use `location.madhab` to preselect UI
-preferences and `applied.asrSchool` to explain the time actually returned.
+Until that lands, downstream apps should use `location.madhab` only as an
+Asr-convention hint and `applied.asrSchool` to explain the time actually
+returned. When these differ, fajr surfaces an `Asr-school advisory` in
+`notes[]`.
 
 ---
 

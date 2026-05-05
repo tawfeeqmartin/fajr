@@ -28,24 +28,26 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ### Fixed
 
-- **Country→madhab metadata dispatch** parallel to country→method — resolves
+- **Country→Asr-school convention metadata dispatch** parallel to country→method — resolves
   [#83](https://github.com/tawfeeqmartin/fajr/issues/83). v1.7.21
   exposed `location.madhab` but the field always reported `'shafii'`
   because adhan.js's method presets all default to Shafi'i 1× shadow
   Asr regardless of country. v1.7.22 introduces an explicit
   `COUNTRY_MADHAB` table in `src/engine.js` and uses it as
-  location/user metadata for country-default and city-institutional
+  Hanafi-vs-standard Asr convention metadata for country-default and city-institutional
   dispatch paths (skipping caller-explicit + skipping methods whose name
   carries an explicit `+ Shafi Asr` / `+ Hanafi Asr` composition marker).
 
 ### Behavioral note — metadata fixed, Asr calculation not silently shifted
 
 After [#85](https://github.com/tawfeeqmartin/fajr/issues/85), v1.7.22
-deliberately splits likely local madhab from the calculation-facing Asr
-school:
+deliberately splits the likely local Asr-school convention from the
+calculation-facing Asr school. In v1.7.x, `madhab` is the legacy field name
+for the Hanafi-vs-standard Asr convention label, not a full legal-madhhab
+taxonomy:
 
-- `location.madhab` / `location.madhabSource` describe likely local/user
-  madhab metadata.
+- `location.madhab` / `location.madhabSource` describe likely local
+  Asr-school convention metadata.
 - `applied.madhab` / `applied.asrSchool` describe what the engine actually
   used for Asr.
 
@@ -88,8 +90,8 @@ override or source-specific 2× shadow implementation is added.
   Apps relying on the previous binary union should update; the change
   is additive (no removed values).
 - **`applied.asrSchool`** is a new additive field (`'standard' | 'hanafi'`)
-  so apps can distinguish likely local madhab from the Asr formula used in
-  the returned time.
+  so apps can distinguish likely local Asr-school convention metadata from
+  the Asr formula used in the returned time.
 
 ### Cross-references
 

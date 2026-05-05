@@ -124,6 +124,7 @@ describe('#83/#85 — metadata does not silently shift Asr calculation', () => {
     expect(auto.location.madhabSource).toBe('country-default')
     expect(auto.applied.madhab).toBe('shafii')
     expect(auto.applied.asrSchool).toBe('standard')
+    expect(auto.notes.some(note => note.includes('Asr-school advisory'))).toBe(true)
     expect(Math.abs(diffMin)).toBeLessThanOrEqual(1)
   })
 })
