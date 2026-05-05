@@ -104,7 +104,8 @@ override or source-specific 2× shadow implementation is added.
   [docs/data-sources.md](docs/data-sources.md), and
   [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md)
   for the deeper material, while preserving the sadaqah jariyah dedication to
-  Nurjaan and Kauthar and crediting AlAdhan as an eval reference layer.
+  Nurjaan and Kauthar, crediting AlAdhan as an eval reference layer, and
+  clarifying that qiyam/last-third times live on `dayTimes()` / `nightThirds()`.
 
 ### Cross-references
 

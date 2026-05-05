@@ -96,6 +96,20 @@ console.log(times.notes)
 
 The `location.madhab` field is a legacy name for Hanafi-vs-standard Asr-convention metadata. It is **not** a full legal-madhhab taxonomy. The calculation-facing value is `applied.asrSchool`. In v1.7.22, Hanafi-majority countries can report `location.madhab: 'hanafi'` while keeping `applied.asrSchool: 'standard'` when the selected timetable method uses standard 1x Asr. When that mismatch matters, `notes[]` includes an Asr-school advisory.
 
+For qiyam and night divisions, use `dayTimes()` or `nightThirds()`:
+
+```js
+import { dayTimes, nightThirds } from '@tawfeeqmartin/fajr'
+
+const day = dayTimes({ latitude, longitude, date: new Date() })
+console.log(day.midnight)
+console.log(day.qiyam)      // start of the last third
+
+const thirds = nightThirds({ date: new Date(), latitude, longitude })
+console.log(thirds.firstThird)
+console.log(thirds.lastThird)
+```
+
 ## Safe-Use Framing
 
 `fajr` improves the wasail, the means of calculating time. It does not issue religious rulings.
