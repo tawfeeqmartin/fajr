@@ -103,7 +103,8 @@ override or source-specific 2× shadow implementation is added.
   [CALIBRATION.md](CALIBRATION.md), [docs/progress.md](docs/progress.md),
   [docs/data-sources.md](docs/data-sources.md), and
   [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md)
-  for the deeper material.
+  for the deeper material, while preserving the sadaqah jariyah dedication to
+  Nurjaan and Kauthar.
 
 ### Cross-references
 

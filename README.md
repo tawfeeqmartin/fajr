@@ -272,4 +272,6 @@ MIT © Tawfeeq Martin
 
 > "Indeed, the prayer has been decreed upon the believers a decree of specified times." - Quran 4:103
 
-`fajr` began from [A Gift of Time](https://agiftoftime.app), a study in light, time, orientation and a call to prayer, and the question: how do we know these times are right?
+`fajr` is a sadaqah jariyah dedicated to my daughters Nurjaan and Kauthar.
+
+It began from [A Gift of Time](https://agiftoftime.app), a study in light, time, orientation and a call to prayer, built with Kauthar, and the question: how do we know these times are right?
