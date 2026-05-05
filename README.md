@@ -266,7 +266,7 @@ Accuracy PRs should modify one concern at a time, run `node eval/eval.js` and `n
 
 ## Credits
 
-`fajr` stands on the Islamic astronomy and muwaqqit tradition, and on modern open work by Batoul Apps (`adhan-js`), Hamid Zarrabi-Zadeh (`praytimes.org`), ICOP/Odeh, Yallop/HMNAO, Shaukat/Pakistan Ruet-e-Hilal, JPL Horizons, and the institutions and mosques that publish prayer and hilal data.
+`fajr` stands on the Islamic astronomy and muwaqqit tradition, and on modern open work by Batoul Apps (`adhan-js`), Hamid Zarrabi-Zadeh (`praytimes.org`), [AlAdhan](https://aladhan.com), ICOP/Odeh, Yallop/HMNAO, Shaukat/Pakistan Ruet-e-Hilal, JPL Horizons, and the institutions and mosques that publish prayer and hilal data.
 
 MIT © Tawfeeq Martin
 
