@@ -71,7 +71,7 @@ async function main() {
         failures.push({ slug: m.slug, reason: 'no-calendar' })
         continue
       }
-      const dates = calendarToDates(fetched.calendar, targetYear)
+      const dates = calendarToDates(fetched.calendar, targetYear, fetched.iqamaCalendar)
       // Coord priority: mosque-page embed > registry > 0 fallback.
       const latitude = fetched.latitude ?? m.lat ?? m.latitude ?? 0
       const longitude = fetched.longitude ?? m.lng ?? m.longitude ?? 0
@@ -131,17 +131,24 @@ async function fetchYearlyCalendar(slug) {
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const html = await res.text()
-  // Inline JSON: "calendar":[{"1":["07:01","08:35",...],...},{...},...]
-  const idx = html.indexOf('"calendar":[')
-  if (idx < 0) return null
-  const calendar = extractBalancedArray(html, idx + '"calendar":'.length)
+  // Inline JSON: "calendar":[{"1":["07:01","08:35",...],...},{...},...] = ADHAN times.
+  const calIdx = html.indexOf('"calendar":[')
+  if (calIdx < 0) return null
+  const calendar = extractBalancedArray(html, calIdx + '"calendar":'.length)
   if (!calendar) return null
-  // Also pull mosque-embedded coords + name (registry doesn't always have them).
+  // "iqamaCalendar":[{"1":["+20","+15","+15","+10","+15"],...},...] = IQAMAT offsets
+  // (delay between adhan and congregational prayer; mosque-specific). 5 fields per day:
+  // [Fajr, Dhuhr, Asr, Maghrib, Isha]. Strings like "+20" or "20" minutes; some mosques
+  // publish absolute iqamat HH:MM instead — handle both at the parse layer.
+  const iqIdx = html.indexOf('"iqamaCalendar":[')
+  const iqamaCalendar = iqIdx >= 0 ? extractBalancedArray(html, iqIdx + '"iqamaCalendar":'.length) : null
+  // Mosque-embedded coords + name (registry doesn't always carry them).
   const latM = html.match(/"latitude":\s*(-?\d+(?:\.\d+)?)/)
   const lonM = html.match(/"longitude":\s*(-?\d+(?:\.\d+)?)/)
   const nameM = html.match(/"name":\s*"((?:[^"\\]|\\.)*)"/)
   return {
     calendar,
+    iqamaCalendar,
     latitude: latM ? Number(latM[1]) : null,
     longitude: lonM ? Number(lonM[1]) : null,
     name: nameM ? JSON.parse('"' + nameM[1] + '"') : null,
@@ -171,13 +178,14 @@ function extractBalancedArray(html, start) {
   return null
 }
 
-function calendarToDates(calendar, year) {
+function calendarToDates(calendar, year, iqamaCalendar = null) {
   if (!Array.isArray(calendar)) return []
   const out = []
   for (let monthIdx = 0; monthIdx < calendar.length; monthIdx++) {
     const month = calendar[monthIdx]
     if (!month || typeof month !== 'object') continue
     const m1 = String(monthIdx + 1).padStart(2, '0')
+    const iqamaMonth = iqamaCalendar?.[monthIdx] || null
     for (const [dayKey, times] of Object.entries(month)) {
       if (!Array.isArray(times) || times.length < 5) continue
       const day = String(Number(dayKey)).padStart(2, '0')
@@ -185,7 +193,7 @@ function calendarToDates(calendar, year) {
       // Mawaqit format historically: [Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha]
       // Some pages drop sunrise into a sibling "shuruq" array; calendar arrays
       // observed at >= 5 entries are [F, D, A, M, I] without sunrise. Detect
-      // length and map accordingly.
+      // length and map accordingly. ADHAN times only — iqamat is separate.
       const row = { date }
       if (times.length >= 6) {
         row.fajr = times[0]
@@ -195,12 +203,21 @@ function calendarToDates(calendar, year) {
         row.maghrib = times[4]
         row.isha = times[5]
       } else {
-        // 5-entry calendars: assume no sunrise embedded
         row.fajr = times[0]
         row.dhuhr = times[1]
         row.asr = times[2]
         row.maghrib = times[3]
         row.isha = times[4]
+      }
+      // Iqamat: per-day 5-element array [F, D, A, M, I] — congregational delay
+      // after adhan. Strings like "+20" / "20" (minutes) or absolute "HH:MM".
+      // We preserve them as-is so downstream apps can render either offset
+      // countdown UX or absolute iqamat clock.
+      if (iqamaMonth && Array.isArray(iqamaMonth[dayKey]) && iqamaMonth[dayKey].length >= 5) {
+        const iq = iqamaMonth[dayKey]
+        row.iqamat = {
+          fajr: iq[0], dhuhr: iq[1], asr: iq[2], maghrib: iq[3], isha: iq[4],
+        }
       }
       out.push(row)
     }
