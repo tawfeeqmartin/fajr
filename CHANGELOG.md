@@ -28,47 +28,56 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ### Fixed
 
-- **Country→madhab dispatch** parallel to country→method — resolves
-  [#83](https://github.com/tawfeeqmartin/agiftoftime/issues/83). v1.7.21
+- **Country→madhab metadata dispatch** parallel to country→method — resolves
+  [#83](https://github.com/tawfeeqmartin/fajr/issues/83). v1.7.21
   exposed `location.madhab` but the field always reported `'shafii'`
   because adhan.js's method presets all default to Shafi'i 1× shadow
   Asr regardless of country. v1.7.22 introduces an explicit
-  `COUNTRY_MADHAB` table in `src/engine.js` and applies it for both
-  country-default AND city-institutional dispatch paths (skipping
-  caller-explicit + skipping methods whose name carries an explicit
-  `+ Shafi Asr` / `+ Hanafi Asr` composition marker).
+  `COUNTRY_MADHAB` table in `src/engine.js` and uses it as
+  location/user metadata for country-default and city-institutional
+  dispatch paths (skipping caller-explicit + skipping methods whose name
+  carries an explicit `+ Shafi Asr` / `+ Hanafi Asr` composition marker).
 
-### Behavioral change — Asr times shift in Hanafi-majority countries
+### Behavioral note — metadata fixed, Asr calculation not silently shifted
 
-This is **observable but correct**. Asr is now computed at the 2× shadow
-length (Hanafi convention) for these countries — a 30-60 minute later
-Asr that matches what their own institutions publish:
+After [#85](https://github.com/tawfeeqmartin/fajr/issues/85), v1.7.22
+deliberately splits likely local madhab from the calculation-facing Asr
+school:
 
-- **Pakistan** (Karachi method + Hanafi)
-- **Bangladesh** (Karachi + Hanafi)
-- **Türkiye** (Diyanet + Hanafi)
-- **Albania** (Diyanet + Hanafi)
-- **Bosnia, Kosovo, North Macedonia** (Diyanet + Hanafi)
-- **Afghanistan** (Karachi + Hanafi)
-- **India** (Karachi + Hanafi-majority via AIMPLB)
+- `location.madhab` / `location.madhabSource` describe likely local/user
+  madhab metadata.
+- `applied.madhab` / `applied.asrSchool` describe what the engine actually
+  used for Asr.
+
+Hanafi-majority countries now report `location.madhab: 'hanafi'`, but
+this does **not** automatically mutate Asr to 2× shadow:
+
+- **Pakistan** (Karachi region; Hanafi metadata)
+- **Bangladesh** (Karachi region; Hanafi metadata)
+- **Türkiye** (Diyanet region; Hanafi metadata)
+- **Albania** (Diyanet region; Hanafi metadata)
+- **Bosnia, Kosovo, North Macedonia** (Diyanet region; Hanafi metadata)
+- **Afghanistan** (Karachi region; Hanafi metadata)
+- **India** (Karachi region; Hanafi-majority metadata via AIMPLB)
 - **Uzbekistan, Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan**
   (Hanafi tradition)
 
 Cities with explicit Shafi'i overrides (Maldives, Sri Lanka, Lucknow,
-Kochi, Cotabato, Marawi, Sarajevo's Diyanet method-only override
-inheriting Bosnia's Hanafi) are honored correctly: Maldives/Sri-Lanka
-keep Shafi'i (explicit composition); Sarajevo gets Hanafi (city
-methodOverride is method-only, country-madhab fills in).
+Kochi, Cotabato, Marawi) are honored correctly. Sarajevo and other
+Diyanet city overrides can report Hanafi local metadata while their
+calculation-facing Asr remains method-implied unless a future explicit
+override or source-specific 2× shadow implementation is added.
 
 ### Honest caveats
 
-- **Eval ratchet impact**: Diyanet (Türkiye) train fixtures use the
-  institution's own Hanafi Asr → WMAE will *improve* on this cell.
-  AlAdhan-routed Pakistan / Bangladesh train fixtures may *regress*
-  because they were fetched at AlAdhan's default `school=0` (Shafi'i).
-  Follow-up: refresh AlAdhan ground-truth queries with `school=1` for
-  Hanafi-majority countries so apples-to-apples ground truth matches
-  engine output. Tracked separately.
+- **Why not default Hanafi times immediately?** Product-wise, Hanafi-majority
+  countries should preselect Hanafi in app settings. Engine-wise, fajr's
+  default calculation is benchmarked against published timetable fixtures.
+  A blanket country-level 2× shadow mutation failed the ratchet: Diyanet
+  Türkiye and Karachi/AlAdhan Asr moved away from current ground truth.
+  The safe split is: metadata now, explicit caller/source-specific Asr
+  override later. Tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+  and [#85](https://github.com/tawfeeqmartin/fajr/issues/85).
 - **Mixed-madhab countries** (Egypt, Saudi, Iraq, Lebanon, Syria,
   Morocco, Western diaspora) are intentionally not in `COUNTRY_MADHAB`
   and fall through to `madhabSource: 'method-implied'`. The
@@ -78,6 +87,9 @@ methodOverride is method-only, country-madhab fills in).
   TS union type alongside `'caller-explicit'` and `'method-implied'`).
   Apps relying on the previous binary union should update; the change
   is additive (no removed values).
+- **`applied.asrSchool`** is a new additive field (`'standard' | 'hanafi'`)
+  so apps can distinguish likely local madhab from the Asr formula used in
+  the returned time.
 
 ### Cross-references
 

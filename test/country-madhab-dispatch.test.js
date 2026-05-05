@@ -5,8 +5,9 @@
  *
  * Fixes the v1.7.21 adhan-preset leak where every country reported
  * `madhab: 'shafii'` regardless of institutional convention. Now
- * Hanafi-majority countries return 'hanafi' and the underlying Asr
- * calculation uses 2× shadow.
+ * Hanafi-majority countries return location.madhab='hanafi' as metadata,
+ * while applied.asrSchool remains tied to the selected timetable method
+ * unless an explicit calculation override is used.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -34,7 +35,8 @@ describe('#83 — Hanafi-majority country dispatch', () => {
       const r = prayerTimes({ latitude: lat, longitude: lon, date: new Date('2026-05-04') })
       expect(r.location.madhab).toBe('hanafi')
       expect(r.location.madhabSource).toBe('country-default')
-      expect(r.applied.madhab).toBe('hanafi')
+      expect(r.applied.madhab).toBe('shafii')
+      expect(r.applied.asrSchool).toBe('standard')
     })
   }
 })
@@ -56,6 +58,7 @@ describe('#83 — Shafi\'i-majority country dispatch', () => {
       const r = prayerTimes({ latitude: lat, longitude: lon, date: new Date('2026-05-04') })
       expect(r.location.madhab).toBe('shafii')
       expect(r.applied.madhab).toBe('shafii')
+      expect(r.applied.asrSchool).toBe('standard')
     })
   }
 })
@@ -107,18 +110,21 @@ describe('#83 — explicit-Shafi composition (Maldives / Sri Lanka / KarachiShaf
   })
 })
 
-describe('#83 — Asr time actually shifts (Hanafi 2× shadow vs Shafi\'i 1× shadow)', () => {
-  it('Karachi PK Asr is later than Karachi-with-Shafi for same date (2× shadow > 1× shadow)', () => {
-    // The v1.7.22 fix means Karachi PK now uses Hanafi 2× shadow Asr.
-    // Compare against an explicit-Shafi composition for the same coords —
-    // the Hanafi Asr should be 30-60 min LATER.
+describe('#83/#85 — metadata does not silently shift Asr calculation', () => {
+  it('Karachi PK reports Hanafi metadata but keeps method-implied standard Asr', () => {
+    // Country-level madhab metadata is useful for UX, but #85 split it from
+    // calculation-facing Asr because blanket 2× shadow mutation regressed
+    // current institutional fixtures. Karachi and KarachiShafi should remain
+    // effectively identical until a caller-explicit Asr override lands.
     const date = new Date('2026-06-21T00:00:00Z')  // summer solstice — biggest Asr gap
-    const hanafi = prayerTimes({ latitude: 24.8607, longitude: 67.0011, date })
+    const auto = prayerTimes({ latitude: 24.8607, longitude: 67.0011, date })
     const shafii = prayerTimes({ latitude: 24.8607, longitude: 67.0011, date, method: 'KarachiShafi' })
-    const diffMin = (hanafi.asr.getTime() - shafii.asr.getTime()) / 60000
-    expect(hanafi.location.madhab).toBe('hanafi')
-    expect(diffMin).toBeGreaterThan(20)  // 2× shadow vs 1× → at least 20 min difference
-    expect(diffMin).toBeLessThan(90)     // sanity upper bound
+    const diffMin = (auto.asr.getTime() - shafii.asr.getTime()) / 60000
+    expect(auto.location.madhab).toBe('hanafi')
+    expect(auto.location.madhabSource).toBe('country-default')
+    expect(auto.applied.madhab).toBe('shafii')
+    expect(auto.applied.asrSchool).toBe('standard')
+    expect(Math.abs(diffMin)).toBeLessThanOrEqual(1)
   })
 })
 

@@ -124,7 +124,7 @@ for the dual-ihtiyat framework.
 | Cairo | Egypt | AlAdhan | 2.74 | 6.30 | 3.40 | 0.80 | **Outlier — Egyptian 19.5°/17.5° vs AlAdhan dispatch mismatch under review.** Pending v1.8.0+ scholarly-review batch. |
 | Alexandria | Egypt | AlAdhan | 2.69 | 6.80 | 3.00 | 0.70 | (same) |
 | Jakarta | Indonesia | KEMENAG | 0.63 | 0.40 | 0.40 | 0.40 | KEMENAG region |
-| Karachi | Pakistan | AlAdhan | 0.94 | 0.60 | 0.60 | 0.50 | Karachi 18°/18° + Hanafi |
+| Karachi | Pakistan | AlAdhan | 0.94 | 0.60 | 0.60 | 0.50 | Karachi 18°/18° angles; current fixture matches standard/adhan default Asr while v1.7.22 reports Hanafi country metadata |
 | Casablanca | Morocco | Mawaqit | 1.31 | 0.33 | 0.67 | 0.67 | Morocco 19°/17° + Maghrib +5 (v1.5.0 Path A across 23 Moroccan mosques) |
 | Rabat / Marrakech / Tanger / Nador / Oujda / Fes / Meknes / Taza / Khouribga / Settat / Sale / Kenitra / Safi / Essaouira / Agadir / Taroudant / Ouarzazate / Errachidia | Morocco | Mawaqit | 0.79 – 1.93 | varies | varies | varies | 18 additional Mawaqit-Morocco cities; full breakdown in `eval/results/runs.jsonl` |
 | Paris | France | Mawaqit | 0.75 | 0.50 | 0.60 | 0.50 | France UOIF 12°/12° |
@@ -250,29 +250,45 @@ timetables can be cross-checked.
 
 ---
 
-## Madhab dispatch per region
+## Madhab metadata vs applied Asr school
 
 The Asr school choice (Standard / Shafi'i = 1× shadow length, Hanafi = 2×)
-also varies by country:
+varies by country and community, but the *metadata* a user expects and the
+*calculation formula* used by a published timetable are not always the same
+thing. v1.7.22 therefore exposes both:
 
-| Country | Asr school default | Override status | Source |
-|---|---|---|---|
-| Maldives | Shafi'i (explicit) | v1.7.1 fix (issue #26) | Maldives Islamic Ministry — Maldivian Sunni Shafi'i tradition |
-| Sri Lanka | Shafi'i (explicit) | v1.7.1 fix (issue #26) | Sri Lankan Sunni Shafi'i (Mappila / Tamil Muslim) tradition |
-| Pakistan | Shafi'i (Karachi method default in adhan-js) | **Population mismatch documented** — Pakistan is Hanafi-majority. Issue #39 closed pending v1.8.0 override design (issue #40). | adhan-js Karachi method default |
-| Bangladesh | Shafi'i (Karachi default) | Same as Pakistan — Hanafi-majority population, Karachi-dispatch default | (same) |
-| Türkiye | Shafi'i (Diyanet preset default) | Population mismatch documented (Hanafi-majority); issue #39 closed pending #40 | (Diyanet preset) |
-| Albania / Kosovo / Bosnia | Shafi'i (Diyanet default) | Same as Türkiye | (Diyanet preset) |
-| Indonesia | Shafi'i (KEMENAG default) | Aligned — Indonesian Muslim community is overwhelmingly Shafi'i | KEMENAG |
-| Malaysia / Singapore / Brunei | Shafi'i | Aligned — South-East-Asian Sunni Shafi'i tradition | JAKIM / MUIS / Brunei Awqaf |
-| India | Hanafi (default) | Population-aligned; Kochi override flips to Shafi'i for Kerala (v1.7.2) | All India Muslim Personal Law Board / Samastha Kerala for Kochi |
-| Iran / Iraq (Najaf/Karbala/Basra) | Twelver Shia Jafari (Tehran method) | Aligned — Twelver Shia majority | Tehran Institute / Sistani office |
-| Egypt / Saudi / UAE / Qatar / Kuwait / Bahrain / Oman | varies (institutional default) | Aligned — Sunni-majority with country-specific schools | Country institution |
-| Morocco | Maliki (1× shadow = Standard Asr) | Aligned — Moroccan Sunni Maliki tradition | Habous |
+- `location.madhab` / `location.madhabSource` — likely local/user madhab,
+  useful for downstream UX, warnings, and traveler-mode framing.
+- `applied.madhab` / `applied.asrSchool` — what the engine actually used for
+  Asr in this calculation.
 
-The `madhab` parameter on `prayerTimes()` lets callers override the country
-default — e.g. an Indian Hanafi diaspora consumer in the UK can pass
-`madhab: 'Hanafi'` explicitly to override the Standard default.
+This split is deliberate. A blanket country-level Hanafi override would shift
+Asr 30-60 minutes later in Hanafi-majority regions, but the ratchet check in
+[#85](https://github.com/tawfeeqmartin/fajr/issues/85) showed that current
+Diyanet Türkiye and AlAdhan Karachi fixtures match the selected method's
+standard/adhan-default Asr behavior. fajr therefore reports Hanafi metadata
+for Hanafi-majority countries while leaving calculation-facing Asr tied to
+the selected method until source-specific 2× shadow support or caller
+override lands via [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
+
+| Country / region | `location.madhab` metadata | Current applied Asr school | Override status | Source |
+|---|---|---|---|---|
+| Maldives | Shafi'i | Standard / Shafi'i explicit | v1.7.1 fix (issue #26) | Maldives Islamic Ministry — Maldivian Sunni Shafi'i tradition |
+| Sri Lanka | Shafi'i | Standard / Shafi'i explicit | v1.7.1 fix (issue #26) | Sri Lankan Sunni Shafi'i (Mappila / Tamil Muslim) tradition |
+| Pakistan | Hanafi | Standard / adhan default | Metadata fixed in v1.7.22; calculation override deferred to #40 / source-specific validation | University of Islamic Sciences Karachi; current AlAdhan fixture default |
+| Bangladesh | Hanafi | Standard / adhan default | Same as Pakistan | Islamic Foundation Bangladesh; current AlAdhan default |
+| Türkiye | Hanafi | Standard / Diyanet preset default | Metadata fixed in v1.7.22; blanket 2× shadow rejected by ratchet | Diyanet; eval fixture via ezanvakti.emushaf.net |
+| Albania / Kosovo / Bosnia | Hanafi | Standard / Diyanet preset default | Same as Türkiye; city-level Diyanet method overrides still apply method provenance | National Islamic communities |
+| Indonesia | Shafi'i | Standard / Shafi'i | Aligned — Indonesian Muslim community is overwhelmingly Shafi'i | KEMENAG |
+| Malaysia / Singapore / Brunei | Shafi'i | Standard / Shafi'i | Aligned — South-East-Asian Sunni Shafi'i tradition | JAKIM / MUIS / Brunei Awqaf |
+| India | Hanafi by country default, with Kerala Shafi'i city overrides | Standard / adhan default unless explicit composition | Metadata fixed in v1.7.22; Kochi override remains Shafi'i | AIMPLB / Samastha Kerala for Kochi |
+| Iran / Iraq (Najaf/Karbala/Basra) | Jafari/Twelver Shia context via method/provenance | Tehran method | Aligned — Twelver Shia majority in these city overrides | Tehran Institute / Sistani office |
+| Egypt / Saudi / UAE / Qatar / Kuwait / Bahrain / Oman | varies / mixed | Institution-specific selected method | No forced country madhab metadata | Country institution |
+| Morocco | Maliki | Standard Asr | Aligned — Moroccan Sunni Maliki tradition | Habous |
+
+Caller-side Asr/madhab override is still tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
+Until that lands, downstream apps should use `location.madhab` to preselect UI
+preferences and `applied.asrSchool` to explain the time actually returned.
 
 ---
 

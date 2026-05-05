@@ -108,9 +108,16 @@ export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-d
  *    (sea level) silently — the safest default. */
 export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zero'
 
-/** Madhab dispatched for a given location. Affects Asr shadow-length
- *  formula (Shafi'i: 1×, Hanafi: 2×) which can shift Asr by 30-60 minutes. */
+/** Madhab label surfaced for a given location or calculation.
+ *  For location metadata this can describe the likely local/user madhab;
+ *  for applied dispatch it describes the Asr formula actually used. */
 export type Madhab = 'shafii' | 'hanafi'
+
+/** Asr calculation school actually applied.
+ *  - `'standard'`: 1× shadow Asr, used by Shafi'i/Maliki/Hanbali-standard
+ *    calculations and adhan.js presets unless explicitly changed.
+ *  - `'hanafi'`: 2× shadow Asr. */
+export type AsrSchool = 'standard' | 'hanafi'
 
 /** How `prayerTimes` chose the madhab for a given coordinate. v1.7.21+ (#81),
  *  with country-default dispatch added in v1.7.22 (#83).
@@ -118,14 +125,13 @@ export type Madhab = 'shafii' | 'hanafi'
  *  - `'caller-explicit'`: caller will pass an explicit madhab override
  *    (planned for v1.8.x via #40 — not yet supported in v1.7.x).
  *  - `'country-default'`: country is listed in `COUNTRY_MADHAB` and fajr
- *    applied that institutional choice. Pakistan → Hanafi, Maldives →
- *    Shafi'i, Türkiye → Hanafi, Indonesia → Shafi'i, etc.
- *  - `'method-implied'`: neither caller nor country override fired; the
- *    adhan.js method preset's default is what's reported (currently always
- *    Shafi'i 1× shadow Asr). Mixed-madhab countries (Egypt, Saudi, Iraq,
- *    Lebanon, Syria, Morocco, Western diaspora, etc.) intentionally fall
- *    through to this default and surface the `disclaimer` + verification
- *    prompt instead of forcing a single school.
+ *    reports the likely local/user madhab. This is metadata; it does not by
+ *    itself mutate the calculation-facing Asr school.
+ *  - `'method-implied'`: the selected method's calculation madhab is what is
+ *    reported. Mixed-madhab countries (Egypt, Saudi, Iraq, Lebanon, Syria,
+ *    Morocco, Western diaspora, etc.) intentionally fall through here and
+ *    surface the `disclaimer` + verification prompt instead of forcing a
+ *    single school.
  *
  *  Future v1.8.x will add `'caller-explicit'` once the override surface
  *  in #40 lands. */
@@ -147,8 +153,9 @@ export interface PrayerTimesLocation {
   timezone:        string
   /** Effective elevation in metres used by the engine on this call. */
   elevation:       number
-  /** Madhab implicit in the dispatched method (v1.7.21+, #81). 'shafii' for
-   *  Shafi'i 1× shadow Asr; 'hanafi' for Hanafi 2× shadow Asr. */
+  /** Likely local/user madhab for this coordinate (v1.7.21+, #81; country
+   *  metadata added v1.7.22, #83). This may differ from `applied.madhab`
+   *  when the bundled timetable method still uses standard 1× Asr. */
   madhab:          Madhab
   /** How the method was chosen — see MethodSource above. */
   methodSource:    MethodSource
@@ -165,8 +172,10 @@ export interface PrayerTimesLocation {
 export interface AppliedDispatch {
   /** The method actually used (verbose label, same string as `result.method`). */
   method:        string
-  /** The madhab actually used. */
+  /** The madhab / Asr formula actually used by the calculation. */
   madhab:        Madhab
+  /** The Asr calculation school actually applied. */
+  asrSchool:     AsrSchool
   /** Elevation correction in minutes that fajr applied (or would apply at the
    *  given effective elevation). 0 at sea level / when correction declined. */
   elevationMin:  number
