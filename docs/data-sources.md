@@ -104,6 +104,19 @@ Morocco is the clearest example of how fajr should use multiple source layers.
 | Mawaqit Morocco train | Mosque-published local practice. | Anchored early Path A calibration. |
 | Mawaqit Morocco yearly corpus | Seasonal mosque data across many mosques. | Reinforces that a single canonical Morocco stance is better than separate semantic aliases. |
 
+Snapshot tooling:
+
+- [`scripts/fetch-habous-morocco-month.js`](../scripts/fetch-habous-morocco-month.js)
+  captures the official current Hijri-month table
+  `https://www.habous.gov.ma/prieres/horaire_hijri_2.php?ville={id}` into
+  fixture-shaped JSON. It prints to stdout by default and writes only when
+  `--out` is supplied.
+- The 2026-05-05 probe produced 990 current-month rows across the 33 mapped
+  Moroccan cities. Internet Archive recovery was useful but sparse: 7
+  Rabat/default monthly snapshots and 3 Casablanca snapshots. That supports
+  source triage and seasonal spot-checking, not a dense two-year calibration
+  corpus yet.
+
 Raw/source locations:
 
 - `eval/data/train/mawaqit-morocco.json`
@@ -114,6 +127,7 @@ Raw/source locations:
 - `scripts/data/habous-morocco-cities.json`
 - `scripts/data/mawaqit-mosques.json`
 - `scripts/fetch-morocco-habous.js`
+- `scripts/fetch-habous-morocco-month.js`
 - `scripts/fetch-mawaqit.js`
 - `scripts/fetch-mawaqit-yearly.js`
 - `scripts/validate-habous-morocco.js`

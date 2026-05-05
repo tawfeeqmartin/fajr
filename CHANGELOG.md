@@ -45,12 +45,24 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   ratchet train vs holdout diagnostic vs institutional reference vs research
   lead, with raw corpus details preserved in `eval/data/` and `scripts/data/`.
 
+### Added — Morocco Habous monthly snapshot tooling
+
+- Added `scripts/fetch-habous-morocco-month.js`, a non-mutating helper that
+  snapshots Morocco's official Habous current Hijri-month city tables into
+  fixture-shaped JSON. It writes only when `--out` is supplied and supports
+  `--from-file` / `--wayback-from` recovery for archived HTML.
+
 ### Honest caveats
 
 - Documentation and note-text cleanup only. The correction math and returned
   prayer Date instants are unchanged.
 - The public `notes[]` wording around Saudi elevation practice is softened to
   avoid overclaiming a primary policy rationale that has not yet been retrieved.
+- The Habous monthly snapshot helper does not promote rows into `eval/data`. A
+  2026-05-05 probe produced 990 current-month rows across the 33 mapped
+  Moroccan cities, but Internet Archive recovery is sparse, so a dense two-year
+  Morocco calibration corpus still needs recurring snapshots or another
+  official historical source.
 
 ## [1.8.0] — 2026-05-06
 
