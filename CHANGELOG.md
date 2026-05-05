@@ -93,9 +93,22 @@ override or source-specific 2× shadow implementation is added.
   so apps can distinguish likely local Asr-school convention metadata from
   the Asr formula used in the returned time.
 
+### Changed
+
+- **README simplified and reorganized** — resolves
+  [#51](https://github.com/tawfeeqmartin/fajr/issues/51) via
+  [#89](https://github.com/tawfeeqmartin/fajr/pull/89). The front page
+  is now a compact project overview instead of a combined research paper,
+  API reference, changelog, and bibliography. It links directly to
+  [CALIBRATION.md](CALIBRATION.md), [docs/progress.md](docs/progress.md),
+  [docs/data-sources.md](docs/data-sources.md), and
+  [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md)
+  for the deeper material.
+
 ### Cross-references
 
 - Resolves [#83](https://github.com/tawfeeqmartin/fajr/issues/83)
+- Resolves [#51](https://github.com/tawfeeqmartin/fajr/issues/51)
 - Builds on v1.7.21 (#81 best-guess framing surface)
 - Cross-refs [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
   (caller-side override umbrella — composes with this), [#26](https://github.com/tawfeeqmartin/fajr/issues/26)
