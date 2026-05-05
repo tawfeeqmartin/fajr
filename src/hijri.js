@@ -95,9 +95,9 @@ export function hijri(date, opts = {}) {
  */
 function _hijriTabular(date) {
   const jd = _gregorianToJD(
-    date.getFullYear(),
-    date.getMonth() + 1,
-    date.getDate()
+    date.getUTCFullYear(),
+    date.getUTCMonth() + 1,
+    date.getUTCDate()
   )
   const { year, month, day } = _jdToHijri(jd)
   return {

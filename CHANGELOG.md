@@ -24,6 +24,85 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.7.22] — 2026-05-03
+
+### Fixed
+
+- **Country→Asr-school convention metadata dispatch** parallel to country→method — resolves
+  [#83](https://github.com/tawfeeqmartin/fajr/issues/83). v1.7.21
+  exposed `location.madhab` but the field always reported `'shafii'`
+  because adhan.js's method presets all default to Shafi'i 1× shadow
+  Asr regardless of country. v1.7.22 introduces an explicit
+  `COUNTRY_MADHAB` table in `src/engine.js` and uses it as
+  Hanafi-vs-standard Asr convention metadata for country-default and city-institutional
+  dispatch paths (skipping caller-explicit + skipping methods whose name
+  carries an explicit `+ Shafi Asr` / `+ Hanafi Asr` composition marker).
+
+### Behavioral note — metadata fixed, Asr calculation not silently shifted
+
+After [#85](https://github.com/tawfeeqmartin/fajr/issues/85), v1.7.22
+deliberately splits the likely local Asr-school convention from the
+calculation-facing Asr school. In v1.7.x, `madhab` is the legacy field name
+for the Hanafi-vs-standard Asr convention label, not a full legal-madhhab
+taxonomy:
+
+- `location.madhab` / `location.madhabSource` describe likely local
+  Asr-school convention metadata.
+- `applied.madhab` / `applied.asrSchool` describe what the engine actually
+  used for Asr.
+
+Hanafi-majority countries now report `location.madhab: 'hanafi'`, but
+this does **not** automatically mutate Asr to 2× shadow:
+
+- **Pakistan** (Karachi region; Hanafi metadata)
+- **Bangladesh** (Karachi region; Hanafi metadata)
+- **Türkiye** (Diyanet region; Hanafi metadata)
+- **Albania** (Diyanet region; Hanafi metadata)
+- **Bosnia, Kosovo, North Macedonia** (Diyanet region; Hanafi metadata)
+- **Afghanistan** (Karachi region; Hanafi metadata)
+- **India** (Karachi region; Hanafi-majority metadata via AIMPLB)
+- **Uzbekistan, Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan**
+  (Hanafi tradition)
+
+Cities with explicit Shafi'i overrides (Maldives, Sri Lanka, Lucknow,
+Kochi, Cotabato, Marawi) are honored correctly. Sarajevo and other
+Diyanet city overrides can report Hanafi local metadata while their
+calculation-facing Asr remains method-implied unless a future explicit
+override or source-specific 2× shadow implementation is added.
+
+### Honest caveats
+
+- **Why not default Hanafi times immediately?** Product-wise, Hanafi-majority
+  countries should preselect Hanafi in app settings. Engine-wise, fajr's
+  default calculation is benchmarked against published timetable fixtures.
+  A blanket country-level 2× shadow mutation failed the ratchet: Diyanet
+  Türkiye and Karachi/AlAdhan Asr moved away from current ground truth.
+  The safe split is: metadata now, explicit caller/source-specific Asr
+  override later. Tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+  and [#85](https://github.com/tawfeeqmartin/fajr/issues/85).
+- **Mixed-madhab countries** (Egypt, Saudi, Iraq, Lebanon, Syria,
+  Morocco, Western diaspora) are intentionally not in `COUNTRY_MADHAB`
+  and fall through to `madhabSource: 'method-implied'`. The
+  `disclaimer` field flags this for users; #40's caller-side override
+  surface in v1.8.x is the actionable mechanism.
+- **`madhabSource: 'country-default'`** is the new value (added to the
+  TS union type alongside `'caller-explicit'` and `'method-implied'`).
+  Apps relying on the previous binary union should update; the change
+  is additive (no removed values).
+- **`applied.asrSchool`** is a new additive field (`'standard' | 'hanafi'`)
+  so apps can distinguish likely local Asr-school convention metadata from
+  the Asr formula used in the returned time.
+
+### Cross-references
+
+- Resolves [#83](https://github.com/tawfeeqmartin/fajr/issues/83)
+- Builds on v1.7.21 (#81 best-guess framing surface)
+- Cross-refs [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+  (caller-side override umbrella — composes with this), [#26](https://github.com/tawfeeqmartin/fajr/issues/26)
+  (Maldives/Sri-Lanka madhab fix — same pattern, this generalizes)
+
+---
+
 ## [1.7.21] — 2026-05-03
 
 ### Added
