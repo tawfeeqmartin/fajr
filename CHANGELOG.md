@@ -28,6 +28,15 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ### Fixed
 
+- **City registry row-quality validation** — resolves
+  [#86](https://github.com/tawfeeqmartin/fajr/issues/86). Shah Alam's
+  Malaysia bbox now contains its own canonical row center, Kuala Lumpur's
+  adjacent western edge no longer shadows Shah Alam, and
+  `validate:registry` now fails any non-allowlisted city whose row lat/lon
+  sits outside its declared bbox. `Jerusalem|PS` is explicitly allowlisted
+  as an intentional Palestine routing anchor while `Jerusalem|IL` owns the
+  canonical Jerusalem coordinate.
+
 - **Country→Asr-school convention metadata dispatch** parallel to country→method — resolves
   [#83](https://github.com/tawfeeqmartin/fajr/issues/83). v1.7.21
   exposed `location.madhab` but the field always reported `'shafii'`

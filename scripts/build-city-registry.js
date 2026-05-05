@@ -897,10 +897,12 @@ const BBOX_OVERRIDES = {
   'Podgorica|ME':       [42.40, 42.50, 19.20, 19.40],
   'Detroit|US':         [42.18, 42.46, -83.08, -82.92],
   'Fes|MA':             [33.94, 34.28, -5.30, -4.85],
-  'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.45],
+  // v1.7.22 #86: keep Shah Alam's own centre lon 101.5183 inside the bbox
+  // while still excluding KL CBD at lon ~101.69.
+  'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.55],
   'Singapore|SG':       [1.16, 1.44, 103.6, 104.05],
   'Johor Bahru|MY':     [1.45, 1.6927, 103.5414, 103.9414],
-  'Kuala Lumpur|MY':    [2.939, 3.339, 101.50, 101.99],
+  'Kuala Lumpur|MY':    [2.939, 3.339, 101.55, 101.99],
   'Basel|CH':           [47.41, 47.65, 7.44, 7.74],
   'Mulhouse|FR':        [47.65, 47.90, 7.19, 7.49],
 

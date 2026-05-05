@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-03T18:25:06.051Z",
+  "generated": "2026-05-05T05:59:37.336Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -189,7 +189,6 @@
     {"name":"Port Moresby","countryISO":"PG","lat":-9.4438,"lon":147.1803,"bbox":[-9.5438,-9.3438,147.0803,147.2803],"timezone":"Pacific/Port_Moresby","elevation":49,"source":{"type":"inherited","from":"PG"}},
     {"name":"Detroit","countryISO":"US","lat":42.3314,"lon":-83.0458,"bbox":[42.18,42.46,-83.08,-82.92],"timezone":"America/Detroit","adminRegion":"Michigan","population":632000,"elevation":183,"source":{"type":"inherited","from":"USA"}},
     {"name":"Kinshasa","countryISO":"CD","lat":-4.4419,"lon":15.2663,"bbox":[-4.55,-4.36,15.2,15.45],"timezone":"Africa/Kinshasa","elevation":280,"source":{"type":"inherited","from":"DRCongo"}},
-    {"name":"Shah Alam","countryISO":"MY","lat":3.0731,"lon":101.5183,"bbox":[2.8731,3.2731,101.3183,101.45],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Selangor","population":740000,"elevation":28,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Laval","countryISO":"CA","lat":45.6066,"lon":-73.7124,"bbox":[45.55,45.75,-73.86,-73.59],"timezone":"America/Toronto","population":438000,"elevation":39,"source":{"type":"mawaqit","slug":"iqra-laval-h7v-2v5-canada"}},
     {"name":"Agadir","countryISO":"MA","lat":30.4278,"lon":-9.5981,"bbox":[30.4,30.58,-9.75,-9.45],"timezone":"Africa/Casablanca","nameLocal":"أكادير","adminRegion":"Souss-Massa","population":421000,"elevation":74,"source":{"type":"mawaqit","slug":"msjd-hl-sws-agadir-80000-morocco"}},
     {"name":"Omdurman","countryISO":"SD","lat":15.6446,"lon":32.4778,"bbox":[15.5,15.78,32.3,32.5],"timezone":"Africa/Khartoum","nameLocal":"أم درمان","adminRegion":"Khartoum State","population":2805000,"elevation":381,"source":{"type":"inherited","from":"Sudan"}},
@@ -277,6 +276,7 @@
     {"name":"Kuching","countryISO":"MY","lat":1.5533,"lon":110.3592,"bbox":[1.4033,1.7033,110.2092,110.5092],"timezone":"Asia/Kuching","adminRegion":"Sarawak","population":325000,"elevation":27,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Miami","countryISO":"US","lat":25.7617,"lon":-80.1918,"bbox":[25.6117,25.9117,-80.3418,-80.0418],"timezone":"America/New_York","adminRegion":"Florida","population":467000,"elevation":2,"source":{"type":"inherited","from":"USA"}},
     {"name":"Khujand","countryISO":"TJ","lat":40.2854,"lon":69.6203,"bbox":[40.1354,40.4354,69.4703,69.7703],"timezone":"Asia/Dushanbe","nameLocal":"Хуҷанд","adminRegion":"Sughd","population":181000,"elevation":320,"source":{"type":"inherited","from":"Tajikistan"}},
+    {"name":"Shah Alam","countryISO":"MY","lat":3.0731,"lon":101.5183,"bbox":[2.8731,3.2731,101.3183,101.55],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Selangor","population":740000,"elevation":28,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Johor Bahru","countryISO":"MY","lat":1.4927,"lon":103.7414,"bbox":[1.45,1.6927,103.5414,103.9414],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Johor","population":858000,"elevation":26,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Rotterdam","countryISO":"NL","lat":51.9244,"lon":4.4777,"bbox":[51.72,52,4.28,4.68],"timezone":"Europe/Amsterdam","adminRegion":"South Holland","population":651000,"elevation":0,"source":{"type":"mawaqit","slug":"pakistan-islamic-centre-rotterdam-rotterdam-3014-ed-netherlands"}},
     {"name":"Doha","countryISO":"QA","lat":25.2854,"lon":51.531,"bbox":[25.05,25.5,51.4,51.65],"timezone":"Asia/Qatar","population":2382000,"elevation":10,"source":{"type":"mawaqit","slug":"masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar"}},
@@ -359,7 +359,7 @@
     {"name":"Nampula","countryISO":"MZ","lat":-15.1167,"lon":39.2667,"bbox":[-15.3167,-14.9167,39.0667,39.4667],"timezone":"Africa/Maputo","population":743000,"elevation":441,"source":{"type":"mawaqit","slug":"masjid-fatimah-rua-monomotapa-3100-nampula-mozambique"}},
     {"name":"Rajshahi","countryISO":"BD","lat":24.3636,"lon":88.6241,"bbox":[24.1636,24.5636,88.4241,88.8241],"timezone":"Asia/Dhaka","nameLocal":"রাজশাহী","adminRegion":"Rajshahi Division","population":760000,"elevation":18,"source":{"type":"inherited","from":"Bangladesh"}},
     {"name":"Bahawalpur","countryISO":"PK","lat":29.3956,"lon":71.6722,"bbox":[29.1956,29.5956,71.4722,71.8722],"timezone":"Asia/Karachi","nameLocal":"بہاولپور","adminRegion":"Punjab","population":762000,"elevation":116,"source":{"type":"inherited","from":"Pakistan"}},
-    {"name":"Kuala Lumpur","countryISO":"MY","lat":3.139,"lon":101.6869,"bbox":[2.939,3.339,101.5,101.99],"timezone":"Asia/Kuala_Lumpur","population":1809000,"elevation":22,"source":{"type":"mawaqit","slug":"surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2"}},
+    {"name":"Kuala Lumpur","countryISO":"MY","lat":3.139,"lon":101.6869,"bbox":[2.939,3.339,101.55,101.99],"timezone":"Asia/Kuala_Lumpur","population":1809000,"elevation":22,"source":{"type":"mawaqit","slug":"surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2"}},
     {"name":"Giza","countryISO":"EG","lat":30.0131,"lon":31.2089,"bbox":[29.6131,30.1,30.8089,31.22],"timezone":"Africa/Cairo","nameLocal":"الجيزة","adminRegion":"Giza","population":9200000,"elevation":30,"source":{"type":"inherited","from":"Egypt"}},
     {"name":"Dubai","countryISO":"AE","lat":25.2048,"lon":55.2708,"bbox":[24.9,25.35,55.05,55.5],"timezone":"Asia/Dubai","nameLocal":"دبي","adminRegion":"Dubai Emirate","population":3604000,"elevation":5,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Hong Kong","countryISO":"HK","lat":22.3193,"lon":114.1694,"bbox":[22.16,22.55,113.85,114.43],"timezone":"Asia/Hong_Kong","population":7482000,"elevation":50,"source":{"type":"inherited","from":"HongKong"}},

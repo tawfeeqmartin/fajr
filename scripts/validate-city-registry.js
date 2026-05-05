@@ -9,26 +9,30 @@
  * false positives during a 52-coord sample worldwide; user asked for full
  * registry validation rather than whack-a-mole patching).
  *
- * The script enforces five invariants across every row in the registry:
+ * The script enforces six invariants across every row in the registry:
  *
- *   1. bbox-internal:    For each city, sample N points uniformly inside the
+ *   1. row-center:       For each city, the canonical row lat/lon SHOULD sit
+ *                        inside the declared bbox. Intentional routing anchors
+ *                        must be explicitly allowlisted.
+ *
+ *   2. bbox-internal:    For each city, sample N points uniformly inside the
  *                        declared bbox. Each MUST resolve via detectLocation
  *                        to that city's name AND its claimed country.
  *
- *   2. bbox-leak:        For each city, sample N points just OUTSIDE the
+ *   3. bbox-leak:        For each city, sample N points just OUTSIDE the
  *                        declared bbox (1 km buffer). None may resolve to
  *                        that city.
  *
- *   3. country-claim:    For each city, detectCountry(centerLat, centerLon)
+ *   4. country-claim:    For each city, detectCountry(centerLat, centerLon)
  *                        must match the city's claimed countryISO (mapped to
  *                        the engine's country-key vocabulary).
  *
- *   4. cross-border:     For each city, every internal sample point must
+ *   5. cross-border:     For each city, every internal sample point must
  *                        resolve to the SAME country as the city's claimed
  *                        country. A bbox extending across an international
  *                        border is a fail.
  *
- *   5. bbox-overlap:     Pairs of cities whose bboxes intersect are flagged
+ *   6. bbox-overlap:     Pairs of cities whose bboxes intersect are flagged
  *                        as WARN (not fail) — some overlaps are intentional
  *                        (metro + satellite city, where the smaller-bbox sort
  *                        order disambiguates correctly). The list is for
@@ -139,6 +143,22 @@ function makePrng(seed) {
 const SAMPLES_PER_CATEGORY = 10
 const OUTSIDE_BUFFER_DEG  = 0.01  // ~1.1 km at the equator; smaller near poles.
 
+const ROW_CENTER_OUTSIDE_BBOX_ALLOWLIST = new Set([
+  // Jerusalem|PS is an intentional routing anchor: the canonical Jerusalem
+  // point is served by Jerusalem|IL, while this east-shifted bbox catches
+  // West Bank / Palestinian institutional coordinates without shadowing it.
+  'Jerusalem|PS',
+])
+
+function cityKey(city) {
+  return `${city.name}|${city.countryISO}`
+}
+
+function pointInsideBbox(lat, lon, bbox) {
+  const [latMin, latMax, lonMin, lonMax] = bbox
+  return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax
+}
+
 function randomInsideBbox(rng, bbox) {
   const [latMin, latMax, lonMin, lonMax] = bbox
   const lat = latMin + rng() * (latMax - latMin)
@@ -206,6 +226,7 @@ const internalWinByName = new Map()
 for (const city of cities) {
   const cityName = city.name
   const claimedISO = city.countryISO
+  const key = cityKey(city)
   const claimedEngineCountry = isoToEngineCountry(claimedISO)
   const bbox = city.bbox
   const [latMin, latMax, lonMin, lonMax] = bbox
@@ -218,7 +239,22 @@ for (const city of cities) {
       { city: cityName, iso: claimedISO })
   }
 
-  // 3. Cross-check claimed countryISO against detectCountry(center).
+  // 1. Row-quality check: a city's canonical row lat/lon should generally be
+  // inside its own bbox. Intentional routing anchors must be explicit here.
+  if (!pointInsideBbox(city.lat, city.lon, bbox)) {
+    const msg = `${key} row center (${city.lat.toFixed(4)}, ${city.lon.toFixed(4)}) is outside its bbox [${bbox.join(', ')}]`
+    if (ROW_CENTER_OUTSIDE_BBOX_ALLOWLIST.has(key)) {
+      warn('row-center-outside-bbox-allowlisted', msg, {
+        city: cityName, iso: claimedISO, point: [city.lat, city.lon], bbox,
+      })
+    } else {
+      fail('row-center-outside-bbox', msg, {
+        city: cityName, iso: claimedISO, point: [city.lat, city.lon], bbox,
+      })
+    }
+  }
+
+  // 4. Cross-check claimed countryISO against detectCountry(center).
   const centerCountry = detectCountryViaLocation(centerLat, centerLon)
   if (claimedEngineCountry && centerCountry !== claimedEngineCountry) {
     fail('country-claim',
@@ -226,7 +262,7 @@ for (const city of cities) {
       { city: cityName, claimed: claimedEngineCountry, detected: centerCountry, center: [centerLat, centerLon] })
   }
 
-  // 1. bbox-internal: N samples inside the bbox.
+  // 2. bbox-internal: N samples inside the bbox.
   let internalWin = 0
   for (let i = 0; i < SAMPLES_PER_CATEGORY; i++) {
     const [lat, lon] = randomInsideBbox(rng, bbox)
@@ -250,7 +286,7 @@ for (const city of cities) {
       continue
     }
     internalWin++
-    // 4. cross-border: the country at this internal point must match the
+    // 5. cross-border: the country at this internal point must match the
     // city's claimed country.
     if (claimedEngineCountry && got.country !== claimedEngineCountry) {
       fail('cross-border',
@@ -260,7 +296,7 @@ for (const city of cities) {
   }
   internalWinByName.set(cityName, internalWin)
 
-  // 2. bbox-leak: N samples just outside the bbox.
+  // 3. bbox-leak: N samples just outside the bbox.
   for (let i = 0; i < SAMPLES_PER_CATEGORY; i++) {
     const [lat, lon] = randomJustOutsideBbox(rng, bbox)
     const got = detectLocation(lat, lon)
@@ -277,7 +313,7 @@ for (const city of cities) {
   }
 }
 
-// 5. bbox-overlap detection across all pairs. WARN-class — many overlaps are
+// 6. bbox-overlap detection across all pairs. WARN-class — many overlaps are
 // intentional (metro + satellite where smaller-bbox-first wins). The list
 // is informational. We omit pairs that are far apart (different countries
 // with no shared land border) since the only same-country overlaps are
@@ -315,6 +351,7 @@ console.log(`========================================`)
 console.log(`Validation report (seed=${SEED.toString(16)})`)
 console.log(`========================================`)
 console.log(`Cities checked:        ${cities.length}`)
+console.log(`Row-center checks:     ${cities.length}`)
 console.log(`Internal samples:      ${cities.length * SAMPLES_PER_CATEGORY}`)
 console.log(`External samples:      ${cities.length * SAMPLES_PER_CATEGORY}`)
 console.log(`Country-claim checks:  ${cities.length}`)
