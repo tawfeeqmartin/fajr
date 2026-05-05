@@ -439,16 +439,18 @@ When the tracker is empty, say so explicitly in your status update. When it's no
 
 - **Title:** `[fajr↔agiftoftime] vX.Y.Z released — <one-line summary>` (or `[fajr↔agiftoftime] wiki addition — <topic>` for wiki changes)
 - **Body:** (a) what's new, (b) why it might matter to agiftoftime's UX or integration code, (c) **specific test/review asks framed as concrete actions** — e.g. "render `times.notes` in the long-press provenance sheet and report whether the high-lat advisory text reads usefully at Reykjavik test coords" — not vague "let me know if anything seems off".
-- Sign as `— fajr-agent`.
+- Sign as `— fajr-claude`.
 
 Do NOT let agiftoftime-agent discover changes by reading commits, the README, or by accident. Proactive surfacing is the contract.
 
-**Identify yourself as `fajr-agent` whenever the conversation crosses repo boundaries.** Specifically:
+**Identify yourself as `fajr-claude` whenever the conversation crosses repo boundaries.** Specifically:
 
-- In commit messages, use `Co-Authored-By: fajr-agent (Claude Opus 4.7) <noreply@anthropic.com>` instead of the generic Claude footer.
-- At the end of any GitHub issue comment or PR description you write, sign with `— fajr-agent`.
+- In commit messages, use `Co-Authored-By: fajr-claude (Claude Opus 4.7) <noreply@anthropic.com>` instead of the generic Claude footer.
+- At the end of any GitHub issue comment or PR description you write, sign with `— fajr-claude`.
 
-This is purely for human/cross-agent legibility — Tawfeeq and the agiftoftime-agent should be able to read a thread and immediately know which agent said what. The other repo's agent uses `agiftoftime-agent` correspondingly.
+The Codex variant operating in this repo signs as `fajr-codex` (see AGENTS.md). The distinct names let humans + cross-repo agents read a thread and immediately know which model produced which line of work — fajr-claude / fajr-codex / agiftoftime-agent are all peers.
+
+Past artifacts signed `fajr-agent` (commits, issues, PR descriptions before this rename) are durable history — don't rewrite. Only new outputs use `fajr-claude`.
 
 This pattern lets each agent work asynchronously in its own repo without bottlenecking the human as a relay between sessions.
 
