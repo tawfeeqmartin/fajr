@@ -7,13 +7,11 @@
     "elevation": 23,
     "timezone": "Africa/Cairo",
     "method": "Egyptian (19.5°/17.5°)",
-    "source": {
-      "type": "national-authority",
-      "institution": "Egyptian General Authority of Survey (EGSA)",
-      "url": "https://esa.gov.eg/praytimes.aspx"
-    },
+    "source": "Egyptian General Authority of Survey (EGSA)",
     "notes": "ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.",
-    "dates": []
+    "dates": [],
+    "source_institution": "Egyptian General Authority of Survey (EGSA)",
+    "source_url": "https://esa.gov.eg/praytimes.aspx"
   },
   {
     "city": "Alexandria",
@@ -23,13 +21,11 @@
     "elevation": 7,
     "timezone": "Africa/Cairo",
     "method": "Egyptian (19.5°/17.5°)",
-    "source": {
-      "type": "national-authority",
-      "institution": "Egyptian General Authority of Survey (EGSA)",
-      "url": "https://esa.gov.eg/praytimes.aspx"
-    },
+    "source": "Egyptian General Authority of Survey (EGSA)",
     "notes": "ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.",
-    "dates": []
+    "dates": [],
+    "source_institution": "Egyptian General Authority of Survey (EGSA)",
+    "source_url": "https://esa.gov.eg/praytimes.aspx"
   },
   {
     "city": "Aswan",
@@ -39,13 +35,11 @@
     "elevation": 104,
     "timezone": "Africa/Cairo",
     "method": "Egyptian (19.5°/17.5°)",
-    "source": {
-      "type": "national-authority",
-      "institution": "Egyptian General Authority of Survey (EGSA)",
-      "url": "https://esa.gov.eg/praytimes.aspx"
-    },
+    "source": "Egyptian General Authority of Survey (EGSA)",
     "notes": "ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.",
-    "dates": []
+    "dates": [],
+    "source_institution": "Egyptian General Authority of Survey (EGSA)",
+    "source_url": "https://esa.gov.eg/praytimes.aspx"
   },
   {
     "city": "Luxor",
@@ -55,13 +49,11 @@
     "elevation": 71,
     "timezone": "Africa/Cairo",
     "method": "Egyptian (19.5°/17.5°)",
-    "source": {
-      "type": "national-authority",
-      "institution": "Egyptian General Authority of Survey (EGSA)",
-      "url": "https://esa.gov.eg/praytimes.aspx"
-    },
+    "source": "Egyptian General Authority of Survey (EGSA)",
     "notes": "ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.",
-    "dates": []
+    "dates": [],
+    "source_institution": "Egyptian General Authority of Survey (EGSA)",
+    "source_url": "https://esa.gov.eg/praytimes.aspx"
   },
   {
     "city": "Port Said",
@@ -71,13 +63,11 @@
     "elevation": 3,
     "timezone": "Africa/Cairo",
     "method": "Egyptian (19.5°/17.5°)",
-    "source": {
-      "type": "national-authority",
-      "institution": "Egyptian General Authority of Survey (EGSA)",
-      "url": "https://esa.gov.eg/praytimes.aspx"
-    },
+    "source": "Egyptian General Authority of Survey (EGSA)",
     "notes": "ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.",
-    "dates": []
+    "dates": [],
+    "source_institution": "Egyptian General Authority of Survey (EGSA)",
+    "source_url": "https://esa.gov.eg/praytimes.aspx"
   },
   {
     "city": "Suez",
@@ -87,13 +77,11 @@
     "elevation": 12,
     "timezone": "Africa/Cairo",
     "method": "Egyptian (19.5°/17.5°)",
-    "source": {
-      "type": "national-authority",
-      "institution": "Egyptian General Authority of Survey (EGSA)",
-      "url": "https://esa.gov.eg/praytimes.aspx"
-    },
+    "source": "Egyptian General Authority of Survey (EGSA)",
     "notes": "ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.",
-    "dates": []
+    "dates": [],
+    "source_institution": "Egyptian General Authority of Survey (EGSA)",
+    "source_url": "https://esa.gov.eg/praytimes.aspx"
   },
   {
     "city": "Sharm el-Sheikh",
@@ -103,12 +91,10 @@
     "elevation": 17,
     "timezone": "Africa/Cairo",
     "method": "Egyptian (19.5°/17.5°)",
-    "source": {
-      "type": "national-authority",
-      "institution": "Egyptian General Authority of Survey (EGSA)",
-      "url": "https://esa.gov.eg/praytimes.aspx"
-    },
+    "source": "Egyptian General Authority of Survey (EGSA)",
     "notes": "ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.",
-    "dates": []
+    "dates": [],
+    "source_institution": "Egyptian General Authority of Survey (EGSA)",
+    "source_url": "https://esa.gov.eg/praytimes.aspx"
   }
 ]
