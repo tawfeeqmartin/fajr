@@ -250,19 +250,27 @@ timetables can be cross-checked.
 
 ---
 
-## Asr-school convention metadata vs applied Asr school
+## Asr convention metadata vs applied Asr school
 
 The Asr school choice (standard 1× shadow length, often associated with
 Shafi'i/Maliki/Hanbali calculations, vs Hanafi 2× shadow) varies by country
 and community, but the *metadata* a user expects and the *calculation formula*
-used by a published timetable are not always the same thing. In v1.7.x the
-legacy `madhab` field is only this Hanafi-vs-standard Asr convention label;
-it is not a full legal-madhhab taxonomy. v1.7.22 therefore exposes both:
+used by a published timetable are not always the same thing. After #88,
+the primary public field is `asrConvention`, not `madhab`, because this is
+not a full legal-madhhab taxonomy. Morocco is the cautionary example: a
+Moroccan user may be Maliki while the relevant Asr convention is still
+`standard` 1× shadow, not "Shafi'i."
 
-- `location.madhab` / `location.madhabSource` — likely local Asr-school
-  convention, useful for downstream UX, warnings, and traveler-mode framing.
-- `applied.madhab` / `applied.asrSchool` — what the engine actually used for
-  Asr in this calculation.
+v1.7.22 therefore exposes both:
+
+- `location.asrConvention` / `location.asrConventionSource` — likely local
+  Asr convention, useful for downstream UX, warnings, and traveler-mode
+  framing.
+- `applied.asrSchool` — what the engine actually used for Asr in this
+  calculation.
+- `location.madhab`, `location.madhabSource`, and `applied.madhab` —
+  deprecated v1.7.21 compatibility aliases. Do not render these as "local
+  madhhab" in user-facing UI.
 
 This split is deliberate. A blanket country-level Hanafi override would shift
 Asr 30-60 minutes later in Hanafi-majority regions, but the ratchet check in
@@ -273,25 +281,25 @@ for Hanafi-majority countries while leaving calculation-facing Asr tied to
 the selected method until source-specific 2× shadow support or caller
 override lands via [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
 
-| Country / region | `location.madhab` metadata | Current applied Asr school | Override status | Source |
+| Country / region | `location.asrConvention` metadata | Current applied Asr school | Override status | Source |
 |---|---|---|---|---|
-| Maldives | Shafi'i | Standard / Shafi'i explicit | v1.7.1 fix (issue #26) | Maldives Islamic Ministry — Maldivian Sunni Shafi'i tradition |
-| Sri Lanka | Shafi'i | Standard / Shafi'i explicit | v1.7.1 fix (issue #26) | Sri Lankan Sunni Shafi'i (Mappila / Tamil Muslim) tradition |
+| Maldives | Standard 1× | Standard / explicit Shafi composition | v1.7.1 fix (issue #26) | Maldives Islamic Ministry — Maldivian Sunni Shafi'i tradition |
+| Sri Lanka | Standard 1× | Standard / explicit Shafi composition | v1.7.1 fix (issue #26) | Sri Lankan Sunni Shafi'i (Mappila / Tamil Muslim) tradition |
 | Pakistan | Hanafi | Standard / adhan default | Metadata fixed in v1.7.22; calculation override deferred to #40 / source-specific validation | University of Islamic Sciences Karachi; current AlAdhan fixture default |
 | Bangladesh | Hanafi | Standard / adhan default | Same as Pakistan | Islamic Foundation Bangladesh; current AlAdhan default |
 | Türkiye | Hanafi | Standard / Diyanet preset default | Metadata fixed in v1.7.22; blanket 2× shadow rejected by ratchet | Diyanet; eval fixture via ezanvakti.emushaf.net |
 | Albania / Kosovo / Bosnia | Hanafi | Standard / Diyanet preset default | Same as Türkiye; city-level Diyanet method overrides still apply method provenance | National Islamic communities |
-| Indonesia | Shafi'i | Standard / Shafi'i | Aligned — Indonesian Muslim community is overwhelmingly Shafi'i | KEMENAG |
-| Malaysia / Singapore / Brunei | Shafi'i | Standard / Shafi'i | Aligned — South-East-Asian Sunni Shafi'i tradition | JAKIM / MUIS / Brunei Awqaf |
+| Indonesia | Standard 1× | Standard | Aligned — Indonesian Muslim community is overwhelmingly Shafi'i, but API reports Asr convention | KEMENAG |
+| Malaysia / Singapore / Brunei | Standard 1× | Standard | Aligned — South-East-Asian Sunni Shafi'i tradition, but API reports Asr convention | JAKIM / MUIS / Brunei Awqaf |
 | India | Hanafi by country default, with Kerala Shafi'i city overrides | Standard / adhan default unless explicit composition | Metadata fixed in v1.7.22; Kochi override remains Shafi'i | AIMPLB / Samastha Kerala for Kochi |
 | Iran / Iraq (Najaf/Karbala/Basra) | Jafari/Twelver Shia context via method/provenance | Tehran method | Aligned — Twelver Shia majority in these city overrides | Tehran Institute / Sistani office |
 | Egypt / Saudi / UAE / Qatar / Kuwait / Bahrain / Oman | varies / mixed | Institution-specific selected method | No forced country madhab metadata | Country institution |
-| Morocco | no forced value; method-implied standard Asr | Standard Asr | Aligned with selected Habous method; API does not encode Maliki as a `madhab` value in v1.7.x | Habous |
+| Morocco | method-implied standard 1× | Standard Asr | Aligned with selected Habous method; API does not encode Maliki as a `madhab` value | Habous |
 
-Caller-side Asr/madhab override is still tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
-Until that lands, downstream apps should use `location.madhab` only as an
-Asr-convention hint and `applied.asrSchool` to explain the time actually
-returned. When these differ, fajr surfaces an `Asr-school advisory` in
+Caller-side Asr-convention override is still tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
+Until that lands, downstream apps should use `location.asrConvention` as the
+local Asr-convention hint and `applied.asrSchool` to explain the time actually
+returned. When these differ, fajr surfaces an `Asr-convention advisory` in
 `notes[]`.
 
 ---

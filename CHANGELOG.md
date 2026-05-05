@@ -37,30 +37,39 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   as an intentional Palestine routing anchor while `Jerusalem|IL` owns the
   canonical Jerusalem coordinate.
 
-- **Country→Asr-school convention metadata dispatch** parallel to country→method — resolves
-  [#83](https://github.com/tawfeeqmartin/fajr/issues/83). v1.7.21
+- **Country→Asr-convention metadata dispatch** parallel to country→method — resolves
+  [#83](https://github.com/tawfeeqmartin/fajr/issues/83) and the
+  naming follow-up in [#88](https://github.com/tawfeeqmartin/fajr/issues/88).
+  v1.7.21
   exposed `location.madhab` but the field always reported `'shafii'`
-  because adhan.js's method presets all default to Shafi'i 1× shadow
+  because adhan.js's method presets all default to standard 1× shadow
   Asr regardless of country. v1.7.22 introduces an explicit
-  `COUNTRY_MADHAB` table in `src/engine.js` and uses it as
+  `COUNTRY_ASR_CONVENTION` table in `src/engine.js` and uses it as
   Hanafi-vs-standard Asr convention metadata for country-default and city-institutional
   dispatch paths (skipping caller-explicit + skipping methods whose name
   carries an explicit `+ Shafi Asr` / `+ Hanafi Asr` composition marker).
+  New integrations should read `location.asrConvention` /
+  `location.asrConventionSource`; `location.madhab` / `madhabSource` remain
+  deprecated v1.7.21 aliases only.
 
 ### Behavioral note — metadata fixed, Asr calculation not silently shifted
 
 After [#85](https://github.com/tawfeeqmartin/fajr/issues/85), v1.7.22
-deliberately splits the likely local Asr-school convention from the
-calculation-facing Asr school. In v1.7.x, `madhab` is the legacy field name
-for the Hanafi-vs-standard Asr convention label, not a full legal-madhhab
-taxonomy:
+deliberately splits the likely local Asr convention from the
+calculation-facing Asr school. After [#88](https://github.com/tawfeeqmartin/fajr/issues/88),
+the primary field names are explicit Asr-convention names, because the
+two-value Hanafi-vs-standard Asr convention is not a full legal-madhhab
+taxonomy. Morocco is the cautionary example: Moroccan users may be Maliki,
+while `location.asrConvention` correctly reports `standard` 1× Asr.
 
-- `location.madhab` / `location.madhabSource` describe likely local
-  Asr-school convention metadata.
-- `applied.madhab` / `applied.asrSchool` describe what the engine actually
-  used for Asr.
+- `location.asrConvention` / `location.asrConventionSource` describe likely local
+  Asr-convention metadata.
+- `applied.asrSchool` describes what the engine actually used for Asr.
+- `location.madhab`, `location.madhabSource`, and `applied.madhab` remain
+  deprecated compatibility aliases and should not be rendered as "local
+  madhhab" in user-facing UI.
 
-Hanafi-majority countries now report `location.madhab: 'hanafi'`, but
+Hanafi-convention countries now report `location.asrConvention: 'hanafi'`, but
 this does **not** automatically mutate Asr to 2× shadow:
 
 - **Pakistan** (Karachi region; Hanafi metadata)
@@ -90,16 +99,16 @@ override or source-specific 2× shadow implementation is added.
   override later. Tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
   and [#85](https://github.com/tawfeeqmartin/fajr/issues/85).
 - **Mixed-madhab countries** (Egypt, Saudi, Iraq, Lebanon, Syria,
-  Morocco, Western diaspora) are intentionally not in `COUNTRY_MADHAB`
-  and fall through to `madhabSource: 'method-implied'`. The
+  Morocco, Western diaspora) are intentionally not in `COUNTRY_ASR_CONVENTION`
+  and fall through to `asrConventionSource: 'method-implied'`. The
   `disclaimer` field flags this for users; #40's caller-side override
   surface in v1.8.x is the actionable mechanism.
-- **`madhabSource: 'country-default'`** is the new value (added to the
-  TS union type alongside `'caller-explicit'` and `'method-implied'`).
-  Apps relying on the previous binary union should update; the change
-  is additive (no removed values).
+- **`asrConventionSource: 'country-default'`** is the primary new value
+  (mirrored by deprecated `madhabSource` for v1.7.21 compatibility). Apps
+  relying on the previous binary union should update; the change is additive
+  (no removed values).
 - **`applied.asrSchool`** is a new additive field (`'standard' | 'hanafi'`)
-  so apps can distinguish likely local Asr-school convention metadata from
+  so apps can distinguish likely local Asr-convention metadata from
   the Asr formula used in the returned time.
 
 ### Changed
@@ -136,11 +145,12 @@ override or source-specific 2× shadow implementation is added.
   dispatched values now carry explicit framing so downstream apps can
   drive verify-this-default UX without re-deriving from scattered output
   fields. New fields:
-  - `location.madhab: 'shafii' | 'hanafi'` — madhab implicit in the
-    dispatched method (Shafi'i = 1× shadow Asr; Hanafi = 2× shadow,
-    can shift Asr by 30-60 minutes).
+  - `location.madhab: 'shafii' | 'hanafi'` — legacy name for the Asr
+    convention implicit in the dispatched method (standard 1× shadow Asr
+    vs Hanafi 2× shadow, which can shift Asr by 30-60 minutes). Superseded
+    by `location.asrConvention` in v1.7.22.
   - `location.madhabSource: 'caller-explicit' | 'method-implied'` —
-    provenance of the madhab choice. Until [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
+    legacy provenance of the Asr-convention choice. Until [#40](https://github.com/tawfeeqmartin/fajr/issues/40)
     lands the v1.8.x override surface, the value is always
     `'method-implied'`.
   - `applied: { method, madhab, elevationMin }` — single canonical

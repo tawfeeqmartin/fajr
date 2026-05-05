@@ -2,17 +2,20 @@
 // Bismillah ir-Rahman ir-Rahim
 /**
  * Tests for v1.7.21 #81 — "best guess" framing surface:
- *   - location.madhab + location.madhabSource
- *   - applied: { method, madhab, elevationMin } summary object
+ *   - location.asrConvention + location.asrConventionSource
+ *   - applied: { method, asrSchool, elevationMin } summary object
  *   - disclaimer: turn-key user-facing copy
  */
 
 import { describe, it, expect } from 'vitest'
 import { prayerTimes } from '../src/index.js'
 
-describe('#81 — location.madhab + madhabSource', () => {
-  it('Riyadh SA (Umm al-Qura preset, Shafi default)', () => {
+describe('#81/#88 — location Asr-convention provenance', () => {
+  it('Riyadh SA (Umm al-Qura preset, standard Asr default)', () => {
     const r = prayerTimes({ latitude: 24.7136, longitude: 46.6753, date: new Date('2026-05-04') })
+    expect(r.location.asrConvention).toBe('standard')
+    expect(r.location.asrConventionSource).toBe('method-implied')
+    // Deprecated aliases remain for v1.7.21 consumers.
     expect(r.location.madhab).toBe('shafii')
     expect(r.location.madhabSource).toBe('method-implied')
   })
@@ -22,14 +25,18 @@ describe('#81 — location.madhab + madhabSource', () => {
     // preset leak. v1.7.22 fixes the metadata while #85 keeps the actual
     // Asr calculation method-implied until caller-side override lands.
     const r = prayerTimes({ latitude: 24.86, longitude: 67.01, date: new Date('2026-05-04') })
+    expect(r.location.asrConvention).toBe('hanafi')
+    expect(r.location.asrConventionSource).toBe('country-default')
     expect(r.location.madhab).toBe('hanafi')
     expect(r.location.madhabSource).toBe('country-default')
-    expect(r.applied.madhab).toBe('shafii')
     expect(r.applied.asrSchool).toBe('standard')
+    expect(r.applied.madhab).toBe('shafii')
   })
 
   it('Malé MV (KarachiShafi explicit override; correctly matches population)', () => {
     const r = prayerTimes({ latitude: 4.1755, longitude: 73.5093, date: new Date('2026-05-04') })
+    expect(r.location.asrConvention).toBe('standard')
+    expect(r.location.asrConventionSource).toBe('method-implied')
     expect(r.location.madhab).toBe('shafii')
     // Source is still 'method-implied' because the explicit composition in
     // selectMethod produces a single method with baked-in Shafi madhab.
@@ -40,19 +47,21 @@ describe('#81 — location.madhab + madhabSource', () => {
     const r = prayerTimes({ latitude: 0, longitude: -120, date: new Date('2026-05-04') })
     expect(r.location.country).toBeNull()
     expect(r.location.methodSource).toBe('fallback')
+    expect(r.location.asrConvention).toBe('standard')
+    expect(r.location.asrConventionSource).toBe('method-implied')
     expect(r.location.madhab).toBe('shafii')  // ISNA default
     expect(r.location.madhabSource).toBe('method-implied')
   })
 })
 
-describe('#81 — applied dispatch summary', () => {
-  it('always present, with method + madhab + elevationMin', () => {
+describe('#81/#88 — applied dispatch summary', () => {
+  it('always present, with method + asrSchool + elevationMin', () => {
     const r = prayerTimes({ latitude: 24.7136, longitude: 46.6753, date: new Date('2026-05-04') })
     expect(r.applied).toBeDefined()
     expect(typeof r.applied.method).toBe('string')
     expect(r.applied.method.length).toBeGreaterThan(0)
-    expect(['shafii', 'hanafi']).toContain(r.applied.madhab)
     expect(['standard', 'hanafi']).toContain(r.applied.asrSchool)
+    expect(['shafii', 'hanafi']).toContain(r.applied.madhab)
     expect(typeof r.applied.elevationMin).toBe('number')
     expect(r.applied.elevationMin).toBeGreaterThanOrEqual(0)
   })
@@ -82,6 +91,8 @@ describe('#81 — disclaimer copy', () => {
     expect(typeof r.disclaimer).toBe('string')
     expect(r.disclaimer).toContain('best guess')
     expect(r.disclaimer).toContain('Verify your location')
+    expect(r.disclaimer).toContain('Asr convention')
+    expect(r.disclaimer).not.toContain('madhab + elevation')
     expect(r.disclaimer).toContain('local mosque or scholar')
   })
 
@@ -111,7 +122,12 @@ describe('#81 — provenance shape backwards-compat', () => {
     expect(r.location.country).toBeDefined()
     expect(r.location.timezone).toBeDefined()
     expect(r.location.elevation).toBeDefined()
+    expect(r.location.asrConvention).toBeDefined()
+    expect(r.location.asrConventionSource).toBeDefined()
     expect(r.location.methodSource).toBeDefined()
+    // Deprecated aliases are intentionally still present.
+    expect(r.location.madhab).toBeDefined()
+    expect(r.location.madhabSource).toBeDefined()
     expect(r.location.elevationSource).toBeDefined()
   })
 })

@@ -70,15 +70,14 @@ console.log(times.notes)
     country: 'Morocco',
     timezone: 'Africa/Casablanca',
     elevation: 75,
-    madhab: 'shafii',
+    asrConvention: 'standard',
     methodSource: 'country-default',
-    madhabSource: 'method-implied',
+    asrConventionSource: 'method-implied',
     elevationSource: 'city-registry',
   },
 
   applied: {
     method: 'Morocco (19°/17° community calibration)',
-    madhab: 'shafii',
     asrSchool: 'standard',
     elevationMin: 0.59,
   },
@@ -94,7 +93,7 @@ console.log(times.notes)
 }
 ```
 
-The `location.madhab` field is a legacy name for Hanafi-vs-standard Asr-convention metadata. It is **not** a full legal-madhhab taxonomy. The calculation-facing value is `applied.asrSchool`. In v1.7.22, Hanafi-majority countries can report `location.madhab: 'hanafi'` while keeping `applied.asrSchool: 'standard'` when the selected timetable method uses standard 1x Asr. When that mismatch matters, `notes[]` includes an Asr-school advisory.
+Use `location.asrConvention` for local Asr-convention metadata and `applied.asrSchool` for the formula actually used. These are **not** a full legal-madhhab taxonomy: Morocco, for example, is Maliki, while its relevant Asr-convention value is `standard` 1x shadow. The older `location.madhab` / `applied.madhab` fields remain as deprecated aliases for v1.7.21 compatibility and should not be rendered as "local madhhab." In v1.7.22, Hanafi-convention countries can report `location.asrConvention: 'hanafi'` while keeping `applied.asrSchool: 'standard'` when the selected timetable method uses standard 1x Asr. When that mismatch matters, `notes[]` includes an Asr-convention advisory.
 
 For qiyam and night divisions, use `dayTimes()` or `nightThirds()`:
 

@@ -108,10 +108,11 @@ export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-d
  *    (sea level) silently — the safest default. */
 export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zero'
 
-/** Madhab / Asr-convention label surfaced for a given location or calculation.
- *  In v1.7.x this is intentionally only the Hanafi-vs-standard Asr convention
- *  label, not a full legal-madhhab taxonomy. For applied dispatch it describes
- *  the Asr formula actually used. */
+/** Deprecated v1.7.21 legacy name for the Hanafi-vs-standard Asr convention.
+ *  This is not a full legal-madhhab taxonomy: Maliki, Hanbali, and Jafari are
+ *  not represented by this field. New integrations should use
+ *  `AsrConvention` / `asrConvention` for location metadata and `AsrSchool` /
+ *  `applied.asrSchool` for the calculation actually used. */
 export type Madhab = 'shafii' | 'hanafi'
 
 /** Asr calculation school actually applied.
@@ -120,23 +121,37 @@ export type Madhab = 'shafii' | 'hanafi'
  *  - `'hanafi'`: 2× shadow Asr. */
 export type AsrSchool = 'standard' | 'hanafi'
 
-/** How `prayerTimes` chose the madhab for a given coordinate. v1.7.21+ (#81),
- *  with country-default dispatch added in v1.7.22 (#83).
+/** Primary location metadata for the local Asr convention:
+ *  - `'standard'`: 1× shadow Asr. This covers Shafi'i, Maliki, Hanbali-
+ *    standard, and many institutional timetables. It does not imply the
+ *    location's full legal madhhab is Shafi'i.
+ *  - `'hanafi'`: 2× shadow Asr convention metadata. */
+export type AsrConvention = AsrSchool
+
+/** Full legal-madhhab labels used by helper APIs that actually model fiqh
+ *  schools, such as `travelerMode`. Distinct from the two-value Asr
+ *  convention metadata above. */
+export type LegalMadhhab = 'hanafi' | 'maliki' | 'shafii' | 'hanbali'
+
+/** Deprecated legacy provenance alias for `AsrConventionSource`.
  *
- *  - `'caller-explicit'`: caller will pass an explicit madhab override
+ *  - `'caller-explicit'`: caller will pass an explicit Asr-convention override
  *    (planned for v1.8.x via #40 — not yet supported in v1.7.x).
- *  - `'country-default'`: country is listed in `COUNTRY_MADHAB` and fajr
- *    reports the likely local Asr-school convention. This is metadata; it
+ *  - `'country-default'`: country is listed in the Asr-convention table and
+ *    fajr reports the likely local Asr convention. This is metadata; it
  *    does not by itself mutate the calculation-facing Asr school.
- *  - `'method-implied'`: the selected method's calculation madhab is what is
- *    reported. Mixed-madhab countries (Egypt, Saudi, Iraq, Lebanon, Syria,
- *    Morocco, Western diaspora, etc.) intentionally fall through here and
- *    surface the `disclaimer` + verification prompt instead of forcing a
- *    single school.
+ *  - `'method-implied'`: the selected method's calculation Asr school is what
+ *    is reported. Mixed-madhab countries (Egypt, Saudi, Iraq, Lebanon, Syria,
+ *    Morocco, Western diaspora, etc.) intentionally fall through here.
  *
  *  Future v1.8.x will add `'caller-explicit'` once the override surface
  *  in #40 lands. */
 export type MadhabSource = 'caller-explicit' | 'country-default' | 'method-implied'
+
+/** How `prayerTimes` chose `location.asrConvention`. Same provenance values
+ *  as the legacy `madhabSource` alias, but named for the actual two-value
+ *  Asr-convention surface. */
+export type AsrConventionSource = MadhabSource
 
 /** The location field on `prayerTimes` / `dayTimes` return values (v1.7.0+).
  *  Always populated. Apps can use this to display "you are in <city>"
@@ -154,14 +169,20 @@ export interface PrayerTimesLocation {
   timezone:        string
   /** Effective elevation in metres used by the engine on this call. */
   elevation:       number
-  /** Likely local Asr-school convention for this coordinate (v1.7.21+, #81;
-   *  country metadata added v1.7.22, #83). This may differ from
-   *  `applied.madhab` when the bundled timetable method still uses standard
-   *  1× Asr. This is not a full legal-madhhab taxonomy. */
+  /** Likely local Asr convention for this coordinate (v1.7.22+, #88). This
+   *  may differ from `applied.asrSchool` when the bundled timetable method
+   *  still uses standard 1× Asr. This is not a full legal-madhhab taxonomy. */
+  asrConvention:       AsrConvention
+  /** How the Asr convention was chosen — see AsrConventionSource above. */
+  asrConventionSource: AsrConventionSource
+  /** Deprecated legacy alias for `asrConvention`, using adhan.js's historic
+   *  `'shafii' | 'hanafi'` vocabulary. Do not render this as "local madhhab";
+   *  Morocco, for example, is Maliki while standard 1× Asr remains the
+   *  relevant convention label here. */
   madhab:          Madhab
   /** How the method was chosen — see MethodSource above. */
   methodSource:    MethodSource
-  /** How the madhab was chosen — see MadhabSource above. v1.7.21+ (#81). */
+  /** Deprecated legacy alias for `asrConventionSource`. v1.7.21+ (#81). */
   madhabSource:    MadhabSource
   /** How the elevation was chosen — see ElevationSource above. */
   elevationSource: ElevationSource
@@ -169,15 +190,17 @@ export interface PrayerTimesLocation {
 
 /** Summary of what was actually applied for this call (v1.7.21+, #81).
  *  Apps surface a single canonical "what we did" badge from this without
- *  re-deriving from method/madhab/elevation fields scattered through the
+ *  re-deriving from method/Asr-convention/elevation fields scattered through the
  *  result. */
 export interface AppliedDispatch {
   /** The method actually used (verbose label, same string as `result.method`). */
   method:        string
-  /** The madhab / Asr formula actually used by the calculation. */
-  madhab:        Madhab
   /** The Asr calculation school actually applied. */
   asrSchool:     AsrSchool
+  /** Deprecated legacy alias for the Asr formula actually used. Prefer
+   *  `asrSchool`, because `'shafii'` here means standard 1× shadow Asr, not a
+   *  full legal-madhhab claim. */
+  madhab:        Madhab
   /** Elevation correction in minutes that fajr applied (or would apply at the
    *  given effective elevation). 0 at sea level / when correction declined. */
   elevationMin:  number
@@ -384,9 +407,9 @@ export interface PrayerTimesResult {
   /** City + country + timezone + sourcing metadata for this call (v1.7.0+).
    *  Always populated. Apps can use this to display "you are in <city>"
    *  without an additional `detectLocation` call. `methodSource` /
-   *  `madhabSource` / `elevationSource` report HOW the engine chose its
+   *  `asrConventionSource` / `elevationSource` report HOW the engine chose its
    *  inputs for this call — useful for "Why is my Fajr at this time?"
-   *  explanatory UX and "verify your madhab" verification prompts.
+   *  explanatory UX and "verify your Asr convention" verification prompts.
    *
    *  When no city in the bundled registry matches the coordinate, `city`
    *  is null. When outside all known country bboxes (open ocean,
@@ -710,7 +733,7 @@ export interface TravelerModeResult {
     dhuhrAsr:    { atDhuhr:   { dhuhr: Date; asr: Date }; atAsr:    { dhuhr: Date; asr: Date } }
     maghribIsha: { atMaghrib: { maghrib: Date; isha: Date }; atIsha: { maghrib: Date; isha: Date } }
   }
-  madhab: Madhab
+  madhab: LegalMadhhab
   /** Disclaimer reminding the user that traveler-status determination is
    *  a fiqh question this library does not answer. */
   note: string
@@ -727,7 +750,7 @@ export interface TravelerModeResult {
  *  🟢 Established — Quran 4:101 + numerous hadith. */
 export function travelerMode(params: {
   times:  PrayerTimesResult | { fajr: Date; shuruq: Date; dhuhr: Date; asr: Date; maghrib: Date; isha: Date }
-  madhab?: Madhab
+  madhab?: LegalMadhhab
 }): TravelerModeResult
 
 // ─────────────────────────────────────────────────────────────────────────────
