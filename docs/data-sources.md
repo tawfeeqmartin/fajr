@@ -117,6 +117,18 @@ Snapshot tooling:
   source triage and seasonal spot-checking, not a dense two-year calibration
   corpus yet.
 
+Fixture gate:
+
+- [`test/habousMoroccoFixture.test.js`](../test/habousMoroccoFixture.test.js)
+  verifies that `eval/data/test/morocco-habous-monthly.json` covers every
+  mapped Moroccan city, preserves Habous source metadata, and keeps the Morocco
+  default within the current official-month envelope for Fajr, Dhuhr, Asr,
+  Maghrib, and Isha.
+- Sunrise is intentionally excluded from the five-prayer accuracy gate and kept
+  as a loose source-sanity check only. In Morocco comparisons it can behave like
+  a mosque-practice end-of-Fajr marker rather than a pure astronomical sunrise
+  target.
+
 Raw/source locations:
 
 - `eval/data/train/mawaqit-morocco.json`

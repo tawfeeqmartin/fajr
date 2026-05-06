@@ -51,6 +51,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   snapshots Morocco's official Habous current Hijri-month city tables into
   fixture-shaped JSON. It writes only when `--out` is supplied and supports
   `--from-file` / `--wayback-from` recovery for archived HTML.
+- Added `test/habousMoroccoFixture.test.js`, a focused holdout gate that keeps
+  fajr's Morocco five-prayer output close to the official Habous monthly city
+  fixture and validates the fixture source metadata.
 
 ### Fixed — Diyanet city-ID mapping guardrail
 
@@ -72,6 +75,10 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   Moroccan cities, but Internet Archive recovery is sparse, so a dense two-year
   Morocco calibration corpus still needs recurring snapshots or another
   official historical source.
+- The Habous fixture test is diagnostic, not a train-ratchet change. It gates
+  the five prayer times and treats Sunrise as loose source sanity only because
+  Moroccan published Sunrise can encode mosque-practice ihtiyat rather than a
+  pure astronomical calculation.
 - The Diyanet mapping fix does not promote a new yearly Turkiye fixture. It
   prevents future bad fixture generation; curated fixture promotion still needs
   a separate PR with cross-source spot checks.
