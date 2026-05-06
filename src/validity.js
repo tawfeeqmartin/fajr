@@ -63,23 +63,12 @@ function isInRamadan(date) {
  * @property {string} [fix]
  */
 
-/**
- * Compute fajr/isha reference time at a given solar depression angle.
- * Used for the 12° absolute floor checks.
- */
-function fajrAtAngle(coords, date, angleDeg) {
-  const p = adhan.CalculationMethod.MuslimWorldLeague()
-  p.fajrAngle = angleDeg
-  p.rounding = adhan.Rounding.None
-  return new adhan.PrayerTimes(coords, date, p).fajr
-}
-
-function ishaAtAngle(coords, date, angleDeg) {
-  const p = adhan.CalculationMethod.MuslimWorldLeague()
-  p.ishaAngle = angleDeg
-  p.rounding = adhan.Rounding.None
-  return new adhan.PrayerTimes(coords, date, p).isha
-}
+// NOTE: fajrAtAngle / ishaAtAngle helpers were removed alongside the
+// FAJR_BEFORE_DAWN_12DEG / ISHA_BEFORE_TWILIGHT_12DEG checks (polarity bug
+// in design doc; deferred to v1.8.1). Keeping the deletion explicit here so
+// the next agent who picks up the v1.8.1 polarity fix knows where the
+// reference-angle helpers used to live and re-introduces them per CLAUDE.md
+// Layer 1 lint (angles only in src/engine.js or src/methods.js).
 
 function isInvalidDate(d) {
   return !d || (d instanceof Date && Number.isNaN(d.getTime()))
