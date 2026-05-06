@@ -424,6 +424,60 @@ export interface PrayerTimesResult {
    *  ignore it. Saves every consumer rewriting the same disclaimer
    *  text and keeps framing consistent across the ecosystem. */
   disclaimer: string
+  /** Layer 4 fiqh-validity warnings (v1.8.0+, #101). Always populated; empty
+   *  array when no warnings apply (the green-state baseline). Catches
+   *  conditions like Maghrib before astronomical sunset, Fajr after Shuruq,
+   *  Asr outside the Dhuhr-Maghrib window, Dhuhr before solar noon, the 12°
+   *  absolute floor on Fajr/Isha, and polar regions where the sun doesn't
+   *  set or rise. Apps that render prayer times should at minimum check
+   *  `validityWarnings.some(w => w.severity === 'critical')` and surface
+   *  prominently if any critical warnings fire — a prayer at a flagged time
+   *  may be invalid regardless of madhab. */
+  validityWarnings: ValidityWarning[]
+}
+
+/** Severity tier for a Layer 4 validity warning (v1.8.0+).
+ *
+ *  - `'critical'`: definite fiqh violation under any recognised school.
+ *    The returned time is astronomically impossible given the prayer's
+ *    *shar'i* definition (e.g. Maghrib before apparent sunset). Surface
+ *    prominently.
+ *  - `'advisory'`: outside typical range for one or more schools but may
+ *    be valid under a minority position. (Reserved for v1.8.1+; v1.8.0
+ *    emits only critical and info.)
+ *  - `'info'`: a high-latitude rule fired or other transparency signal.
+ *    The calculation is valid; this is provenance, not a warning. */
+export type ValidityWarningSeverity = 'critical' | 'advisory' | 'info'
+
+/** Layer 4 fiqh-validity warning (v1.8.0+, #101).
+ *  Each entry on `prayerTimes().validityWarnings[]` describes one violation
+ *  or advisory signal. Codes are stable across versions; new codes may be
+ *  added but existing codes will not be removed or redefined. */
+export interface ValidityWarning {
+  severity: ValidityWarningSeverity
+  /** Which prayer this warning applies to. `null` for warnings that span
+   *  multiple prayers or are structural. */
+  prayer: PrayerKey | null
+  /** Machine-readable code for programmatic handling and i18n keying.
+   *  Examples: `'MAGHRIB_BEFORE_SUNSET'`, `'FAJR_AFTER_SHURUQ'`,
+   *  `'POLAR_NO_SUNSET'`, `'FAJR_HIGH_LAT_RULE_APPLIED'`. */
+  code: string
+  /** Human-readable English explanation, complete sentence. Suitable for
+   *  display in a "Why?" provenance sheet or developer log. NOT suitable
+   *  for end-user-facing prayer-time display without i18n. */
+  message: string
+  /** ISO 8601 UTC string of the astronomical reference value being checked
+   *  against, or `null` for structural warnings (e.g. polar / high-lat). */
+  astronomicalReference: string | null
+  /** ISO 8601 UTC string of the time fajr returned for this prayer, or
+   *  `null` for structural warnings. */
+  applied: string | null
+  /** Magnitude of the discrepancy in minutes (applied − reference), signed:
+   *  positive = applied is later than reference, negative = earlier.
+   *  `null` for structural warnings. */
+  diffMinutes: number | null
+  /** Optional human-readable suggestion for resolving the warning. */
+  fix?: string
 }
 
 export function prayerTimes(params: PrayerTimesParams): PrayerTimesResult
