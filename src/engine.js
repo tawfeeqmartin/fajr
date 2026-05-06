@@ -1040,18 +1040,24 @@ function selectMethod(country, lat, coords) {
       // back when this empirical check showed the flip would drift AWAY from
       // Habous (and Mawaqit) by ~5 min on Dhuhr/Maghrib — prayer-validity-
       // unsafe (truncating the prayer window) and institutionally MIS-aligned.
-      // The 'MoroccoMawaqit' and 'MoroccoHabous' method-strings are retained
-      // as same-as-default aliases for caller-side semantic clarity (apps can
-      // surface "Habous" or "Mawaqit" in UX without the calc differing).
+      //
+      // The proposed 'MoroccoMawaqit' and 'MoroccoHabous' method-strings
+      // were dropped pre-merge: cross-season verification (autoresearch
+      // 2026-05-05-habous-multi-season-verification.md, 6,660 cells across
+      // 32 cities × 3 seasons) confirmed the two would have returned identical
+      // calc to the country default, making the aliases scaffolding without
+      // empirical justification. Apps can label "Habous" or "Mawaqit" in
+      // their UX over the same canonical Morocco stance.
       //
       // Mode summary:
-      //   Default (no `method:` passed):                 19°/17° + +5 Maghrib + +5 Dhuhr (matches Habous + Mawaqit)
-      //   `method: 'MoroccoHabous'`:                     same as default — semantic alias for "Habous" UX
-      //   `method: 'MoroccoMawaqit'`:                    same as default — semantic alias for "Mawaqit" UX
+      //   Default (no `method:` passed): 19°/17° + +5 Maghrib + +5 Dhuhr
+      //                                  (canonical, matches Habous + Mawaqit
+      //                                  within ~1 min year-round across 32 cities)
       //
       // Classification: 🟡→🟢 (Approaching established — Path A community
       // calibration cross-validated against ministerial Habous direct API +
-      // 18 Mawaqit mosque corpus; same +5 baked into both sources).
+      // 18 Mawaqit mosque corpus + Wayback historical Habous winter coverage;
+      // same +5 baked into all institutional sources).
       //
       // FAJR 19° (v1.0): The formal Ministry-stated angle is 18° but the
       // published Imsakiyya is best reproduced by 19°. Empirically corroborated
@@ -2523,26 +2529,6 @@ function methodFromString(name, country, lat, _coords) {
       return { params: adhan.CalculationMethod.Egyptian(), methodName: 'Egyptian (19.5°/17.5°)' }
     case 'Karachi':
       return { params: adhan.CalculationMethod.Karachi(), methodName: 'Karachi (18°/18°)' }
-    case 'MoroccoMawaqit':
-    case 'MoroccoHabous': {
-      // v1.7.25: Semantic aliases for the country-default Morocco dispatch.
-      // Empirical re-validation (see selectMethod's Morocco case for full
-      // analysis) showed that BOTH Mawaqit (mosque-published) and Habous
-      // (Ministry direct API) publish Dhuhr +5 and Maghrib +5 over astronomical
-      // — i.e. the v1.5.0 + v1.7.16 Path A buffers ARE the institutional
-      // position, not a mosque-only addition. There is no Mawaqit/Habous
-      // ikhtilaf for fajr to surface; both names map to the same calc.
-      //
-      // These aliases exist so apps can use whichever name resonates with
-      // their UX ("trust Habous" / "trust Mawaqit") without the calc differing.
-      // Classification: 🟡→🟢 (cross-validated against both sources).
-      const p = adhan.CalculationMethod.Other()
-      p.fajrAngle = 19
-      p.ishaAngle = 17
-      p.methodAdjustments = { ...(p.methodAdjustments || {}), dhuhr: 5, maghrib: 5 }
-      const label = key === 'MoroccoHabous' ? 'Habous-aligned' : 'Mawaqit-aligned'
-      return { params: p, methodName: `Morocco (19°/17° + +5min Dhuhr/+5min Maghrib ihtiyati, ${label})` }
-    }
     case 'KarachiShafi': {
       // Karachi 18°/18° angles + Shafi'i Asr (shadow = object length).
       // Used by city overrides for Shafi'i-majority South Asian regions

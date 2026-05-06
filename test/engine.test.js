@@ -276,31 +276,17 @@ describe('Path A calibration regression', () => {
     expect(r.method).not.toMatch(/Path A|ihtiyati|Malaysia/i)
   })
 
-  it('Morocco — default applies v1.5.0 + v1.7.16 Path A buffers; Mawaqit/Habous aliases match default (v1.7.25)', () => {
-    // v1.7.25: Empirical re-validation against the Habous Ministry direct API
-    // confirmed Habous itself bakes Dhuhr +5 and Maghrib +5 into its published
-    // Imsakiyya — same as Mawaqit. The v1.5.0/v1.7.16 Path A buffers are
-    // therefore the institutional position, NOT a mosque-only addition. A
-    // prep-flip to "Habous-aligned without buffers" was rolled back when the
-    // bias check showed it would drift AWAY from Habous by ~5 min on
-    // Dhuhr/Maghrib (prayer-validity-unsafe, institutionally MIS-aligned).
-    // 'MoroccoMawaqit' and 'MoroccoHabous' are retained as semantic aliases
-    // for caller UX clarity; both calc identically to the default.
+  it('Morocco — country default applies v1.5.0 + v1.7.16 Path A buffers (canonical, single-stance)', () => {
+    // The v1.5.0/v1.7.16 +5 Maghrib + +5 Dhuhr Path A buffers are empirically
+    // the institutional position across BOTH Mawaqit (mosque-published) and
+    // Habous (real published Imsakiyya from horaire_hijri_2.php). Cross-season
+    // verification (autoresearch/proposals/2026-05-05-habous-multi-season-
+    // verification.md): 6,660 cells across 32 cities × 3 seasons confirm
+    // < 1 min mean abs Habous-vs-Mawaqit agreement. There is no institutional
+    // ikhtilaf for fajr to surface; Morocco is a single canonical stance.
     const def = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
     expect(def.method).toMatch(/Morocco.*19/i)
     expect(def.method).toMatch(/ihtiyati|Path A|\+5/i)
-
-    const maw = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE, method: 'MoroccoMawaqit' })
-    expect(maw.method).toMatch(/Mawaqit-aligned/i)
-    const hab = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE, method: 'MoroccoHabous' })
-    expect(hab.method).toMatch(/Habous-aligned/i)
-
-    // Both aliases must produce the same instants as the default (no ikhtilaf;
-    // both sources empirically agree on the +5 calibration).
-    expect(maw.maghrib.getTime()).toBe(def.maghrib.getTime())
-    expect(maw.dhuhr.getTime()).toBe(def.dhuhr.getTime())
-    expect(hab.maghrib.getTime()).toBe(def.maghrib.getTime())
-    expect(hab.dhuhr.getTime()).toBe(def.dhuhr.getTime())
   })
 })
 
