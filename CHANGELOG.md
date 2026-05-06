@@ -41,6 +41,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   rather than overclaimed as a formal rejection.
 - Updated README and CALIBRATION links so users and other agents can find the
   new doctrine layer before diving into raw evidence.
+- Rewrote [docs/data-sources.md](docs/data-sources.md) as a source-trust map:
+  ratchet train vs holdout diagnostic vs institutional reference vs research
+  lead, with raw corpus details preserved in `eval/data/` and `scripts/data/`.
 
 ### Honest caveats
 
