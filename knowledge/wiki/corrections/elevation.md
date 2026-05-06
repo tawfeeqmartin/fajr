@@ -150,6 +150,17 @@ The **IACAD (Islamic Affairs and Charitable Activities Department)** of Dubai in
 
 The fatwa explicitly applies the geometric horizon dip principle — that elevated observers see the sun set later and rise earlier — within the framework of Islamic jurisprudence. It represents a formal scholarly determination that elevation is a legitimate wasail correction, not a redefinition of shar'i terms.
 
+**Source-of-record caveat (per fajr#109 Phase 2 research, 2026-05-06):** The
+fatwa's existence and zone structure are confirmed by [BBC News (2011)](https://www.bbc.com/news/world-middle-east-13899115)
+and Wikipedia's footnote on that BBC article. The IACAD website
+(`iacad.gov.ae`) underwent a URL restructuring; the original
+`/ar/FatwaAndResearch/` path returns 404, so the **primary fatwa text is
+journalism-confirmed but not currently retrievable from any public archive**.
+fajr's wiki + engine.js cite the zones correctly per the BBC source; the
+citation chain is journalism → BBC → Wikipedia → fajr, NOT primary
+fatwa text. If a downstream agent or contributor finds the original
+text in a Wayback capture or a re-published IACAD page, link it here.
+
 ### Malaysia — Systematic Institutional Implementation
 
 **JAKIM (Jabatan Kemajuan Islam Malaysia)** applies elevation corrections systematically across all Malaysian states using topographic data from the **Department of Survey and Mapping Malaysia (JUPEM)**:
@@ -169,6 +180,16 @@ Saudi Arabia **does NOT** apply elevation corrections near the Haram, despite th
 **Jurisprudential rationale:** The Saudi position prioritizes **communal unity (jama'ah)** over individual astronomical precision. Prayer times in Makkah are tied to the adhan from the Haram itself — when the mu'adhin calls, all Muslims in the city pray together. Applying floor-stratified corrections would fragment the communal prayer and introduce confusion about which adhan corresponds to one's actual prayer time. This is a deliberate, reasoned choice, not an oversight.
 
 This contrast is jurisprudentially significant: both the UAE (Burj Khalifa correction) and Saudi Arabia (no correction) represent valid scholarly positions, differing on how to weigh astronomical precision against communal practice.
+
+**Source-of-record caveat (per fajr#109 Phase 2 research, 2026-05-06):** The
+"Saudi declines elevation correction for jama'ah unity" position is **observed
+practice and well-documented institutional consensus, but no locatable primary
+fatwa from MoIA, GPH, or the Council of Senior Scholars formalizes the stance
+in published-text form** that's reachable from non-Saudi networks
+(gph.gov.sa, ummulqura.org.sa are TCP-blocked from outside Saudi; alifta.gov.sa
+has unverifiable TLS but is reachable). Treat the citation as 🟡→🟢 — strong
+practice consensus, no formal published fatwa retrieved. If a Saudi-routable
+contributor locates the formal fatwa text, link it here.
 
 ### FCNA (Fiqh Council of North America)
 
@@ -202,3 +223,16 @@ Implementing elevation correction is expected to reduce Shuruq and Maghrib MAE a
 - [[wiki/corrections/atmosphere]] — Atmospheric refraction corrections that interact with elevation
 - [[wiki/fiqh/scholarly-oversight]] — Why 🟡 classification means disclosure, not suppression
 - [[wiki/regions/morocco]] — Morocco as a practical case with significant elevation variation
+
+## External Scholarly References
+
+- **Jamaluddin, M. (2023). "Altitude Correction Test for Islamic Prayer
+  Schedule Calculation."** *Al-Hilal: Journal of Islamic Astronomy*, 4(2).
+  DOI: [10.21580/al-hilal.2022.4.2.12330](https://doi.org/10.21580/al-hilal.2022.4.2.12330).
+  Surfaced by fajr#109 Phase 2 research (2026-05-06). Tests altitude
+  corrections for Islamic prayer schedules with quantitative formulas;
+  full text accessible via [Walisongo journal landing page](https://journal.walisongo.ac.id/index.php/al-hilal/article/view/12330).
+  fajr's elevation-correction implementation can cite this as peer-reviewed
+  scholarly grounding for the geometric horizon-dip approach. *Note:* paper
+  not yet vendored into the fajr knowledge base; surfacing here as a
+  citation lead for future wiki refinement.
