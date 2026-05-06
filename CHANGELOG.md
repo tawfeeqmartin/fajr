@@ -24,6 +24,114 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [1.8.0] — 2026-05-06
+
+### Added — Layer 4 fiqh-validity warnings (#101, #106)
+
+Per the 5-layer canonical architecture proposed by agot-claude in fajr#101.
+Layer 4 ships as an always-on `validityWarnings: ValidityWarning[]` field on
+every `prayerTimes()` response. Empty array when no warnings; entries flag
+fiqh-validity violations and high-latitude / polar / Ramadan-DST advisories.
+
+#### New module
+
+- **`src/validity.js`** (260 lines, pure read-only checker, Bismillah header).
+  Receives the raw `adhan.PrayerTimes` and the rounded result, returns
+  `ValidityWarning[]`. Integrates into `prayerTimes()` at the tail, after
+  elevation correction.
+
+#### New TypeScript surface
+
+- **`ValidityWarning` interface** — severity (`'critical'|'advisory'|'info'`),
+  prayer, code, message, astronomicalReference, applied, diffMinutes, fix.
+- **`ValidityWarningSeverity` type** — exported for downstream consumption.
+- **`PrayerTimesResult.validityWarnings: ValidityWarning[]`** — new always-on
+  field. JavaScript destructuring callers unaffected; TypeScript callers get
+  the new field automatically.
+
+#### Codes shipped in v1.8.0
+
+| Code | Severity | When it fires |
+|---|---|---|
+| `MAGHRIB_BEFORE_SUNSET` | critical | Maghrib precedes astronomical apparent sunset (the fajr#100 motivating case) |
+| `FAJR_AFTER_SHURUQ` | critical | Fajr ≥ Shuruq (window collapse) |
+| `ASR_NOT_AFTER_DHUHR` | critical | Asr ≤ Dhuhr |
+| `ASR_NOT_BEFORE_MAGHRIB` | critical | Asr ≥ Maghrib |
+| `DHUHR_BEFORE_SOLAR_NOON` | critical | Dhuhr precedes solar noon by > 30s |
+| `POLAR_NO_SUNSET` | critical | Continuous midnight sun — no astronomical Maghrib reference |
+| `POLAR_NO_SUNRISE` | critical | Continuous polar night — no astronomical Shuruq reference |
+| `MOROCCO_RAMADAN_DST_GAP` | info | Morocco coords + Ramadan dates — defensive flag for stale tzdata consumers (fajr#106) |
+| `FAJR_HIGH_LAT_RULE_APPLIED` | info | High-latitude rule may have synthesised Fajr |
+| `ISHA_HIGH_LAT_RULE_APPLIED` | info | High-latitude rule may have synthesised Isha |
+
+#### Codes deferred to v1.8.1+
+
+- `FAJR_BEFORE_DAWN_12DEG` / `ISHA_BEFORE_TWILIGHT_12DEG` — design-doc had
+  inverted polarity (12° is the SHALLOWEST any school uses, not deepest).
+  Implementation caught the false-positive on Casablanca + Mecca during smoke
+  testing. Will refile with polarity fix in v1.8.1.
+- All `advisory`-tier codes (`MAGHRIB_UNUSUAL_LATE`, `ISHA_BEFORE_15DEG`, etc.)
+  per agot's explicit defer call in agiftoftime#30.
+
+### Added — SCOREBOARD.md auto-regenerated health/trajectory snapshot (#105)
+
+Per the documentation-discipline proposal from agot-claude in fajr#105.
+
+- **`scripts/build-scoreboard.js`** (Node ESM, ~250 lines) — reads
+  `eval/results/runs.jsonl`, `package.json`, `gh issue list`, `git log`,
+  `src/data/cities.json`, `eval/data/`, and test counts; regenerates
+  `SCOREBOARD.md` from current state.
+- **`SCOREBOARD.md`** at repo root — current verdict, per-source WMAE,
+  coverage, bug health, test corpus, reference-source freshness, release
+  history (last 5), 30-day trajectory verdict.
+- **`docs/INCIDENT-LOG.md`** — bootstrap with 5 entries from this session
+  (Habous row-mapping, Türkiye fetcher city-IDs, Layer 4 12° polarity,
+  Morocco Ramadan DST false alarm, v1.7.6 browser-load regression). Format:
+  date / severity / triggered-by / root-cause / resolution / prevention.
+
+#### Deferred per spec to v1.8.x
+
+- CI gate to auto-regen on release tag — defer to v1.8.x once SCOREBOARD
+  stabilises.
+- `CALIBRATION.md` health-metadata extension — defer to v1.8.x.
+- Doc-vs-code consistency agent (#49 QA roster) — separate work.
+
+### Fixed — MoroccoMawaqit / MoroccoHabous semantic-alias collapse (#103)
+
+Per agot-claude's empirical decision rule in fajr#103: cross-season Habous
+verification (32 cities × 3 seasons × 6,660 cells) confirmed the proposed
+`MoroccoMawaqit` and `MoroccoHabous` method-string aliases would have
+returned identical calc to the country default. Single canonical Morocco
+stance is the right surface; the aliases were premature complexity.
+
+The aliases were never published to npm (added in unmerged commit `0a03ab4`,
+removed before merge). No migration needed for existing v1.7.x callers.
+
+### Honest caveats
+
+- **API addition, not breaking.** `validityWarnings` is a new field; existing
+  destructuring callers are unaffected. TypeScript callers using the full
+  `PrayerTimesResult` type get the new field automatically.
+- **No calc behavior change.** Layer 4 is a diagnostic surface; `prayerTimes()`
+  returns the same Date instants for `fajr/shuruq/dhuhr/asr/maghrib/isha`
+  as v1.7.25. Train ratchet WMAE 0.9757 unchanged.
+- **The `MOROCCO_RAMADAN_DST_GAP` info warning is defensive, not corrective.**
+  Modern Node ≥18 with current tzdata correctly handles Morocco's Ramadan
+  GMT+0 exception via `Africa/Casablanca`. The warning surfaces the risk for
+  consumers on stale runtimes; fajr does NOT shift the returned Date instants.
+- **Polarity bug caught in design doc.** The original Layer 4 spec had
+  `FAJR_BEFORE_DAWN_12DEG` checking the wrong direction; implementation smoke
+  testing on Casablanca + Mecca caught it. Deferred with marker in code; v1.8.1
+  will ship the corrected version.
+
+### Cross-repo
+
+- agiftoftime#30: agot signed off on Layer 4 design (POLAR=critical,
+  advisory deferred to v1.8.1, sign convention as spec).
+- agiftoftime#31: agot endorsed the COLLAPSE verdict on the alias question.
+
+---
+
 ## [1.7.25] — 2026-05-05
 
 ### Added — Track A holdout-corpus expansion + Track D data corrections
