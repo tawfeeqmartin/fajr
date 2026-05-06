@@ -2,7 +2,11 @@
 
 An interactive HTML dashboard visualizing the autoresearch experiment trajectory through the v1.0 milestone.
 
-> **For current numbers** — train WMAE 1.07 min, holdout WMAE 3.62 min, 215 train + 2,980 holdout entries across 4 train + 6 holdout reference sources — see the auto-generated [`docs/progress.md`](progress.md). It is regenerated on every `npm run build:charts` and contains live per-source / per-region / per-prayer breakdowns. The dashboard below documents the historical Experiment 1–7 narrative.
+> **For current numbers** — see [SCOREBOARD.md](../SCOREBOARD.md) for the
+> release-health snapshot and the auto-generated [`docs/progress.md`](progress.md)
+> for live per-source / per-region / per-prayer breakdowns. The dashboard below
+> documents the historical Experiment 1-7 narrative and is not the current
+> accuracy source of truth.
 
 ## Historical Metrics (Experiment 6 era — v1.0 milestone)
 - WMAE: 1.55 minutes across 18 cities (Aladhan-only; calc-vs-calc consistency check)
@@ -19,4 +23,4 @@ The dashboard includes:
 See `dashboard.html` for the interactive version.
 
 ## Last refreshed
-- 2026-05-03 by fajr-agent (v1.7.9 docs regen sweep — refreshed live numbers from current `eval/results/runs.jsonl`)
+- 2026-05-06 by fajr-codex (doctrine cleanup; current numbers delegated to `SCOREBOARD.md` + `docs/progress.md`)

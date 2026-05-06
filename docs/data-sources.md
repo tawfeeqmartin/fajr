@@ -1,381 +1,268 @@
-# Data Sources — Every Cell fajr Validates Against
+# Data Sources
 
-> Comprehensive inventory of every prayer-time fixture fajr's eval pulls from, with provenance and counts. **Auto-generated structure; counts updated 2026-05-02 with v1.5.0 + KEMENAG 34-province expansion.** This page exists to demonstrate breadth of validation — every named cell below is a real, verifiable institutional / mosque-published / reference-implementation source the eval gates against.
+Last refreshed: 2026-05-06
 
-## At a glance
+This page explains what fajr validates against, how each source should be
+trusted, and where the raw source details live. It is not the source of truth
+for prayer-time fixtures: the canonical data remains in `eval/data/`, source
+registries remain in `scripts/data/`, and current WMAE/counts are generated in
+[docs/progress.md](progress.md) and [SCOREBOARD.md](../SCOREBOARD.md).
 
-| Layer | Source | Cells | Daily entries | Set | License / channel |
-|---|---|---:|---:|---|---|
-| **Mosque-published** | Mawaqit-Morocco (calibration anchor) | 25 | 25 | train | mawaqit.net per-mosque slug; refreshed daily by cloud routine |
-| **Mosque-published** | Mawaqit-Morocco-extended (post-v1.5.0) | 13 | 13 | holdout | mawaqit.net per-mosque slug; refreshed daily |
-| **Mosque-published** | Mawaqit (non-Morocco) | 13 | 13 | holdout | mawaqit.net per-mosque slug; refreshed daily |
-| **Institutional** | KEMENAG (Indonesia) | 34 | 1054 | holdout | bimasislam.kemenag.go.id; daily-refresh capable |
-| **Institutional** | MUIS (Singapore) | 1 | 365 | holdout | data.gov.sg poll-download API; **Open Data Licence v1.0** |
-| **Institutional** | Diyanet (Türkiye) | 3 | 30 | train | ezanvakti.emushaf.net |
-| **Institutional** | JAKIM (Malaysia) | 3 | 30 | train | waktusolat.app community proxy for e-solat.gov.my |
-| **Calc consensus** | Aladhan API | 17 (train) + 145 (world) | 130 + ~3500 | train + holdout | aladhan.com (calc-vs-calc reproduction) |
-| **Calc consensus** | praytimes.org | 10 | ~100 | holdout | independent JS reference impl |
-| **Aggregator** | muslimsalat.com | 4 | 32 | holdout | third-party aggregator |
-| **Stress** | high-elevation, high-latitude, polar, equator | 5 fixture files | varied | holdout | targeted edge cases |
+The purpose of this page is to prevent a common failure mode: treating every
+API, mosque row, paper, or blocked URL as equally authoritative. They are not.
 
-**Totals: 1800+ daily prayer-time entries across 219 distinct named cells / locations / mosques** — and that's *before* the in-flight global Mawaqit / minority-country slug sweeps land. When the daily Mawaqit refresh, KEMENAG snapshot, and MUIS annual fetch are kept current, the corpus refreshes ~1500 fresh entries per month.
+## Source Classes
 
----
-
-## Mosque-published reality (Mawaqit, n = 38 mosques across 14 countries)
-
-Each entry is a real, active mosque on [mawaqit.net](https://mawaqit.net) — a community platform that 6000+ mosques use to publish their official daily prayer times. The slug links to `https://mawaqit.net/en/m/<slug>`. Mosque-published reality is fajr's highest-quality grounding signal: it's what Muslims actually pray to, after each mosque's *muezzin* applies their local horizon, ihtiyati margin, and fiqh interpretation.
-
-### Morocco (25 mosques across 14 cities — train fixture; v1.5.0 Path A signal)
-
-These 25 are the institutional ground-truth that anchored the v1.5.0 Maghrib +5 calibration. They span all macro-regions of Morocco including the high-elevation Atlas / pre-Sahara cities at 1037 m and 1135 m above sea level — fajr's first elevation-validated Moroccan ground truth above the coastal plain.
-
-| City | Region | Mosque slug | Arabic name |
-|---|---|---|---|
-| Casablanca | Atlantic Coast | `moulay-ismail-casablanca-20400-morocco` | مولاي إسماعيل |
-| Casablanca | Atlantic Coast | `msjd-qm-lslm-casablanca-20320-morocco` | مسجد اقامة السلام |
-| Casablanca | Atlantic Coast | `mosquee-bab-arrahmane-casablanca-20050-morocco` | مسجد باب الرحمن |
-| Rabat | Atlantic Coast (capital) | `msjd-lm-masjid-ummah-rabat-10130-morocco` | مسجد الأمة |
-| Marrakech | Interior | `msjd-lthr-marrakech-40170-morocco` | مسجد الطاهر |
-| Tanger | Northern | `msjd-sydy-qsm-tanger-90000-morocco` | مسجد سيدي قاسم |
-| Tanger | Northern | `msjd-hjryyn-tnj-tanger-90000-morocco` | مسجد حجريين |
-| Nador | Northern | `masjid-al-falah-nador-66000-morocco` | مسجد الفلاح |
-| Oujda | Eastern | `lmoubacharine-biljna-oujda-60020-morocco` | مسجد المبشرين بالجنة |
-| Oujda | Eastern | `mosquee-jaafar-ibn-abi-talib-oujda-60000-morocco` | مسجد جعفر بن أبي طالب |
-| Fes | Interior / Atlas-foothill | `masjid-aamrou-bn-laas-fes-30000-morocco-1` | مسجد عمرو بن العاص |
-| Fes | Interior / Atlas-foothill | `msjd-lhsn-ryd-llymwn-fes-30000-morocco` | مسجد الحسنى رياض الليمون |
-| Meknes | Interior / Atlas-foothill | `mosquee-elamine-meknes-50000-morocco` | مسجد الامين |
-| Taza | Interior / Atlas-foothill | `msjd-mr-bn-lkhtb-lqds1-tz-taza-35000-morocco` | مسجد عمر بن الخطاب — القدس1 |
-| Khouribga | Interior | `msjd-mr-bn-bd-l-zyz-khouribga-25000-morocco-1` | مسجد عمر بن عبد العزيز |
-| Settat | Interior | `mosquee-imam-tarmidi-settat-26000-morocco` | مسجد الإمام الترمذي |
-| Sale | Atlantic Coast (capital region) | `msjd-lsf-sale-11000-morocco` | مسجد الصف |
-| Kenitra | Atlantic Coast (capital region) | `msjd-lqdsy-kenitra-14000-morocco` | مسجد القادسية |
-| Safi | Atlantic Coast (central) | `msjd-blkhy-safi-46000-morocco` | مسجد بلكاهية |
-| Essaouira | Atlantic Coast (central) | `msjd-lrwnq-essaouira-44000-morocco` | مسجد الرونق |
-| Agadir | Atlantic Coast (south) | `msjd-hl-sws-agadir-80000-morocco` | مسجد اهل سوس |
-| Taroudant | Atlantic Coast (south) | `msjd-wld-brhym-taroudant-83300-morocco` | مسجد اولاد براهيم |
-| Ouarzazate (1135 m) | High-elevation Atlas | `msjd-lqds-masjid-elqods-ouarzazate-45000-morocco` | مسجد القدس |
-| Ouarzazate (1135 m) | High-elevation Atlas | `msjd-sydy-dwd-wrzzt-ouarzazate-45000-morocco` | مسجد سيدي داود |
-| Errachidia (1037 m) | High-elevation pre-Sahara | `masjid-marzouga-lgharbia-errachidia-52202-morocco` | مسجد مرزوكة الغربية |
-
-### Morocco — extended holdout (13 mosques across 13 additional cities, post-v1.5.0)
-
-Added 2026-05-02 in the "every Moroccan city" expansion pass. Held in `eval/data/test/mawaqit-morocco-extended.json` rather than train so the v1.5.0 +5 Maghrib calibration's per-cell ratchet stays anchored against its original 25-mosque signal. Future calibrations targeting Atlas / Sahara / extended-region biases can promote individual mosques into train as warranted.
-
-| City | Region | Mosque slug |
+| Class | Meaning | Used for |
 |---|---|---|
-| Taourirt | Eastern | `jamii-ibrahim-lkhalil-taourirt-65000-morocco-1` |
-| Berrechid | Atlantic Coast (Casa metro) | `mosquee-brahimm-lkhlalil-berrchid-26100-morocco` |
-| Temara | Atlantic Coast (capital region) | `msjd-bd-llh-bn-ysyn-temara-12123-morocco` |
-| Sidi Kacem | Atlantic Coast (capital region) | `msjd-zgr-sidi-kacem-16000-morocco` |
-| Sidi Kacem | Atlantic Coast (capital region) | `msjd-lmm-lbkhry-sidi-kacem-16000-morocco` |
-| Fquih Ben Salah | Interior | `masjid-lhouda-fkih-ben-salah-23200-morocco` |
-| Sefrou | Interior / Atlas-foothill | `mosquee-ahel-sefrou-sefrou-31000-morocco` |
-| Guelmim | Atlantic Coast (south) | `msjd-m-dh-bn-jbl-tl-ynt-timoulay-izdar-guelmim-81053-morocco` |
-| Inezgane | Atlantic Coast (south) | `msjd-lbrr-nzkn-86150-morocco` |
-| Inezgane | Atlantic Coast (south) | `msjd-bdr-msdwr-nzkn-86350-morocco` |
-| Ifrane (1665 m) | High-elevation Atlas | `mosquee-universite-alakhawayn-ifrane-53000-morocco` |
-| Midelt (1488 m) | High-elevation Atlas | `masjid-lryad-midelt-54350-morocco` |
-| Tinghir | High-elevation Atlas | `mosquee-icherban-tinghir-45800-morocco` |
-| Tinghir | High-elevation Atlas | `mosquee-alhidaya-tinghir-45800-morocco` |
-| Erfoud | High-elevation pre-Sahara | `msjd-lhmry-erfoud-52200-morocco` |
-| Erfoud | High-elevation pre-Sahara | `msjd-mwly-slymn-erfoud-52200-morocco` |
-| Zagora | Sahara | `msjd-yt-hdw-tgblt-zkwr-zagora-49000-morocco` |
+| Ratchet train | Sources included in `eval/data/train/`; changes must not regress train WMAE or per-region safety rules. | Release gating. |
+| Holdout diagnostic | Sources included in `eval/data/test/`; reported but never optimized against. | Drift detection, source-quality triage, coverage. |
+| Institutional reference | Named publisher of a method or policy, but not yet fixture-backed. | Citation chain and future ingestion. |
+| Research lead | Promising but blocked, stale, JS-rendered, PDF-only, or not yet verified. | Issue tracking, not calibration. |
+| Noisy aggregator | Third-party consumer API or mosque row with known variance. | Warning signal only. |
 
-**Total Morocco coverage: 38 mosques across 27 distinct cities, spanning every macro-region** (north / east / interior / Atlantic coast — north & central & south / Atlas / pre-Sahara / Sahara / Western Sahara).
+## Trust Policy
 
-### Cities probed but NOT in Mawaqit's coverage
+When sources disagree, fajr should prefer:
 
-Mawaqit's coverage is structurally community / diaspora-skewed; some major Moroccan cities have no mosque listings on the platform. Documented honestly so the next agent doesn't re-walk these dead-ends:
+1. Official ministry/council timetable for that place.
+2. Validated multi-mosque local practice across cities and seasons.
+3. Named institutional method specification.
+4. Calc-vs-calc agreement with independent engines.
+5. Aggregator data or single mosque rows.
 
-- **Tetouan** (~400k pop) — no mosque slugs found via name or postcode (93000) search.
-- **Beni Mellal** (~200k) — no mosque slugs.
-- **Al Hoceima** — no mosque slugs.
-- **Chefchaouen** — no mosque slugs.
-- **Larache, Ksar el Kebir, Asilah, Ouezzane** — northern coastal/interior cities with no Mawaqit coverage.
-- **Berkane** — no mosque slugs.
-- **Khemisset** — no Mawaqit results at all.
-- **Azrou, Tiznit, Rissani** — no Mawaqit-published mosques.
-- **Laayoune, Dakhla, Tan Tan** (Western Sahara / far south) — `tayib-morabit-tantan-82000-morocco` exists but returns stale/undefined times.
+Do not average sources until the source type is understood. A mosque row may
+contain adhan time, iqama time, local ihtiyat, stale app settings, timezone
+misconfiguration, or a mosque-specific convention. A stronger position needs
+official data, multiple local mosques, seasonal validation, or a clearly
+documented institutional method.
 
-**Recommended channels for these cities:** Ministry of Habous publishes regional Imsakiyya for all Moroccan governorates; manual transcription of the regional PDF would close every remaining gap. Aladhan API custom-method-99 is the calc-vs-calc fallback already in `eval/data/test/morocco.json`.
+## Current Fixture Summary
 
-### Morocco — Habous official city tables (live local validation resource)
+Current generated metrics live in [docs/progress.md](progress.md). As of the
+latest generated run:
 
-Added 2026-05-05 from a public thread by Abdelaziz Bennouna pointing to the
-official Ministry of Habous prayer-time portal:
-[`https://www.habous.gov.ma/prieres/`](https://www.habous.gov.ma/prieres/).
-This is the source Moroccan users are referring to when they say the official
-times are grouped by city/region rather than geolocated point coordinates.
+| Set | Entries | Fixture files | Role |
+|---|---:|---:|---|
+| Train | 215 | 12 | Ratchet-gated. |
+| Holdout | 29,004 | 186 | Diagnostic only; do not optimize against this aggregate. |
 
-The live source is now saved locally as metadata, not ratchet fixtures:
+### Train Sources
 
-- [`scripts/data/habous-morocco-cities.json`](../scripts/data/habous-morocco-cities.json)
-  maps all 33 bundled Moroccan registry cities to a Habous `ville` ID, including
-  explicit nearest-official-city mappings for Sale → Rabat, Temara → Rabat, and
-  Inezgane → Agadir.
-- [`scripts/validate-habous-morocco.js`](../scripts/validate-habous-morocco.js)
-  fetches the current-day official Habous HTML endpoint
-  `https://www.habous.gov.ma/prieres/horaire-api.php?ville={id}` and compares
-  it against fajr output for the mapped registry cities.
+| Source | Entries | Current role | Notes |
+|---|---:|---|---|
+| Mawaqit Morocco | 25 | Mosque-published train anchor | Anchors Morocco Path A calibration. Strong for community practice, but individual mosque rows are still checked for data quality. |
+| Diyanet Turkiye | 30 | Official institutional train source | Official Turkiye source via `ezanvakti.emushaf.net`; yearly city-ID mapping expansion is tracked in #102. |
+| JAKIM via waktusolat.app | 30 | Institutional train source via proxy | Used for Malaysia calibration; proxy should be treated as a channel to JAKIM data, not the authority itself. |
+| Aladhan API | 130 | Calc-consistency train anchor | Useful for formula drift. It is not a local authority and should not override mosque/ministry data. |
 
-Current live check on 2026-05-05:
+Train files currently present:
 
-```bash
-node scripts/validate-habous-morocco.js --allow-insecure-habous-cert --threshold-min 10
+```txt
+eval/data/train/diyanet.json
+eval/data/train/dubai.json
+eval/data/train/egypt.json
+eval/data/train/jakarta.json
+eval/data/train/karachi.json
+eval/data/train/mawaqit-morocco.json
+eval/data/train/paris.json
+eval/data/train/saudi.json
+eval/data/train/toronto.json
+eval/data/train/uk.json
+eval/data/train/usa.json
+eval/data/train/waktusolat.json
 ```
 
-Result: 33/33 mapped Moroccan city rows within threshold; worst absolute delta
-was 5 minutes, with most deltas in the 0-4 minute range. This should be treated
-as a live local validation signal and future ingestion lead. It does **not**
-modify `eval/data/`; promoting Habous monthly rows into train/test fixtures
-requires a separate curated fixture PR.
+### Holdout Sources
 
-### International (13 mosques across 12 cities — holdout)
+| Source | Entries | Current role | Notes |
+|---|---:|---|---|
+| Mawaqit yearly corpora | 20,296 | Mosque-published seasonal diagnostic | Large and useful, but contains mosque-level variance and occasional stale/corrupt rows. Analyze before calibrating. |
+| Morocco Habous monthly | 990 | Official institutional diagnostic | Strong Morocco validation source; supports the canonical Morocco official-timetable position. |
+| MUIS Singapore | 365 | Official institutional diagnostic | Clean licensed annual source; currently one of fajr's strongest institutional matches. |
+| KEMENAG Indonesia | 1,054 | Official institutional diagnostic | Broad provincial coverage; use for Indonesia position work, not as a blind global correction. |
+| KEMENAG via myQuran | 147 | Wrapper diagnostic | Divergence tracked in #97; use to investigate wrapper fidelity, not direct calibration. |
+| Aladhan yearly / world fixtures | 4,000+ | Calc-vs-calc diagnostic | Useful for breadth and formula drift; not local authority. |
+| praytimes.org | 100 | Independent JS reference | Calc-vs-calc cross-check. |
+| muslimsalat.com | 32 | Noisy aggregator | High WMAE; useful because the metric system should flag it as noisy. |
+| Stress fixtures | varied | Edge-case validation | High latitude, polar, equator, and high elevation behavior. |
 
-| City | Country | Mosque slug |
+Holdout fixture files are intentionally numerous (`eval/data/test/` currently
+contains 186 fixture files). Use [docs/progress.md](progress.md) for the
+current per-source WMAE table rather than hand-maintaining that table here.
+
+## Major Source Notes
+
+### Morocco: Habous and Mawaqit
+
+Morocco is the clearest example of how fajr should use multiple source layers.
+
+| Source | What it contributes | Product conclusion |
 |---|---|---|
-| Cairo | Egypt | `msjd-l-lm-lnf-nouveau-caire-4710001-egypt` |
-| London | United Kingdom | `dar-ul-quran-london-london-nw1-1hw-united-kingdom` |
-| Marseille | France | `mosquee-de-frais-vallon-marseille-13013-france-1` |
-| Limoges | France | `les-compagnons-limoges-87000-france-1` |
-| Mulhouse | France | `association-des-musulmans-des-coteaux-mulhouse` |
-| Tunis | Tunisia | `msjd-sydy-qwysm-tunis-1006-tunisia` |
-| Algiers | Algeria | `masjid-abi-bakr-lsidiq-algiers-16200-algeria` |
-| Doha | Qatar | `masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar` |
-| Kuwait | Kuwait | `mubarak-omar-dhiyab-al-rajhi-mosque-abdali-3200-kuwait` |
-| Dammam | Saudi Arabia | `jawharah-taybah-dammam-32275-saudi-arabia` |
-| Jakarta | Indonesia | `attaufiq-cptiv-jakarta-dki-jakarta-10510-indonesia` |
-| Singapore | Singapore | `al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore` |
-| Kuala Lumpur | Malaysia | `surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2` |
-
-The full registry — including 5 explicitly excluded slugs (data-quality issues like Ramadan-DST tz misconfigs and 30 `iconic_wishlist` canonical mosques (Hassan II, Al-Qarawiyyin, Al-Azhar, Sheikh Zayed, Faisal, Masjid Negara, Istiqlal, Süleymaniye, etc.) with their recommended national-awqaf channels — is at [`scripts/data/mawaqit-mosques.json`](../scripts/data/mawaqit-mosques.json).
-
----
-
-## Institutional ground truth — KEMENAG (Indonesia, n = 34 provincial capitals, 1054 daily entries)
-
-Indonesia has the world's largest Muslim population (~270 million). KEMENAG (Kementerian Agama Republik Indonesia, the Ministry of Religious Affairs) publishes per-kabupaten/kota Imsakiyya at [bimasislam.kemenag.go.id](https://bimasislam.kemenag.go.id). One representative provincial capital is fetched per province for the v1 corpus expansion.
-
-The endpoint uses an undocumented `md5(N)` ID convention discovered via [aproxtimedev/api-jadwal-sholat](https://github.com/aproxtimedev/api-jadwal-sholat) and verified live 2026-05-02. KEMENAG's own province ordering is registered at [`scripts/data/kemenag-provinces.json`](../scripts/data/kemenag-provinces.json).
-
-| n  | Province                     | Capital            | KEMENAG kabupaten name | Timezone |
-|----|------------------------------|--------------------|-----------------------|----------|
-|  1 | Aceh                         | Banda Aceh         | KOTA BANDA ACEH       | WIB      |
-|  2 | Sumatera Utara               | Medan              | KOTA MEDAN            | WIB      |
-|  3 | Sumatera Barat               | Padang             | KOTA PADANG           | WIB      |
-|  4 | Riau                         | Pekanbaru          | KOTA PEKANBARU        | WIB      |
-|  5 | Kepulauan Riau               | Tanjung Pinang     | KOTA TANJUNG PINANG   | WIB      |
-|  6 | Jambi                        | Jambi              | KOTA JAMBI            | WIB      |
-|  7 | Bengkulu                     | Bengkulu           | KOTA BENGKULU         | WIB      |
-|  8 | Sumatera Selatan             | Palembang          | KOTA PALEMBANG        | WIB      |
-|  9 | Kepulauan Bangka Belitung    | Pangkal Pinang     | KOTA PANGKAL PINANG   | WIB      |
-| 10 | Lampung                      | Bandar Lampung     | KOTA BANDAR LAMPUNG   | WIB      |
-| 11 | Banten                       | Serang             | KOTA SERANG           | WIB      |
-| 12 | Jawa Barat                   | Bandung            | KOTA BANDUNG          | WIB      |
-| 13 | DKI Jakarta                  | Jakarta            | KOTA JAKARTA          | WIB      |
-| 14 | Jawa Tengah                  | Semarang           | KOTA SEMARANG         | WIB      |
-| 15 | DI Yogyakarta                | Yogyakarta         | KOTA YOGYAKARTA       | WIB      |
-| 16 | Jawa Timur                   | Surabaya           | KOTA SURABAYA         | WIB      |
-| 17 | Bali                         | Denpasar           | KOTA DENPASAR         | WITA     |
-| 18 | Nusa Tenggara Barat          | Mataram            | KOTA MATARAM          | WITA     |
-| 19 | Nusa Tenggara Timur          | Kupang             | KOTA KUPANG           | WITA     |
-| 20 | Kalimantan Barat             | Pontianak          | KOTA PONTIANAK        | WIB      |
-| 21 | Kalimantan Selatan           | Banjarmasin        | KOTA BANJARMASIN      | WITA     |
-| 22 | Kalimantan Tengah            | Palangka Raya      | KOTA PALANGKARAYA     | WIB      |
-| 23 | Kalimantan Timur             | Samarinda          | KOTA SAMARINDA        | WITA     |
-| 24 | Kalimantan Utara             | Tanjung Selor      | KAB. BULUNGAN         | WITA     |
-| 25 | Gorontalo                    | Gorontalo          | KOTA GORONTALO        | WITA     |
-| 26 | Sulawesi Selatan             | Makassar           | KOTA MAKASSAR         | WITA     |
-| 27 | Sulawesi Tenggara            | Kendari            | KOTA KENDARI          | WITA     |
-| 28 | Sulawesi Tengah              | Palu               | KOTA PALU             | WITA     |
-| 29 | Sulawesi Utara               | Manado             | KOTA MANADO           | WITA     |
-| 30 | Sulawesi Barat               | Mamuju             | KAB. MAMUJU           | WITA     |
-| 31 | Maluku                       | Ambon              | KOTA AMBON            | WIT      |
-| 32 | Maluku Utara                 | Ternate            | KOTA TERNATE          | WIT      |
-| 33 | Papua                        | Jayapura           | KOTA JAYAPURA         | WIT      |
-| 34 | Papua Barat                  | Manokwari          | KAB. MANOKWARI        | WIT      |
-
-Each provincial cell carries a full month of daily entries (1054 days total). KEMENAG-province residual against fajr's calc layer (fresh holdout, 2026-05-02): WMAE 2.44 min, Maghrib bias −2.84 min — visible Path A signal for a future v1.6.0 calibration.
-
----
-
-## Institutional ground truth — MUIS (Singapore, n = 365 daily entries, **WMAE 0.31 — fajr's strongest single match**)
-
-[MUIS](https://muis.gov.sg) (Majlis Ugama Islam Singapura — the Islamic Religious Council of Singapore) publishes their official annual Imsakiyya to [data.gov.sg](https://data.gov.sg) under the **Singapore Open Data Licence v1.0** — commercial redistribution explicitly permitted with attribution. This is the cleanest licensed institutional channel fajr integrates: official, no auth, no scraping, full year of daily data in a single API call.
-
-| Year | Resource ID                                  |
-|------|----------------------------------------------|
-| 2026 | `d_d441e7242e78efc566024dd5b0d9829c`        |
-| 2025 | `d_e81ea2337599b674c4f645c1af93e0dc`        |
-| 2024 | `d_dddc19f6c90edd7cff6b57494630ad29`        |
-
-Per-year fetcher: `scripts/fetch-muis.js`. Output: `eval/data/test/muis.json` — single fixture with 365 daily entries.
+| Ministry of Habous | Official city/region timetable. | Highest authority for Morocco default. |
+| Habous monthly fixture | 33 mapped Moroccan cities x current Hijri month. | Confirms broad city-level alignment. |
+| Mawaqit Morocco train | Mosque-published local practice. | Anchored early Path A calibration. |
+| Mawaqit Morocco yearly corpus | Seasonal mosque data across many mosques. | Reinforces that a single canonical Morocco stance is better than separate semantic aliases. |
 
-**Empirical agreement (post-fetch eval, 2026-05-02):** WMAE **0.31 min** across 365 days. Per-prayer biases all under 0.30 minutes. This is fajr's single best-agreeing institutional source — calc against MUIS published Imsakiyya is sub-minute precision across the entire year.
+Raw/source locations:
 
----
+- `eval/data/train/mawaqit-morocco.json`
+- `eval/data/test/mawaqit-morocco-yearly.json`
+- `eval/data/test/mawaqit-morocco-extended.json`
+- `eval/data/test/morocco-habous-monthly.json`
+- `eval/data/test/morocco-habous.json`
+- `scripts/data/habous-morocco-cities.json`
+- `scripts/data/mawaqit-mosques.json`
+- `scripts/fetch-morocco-habous.js`
+- `scripts/fetch-mawaqit.js`
+- `scripts/fetch-mawaqit-yearly.js`
+- `scripts/validate-habous-morocco.js`
 
-## Institutional ground truth — Diyanet İşleri Başkanlığı (Türkiye, n = 3 zones)
+Do not re-expand mosque slug lists in this document. The canonical slug
+registry is `scripts/data/mawaqit-mosques.json`, including active, excluded,
+and wishlist entries.
 
-Diyanet is Türkiye's authoritative state Islamic body for Sunni practice. Their ezanvakti.emushaf.net publishing endpoint is fajr's institutional channel for Türkiye (calibrated against in v1.4.5 Maghrib/Isha −1).
+### Turkiye: Diyanet
 
-| Zone     | City     | Method                          |
-|----------|----------|---------------------------------|
-| 9541     | Istanbul | Diyanet İşleri Başkanlığı       |
-| 9206     | Ankara   | Diyanet İşleri Başkanlığı       |
-| 9560     | Izmir    | Diyanet İşleri Başkanlığı       |
+Diyanet is the authoritative institutional source for Turkiye. Current train
+coverage is Istanbul, Ankara, and Izmir. A yearly expansion attempt found broken
+city-ID mapping and is tracked in #102. Until those IDs are verified, do not
+promote yearly Diyanet claims.
 
-10 daily entries per zone × 3 zones = 30 entries.
+Raw/source locations:
 
----
+- `eval/data/train/diyanet.json`
+- `scripts/fetch-diyanet.js`
 
-## Institutional ground truth — JAKIM (Malaysia, n = 3 zones)
+### Malaysia: JAKIM via Waktusolat
 
-JAKIM (Department of Islamic Development Malaysia) is the federal Islamic authority for Malaysia. Their e-solat.gov.my system is geo-restricted; fajr accesses JAKIM data via the [waktusolat.app](https://waktusolat.app) community proxy. Calibrated against in v1.4.1 (Fajr +8) and v1.4.4 (Isha +1).
+JAKIM is the authority; `waktusolat.app` is the current data channel. Treat this
+as institutional evidence through a proxy, with future work to prefer official
+JAKIM endpoints if available.
 
-| Zone   | Region              | City         |
-|--------|---------------------|--------------|
-| WLY01  | Wilayah Persekutuan | Kuala Lumpur |
-| SGR03  | Selangor            | Shah Alam    |
-| PNG01  | Pulau Pinang        | George Town  |
+Raw/source locations:
 
-10 daily entries per zone × 3 zones = 30 entries.
+- `eval/data/train/waktusolat.json`
+- `scripts/fetch-waktusolat.js`
 
----
+### Singapore: MUIS
 
-## Institutional reference sources — methods fajr dispatches but doesn't yet sample
+MUIS publishes annual data through data.gov.sg under Singapore's Open Data
+Licence. This is a clean official source and should be a model for future
+institutional ingestion.
 
-Named publishers of calculation methods fajr's `selectMethod()` dispatches to. Per fajr#109 (agot-claude). **URL liveness verified 2026-05-06** from this network — entries marked ✅ responded with HTTP 200 to `curl --max-time 8 -L -A <browser>`; entries marked ❌ timed out (likely geo-blocked from non-Saudi network paths but cited as the canonical scholarly reference for completeness; entries marked ⚠ are reachable but with TLS issues).
+Raw/source locations:
 
-### Saudi Arabia (priority subset per fajr#109)
+- `eval/data/test/muis.json`
+- `scripts/fetch-muis.js`
 
-| Source | URL | Reachable? | Notes |
-|---|---|---|---|
-| **Ministry of Islamic Affairs, Da'wah and Guidance (MoIA)** | [moia.gov.sa](https://moia.gov.sa) | ✅ | Naked domain works (`www.moia.gov.sa` does NOT — corrected from earlier draft). Hosts a prayer-times widget on the homepage with a city picker (`#prayerModal`); SharePoint OData backend, JS-rendered values. Mobile apps (`/Pages/MobileApps.aspx`) expose Imsakiyya programmatically. **Best candidate for an automated Saudi institutional fetcher.** |
-| **Council of Senior Scholars / Permanent Committee for Islamic Research and Issuing Fatwas (Al-Lajna al-Da'ima)** | [alifta.gov.sa](https://www.alifta.gov.sa) | ⚠ | Self-signed/expired TLS cert; reachable with `--insecure` flag. Primary fatwa source for Saudi-stance positions on prayer-time methodology, elevation, moon-sighting. Mirror at [alifta.net](https://www.alifta.net) ✅ also reachable. |
-| **Umm al-Qura University, Mecca** | [uqu.edu.sa](https://uqu.edu.sa) | ✅ | The host university for Umm al-Qura research outputs. Where the canonical UAQ calendar publication site (`ummulqura.org.sa` — see below) is unreachable, scholarly references via UQU's institutional repository are the proxy citation chain. |
-| **Islamic University of Madinah** | [iu.edu.sa](https://iu.edu.sa) | ✅ | Major Saudi Islamic-sciences institution. Scholarly publications on prayer-time astronomy + Hijri calendar appear in its institutional repository. |
-| **Imam Muhammad ibn Saud Islamic University (Riyadh)** | [imamu.edu.sa](https://imamu.edu.sa) | ✅ | Major Saudi Islamic-sciences institution. |
-| **General Authority of Awqaf** | [awqaf.gov.sa](https://awqaf.gov.sa) | ✅ | Administers Saudi religious endowments + waqf-funded mosques. Institutional-policy reference for cross-Saudi mosque practices. |
-| **Ministry of Hajj and Umrah** | [haj.gov.sa](https://www.haj.gov.sa) | ✅ | Pilgrimage-period guidance, including special schedules during Ramadan + Hajj. |
-| **Saudi Press Agency (SPA)** | [spa.gov.sa](https://www.spa.gov.sa) | ✅ | Publishes official announcements including Council of Senior Scholars Hijri-month determinations (the moon-sighting verdicts that drive UAQ calendar). Cross-cite when UAQ's primary site is unreachable. |
-| **General Presidency for the Affairs of the Two Holy Mosques (الرئاسة العامة)** | [gph.gov.sa](https://gph.gov.sa) | ❌ | Administers Masjid al-Haram (Mecca) + Al-Masjid an-Nabawi (Madinah). Confirmed unreachable from this session's network paths (curl + WebFetch both time out at 12s). Cited as the canonical reference; downstream consumers in Saudi-routable networks should reach it. fajr's automated Mecca/Madinah Imsakiyya fetcher cannot pull from this URL until reachability is restored. |
-| **Umm al-Qura Calendar — Saudi Royal Court / KACST** | [ummulqura.org.sa](https://ummulqura.org.sa) | ❌ | Canonical UAQ publishing endpoint. Confirmed unreachable from this network. fajr's `hijri()` UAQ implementation derives from published algorithms (Khalid Shaukat 2002 + KACST data tables); validation against `ummulqura.org.sa` directly is blocked. Replace IslamicFinder relay citation in v1.7.6 #48 with this entry **once a reachable mirror or archive is identified**. |
-| **King Abdulaziz City for Science and Technology (KACST)** | [kacst.gov.sa](https://kacst.gov.sa) | ❌ | Scientifically backs the UAQ calendar. Confirmed unreachable from this session. Same caveat as above. |
-| **King Fahd Complex for Printing the Holy Quran** | [qurancomplex.gov.sa](https://qurancomplex.gov.sa) | ❌ | Confirmed unreachable. Scholarly publications on prayer-time astronomy + lunar visibility appear in its publication catalog. Citation kept for completeness. |
+### Indonesia: KEMENAG
 
-### Other named-method publishers
+KEMENAG is the authority for Indonesia. The official KEMENAG fixture is more
+important than wrapper data. The myQuran wrapper is retained as a diagnostic
+because its divergence can reveal wrapper or mapping issues.
 
-| Country | Method fajr dispatches | Authoritative publisher | URL | Reachable? | Notes |
-|---|---|---|---|---|---|
-| **UAE** | (elevation stance) | **IACAD — Islamic Affairs and Charitable Activities Department, Dubai** | [iacad.gov.ae](https://www.iacad.gov.ae) | ✅ | Publisher of the Burj Khalifa floor-stratified elevation fatwa (Dr. Ahmed Al Haddad). |
-| **Egypt** | `Egyptian` (19.5°/17.5°) | **General Authority for Survey (GAS / ESA)** | [esa.gov.eg](http://www.esa.gov.eg) | ✅ | ESA portal is JS-rendered (VIEWSTATE form); `scripts/fetch-egypt-esa.js` attempt failed. Reachable but data extraction needs Puppeteer. |
-| **Iran** | `Tehran` (17.7°/14°) | **Institute of Geophysics, University of Tehran** | [geophysics.ut.ac.ir](https://geophysics.ut.ac.ir) | ✅ | Source of the Tehran method angle pair. |
-| **Pakistan** | `Karachi` (18°/18°) | **University of Islamic Sciences, Karachi** | (no canonical web URL) | n/a | Institutional reference only. The Karachi 18°/18° method is documented in the institutional literature but the university lacks a canonical methodology-publication URL. |
-| **Morocco** | `Morocco` (19°/17° + Path A) | **Ministry of Habous and Islamic Affairs (Habous)** | [habous.gov.ma](https://www.habous.gov.ma) | ✅ | Cross-validated by fajr#103 multi-season corpus (32 cities × 3 seasons × 6,660 cells). |
+Raw/source locations:
 
-### Verification methodology + honest caveats
+- `eval/data/test/kemenag.json`
+- `eval/data/test/indonesia-myquran.json`
+- `scripts/data/kemenag-provinces.json`
+- `scripts/fetch-kemenag.js`
+- `scripts/fetch-kemenag-official-yearly.js`
+- `scripts/fetch-indonesia-myquran.js`
 
-1. **URL liveness was verified by `curl --max-time 8 -L -A <Chrome>` from a US-routed network on 2026-05-06.** Saudi `.gov.sa` sites that timed out may still be reachable from Saudi-routable networks. WebFetch (Anthropic's network path) was used as a secondary check; sites that fail BOTH paths (gph.gov.sa, ummulqura.org.sa, kacst.gov.sa, qurancomplex.gov.sa) are flagged ❌.
+### Aladhan and PrayTimes
 
-2. **No primary scholarly material has been extracted from these institutions yet** beyond what fajr already vendored from open-citation sources (Khalid Shaukat 2002 for UAQ algorithm; published institutional method angles for Egyptian/Tehran/Karachi). fajr#109 is the citation-chain commitment; data extraction (fetcher scripts pulling Imsakiyya tables, fatwa text, scholarly papers) is queued separately and tracked under the Phase-2 dispatch from the verification work.
+Aladhan and praytimes.org are valuable independent calculation references. They
+catch method-dispatch and formula drift, but they cannot arbitrate local
+practice against official timetables or mosque-published reality.
 
-3. **The list above is institutional-reference-completeness, not a fixture inventory.** Where a fetcher exists (Habous via PR #98 tooling, MUIS via data.gov.sg, KEMENAG via bimasislam, JAKIM via waktusolat proxy, Diyanet via ezanvakti), the corresponding cell appears in the institutional-fixture sections above. Where no clean fetch exists, the institutional reference is named here so the citation chain is complete.
+Raw/source locations:
 
----
+- `eval/data/train/*` files with source `Aladhan API`
+- `eval/data/test/world-*.json`
+- `eval/data/test/iran-pakistan-aladhan-yearly.json`
+- `eval/data/test/uk-aladhan-moonsighting-yearly.json`
+- `eval/data/test/praytimes-reference.json`
+- `scripts/fetch-aladhan.js`
+- `scripts/fetch-aladhan-world.js`
+- `scripts/fetch-aladhan-iran-pakistan.js`
+- `scripts/fetch-aladhan-uk-yearly.js`
+- `scripts/fetch-praytimes.js`
 
-## Calculation-method consensus — Aladhan (n = 17 train cities + 145 country fixtures)
+### Mawaqit Outside Morocco
 
-[Aladhan API](https://aladhan.com) is an independent JS implementation of the same calculation methods fajr auto-detects. Its agreement with fajr is a *consistency check* (we're applying the formulas correctly), not an *accuracy claim* (we match what mosques publish). Both used as train-corpus stability anchors and as a holdout coverage backbone.
+Mawaqit is excellent for discovering lived mosque practice, but mosque pages can
+have corrupt embedded calendars, stale values, or local buffers. Treat large
+Mawaqit yearly corpora as a diagnostic and calibration lead, not as automatic
+ground truth.
 
-### Train (n = 17 cities)
+Raw/source locations:
 
-| Region            | Cities                                                                |
-|-------------------|-----------------------------------------------------------------------|
-| Saudi Arabia      | Makkah, Madinah, Riyadh                                               |
-| UAE               | Dubai                                                                 |
-| Egypt             | Cairo, Alexandria                                                     |
-| France            | Paris                                                                 |
-| United Kingdom    | London                                                                |
-| Pakistan          | Karachi                                                               |
-| Indonesia         | Jakarta                                                               |
-| USA               | New York, Los Angeles                                                 |
-| Canada            | Toronto                                                               |
-
-10 daily entries per city × 17 cities = 170 train entries.
-
-### Holdout — `world-coverage` (n = 145 countries)
-
-In v1.4.0 the eval expanded to 163 country fixtures via `scripts/fetch-aladhan-world.js`, hitting one major-city per UN-member-state. Each country's fixture carries 8 daily entries (one per representative day across spring/summer/autumn ranges). Run `ls eval/data/test/world-*.json` for the full list — every country with a Muslim population of any size is covered, plus tropical / equatorial / polar stress cells (Ecuador, Iceland, Norway, etc.) and ≥10 % Muslim minority countries (India, China, Russia, Ethiopia, Nigeria, etc.).
-
----
-
-## Calculation-method reference — praytimes.org / Hamid Zarrabi-Zadeh (n = 10 cities)
-
-`praytimes.json` ships [praytimes.org](http://praytimes.org)'s reference implementation evaluations — an independent JavaScript engine maintained by Hamid Zarrabi-Zadeh. Used as a third independent reference layer for selected major Islamic cities; ~100 daily entries.
-
----
-
-## Aggregator cross-check — muslimsalat.com (n = 4 cities, holdout)
-
-Third-party prayer-time aggregator with known accuracy variance — explicitly held in the test set as a *cross-check ceiling* (its 26 min holdout WMAE flags it as the noisiest source we look at, used to verify our metric system flags real divergence rather than fitting to noise).
-
-| City    | Country        |
-|---------|----------------|
-| Karachi | Pakistan       |
-| Cairo   | Egypt          |
-| London  | United Kingdom |
-| Dubai   | UAE            |
-
----
-
-## Stress-test fixtures (holdout, edge-case validation)
-
-| Fixture | Purpose |
-|---|---|
-| `eval/data/test/anchorage.json` | Sub-arctic high-latitude (61° N) — exercises the high-latitude rule |
-| `eval/data/test/svalbard.json`  | Polar 78° N — beyond the analytical solver's domain; verifies graceful fallback |
-| `eval/data/test/quito.json`     | Equator 0° — verifies symmetry / no NaN at θ = 0 |
-| `eval/data/test/high_elevation.json` | Mountain coordinates — verifies elevation-correction guard rails |
-| `eval/data/test/high_latitude.json`  | Mid-high latitudes (Reykjavik, etc.) — verifies notes/warnings |
-
----
-
-## Calc-vs-calc fixtures held in test/ (corpus curation per recipe step 2)
-
-Three Aladhan-method-99 calc-vs-calc reproductions are explicitly *held* in test/ rather than train/, so they're reported but never gating. Each was originally in train/ then moved out when an actual-institutional Path A signal arrived for the same region:
-
-| Fixture | Reason for test-only classification |
-|---|---|
-| `eval/data/test/morocco.json` | Aladhan reproduction of `Other(19, 17)`; replaced in train by `mawaqit-morocco.json` at v1.5.0 |
-| `eval/data/test/turkey.json` | Aladhan reproduction of `CalculationMethod.Turkey()`; replaced in train by `diyanet.json` at v1.4.5 |
-| `eval/data/test/malaysia.json` | Aladhan reproduction of `JAKIM` method; replaced in train by `waktusolat.json` at v1.4.1 |
-
-This is corpus *curation*, not data modification — the file content is unchanged, only its classification.
-
----
-
-## Refresh cadence
-
-- **Daily** — `node scripts/fetch-mawaqit.js` refreshes Mawaqit fixtures (38 mosques, both Morocco-train and non-Morocco-test). Wired up as a 06:00 UTC cloud routine; opens an auto-PR if `docs/progress.md` shifts more than timestamp-only.
-- **On-demand** — `node scripts/fetch-kemenag.js` refreshes the 34 KEMENAG provincial-capital fixtures with a fresh full-month snapshot. Run before any v1.6.0 calibration work to ensure the Path A signal is current.
-- **Annual / per-release** — `node scripts/fetch-diyanet.js`, `fetch-waktusolat.js`, `fetch-aladhan.js`, `fetch-aladhan-world.js`, `fetch-praytimes.js`, `fetch-muslimsalat.js`. These produce stable monthly snapshots that don't need daily refresh.
-
----
-
-## Sources we WANT but cannot yet integrate
-
-Three institutional channels were probed 2026-05-02 and remain blocked from a clean / scriptable / non-residential context:
-
-| Channel | Status | Recommended unblock |
+- `eval/data/test/mawaqit.json`
+- `eval/data/test/mawaqit-france-yearly.json`
+- `eval/data/test/mawaqit-uk-yearly.json`
+- `scripts/data/mawaqit-mosques.json`
+- `scripts/fetch-mawaqit.js`
+- `scripts/fetch-mawaqit-yearly.js`
+
+## Institutional References Not Yet Fully Fixture-Backed
+
+These sources are important for citation and future ingestion, but a named
+institution is not the same thing as a passing fixture.
+
+| Institution | Region/method relevance | Current status |
 |---|---|---|
-| ~~MUIS (Singapore)~~ | ✅ INTEGRATED — `scripts/fetch-muis.js` via data.gov.sg poll-download API. WMAE 0.31 across 365 daily entries — sub-minute agreement, fajr's strongest institutional match. | n/a |
-| IACAD (UAE Dulook DXB) | `/services/prayertimes` redirects to login | Mobile-app-only; awaiting documented public API |
-| Saudi Hajj Ministry Haramain Imsakiyya | PDF-only | Manual transcription required — small one-time effort |
-| Egyptian GAS / Al-Azhar | No public JSON API | Manual transcription required |
-| Pakistani Auqaf | DNS does not resolve from outside-region | Either community proxy or in-region access |
+| Saudi MoIA | Saudi prayer-time practice and possible automated Saudi fetcher. | Reachable; JS-rendered / app-backed extraction needs separate work. |
+| General Presidency for the Affairs of the Two Holy Mosques | Makkah/Madinah prayer-time publication. | Canonical but unreachable from current network path; not fixture-backed. |
+| Umm al-Qura Calendar / KACST | Saudi Hijri calendar source. | Canonical but direct site unreachable from current network path; use reachable institutional mirrors or archived tables when found. |
+| Council of Senior Scholars / al-Ifta | Saudi fatwa source. | Reachable with TLS caveats; primary text extraction still needed. |
+| IACAD Dubai | UAE method and high-rise/elevation precedent. | Reachable; original Burj Khalifa fatwa text still needs archival recovery. |
+| Egyptian General Authority for Survey | Egyptian method source. | Reachable but JS-rendered; current fetcher is a stub/dead-end marker. |
+| Tehran Institute of Geophysics | Tehran method source. | Referenced and partly fixture-backed through Aladhan proxy; direct institutional timetable ingestion remains future work. |
+| University of Islamic Sciences Karachi | Karachi method source. | Institutional reference without canonical public URL; needs paper/manual source recovery. |
+| Ministry of Habous | Morocco official timetable source. | Fixture-backed and central to Morocco position. |
 
-Detailed status notes are in [`scripts/data/mawaqit-mosques.json`](../scripts/data/mawaqit-mosques.json) under each `iconic_wishlist[*].recommended_channel`. Each entry includes a 2026-05-02 probe timestamp so future agents don't re-walk the same dead-ends.
+## Blocked or Noisy Channels
 
-The MUIS data.gov.sg path was identified by a parallel-research agent and is an obvious next-PR target — single-fetch CSV download, official Open Data Licence v1.0, ~365 daily Singapore entries.
+| Channel | Status | Handling |
+|---|---|---|
+| Egyptian GAS web form | JS/VIEWSTATE rendered. | Keep stub fetcher; use browser/manual path in a separate PR. |
+| Saudi Haramain/GPH direct fetch | Network unreachable from current session. | Do not claim fixture coverage until reachable source or manual transcription lands. |
+| Pakistan Auqaf / Karachi original method | No clean public API or canonical method URL found. | Treat as literature recovery, not automated ingestion. |
+| muslimsalat.com | High WMAE third-party aggregator. | Keep as noisy holdout only. |
+| Single Mawaqit mosque anomalies | May be stale/local-buffered/corrupt. | Exclude or mark in `scripts/data/mawaqit-mosques.json`; do not tune globally. |
+
+## Refresh Cadence
+
+| Source family | Script | Cadence |
+|---|---|---|
+| Mawaqit daily snapshots | `scripts/fetch-mawaqit.js` | Daily or before mosque-practice investigations. |
+| Mawaqit yearly corpora | `scripts/fetch-mawaqit-yearly.js` | On-demand per country/region audit. |
+| Morocco Habous | `scripts/fetch-morocco-habous.js` and `scripts/validate-habous-morocco.js` | Before Morocco position/calibration changes. |
+| KEMENAG | `scripts/fetch-kemenag.js`, `scripts/fetch-kemenag-official-yearly.js` | Before Indonesia calibration work. |
+| MUIS | `scripts/fetch-muis.js` | Annual or per release when Singapore changes matter. |
+| Diyanet | `scripts/fetch-diyanet.js` | After #102 city-ID verification; before Turkiye expansion claims. |
+| JAKIM proxy | `scripts/fetch-waktusolat.js` | Before Malaysia calibration work. |
+| Aladhan world/yearly | `scripts/fetch-aladhan*.js` | Calc-vs-calc coverage sweeps, not local-authority arbitration. |
+| praytimes / muslimsalat | `scripts/fetch-praytimes.js`, `scripts/fetch-muslimsalat.js` | Occasional drift checks. |
+
+## Contributor Rules
+
+- Never modify existing `eval/data/` rows to make a calibration pass.
+- New fixture files should preserve source identity and stay in holdout unless
+  the maintainer deliberately promotes them to train.
+- Do not describe holdout WMAE as a release gate.
+- Do not call a source "official" because a wrapper says it mirrors one; verify
+  the upstream institution or label it as a proxy.
+- Do not promote a source lead to a position. Convert leads through the chain:
+  source found -> fixture built -> source quality checked -> residual analyzed
+  -> position/disagreement updated -> only then consider calibration.
+
+## Related Docs
+
+- [Position registry](positions.md)
+- [Known disagreements](known-disagreements.md)
+- [Calibration methodology](../CALIBRATION.md)
+- [Generated progress](progress.md)
+- [Scoreboard](../SCOREBOARD.md)

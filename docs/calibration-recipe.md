@@ -1,11 +1,9 @@
 # Calibration Recipe — Path A WMAE Improvements
 
-> **Last refreshed:** 2026-05-03 (v1.7.19). Headline numbers reflect the
-> post-v1.7.16 Karpathy autoresearch ratchet baseline — train WMAE **0.98 min**
-> after Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations.
-> v1.7.18 added 84 cities to the registry; v1.7.19 fixed 6 country-edge
-> misroutings via engine bbox-table tightening. The "What's left on the table"
-> section now reflects post-v1.7.16 per-source residuals.
+> **Last refreshed:** 2026-05-06 (v1.8.0). This remains the Path A calibration
+> methodology guide, not the live scoreboard. Current WMAE, corpus counts, and
+> per-source residuals live in [SCOREBOARD.md](../SCOREBOARD.md) and
+> [docs/progress.md](progress.md).
 >
 > A durable methodology guide for finding, validating, and shipping per-source calibration corrections that decrease train WMAE without violating the ratchet. The JAKIM offset shipped in v1.4.1 is the worked example — every step below references that change as the canonical demonstration.
 >
@@ -322,7 +320,14 @@ After v1.5.0 the calibration loop has hit the same structural ceiling for fajr's
 
 v1.7.16 broke the **train WMAE ≈1.07 steady-state floor** by recognising that two regions (Morocco Dhuhr, JAKIM Dhuhr/Asr) had recoverable Path A bias even in the post-#50-fix re-baseline. The new floor is **0.98 min**. Further reduction requires either (a) closing the Aladhan +1.22 cohort bias — but Aladhan is calc-vs-calc, not institutional ground truth, so this needs an upstream fix in adhan-js or AlAdhan API, see [#72](https://github.com/tawfeeqmartin/fajr/issues/72) — or (b) breaking new institutional source channels from the dead-end list above. The Mawaqit Morocco fixture refreshes daily via the `fajr · daily Mawaqit refresh` cloud routine (06:00 UTC), so per-date drift is captured automatically — but the institutional source set is what gates further calibration.
 
-**Holdout signals** (2,980 entries across 6 sources — Aladhan 1263, KEMENAG 1054, MUIS 365, Mawaqit 166, praytimes.org 100, muslimsalat 32): the holdout corpus has expanded substantially through v1.6/1.7 — KEMENAG 2026 imsakiyya (Indonesia) and MUIS 2026 imsakiyya (Singapore) are the two largest additions. 60-min outliers cluster around DST transitions (Tehran in IRDT, Vilnius in EEST, etc.). These are NOT calibration opportunities — they're tz-handling refinements in `eval/eval.js`'s dynamic resolver. Address as framework improvements, not Path A corrections.
+**Holdout signals:** the holdout corpus is diagnostic only and now changes
+frequently as yearly mosque and institutional fixtures land. Read
+[docs/progress.md](progress.md) for current source counts and WMAE. Large
+holdout outliers are not automatically calibration opportunities: first decide
+whether the source is an institution, a mosque-published timetable, a
+calc-vs-calc reference, a stale/misconfigured mosque row, or a timezone /
+row-mapping artifact. Address framework/source-quality issues separately from
+Path A corrections.
 
 ---
 

@@ -1,6 +1,6 @@
 # fajr — accuracy + scholarly methodology
 
-Last refreshed: 2026-05-05 (v1.7.25)
+Last refreshed: 2026-05-06 (v1.8.0)
 
 ## What this document is
 
@@ -20,11 +20,16 @@ in your local mosque's experience contradicts what is published here, please
 file an issue — that is the regression-report contract that the v1.x public
 beta framing in the README makes explicit.
 
+For the compact product answer to "what does fajr do by default here?", read
+[docs/positions.md](docs/positions.md). For disagreements that should be shown
+to users rather than hidden inside calibration prose, read
+[docs/known-disagreements.md](docs/known-disagreements.md).
+
 CALIBRATION.md is refreshed with every release. The "Last refreshed" line at
 the top of this file always reflects the most recent version on npm.
 
 > **Important caveat about the holdout corpus.** The "Holdout WMAE" number
-> reported below (currently ~3.62 min) is heavily skewed by a small number of
+> reported below (currently ~7.36 min) is heavily skewed by a small number of
 > calc-vs-calc comparison cells with known data-quality issues (date-format
 > drift, pre-fix Aladhan corruption surfaced in the v1.6.1 fix, high-latitude
 > outliers like Longyearbyen 78°N, Oslo 60°N, Reykjavík 64°N, plus the
@@ -111,7 +116,7 @@ last record is always the current state.
 | Corpus | WMAE (min) | Entries | Notes |
 |---|---|---|---|
 | **Train** (institutional ground truth) | **0.98** | 215 | Mawaqit / Diyanet / JAKIM — drives the ratchet. **Broke the 1-minute barrier in v1.7.16** via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations. |
-| Holdout (calc-vs-calc + outlier cities) | 3.62 | 2980 | Informational only — heavily skewed by polar latitudes (Longyearbyen 78°N WMAE 39.9, Oslo 60°N WMAE 46.4, Reykjavík 64°N WMAE 36.2) + muslimsalat.com aggregator (26 min WMAE). See caveat at top of file. |
+| Holdout (diagnostic only) | 7.36 | 29004 | Informational only — expanded yearly mosque/institutional/calc-vs-calc holdout includes noisy aggregators, seasonal mosque variance, and high-latitude / source-quality outliers. See caveat at top of file and [SCOREBOARD.md](SCOREBOARD.md). |
 
 ### Per-source breakdown (v1.7.19)
 
@@ -162,7 +167,7 @@ for the dual-ihtiyat framework.
 | Paris | France | Mawaqit | 0.75 | 0.50 | 0.60 | 0.50 | France UOIF 12°/12° |
 | Makkah | Saudi Arabia | AlAdhan | 0.71 | 1.00 | 0.30 | 0.30 | Umm al-Qura method |
 | Madinah | Saudi Arabia | AlAdhan | 0.81 | 0.50 | 0.60 | 0.60 | (same) |
-| Riyadh | Saudi Arabia | AlAdhan | 0.94 | 0.90 | 0.90 | 0.90 | Umm al-Qura + 612m elevation auto-applied (v1.7.0). Saudi institutional stance is Umm al-Qura *declines* elevation correction for jama'ah unity; fajr applies it because the city-registry path encodes UAE/JAKIM-aligned policy. Surfaced via `notes[]`. See [Known deviations](#known-deviations-from-reference-sources) below. |
+| Riyadh | Saudi Arabia | AlAdhan | 0.94 | 0.90 | 0.90 | 0.90 | Umm al-Qura + 612m elevation auto-applied (v1.7.0). Saudi published city timetables are uniform while UAE/Malaysia precedent supports elevation-aware Shuruq/Maghrib; fajr applies correction when elevation is resolved and surfaces an opt-out via `elevation: 0`. See [Known deviations](#known-deviations-from-reference-sources) below. |
 | Toronto | Canada | AlAdhan | 0.94 | 0.50 | 0.50 | 0.50 | ISNA / NorthAmerica method |
 | London | UK | Mawaqit | 2.16 | 1.10 | 0.90 | 3.60 | **MoonsightingCommittee Maghrib delta under review** — 3.6 min Maghrib MAE is a Path-A candidate for v1.8.0+ |
 | New York | USA | AlAdhan | 1.04 | 0.60 | 0.90 | 0.70 | ISNA / NorthAmerica |
@@ -348,7 +353,7 @@ to the user.
 
 | City | fajr Maghrib delta vs AlAdhan / Saudi | Why | How surfaced |
 |---|---|---|---|
-| Mecca (277 m) | +1.6 min later | UAE Burj Khalifa fatwa (IACAD Dulook DXB) + Malaysia JAKIM apply elevation correction; Saudi Umm al-Qura *declines* it for jama'ah unity. fajr's city-registry path applies it (UAE/JAKIM-aligned default), with `elevation: 0` opt-out. | `notes[]` "Elevation auto-resolved from city registry: Mecca, 277m → Maghrib +1.6 min later, Shuruq -1.6 min earlier vs sea-level" |
+| Mecca (277 m) | +1.6 min later | UAE Burj Khalifa fatwa (IACAD Dulook DXB) + Malaysia/JAKIM-adjacent precedent support elevation correction; Saudi/Umm al-Qura published city timetables remain uniform. fajr's city-registry path applies the correction, with `elevation: 0` opt-out. | `notes[]` "Elevation auto-resolved from city registry: Mecca, 277m → Maghrib +1.6 min later, Shuruq -1.6 min earlier vs sea-level" |
 | Madinah (608 m) | +2.7 min | (same) | (same) |
 | Riyadh (612 m) | +2.7 min | (same) | (same) |
 | Tehran (~1200 m) | +5.4 min | (same) | (same) |
@@ -358,7 +363,8 @@ This is the v1.7.0 elevation auto-application case, surfaced explicitly per
 issue #50 (v1.7.6) so apps can render the institutional split to the user.
 See [knowledge/wiki/corrections/elevation.md](knowledge/wiki/corrections/elevation.md)
 for the full institutional-precedent breakdown. Classification:
-**🟡→🟢 Approaching established** (UAE + JAKIM apply; Saudi declines).
+**🟡→🟢 Approaching established** (UAE + Malaysia apply in modern institutional
+settings; Saudi published city timetables remain uniform).
 
 ### Hijri calendar — diverges from Kuwaiti tabular default (v1.7.6)
 
