@@ -156,6 +156,12 @@ if (!fixtures.length) {
   process.exit(1)
 }
 
+if (failures.length) {
+  console.error(`[habous-month] ${failures.length} city fetch(es) failed:`)
+  for (const failure of failures) console.error(`  - ${failure}`)
+  process.exit(1)
+}
+
 const json = `${JSON.stringify(fixtures, null, 2)}\n`
 if (outPath) {
   mkdirSync(dirname(outPath), { recursive: true })
@@ -163,12 +169,6 @@ if (outPath) {
   console.error(`[habous-month] wrote ${outPath}`)
 } else {
   process.stdout.write(json)
-}
-
-if (failures.length) {
-  console.error(`[habous-month] ${failures.length} city fetch(es) failed:`)
-  for (const failure of failures) console.error(`  - ${failure}`)
-  process.exit(1)
 }
 
 async function fetchRemoteMonth(row, url) {
