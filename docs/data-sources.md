@@ -52,7 +52,7 @@ latest generated run:
 | Source | Entries | Current role | Notes |
 |---|---:|---|---|
 | Mawaqit Morocco | 25 | Mosque-published train anchor | Anchors Morocco Path A calibration. Strong for community practice, but individual mosque rows are still checked for data quality. |
-| Diyanet Turkiye | 30 | Official institutional train source | Official Turkiye source via `ezanvakti.emushaf.net`; yearly city-ID mapping expansion is tracked in #102. |
+| Diyanet Turkiye | 30 | Official institutional train source | Official Turkiye source via `ezanvakti.emushaf.net`; verified city-ID mapping now lives in `scripts/data/diyanet-ezanvakti-cities.json`, but yearly fixture promotion is still a separate curation step. |
 | JAKIM via waktusolat.app | 30 | Institutional train source via proxy | Used for Malaysia calibration; proxy should be treated as a channel to JAKIM data, not the authority itself. |
 | Aladhan API | 130 | Calc-consistency train anchor | Useful for formula drift. It is not a local authority and should not override mosque/ministry data. |
 
@@ -139,13 +139,15 @@ and wishlist entries.
 ### Turkiye: Diyanet
 
 Diyanet is the authoritative institutional source for Turkiye. Current train
-coverage is Istanbul, Ankara, and Izmir. A yearly expansion attempt found broken
-city-ID mapping and is tracked in #102. Until those IDs are verified, do not
-promote yearly Diyanet claims.
+coverage is Istanbul, Ankara, and Izmir. The ezanvakti API uses numeric city and
+district IDs, so multi-city fetches must use the verified mapping file instead
+of guessed IDs. The mapping covers every bundled Turkish registry city, but it
+does not by itself promote a yearly Diyanet fixture.
 
 Raw/source locations:
 
 - `eval/data/train/diyanet.json`
+- `scripts/data/diyanet-ezanvakti-cities.json`
 - `scripts/fetch-diyanet.js`
 
 ### Malaysia: JAKIM via Waktusolat
@@ -256,7 +258,7 @@ institution is not the same thing as a passing fixture.
 | Morocco Habous | `scripts/fetch-morocco-habous.js` and `scripts/validate-habous-morocco.js` | Before Morocco position/calibration changes. |
 | KEMENAG | `scripts/fetch-kemenag.js`, `scripts/fetch-kemenag-official-yearly.js` | Before Indonesia calibration work. |
 | MUIS | `scripts/fetch-muis.js` | Annual or per release when Singapore changes matter. |
-| Diyanet | `scripts/fetch-diyanet.js` | After #102 city-ID verification; before Turkiye expansion claims. |
+| Diyanet | `scripts/fetch-diyanet.js` | Monthly/quarterly for source health; before any Turkiye fixture expansion claim. |
 | JAKIM proxy | `scripts/fetch-waktusolat.js` | Before Malaysia calibration work. |
 | Aladhan world/yearly | `scripts/fetch-aladhan*.js` | Calc-vs-calc coverage sweeps, not local-authority arbitration. |
 | praytimes / muslimsalat | `scripts/fetch-praytimes.js`, `scripts/fetch-muslimsalat.js` | Occasional drift checks. |
