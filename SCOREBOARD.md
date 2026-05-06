@@ -46,18 +46,18 @@
 ### Bug health
 
 - Open critical: **0** ✅
-- Open advisory / tracking: **20**
-  - #106 — [fajr↔agot] v1.8.0 release blocker: ship checklist with hard delivery dates
+- Open advisory / tracking: **18**
   - #105 — [fajr↔agot] documentation discipline: a SCOREBOARD that makes 'are we winning or losing' computable + glanceable
   - #103 — [fajr↔agot] Habous-Morocco rigorous calibration: per-city × per-season × multi-year empirical fixtures (Option C from agot#101)
-  - #102 — Türkiye yearly Diyanet corpus — broken city-ID mapping in haiku-fetcher attempt
   - #101 — [fajr↔agot] proposal: 5-layer canonical architecture — multi-institution per country, cited sources, empirical fixtures, fiqh validity, astronomical primitives
   - #99 — [audit-gap] Mawaqit train+test fixtures are single-day snapshots; calibrations extrapolated without seasonal evidence
+  - #97 — Indonesia myQuran wrapper shows 3x divergence vs official KEMENAG — wrapper may not mirror official Imsakiyya
+  - #92 — [morocco] promote Habous official prayer tables into curated fixtures
 - Closed last 30 days: **20**
 
 ### Test corpus
 
-- Tests: **337/337 passing** ✅
+- Tests: **340/340 passing** ✅
 
 ---
 
