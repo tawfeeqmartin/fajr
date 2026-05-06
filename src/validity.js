@@ -25,8 +25,31 @@
  */
 
 import * as adhan from 'adhan'
+import { hijri } from './hijri.js'
 
 const MS_PER_MIN = 60_000
+
+/**
+ * Morocco's Ramadan DST exception: Morocco observes year-round GMT+1 except
+ * during Ramadan, when it switches to GMT+0. Modern Node (≥18) and v8 model
+ * this correctly via the IANA tz database, but consumers on older Node, on
+ * stale tzdata, or applying custom date arithmetic may miss the offset.
+ * Layer 4 emits MOROCCO_RAMADAN_DST_GAP as info when both conditions hold:
+ * (a) coordinates land in the Morocco bbox, (b) the date is in Ramadan.
+ *
+ * Bbox source: same conservative bounds as detectCountry's Morocco case.
+ * Hijri detection: src/hijri.js (Umm al-Qura by default — close enough to
+ * Morocco's Habous Hijri for boundary detection; Habous occasionally lags by
+ * 1 day, which doesn't affect this warning meaningfully).
+ */
+const MOROCCO_BBOX = { latMin: 21, latMax: 36, lonMin: -17, lonMax: -1 }
+function isInMoroccoBbox(lat, lon) {
+  return lat >= MOROCCO_BBOX.latMin && lat <= MOROCCO_BBOX.latMax
+      && lon >= MOROCCO_BBOX.lonMin && lon <= MOROCCO_BBOX.lonMax
+}
+function isInRamadan(date) {
+  try { return hijri(date).month === 9 } catch { return false }
+}
 
 /**
  * @typedef {Object} ValidityWarning
@@ -225,6 +248,24 @@ export function computeValidityWarnings({ rawTimes, result, params, coords, date
   // critical check, OR redefine the 12° check as a CEILING ("Fajr later
   // than 12° = past the dawn window, no school places Fajr that late").
   // Tracking issue to be filed with v1.8.0 ship.
+
+  // ── MOROCCO_RAMADAN_DST_GAP (info, fajr#106): defensive warning for
+  // consumers on older Node versions or custom display layers that may not
+  // correctly model Morocco's Ramadan GMT+0 exception. Modern Node ≥18 with
+  // current tzdata handles this correctly via Africa/Casablanca; the warning
+  // exists to flag cases where the consumer might be on stale infrastructure.
+  if (isInMoroccoBbox(lat, coords.longitude ?? coords.longitude_ ?? 0) && isInRamadan(date)) {
+    warnings.push({
+      severity: 'info',
+      prayer: null,
+      code: 'MOROCCO_RAMADAN_DST_GAP',
+      message: 'Morocco observes UTC+0 during Ramadan (vs UTC+1 the rest of the year). Modern Node (≥18) with up-to-date tzdata applies this exception correctly when displaying via the `Africa/Casablanca` timezone, but consumers on older Node, on stale tzdata, or applying custom date arithmetic may miss the offset and display times 60 minutes late. Verify your display layer applies Africa/Casablanca correctly for this date.',
+      astronomicalReference: null,
+      applied: null,
+      diffMinutes: null,
+      fix: 'Use Date.toLocaleString(\"...\", { timeZone: \"Africa/Casablanca\" }) on a Node ≥18 runtime to get the correct local-time rendering during Ramadan.',
+    })
+  }
 
   return warnings
 }

@@ -166,6 +166,35 @@ describe('Layer 4 validity warnings — critical checks (synthetic injection)', 
   })
 })
 
+describe('Layer 4 validity warnings — Morocco Ramadan DST gap (info, fajr#106)', () => {
+  it('fires for Casablanca during Ramadan 1447 (Mar 1 2026)', () => {
+    const t = prayerTimes({ latitude: 33.5769, longitude: -7.5473, date: new Date('2026-03-01T12:00:00Z') })
+    const w = t.validityWarnings.find(x => x.code === 'MOROCCO_RAMADAN_DST_GAP')
+    expect(w).toBeDefined()
+    expect(w.severity).toBe('info')
+    expect(w.prayer).toBeNull()
+    expect(w.fix).toBeDefined()
+  })
+
+  it('does NOT fire for Casablanca outside Ramadan', () => {
+    const t = prayerTimes({ latitude: 33.5769, longitude: -7.5473, date: TEST_DATE })  // May 5 = post-Ramadan
+    expect(t.validityWarnings.find(x => x.code === 'MOROCCO_RAMADAN_DST_GAP')).toBeUndefined()
+  })
+
+  it('does NOT fire for non-Morocco Ramadan calls (Cairo Mar 1 2026)', () => {
+    const t = prayerTimes({ latitude: 30.0444, longitude: 31.2357, date: new Date('2026-03-01T12:00:00Z') })
+    expect(t.validityWarnings.find(x => x.code === 'MOROCCO_RAMADAN_DST_GAP')).toBeUndefined()
+  })
+
+  it('fires for any Morocco coord during Ramadan (Marrakech, Tangier)', () => {
+    const ramadan = new Date('2026-03-15T12:00:00Z')
+    const marrakech = prayerTimes({ latitude: 31.6291, longitude: -8.0088, date: ramadan })
+    const tangier = prayerTimes({ latitude: 35.7595, longitude: -5.8331, date: ramadan })
+    expect(marrakech.validityWarnings.find(w => w.code === 'MOROCCO_RAMADAN_DST_GAP')).toBeDefined()
+    expect(tangier.validityWarnings.find(w => w.code === 'MOROCCO_RAMADAN_DST_GAP')).toBeDefined()
+  })
+})
+
 describe('Layer 4 validity warnings — schema integrity', () => {
   it('every warning has the required ValidityWarning shape', () => {
     const t = prayerTimes({ latitude: 64.1, longitude: -22.0, date: new Date('2026-06-21T12:00:00Z') })
