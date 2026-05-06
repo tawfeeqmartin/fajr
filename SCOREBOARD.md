@@ -19,7 +19,7 @@
 | JAKIM (via waktusolat.app) | 0.4548 | 0.0% | 🟢 stable |
 
 **Overall train WMAE:** 0.9757 min (215 entry-dates across 12 fixture files)
-**Holdout WMAE:** 8.3248 min (25354 entry-dates across 185 fixture files)
+**Holdout WMAE:** 7.3599 min (29004 entry-dates across 186 fixture files)
 
 > Holdout WMAE is reported for transparency only — it is never used to gate the ratchet.
 > A large holdout number (e.g. 8+ min) reflects low-quality third-party aggregators and
@@ -41,7 +41,7 @@
 
 - Cities in registry: **477**
 - Train fixtures: **12 files** / **215 entry-dates**
-- Holdout fixtures: **185 files** / **25354 entry-dates**
+- Holdout fixtures: **186 files** / **29004 entry-dates**
 
 ### Bug health
 
@@ -65,17 +65,17 @@
 
 | Version | Date | Train WMAE | Cities | Notes |
 |---------|------|------------|--------|-------|
+| v1.8.0 | 2026-05-05 | — | — | — |
 | v1.7.24 | 2026-05-05 | — | — | — |
 | v1.7.23 | 2026-05-05 | — | — | — |
 | v1.7.22 | 2026-05-04 | — | — | — |
 | v1.7.21 | 2026-05-03 | — | — | — |
-| v1.7.20 | 2026-05-03 | — | — | — |
 
 ---
 
 ## Trajectory verdict (rolling 30 days)
 
-**Rolling 30-day window (92 runs):**
+**Rolling 30-day window (93 runs):**
 - Train WMAE: 1.1667 → 0.9757 (-16.4%)
 - Direction: 📈 improving
 
