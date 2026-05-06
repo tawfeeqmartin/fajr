@@ -1,0 +1,161 @@
+{
+  "_schema": "Verified mapping from fajr Turkish registry cities to ezanvakti.emushaf.net city/district IDs. sehirID comes from /sehirler/2; ilceID comes from /ilceler/{sehirID}.",
+  "_source": "https://ezanvakti.emushaf.net/sehirler/2 and https://ezanvakti.emushaf.net/ilceler/{sehirID}",
+  "_verified": "2026-05-06 by fajr-codex against live API names and first returned vakitler row; Fajr sanity check was 0-1 min for all mapped cities.",
+  "cities": [
+    {
+      "fajrCity": "Adana",
+      "countryISO": "TR",
+      "sehirID": "500",
+      "sehirAdi": "ADANA",
+      "sehirAdiEn": "ADANA",
+      "ilceID": "9146",
+      "ilceAdi": "ADANA",
+      "ilceAdiEn": "ADANA",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Ankara",
+      "countryISO": "TR",
+      "sehirID": "506",
+      "sehirAdi": "ANKARA",
+      "sehirAdiEn": "ANKARA",
+      "ilceID": "9206",
+      "ilceAdi": "ANKARA",
+      "ilceAdiEn": "ANKARA",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Antalya",
+      "countryISO": "TR",
+      "sehirID": "507",
+      "sehirAdi": "ANTALYA",
+      "sehirAdiEn": "ANTALYA",
+      "ilceID": "9225",
+      "ilceAdi": "ANTALYA",
+      "ilceAdiEn": "ANTALYA",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Bursa",
+      "countryISO": "TR",
+      "sehirID": "520",
+      "sehirAdi": "BURSA",
+      "sehirAdiEn": "BURSA",
+      "ilceID": "9335",
+      "ilceAdi": "BURSA",
+      "ilceAdiEn": "BURSA",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Diyarbakir",
+      "countryISO": "TR",
+      "sehirID": "525",
+      "sehirAdi": "DİYARBAKIR",
+      "sehirAdiEn": "DIYARBAKIR",
+      "ilceID": "9402",
+      "ilceAdi": "DİYARBAKIR",
+      "ilceAdiEn": "DIYARBAKIR",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Eskisehir",
+      "countryISO": "TR",
+      "sehirID": "531",
+      "sehirAdi": "ESKİŞEHİR",
+      "sehirAdiEn": "ESKISEHIR",
+      "ilceID": "9470",
+      "ilceAdi": "ESKİŞEHİR",
+      "ilceAdiEn": "ESKISEHIR",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Gaziantep",
+      "countryISO": "TR",
+      "sehirID": "532",
+      "sehirAdi": "GAZİANTEP",
+      "sehirAdiEn": "GAZIANTEP",
+      "ilceID": "9479",
+      "ilceAdi": "GAZİANTEP",
+      "ilceAdiEn": "GAZIANTEP",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Istanbul",
+      "countryISO": "TR",
+      "sehirID": "539",
+      "sehirAdi": "İSTANBUL",
+      "sehirAdiEn": "ISTANBUL",
+      "ilceID": "9541",
+      "ilceAdi": "İSTANBUL",
+      "ilceAdiEn": "ISTANBUL",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Izmir",
+      "countryISO": "TR",
+      "sehirID": "540",
+      "sehirAdi": "İZMİR",
+      "sehirAdiEn": "IZMIR",
+      "ilceID": "9560",
+      "ilceAdi": "İZMİR",
+      "ilceAdiEn": "IZMIR",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Kayseri",
+      "countryISO": "TR",
+      "sehirID": "546",
+      "sehirAdi": "KAYSERİ",
+      "sehirAdiEn": "KAYSERI",
+      "ilceID": "9620",
+      "ilceAdi": "KAYSERİ",
+      "ilceAdiEn": "KAYSERI",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Konya",
+      "countryISO": "TR",
+      "sehirID": "552",
+      "sehirAdi": "KONYA",
+      "sehirAdiEn": "KONYA",
+      "ilceID": "9676",
+      "ilceAdi": "KONYA",
+      "ilceAdiEn": "KONYA",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Mersin",
+      "countryISO": "TR",
+      "sehirID": "557",
+      "sehirAdi": "MERSİN",
+      "sehirAdiEn": "MERSIN",
+      "ilceID": "9737",
+      "ilceAdi": "MERSİN",
+      "ilceAdiEn": "MERSIN",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Samsun",
+      "countryISO": "TR",
+      "sehirID": "566",
+      "sehirAdi": "SAMSUN",
+      "sehirAdiEn": "SAMSUN",
+      "ilceID": "9819",
+      "ilceAdi": "SAMSUN",
+      "ilceAdiEn": "SAMSUN",
+      "match": "exact-central-district"
+    },
+    {
+      "fajrCity": "Trabzon",
+      "countryISO": "TR",
+      "sehirID": "574",
+      "sehirAdi": "TRABZON",
+      "sehirAdiEn": "TRABZON",
+      "ilceID": "9905",
+      "ilceAdi": "TRABZON",
+      "ilceAdiEn": "TRABZON",
+      "match": "exact-central-district"
+    }
+  ]
+}

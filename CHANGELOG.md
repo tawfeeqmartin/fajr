@@ -52,6 +52,15 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   fixture-shaped JSON. It writes only when `--out` is supplied and supports
   `--from-file` / `--wayback-from` recovery for archived HTML.
 
+### Fixed — Diyanet city-ID mapping guardrail
+
+- Added `scripts/data/diyanet-ezanvakti-cities.json`, a verified mapping from
+  every bundled Turkish registry city to the correct ezanvakti `sehirID` and
+  central `ilceID`, addressing #102's broken guessed-ID failure mode.
+- Updated `scripts/fetch-diyanet.js` to consume the verified mapping, verify
+  live API names on request, and require `--out` / `--stdout` before widening
+  beyond the existing three-city train fixture.
+
 ### Honest caveats
 
 - Documentation and note-text cleanup only. The correction math and returned
@@ -63,6 +72,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   Moroccan cities, but Internet Archive recovery is sparse, so a dense two-year
   Morocco calibration corpus still needs recurring snapshots or another
   official historical source.
+- The Diyanet mapping fix does not promote a new yearly Turkiye fixture. It
+  prevents future bad fixture generation; curated fixture promotion still needs
+  a separate PR with cross-source spot checks.
 
 ## [1.8.0] — 2026-05-06
 
