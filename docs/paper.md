@@ -4,7 +4,10 @@
 
 *Independent Research, 2026*
 
-> **Last refreshed:** 2026-05-03 (v1.7.19). Headline numbers below now reflect the post-v1.7.16 state — **train WMAE 0.98 min** (broke the 1-minute barrier in v1.7.16 via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations) plus auto-elevation Maghrib bug fixed (issue #50), Umm al-Qura Hijri (issue #48), bbox false-positives fixed (issue #47), Maldives/Sri Lanka explicit Shafi Asr (issue #26). Pre-v1.7.6 baselines have been retired. The 1.55-min v1.0 milestone WMAE in Section 7 is preserved as a *historical* milestone; the live current WMAE is reported in [`docs/progress.md`](progress.md).
+> **Last refreshed:** 2026-05-06 (v1.8.0). This paper preserves the historical
+> Experiment 1-7 narrative and v1.0 milestone. The live current WMAE and corpus
+> counts are reported in [SCOREBOARD.md](../SCOREBOARD.md) and
+> [`docs/progress.md`](progress.md).
 >
 > **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration; 4 train institutions + 6 holdout institutions), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, the v1.7.x city registry (**477 cities across 168 countries**, post-v1.7.19) and offline `nearestCity` lookup — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
 
@@ -303,7 +306,13 @@ The dominant improvement occurred at Experiment 3 (−19.08 min), confirming tha
 
 **Weighted WMAE: 1.55 minutes** (v1.0 milestone — Aladhan-only calc-vs-calc consistency check across 18 cities)
 
-> **v1.7.19 update — post-v1.0 multi-source eval (live):** train WMAE **0.98 min** (215 entries across Aladhan / Diyanet / JAKIM / Mawaqit-Morocco institutional sources) — **broke the 1-minute barrier in v1.7.16** via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations. Holdout WMAE 3.62 min (2,980 entries across Aladhan / KEMENAG / MUIS / Mawaqit / praytimes.org / muslimsalat). Per-source breakdown: Mawaqit 0.88 (-42% from v1.7.15), JAKIM 0.45 (-22%), Aladhan 1.22 (unchanged — region-bounded targeting), Diyanet 0.50 (unchanged — region-bounded targeting). Per-prayer signed bias (train, calc − ground truth) is Fajr −0.25, Shuruq −0.33, Dhuhr +1.00, Asr +1.36, Maghrib +0.49, Isha +0.71 min — see [`docs/progress.md`](progress.md) for the live breakdown, regenerated each `npm run build:charts`. The post-v1.0 corpus is materially larger and more institutionally diverse than the v1.0 18-city Aladhan-only set, so the *number* is not directly comparable to the 1.55-min v1.0 milestone — but the methodology has hardened (Path A cross-source corroboration, per-source / per-prayer bias guards, train/holdout separation).
+> **Post-v1.0 multi-source eval note:** the live corpus is now materially larger
+> and more institutionally diverse than the v1.0 18-city Aladhan-only set, so
+> current WMAE is not directly comparable to the 1.55-min v1.0 milestone. The
+> methodology has hardened through Path A cross-source corroboration,
+> per-source / per-prayer bias guards, train/holdout separation, and generated
+> release-health reporting. See [SCOREBOARD.md](../SCOREBOARD.md) and
+> [`docs/progress.md`](progress.md) for the current numbers.
 
 ### 7.3 Per-City Accuracy
 

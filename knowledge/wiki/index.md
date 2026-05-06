@@ -54,7 +54,7 @@ See `../lint.md` for quality and consistency rules.
 
 | Article | Classification | Description |
 |---------|---------------|-------------|
-| [Elevation](corrections/elevation.md) | 🟡 Limited precedent | Dip angle correction for Shuruq/Maghrib; adhan.js implementation; per-prayer applicability |
+| [Elevation](corrections/elevation.md) | 🟡→🟢 Approaching established | Horizon-dip correction for Shuruq/Maghrib; current fajr behavior, institutional split, and open citation gaps |
 | [Atmospheric refraction](corrections/atmosphere.md) | 🟡 Limited precedent | Bennett formula with T/P: R × (P/1010) × (283/(273+T)); 0–2 min practical impact |
 | [Terrain horizon](corrections/terrain.md) | 🔴 Novel | DEM/SRTM horizon profiles; PVGIS API; 30–60 min shifts in mountain valleys; no Islamic precedent |
 

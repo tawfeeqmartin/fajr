@@ -177,7 +177,7 @@ describe('prayerTimes invariants', () => {
     // Advisory should mention the institutional disagreement explicitly
     expect(elevNote).toMatch(/UAE|JAKIM/)
     expect(elevNote).toMatch(/Saudi|Umm al-Qura/)
-    expect(elevNote).toMatch(/jama'ah/)
+    expect(elevNote).toMatch(/uniform city timetables/)
     expect(elevNote).toMatch(/612/)
     // High-elevation case scales up
     const sanaa = prayerTimes({ latitude: 15.3694, longitude: 44.1910, date: TEST_DATE, elevation: 2250 })

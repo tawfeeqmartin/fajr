@@ -88,7 +88,7 @@ knowledge/wiki/
 When proposing a change, cite the specific wiki page(s) that support it. Example:
 
 ```js
-// Elevation horizon correction — see knowledge/wiki/corrections/elevation-horizon.md
+// Elevation horizon correction — see knowledge/wiki/corrections/elevation.md
 // Classification: 🟢 Established
 const horizonDip = Math.sqrt(2 * elevation / EARTH_RADIUS_M) * (180 / Math.PI)
 ```

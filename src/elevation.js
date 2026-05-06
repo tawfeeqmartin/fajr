@@ -6,7 +6,7 @@
  * Corrections are tagged with scholarly classification per CLAUDE.md:
  *   🟢 Established | 🟡 Limited precedent | 🔴 Novel
  *
- * See knowledge/wiki/corrections/elevation-horizon.md for derivation and sources.
+ * See knowledge/wiki/corrections/elevation.md for derivation and sources.
  */
 
 const EARTH_RADIUS_M = 6_371_000

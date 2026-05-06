@@ -2875,8 +2875,8 @@ export function prayerTimes(params) {
     notes.push(
       `Elevation auto-resolved from city registry: ${loc.city.name}, ${loc.city.elevation}m` +
       ` → Maghrib +${dipMin.toFixed(1)} min later, Shuruq -${dipMin.toFixed(1)} min earlier vs sea-level.` +
-      ` Saudi/Umm al-Qura institutionally declines this correction; UAE (Burj Khalifa) + Malaysia JAKIM apply it.` +
-      ` To match Saudi convention, pass elevation: 0.`
+      ` Saudi/Umm al-Qura published city timetables are uniform; UAE (Burj Khalifa) + Malaysia apply elevation-aware guidance.` +
+      ` To match a uniform city timetable, pass elevation: 0.`
     )
   }
   if (methodSource === 'city-institutional') {
@@ -2917,8 +2917,8 @@ export function prayerTimes(params) {
       `significant — sun rises ~${dipMin.toFixed(1)} min EARLIER and Maghrib ` +
       `falls ~${dipMin.toFixed(1)} min LATER than at sea level. Institutional ` +
       `stances differ: UAE (Burj Khalifa fatwa, IACAD Dulook DXB) and Malaysia ` +
-      `JAKIM apply this correction; Saudi Arabia / Umm al-Qura declines it for ` +
-      `jama'ah unity. Because you passed a non-zero elevation, fajr's public ` +
+      `apply elevation-aware guidance, while Saudi Arabia / Umm al-Qura publishes ` +
+      `uniform city timetables. Because you passed a non-zero elevation, fajr's public ` +
       `\`prayerTimes\` wrapper has applied the correction (apply-stance default ` +
       `when elevation is supplied). To compute sea-level times instead, call ` +
       `again with \`elevation: 0\`. The app/user should choose based on local ` +
@@ -3110,11 +3110,10 @@ export function computeElevationDipMinutes(elevation, latitude = 0) {
  *
  * 🟡→🟢 Approaching established: Geometry is classical; institutional
  * precedent includes UAE Grand Mufti's Burj Khalifa fatwa (IACAD Dulook DXB
- * publishes floor-stratified times) and Malaysia JAKIM's systematic
- * topographic correction. Saudi Arabia / Umm al-Qura explicitly DECLINES
- * the correction, prioritising jama'ah unity (high-rise residents pray with
- * their city, not their floor). fajr leaves it OFF by default; pass through
- * this function to apply. See wiki/corrections/elevation.md.
+ * publishes floor-stratified times) and Malaysia elevation-aware guidance.
+ * Saudi Arabia / Umm al-Qura publishes uniform city timetables; no primary
+ * policy text explaining the rationale has been retrieved. See
+ * wiki/corrections/elevation.md.
  *
  * @param {object} times      Output from prayerTimes()
  * @param {number} elevation  Meters above sea level

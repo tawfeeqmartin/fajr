@@ -4,7 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Last refreshed: 2026-05-05
+Last refreshed: 2026-05-06
 
 `fajr` is an offline JavaScript library for Islamic prayer times, qibla, Hijri dates, and hilal visibility. It builds on [`adhan.js`](https://github.com/batoulapps/adhan-js), then adds:
 
@@ -18,7 +18,10 @@ Status: **v1.x public beta**. The API is usable and tested, but calculation defa
 
 Core docs:
 
+- [docs/positions.md](docs/positions.md) - canonical regional defaults and confidence grades.
+- [docs/known-disagreements.md](docs/known-disagreements.md) - where local authorities or valid methods differ.
 - [CALIBRATION.md](CALIBRATION.md) - accuracy methodology, ratchet rules, and current caveats.
+- [SCOREBOARD.md](SCOREBOARD.md) - generated release health, WMAE, coverage, and open-issue snapshot.
 - [docs/progress.md](docs/progress.md) - generated WMAE dashboard and trend charts.
 - [docs/data-sources.md](docs/data-sources.md) - source inventory and fixture-refresh status.
 - [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) - app-side integration guide for [A Gift of Time](https://agiftoftime.app).
@@ -64,6 +67,7 @@ console.log(times.notes)
 
   method: 'Morocco (19°/17° community calibration)',
   notes: [],
+  validityWarnings: [],
 
   location: {
     city: City | null,
@@ -83,7 +87,8 @@ console.log(times.notes)
   },
 
   corrections: {
-    elevation: false,
+    elevation: true,
+    elevationCorrectionMin: 0.59,
     refraction: 'standard (0.833°)',
     rounding: 'ihtiyat-aware per-prayer ...',
     imsak_offset_min: 10,
@@ -94,6 +99,10 @@ console.log(times.notes)
 ```
 
 Use `location.asrConvention` for local Asr-convention metadata and `applied.asrSchool` for the formula actually used. These are **not** a full legal-madhhab taxonomy: Morocco, for example, is Maliki, while its relevant Asr-convention value is `standard` 1x shadow. The older `location.madhab` / `applied.madhab` fields remain as deprecated aliases for v1.7.21 compatibility and should not be rendered as "local madhhab." In v1.7.22, Hanafi-convention countries can report `location.asrConvention: 'hanafi'` while keeping `applied.asrSchool: 'standard'` when the selected timetable method uses standard 1x Asr. When that mismatch matters, `notes[]` includes an Asr-convention advisory.
+
+For regional defaults, read [docs/positions.md](docs/positions.md). For areas
+where authorities or valid methods differ, read
+[docs/known-disagreements.md](docs/known-disagreements.md).
 
 For qiyam and night divisions, use `dayTimes()` or `nightThirds()`:
 
@@ -117,7 +126,7 @@ For everyday use, the defaults are designed to be practical and transparent. For
 
 1. Verify the resolved city and country.
 2. Check the calculation method, elevation stance, and Asr convention.
-3. Render `notes[]` and `disclaimer` in the app.
+3. Render `notes[]`, `validityWarnings[]`, and `disclaimer` in the app.
 4. Follow the local mosque or scholar when practice differs from the computed default.
 
 This is the same stance used by the reference downstream app, [A Gift of Time](https://agiftoftime.app). See [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) for the app-side integration checklist and provenance UX notes.
@@ -126,15 +135,16 @@ This is the same stance used by the reference downstream app, [A Gift of Time](h
 
 | Area | Current state |
 |---|---|
-| Repository version | `1.7.25` in `package.json`; published npm version may lag until release |
+| Repository version | `1.8.0` in `package.json`; published npm version may lag until release |
 | City/country dispatch | 477 cities, 168 countries |
 | Train eval | 215 entries, WMAE 0.9757 min |
-| Holdout eval | 2,980 entries, WMAE 3.6162 min |
-| Reference layers | Mawaqit, Diyanet, JAKIM, KEMENAG, MUIS, Aladhan, praytimes.org |
+| Holdout eval | 29,004 entries, WMAE 7.3599 min |
+| Reference layers | Mawaqit, Diyanet, JAKIM, KEMENAG, MUIS, Habous, Aladhan, praytimes.org |
 | Hilal validation | 78 documented committee decisions across 15 Hijri month onsets |
 | Runtime dependency | `adhan` only |
 
-Live eval details are generated in [docs/progress.md](docs/progress.md).
+Live release health is generated in [SCOREBOARD.md](SCOREBOARD.md). Detailed
+eval charts are generated in [docs/progress.md](docs/progress.md).
 
 ![WMAE over time](docs/charts/wmae-trend.svg)
 
@@ -179,7 +189,8 @@ For web/mobile apps:
 1. Request high-accuracy GPS when possible.
 2. Pass `latitude`, `longitude`, `date`, and a reliable `elevation` if the platform provides one.
 3. Render the returned `location`, `applied`, `notes`, and `disclaimer` in a "why this time?" sheet.
-4. Let users override method/elevation/Asr convention when their local mosque differs.
+4. Render `validityWarnings[]` prominently when any entry has `severity: 'critical'`.
+5. Let users override method/elevation/Asr convention when their local mosque differs.
 
 ```js
 import { prayerTimes, nearestCity } from '@tawfeeqmartin/fajr'
@@ -200,6 +211,7 @@ renderPrayerCard({
   prayers: times,
   provenance: times.applied,
   notes: times.notes,
+  warnings: times.validityWarnings,
   disclaimer: times.disclaimer,
 })
 ```
@@ -255,7 +267,10 @@ Hilal output is astronomical possibility, not a religious ruling. See [docs/hila
 
 | Need | Read |
 |---|---|
+| What fajr does by default in each region | [docs/positions.md](docs/positions.md) |
+| Where valid authorities or practices differ | [docs/known-disagreements.md](docs/known-disagreements.md) |
 | Accuracy and ratchet methodology | [CALIBRATION.md](CALIBRATION.md) |
+| Current release health | [SCOREBOARD.md](SCOREBOARD.md) |
 | Generated eval dashboard | [docs/progress.md](docs/progress.md) |
 | Integration in A Gift of Time | [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) |
 | Source inventory | [docs/data-sources.md](docs/data-sources.md) |

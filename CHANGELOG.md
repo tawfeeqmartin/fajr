@@ -24,6 +24,31 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ---
 
+## [Unreleased]
+
+### Changed — documentation doctrine cleanup
+
+- Added [docs/positions.md](docs/positions.md), a compact registry for the
+  regional default that fajr applies, the confidence grade behind it, and the
+  end-user wording downstream apps should prefer.
+- Added [docs/known-disagreements.md](docs/known-disagreements.md) so active
+  ikhtilaf, institutional splits, and source-quality gaps are surfaced in one
+  place instead of being buried in calibration prose.
+- Rewrote [knowledge/wiki/corrections/elevation.md](knowledge/wiki/corrections/elevation.md)
+  from an accumulated research log into a clear position page: Shuruq/Sunrise
+  and Maghrib/Sunset only, current fajr behavior first, evidence summary
+  second, and Saudi uniform-city practice labeled carefully as a citation gap
+  rather than overclaimed as a formal rejection.
+- Updated README and CALIBRATION links so users and other agents can find the
+  new doctrine layer before diving into raw evidence.
+
+### Honest caveats
+
+- Documentation and note-text cleanup only. The correction math and returned
+  prayer Date instants are unchanged.
+- The public `notes[]` wording around Saudi elevation practice is softened to
+  avoid overclaiming a primary policy rationale that has not yet been retrieved.
+
 ## [1.8.0] — 2026-05-06
 
 ### Added — Layer 4 fiqh-validity warnings (#101, #106)
