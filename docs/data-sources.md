@@ -244,6 +244,25 @@ JAKIM (Department of Islamic Development Malaysia) is the federal Islamic author
 
 ---
 
+## Institutional reference sources — methods fajr dispatches but doesn't yet sample
+
+These are the named publishers of calculation methods fajr's `selectMethod()` already dispatches to. Listed here per fajr#109 (agot-claude) so the citation chain from "fajr method name" → "scientific publisher" is explicit even where fajr doesn't yet have an automated fixture pipeline pulling from them.
+
+| Country | Method fajr dispatches | Authoritative publisher | URL | Notes |
+|---|---|---|---|---|
+| **Saudi Arabia** | `UmmAlQura` | **General Presidency for the Affairs of the Two Holy Mosques** (الرئاسة العامة) | [gph.gov.sa](https://gph.gov.sa) | Official prayer times for Masjid al-Haram (Mecca) + Al-Masjid an-Nabawi (Madinah). The most-watched prayer times in the world (livestreamed Tarawih during Ramadan, Hajj season throughout Dhul Hijjah). The 2-city Mecca + Madinah holdout is the highest-stakes institutional ground truth fajr could sample. |
+| **Saudi Arabia** | hijri (Umm al-Qura) | **Umm al-Qura Calendar — Saudi Royal Court / KACST** | [ummulqura.org.sa](https://www.ummulqura.org.sa) | The official Saudi Hijri calendar, scientifically backed by King Abdulaziz City for Science and Technology (KACST). **The publisher** of the Umm al-Qura calendar fajr's `hijri()` function uses by default. (IslamicFinder, used in v1.7.6 #48 hijri validation, **relays** UAQ but isn't the source — `ummulqura.org.sa` is the canonical citation going forward.) |
+| **Saudi Arabia** | (cross-Saudi prayer-time methodology) | **Ministry of Islamic Affairs, Da'wah and Guidance (MoIA)** | [moia.gov.sa](https://www.moia.gov.sa) | Institutional dispatch for prayer-time conventions across all Saudi mosques (Riyadh, Jeddah, Dammam, etc., beyond the Two Holy Mosques). Source for the well-documented *"Saudi Arabia institutionally declines elevation correction for jama'ah unity"* stance fajr already cites in `notes[]`. |
+| **UAE** | (UAE-specific elevation stance) | **IACAD — Islamic Affairs and Charitable Activities Department, Dubai** | [iacad.gov.ae](https://www.iacad.gov.ae) | Publisher of the Burj Khalifa floor-stratified elevation fatwa (Dr. Ahmed Al Haddad, IACAD Grand Mufti) that fajr cites for the 🟡→🟢 elevation correction classification. UAE-specific institutional reference. |
+| **Egypt** | `Egyptian` (19.5°/17.5°) | **General Authority for Survey (GAS / ESA)** | [esa.gov.eg](http://www.esa.gov.eg) | Publisher of the Egyptian General method that fajr's `Egyptian` dispatch reproduces. fajr's `scripts/fetch-egypt-esa.js` attempted a direct scrape; the ESA portal is JS-rendered (VIEWSTATE form) so raw HTTP scrape failed. The institutional reference stays valid even though the automated fetch path is blocked. |
+| **Iran** | `Tehran` (17.7°/14°) | **Institute of Geophysics, University of Tehran** | [geophysics.ut.ac.ir](https://geophysics.ut.ac.ir) | Source of the Tehran method fajr dispatches for Iran. The Institute publishes the angle pair adhan.js and fajr both use under `Tehran`. |
+| **Pakistan** | `Karachi` (18°/18°) | **University of Islamic Sciences, Karachi** (institutional reference; no canonical web URL) | (institutional only) | Source of the Karachi 18°/18° method fajr dispatches for Pakistan + cluster countries (Bangladesh, Afghanistan, Maldives, Sri Lanka per cluster-method conventions). |
+| **Morocco** | `Morocco` (19°/17° + Path A buffers) | **Ministry of Habous and Islamic Affairs (Habous)** | [habous.gov.ma](https://www.habous.gov.ma) | Already cross-validated by fajr#103 multi-season corpus (32 cities × 3 seasons × 6,660 cells, mean abs bias < 1 min). Habous publishes the official Imsakiyya at `horaire_hijri_2.php` per fajr-codex's PR #98 tooling. |
+
+These cells are documented as institutional references rather than as committed fixtures because not every publisher exposes a clean fetchable endpoint. Where a fetcher exists (Habous via PR #98 tooling, MUIS via data.gov.sg, KEMENAG via bimasislam, JAKIM via waktusolat proxy, Diyanet via ezanvakti), the corresponding cell appears in the institutional-fixture sections above. Where no clean fetch exists (Saudi GPH, Saudi UAQ, Egypt ESA's JS-rendered form, Tehran institutional site, Karachi University), the institutional reference is named here with the canonical URL so the citation chain is complete.
+
+---
+
 ## Calculation-method consensus — Aladhan (n = 17 train cities + 145 country fixtures)
 
 [Aladhan API](https://aladhan.com) is an independent JS implementation of the same calculation methods fajr auto-detects. Its agreement with fajr is a *consistency check* (we're applying the formulas correctly), not an *accuracy claim* (we match what mosques publish). Both used as train-corpus stability anchors and as a holdout coverage backbone.
