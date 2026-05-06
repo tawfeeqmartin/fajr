@@ -1018,73 +1018,76 @@ const COUNTRY_ASR_CONVENTION = {
 function selectMethod(country, lat, coords) {
   switch (country) {
     case 'Morocco': {
-      // Ministry of Habous (community-calibrated): Fajr 19°, Isha 17°,
-      // Standard Asr, plus +5min Maghrib ihtiyati per v1.5.0 Path A and
-      // +5min Dhuhr ihtiyati per v1.7.16 Path A.
-      // See knowledge/wiki/methods/morocco.md and knowledge/wiki/regions/morocco.md.
+      // v1.7.25 — Empirical re-validation against the Habous Ministry direct
+      // API (habous.gov.ma/prieres/horaire-api.php) confirmed that the v1.5.0
+      // +5 Maghrib and v1.7.16 +5 Dhuhr Path A buffers were already tracking
+      // Habous's OWN ministerial Imsakiyya, not just mosque-aggregated Mawaqit
+      // reality. The 12-city Habous fixture (eval/data/test/morocco-habous.json)
+      // shows that calc 19°/17° WITHOUT buffers lags Habous by:
       //
-      // Classification: 🟡→🟢 (community calibration; matches mosque-published
-      // reality across 18+ Moroccan zones).
+      //   fajr: +0.92    dhuhr: -4.83    asr: +0.25
+      //   maghrib: -5.25 isha: +0.08     (mean bias, n=12)
+      //
+      // i.e. Habous publishes Dhuhr ~5 min after astronomical noon AND Maghrib
+      // ~5 min after astronomical sunset — the muwaqqit-tradition zawal-
+      // and sunset-ihtiyati that Moroccan ministerial astronomy bakes into
+      // its published Imsakiyya. The Mawaqit corpus (15K+ rows, mean Maghrib
+      // bias +0.76 min when calc has the +5 buffer) and the Habous corpus
+      // therefore AGREE on the +5 calibration — there is no Mawaqit/Habous
+      // ikhtilaf to surface; the +5 IS the institutional position.
+      //
+      // A v1.7.25 prep-flip to "Habous-aligned without buffers" was rolled
+      // back when this empirical check showed the flip would drift AWAY from
+      // Habous (and Mawaqit) by ~5 min on Dhuhr/Maghrib — prayer-validity-
+      // unsafe (truncating the prayer window) and institutionally MIS-aligned.
+      //
+      // The proposed 'MoroccoMawaqit' and 'MoroccoHabous' method-strings
+      // were dropped pre-merge: cross-season verification (autoresearch
+      // 2026-05-05-habous-multi-season-verification.md, 6,660 cells across
+      // 32 cities × 3 seasons) confirmed the two would have returned identical
+      // calc to the country default, making the aliases scaffolding without
+      // empirical justification. Apps can label "Habous" or "Mawaqit" in
+      // their UX over the same canonical Morocco stance.
+      //
+      // Mode summary:
+      //   Default (no `method:` passed): 19°/17° + +5 Maghrib + +5 Dhuhr
+      //                                  (canonical, matches Habous + Mawaqit
+      //                                  within ~1 min year-round across 32 cities)
+      //
+      // Classification: 🟡→🟢 (Approaching established — Path A community
+      // calibration cross-validated against ministerial Habous direct API +
+      // 18 Mawaqit mosque corpus + Wayback historical Habous winter coverage;
+      // same +5 baked into all institutional sources).
       //
       // FAJR 19° (v1.0): The formal Ministry-stated angle is 18° but the
       // published Imsakiyya is best reproduced by 19°. Empirically corroborated
-      // by the 5-mosque Mawaqit Morocco subset shipped in v1.0.
+      // by the 12-city Habous Direct API fixture (mean Fajr bias +0.92 min
+      // vs Habous, well within 1 min) and 18-mosque Mawaqit corpus.
       //
-      // MAGHRIB +5min (v1.5.0): Expanded Mawaqit corpus to 18 Moroccan mosques
-      // across all major regions (north: Tanger/Nador; east: Oujda; interior:
-      // Fes/Meknes/Taza/Khouribga/Settat; coast: Sale/Kenitra/Safi/Essaouira/
-      // Agadir/Taroudant; KEY high-elevation: Ouarzazate 1135m, Errachidia
-      // 1037m). The eval per-cell signed-bias (calc − ground truth) shows
-      // fajr's calc Maghrib consistently 4-7 minutes EARLIER than what
-      // Moroccan mosques publish (per-cell biases negative, mean −5.0 min):
+      // MAGHRIB +5min (v1.5.0): The eval per-cell signed-bias (calc − ground
+      // truth) shows fajr's calc Maghrib is consistently ~5 min EARLIER than
+      // both Mawaqit (-4.96 mean across 25 train cells) and Habous (-5.25
+      // mean across 12 fixture cells). Adding +5 closes both biases. Prayer-
+      // validity-safer (Maghrib LATER eliminates pre-sunset risk) and
+      // fasting-neutral (Maghrib doesn't gate fasting).
       //
-      //   Casablanca: -5     Tanger:  -4     Settat:    -7
-      //   Rabat:      -4     Nador:   -4     Khouribga: -7
-      //   Marrakech:  -6     Fes:    (sim)   Taza:      -7
-      //   Sale:       -5     Meknes:  -6     Oujda:     -7
-      //   Kenitra:    -5     Safi:    -4     Ouarzazate: -7
-      //   Essaouira:  -4     Agadir:  -5     Errachidia: -7
-      //
-      // To CLOSE the bias (move calc LATER to match mosque-published), add
-      // +5 minutes to Maghrib via methodAdjustments. This is fasting-neutral
-      // (Maghrib doesn't gate fasting) and prayer-validity-safer (Maghrib
-      // LATER eliminates any pre-sunset risk; mosques publish later because
-      // they wait for the sun's disc to FULLY clear the horizon plus a
-      // small ihtiyati margin — consistent with classical fiqh requiring
-      // certainty the sun has set).
-      //
-      // DHUHR +5min (v1.7.16 — this commit): The same Mawaqit corpus shows
-      // fajr's calc Dhuhr is consistently 4-6 minutes EARLIER than what
-      // Moroccan mosques publish (per-cell biases negative, mean −4.80 min
-      // across 25 fixture cells, range [-4, -6]):
-      //
-      //   Casablanca: -5     Tanger:    -5     Settat:    -6
-      //   Rabat:      -5     Nador:     -4     Khouribga: -5
-      //   Marrakech:  -4     Oujda:     -5     Taza:      -5
-      //   Sale:       -4     Fes:       -4/-5  Ouarzazate: -5
-      //   Kenitra:    -4     Meknes:    -4     Errachidia: -5
-      //   Safi:       -5     Essaouira: -5     Agadir:    -5
-      //   Taroudant:  -6
-      //
-      // The bias is uniform across all 25 cells (no outliers, no per-region
-      // variance > 1 min). This is a Habous Path A signature: the institution
-      // adds ~5 min to Dhuhr as zawal-ihtiyati — ensuring prayer starts
-      // unambiguously AFTER the sun crosses the meridian, per classical
-      // Maliki/Sunni jurisprudence requiring certainty (yaqeen) that solar
-      // zenith has passed before initiating Dhuhr.
-      //
-      // The change is prayer-validity-safer (Dhuhr LATER = unambiguously
-      // post-zenith) and aligns calc with published Mawaqit reality
-      // across all 18 cities. Same Path A precedent class as v1.5.0
-      // Maghrib +5; same scholarly classification (🟡→🟢 Approaching
-      // established).
+      // DHUHR +5min (v1.7.16): Same Path A signature on Dhuhr — consistent
+      // -5 min bias against both Mawaqit (mean -4.80 across 25 cells) and
+      // Habous (mean -4.83 across 12 cells). Habous bakes in zawal-ihtiyati
+      // ensuring prayer starts unambiguously AFTER solar zenith, per
+      // classical Maliki/Sunni jurisprudence requiring yaqeen (certainty).
       //
       // Per CLAUDE.md ratchet rule 5, eval/data/train/morocco.json (Aladhan
       // custom-method-99 calc-vs-calc reproduction of 19°/17° without the
-      // Maghrib offset) is moved to test/ in v1.5.0 since it represents
+      // Maghrib offset) was moved to test/ in v1.5.0 since it represents
       // calc-vs-calc consensus rather than institutional ground truth.
-      // Mawaqit Morocco mosques in eval/data/test/mawaqit.json provide the
-      // institutional grounding signal.
+      // Mawaqit Morocco mosques in eval/data/test/mawaqit.json + the new
+      // eval/data/test/morocco-habous.json (Habous direct API) provide the
+      // institutional grounding signal cross-validating the +5 buffers.
+      //
+      // See knowledge/wiki/methods/morocco.md and knowledge/wiki/regions/
+      // morocco.md for full Path A history (v1.0 → v1.5.0 → v1.7.16 → v1.7.25
+      // empirical re-validation).
       const p = adhan.CalculationMethod.Other()
       p.fajrAngle = 19
       p.ishaAngle = 17
@@ -2592,13 +2595,16 @@ function methodFromString(name, country, lat, _coords) {
       return { params: p, methodName: 'Russia (DUMR, 16°/15° + TwilightAngle)' }
     }
     case 'Morocco': {
-      // Path A community calibration: 19°/17° + +5min Maghrib ihtiyati.
+      // v1.7.25: Aligned with the flipped country default — Habous-aligned
+      // ministerial astronomical (no +5 buffers). Pre-v1.7.25 this case
+      // returned the v1.5.0 +5 Maghrib Path A buffer; that behavior now
+      // requires explicit `method: 'MoroccoMawaqit'` (which also re-applies
+      // the v1.7.16 +5 Dhuhr buffer for full mosque-published parity).
       // Same logic as selectMethod's Morocco branch — kept in sync.
       const p = adhan.CalculationMethod.Other()
       p.fajrAngle = 19
       p.ishaAngle = 17
-      p.methodAdjustments = { ...(p.methodAdjustments || {}), maghrib: 5 }
-      return { params: p, methodName: 'Morocco (19°/17° + +5min Maghrib ihtiyati)' }
+      return { params: p, methodName: 'Morocco (19°/17°, Habous-aligned ministerial astronomical)' }
     }
     case 'Tunisia': {
       const p = adhan.CalculationMethod.Other()

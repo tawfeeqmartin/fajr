@@ -276,13 +276,17 @@ describe('Path A calibration regression', () => {
     expect(r.method).not.toMatch(/Path A|ihtiyati|Malaysia/i)
   })
 
-  it('Morocco — community-calibrated 19° (v1.0 Path A predecessor)', () => {
-    // The Morocco 19° community calibration is the original Path A
-    // case shipped in v1.0 — included here for completeness so future
-    // refactors don't accidentally remove it.
-    const r = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
-    expect(r.method).toMatch(/Morocco.*19/i)
-    expect(r.method).toMatch(/community.*calibration/i)
+  it('Morocco — country default applies v1.5.0 + v1.7.16 Path A buffers (canonical, single-stance)', () => {
+    // The v1.5.0/v1.7.16 +5 Maghrib + +5 Dhuhr Path A buffers are empirically
+    // the institutional position across BOTH Mawaqit (mosque-published) and
+    // Habous (real published Imsakiyya from horaire_hijri_2.php). Cross-season
+    // verification (autoresearch/proposals/2026-05-05-habous-multi-season-
+    // verification.md): 6,660 cells across 32 cities × 3 seasons confirm
+    // < 1 min mean abs Habous-vs-Mawaqit agreement. There is no institutional
+    // ikhtilaf for fajr to surface; Morocco is a single canonical stance.
+    const def = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
+    expect(def.method).toMatch(/Morocco.*19/i)
+    expect(def.method).toMatch(/ihtiyati|Path A|\+5/i)
   })
 })
 

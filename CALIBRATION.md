@@ -1,6 +1,6 @@
 # fajr — accuracy + scholarly methodology
 
-Last refreshed: 2026-05-05 (v1.7.24)
+Last refreshed: 2026-05-05 (v1.7.25)
 
 ## What this document is
 
@@ -37,6 +37,38 @@ the top of this file always reflects the most recent version on npm.
 > dishonest, but they should not be read as fajr's accuracy claim. See
 > [Per-region accuracy](#per-region-accuracy-current-post-v1719) for the
 > breakdown.
+
+> **🟢 Audit closure (2026-05-05) — Morocco Path A empirically validated
+> year-round.** A 2026-05-05 audit revealed that fajr's Mawaqit-anchored
+> train + test fixtures were single-day snapshots, leaving the v1.5.0
+> Morocco Maghrib +5 and v1.7.16 Morocco Dhuhr +5 calibrations
+> empirically presumed but unvalidated seasonally. **The audit-gap is
+> now closed for Morocco**: a yearly Mawaqit corpus was built (42
+> Moroccan mosques × 366 days = 15,372 rows; corrupt rows filtered to
+> 15,164) via the new `scripts/fetch-mawaqit-yearly.js` extracting each
+> mosque page's embedded full-year calendar. Re-validation result:
+>
+> | Prayer | Mean bias (full year) | MAE | Verdict |
+> |---|---|---|---|
+> | Fajr | +0.61 | 3.62 | within tolerance |
+> | Sunrise | -1.38 | 4.38 | within tolerance |
+> | **Dhuhr** | **-0.15** | **1.51** | **v1.7.16 +5 Path A empirically perfect year-round** |
+> | Asr | -1.16 | 2.92 | within tolerance |
+> | **Maghrib** | **+0.76** | **5.46** | **v1.5.0 +5 Path A empirically correct year-round** (mean near-zero; ±4-5 min seasonal swing within ihtiyat tolerance) |
+> | Isha | -1.06 | 3.52 | within tolerance |
+>
+> **What remains audit-open**: same yearly-fetch + seasonal validation
+> still owes for the other Mawaqit-anchored corpora (France, Malaysia
+> via JAKIM, UK / London, etc.) and for the Diyanet / KEMENAG / MUIS
+> institutional sources. Tracked in fajr#99. Until those land, those
+> source-specific accuracy claims remain "verified accurate FOR a
+> specific day, presumed accurate year-round."
+>
+> **Side-finding**: 1.4% (208/15,372) of Morocco Mawaqit yearly rows
+> were structurally implausible (12h/24h format leaks, stale-year
+> entries) — a few mosque pages have corrupt embedded calendars even
+> though their daily live page is correct. The analyzer filters these
+> out; tracked for future data-quality follow-up.
 
 ---
 
