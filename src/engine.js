@@ -14,6 +14,7 @@
 
 import * as adhan from 'adhan'
 import citiesRegistry from './data/cities.json' with { type: 'json' }
+import { computeValidityWarnings } from './validity.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPERIMENT 1: Regional method auto-selection
@@ -3063,6 +3064,23 @@ export function prayerTimes(params) {
     // `corrections.elevationCorrectionMin` — `location` and `notes` survive
     // because applyElevationCorrection spreads `times` into a new object.
   }
+
+  // ── v1.8.0 Layer 4 (#101): fiqh-validity warnings.
+  //
+  // Always-on machine-readable signals when returned times violate astronomical
+  // or fiqh windows. Catches MAGHRIB_BEFORE_SUNSET (the fajr#100 motivating
+  // case), FAJR_AFTER_SHURUQ, ASR window violations, DHUHR_BEFORE_SOLAR_NOON,
+  // and the 12° absolute floors for Fajr/Isha. Polar regions emit
+  // POLAR_NO_SUNSET / POLAR_NO_SUNRISE as critical.
+  // see autoresearch/proposals/2026-05-05-layer-4-validity-warnings-design.md
+  // Classification: 🟢 Established — checks are shar'i window definitions.
+  result.validityWarnings = computeValidityWarnings({
+    rawTimes: times,
+    result,
+    params: params_,
+    coords,
+    date,
+  })
 
   return result
 }
