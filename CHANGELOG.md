@@ -54,6 +54,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added `test/habousMoroccoFixture.test.js`, a focused holdout gate that keeps
   fajr's Morocco five-prayer output close to the official Habous monthly city
   fixture and validates the fixture source metadata.
+- Added a scheduled Morocco Habous snapshot workflow that opens review PRs with
+  future official monthly table captures under `fixtures/habous-morocco/`.
 
 ### Fixed — Diyanet city-ID mapping guardrail
 
@@ -79,6 +81,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   the five prayer times and treats Sunrise as loose source sanity only because
   Moroccan published Sunrise can encode mosque-practice ihtiyat rather than a
   pure astronomical calculation.
+- Scheduled Habous captures are source snapshots only. Promotion into
+  `eval/data/` remains a separate curated fixture PR.
 - The Diyanet mapping fix does not promote a new yearly Turkiye fixture. It
   prevents future bad fixture generation; curated fixture promotion still needs
   a separate PR with cross-source spot checks.

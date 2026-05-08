@@ -1,0 +1,133 @@
+# بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+# Bismillah ir-Rahman ir-Rahim
+#
+# Captures Morocco Habous current Hijri-month city tables before the live
+# endpoint rolls over. The workflow opens a review PR with a source snapshot
+# under fixtures/, not eval/data. Promotion into eval remains a separate human
+# review step.
+
+name: Morocco Habous monthly snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Hijri months do not align with Gregorian months. Run three times/month so
+    # each official monthly table is likely captured before Habous rolls over.
+    - cron: '17 5 5,15,25 * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: habous-morocco-snapshot
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch current Habous monthly table
+        run: |
+          set -euo pipefail
+          mkdir -p fixtures/habous-morocco/monthly /tmp/habous
+          node scripts/fetch-habous-morocco-month.js \
+            --allow-insecure-habous-cert \
+            --out /tmp/habous/current.json
+
+      - name: Normalize snapshot path
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+
+          const input = '/tmp/habous/current.json'
+          const fixtures = JSON.parse(readFileSync(input, 'utf8'))
+          if (!Array.isArray(fixtures) || fixtures.length === 0) {
+            throw new Error('Habous monthly snapshot did not produce fixture rows')
+          }
+
+          const dates = fixtures
+            .flatMap(fixture => (fixture.dates || []).map(row => row.date))
+            .sort()
+          if (dates.length === 0) {
+            throw new Error('Habous monthly snapshot did not contain dated rows')
+          }
+
+          const start = dates[0]
+          const end = dates[dates.length - 1]
+          const outPath = `fixtures/habous-morocco/monthly/${start}_to_${end}.json`
+
+          if (!existsSync(outPath)) {
+            writeFileSync(outPath, `${JSON.stringify(fixtures, null, 2)}\n`)
+          }
+
+          writeFileSync(process.env.GITHUB_ENV, [
+            `HABOUS_SNAPSHOT_PATH=${outPath}`,
+            `HABOUS_SNAPSHOT_START=${start}`,
+            `HABOUS_SNAPSHOT_END=${end}`,
+            `HABOUS_SNAPSHOT_ROWS=${dates.length}`,
+            '',
+          ].join('\n'), { flag: 'a' })
+          NODE
+
+      - name: Validate snapshot tests
+        run: npm test
+
+      - name: Open snapshot PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- fixtures/habous-morocco/monthly; then
+            echo "No new Habous monthly snapshot to commit."
+            exit 0
+          fi
+
+          branch="automation/habous-morocco-${HABOUS_SNAPSHOT_START}-to-${HABOUS_SNAPSHOT_END}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add "$HABOUS_SNAPSHOT_PATH"
+          git commit -m "data(morocco): capture Habous monthly snapshot ${HABOUS_SNAPSHOT_START} to ${HABOUS_SNAPSHOT_END}"
+          git push --force-with-lease origin "$branch"
+
+          existing="$(gh pr list --head "$branch" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "Snapshot PR already exists: #$existing"
+            exit 0
+          fi
+
+          cat > /tmp/habous-snapshot-pr-body.md <<EOF
+          Automated Habous Morocco monthly snapshot.
+
+          - Source: Ministry of Habous current Hijri-month city tables
+          - Date range: ${HABOUS_SNAPSHOT_START} to ${HABOUS_SNAPSHOT_END}
+          - Rows: ${HABOUS_SNAPSHOT_ROWS} dated prayer rows
+          - Output: \`${HABOUS_SNAPSHOT_PATH}\`
+
+          This stores source evidence under \`fixtures/\` only. Promotion into
+          \`eval/data/\` remains a separate curated PR.
+
+          Refs #92.
+          Refs #103.
+          EOF
+
+          gh pr create \
+            --base master \
+            --head "$branch" \
+            --title "data(morocco): capture Habous monthly snapshot ${HABOUS_SNAPSHOT_START} to ${HABOUS_SNAPSHOT_END}" \
+            --body-file /tmp/habous-snapshot-pr-body.md
