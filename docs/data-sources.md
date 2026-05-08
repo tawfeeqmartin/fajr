@@ -111,6 +111,10 @@ Snapshot tooling:
   `https://www.habous.gov.ma/prieres/horaire_hijri_2.php?ville={id}` into
   fixture-shaped JSON. It prints to stdout by default and writes only when
   `--out` is supplied.
+- [`.github/workflows/habous-morocco-snapshot.yml`](../.github/workflows/habous-morocco-snapshot.yml)
+  runs recurring captures and opens review PRs with new source snapshots under
+  [`fixtures/habous-morocco/`](../fixtures/habous-morocco/). These are archived
+  evidence, not automatic eval fixtures.
 - The 2026-05-05 probe produced 990 current-month rows across the 33 mapped
   Moroccan cities. Internet Archive recovery was useful but sparse: 7
   Rabat/default monthly snapshots and 3 Casablanca snapshots. That supports
@@ -138,6 +142,7 @@ Raw/source locations:
 - `eval/data/test/morocco-habous.json`
 - `scripts/data/habous-morocco-cities.json`
 - `scripts/data/mawaqit-mosques.json`
+- `fixtures/habous-morocco/`
 - `scripts/fetch-morocco-habous.js`
 - `scripts/fetch-habous-morocco-month.js`
 - `scripts/fetch-mawaqit.js`
