@@ -1,6 +1,6 @@
 # Data Sources
 
-Last refreshed: 2026-05-06
+Last refreshed: 2026-05-08
 
 This page explains what fajr validates against, how each source should be
 trusted, and where the raw source details live. It is not the source of truth
@@ -142,9 +142,9 @@ Raw/source locations:
 - `eval/data/test/morocco-habous.json`
 - `scripts/data/habous-morocco-cities.json`
 - `scripts/data/mawaqit-mosques.json`
-- `scripts/data/city-geometry-sources.json` (planned source map for
-  reviewed external geometry IDs; see
-  [city geometry audit](city-geometry-audit.md))
+- `scripts/data/city-geometry-sources.json` (candidate source map for reviewed
+  external geometry IDs; stores stable IDs and cache pointers only, with raw
+  geometry kept outside git/npm; see [city geometry audit](city-geometry-audit.md))
 - `fixtures/habous-morocco/`
 - `scripts/fetch-morocco-habous.js`
 - `scripts/fetch-habous-morocco-month.js`

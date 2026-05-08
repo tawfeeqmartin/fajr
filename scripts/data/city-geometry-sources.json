@@ -1,0 +1,402 @@
+{
+  "$schema_doc": "Build-time source map for auditing src/data/cities.json city bboxes. This file stores stable external IDs, review state, authority IDs, and cache pointers only. Raw geometry stays outside git/npm in .cache/city-geometry.",
+  "version": 1,
+  "updated": "2026-05-08",
+  "issue": 118,
+  "cacheRoot": ".cache/city-geometry",
+  "providers": {
+    "osm": {
+      "name": "OpenStreetMap administrative boundary",
+      "stableIdFormat": "osm:relation:{id}",
+      "license": "ODbL",
+      "defaultUse": "audit-only-until-license-review",
+      "notes": [
+        "Store OSM relation IDs only; never store Nominatim place_id.",
+        "Raw OSM geometry and derived bbox edits require license review before shipping in the MIT package."
+      ]
+    },
+    "wof": {
+      "name": "Who's On First / Geocode Earth",
+      "stableIdFormat": "wof:{placetype}:{id}",
+      "license": "Who's On First License with row-level upstream attribution caveats",
+      "defaultUse": "audit-and-reviewed-bbox-proposal"
+    },
+    "official": {
+      "name": "Official local or national boundary source",
+      "stableIdFormat": "provider-specific",
+      "license": "provider-specific",
+      "defaultUse": "preferred-when-license-reviewed"
+    }
+  },
+  "cities": [
+    {
+      "cityKey": "Rabat|MA",
+      "priority": ["phase-1-morocco", "habous", "rabat-metro"],
+      "relatedAuthorityIds": { "habousVilleId": 1, "habousMatch": "direct" },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["Morocco phase-1 row. Habous ID is prayer-time provenance, not geometry."]
+      },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2799215",
+          "ids": { "osmRelationId": 2799215, "adminLevel": 8, "wikidata": "Q3551", "refMAHCP": "04.421.01.0" },
+          "cacheFile": "MA/rabat/osm-relation-2799215.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Sale|MA",
+      "priority": ["phase-1-morocco", "habous", "rabat-metro", "nearest-official-city"],
+      "relatedAuthorityIds": { "habousVilleId": 1, "habousMatch": "nearest-official-city" },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["Habous maps Sale to Rabat; geometry audit should keep the Sale city bbox distinct."]
+      },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2801066",
+          "ids": { "osmRelationId": 2801066, "adminLevel": 8, "wikidata": "Q466046", "refMAHCP": "04.441.01.0" },
+          "cacheFile": "MA/sale/osm-relation-2801066.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Temara|MA",
+      "priority": ["phase-1-morocco", "habous", "rabat-metro", "nearest-official-city"],
+      "relatedAuthorityIds": { "habousVilleId": 1, "habousMatch": "nearest-official-city" },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["Habous maps Temara to Rabat; geometry audit should keep the Temara city bbox distinct."]
+      },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2498868",
+          "ids": { "osmRelationId": 2498868, "adminLevel": 8, "wikidata": "Q1635606", "refMAHCP": "04.501.01.07." },
+          "cacheFile": "MA/temara/osm-relation-2498868.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Agadir|MA",
+      "priority": ["phase-1-morocco", "habous", "agadir-metro"],
+      "relatedAuthorityIds": { "habousVilleId": 117, "habousMatch": "direct" },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["Agadir is the official Habous table used for Inezgane as nearest official city."]
+      },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2529624",
+          "ids": { "osmRelationId": 2529624, "adminLevel": 8, "wikidata": "Q170525", "refMAHCP": "09.001.01.01" },
+          "cacheFile": "MA/agadir/osm-relation-2529624.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Inezgane|MA",
+      "priority": ["phase-1-morocco", "habous", "agadir-metro", "nearest-official-city"],
+      "relatedAuthorityIds": { "habousVilleId": 117, "habousMatch": "nearest-official-city" },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["Habous maps Inezgane to Agadir; geometry audit should keep the Inezgane city bbox distinct."]
+      },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2529625",
+          "ids": { "osmRelationId": 2529625, "adminLevel": 8, "wikidata": "Q2736030", "refMAHCP": "09.273.01.15." },
+          "cacheFile": "MA/inezgane/osm-relation-2529625.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Casablanca|MA",
+      "priority": ["phase-1-morocco", "habous", "large-metro-bbox"],
+      "relatedAuthorityIds": { "habousVilleId": 58, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:4072985",
+          "ids": { "osmRelationId": 4072985, "adminLevel": 8, "wikidata": "Q7903", "refMAHCP": "06.141.01.0" },
+          "cacheFile": "MA/casablanca/osm-relation-4072985.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Berrechid|MA",
+      "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
+      "relatedAuthorityIds": { "habousVilleId": 65, "habousMatch": "direct" },
+      "review": { "status": "unreviewed", "issue": 118 },
+      "geometries": []
+    },
+    {
+      "cityKey": "Settat|MA",
+      "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
+      "relatedAuthorityIds": { "habousVilleId": 61, "habousMatch": "direct" },
+      "review": { "status": "unreviewed", "issue": 118 },
+      "geometries": []
+    },
+    {
+      "cityKey": "Fes|MA",
+      "priority": ["phase-1-morocco", "habous", "large-metro-bbox"],
+      "relatedAuthorityIds": { "habousVilleId": 81, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2799557",
+          "ids": { "osmRelationId": 2799557, "adminLevel": 8, "wikidata": "Q80985", "refMAHCP": "03.231.01.0" },
+          "cacheFile": "MA/fes/osm-relation-2799557.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Sefrou|MA",
+      "priority": ["phase-1-morocco", "habous", "fes-cluster"],
+      "relatedAuthorityIds": { "habousVilleId": 82, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2808834",
+          "ids": { "osmRelationId": 2808834, "adminLevel": 8, "wikidata": "Q1009308", "refMAHCP": "03.451.01.09." },
+          "cacheFile": "MA/sefrou/osm-relation-2808834.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Meknes|MA",
+      "priority": ["phase-1-morocco", "habous", "fes-meknes-cluster"],
+      "relatedAuthorityIds": { "habousVilleId": 99, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2561177",
+          "ids": { "osmRelationId": 2561177, "adminLevel": 8, "wikidata": "Q178663", "refMAHCP": "03.061.01.01." },
+          "cacheFile": "MA/meknes/osm-relation-2561177.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Tangier|MA",
+      "priority": ["phase-1-morocco", "habous", "north-morocco-border"],
+      "relatedAuthorityIds": { "habousVilleId": 14, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2758781",
+          "ids": { "osmRelationId": 2758781, "adminLevel": 8, "wikidata": "Q126148", "refMAHCP": "01.511.01.0" },
+          "cacheFile": "MA/tangier/osm-relation-2758781.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Tetouan|MA",
+      "priority": ["phase-1-morocco", "habous", "north-morocco-border"],
+      "relatedAuthorityIds": { "habousVilleId": 15, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2464649",
+          "ids": { "osmRelationId": 2464649, "adminLevel": 8, "wikidata": "Q185157", "refMAHCP": "01.571.01.11." },
+          "cacheFile": "MA/tetouan/osm-relation-2464649.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Nador|MA",
+      "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
+      "relatedAuthorityIds": { "habousVilleId": 39, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2431056",
+          "ids": { "osmRelationId": 2431056, "adminLevel": 8, "wikidata": "Q824594", "refMAHCP": "02.381.01.05." },
+          "cacheFile": "MA/nador/osm-relation-2431056.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Oujda|MA",
+      "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
+      "relatedAuthorityIds": { "habousVilleId": 31, "habousMatch": "direct" },
+      "review": { "status": "candidate", "issue": 118 },
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:2527998",
+          "ids": { "osmRelationId": 2527998, "adminLevel": 8, "wikidata": "Q193802", "refMAHCP": "02.411.01.23." },
+          "cacheFile": "MA/oujda/osm-relation-2527998.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Jerusalem|PS",
+      "priority": ["current-validator-warning", "intentional-routing-anchor", "human-review-required"],
+      "review": {
+        "status": "intentional-routing-anchor",
+        "issue": 118,
+        "notes": [
+          "Current validator WARN: row center is outside bbox by design.",
+          "Do not attach a municipal polygon or change routing semantics without human review."
+        ]
+      },
+      "auditExpectations": [
+        {
+          "kind": "row-center-outside-bbox-allowlisted",
+          "accepted": true
+        }
+      ],
+      "geometries": []
+    },
+    {
+      "cityKey": "Brazzaville|CG",
+      "priority": ["current-validator-warning", "cross-border-overlap", "congo-river"],
+      "review": { "status": "candidate", "issue": 118 },
+      "expectedNeighborWarnings": [
+        { "cityKey": "Kinshasa|CD", "kind": "bbox-overlap-cross-country" }
+      ],
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:16370691",
+          "ids": { "osmRelationId": 16370691, "adminLevel": 5, "wikidata": "Q3844" },
+          "cacheFile": "CG/brazzaville/osm-relation-16370691.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate",
+          "notes": ["OSM candidate is commune/departement level; compare with WOF/official sources before bbox edits."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Kinshasa|CD",
+      "priority": ["current-validator-warning", "cross-border-overlap", "congo-river"],
+      "review": { "status": "candidate", "issue": 118 },
+      "expectedNeighborWarnings": [
+        { "cityKey": "Brazzaville|CG", "kind": "bbox-overlap-cross-country" }
+      ],
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:5646651",
+          "ids": { "osmRelationId": 5646651, "adminLevel": 4, "wikidata": "Q3838" },
+          "cacheFile": "CD/kinshasa/osm-relation-5646651.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate",
+          "notes": ["OSM candidate is province-level; compare with WOF/official sources before bbox edits."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Basel|CH",
+      "priority": ["current-validator-warning", "cross-border-overlap", "europe-p0"],
+      "review": { "status": "candidate", "issue": 118 },
+      "expectedNeighborWarnings": [
+        { "cityKey": "Mulhouse|FR", "kind": "bbox-overlap-cross-country" }
+      ],
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:1683619",
+          "ids": { "osmRelationId": 1683619, "adminLevel": 8, "wikidata": "Q78", "swisstopoBfsNumber": "2701" },
+          "cacheFile": "CH/basel/osm-relation-1683619.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Mulhouse|FR",
+      "priority": ["current-validator-warning", "cross-border-overlap", "europe-p0"],
+      "review": { "status": "candidate", "issue": 118 },
+      "expectedNeighborWarnings": [
+        { "cityKey": "Basel|CH", "kind": "bbox-overlap-cross-country" }
+      ],
+      "geometries": [
+        {
+          "provider": "osm",
+          "stableId": "osm:relation:38246",
+          "ids": { "osmRelationId": 38246, "adminLevel": 8, "wikidata": "Q79815", "refINSEE": "68224" },
+          "cacheFile": "FR/mulhouse/osm-relation-38246.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-only-until-license-review",
+          "reviewStatus": "candidate"
+        }
+      ]
+    }
+  ]
+}
