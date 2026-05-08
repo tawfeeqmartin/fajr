@@ -142,6 +142,9 @@ Raw/source locations:
 - `eval/data/test/morocco-habous.json`
 - `scripts/data/habous-morocco-cities.json`
 - `scripts/data/mawaqit-mosques.json`
+- `scripts/data/city-geometry-sources.json` (planned source map for
+  reviewed external geometry IDs; see
+  [city geometry audit](city-geometry-audit.md))
 - `fixtures/habous-morocco/`
 - `scripts/fetch-morocco-habous.js`
 - `scripts/fetch-habous-morocco-month.js`

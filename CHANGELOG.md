@@ -57,6 +57,19 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added a scheduled Morocco Habous snapshot workflow that opens review PRs with
   future official monthly table captures under `fixtures/habous-morocco/`.
 
+### Added — city geometry bbox audit scaffold
+
+- Added `scripts/audit-city-geometry.js` and `scripts/lib/geometry-audit.js`,
+  a no-network advisory audit path for comparing reviewed cached GeoJSON
+  geometries against the shipped city bbox registry.
+- Added [docs/city-geometry-audit.md](docs/city-geometry-audit.md), documenting
+  why raw municipal polygons stay out of the runtime package, which sources are
+  safe for audit vs bundled derivation, and which Morocco/current-warning rows
+  should be reviewed first.
+- Added focused geometry helper tests covering GeoJSON bbox extraction,
+  polygon holes, multipolygons, deterministic grid sampling, and bbox coverage
+  metrics.
+
 ### Fixed — Diyanet city-ID mapping guardrail
 
 - Added `scripts/data/diyanet-ezanvakti-cities.json`, a verified mapping from
@@ -86,6 +99,10 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - The Diyanet mapping fix does not promote a new yearly Turkiye fixture. It
   prevents future bad fixture generation; curated fixture promotion still needs
   a separate PR with cross-source spot checks.
+- The city geometry audit scaffold does not change `detectLocation()`, city
+  bboxes, package runtime behavior, or prayer-time calculations. It exits
+  cleanly until `scripts/data/city-geometry-sources.json` is curated with
+  reviewed external IDs and cached geometry.
 
 ## [1.8.0] — 2026-05-06
 

@@ -4,7 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Last refreshed: 2026-05-06
+Last refreshed: 2026-05-08
 
 `fajr` is an offline JavaScript library for Islamic prayer times, qibla, Hijri dates, and hilal visibility. It builds on [`adhan.js`](https://github.com/batoulapps/adhan-js), then adds:
 
@@ -24,6 +24,7 @@ Core docs:
 - [SCOREBOARD.md](SCOREBOARD.md) - generated release health, WMAE, coverage, and open-issue snapshot.
 - [docs/progress.md](docs/progress.md) - generated WMAE dashboard and trend charts.
 - [docs/data-sources.md](docs/data-sources.md) - source inventory and fixture-refresh status.
+- [docs/city-geometry-audit.md](docs/city-geometry-audit.md) - build-time QA plan for reverse-geolocation bboxes.
 - [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) - app-side integration guide for [A Gift of Time](https://agiftoftime.app).
 
 ## Install
@@ -274,6 +275,7 @@ Hilal output is astronomical possibility, not a religious ruling. See [docs/hila
 | Generated eval dashboard | [docs/progress.md](docs/progress.md) |
 | Integration in A Gift of Time | [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) |
 | Source inventory | [docs/data-sources.md](docs/data-sources.md) |
+| City bbox geometry audit | [docs/city-geometry-audit.md](docs/city-geometry-audit.md) |
 | Scholarly review brief | [docs/scholar-review-brief.md](docs/scholar-review-brief.md) |
 | Hilal historical analysis | [docs/hilal-historical-analysis.md](docs/hilal-historical-analysis.md) |
 | Release log | [CHANGELOG.md](CHANGELOG.md) |

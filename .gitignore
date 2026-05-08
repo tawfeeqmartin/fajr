@@ -12,6 +12,7 @@
 *.swp
 .DS_Store
 .claude/
+.cache/
 .env
 .env.local
 .idea/
