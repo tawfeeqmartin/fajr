@@ -32,9 +32,10 @@ human review. It must not mutate the runtime registry automatically.
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
 20 high-priority rows: 15 Morocco/Habous phase-1 rows and 5 existing registry
-warning rows. Seventeen rows carry candidate OSM relation IDs; Berrechid,
-Settat, and Jerusalem intentionally remain without geometry candidates until a
-reviewed source or human routing decision is available.
+warning rows. It carries 17 candidate OSM relation IDs plus 11 WOF candidate
+IDs. Berrechid and Settat now have WOF locality candidates; Jerusalem
+intentionally remains without a geometry candidate until a human routing
+decision is available.
 
 ```json
 {
@@ -71,7 +72,9 @@ Use stable provider IDs: WOF IDs/GIDs, OSM relation IDs, Overture GERS IDs, or
 official local authority IDs. Do not store Nominatim `place_id`; it is not a
 stable external identifier. The current OSM relation IDs are audit-only
 candidates, not bundled source data and not approved sources for deriving MIT
-package bboxes without license review.
+package bboxes without license review. WOF candidates are still candidates:
+locality records are preferred, while county-level WOF records are marked
+medium confidence because their placetype can over-cover the city row.
 
 ## Running
 

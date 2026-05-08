@@ -65,6 +65,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added `scripts/data/city-geometry-sources.json`, a seed source map for 20
   high-priority bbox QA rows: Morocco/Habous phase-1 cities plus the current
   Jerusalem, Brazzaville/Kinshasa, and Basel/Mulhouse validator-warning rows.
+- Added WOF candidate IDs for Morocco source-map rows where WOF has a plausible
+  locality or reviewed lower-confidence county geometry, including Berrechid
+  and Settat which previously had no geometry candidate.
 - Added [docs/city-geometry-audit.md](docs/city-geometry-audit.md), documenting
   why raw municipal polygons stay out of the runtime package, which sources are
   safe for audit vs bundled derivation, and which Morocco/current-warning rows
