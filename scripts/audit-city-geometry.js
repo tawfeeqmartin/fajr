@@ -14,9 +14,11 @@
  *         {
  *           "provider": "wof",
  *           "stableId": "whosonfirst:locality:...",
- *           "license": "Who's On First License",
+ *           "licenseUse": "audit-only-until-license-review",
  *           "cacheFile": "MA/rabat.geojson",
- *           "confidence": "candidate"
+ *           "sourceConfidence": "high",
+ *           "matchConfidence": "candidate",
+ *           "reviewStatus": "candidate"
  *         }
  *       ]
  *     }
@@ -64,7 +66,13 @@ for (const entry of sourceMap.cities || []) {
     continue
   }
 
-  for (const source of geometrySourcesForEntry(entry)) {
+  const sources = geometrySourcesForEntry(entry)
+  if (!sources.length) {
+    rows.push(sourceMapEntryRow(city, entry, { status: 'no-geometry-candidates' }))
+    continue
+  }
+
+  for (const source of sources) {
     const cacheFile = source.cacheFile || source.geometryFile
     if (!cacheFile) {
       rows.push(sourceRow(city, source, { status: 'missing-cache-file' }))
@@ -108,6 +116,20 @@ function sourceRow(city, source, result) {
   }
 }
 
+function sourceMapEntryRow(city, entry, result) {
+  return {
+    cityKey: `${city.name}|${city.countryISO}`,
+    city: city.name,
+    countryISO: city.countryISO,
+    priority: entry.priority || [],
+    reviewStatus: entry.review?.status || null,
+    notes: entry.notes || entry.review?.notes || [],
+    provider: null,
+    stableId: null,
+    ...result,
+  }
+}
+
 function report(rows) {
   return {
     version: 1,
@@ -116,10 +138,12 @@ function report(rows) {
     registryPath: 'src/data/cities.json',
     cacheDir: path.relative(ROOT, cacheDir),
     summary: {
-      sourceCandidatesChecked: rows.length,
+      sourceMapCities: (sourceMap.cities || []).length,
+      sourceRowsReported: rows.length,
       checked: rows.filter(row => row.status === 'checked').length,
       missingCacheFiles: rows.filter(row => row.status === 'cache-file-not-found').length,
       missingGeometry: rows.filter(row => row.status === 'missing-geometry').length,
+      noGeometryCandidates: rows.filter(row => row.status === 'no-geometry-candidates').length,
       cityNotFound: rows.filter(row => row.status === 'city-not-found').length,
     },
     rows,

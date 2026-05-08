@@ -62,10 +62,16 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added `scripts/audit-city-geometry.js` and `scripts/lib/geometry-audit.js`,
   a no-network advisory audit path for comparing reviewed cached GeoJSON
   geometries against the shipped city bbox registry.
+- Added `scripts/data/city-geometry-sources.json`, a seed source map for 20
+  high-priority bbox QA rows: Morocco/Habous phase-1 cities plus the current
+  Jerusalem, Brazzaville/Kinshasa, and Basel/Mulhouse validator-warning rows.
 - Added [docs/city-geometry-audit.md](docs/city-geometry-audit.md), documenting
   why raw municipal polygons stay out of the runtime package, which sources are
   safe for audit vs bundled derivation, and which Morocco/current-warning rows
   should be reviewed first.
+- Added CLI coverage for source-map rows with missing local cache files,
+  intentionally blank geometry candidates, cached local GeoJSON, and cache-path
+  escapes.
 - Added focused geometry helper tests covering GeoJSON bbox extraction,
   polygon holes, multipolygons, deterministic grid sampling, and bbox coverage
   metrics.
@@ -101,8 +107,12 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   a separate PR with cross-source spot checks.
 - The city geometry audit scaffold does not change `detectLocation()`, city
   bboxes, package runtime behavior, or prayer-time calculations. It exits
-  cleanly until `scripts/data/city-geometry-sources.json` is curated with
-  reviewed external IDs and cached geometry.
+  cleanly when a source map is absent, and reports `cache-file-not-found` until
+  reviewed external geometry is fetched into `.cache/city-geometry/`.
+- The seeded city geometry source map stores stable OSM relation IDs and
+  Habous authority IDs only. OSM-derived geometries and bbox edits remain
+  audit-only until explicit license review approves any derived MIT-package
+  data.
 
 ## [1.8.0] — 2026-05-06
 

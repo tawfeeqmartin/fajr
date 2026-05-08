@@ -30,7 +30,11 @@ human review. It must not mutate the runtime registry automatically.
 ## Source Map
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
-The source map stores metadata and cache pointers only:
+The source map stores metadata and cache pointers only. The current seed covers
+20 high-priority rows: 15 Morocco/Habous phase-1 rows and 5 existing registry
+warning rows. Seventeen rows carry candidate OSM relation IDs; Berrechid,
+Settat, and Jerusalem intentionally remain without geometry candidates until a
+reviewed source or human routing decision is available.
 
 ```json
 {
@@ -65,7 +69,9 @@ The source map stores metadata and cache pointers only:
 
 Use stable provider IDs: WOF IDs/GIDs, OSM relation IDs, Overture GERS IDs, or
 official local authority IDs. Do not store Nominatim `place_id`; it is not a
-stable external identifier.
+stable external identifier. The current OSM relation IDs are audit-only
+candidates, not bundled source data and not approved sources for deriving MIT
+package bboxes without license review.
 
 ## Running
 
@@ -78,8 +84,9 @@ node scripts/audit-city-geometry.js --sources scripts/data/city-geometry-sources
 ```
 
 If `scripts/data/city-geometry-sources.json` is absent, the script exits cleanly
-and prints a setup message. That is intentional while the source map is being
-curated.
+and prints a setup message. If the source map exists but cached GeoJSON is
+absent, the report lists `cache-file-not-found`; that is expected until a
+reviewer fetches raw geometry into `.cache/city-geometry/`.
 
 ## First Audit Targets
 
