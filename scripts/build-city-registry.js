@@ -47,6 +47,7 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname  = path.dirname(__filename)
 const ROOT       = path.resolve(__dirname, '..')
+const CHECK_MODE = process.argv.includes('--check')
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Load inputs
@@ -417,7 +418,7 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Brisbane',   countryISO: 'AU', adminRegion: 'Queensland', lat: -27.4698, lon: 153.0251, elevation: 28, timezone: 'Australia/Brisbane', population: 2462000 },
 
   // ─── Multi-method-split / minority-fiqh stress cases ──────────────────────
-  { name: 'Pattani',    nameLocal: 'ปัตตานี', countryISO: 'TH', adminRegion: 'Pattani Province', lat: 6.8682, lon: 101.2497, elevation: 4, timezone: 'Asia/Bangkok', population: 144000 },
+  { name: 'Pattani',    nameLocal: 'ปัตตานี', countryISO: 'TH', adminRegion: 'Pattani Province', lat: 6.8682, lon: 101.2497, elevation: 4, timezone: 'Asia/Bangkok', population: 45000 },
   { name: 'Cotabato',   countryISO: 'PH', adminRegion: 'Maguindanao del Norte / BARMM', lat: 7.2178, lon: 124.2451, elevation: 9, timezone: 'Asia/Manila', population: 325000 },
   { name: 'Marawi',     countryISO: 'PH', adminRegion: 'Lanao del Sur / BARMM', lat: 7.9988, lon: 124.2937, elevation: 730, timezone: 'Asia/Manila', population: 201000 },
   { name: 'Bradford',   countryISO: 'GB', adminRegion: 'West Yorkshire', lat: 53.7960, lon: -1.7594, elevation: 110, timezone: 'Europe/London', population: 358000 },
@@ -917,6 +918,9 @@ const BBOX_OVERRIDES = {
   'Mamoudzou|YT':       [-12.81, -12.74, 45.20, 45.27],
   'Laayoune|EH':        [27.10, 27.20, -13.25, -13.13],
   'Nicosia|CY':         [35.13, 35.24, 33.32, 33.45],
+  // v1.8.0 #126: Pattani's city population is municipal-scale, but the
+  // runtime row intentionally keeps the wider southern Thailand lookup cell.
+  'Pattani|TH':         [6.7182, 7.0182, 101.0997, 101.3997],
 
   // v1.7.8 Tier 4: tighten new-city bboxes to avoid sibling overlaps.
   'Hebron|PS':          [31.50, 31.60, 35.05, 35.16],
@@ -1273,6 +1277,7 @@ for (const [overrideKey, ov] of Object.entries(overrides)) {
   target._methodOverride = ov.methodOverride
   target._altMethods = (ov.altMethods || []).slice()
   target._sourceCitation = ov.citation
+  target._sourceInstitution = ov.sourceInstitution
   target._overrideReasoning = ov.reasoning
 }
 
@@ -1295,7 +1300,7 @@ for (const c of citiesByKey.values()) {
     source = { type: 'mawaqit', slug: c._mawaqitSlug }
   } else if (c._methodOverride) {
     // Override has explicit institutional citation.
-    source = { type: 'national-authority', institution: institutionForMethod(c._methodOverride) || 'See citation' }
+    source = { type: 'national-authority', institution: c._sourceInstitution || institutionForMethod(c._methodOverride) || 'See citation' }
   } else if (c._isCapital) {
     // Capital — institutional national authority owns the timetable.
     const country = c._engineCountry
@@ -1364,11 +1369,18 @@ for (const c of cities) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const outputDir = path.join(ROOT, 'src/data')
+const outputPath = path.join(outputDir, 'cities.json')
 fs.mkdirSync(outputDir, { recursive: true })
+
+let generatedAt = new Date().toISOString()
+if (CHECK_MODE && fs.existsSync(outputPath)) {
+  const existing = JSON.parse(fs.readFileSync(outputPath, 'utf-8'))
+  if (existing.generated) generatedAt = existing.generated
+}
 
 const output = {
   version:   '1.7.0-alpha.0',
-  generated: new Date().toISOString(),
+  generated: generatedAt,
   license: {
     'world-cities':           'Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)',
     'mawaqit-slugs':          'Curated metadata derived from public Mawaqit profile pages (slugs only)',
@@ -1387,8 +1399,19 @@ const headerObj = { ...output, cities: '__CITIES_PLACEHOLDER__' }
 let serialised = JSON.stringify(headerObj, null, 2)
 const cityLines = cities.map(c => '    ' + JSON.stringify(c)).join(',\n')
 serialised = serialised.replace('"__CITIES_PLACEHOLDER__"', `[\n${cityLines}\n  ]`)
+serialised += '\n'
 
-const outputPath = path.join(outputDir, 'cities.json')
+if (CHECK_MODE) {
+  const existing = fs.readFileSync(outputPath, 'utf-8')
+  if (existing !== serialised) {
+    console.error('[build-city-registry] check failed: src/data/cities.json is out of sync with generator inputs')
+    process.exitCode = 1
+  } else {
+    console.log('[build-city-registry] check passed: src/data/cities.json is in sync')
+  }
+  process.exit()
+}
+
 fs.writeFileSync(outputPath, serialised)
 const stats = fs.statSync(outputPath)
 console.log(`Wrote ${cities.length} cities to ${path.relative(ROOT, outputPath)} (${stats.size} bytes, ${(stats.size / 1024).toFixed(1)} KB)`)

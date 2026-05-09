@@ -73,7 +73,7 @@
     "NL": { "country": "Netherlands", "capital": "Amsterdam", "latitude": 52.3676, "longitude": 4.9041, "elevation": 2, "timezone": "Europe/Amsterdam", "aladhanMethod": 3, "methodLabel": "MWL" },
     "IT": { "country": "Italy", "capital": "Rome", "latitude": 41.9028, "longitude": 12.4964, "elevation": 21, "timezone": "Europe/Rome", "aladhanMethod": 3, "methodLabel": "MWL" },
     "ES": { "country": "Spain", "capital": "Madrid", "latitude": 40.4168, "longitude": -3.7038, "elevation": 667, "timezone": "Europe/Madrid", "aladhanMethod": 3, "methodLabel": "MWL" },
-    "PT": { "country": "Portugal", "capital": "Lisbon", "latitude": 38.7223, "longitude": -9.1393, "elevation": 2, "timezone": "Europe/Lisbon", "aladhanMethod": 21, "methodLabel": "Lisboa" },
+    "PT": { "country": "Portugal", "capital": "Lisbon", "latitude": 38.7223, "longitude": -9.1393, "elevation": 50, "timezone": "Europe/Lisbon", "aladhanMethod": 21, "methodLabel": "Lisboa" },
     "AT": { "country": "Austria", "capital": "Vienna", "latitude": 48.2082, "longitude": 16.3738, "elevation": 171, "timezone": "Europe/Vienna", "aladhanMethod": 3, "methodLabel": "MWL" },
     "CH": { "country": "Switzerland", "capital": "Bern", "latitude": 46.9480, "longitude": 7.4474, "elevation": 540, "timezone": "Europe/Zurich", "aladhanMethod": 3, "methodLabel": "MWL" },
     "GR": { "country": "Greece", "capital": "Athens", "latitude": 37.9838, "longitude": 23.7275, "elevation": 70, "timezone": "Europe/Athens", "aladhanMethod": 12, "methodLabel": "Diyanet" },

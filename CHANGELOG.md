@@ -35,6 +35,10 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Synchronized the city-registry generator overrides so future
   `scripts/build-city-registry.js` runs preserve the reviewed Rabat/Agadir
   bboxes.
+- Added a `scripts/build-city-registry.js --check` guard and reconciled
+  generator inputs for Lisbon, Pattani, and Iraqi override source institutions
+  so the checked-in city registry can no longer drift silently from its source
+  data.
 
 ### Changed — documentation doctrine cleanup
 

@@ -1,6 +1,6 @@
 {
   "_comment": "City-level institutional method overrides for fajr v1.7.0+. Each entry documents an intra-country ikhtilaf where one or more cities follow a different institutional convention than the country default returned by selectMethod(). Citations link to the institutional published source where possible; when no live URL exists the institution and locally-verifiable artefact (e.g. published Imsakiyya, mosque-published timetable, regional council) is named instead so a reviewer can audit. Per CLAUDE.md feedback_aggressive_data_hunt: Wikipedia is not authoritative for fiqh; institutional citations only. Per feedback_surface_disagreement: ALL of these cities also list altMethods (the country default plus any other documented minority) so apps can render the disagreement rather than presenting a single answer.",
-  "_schema": "Record<cityKey, { country, lat, lon, methodOverride, altMethods, citation, reasoning }>. cityKey is the English/Latin transliteration. methodOverride is a string method name resolvable by selectMethod (e.g. 'Karachi', 'Tehran', 'Diyanet', 'Egyptian', 'MoonsightingCommittee'). altMethods entries follow the schema { method, source, populationShare? } where populationShare is omitted when no credible quantitative estimate exists.",
+  "_schema": "Record<cityKey, { country, lat, lon, methodOverride, altMethods, citation, reasoning, sourceInstitution? }>. cityKey is the English/Latin transliteration. methodOverride is a string method name resolvable by selectMethod (e.g. 'Karachi', 'Tehran', 'Diyanet', 'Egyptian', 'MoonsightingCommittee'). altMethods entries follow the schema { method, source, populationShare? } where populationShare is omitted when no credible quantitative estimate exists. sourceInstitution overrides the generic method publisher when the city follows a local institution using that method shape.",
   "_classification_note": "All 16 entries below are 🟢 Established or 🟡→🟢 Approaching established. No 🔴 Novel overrides. Each citation is to a real institutional publisher whose timetables can be verified against the city's Mawaqit / WaktuSolat / equivalent regional registry.",
   "_version": "1.7.2",
 
@@ -24,6 +24,7 @@
     "altMethods": [
       { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
     ],
+    "sourceInstitution": "Najaf hawza maraji' (Office of Sistani; Astan al-Husayniyya custodial offices) — Tehran-style timing convention",
     "citation": "Office of Grand Ayatollah Sayyid Ali al-Sistani — https://www.sistani.org/ (Najaf hawza published Imsakiyya); cross-referenced with Astan Quds Razavi-style Twelver Shia Imsakiyya conventions",
     "reasoning": "Najaf is the Shia hawza centre — the global Twelver Shia scholarly seat. The maraji' offices (Sistani, Najafi-style) publish Imsakiyya following Tehran-style angles (Fajr 17.7°, Isha 14°, Maghrib +4.5min) consistent with the Jafari fiqh treatment of Maghrib as starting at the disappearance of redness in the eastern sky rather than at sunset itself."
   },
@@ -36,6 +37,7 @@
     "altMethods": [
       { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
     ],
+    "sourceInstitution": "Najaf hawza maraji' (Office of Sistani; Astan al-Husayniyya custodial offices) — Tehran-style timing convention",
     "citation": "Astan al-Husayniyya / Astan al-Abbasiyya custodial offices, Karbala — https://imamhussain.org/ (Holy Karbala custodial offices publish Imsakiyya for ziyarat); cross-referenced with the Office of Sayyid Sistani Najaf",
     "reasoning": "Karbala is the second principal Shia ziyarat centre; the custodial offices of the Imam Husayn and Abbas shrines publish daily Imsakiyya following Twelver Shia (Tehran-style) timing conventions, identical in shape to Najaf."
   },
@@ -48,6 +50,7 @@
     "altMethods": [
       { "method": "Egyptian", "source": "Aladhan world-default for Iraq" }
     ],
+    "sourceInstitution": "Najaf hawza maraji' (Office of Sistani; Astan al-Husayniyya custodial offices) — Tehran-style timing convention",
     "citation": "Basra-area Twelver Shia mosque-published timetables (Imam Ali, Imam Husayn mosques, Basra) following the Sistani-office Imsakiyya convention",
     "reasoning": "Basra and the southern Iraqi governorates are Shia-majority and follow the Twelver maraji' Imsakiyya. Same Tehran-method dispatch as Najaf/Karbala."
   },
