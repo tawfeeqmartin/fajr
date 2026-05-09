@@ -1,6 +1,6 @@
 # City Geometry Audit
 
-Last refreshed: 2026-05-08
+Last refreshed: 2026-05-09
 
 `detectLocation()` intentionally ships a compact offline bbox registry rather
 than raw municipal polygons. The bbox layer is fast and small enough for
@@ -15,6 +15,9 @@ human review. It must not mutate the runtime registry automatically.
 ## Policy
 
 - Runtime stays bbox-based and offline.
+- Runtime bboxes are lookup cells, not legal municipal polygons. When neighbor
+  rectangles would overlap, reviewed bbox proposals may be clipped to preserve
+  deterministic `detectLocation()` routing; document the clip in the source map.
 - Raw WOF/OSM/Overture/official polygons stay in `.cache/city-geometry/`, not
   in `src/`, not in git, and not in the npm package.
 - OSM and Overture are audit-only by default because their city geometry is
@@ -75,6 +78,21 @@ candidates, not bundled source data and not approved sources for deriving MIT
 package bboxes without license review. WOF candidates are still candidates:
 locality records are preferred, while county-level WOF records are marked
 medium confidence because their placetype can over-cover the city row.
+
+## Reviewed Runtime Changes
+
+The first runtime bbox edits from this workflow are Rabat and Agadir, applied
+on 2026-05-09. Both use reviewed WOF locality candidates as the source of
+direction, but both are clipped before shipping so they do not steal coordinates
+from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
+
+- `Rabat|MA`: widened toward the WOF locality while stopping short of the
+  Sale and Temara lookup cells.
+- `Agadir|MA`: tightened from the old broad rectangle and aligned to the WOF
+  locality while stopping short of the Inezgane lookup cell.
+
+These are provenance/routing fixes only. They do not change prayer-time
+calculation math or imply that rectangles now encode municipal boundaries.
 
 ## Running
 

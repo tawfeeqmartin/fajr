@@ -143,8 +143,9 @@ Raw/source locations:
 - `scripts/data/habous-morocco-cities.json`
 - `scripts/data/mawaqit-mosques.json`
 - `scripts/data/city-geometry-sources.json` (candidate source map for reviewed
-  external geometry IDs; stores stable IDs and cache pointers only, with raw
-  geometry kept outside git/npm; see [city geometry audit](city-geometry-audit.md))
+  external geometry IDs, currently WOF and OSM; stores stable IDs and cache
+  pointers only, with raw geometry kept outside git/npm; see
+  [city geometry audit](city-geometry-audit.md))
 - `fixtures/habous-morocco/`
 - `scripts/fetch-morocco-habous.js`
 - `scripts/fetch-habous-morocco-month.js`
