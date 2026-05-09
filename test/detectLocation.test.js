@@ -157,6 +157,28 @@ describe('detectLocation — Mawaqit institutional source', () => {
     expect(loc.country).toBe('Morocco')
     expect(loc.recommendedMethod).toBe('Morocco')
   })
+
+  it('Morocco reviewed bbox clips keep Rabat/Agadir distinct from neighboring Mawaqit rows', () => {
+    const rabatEdge = detectLocation(33.962, -6.917)
+    expect(rabatEdge.city).not.toBeNull()
+    expect(rabatEdge.city.name).toBe('Rabat')
+    expect(rabatEdge.source.type).toBe('mawaqit')
+
+    const temaraNeighbor = detectLocation(33.959, -6.90)
+    expect(temaraNeighbor.city).not.toBeNull()
+    expect(temaraNeighbor.city.name).toBe('Temara')
+    expect(temaraNeighbor.source.type).toBe('mawaqit')
+
+    const agadirEdge = detectLocation(30.392, -9.651)
+    expect(agadirEdge.city).not.toBeNull()
+    expect(agadirEdge.city.name).toBe('Agadir')
+    expect(agadirEdge.source.type).toBe('mawaqit')
+
+    const inezganeNeighbor = detectLocation(30.389, -9.54)
+    expect(inezganeNeighbor.city).not.toBeNull()
+    expect(inezganeNeighbor.city.name).toBe('Inezgane')
+    expect(inezganeNeighbor.source.type).toBe('mawaqit')
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

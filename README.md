@@ -140,7 +140,7 @@ This is the same stance used by the reference downstream app, [A Gift of Time](h
 | City/country dispatch | 477 cities, 168 countries |
 | Train eval | 215 entries, WMAE 0.9757 min |
 | Holdout eval | 29,004 entries, WMAE 7.3599 min |
-| Reference layers | Mawaqit, Diyanet, JAKIM, KEMENAG, MUIS, Habous, Aladhan, praytimes.org |
+| Reference layers | Mawaqit, Diyanet, JAKIM, KEMENAG, MUIS, Habous, Aladhan, praytimes.org, Who's On First |
 | Hilal validation | 78 documented committee decisions across 15 Hijri month onsets |
 | Runtime dependency | `adhan` only |
 
@@ -296,7 +296,7 @@ Accuracy PRs should modify one concern at a time, run `node eval/eval.js` and `n
 
 ## Credits
 
-`fajr` stands on the Islamic astronomy and muwaqqit tradition, and on modern open work by Batoul Apps (`adhan-js`), Hamid Zarrabi-Zadeh (`praytimes.org`), [AlAdhan](https://aladhan.com), ICOP/Odeh, Yallop/HMNAO, Shaukat/Pakistan Ruet-e-Hilal, JPL Horizons, and the institutions and mosques that publish prayer and hilal data.
+`fajr` stands on the Islamic astronomy and muwaqqit tradition, and on modern open work by Batoul Apps (`adhan-js`), Hamid Zarrabi-Zadeh (`praytimes.org`), [AlAdhan](https://aladhan.com), Who's On First / Geocode Earth, ICOP/Odeh, Yallop/HMNAO, Shaukat/Pakistan Ruet-e-Hilal, JPL Horizons, and the institutions and mosques that publish prayer and hilal data.
 
 MIT © Tawfeeq Martin
 

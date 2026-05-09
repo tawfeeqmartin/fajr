@@ -1,7 +1,7 @@
 {
   "$schema_doc": "Build-time source map for auditing src/data/cities.json city bboxes. This file stores stable external IDs, review state, authority IDs, and cache pointers only. Raw geometry stays outside git/npm in .cache/city-geometry.",
   "version": 1,
-  "updated": "2026-05-08",
+  "updated": "2026-05-09",
   "issue": 118,
   "cacheRoot": ".cache/city-geometry",
   "providers": {
@@ -39,7 +39,10 @@
       "review": {
         "status": "candidate",
         "issue": 118,
-        "notes": ["Morocco phase-1 row. Habous ID is prayer-time provenance, not geometry."]
+        "notes": [
+          "Morocco phase-1 row. Habous ID is prayer-time provenance, not geometry.",
+          "2026-05-09: runtime bbox updated from reviewed WOF locality direction and clipped to avoid stealing Sale/Temara lookup cells."
+        ]
       },
       "geometries": [
         {
@@ -125,7 +128,10 @@
       "review": {
         "status": "candidate",
         "issue": 118,
-        "notes": ["Agadir is the official Habous table used for Inezgane as nearest official city."]
+        "notes": [
+          "Agadir is the official Habous table used for Inezgane as nearest official city.",
+          "2026-05-09: runtime bbox updated from reviewed WOF locality direction and clipped to avoid stealing the Inezgane lookup cell."
+        ]
       },
       "geometries": [
         {

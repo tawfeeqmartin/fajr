@@ -26,6 +26,13 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — Morocco city bbox routing
+
+- Adjusted the Rabat and Agadir runtime bboxes using reviewed Who's On First
+  locality candidates, clipped to preserve deterministic non-overlap with the
+  neighboring Sale/Temara and Inezgane rows. Prayer-time math is unchanged; this
+  only affects city/source provenance for coordinates near those bbox edges.
+
 ### Changed — documentation doctrine cleanup
 
 - Added [docs/positions.md](docs/positions.md), a compact registry for the
