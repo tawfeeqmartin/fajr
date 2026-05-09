@@ -853,14 +853,18 @@ const BBOX_OVERRIDES = {
   'Lahore|PK':          [31.25, 31.85, 74.04, 74.50],
   'Temara|MA':          [33.85, 33.99, -7.00, -6.86],
   'Sale|MA':            [34.04, 34.14, -6.90, -6.78],
-  'Rabat|MA':           [33.97, 34.04, -6.90, -6.78],
+  // v1.8.0 #118/#124: WOF-backed lookup cell, clipped so Rabat does not
+  // steal adjacent Sale/Temara coordinates in detectLocation().
+  'Rabat|MA':           [33.961, 34.035, -6.918, -6.762],
   'Khartoum Bahri|SD':  [15.61, 15.72, 32.50, 32.62],
   'Khartoum|SD':        [15.40, 15.60, 32.50, 32.66],
   'Omdurman|SD':        [15.50, 15.78, 32.30, 32.50],
   'Sharjah|AE':         [25.35, 25.65, 55.42, 55.72],
   'Dubai|AE':           [24.90, 25.35, 55.05, 55.50],
   'Inezgane|MA':        [30.32, 30.39, -9.58, -9.49],
-  'Agadir|MA':          [30.40, 30.58, -9.75, -9.45],
+  // v1.8.0 #118/#124: WOF-backed lookup cell, clipped so Agadir does not
+  // steal adjacent Inezgane coordinates in detectLocation().
+  'Agadir|MA':          [30.391, 30.454, -9.652, -9.454],
   'Zarqa|JO':           [32.05, 32.27, 35.94, 36.24],
   'Amman|JO':           [31.85, 32.00, 35.83, 36.00],
   'Berrechid|MA':       [33.20, 33.34, -7.65, -7.49],

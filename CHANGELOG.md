@@ -32,6 +32,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   locality candidates, clipped to preserve deterministic non-overlap with the
   neighboring Sale/Temara and Inezgane rows. Prayer-time math is unchanged; this
   only affects city/source provenance for coordinates near those bbox edges.
+- Synchronized the city-registry generator overrides so future
+  `scripts/build-city-registry.js` runs preserve the reviewed Rabat/Agadir
+  bboxes.
 
 ### Changed — documentation doctrine cleanup
 
