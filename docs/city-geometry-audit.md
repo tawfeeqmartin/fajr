@@ -90,6 +90,10 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   Sale and Temara lookup cells.
 - `Agadir|MA`: tightened from the old broad rectangle and aligned to the WOF
   locality while stopping short of the Inezgane lookup cell.
+- `Berrechid|MA`, `Settat|MA`, `Sefrou|MA`, `Tangier|MA`, `Nador|MA`, and
+  `Oujda|MA`: tightened to reviewed WOF locality envelopes where the previous
+  population-radius boxes materially over-covered surrounding areas and no
+  adjacent-city clipping was needed.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.
@@ -150,6 +154,9 @@ opening bbox PRs:
   bbox; potential missed city coverage.
 - `tighten-review` — most shipped bbox samples fall outside reviewed geometry;
   potential metro/border leakage.
+- `envelope-aligned` — the bbox already matches the reviewed geometry envelope;
+  remaining sample mismatch is polygon shape and cannot be improved without
+  runtime polygon routing.
 - `watch` / `low-priority` — visible or minor mismatch, usually not first in
   line unless the row affects a known source or border problem.
 - `registry-center-review` / `center-geometry-review` — center-point mismatch;

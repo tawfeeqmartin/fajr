@@ -179,6 +179,28 @@ describe('detectLocation — Mawaqit institutional source', () => {
     expect(inezganeNeighbor.city.name).toBe('Inezgane')
     expect(inezganeNeighbor.source.type).toBe('mawaqit')
   })
+
+  it('Morocco WOF-tightened rows keep centers while dropping old overbroad corners', () => {
+    const rows = [
+      ['Berrechid', 33.2659, -7.5867, 33.21, -7.64],
+      ['Settat', 33.0017, -7.6166, 32.90, -7.75],
+      ['Sefrou', 33.8311, -4.8294, 33.75, -4.90],
+      ['Tangier', 35.7595, -5.8340, 35.60, -6.00],
+      ['Nador', 35.1741, -2.9287, 35.05, -3.05],
+      ['Oujda', 34.6814, -1.9086, 34.55, -2.00],
+    ]
+
+    for (const [name, centerLat, centerLon, oldCornerLat, oldCornerLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe('Morocco')
+
+      const oldCorner = detectLocation(oldCornerLat, oldCornerLon)
+      expect(oldCorner.city?.name, `${name} old overbroad corner should no longer resolve to ${name}`).not.toBe(name)
+      expect(oldCorner.country).toBe('Morocco')
+    }
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

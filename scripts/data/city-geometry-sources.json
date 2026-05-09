@@ -210,7 +210,11 @@
       "cityKey": "Berrechid|MA",
       "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 65, "habousMatch": "direct" },
-      "review": { "status": "unreviewed", "issue": 118 },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
+      },
       "geometries": [
         {
           "provider": "wof",
@@ -228,7 +232,11 @@
       "cityKey": "Settat|MA",
       "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 61, "habousMatch": "direct" },
-      "review": { "status": "unreviewed", "issue": 118 },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
+      },
       "geometries": [
         {
           "provider": "wof",
@@ -274,7 +282,11 @@
       "cityKey": "Sefrou|MA",
       "priority": ["phase-1-morocco", "habous", "fes-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 82, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
+      },
       "geometries": [
         {
           "provider": "osm",
@@ -320,7 +332,11 @@
       "cityKey": "Tangier|MA",
       "priority": ["phase-1-morocco", "habous", "north-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 14, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
+      },
       "geometries": [
         {
           "provider": "osm",
@@ -366,7 +382,11 @@
       "cityKey": "Nador|MA",
       "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 39, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
+      },
       "geometries": [
         {
           "provider": "osm",
@@ -394,7 +414,11 @@
       "cityKey": "Oujda|MA",
       "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 31, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
+      },
       "geometries": [
         {
           "provider": "osm",

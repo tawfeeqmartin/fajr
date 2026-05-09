@@ -39,6 +39,10 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   generator inputs for Lisbon, Pattani, and Iraqi override source institutions
   so the checked-in city registry can no longer drift silently from its source
   data.
+- Tightened six additional Morocco lookup cells (`Berrechid`, `Settat`,
+  `Sefrou`, `Tangier`, `Nador`, `Oujda`) to reviewed WOF locality envelopes,
+  and taught the geometry audit to label bbox-envelope matches separately from
+  residual polygon-shape mismatch.
 
 ### Changed — documentation doctrine cleanup
 
