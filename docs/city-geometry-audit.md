@@ -81,6 +81,8 @@ medium confidence because their placetype can over-cover the city row.
 With reviewed IDs and cached GeoJSON present:
 
 ```bash
+node scripts/fetch-city-geometry-cache.js --provider wof --dry-run
+node scripts/fetch-city-geometry-cache.js --provider wof
 node scripts/audit-city-geometry.js
 node scripts/audit-city-geometry.js --format json
 node scripts/audit-city-geometry.js --sources scripts/data/city-geometry-sources.json --cache-dir .cache/city-geometry
@@ -90,6 +92,11 @@ If `scripts/data/city-geometry-sources.json` is absent, the script exits cleanly
 and prints a setup message. If the source map exists but cached GeoJSON is
 absent, the report lists `cache-file-not-found`; that is expected until a
 reviewer fetches raw geometry into `.cache/city-geometry/`.
+
+`fetch-city-geometry-cache.js` currently hydrates WOF candidates only. It uses
+the explicit WOF repository metadata in the source map, writes raw GeoJSON to
+`.cache/city-geometry/`, and leaves OSM/Overture/official fetch paths to
+separate reviewed workflows because their terms and APIs differ.
 
 ## First Audit Targets
 

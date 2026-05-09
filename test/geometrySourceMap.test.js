@@ -43,6 +43,7 @@ describe('city geometry source map', () => {
         }
         if (geometry.provider === 'wof') {
           expect(geometry.stableId).toMatch(/^wof:[a-z]+:\d+$/)
+          expect(geometry.ids?.repo, geometry.stableId).toMatch(/^whosonfirst-data-/)
           expect(geometry.licenseUse).toBe('audit-and-reviewed-bbox-proposal')
           if (geometry.ids?.placetype !== 'locality') {
             expect(geometry.sourceConfidence).not.toBe('high')

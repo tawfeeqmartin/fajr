@@ -19,7 +19,10 @@
       "name": "Who's On First / Geocode Earth",
       "stableIdFormat": "wof:{placetype}:{id}",
       "license": "Who's On First License with row-level upstream attribution caveats",
-      "defaultUse": "audit-and-reviewed-bbox-proposal"
+      "defaultUse": "audit-and-reviewed-bbox-proposal",
+      "notes": [
+        "Each WOF candidate must store ids.repo so fetch-city-geometry-cache.js can hydrate the local raw-geometry cache deterministically."
+      ]
     },
     "official": {
       "name": "Official local or national boundary source",
@@ -52,7 +55,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421190103",
-          "ids": { "wofId": 421190103, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 421190103, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/rabat/wof-locality-421190103.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
@@ -84,7 +87,7 @@
         {
           "provider": "wof",
           "stableId": "wof:county:1108784811",
-          "ids": { "wofId": 1108784811, "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "ids": { "wofId": 1108784811, "repo": "whosonfirst-data-admin-ma", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
           "cacheFile": "MA/sale/wof-county-1108784811.geojson",
           "sourceConfidence": "medium",
           "matchConfidence": "placetype-mismatch-candidate",
@@ -138,7 +141,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421170495",
-          "ids": { "wofId": 421170495, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 421170495, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/agadir/wof-locality-421170495.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
@@ -188,7 +191,7 @@
         {
           "provider": "wof",
           "stableId": "wof:county:890442533",
-          "ids": { "wofId": 890442533, "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "ids": { "wofId": 890442533, "repo": "whosonfirst-data-admin-ma", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
           "cacheFile": "MA/casablanca/wof-county-890442533.geojson",
           "sourceConfidence": "medium",
           "matchConfidence": "placetype-mismatch-candidate",
@@ -206,7 +209,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:1125988395",
-          "ids": { "wofId": 1125988395, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 1125988395, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/berrechid/wof-locality-1125988395.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
@@ -224,7 +227,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421190099",
-          "ids": { "wofId": 421190099, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 421190099, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/settat/wof-locality-421190099.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
@@ -252,7 +255,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421170491",
-          "ids": { "wofId": 421170491, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 0 },
+          "ids": { "wofId": 421170491, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 0 },
           "cacheFile": "MA/fes/wof-locality-421170491.geojson",
           "sourceConfidence": "medium",
           "matchConfidence": "candidate",
@@ -280,7 +283,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421190111",
-          "ids": { "wofId": 421190111, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 421190111, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/sefrou/wof-locality-421190111.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
@@ -326,7 +329,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421190123",
-          "ids": { "wofId": 421190123, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 421190123, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/tangier/wof-locality-421190123.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
@@ -372,7 +375,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421190085",
-          "ids": { "wofId": 421190085, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 421190085, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/nador/wof-locality-421190085.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
@@ -400,7 +403,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:421200921",
-          "ids": { "wofId": 421200921, "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 421200921, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "MA/oujda/wof-locality-421200921.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
