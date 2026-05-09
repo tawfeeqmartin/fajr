@@ -101,6 +101,8 @@ if (format === 'json') {
 }
 
 function sourceRow(city, source, result) {
+  const sourceNeedsReview = source.sourceConfidence !== 'high' ||
+    Boolean(source.matchConfidence && source.matchConfidence !== 'candidate')
   return {
     cityKey: `${city.name}|${city.countryISO}`,
     city: city.name,
@@ -112,6 +114,7 @@ function sourceRow(city, source, result) {
     matchConfidence: source.matchConfidence || null,
     licenseUse: source.licenseUse || null,
     reviewStatus: source.reviewStatus || null,
+    sourceNeedsReview: result.status === 'checked' ? sourceNeedsReview : null,
     ...result,
   }
 }
@@ -145,9 +148,21 @@ function report(rows) {
       missingGeometry: rows.filter(row => row.status === 'missing-geometry').length,
       noGeometryCandidates: rows.filter(row => row.status === 'no-geometry-candidates').length,
       cityNotFound: rows.filter(row => row.status === 'city-not-found').length,
+      sourceNeedsReview: rows.filter(row => row.sourceNeedsReview).length,
+      triage: triageCounts(rows),
     },
     rows,
   }
+}
+
+function triageCounts(rows) {
+  const counts = {}
+  for (const row of rows) {
+    const action = row.triage?.action
+    if (!action) continue
+    counts[action] = (counts[action] || 0) + 1
+  }
+  return counts
 }
 
 function cityKey(name, iso) {
@@ -186,8 +201,8 @@ function printMarkdown(rows) {
   console.log(`Cache dir: ${path.relative(ROOT, cacheDir)}`)
   console.log(`Rows checked: ${rows.length}`)
   console.log('')
-  console.log('| City | ISO | Provider | Stable ID | Status | Review | License use | Center in geometry | Registry outside geom bbox | Geom bbox outside registry |')
-  console.log('|---|---|---|---|---|---|---|---:|---:|---:|')
+  console.log('| City | ISO | Provider | Stable ID | Status | Triage | Source review | License use | Center in geometry | Overcoverage | Undercoverage |')
+  console.log('|---|---|---|---|---|---|---|---|---:|---:|---:|')
   for (const row of rows) {
     console.log([
       row.city,
@@ -195,11 +210,12 @@ function printMarkdown(rows) {
       row.provider || '-',
       row.stableId || '-',
       row.status,
-      row.reviewStatus || '-',
+      row.triage?.action || '-',
+      row.sourceNeedsReview == null ? '-' : String(row.sourceNeedsReview),
       row.licenseUse || '-',
       row.centerInsideGeometry == null ? '-' : String(row.centerInsideGeometry),
-      percent(row.registryBboxOutsideGeometryBboxRatio),
-      percent(row.geometryBboxOutsideRegistryBboxRatio),
+      percent(row.coverage?.overcoverageRatio),
+      percent(row.coverage?.undercoverageRatio),
     ].map(markdownCell).join(' | ').replace(/^/, '| ').replace(/$/, ' |'))
   }
 }

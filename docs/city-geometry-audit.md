@@ -125,6 +125,18 @@ The report should distinguish geometry QA from prayer-time math. A bbox change
 may alter city/source/method provenance, but it is not a WMAE improvement unless
 fixtures prove a calculation change.
 
+Reports include advisory triage labels so reviewers can sort rows before
+opening bbox PRs:
+
+- `undercoverage-review` — reviewed geometry samples fall outside the shipped
+  bbox; potential missed city coverage.
+- `tighten-review` — most shipped bbox samples fall outside reviewed geometry;
+  potential metro/border leakage.
+- `watch` / `low-priority` — visible or minor mismatch, usually not first in
+  line unless the row affects a known source or border problem.
+- `registry-center-review` / `center-geometry-review` — center-point mismatch;
+  treat as high-priority data quality review.
+
 Each row should report at minimum:
 
 - city key and provider stable ID;
