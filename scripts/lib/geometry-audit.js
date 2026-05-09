@@ -127,6 +127,17 @@ export function triageGeometryComparison(result) {
 
   const undercoverage = result.coverage?.undercoverageRatio ?? 0
   const overcoverage = result.coverage?.overcoverageRatio ?? 0
+  const envelopeMismatch = Math.max(
+    result.registryBboxOutsideGeometryBboxRatio ?? 0,
+    result.geometryBboxOutsideRegistryBboxRatio ?? 0
+  )
+  if (envelopeMismatch <= 0.02 && (undercoverage >= 0.05 || overcoverage >= 0.40)) {
+    return {
+      action: 'envelope-aligned',
+      severity: 'info',
+      reason: 'Registry bbox matches the external geometry envelope; remaining mismatch is polygon shape, not bbox extent.',
+    }
+  }
   if (undercoverage >= 0.20) {
     return {
       action: 'undercoverage-review',

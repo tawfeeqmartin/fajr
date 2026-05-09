@@ -868,7 +868,8 @@ const BBOX_OVERRIDES = {
   'Agadir|MA':          [30.391, 30.454, -9.652, -9.454],
   'Zarqa|JO':           [32.05, 32.27, 35.94, 36.24],
   'Amman|JO':           [31.85, 32.00, 35.83, 36.00],
-  'Berrechid|MA':       [33.20, 33.34, -7.65, -7.49],
+  // v1.8.0 #118: WOF locality envelope; replaces broad population-radius box.
+  'Berrechid|MA':       [33.230306, 33.299095, -7.613623, -7.545455],
   'Casablanca|MA':      [33.40, 33.78, -7.78, -7.39],
   'Brussels|BE':        [50.65, 51.05, 4.15, 4.55],
   'Antwerp|BE':         [51.06, 51.42, 4.20, 4.60],
@@ -921,6 +922,12 @@ const BBOX_OVERRIDES = {
   // v1.8.0 #126: Pattani's city population is municipal-scale, but the
   // runtime row intentionally keeps the wider southern Thailand lookup cell.
   'Pattani|TH':         [6.7182, 7.0182, 101.0997, 101.3997],
+  // v1.8.0 #118: WOF locality envelopes; no adjacent-city clip needed.
+  'Settat|MA':          [32.959792, 33.036468, -7.679587, -7.576121],
+  'Sefrou|MA':          [33.809375, 33.844543, -4.853352, -4.804161],
+  'Tangier|MA':         [35.708029, 35.820327, -5.942508, -5.733967],
+  'Nador|MA':           [35.126272, 35.223768, -2.962899, -2.88235],
+  'Oujda|MA':           [34.640786, 34.745161, -1.966294, -1.850833],
 
   // v1.7.8 Tier 4: tighten new-city bboxes to avoid sibling overlaps.
   'Hebron|PS':          [31.50, 31.60, 35.05, 35.16],

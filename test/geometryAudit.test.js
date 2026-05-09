@@ -180,6 +180,30 @@ describe('geometry audit helpers', () => {
     expect(result.triage.severity).toBe('medium')
   })
 
+  it('labels bbox-envelope matches separately from polygon-shape mismatch', () => {
+    const sparseEnvelope = {
+      type: 'MultiPolygon',
+      coordinates: [
+        [[[0, 0], [0.5, 0], [0.5, 0.5], [0, 0.5], [0, 0]]],
+        [[[9.5, 9.5], [10, 9.5], [10, 10], [9.5, 10], [9.5, 9.5]]],
+        [[[4.8, 4.8], [5.2, 4.8], [5.2, 5.2], [4.8, 5.2], [4.8, 4.8]]],
+      ],
+    }
+    const city = {
+      name: 'Envelope City',
+      countryISO: 'EC',
+      lat: 5,
+      lon: 5,
+      bbox: [0, 10, 0, 10],
+    }
+
+    const result = compareCityBboxToGeojson(city, sparseEnvelope)
+    expect(result.geometryBbox).toEqual(city.bbox)
+    expect(result.coverage.overcoverageRatio).toBeGreaterThan(0.9)
+    expect(result.triage.action).toBe('envelope-aligned')
+    expect(result.triage.severity).toBe('info')
+  })
+
   it('returns null triage for unchecked rows', () => {
     expect(triageGeometryComparison({ status: 'cache-file-not-found' })).toBeNull()
   })
