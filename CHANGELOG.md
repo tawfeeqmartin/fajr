@@ -78,6 +78,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added CLI coverage for source-map rows with missing local cache files,
   intentionally blank geometry candidates, cached local GeoJSON, and cache-path
   escapes.
+- Added automatic geometry-audit triage labels for undercoverage, over-broad
+  bboxes, center mismatches, source-review needs, and low-priority matches.
 - Added focused geometry helper tests covering GeoJSON bbox extraction,
   polygon holes, multipolygons, deterministic grid sampling, and bbox coverage
   metrics.

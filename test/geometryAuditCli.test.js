@@ -90,8 +90,10 @@ describe('city geometry audit CLI', () => {
 
     const report = JSON.parse(runCli(['--sources', sourcePath, '--format', 'json']))
     expect(report.summary.checked).toBe(1)
+    expect(report.summary.triage['undercoverage-review']).toBe(1)
     expect(report.rows[0].status).toBe('checked')
     expect(report.rows[0].centerInsideGeometry).toBe(true)
+    expect(report.rows[0].triage.action).toBe('undercoverage-review')
   })
 
   it('reports cache path escapes instead of reading outside cache dir', () => {

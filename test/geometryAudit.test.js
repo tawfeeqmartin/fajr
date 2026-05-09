@@ -10,6 +10,7 @@ import {
   gridSamplesForBbox,
   gridSideForBbox,
   sampleCoverage,
+  triageGeometryComparison,
 } from '../scripts/lib/geometry-audit.js'
 
 describe('geometry audit helpers', () => {
@@ -108,6 +109,7 @@ describe('geometry audit helpers', () => {
     expect(result.geometryBboxOutsideRegistryBboxRatio).toBe(0.91)
     expect(result.coverage.overcoverageRatio).toBe(0)
     expect(result.coverage.undercoverageRatio).toBeGreaterThan(0.7)
+    expect(result.triage.action).toBe('undercoverage-review')
   })
 
   it('separates center-inside-geometry from center-inside-registry-bbox', () => {
@@ -123,6 +125,7 @@ describe('geometry audit helpers', () => {
     expect(result.centerInsideGeometry).toBe(true)
     expect(result.centerInsideRegistryBbox).toBe(false)
     expect(result.bboxIntersection).toBeNull()
+    expect(result.triage.action).toBe('registry-center-review')
   })
 
   it('reports missing geometry when no usable coordinates exist', () => {
@@ -162,5 +165,22 @@ describe('geometry audit helpers', () => {
     const first = sampleCoverage([0, 3, 0, 3], squareWithHole)
     const second = sampleCoverage([0, 3, 0, 3], squareWithHole)
     expect(second).toEqual(first)
+  })
+
+  it('triages over-broad registry bboxes for tightening review', () => {
+    const city = {
+      name: 'Broad City',
+      countryISO: 'BC',
+      lat: 2,
+      lon: 2,
+      bbox: [-10, 20, -10, 20],
+    }
+    const result = compareCityBboxToGeojson(city, squareWithHole)
+    expect(result.triage.action).toBe('tighten-review')
+    expect(result.triage.severity).toBe('medium')
+  })
+
+  it('returns null triage for unchecked rows', () => {
+    expect(triageGeometryComparison({ status: 'cache-file-not-found' })).toBeNull()
   })
 })

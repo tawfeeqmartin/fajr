@@ -86,7 +86,7 @@ export function compareCityBboxToGeojson(city, geojson) {
   const geometryArea = bboxAreaDeg2(geometryBbox)
   const intersectionArea = intersection ? bboxAreaDeg2(intersection) : 0
 
-  return {
+  const result = {
     city: city.name,
     countryISO: city.countryISO,
     status: 'checked',
@@ -101,6 +101,57 @@ export function compareCityBboxToGeojson(city, geojson) {
     registryBboxOutsideGeometryBboxRatio: ratio(registryArea - intersectionArea, registryArea),
     geometryBboxOutsideRegistryBboxRatio: ratio(geometryArea - intersectionArea, geometryArea),
     coverage: sampleCoverage(city.bbox, geojson, geometryBbox),
+  }
+  return {
+    ...result,
+    triage: triageGeometryComparison(result),
+  }
+}
+
+export function triageGeometryComparison(result) {
+  if (!result || result.status !== 'checked') return null
+  if (!result.centerInsideRegistryBbox) {
+    return {
+      action: 'registry-center-review',
+      severity: 'high',
+      reason: 'City center is outside the shipped registry bbox.',
+    }
+  }
+  if (!result.centerInsideGeometry) {
+    return {
+      action: 'center-geometry-review',
+      severity: 'high',
+      reason: 'City center is outside the reviewed external geometry.',
+    }
+  }
+
+  const undercoverage = result.coverage?.undercoverageRatio ?? 0
+  const overcoverage = result.coverage?.overcoverageRatio ?? 0
+  if (undercoverage >= 0.20) {
+    return {
+      action: 'undercoverage-review',
+      severity: 'high',
+      reason: 'External geometry samples fall outside the shipped bbox.',
+    }
+  }
+  if (overcoverage >= 0.70) {
+    return {
+      action: 'tighten-review',
+      severity: 'medium',
+      reason: 'Most shipped bbox samples fall outside the external geometry.',
+    }
+  }
+  if (undercoverage >= 0.05 || overcoverage >= 0.40) {
+    return {
+      action: 'watch',
+      severity: 'low',
+      reason: 'Geometry mismatch is visible but below review thresholds.',
+    }
+  }
+  return {
+    action: 'low-priority',
+    severity: 'info',
+    reason: 'Registry bbox and external geometry broadly agree.',
   }
 }
 
