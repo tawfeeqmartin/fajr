@@ -909,8 +909,10 @@ const BBOX_OVERRIDES = {
   'Singapore|SG':       [1.16, 1.44, 103.6, 104.05],
   'Johor Bahru|MY':     [1.45, 1.6927, 103.5414, 103.9414],
   'Kuala Lumpur|MY':    [2.939, 3.339, 101.55, 101.99],
-  'Basel|CH':           [47.41, 47.65, 7.44, 7.74],
-  'Mulhouse|FR':        [47.65, 47.90, 7.19, 7.49],
+  // v1.8.0 #118: WOF locality envelopes remove the Basel/Mulhouse
+  // cross-border validator warning without clipping either city centre.
+  'Basel|CH':           [47.519297, 47.589902, 7.554659, 7.634148],
+  'Mulhouse|FR':        [47.721942, 47.783092, 7.282525, 7.368264],
 
   // v1.7.8 Tier 2: tighten new-country anchor bboxes to fit within their
   // own COUNTRY_BBOX_TABLE entries (avoid cross-border samples).

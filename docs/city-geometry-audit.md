@@ -127,8 +127,9 @@ validator warnings:
 
 - Morocco Habous clusters: Rabat/Sale/Temara, Agadir/Inezgane,
   Casablanca/Berrechid/Settat, Fes/Sefrou/Meknes, Tangier/Tetouan/Nador/Oujda.
-- Current registry warnings: Jerusalem PS/IL routing, Brazzaville/Kinshasa,
-  Basel/Mulhouse.
+- Current registry warnings: Jerusalem PS/IL routing and Brazzaville/Kinshasa.
+  Basel/Mulhouse has reviewed WOF locality evidence and a tightened runtime
+  bbox; keep it as a regression target rather than an open warning.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
   Dubai/Sharjah/Ajman, Singapore/Johor Bahru, Kuala Lumpur/Shah Alam,
   Toronto/Mississauga/Laval/Montreal, Lahore/Sialkot/Gujranwala,
