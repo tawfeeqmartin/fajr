@@ -66,10 +66,12 @@ describe('city geometry source map', () => {
     expect(blankEntries[0].review.status).toBe('intentional-routing-anchor')
   })
 
-  it('keeps reviewed WOF locality candidates for the Basel/Mulhouse warning pair', () => {
+  it('keeps reviewed WOF locality candidates for cross-border warning pairs', () => {
     const expected = new Map([
       ['Basel|CH', 'wof:locality:101748459'],
       ['Mulhouse|FR', 'wof:locality:101749573'],
+      ['Brazzaville|CG', 'wof:locality:421180023'],
+      ['Kinshasa|CD', 'wof:locality:421166913'],
     ])
 
     for (const [cityKey, stableId] of expected) {

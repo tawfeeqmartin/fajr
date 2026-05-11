@@ -479,6 +479,17 @@
           "licenseUse": "audit-only-until-license-review",
           "reviewStatus": "candidate",
           "notes": ["OSM candidate is commune/departement level; compare with WOF/official sources before bbox edits."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421180023",
+          "ids": { "wofId": 421180023, "repo": "whosonfirst-data-admin-cg", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "CG/brazzaville/wof-locality-421180023.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["WOF SQLite admin-cg latest lists this as the current locality row for Brazzaville; envelope still overlaps Kinshasa because the Congo River boundary is diagonal."]
         }
       ]
     },
@@ -500,6 +511,17 @@
           "licenseUse": "audit-only-until-license-review",
           "reviewStatus": "candidate",
           "notes": ["OSM candidate is province-level; compare with WOF/official sources before bbox edits."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421166913",
+          "ids": { "wofId": 421166913, "repo": "whosonfirst-data-admin-cd", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "CD/kinshasa/wof-locality-421166913.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["WOF SQLite admin-cd latest lists this as the current locality row for Kinshasa; envelope still overlaps Brazzaville because the Congo River boundary is diagonal."]
         }
       ]
     },

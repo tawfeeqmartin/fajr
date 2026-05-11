@@ -92,6 +92,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added reviewed WOF locality candidates for the Basel/Mulhouse cross-border
   validator-warning pair, confirming the current issue is over-broad shipped
   lookup cells rather than missing municipal coverage.
+- Added reviewed WOF locality candidates for the Brazzaville/Kinshasa
+  cross-border warning pair, documenting that their rectangular envelopes still
+  overlap across the diagonal Congo River boundary.
 - Added `scripts/fetch-city-geometry-cache.js`, a WOF-only cache hydration
   helper that fetches reviewed source-map geometry into `.cache/city-geometry/`
   without committing raw geometry or changing runtime bboxes.
