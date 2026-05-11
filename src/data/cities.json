@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-09T23:00:40.453Z",
+  "generated": "2026-05-11T21:49:44.300Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -17,6 +17,8 @@
     {"name":"Ajman","countryISO":"AE","lat":25.4052,"lon":55.5136,"bbox":[25.4,25.45,55.46,55.55],"timezone":"Asia/Dubai","nameLocal":"عجمان","adminRegion":"Ajman Emirate","population":540000,"elevation":4,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Berrechid","countryISO":"MA","lat":33.2659,"lon":-7.5867,"bbox":[33.230306,33.299095,-7.613623,-7.545455],"timezone":"Africa/Casablanca","population":136000,"elevation":175,"source":{"type":"mawaqit","slug":"mosquee-brahimm-lkhlalil-berrchid-26100-morocco"}},
     {"name":"Mamoudzou","countryISO":"YT","lat":-12.7806,"lon":45.2278,"bbox":[-12.81,-12.74,45.2,45.27],"timezone":"Indian/Mayotte","population":71000,"elevation":14,"source":{"type":"inherited","from":"Mayotte"}},
+    {"name":"Mulhouse","countryISO":"FR","lat":47.7508,"lon":7.3359,"bbox":[47.721942,47.783092,7.282525,7.368264],"timezone":"Europe/Paris","population":109000,"elevation":240,"source":{"type":"mawaqit","slug":"association-des-musulmans-des-coteaux-mulhouse"}},
+    {"name":"Basel","countryISO":"CH","lat":47.5596,"lon":7.5886,"bbox":[47.519297,47.589902,7.554659,7.634148],"timezone":"Europe/Zurich","population":173000,"elevation":260,"source":{"type":"mawaqit","slug":"masjid-arrahma-bale-4057-switzerland"}},
     {"name":"Inezgane","countryISO":"MA","lat":30.3552,"lon":-9.5378,"bbox":[30.32,30.39,-9.58,-9.49],"timezone":"Africa/Casablanca","population":130000,"elevation":33,"source":{"type":"mawaqit","slug":"msjd-lbrr-nzkn-86150-morocco"}},
     {"name":"Niagara Falls","countryISO":"CA","lat":43.0896,"lon":-79.0849,"bbox":[43.05,43.13,-79.13,-79.04],"timezone":"America/Toronto","adminRegion":"Ontario","population":88000,"elevation":167,"source":{"type":"inherited","from":"Canada"}},
     {"name":"Nador","countryISO":"MA","lat":35.1741,"lon":-2.9287,"bbox":[35.126272,35.223768,-2.962899,-2.88235],"timezone":"Africa/Casablanca","population":188000,"elevation":6,"source":{"type":"mawaqit","slug":"masjid-al-falah-nador-66000-morocco"}},
@@ -200,9 +202,7 @@
     {"name":"Utrecht","countryISO":"NL","lat":52.0907,"lon":5.1214,"bbox":[51.94,52.16,4.97,5.27],"timezone":"Europe/Amsterdam","population":359000,"elevation":5,"source":{"type":"mawaqit","slug":"utrecht-ulu-moskee-utrecht-3531-bx-netherlands"}},
     {"name":"Zarqa","countryISO":"JO","lat":32.0728,"lon":36.0876,"bbox":[32.05,32.27,35.94,36.24],"timezone":"Asia/Amman","nameLocal":"الزرقاء","adminRegion":"Zarqa","population":635000,"elevation":619,"source":{"type":"mawaqit","slug":"jordan-mosque-msjd-lrdn-zarqa-009625-jordan"}},
     {"name":"Dammam","countryISO":"SA","lat":26.3927,"lon":49.9777,"bbox":[26.32,26.55,49.85,50.15],"timezone":"Asia/Riyadh","nameLocal":"الدمام","adminRegion":"Eastern Province","population":1252000,"elevation":10,"source":{"type":"mawaqit","slug":"jawharah-taybah-dammam-32275-saudi-arabia"}},
-    {"name":"Basel","countryISO":"CH","lat":47.5596,"lon":7.5886,"bbox":[47.41,47.65,7.44,7.74],"timezone":"Europe/Zurich","population":173000,"elevation":260,"source":{"type":"mawaqit","slug":"masjid-arrahma-bale-4057-switzerland"}},
     {"name":"Mississauga","countryISO":"CA","lat":43.589,"lon":-79.6441,"bbox":[43.43,43.74,-79.79,-79.55],"timezone":"America/Toronto","adminRegion":"Ontario","population":717000,"elevation":156,"source":{"type":"inherited","from":"Canada"}},
-    {"name":"Mulhouse","countryISO":"FR","lat":47.7508,"lon":7.3359,"bbox":[47.65,47.9,7.19,7.49],"timezone":"Europe/Paris","population":109000,"elevation":240,"source":{"type":"mawaqit","slug":"association-des-musulmans-des-coteaux-mulhouse"}},
     {"name":"Birmingham","countryISO":"GB","lat":52.4862,"lon":-1.8904,"bbox":[52.4,52.58,-2.1,-1.65],"timezone":"Europe/London","adminRegion":"West Midlands","population":1145000,"elevation":140,"source":{"type":"mawaqit","slug":"south-birmingham-central-masjid-birmingham-b139ls-united-kingdom"}},
     {"name":"Montreal","countryISO":"CA","lat":45.5017,"lon":-73.5673,"bbox":[45.4,45.55,-73.95,-73.4],"timezone":"America/Toronto","adminRegion":"Quebec","population":1762000,"elevation":36,"source":{"type":"inherited","from":"Canada"}},
     {"name":"Trabzon","countryISO":"TR","lat":41.0027,"lon":39.7168,"bbox":[40.85,41.1,39.55,39.9],"timezone":"Europe/Istanbul","adminRegion":"Trabzon Province","population":808000,"elevation":39,"source":{"type":"inherited","from":"Turkey"}},

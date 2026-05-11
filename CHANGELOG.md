@@ -43,6 +43,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   `Sefrou`, `Tangier`, `Nador`, `Oujda`) to reviewed WOF locality envelopes,
   and taught the geometry audit to label bbox-envelope matches separately from
   residual polygon-shape mismatch.
+- Tightened the Basel and Mulhouse lookup cells to reviewed WOF locality
+  envelopes, removing that cross-border validator warning while preserving both
+  Mawaqit city centers.
 
 ### Changed — documentation doctrine cleanup
 

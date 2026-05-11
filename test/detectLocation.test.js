@@ -201,6 +201,24 @@ describe('detectLocation — Mawaqit institutional source', () => {
       expect(oldCorner.country).toBe('Morocco')
     }
   })
+
+  it('Basel/Mulhouse WOF-tightened rows keep centers while dropping old overbroad edges', () => {
+    const rows = [
+      ['Basel', 'Switzerland', 47.5596, 7.5886, 47.62, 7.70],
+      ['Mulhouse', 'France', 47.7508, 7.3359, 47.66, 7.20],
+    ]
+
+    for (const [name, country, centerLat, centerLon, oldEdgeLat, oldEdgeLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe(country)
+      expect(center.source.type).toBe('mawaqit')
+
+      const oldEdge = detectLocation(oldEdgeLat, oldEdgeLon)
+      expect(oldEdge.city?.name, `${name} old overbroad edge should no longer resolve to ${name}`).not.toBe(name)
+    }
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
