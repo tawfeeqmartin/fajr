@@ -1,7 +1,7 @@
 {
   "$schema_doc": "Build-time source map for auditing src/data/cities.json city bboxes. This file stores stable external IDs, review state, authority IDs, and cache pointers only. Raw geometry stays outside git/npm in .cache/city-geometry.",
   "version": 1,
-  "updated": "2026-05-09",
+  "updated": "2026-05-11",
   "issue": 118,
   "cacheRoot": ".cache/city-geometry",
   "providers": {
@@ -520,6 +520,17 @@
           "matchConfidence": "candidate",
           "licenseUse": "audit-only-until-license-review",
           "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101748459",
+          "ids": { "wofId": 101748459, "repo": "whosonfirst-data-admin-ch", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "CH/basel/wof-locality-101748459.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["WOF SQLite admin-ch latest lists this as the current locality row for Basel; bbox aligns with the OSM municipal envelope."]
         }
       ]
     },
@@ -540,6 +551,17 @@
           "matchConfidence": "candidate",
           "licenseUse": "audit-only-until-license-review",
           "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101749573",
+          "ids": { "wofId": 101749573, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "FR/mulhouse/wof-locality-101749573.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["WOF SQLite admin-fr latest lists this as the current locality row for Mulhouse; bbox aligns with the OSM municipal envelope."]
         }
       ]
     }
