@@ -65,6 +65,25 @@ describe('city geometry source map', () => {
     expect(blankEntries.map(entry => entry.cityKey)).toEqual(['Jerusalem|PS'])
     expect(blankEntries[0].review.status).toBe('intentional-routing-anchor')
   })
+
+  it('keeps reviewed WOF locality candidates for the Basel/Mulhouse warning pair', () => {
+    const expected = new Map([
+      ['Basel|CH', 'wof:locality:101748459'],
+      ['Mulhouse|FR', 'wof:locality:101749573'],
+    ])
+
+    for (const [cityKey, stableId] of expected) {
+      const entry = sourceMap.cities.find(row => row.cityKey === cityKey)
+      const geometry = entry?.geometries?.find(row => row.stableId === stableId)
+      expect(geometry, cityKey).toBeTruthy()
+      expect(geometry.ids).toMatchObject({
+        placetype: 'locality',
+        mzIsCurrent: 1,
+      })
+      expect(geometry.sourceConfidence).toBe('high')
+      expect(geometry.licenseUse).toBe('audit-and-reviewed-bbox-proposal')
+    }
+  })
 })
 
 function slug(city) {

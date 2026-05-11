@@ -86,6 +86,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added WOF candidate IDs for Morocco source-map rows where WOF has a plausible
   locality or reviewed lower-confidence county geometry, including Berrechid
   and Settat which previously had no geometry candidate.
+- Added reviewed WOF locality candidates for the Basel/Mulhouse cross-border
+  validator-warning pair, confirming the current issue is over-broad shipped
+  lookup cells rather than missing municipal coverage.
 - Added `scripts/fetch-city-geometry-cache.js`, a WOF-only cache hydration
   helper that fetches reviewed source-map geometry into `.cache/city-geometry/`
   without committing raw geometry or changing runtime bboxes.
