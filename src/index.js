@@ -11,6 +11,7 @@ import {
   prayerTimes as _prayerTimes,
   applyElevationCorrection,
   applyTayakkunBuffer,
+  astronomical,
   detectLocation as _detectLocation,
   nearestCity as _nearestCity,
 } from './engine.js'
@@ -183,6 +184,7 @@ export default {
   nearestCity,
   applyElevationCorrection,
   applyTayakkunBuffer,
+  astronomical,
   qibla,
   hijri,
   hilalVisibility,
@@ -200,6 +202,7 @@ export {
   nearestCity,
   applyElevationCorrection,
   applyTayakkunBuffer,
+  astronomical,
   qibla,
   hijri,
   hilalVisibility,
