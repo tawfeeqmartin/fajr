@@ -1,0 +1,110 @@
+# بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+# Bismillah ir-Rahman ir-Rahim
+#
+# Auto-regenerate SCOREBOARD.md on every release tag, per fajr#105 agot-claude's
+# documentation-discipline spec. The bootstrap version of build-scoreboard.js
+# shipped in v1.8.0; the auto-regen-on-release-tag gate was explicitly
+# deferred to v1.8.x. This workflow closes that deferral.
+#
+# How it works:
+#   1. Fires on every push of a v* tag (matches the existing publish.yml
+#      trigger so SCOREBOARD updates ship in the same window as the npm
+#      publish).
+#   2. Checks out the tag, runs scripts/build-scoreboard.js (regenerates
+#      SCOREBOARD.md with the new version stamp + current metrics).
+#   3. If SCOREBOARD.md changed (it always will because the version line
+#      shifts), commits the regen directly to master with a chore: prefix.
+#
+# Why direct-commit-to-master rather than a PR:
+#   SCOREBOARD.md is a deterministic auto-generated artifact (same as
+#   docs/progress.md). PR review for a regen would be ceremony without
+#   judgment — every release tag is a new SCOREBOARD by construction.
+#   The bypass is narrow: the workflow ONLY touches SCOREBOARD.md and
+#   commits with a chore: prefix; if it ever drifts beyond that scope
+#   the positions-consistency CI gate would catch it on the next PR.
+#
+# Workflow_dispatch fallback is provided for the same reason publish.yml
+# has one: multi-tag pushes in a single `git push` sometimes drop the
+# tag-push event for all but the most-recent tag.
+
+name: SCOREBOARD regen on release tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to regen scoreboard at (e.g. v1.8.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  # Two tags pushed back-to-back should serialize on master rather than race.
+  group: scoreboard-regen
+  cancel-in-progress: false
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+          # We need write permissions to push back to master
+          token: ${{ github.token }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate SCOREBOARD.md
+        run: node scripts/build-scoreboard.js
+
+      - name: Commit regen to master (if changed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- SCOREBOARD.md; then
+            echo "SCOREBOARD.md unchanged — nothing to commit."
+            exit 0
+          fi
+
+          # Switch to master and apply the regen there. We commit to master
+          # directly (not the tag) because SCOREBOARD.md tracks current state,
+          # not the snapshot at tag-time. The tag itself is unchanged.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin master
+          git checkout master
+          # Re-run the regen on master to catch any post-tag commits;
+          # the version stamp will still reflect package.json's version
+          # which got bumped at tag time.
+          node scripts/build-scoreboard.js
+
+          if git diff --quiet -- SCOREBOARD.md; then
+            echo "SCOREBOARD.md unchanged on master — nothing to commit."
+            exit 0
+          fi
+
+          TAG_REF="${{ github.event.inputs.tag || github.ref_name }}"
+          git add SCOREBOARD.md
+          git commit -m "chore(scoreboard): auto-regen on release ${TAG_REF} (fajr#105)"
+          git push origin master
+
+          echo "✓ SCOREBOARD.md regenerated for ${TAG_REF} and pushed to master"
