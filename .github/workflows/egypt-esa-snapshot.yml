@@ -1,0 +1,141 @@
+# بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+# Bismillah ir-Rahman ir-Rahim
+#
+# Daily snapshot of Egypt ESA (General Authority for Survey) official prayer
+# times for fajr#133 / fajr#114 — auto-accumulates seasonal coverage so
+# Egypt can promote C → B in the position registry organically.
+#
+# Same pattern as fajr-codex's habous-morocco-snapshot.yml workflow. Fires
+# daily; opens a review PR with the snapshot under fixtures/egypt-esa/
+# rather than writing eval/data/ directly. Promotion of a curated subset
+# into eval/data/test/ is a separate human review step.
+#
+# ESA serves 77 Egyptian cities' current-day prayer times in a server-
+# rendered HTML table at https://www.esa.gov.eg/praytimes.aspx (the
+# fajr#109 research's "JS-rendered VIEWSTATE form" diagnosis was wrong —
+# raw HTTP GET with a browser User-Agent works). scripts/fetch-egypt-
+# esa.js handles the parse.
+
+name: Egypt ESA daily snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily at 03:17 UTC = 05:17 Cairo (Africa/Cairo, EET, no DST). ESA
+    # publishes today's table on each page-load; daily captures accumulate
+    # ~30 city-days per month per the 27 mapped cities (~810/month).
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: egypt-esa-snapshot
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch today's ESA snapshot
+        run: |
+          set -euo pipefail
+          mkdir -p fixtures/egypt-esa/daily /tmp/esa
+          node scripts/fetch-egypt-esa.js
+          # The fetcher writes eval/data/test/egypt-esa.json. Move it to
+          # the per-day fixture path so the daily capture doesn't clobber
+          # the curated holdout fixture.
+          mv eval/data/test/egypt-esa.json /tmp/esa/snapshot.json
+
+      - name: Normalize snapshot path
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+
+          const input = '/tmp/esa/snapshot.json'
+          const fixtures = JSON.parse(readFileSync(input, 'utf8'))
+          if (!Array.isArray(fixtures) || fixtures.length === 0) {
+            throw new Error('ESA snapshot did not produce fixture rows')
+          }
+          // All rows share the same date (current-day snapshot)
+          const date = fixtures[0].dates?.[0]?.date
+          if (!date) throw new Error('ESA snapshot did not contain dated rows')
+
+          const outPath = `fixtures/egypt-esa/daily/${date}.json`
+          if (!existsSync(outPath)) {
+            writeFileSync(outPath, `${JSON.stringify(fixtures, null, 2)}\n`)
+          }
+
+          writeFileSync(process.env.GITHUB_ENV, [
+            `ESA_SNAPSHOT_PATH=${outPath}`,
+            `ESA_SNAPSHOT_DATE=${date}`,
+            `ESA_SNAPSHOT_CITIES=${fixtures.length}`,
+            '',
+          ].join('\n'), { flag: 'a' })
+          NODE
+
+      - name: Restore curated holdout fixture (it should NOT change daily)
+        run: |
+          set -euo pipefail
+          # Re-create the empty holdout fixture from master if the move stripped
+          # it. The curated holdout is updated by humans, not by this workflow.
+          if ! git diff --quiet -- eval/data/test/egypt-esa.json; then
+            git checkout -- eval/data/test/egypt-esa.json
+          fi
+
+      - name: Open snapshot PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- fixtures/egypt-esa/daily; then
+            echo "No new ESA snapshot to commit (already exists for today)."
+            exit 0
+          fi
+
+          branch="automation/egypt-esa-${ESA_SNAPSHOT_DATE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add "$ESA_SNAPSHOT_PATH"
+          git commit -m "data(egypt): capture ESA daily snapshot ${ESA_SNAPSHOT_DATE}"
+          git push --force-with-lease origin "$branch"
+
+          existing="$(gh pr list --head "$branch" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "Snapshot PR already exists: #$existing"
+            exit 0
+          fi
+
+          cat > /tmp/esa-snapshot-pr-body.md <<EOF
+          Automated Egypt ESA daily snapshot.
+
+          - Source: Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)
+          - Date: ${ESA_SNAPSHOT_DATE}
+          - Cities: ${ESA_SNAPSHOT_CITIES} mapped Egyptian cities
+
+          [positions: no-change-required] daily capture under fixtures/egypt-esa/daily; does not touch eval/data/.
+
+          Promotion into eval/data/test/ remains a separate human review step (fajr#133 follow-up: multi-season accumulation needed for Egypt C → B promotion per docs/positions.md Promotion Criteria).
+          EOF
+
+          gh pr create \
+            --base master \
+            --head "$branch" \
+            --title "data(egypt): capture ESA daily snapshot ${ESA_SNAPSHOT_DATE}" \
+            --body-file /tmp/esa-snapshot-pr-body.md
