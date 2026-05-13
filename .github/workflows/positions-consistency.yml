@@ -1,0 +1,134 @@
+# بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+# Bismillah ir-Rahman ir-Rahim
+#
+# Position-registry consistency CI gate per fajr#115 (agot-claude).
+#
+# The position registry (docs/positions.md + docs/known-disagreements.md)
+# is the product-doctrine layer that bridges fajr's empirical evidence
+# (CALIBRATION.md, eval/data/, knowledge/wiki/) to a clear default that
+# apps can explain. A registry that drifts out of date is worse than no
+# registry: it carries the *credibility* of "documented position" with
+# the *content* of stale claim.
+#
+# This gate catches the most common drift cases mechanically. When a PR
+# touches code/data/wiki paths that may shift a region's default,
+# confidence grade, or framing, the gate asserts that:
+#
+#   (1) docs/positions.md was also touched in the same PR, OR
+#   (2) docs/known-disagreements.md was also touched (subset of triggers), OR
+#   (3) the PR description carries the bypass marker
+#       `[positions: no-change-required]` with a one-line justification.
+#
+# Same shape as the doc-regen-every-roll discipline fajr-codex applies
+# elsewhere. Bypass is intentional — most src/engine.js edits won't
+# actually shift a region's product-doctrine row; the marker forces
+# the contributor to *think* about it but doesn't force unnecessary
+# doc churn.
+#
+# See fajr#115 for the original proposal; fajr#113 promotion-log is the
+# audit trail for grade changes this gate protects.
+
+name: Position registry consistency
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  positions-consistency:
+    name: docs/positions.md ↔ code drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check positions.md / known-disagreements.md vs touched files
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -e
+
+          # Files changed in this PR vs master
+          CHANGED=$(git diff --name-only origin/master..HEAD || true)
+          echo "Files changed in this PR:"
+          echo "$CHANGED" | sed 's/^/  /'
+          echo
+
+          # Triggers that may shift positions.md (region default / confidence
+          # grade / institutional citation / fixture-evidence base):
+          #
+          #   src/engine.js           — country dispatch logic
+          #   src/methods.js          — method definitions
+          #   src/data/cities.json    — city registry (new countries esp.)
+          #   eval/data/test/*.json   — fixture changes the empirical evidence
+          #   eval/data/train/*.json  — train-fixture changes (rare)
+          #   eval/results/runs.jsonl — eval-output changes (potentially affects grades)
+          #   knowledge/wiki/regions/*.md — region narrative changes
+          #   scripts/fetch-*.js      — institutional source ingestion changes
+          POSITIONS_TRIGGERS=$(echo "$CHANGED" | grep -E \
+            -e '^src/engine\.js$' \
+            -e '^src/methods\.js$' \
+            -e '^src/data/cities\.json$' \
+            -e '^eval/data/(test|train)/.+\.json$' \
+            -e '^eval/results/runs\.jsonl$' \
+            -e '^knowledge/wiki/regions/.+\.md$' \
+            -e '^scripts/fetch-.+\.js$' || true)
+
+          # Triggers that may shift known-disagreements.md (correction
+          # stance / fiqh framing changes):
+          DISAGREEMENT_TRIGGERS=$(echo "$CHANGED" | grep -E \
+            -e '^knowledge/wiki/corrections/.+\.md$' \
+            -e '^knowledge/wiki/fiqh/.+\.md$' || true)
+
+          TOUCHES_POSITIONS=$(echo "$CHANGED" | grep -F 'docs/positions.md' || true)
+          TOUCHES_DISAGREEMENTS=$(echo "$CHANGED" | grep -F 'docs/known-disagreements.md' || true)
+          TOUCHES_PROMOTION_LOG=$(echo "$CHANGED" | grep -F 'docs/promotion-log.md' || true)
+
+          # Bypass marker — PR description must contain the literal sentinel
+          # `[positions: no-change-required]` followed by anything else on
+          # the same line (the justification). Matched case-sensitively to
+          # discourage accidental opt-out.
+          BYPASS_POSITIONS=$(echo "$PR_BODY" | grep -F '[positions: no-change-required]' || true)
+          BYPASS_DISAGREEMENTS=$(echo "$PR_BODY" | grep -F '[known-disagreements: no-change-required]' || true)
+
+          # Verdict — positions.md gate
+          if [ -n "$POSITIONS_TRIGGERS" ]; then
+            echo "::group::Positions-trigger files in this PR"
+            echo "$POSITIONS_TRIGGERS"
+            echo "::endgroup::"
+            if [ -z "$TOUCHES_POSITIONS" ] && [ -z "$TOUCHES_PROMOTION_LOG" ] && [ -z "$BYPASS_POSITIONS" ]; then
+              echo
+              echo "::error::PR touches files that may affect docs/positions.md but doesn't update it."
+              echo "::error::Either update docs/positions.md (or docs/promotion-log.md if you're changing a confidence grade)"
+              echo "::error::OR add a line containing '[positions: no-change-required]' to the PR description"
+              echo "::error::followed by a one-line justification (e.g. 'pure refactor; no region default shift')."
+              echo
+              echo "See fajr#113 (promotion criteria) and fajr#115 (this gate) for context."
+              exit 1
+            fi
+            echo "✓ positions.md gate satisfied"
+          else
+            echo "✓ no positions-trigger files touched"
+          fi
+
+          # Verdict — known-disagreements.md gate
+          if [ -n "$DISAGREEMENT_TRIGGERS" ]; then
+            echo "::group::Known-disagreements-trigger files in this PR"
+            echo "$DISAGREEMENT_TRIGGERS"
+            echo "::endgroup::"
+            if [ -z "$TOUCHES_DISAGREEMENTS" ] && [ -z "$BYPASS_DISAGREEMENTS" ]; then
+              echo
+              echo "::error::PR touches knowledge/wiki/corrections/ or knowledge/wiki/fiqh/ but doesn't"
+              echo "::error::update docs/known-disagreements.md. Either update the disagreement entry"
+              echo "::error::OR add '[known-disagreements: no-change-required]' to the PR description"
+              echo "::error::with a one-line justification."
+              exit 1
+            fi
+            echo "✓ known-disagreements.md gate satisfied"
+          else
+            echo "✓ no known-disagreements-trigger files touched"
+          fi
+
+          echo
+          echo "All position-registry consistency checks passed."

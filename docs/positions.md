@@ -39,6 +39,66 @@ The rule of thumb:
 Confidence is not a fiqh ranking. It is a product-data ranking: how confident
 fajr can be that the returned clock time matches local published practice.
 
+## Promotion Criteria
+
+Grades move between tiers through mechanical thresholds, not judgment-call
+re-rating. This keeps the registry auditable ("why is Singapore A and Egypt
+C?" has a checkable answer) and gives contributors a clear path: a region
+moves up when the listed evidence lands, and moves down when evidence goes
+stale.
+
+| Transition | Promotion criteria (must satisfy ALL) |
+|---|---|
+| **D → C** | Country has a documented method dispatch in `selectMethod()` AND a wiki entry at `knowledge/wiki/regions/<country>.md` describing the institutional context. |
+| **C → B** | Above + at least one fixture file at `eval/data/test/<source>-<region>-*.json` covering ≥1 city × ≥1 season + mean abs bias ≤ 2 min against the institutional source(s) in scope. |
+| **B → A** | Above + ≥3 cities × ≥2 seasons validated + mean abs bias ≤ 1 min + cited primary institutional source URL in both `docs/data-sources.md` AND the region's wiki page. |
+
+These are **product-data** thresholds (returned clock-time matching published
+practice), not fiqh thresholds. Crossing a threshold is necessary but not
+sufficient: a 🔴 Novel correction in `selectMethod()` blocks promotion even
+if the empirical evidence would otherwise qualify, because the correction
+itself needs scholarly review before product-data confidence is meaningful.
+
+### Demotion
+
+A region demotes when its evidence base degrades:
+
+- **A → B**: fixture source goes stale (no live re-check in ≥180 days per
+  the source-freshness audit), OR cited primary URL becomes unreachable
+  from automated paths and isn't replaced within the same release, OR
+  the per-region bias on a re-run eval exceeds 1 min on a previously-A
+  source.
+- **B → C**: above + per-region bias exceeds 2 min, OR the only fixture
+  for the region is dropped without replacement.
+- **C → D**: the wiki region page is deleted or all dispatch logic for the
+  country is removed from `selectMethod()`.
+
+Demotion lands in the same release as the evidence-degradation event,
+even when no other code change is required.
+
+### Promotion Log
+
+Each grade change is a structured PR that touches:
+
+1. The region's row in this table (`docs/positions.md` § Current Positions)
+2. An append-only `docs/promotion-log.md` entry with this shape:
+
+   ```
+   ## YYYY-MM-DD — <region> <from-grade> → <to-grade>
+   **PR:** #NNN
+   **Trigger:** brief reason (new fixture / source-freshness re-check / bias regression / etc.)
+   **Evidence:**
+   - Fixture: eval/data/test/<file>.json (N cities × M seasons, mean abs bias X.X min)
+   - Citation: <URL in docs/data-sources.md>
+   - Wiki: knowledge/wiki/regions/<region>.md (sha: <commit-short>)
+   **Notes:** any caveats or open follow-ups.
+   ```
+
+The promotion log gives reviewers and downstream consumers an auditable
+trail from current grade back to the empirical evidence that justified it.
+When agot or another downstream agent asks "is this grade still current?"
+the log entry's date + evidence-source SHA answer it mechanically.
+
 ## Current Positions
 
 | Region | Default fajr position | Confidence | Main authority / evidence | What apps should say |
@@ -83,7 +143,28 @@ exists. A stronger position needs at least one of:
 ## Backing Docs
 
 - [Known disagreements](known-disagreements.md)
+- [Promotion log](promotion-log.md) — audit trail for confidence-grade changes
 - [CALIBRATION.md](../CALIBRATION.md)
 - [Data sources](data-sources.md)
 - [Elevation correction](../knowledge/wiki/corrections/elevation.md)
 - [A Gift of Time integration guide](../examples/agiftoftime/INTEGRATION.md)
+
+## CI gate (positions-consistency)
+
+`.github/workflows/positions-consistency.yml` enforces that PRs which
+touch position-affecting paths (`src/engine.js`, `src/methods.js`,
+`src/data/cities.json`, `eval/data/{test,train}/*.json`,
+`eval/results/runs.jsonl`, `knowledge/wiki/regions/*.md`,
+`scripts/fetch-*.js`) also update either this file or
+[`promotion-log.md`](promotion-log.md). PRs that touch
+`knowledge/wiki/corrections/*.md` or `knowledge/wiki/fiqh/*.md` are
+similarly required to update [`known-disagreements.md`](known-disagreements.md).
+
+**Bypass marker:** include a line in the PR description containing
+`[positions: no-change-required]` (or
+`[known-disagreements: no-change-required]`) followed by a one-line
+justification. The marker forces a moment of "does this actually shift
+a region's default or confidence grade?" reflection without forcing
+unnecessary doc churn for pure refactors. See fajr#115 for the
+rationale and fajr#113 for the promotion-criteria thresholds this
+gate protects.
