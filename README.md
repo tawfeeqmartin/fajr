@@ -99,7 +99,7 @@ console.log(times.notes)
 }
 ```
 
-Use `location.asrConvention` for local Asr-convention metadata and `applied.asrSchool` for the formula actually used. These are **not** a full legal-madhhab taxonomy: Morocco, for example, is Maliki, while its relevant Asr-convention value is `standard` 1x shadow. The older `location.madhab` / `applied.madhab` fields remain as deprecated aliases for v1.7.21 compatibility and should not be rendered as "local madhhab." In v1.7.22, Hanafi-convention countries can report `location.asrConvention: 'hanafi'` while keeping `applied.asrSchool: 'standard'` when the selected timetable method uses standard 1x Asr. When that mismatch matters, `notes[]` includes an Asr-convention advisory.
+Use `location.asrConvention` for local Asr-convention metadata and `applied.asrSchool` for the formula actually used. These are **not** a full legal-madhhab taxonomy: Morocco, for example, is Maliki, while its relevant Asr-convention value is `standard` 1x shadow. The older `location.madhab` / `applied.madhab` fields are deprecated compatibility aliases; from v1.8.1 they mirror `standard` / `hanafi` Asr values and no longer return `shafii` for generic standard 1x Asr. Do not render them as "local madhhab." Hanafi-convention countries can report `location.asrConvention: 'hanafi'` while keeping `applied.asrSchool: 'standard'` when the selected timetable method uses standard 1x Asr. When that mismatch matters, `notes[]` includes an Asr-convention advisory.
 
 For regional defaults, read [docs/positions.md](docs/positions.md). For areas
 where authorities or valid methods differ, read

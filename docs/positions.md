@@ -1,6 +1,6 @@
 # fajr Position Registry
 
-Last refreshed: 2026-05-06
+Last refreshed: 2026-05-14
 
 This is the compact product-doctrine layer for fajr. It answers the question:
 when a user gives coordinates, what prayer-time position does fajr apply, and
@@ -128,6 +128,8 @@ For end-user UI, do not expose every source row. Show:
 - confidence grade when useful
 - `location.asrConvention` and `applied.asrSchool` separately
 - elevation stance and correction amount when non-zero
+- deprecated `location.madhab` / `applied.madhab` only as compatibility
+  aliases for `standard | hanafi` Asr values, never as legal madhhab labels
 - `notes[]`, `validityWarnings[]`, and `disclaimer`
 - a clear override path for method, Asr convention, and elevation
 

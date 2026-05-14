@@ -108,13 +108,6 @@ export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-d
  *    (sea level) silently — the safest default. */
 export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zero'
 
-/** Deprecated v1.7.21 legacy name for the Hanafi-vs-standard Asr convention.
- *  This is not a full legal-madhhab taxonomy: Maliki, Hanbali, and Jafari are
- *  not represented by this field. New integrations should use
- *  `AsrConvention` / `asrConvention` for location metadata and `AsrSchool` /
- *  `applied.asrSchool` for the calculation actually used. */
-export type Madhab = 'shafii' | 'hanafi'
-
 /** Asr calculation school actually applied.
  *  - `'standard'`: 1× shadow Asr, used by Shafi'i/Maliki/Hanbali-standard
  *    calculations and adhan.js presets unless explicitly changed.
@@ -133,6 +126,18 @@ export type AsrConvention = AsrSchool
  *  convention metadata above. */
 export type LegalMadhhab = 'hanafi' | 'maliki' | 'shafii' | 'hanbali'
 
+/** Deprecated v1.7.21 field-name alias for the Hanafi-vs-standard Asr
+ *  convention. As of v1.8.1 this mirrors `AsrConvention`
+ *  (`'standard' | 'hanafi'`) instead of adhan.js's historic
+ *  `'shafii' | 'hanafi'` vocabulary, because `'shafii'` was misleading for
+ *  Maliki/Hanbali/Jafari-standard regions such as Morocco. */
+export type DeprecatedMadhabAlias = AsrConvention
+
+/** Deprecated public type name retained for callers using `travelerMode`.
+ *  Prefer `LegalMadhhab` for legal schools and `AsrConvention` / `AsrSchool`
+ *  for prayer-time Asr metadata. */
+export type Madhab = LegalMadhhab
+
 /** Deprecated legacy provenance alias for `AsrConventionSource`.
  *
  *  - `'caller-explicit'`: caller will pass an explicit Asr-convention override
@@ -142,7 +147,7 @@ export type LegalMadhhab = 'hanafi' | 'maliki' | 'shafii' | 'hanbali'
  *    does not by itself mutate the calculation-facing Asr school.
  *  - `'method-implied'`: the selected method's calculation Asr school is what
  *    is reported. Mixed-madhab countries (Egypt, Saudi, Iraq, Lebanon, Syria,
- *    Morocco, Western diaspora, etc.) intentionally fall through here.
+ *    Western diaspora, etc.) intentionally fall through here.
  *
  *  Future v1.8.x will add `'caller-explicit'` once the override surface
  *  in #40 lands. */
@@ -175,11 +180,10 @@ export interface PrayerTimesLocation {
   asrConvention:       AsrConvention
   /** How the Asr convention was chosen — see AsrConventionSource above. */
   asrConventionSource: AsrConventionSource
-  /** Deprecated legacy alias for `asrConvention`, using adhan.js's historic
-   *  `'shafii' | 'hanafi'` vocabulary. Do not render this as "local madhhab";
-   *  Morocco, for example, is Maliki while standard 1× Asr remains the
-   *  relevant convention label here. */
-  madhab:          Madhab
+  /** Deprecated legacy alias for `asrConvention`. Do not render this as
+   *  "local madhhab"; Morocco, for example, is Maliki while standard 1× Asr
+   *  remains the relevant convention label here. */
+  madhab:          DeprecatedMadhabAlias
   /** How the method was chosen — see MethodSource above. */
   methodSource:    MethodSource
   /** Deprecated legacy alias for `asrConventionSource`. v1.7.21+ (#81). */
@@ -198,9 +202,8 @@ export interface AppliedDispatch {
   /** The Asr calculation school actually applied. */
   asrSchool:     AsrSchool
   /** Deprecated legacy alias for the Asr formula actually used. Prefer
-   *  `asrSchool`, because `'shafii'` here means standard 1× shadow Asr, not a
-   *  full legal-madhhab claim. */
-  madhab:        Madhab
+   *  `asrSchool`; this is not a full legal-madhhab claim. */
+  madhab:        AsrSchool
   /** Elevation correction in minutes that fajr applied (or would apply at the
    *  given effective elevation). 0 at sea level / when correction declined. */
   elevationMin:  number
@@ -835,8 +838,6 @@ export function nightThirds(params:
 // ─────────────────────────────────────────────────────────────────────────────
 // travelerMode — qasr / jam' (shortened / combined) prayer metadata
 // ─────────────────────────────────────────────────────────────────────────────
-
-export type Madhab = 'shafii' | 'maliki' | 'hanbali' | 'hanafi'
 
 export interface TravelerModeResult {
   fajr:    Date

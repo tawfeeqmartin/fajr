@@ -26,6 +26,18 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — deprecated madhab alias values
+
+- Resolved the agiftoftime QA finding from [#88](https://github.com/tawfeeqmartin/fajr/issues/88):
+  Morocco no longer exposes `location.madhab: 'shafii'` or
+  `applied.madhab: 'shafii'` when the engine only means standard 1× Asr.
+- The primary fields remain unchanged: apps should still render
+  `location.asrConvention` for local Asr-convention metadata and
+  `applied.asrSchool` for the formula actually used.
+- Deprecated `location.madhab` and `applied.madhab` now mirror
+  `standard | hanafi` Asr values. This is an observable compatibility cleanup
+  for the deprecated fields, not a prayer-time calculation change.
+
 ### Fixed — Morocco city bbox routing
 
 - Adjusted the Rabat and Agadir runtime bboxes using reviewed Who's On First
