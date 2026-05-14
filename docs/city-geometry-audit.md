@@ -121,8 +121,9 @@ The first UAE pass shows a different pattern:
   shipped city lookup cells without colliding with neighboring fajr rows, so
   they are runtime-ready.
 - Dubai, Sharjah, and Ajman also have current WOF locality envelopes, but their
-  rectangular envelopes overlap heavily. They are source-map rows for now and
-  need an explicit clipping rule before runtime bboxes should change.
+  rectangular envelopes overlap heavily. Sharjah and Ajman now use clipped WOF
+  extents that improve eastern/northern coverage while preserving Dubai
+  routing. Dubai remains unchanged pending a stronger clipping decision.
 
 Reference URLs checked in this pass:
 
@@ -159,8 +160,11 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   Fes-Ville-Nouvelle in WOF but supersedes the older Fes locality row and
   matches the OSM admin-8 Fes envelope.
 - `Abu Dhabi|AE` and `Al Ain|AE`: expanded/tightened to reviewed WOF current
-  locality envelopes. Dubai, Sharjah, and Ajman were added to the source map
-  but intentionally left unchanged at runtime pending clipping review.
+  locality envelopes.
+- `Sharjah|AE` and `Ajman|AE`: expanded to clipped WOF current locality
+  extents. Sharjah keeps its existing south/west edges to avoid changing Dubai
+  routing; Ajman starts at Sharjah's WOF north edge so the two cells only
+  touch. `Dubai|AE` remains unchanged pending deeper clipping review.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.

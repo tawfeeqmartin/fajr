@@ -65,6 +65,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   Dubai/Sharjah/Ajman; shipped Abu Dhabi and Al Ain runtime bbox updates where
   the WOF envelopes do not collide, while marking Dubai/Sharjah/Ajman for
   clipping review.
+- Expanded Sharjah and Ajman runtime bboxes using clipped WOF locality extents:
+  Sharjah gains eastward coverage without moving south into Dubai, and Ajman
+  gains reviewed WOF extent while only edge-touching Sharjah.
 
 ### Changed — documentation doctrine cleanup
 

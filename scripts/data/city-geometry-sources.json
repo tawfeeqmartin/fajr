@@ -536,15 +536,15 @@
     },
     {
       "cityKey": "Sharjah|AE",
-      "priority": ["uae-metro", "needs-clipping-review"],
+      "priority": ["uae-metro", "wof-locality-runtime-bbox", "clipped"],
       "review": {
-        "status": "needs-clipping-review",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
-        "notes": ["WOF current locality envelope overlaps Dubai/Ajman envelopes; do not ship as runtime bbox without an explicit clipping rule."]
+        "notes": ["2026-05-14: runtime bbox expanded eastward from WOF current locality envelope while keeping Dubai's existing cell unchanged and clipping north edge at Ajman's south edge."]
       },
       "neighborRelations": [
-        { "cityKey": "Dubai|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" },
-        { "cityKey": "Ajman|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" }
+        { "cityKey": "Dubai|AE", "kind": "runtime-overlap-preserved", "status": "existing Dubai/Sharjah overlap preserved; no new southward Sharjah expansion into Dubai" },
+        { "cityKey": "Ajman|AE", "kind": "runtime-edge-touch", "status": "runtime bboxes clipped to touch at lat 25.398821 without area overlap" }
       ],
       "geometries": [
         {
@@ -555,21 +555,22 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime bbox uses WOF current locality east/north extents but keeps existing south/west extents to avoid changing Dubai routing."]
         }
       ]
     },
     {
       "cityKey": "Ajman|AE",
-      "priority": ["uae-metro", "needs-clipping-review"],
+      "priority": ["uae-metro", "wof-locality-runtime-bbox", "clipped"],
       "review": {
-        "status": "needs-clipping-review",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
-        "notes": ["WOF current locality envelope overlaps Dubai/Sharjah envelopes; do not ship as runtime bbox without an explicit clipping rule."]
+        "notes": ["2026-05-14: runtime bbox updated toward WOF current locality envelope and clipped to start at Sharjah's north edge."]
       },
       "neighborRelations": [
-        { "cityKey": "Dubai|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" },
-        { "cityKey": "Sharjah|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" }
+        { "cityKey": "Dubai|AE", "kind": "runtime-separated", "status": "Ajman runtime bbox remains north of Dubai cell" },
+        { "cityKey": "Sharjah|AE", "kind": "runtime-edge-touch", "status": "runtime bboxes clipped to touch at lat 25.398821 without area overlap" }
       ],
       "geometries": [
         {
@@ -580,7 +581,8 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime bbox uses WOF current locality lon/north extents and clips south edge to Sharjah's north edge."]
         }
       ]
     },
