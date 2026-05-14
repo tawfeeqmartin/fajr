@@ -34,9 +34,10 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-39 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
-Turkey large-city rows, 1 Detroit/Windsor border row, 3 Geneva border rows, and
-5 existing registry warning rows. It carries 17 OSM relation rows plus 35 WOF
+41 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
+Turkey large-city rows, 1 Detroit/Windsor border row, 3 Geneva border rows, 2
+Strasbourg/Kehl border rows, and 5 existing registry warning rows. It carries
+17 OSM relation rows plus 37 WOF
 rows across reviewed locality/county candidates. Berrechid, Settat, and Fes
 now have WOF locality candidates; Jerusalem intentionally remains without a
 geometry candidate until a human routing decision is available.
@@ -149,6 +150,12 @@ The Geneva/French-border seam is cleaner with WOF locality rows:
   current locality rows let the runtime keep Geneva city provenance while
   routing Annemasse and Ferney-Voltaire to France.
 
+The Strasbourg/Kehl Rhine seam requires a clipped WOF application:
+
+- Both cities have current WOF locality rows, but the raw rectangular
+  envelopes overlap across the Rhine. Strasbourg is clipped just west of
+  Kehl's WOF west edge; Kehl uses its WOF envelope.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -200,6 +207,8 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
 - `Geneva|CH`, `Annemasse|FR`, and `Ferney-Voltaire|FR`: tightened/added from
   WOF current locality envelopes so French border-town coordinates no longer
   resolve to Geneva/Switzerland.
+- `Strasbourg|FR` and `Kehl|DE`: separated at the Rhine seam so Kehl no
+  longer resolves to Strasbourg/France.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.

@@ -80,6 +80,11 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Tightened `Geneva|CH` and added WOF-backed `Annemasse|FR` and
   `Ferney-Voltaire|FR` lookup cells so adjacent French border towns no longer
   resolve to Geneva/Switzerland.
+- Separated the `Strasbourg|FR` / `Kehl|DE` Rhine seam with clipped WOF-backed
+  lookup cells so Kehl no longer resolves to Strasbourg/France.
+- Extended Equatorial Guinea's country bbox by 0.01° north so Malabo's own
+  northern city samples remain in Equatorial Guinea instead of falling through
+  to Cameroon.
 
 ### Changed — documentation doctrine cleanup
 

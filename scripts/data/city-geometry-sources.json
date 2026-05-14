@@ -859,6 +859,55 @@
       ]
     },
     {
+      "cityKey": "Strasbourg|FR",
+      "priority": ["strasbourg-kehl-border", "wof-locality-runtime-bbox", "clipped", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated from WOF current locality row but clipped west of Kehl because the raw WOF rectangles overlap across the Rhine."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Kehl|DE", "kind": "runtime-separated", "status": "Strasbourg east edge stops at lon 7.79; Kehl starts at WOF west edge lon 7.79153" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101751113",
+          "ids": { "wofId": 101751113, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "FR/strasbourg/wof-locality-101751113.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox extends to lon 7.835923; runtime bbox clips east edge to 7.79 to avoid Kehl."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Kehl|DE",
+      "priority": ["strasbourg-kehl-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added from WOF current locality row so Kehl no longer resolves to Strasbourg/France."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Strasbourg|FR", "kind": "runtime-separated", "status": "Kehl starts east of Strasbourg's clipped runtime cell" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101753099",
+          "ids": { "wofId": 101753099, "repo": "whosonfirst-data-admin-de", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "DE/kehl/wof-locality-101753099.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
       "cityKey": "Jerusalem|PS",
       "priority": ["current-validator-warning", "intentional-routing-anchor", "human-review-required"],
       "review": {

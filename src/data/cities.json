@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T10:48:16.990Z",
+  "generated": "2026-05-14T10:52:57.644Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -8,7 +8,7 @@
     "population-centers": "Manual, sourced from UN World Cities + World Population Review 2024-2025"
   },
   "notes": "Cities sorted by bbox area ascending. detectLocation() linear-scans this array and returns the first bbox that contains (lat, lon) — smallest match wins. Each city carries an institutional `source` (mawaqit | national-authority | inherited) so apps can attribute timetable provenance to users. Method overrides are city-level institutional decisions documented in scripts/data/city-method-overrides.json with citation strings.",
-  "total": 480,
+  "total": 481,
   "cities": [
     {"name":"Alburikent (Dagestan)","countryISO":"RU","lat":42.9234,"lon":47.5089,"bbox":[42.92,42.94,47.5,47.52],"timezone":"Europe/Moscow","adminRegion":"Dagestan","population":11000,"elevation":50,"source":{"type":"mawaqit","slug":"alburkent-dzhuma-mechet-alburikent-367026-russia"}},
     {"name":"Isa Town","countryISO":"BH","lat":26.1762,"lon":50.5495,"bbox":[26.16,26.19,50.53,50.56],"timezone":"Asia/Bahrain","population":38000,"elevation":21,"source":{"type":"mawaqit","slug":"masjid-madina-issa-south-810-issa-town-bahrain"}},
@@ -42,6 +42,7 @@
     {"name":"Fes","countryISO":"MA","lat":34.0331,"lon":-5.0003,"bbox":[33.97125,34.076345,-5.078619,-4.937726],"timezone":"Africa/Casablanca","nameLocal":"فاس","adminRegion":"Fès-Meknès","population":1112000,"elevation":408,"source":{"type":"mawaqit","slug":"masjid-aamrou-bn-laas-fes-30000-morocco-1"}},
     {"name":"Saint-Denis","countryISO":"RE","lat":-20.8823,"lon":55.4504,"bbox":[-20.95,-20.85,55.4,55.55],"timezone":"Indian/Reunion","adminRegion":"Réunion","population":153000,"elevation":20,"source":{"type":"inherited","from":"Reunion"}},
     {"name":"Temara","countryISO":"MA","lat":33.9281,"lon":-6.9067,"bbox":[33.85,33.96,-7,-6.86],"timezone":"Africa/Casablanca","population":313000,"elevation":75,"source":{"type":"mawaqit","slug":"msjd-bd-llh-bn-ysyn-temara-12123-morocco"}},
+    {"name":"Strasbourg","countryISO":"FR","lat":48.5734,"lon":7.7521,"bbox":[48.492024,48.646236,7.687934,7.79],"timezone":"Europe/Paris","adminRegion":"Grand Est","population":287000,"elevation":142,"source":{"type":"mawaqit","slug":"mosquee-quba-neudorf-strasbourg-67100-france"}},
     {"name":"Dearborn","countryISO":"US","lat":42.3223,"lon":-83.1763,"bbox":[42.32,42.4,-83.28,-83.08],"timezone":"America/Detroit","adminRegion":"Michigan","population":109000,"elevation":184,"methodOverride":"ISNA","altMethods":[{"method":"Tehran","source":"Iraqi-Lebanese Shia diaspora — Islamic Center of America (Dearborn) and other Najaf-Karbala diaspora institutions follow Tehran-style timing for the Twelver Shia community"}],"source":{"type":"national-authority","institution":"Islamic Society of North America"}},
     {"name":"Luton","countryISO":"GB","lat":51.8787,"lon":-0.42,"bbox":[51.82,51.94,-0.5,-0.36],"timezone":"Europe/London","adminRegion":"Bedfordshire","population":213000,"elevation":122,"source":{"type":"inherited","from":"UK"}},
     {"name":"Bursa","countryISO":"TR","lat":40.1885,"lon":29.061,"bbox":[40.16606,40.253447,28.996355,29.20099],"timezone":"Europe/Istanbul","adminRegion":"Bursa Province","population":3139000,"elevation":100,"source":{"type":"inherited","from":"Turkey"}},
@@ -58,6 +59,7 @@
     {"name":"Gaziantep","countryISO":"TR","lat":37.0662,"lon":37.3833,"bbox":[37.005549,37.125921,37.275644,37.464959],"timezone":"Europe/Istanbul","nameLocal":"Gaziantep","adminRegion":"Gaziantep Province","population":2070000,"elevation":855,"source":{"type":"inherited","from":"Turkey"}},
     {"name":"Tangier","countryISO":"MA","lat":35.7595,"lon":-5.834,"bbox":[35.708029,35.820327,-5.942508,-5.733967],"timezone":"Africa/Casablanca","nameLocal":"طنجة","adminRegion":"Tanger-Tétouan-Al Hoceima","population":947000,"elevation":18,"source":{"type":"inherited","from":"Morocco"}},
     {"name":"Amman","countryISO":"JO","lat":31.9454,"lon":35.9284,"bbox":[31.85,32,35.83,36],"timezone":"Asia/Amman","elevation":757,"source":{"type":"national-authority","institution":"Jordan Ministry of Awqaf, Islamic Affairs and Holy Places"}},
+    {"name":"Kehl","countryISO":"DE","lat":48.5838,"lon":7.8125,"bbox":[48.485236,48.641269,7.79153,7.956431],"timezone":"Europe/Berlin","adminRegion":"Baden-Württemberg","population":37000,"elevation":139,"source":{"type":"inherited","from":"Germany"}},
     {"name":"Jerusalem","countryISO":"IL","lat":31.7683,"lon":35.2137,"bbox":[31.6683,31.8,35.1137,35.3137],"timezone":"Asia/Jerusalem","elevation":754,"source":{"type":"inherited","from":"Israel"}},
     {"name":"Khobar","countryISO":"SA","lat":26.2172,"lon":50.1971,"bbox":[26.16,26.3,50.1,50.3],"timezone":"Asia/Riyadh","nameLocal":"الخبر","adminRegion":"Eastern Province","population":626000,"elevation":8,"source":{"type":"inherited","from":"SaudiArabia"}},
     {"name":"Port Louis","countryISO":"MU","lat":-20.1609,"lon":57.5012,"bbox":[-20.2,-20.06,57.4,57.6],"timezone":"Indian/Mauritius","population":149000,"elevation":6,"source":{"type":"mawaqit","slug":"umar-bin-al-khattan-r-a-port-louis-11817-mauritius"}},
@@ -223,7 +225,6 @@
     {"name":"Baalbek","countryISO":"LB","lat":34.0058,"lon":36.2181,"bbox":[33.8558,34.1558,36.0681,36.3681],"timezone":"Asia/Beirut","adminRegion":"Baalbek-Hermel","population":105000,"elevation":1170,"source":{"type":"mawaqit","slug":"msjd-lmlk-fysl-al-s-wd-msjd-lmqsd-baalbeck-1801-lebanon"}},
     {"name":"Thies","countryISO":"SN","lat":14.7886,"lon":-16.9359,"bbox":[14.6386,14.9386,-17.0859,-16.7859],"timezone":"Africa/Dakar","population":320000,"elevation":78,"source":{"type":"mawaqit","slug":"mosquee-abou-darda-thies-23000-senegal"}},
     {"name":"Kota Kinabalu","countryISO":"MY","lat":5.9804,"lon":116.0735,"bbox":[5.8304,6.1304,115.9235,116.2235],"timezone":"Asia/Kuching","adminRegion":"Sabah","population":458000,"elevation":3,"source":{"type":"inherited","from":"Malaysia"}},
-    {"name":"Strasbourg","countryISO":"FR","lat":48.5734,"lon":7.7521,"bbox":[48.4234,48.7234,7.6021,7.9021],"timezone":"Europe/Paris","adminRegion":"Grand Est","population":287000,"elevation":142,"source":{"type":"mawaqit","slug":"mosquee-quba-neudorf-strasbourg-67100-france"}},
     {"name":"Pattani","countryISO":"TH","lat":6.8682,"lon":101.2497,"bbox":[6.7182,7.0182,101.0997,101.3997],"timezone":"Asia/Bangkok","nameLocal":"ปัตตานี","adminRegion":"Pattani Province","population":45000,"elevation":4,"source":{"type":"inherited","from":"Thailand"}},
     {"name":"Cotabato","countryISO":"PH","lat":7.2178,"lon":124.2451,"bbox":[7.0678,7.3678,124.0951,124.3951],"timezone":"Asia/Manila","adminRegion":"Maguindanao del Norte / BARMM","population":325000,"elevation":9,"methodOverride":"MWL","altMethods":[{"method":"ISNA","source":"Some Bangsamoro diaspora apps (Muslim Pro defaults via NCMF Manila offices) use ISNA-aligned 15°/15° as a North America-influenced compromise; minority practice."}],"source":{"type":"national-authority","institution":"Muslim World League"}},
     {"name":"Bilbao","countryISO":"ES","lat":43.263,"lon":-2.935,"bbox":[43.113,43.413,-3.085,-2.785],"timezone":"Europe/Madrid","adminRegion":"Basque Country","population":346000,"elevation":19,"source":{"type":"inherited","from":"ES"}},

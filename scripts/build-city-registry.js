@@ -375,6 +375,7 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Lille',      countryISO: 'FR', adminRegion: 'Hauts-de-France', lat: 50.6292, lon: 3.0573, elevation: 21, timezone: 'Europe/Paris', population: 233000 },
   { name: 'Bordeaux',   countryISO: 'FR', adminRegion: 'Nouvelle-Aquitaine', lat: 44.8378, lon: -0.5792, elevation: 22, timezone: 'Europe/Paris', population: 260000 },
   { name: 'Strasbourg', countryISO: 'FR', adminRegion: 'Grand Est', lat: 48.5734, lon: 7.7521, elevation: 142, timezone: 'Europe/Paris', population: 287000 },
+  { name: 'Kehl',       countryISO: 'DE', adminRegion: 'Baden-Württemberg', lat: 48.5838, lon: 7.8125, elevation: 139, timezone: 'Europe/Berlin', population: 37000 },
   { name: 'Hamburg',    countryISO: 'DE', adminRegion: 'Hamburg', lat: 53.5511, lon: 9.9937, elevation: 6, timezone: 'Europe/Berlin', population: 1899000 },
   { name: 'Munich',     countryISO: 'DE', adminRegion: 'Bavaria', lat: 48.1351, lon: 11.5820, elevation: 520, timezone: 'Europe/Berlin', population: 1488000 },
   { name: 'Frankfurt',  countryISO: 'DE', adminRegion: 'Hesse', lat: 50.1109, lon: 8.6821, elevation: 112, timezone: 'Europe/Berlin', population: 763000 },
@@ -967,6 +968,12 @@ const BBOX_OVERRIDES = {
   // Switzerland rectangle sees the first country at these coordinates.
   'Annemasse|FR':       [46.176411, 46.201967, 6.216619, 6.278294],
   'Ferney-Voltaire|FR': [46.237488, 46.266135, 6.088144, 6.12439],
+
+  // v1.8.0 #118: Strasbourg/Kehl Rhine seam. WOF locality rectangles overlap
+  // across the river, so clip Strasbourg's east edge just west of Kehl's WOF
+  // west edge and let Kehl use its reviewed WOF current locality envelope.
+  'Strasbourg|FR':      [48.492024, 48.646236, 7.687934, 7.79],
+  'Kehl|DE':            [48.485236, 48.641269, 7.79153, 7.956431],
 
   // Montevideo — formulaic 0.20 bbox extends south of Uruguay's lat-min.
   'Montevideo|UY':      [-34.95, -34.85, -56.27, -56.05],

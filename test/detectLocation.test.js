@@ -244,6 +244,22 @@ describe('detectLocation — Mawaqit institutional source', () => {
     expect(ferney.timezone).toBe('Europe/Paris')
   })
 
+  it('Strasbourg/Kehl Rhine seam keeps each city on its own country side', () => {
+    const strasbourg = detectLocation(48.5734, 7.7521)
+    expect(strasbourg.city).not.toBeNull()
+    expect(strasbourg.city.name).toBe('Strasbourg')
+    expect(strasbourg.city.countryISO).toBe('FR')
+    expect(strasbourg.country).toBe('France')
+    expect(strasbourg.timezone).toBe('Europe/Paris')
+
+    const kehl = detectLocation(48.5722, 7.8156)
+    expect(kehl.city).not.toBeNull()
+    expect(kehl.city.name).toBe('Kehl')
+    expect(kehl.city.countryISO).toBe('DE')
+    expect(kehl.country).toBe('Germany')
+    expect(kehl.timezone).toBe('Europe/Berlin')
+  })
+
   it('UAE WOF locality rows expand Abu Dhabi/Al Ain city provenance without touching Dubai/Sharjah/Ajman', () => {
     const rows = [
       ['Abu Dhabi', 24.4539, 54.3773, 24.20, 54.80],
@@ -512,6 +528,13 @@ describe('detectLocation — issue #47 regression', () => {
   it('Hanoi VN → country=Vietnam (was Laos)', () => {
     const loc = detectLocation(21.03, 105.85)
     expect(loc.country).toBe('Vietnam')
+  })
+
+  it('Malabo northern bbox sample → city=Malabo, country=EquatorialGuinea', () => {
+    const loc = detectLocation(3.8519, 8.7786)
+    expect(loc.city?.name).toBe('Malabo')
+    expect(loc.city?.countryISO).toBe('GQ')
+    expect(loc.country).toBe('EquatorialGuinea')
   })
 
   it('Asunción PY → country=Paraguay (was Argentina)', () => {

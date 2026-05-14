@@ -411,9 +411,9 @@ function detectCountry(lat, lon) {
   // territory (lat 3.75). Cameroon's bbox 1.7-13.1 / 8.5-16.2 catches
   // Malabo's (3.75, 8.77). EquatorialGuinea was listed first but its
   // northern lat was 2.35 — Malabo 3.75 was OUTSIDE. Expand
-  // EquatorialGuinea to 3.85 (covers Malabo) or restructure. Malabo's
-  // territory IS GQ — extend GQ.
-  if (lat >= 0.92 && lat <= 3.85 && lon >= 5.62 && lon <= 11.34) return 'EquatorialGuinea'
+  // EquatorialGuinea to 3.86 (covers Malabo's northern validation samples) or
+  // restructure. Malabo's territory IS GQ — extend GQ.
+  if (lat >= 0.92 && lat <= 3.86 && lon >= 5.62 && lon <= 11.34) return 'EquatorialGuinea'
   if (lat >= -3.96 && lat <= 2.32 && lon >= 8.70 && lon <= 14.50) return 'Gabon'
   // v1.7.5: DRCongo BEFORE RepublicOfTheCongo — Kinshasa CD (-4.44, 15.27)
   // and Luanda AO (-8.84, 13.29) — Luanda was matched by DRCongo's bbox
@@ -829,6 +829,7 @@ const COUNTRY_BBOX_TABLE = {
   Senegal:      [[12.3, 16.04, -17.6, -11.3]],
   Nigeria:      [[3.9, 14, 2.7, 14.7]],
   Cameroon:     [[1.7, 13.1, 8.5, 16.2]],
+  EquatorialGuinea: [[0.92, 3.86, 5.62, 11.34]],
   Brazil:       [[-33.75, 5.27, -73.99, -34.79]],
   Argentina:    [[-55.06, -21.78, -73.57, -53.65]],
   Paraguay:     [[-27.61, -19.29, -62.65, -54.26]],
