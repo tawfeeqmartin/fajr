@@ -1,7 +1,7 @@
 {
   "$schema_doc": "Build-time source map for auditing src/data/cities.json city bboxes. This file stores stable external IDs, review state, authority IDs, and cache pointers only. Raw geometry stays outside git/npm in .cache/city-geometry.",
   "version": 1,
-  "updated": "2026-05-11",
+  "updated": "2026-05-14",
   "issue": 118,
   "cacheRoot": ".cache/city-geometry",
   "providers": {
@@ -463,10 +463,10 @@
     },
     {
       "cityKey": "Brazzaville|CG",
-      "priority": ["current-validator-warning", "cross-border-overlap", "congo-river"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Kinshasa|CD", "kind": "bbox-overlap-cross-country" }
+      "priority": ["geometry-undercoverage", "edge-adjacent", "congo-river"],
+      "review": { "status": "needs-clipping-review", "issue": 118 },
+      "neighborRelations": [
+        { "cityKey": "Kinshasa|CD", "kind": "bbox-edge-touch", "status": "runtime-adjacent; WOF envelopes still need clipping review" }
       ],
       "geometries": [
         {
@@ -495,10 +495,10 @@
     },
     {
       "cityKey": "Kinshasa|CD",
-      "priority": ["current-validator-warning", "cross-border-overlap", "congo-river"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Brazzaville|CG", "kind": "bbox-overlap-cross-country" }
+      "priority": ["geometry-undercoverage", "edge-adjacent", "congo-river"],
+      "review": { "status": "needs-clipping-review", "issue": 118 },
+      "neighborRelations": [
+        { "cityKey": "Brazzaville|CG", "kind": "bbox-edge-touch", "status": "runtime-adjacent; WOF envelopes still need clipping review" }
       ],
       "geometries": [
         {
@@ -527,10 +527,10 @@
     },
     {
       "cityKey": "Basel|CH",
-      "priority": ["current-validator-warning", "cross-border-overlap", "europe-p0"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Mulhouse|FR", "kind": "bbox-overlap-cross-country" }
+      "priority": ["resolved-validator-warning", "runtime-bbox-shipped", "europe-p0"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118 },
+      "neighborRelations": [
+        { "cityKey": "Mulhouse|FR", "kind": "resolved-bbox-overlap", "status": "runtime WOF-envelope bbox shipped in #130" }
       ],
       "geometries": [
         {
@@ -558,10 +558,10 @@
     },
     {
       "cityKey": "Mulhouse|FR",
-      "priority": ["current-validator-warning", "cross-border-overlap", "europe-p0"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Basel|CH", "kind": "bbox-overlap-cross-country" }
+      "priority": ["resolved-validator-warning", "runtime-bbox-shipped", "europe-p0"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118 },
+      "neighborRelations": [
+        { "cityKey": "Basel|CH", "kind": "resolved-bbox-overlap", "status": "runtime WOF-envelope bbox shipped in #130" }
       ],
       "geometries": [
         {
