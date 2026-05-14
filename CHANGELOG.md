@@ -56,6 +56,11 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Tightened the Fes lookup cell to WOF current locality `421190143`, which
   supersedes the older Fes WOF row and matches OSM admin-8 Fes closely enough
   for the offline city lookup cell.
+- Documented the #118 Morocco geometry source boundary: remaining
+  Temara/Inezgane/Meknes/Tetouan/Sale work needs reviewed WOF locality
+  geometry, compatible official/commune-level geometry, or should stay an audit
+  gap rather than deriving runtime bboxes from OSM alone or broad WOF county
+  rows.
 
 ### Changed — documentation doctrine cleanup
 

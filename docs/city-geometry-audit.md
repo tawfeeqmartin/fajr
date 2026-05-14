@@ -79,6 +79,55 @@ package bboxes without license review. WOF candidates are still candidates:
 locality records are preferred, while county-level WOF records are marked
 medium confidence because their placetype can over-cover the city row.
 
+## Source Findings
+
+The #118 Morocco pass now has enough evidence to separate runtime-ready bbox
+sources from source leads:
+
+- **WOF locality envelopes are runtime-usable after row review.** This is the
+  path used for Rabat, Agadir, Berrechid, Settat, Sefrou, Tangier, Nador,
+  Oujda, Fes, Basel, and Mulhouse. Current locality rows with matching OSM
+  admin-8 envelopes are the strongest candidates.
+- **WOF county envelopes are not automatically runtime-usable.** Casablanca is
+  the exception: its WOF locality rows were deprecated/point-like, while the
+  current county envelope matched OSM admin-8 closely. Sale, Meknes, Tetouan,
+  Temara, and Inezgane do not yet meet that bar; their available WOF rows are
+  either broad county/prefecture envelopes or point-like localadmin/locality
+  records.
+- **OSM relation geometry is audit-only for now.** It is useful as an
+  independent shape check and often carries `ref:MA:HCP`, but OSM-derived bbox
+  edits need license review before entering the MIT package.
+- **HDX / OCHA COD-AB Morocco is authoritative but too coarse for city-cell
+  tightening.** The public Morocco COD-AB package is HCP-derived, reviewed for
+  humanitarian use, and CC BY 3.0 IGO, but the available package is admin
+  level 0-2 only, not commune/city level.
+- **geoBoundaries currently does not solve the Morocco city layer.** The public
+  HDX geoBoundaries mirror exposes ADM0-ADM2 for Morocco, and current API
+  probes for MAR ADM3/ADM4 returned no layer.
+- **SIG-Maroc / HCP-linked commune files are a promising source lead, not a
+  runtime source yet.** SIG-Maroc publishes commune-level downloads and 2024
+  census joins, but the site itself says the geometry is assembled from
+  multiple sources; source and license provenance need review before any bbox
+  can be derived from it.
+
+Practical rule for the remaining Morocco rows: do not tighten from WOF
+county/prefecture bboxes or OSM alone. Either find a reviewed WOF locality
+polygon, verify an official/commune-level source with compatible licensing, or
+leave the row as a documented audit gap.
+
+Reference URLs checked in this pass:
+
+- HDX Morocco COD-AB:
+  `https://data.humdata.org/dataset/cod-ab-mar`
+- OCHA COD-AB guidance:
+  `https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/`
+- geoBoundaries API:
+  `https://www.geoboundaries.org/api.html`
+- SIG-Maroc administrative boundaries:
+  `https://www.sig-maroc.com/donnees/limites-administratives-maroc`
+- SIG-Maroc RGPH 2024 commune joins:
+  `https://sig-maroc.com/donnees/shapefiles-recensement-2024`
+
 ## Reviewed Runtime Changes
 
 The first runtime bbox edits from this workflow are Rabat and Agadir, applied
