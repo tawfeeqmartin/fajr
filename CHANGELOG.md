@@ -26,6 +26,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+## [1.9.1] — 2026-05-14
+
 ### Fixed — Sialkot/Gujranwala city-geometry overlap
 
 - Updated `Sialkot|PK` to a reviewed WOF current locality envelope, removing

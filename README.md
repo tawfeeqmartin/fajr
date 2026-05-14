@@ -156,8 +156,8 @@ This is the same stance used by the reference downstream app, [A Gift of Time](h
 
 | Area | Current state |
 |---|---|
-| Repository version | `1.8.1` in `package.json`; published npm version may lag until release |
-| City/country dispatch | 481 cities, 168 countries |
+| Repository version | `1.9.1` in `package.json`; published npm version may lag until release |
+| City/country dispatch | 483 cities, 168 countries |
 | Train eval | 215 entries, WMAE 0.9757 min |
 | Holdout eval | 54,639 entries, WMAE 7.3646 min |
 | Reference layers | Mawaqit, Diyanet, JAKIM, KEMENAG, MUIS, Habous, Aladhan, praytimes.org, Who's On First |
