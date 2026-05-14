@@ -221,6 +221,25 @@ describe('detectLocation — Mawaqit institutional source', () => {
       expect(oldEdge.city?.name, `${name} old overbroad edge should no longer resolve to ${name}`).not.toBe(name)
     }
   })
+
+  it('UAE WOF locality rows expand Abu Dhabi/Al Ain city provenance without touching Dubai/Sharjah/Ajman', () => {
+    const rows = [
+      ['Abu Dhabi', 24.4539, 54.3773, 24.20, 54.80],
+      ['Al Ain', 24.2075, 55.7447, 24.20, 55.50],
+    ]
+
+    for (const [name, centerLat, centerLon, edgeLat, edgeLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe('UAE')
+
+      const edge = detectLocation(edgeLat, edgeLon)
+      expect(edge.city, `${name} reviewed WOF edge should resolve`).not.toBeNull()
+      expect(edge.city.name).toBe(name)
+      expect(edge.country).toBe('UAE')
+    }
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

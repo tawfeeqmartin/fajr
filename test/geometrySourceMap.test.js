@@ -77,6 +77,8 @@ describe('city geometry source map', () => {
       ['Basel|CH', 'wof:locality:101748459'],
       ['Mulhouse|FR', 'wof:locality:101749573'],
       ['Fes|MA', 'wof:locality:421190143'],
+      ['Abu Dhabi|AE', 'wof:locality:421179641'],
+      ['Al Ain|AE', 'wof:locality:421168687'],
       ['Brazzaville|CG', 'wof:locality:421180023'],
       ['Kinshasa|CD', 'wof:locality:421166913'],
     ])
@@ -99,6 +101,11 @@ describe('city geometry source map', () => {
     expect(statusFor('Mulhouse|FR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Casablanca|MA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Fes|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Abu Dhabi|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Al Ain|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Dubai|AE')).toBe('needs-clipping-review')
+    expect(statusFor('Sharjah|AE')).toBe('needs-clipping-review')
+    expect(statusFor('Ajman|AE')).toBe('needs-clipping-review')
     expect(statusFor('Brazzaville|CG')).toBe('needs-clipping-review')
     expect(statusFor('Kinshasa|CD')).toBe('needs-clipping-review')
   })

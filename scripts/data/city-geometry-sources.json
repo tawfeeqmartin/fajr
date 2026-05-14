@@ -468,6 +468,123 @@
       ]
     },
     {
+      "cityKey": "Abu Dhabi|AE",
+      "priority": ["uae-metro", "wof-locality-runtime-bbox"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope; no neighboring UAE city bbox collision."]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421179641",
+          "ids": { "wofId": 421179641, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/abu-dhabi/wof-locality-421179641.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Al Ain|AE",
+      "priority": ["uae-metro", "wof-locality-runtime-bbox"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope; no neighboring UAE city bbox collision."]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421168687",
+          "ids": { "wofId": 421168687, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/al-ain/wof-locality-421168687.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Dubai|AE",
+      "priority": ["uae-metro", "needs-clipping-review"],
+      "review": {
+        "status": "needs-clipping-review",
+        "issue": 118,
+        "notes": ["WOF current locality envelope overlaps Sharjah/Ajman envelopes; do not ship as runtime bbox without an explicit clipping rule."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Sharjah|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" },
+        { "cityKey": "Ajman|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421174961",
+          "ids": { "wofId": 421174961, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/dubai/wof-locality-421174961.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Sharjah|AE",
+      "priority": ["uae-metro", "needs-clipping-review"],
+      "review": {
+        "status": "needs-clipping-review",
+        "issue": 118,
+        "notes": ["WOF current locality envelope overlaps Dubai/Ajman envelopes; do not ship as runtime bbox without an explicit clipping rule."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Dubai|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" },
+        { "cityKey": "Ajman|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421168683",
+          "ids": { "wofId": 421168683, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/sharjah/wof-locality-421168683.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Ajman|AE",
+      "priority": ["uae-metro", "needs-clipping-review"],
+      "review": {
+        "status": "needs-clipping-review",
+        "issue": 118,
+        "notes": ["WOF current locality envelope overlaps Dubai/Sharjah envelopes; do not ship as runtime bbox without an explicit clipping rule."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Dubai|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" },
+        { "cityKey": "Sharjah|AE", "kind": "bbox-overlap", "status": "WOF locality envelopes overlap; runtime clipping review needed" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:1126024975",
+          "ids": { "wofId": 1126024975, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/ajman/wof-locality-1126024975.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
       "cityKey": "Jerusalem|PS",
       "priority": ["current-validator-warning", "intentional-routing-anchor", "human-review-required"],
       "review": {
