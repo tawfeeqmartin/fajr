@@ -903,10 +903,12 @@ function countryBboxContains(country, lat, lon) {
 // adhan.js's method presets all default to Madhab.Shafi (1× shadow Asr).
 // In this API, `asrConvention` is the primary field for the Hanafi-vs-standard
 // Asr convention surfaced to apps. `location.madhab` remains only a deprecated
-// v1.7.21 legacy alias and is not a full legal-madhhab taxonomy
-// (Maliki/Hanbali/Jafari are not represented by that field). For Hanafi-
-// convention countries, adhan's preset default leaks the wrong Asr-convention
-// metadata even when the country-dispatch context conceptually implies Hanafi.
+// v1.7.21 legacy alias and is not a full legal-madhhab taxonomy. As of v1.8.1,
+// the alias mirrors `standard` / `hanafi` instead of mapping standard 1× Asr
+// to `shafii`, because that was misleading for Maliki/Hanbali/Jafari contexts
+// such as Morocco. For Hanafi-convention countries, adhan's preset default
+// leaks the wrong Asr-convention metadata even when the country-dispatch
+// context conceptually implies Hanafi.
 //
 // The table below is consulted by prayerTimes() as provenance metadata, not
 // as a blanket Asr-calculation override. Calculation-facing Asr school stays
@@ -2777,8 +2779,10 @@ export function prayerTimes(params) {
   // structured output, even when the country-dispatch context implies Hanafi.
   // `location.asrConvention` is the primary API name for this
   // Hanafi-vs-standard Asr convention label. `location.madhab` is retained
-  // as a deprecated v1.7.21 legacy alias; it is not a full legal-madhhab
-  // taxonomy and should not be rendered as "local madhhab" in apps.
+  // as a deprecated v1.7.21 legacy alias. It mirrors `standard` / `hanafi`
+  // rather than adhan.js's historic `shafii` / `hanafi` vocabulary so Morocco
+  // and other Maliki/Hanbali/Jafari-standard regions are not represented as
+  // Shafi'i legal-madhhab locations.
   //
   // Important split after #85: Asr-convention metadata is NOT
   // automatically the Asr formula used by a published timetable. The ratchet
@@ -2811,13 +2815,14 @@ export function prayerTimes(params) {
   const countryAsrConvention = (methodSource !== 'caller-explicit' && country && !methodNameMentionsAsrComposition)
     ? COUNTRY_ASR_CONVENTION[country]
     : null
-  const appliedMadhab = params_.madhab === adhan.Madhab.Hanafi ? 'hanafi' : 'shafii'
-  const asrSchool = appliedMadhab === 'hanafi' ? 'hanafi' : 'standard'
+  const asrSchool = params_.madhab === adhan.Madhab.Hanafi ? 'hanafi' : 'standard'
   const asrConvention = countryAsrConvention || asrSchool
   const asrConventionSource = countryAsrConvention ? 'country-default' : 'method-implied'
   // Deprecated v1.7.21 aliases. Keep these for compatibility with published
   // consumers, but new integrations should use asrConvention/asrConventionSource.
-  const madhab = asrConvention === 'hanafi' ? 'hanafi' : 'shafii'
+  // v1.8.1 stops returning `shafii` for generic standard 1× Asr because the
+  // field name reads as a legal-madhhab claim in downstream UI.
+  const madhab = asrConvention
   const madhabSource = asrConventionSource
 
   // Ask adhan.js for unrounded (seconds-precision) times. We apply our own
@@ -3046,7 +3051,7 @@ export function prayerTimes(params) {
       method:        methodName,
       asrSchool,
       // Deprecated alias; use applied.asrSchool in new UI.
-      madhab:        appliedMadhab,
+      madhab:        asrSchool,
       elevationMin: elevationMinPreview,
     },
     disclaimer:

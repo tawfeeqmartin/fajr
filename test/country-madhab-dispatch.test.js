@@ -8,6 +8,8 @@
  * Hanafi-majority countries return location.asrConvention='hanafi' as metadata,
  * while applied.asrSchool remains tied to the selected timetable method
  * unless an explicit calculation override is used.
+ * Deprecated `madhab` aliases mirror `standard` / `hanafi` Asr values; they
+ * must not emit `shafii` for Maliki/Hanbali/Jafari-standard regions.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -35,11 +37,11 @@ describe('#83 — Hanafi-majority country dispatch', () => {
       const r = prayerTimes({ latitude: lat, longitude: lon, date: new Date('2026-05-04') })
       expect(r.location.asrConvention).toBe('hanafi')
       expect(r.location.asrConventionSource).toBe('country-default')
-      // Legacy aliases remain for v1.7.21 consumers.
+      // Deprecated aliases mirror Asr convention values for v1.7.21 consumers.
       expect(r.location.madhab).toBe('hanafi')
       expect(r.location.madhabSource).toBe('country-default')
       expect(r.applied.asrSchool).toBe('standard')
-      expect(r.applied.madhab).toBe('shafii')
+      expect(r.applied.madhab).toBe('standard')
     })
   }
 })
@@ -60,10 +62,10 @@ describe('#83/#88 — standard-Asr country dispatch', () => {
     it(`${name} → asrConvention='standard'`, () => {
       const r = prayerTimes({ latitude: lat, longitude: lon, date: new Date('2026-05-04') })
       expect(r.location.asrConvention).toBe('standard')
-      // Deprecated alias maps standard 1× Asr to adhan.js's historic label.
-      expect(r.location.madhab).toBe('shafii')
+      // Deprecated alias mirrors standard 1× Asr, not Shafi legal madhhab.
+      expect(r.location.madhab).toBe('standard')
       expect(r.applied.asrSchool).toBe('standard')
-      expect(r.applied.madhab).toBe('shafii')
+      expect(r.applied.madhab).toBe('standard')
     })
   }
 })
@@ -125,8 +127,8 @@ describe('#83 v1.7.23 — Maliki / Jafari / Cham countries report standard with 
       const r = prayerTimes({ latitude: lat, longitude: lon, date: new Date('2026-05-05') })
       expect(r.location.asrConvention).toBe('standard')
       expect(r.location.asrConventionSource).toBe('country-default')
-      // Legacy alias mirrors asrConvention via the standard→shafii mapping
-      expect(r.location.madhab).toBe('shafii')
+      // Legacy alias mirrors asrConvention without legal-madhhab wording.
+      expect(r.location.madhab).toBe('standard')
       expect(r.location.madhabSource).toBe('country-default')
     })
   }
@@ -140,6 +142,10 @@ describe('#83 v1.7.23 — Maliki / Jafari / Cham countries report standard with 
     expect(r.location.country).toBe('Morocco')
     expect(r.location.asrConvention).toBe('standard')
     expect(r.location.asrConventionSource).toBe('country-default')
+    expect(r.location.madhab).toBe('standard')
+    expect(r.location.madhab).not.toBe('shafii')
+    expect(r.applied.madhab).toBe('standard')
+    expect(r.applied.madhab).not.toBe('shafii')
     expect(r.disclaimer).toContain('Asr convention')
     expect(r.disclaimer).not.toContain('madhab + elevation')
   })
@@ -150,7 +156,7 @@ describe('#83 — explicit-Shafi composition (Maldives / Sri Lanka / KarachiShaf
     const r = prayerTimes({ latitude: 4.1755, longitude: 73.5093, date: new Date('2026-05-04') })
     expect(r.location.asrConvention).toBe('standard')
     expect(r.location.asrConventionSource).toBe('method-implied')
-    expect(r.location.madhab).toBe('shafii')
+    expect(r.location.madhab).toBe('standard')
     expect(r.location.madhabSource).toBe('method-implied')
     // methodName carries the '+ Shafi Asr' explicit-composition marker
     expect(r.method).toMatch(/\+ Shafi Asr/)
@@ -160,7 +166,7 @@ describe('#83 — explicit-Shafi composition (Maldives / Sri Lanka / KarachiShaf
     const r = prayerTimes({ latitude: 6.9271, longitude: 79.8612, date: new Date('2026-05-04') })
     expect(r.location.asrConvention).toBe('standard')
     expect(r.location.asrConventionSource).toBe('method-implied')
-    expect(r.location.madhab).toBe('shafii')
+    expect(r.location.madhab).toBe('standard')
     expect(r.location.madhabSource).toBe('method-implied')
     expect(r.method).toMatch(/\+ Shafi Asr/)
   })
@@ -169,7 +175,7 @@ describe('#83 — explicit-Shafi composition (Maldives / Sri Lanka / KarachiShaf
     const r = prayerTimes({ latitude: 9.9312, longitude: 76.2673, date: new Date('2026-05-04') })
     expect(r.location.asrConvention).toBe('standard')
     expect(r.location.asrConventionSource).toBe('method-implied')
-    expect(r.location.madhab).toBe('shafii')
+    expect(r.location.madhab).toBe('standard')
     expect(r.location.madhabSource).toBe('method-implied')
     expect(r.method).toMatch(/\+ Shafi Asr/)
   })
@@ -177,7 +183,7 @@ describe('#83 — explicit-Shafi composition (Maldives / Sri Lanka / KarachiShaf
 
 describe('#83/#85 — metadata does not silently shift Asr calculation', () => {
   it('Karachi PK reports Hanafi metadata but keeps method-implied standard Asr', () => {
-    // Country-level madhab metadata is useful for UX, but #85 split it from
+    // Country-level Asr metadata is useful for UX, but #85 split it from
     // calculation-facing Asr because blanket 2× shadow mutation regressed
     // current institutional fixtures. Karachi and KarachiShafi should remain
     // effectively identical until a caller-explicit Asr override lands.
@@ -190,7 +196,7 @@ describe('#83/#85 — metadata does not silently shift Asr calculation', () => {
     expect(auto.location.madhab).toBe('hanafi')
     expect(auto.location.madhabSource).toBe('country-default')
     expect(auto.applied.asrSchool).toBe('standard')
-    expect(auto.applied.madhab).toBe('shafii')
+    expect(auto.applied.madhab).toBe('standard')
     expect(auto.notes.some(note => note.includes('Asr-convention advisory'))).toBe(true)
     expect(Math.abs(diffMin)).toBeLessThanOrEqual(1)
   })
@@ -204,6 +210,6 @@ describe('#83 — caller-explicit method bypasses COUNTRY_ASR_CONVENTION', () =>
     // ISNA preset uses Shafi (adhan default); caller-explicit path doesn't
     // consult COUNTRY_ASR_CONVENTION so Pakistan's Hanafi default doesn't fire.
     expect(r.location.asrConvention).toBe('standard')
-    expect(r.location.madhab).toBe('shafii')
+    expect(r.location.madhab).toBe('standard')
   })
 })

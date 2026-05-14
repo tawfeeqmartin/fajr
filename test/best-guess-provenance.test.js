@@ -15,8 +15,8 @@ describe('#81/#88 — location Asr-convention provenance', () => {
     const r = prayerTimes({ latitude: 24.7136, longitude: 46.6753, date: new Date('2026-05-04') })
     expect(r.location.asrConvention).toBe('standard')
     expect(r.location.asrConventionSource).toBe('method-implied')
-    // Deprecated aliases remain for v1.7.21 consumers.
-    expect(r.location.madhab).toBe('shafii')
+    // Deprecated aliases mirror Asr convention values; never a legal-madhhab claim.
+    expect(r.location.madhab).toBe('standard')
     expect(r.location.madhabSource).toBe('method-implied')
   })
 
@@ -30,14 +30,14 @@ describe('#81/#88 — location Asr-convention provenance', () => {
     expect(r.location.madhab).toBe('hanafi')
     expect(r.location.madhabSource).toBe('country-default')
     expect(r.applied.asrSchool).toBe('standard')
-    expect(r.applied.madhab).toBe('shafii')
+    expect(r.applied.madhab).toBe('standard')
   })
 
   it('Malé MV (KarachiShafi explicit override; correctly matches population)', () => {
     const r = prayerTimes({ latitude: 4.1755, longitude: 73.5093, date: new Date('2026-05-04') })
     expect(r.location.asrConvention).toBe('standard')
     expect(r.location.asrConventionSource).toBe('method-implied')
-    expect(r.location.madhab).toBe('shafii')
+    expect(r.location.madhab).toBe('standard')
     // Source is still 'method-implied' because the explicit composition in
     // selectMethod produces a single method with baked-in Shafi madhab.
     expect(r.location.madhabSource).toBe('method-implied')
@@ -49,7 +49,7 @@ describe('#81/#88 — location Asr-convention provenance', () => {
     expect(r.location.methodSource).toBe('fallback')
     expect(r.location.asrConvention).toBe('standard')
     expect(r.location.asrConventionSource).toBe('method-implied')
-    expect(r.location.madhab).toBe('shafii')  // ISNA default
+    expect(r.location.madhab).toBe('standard')  // ISNA default
     expect(r.location.madhabSource).toBe('method-implied')
   })
 })
@@ -61,7 +61,7 @@ describe('#81/#88 — applied dispatch summary', () => {
     expect(typeof r.applied.method).toBe('string')
     expect(r.applied.method.length).toBeGreaterThan(0)
     expect(['standard', 'hanafi']).toContain(r.applied.asrSchool)
-    expect(['shafii', 'hanafi']).toContain(r.applied.madhab)
+    expect(['standard', 'hanafi']).toContain(r.applied.madhab)
     expect(typeof r.applied.elevationMin).toBe('number')
     expect(r.applied.elevationMin).toBeGreaterThanOrEqual(0)
   })
