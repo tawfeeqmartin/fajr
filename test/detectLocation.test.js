@@ -240,6 +240,30 @@ describe('detectLocation — Mawaqit institutional source', () => {
       expect(edge.country).toBe('UAE')
     }
   })
+
+  it('UAE clipped WOF cells expand Sharjah/Ajman eastward without stealing Dubai', () => {
+    const rows = [
+      ['Sharjah', 25.3463, 55.4209, 25.35, 55.65],
+      ['Ajman', 25.4052, 55.5136, 25.405, 55.60],
+    ]
+
+    for (const [name, centerLat, centerLon, edgeLat, edgeLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe('UAE')
+
+      const edge = detectLocation(edgeLat, edgeLon)
+      expect(edge.city, `${name} clipped WOF edge should resolve`).not.toBeNull()
+      expect(edge.city.name).toBe(name)
+      expect(edge.country).toBe('UAE')
+    }
+
+    const dubai = detectLocation(25.2048, 55.2708)
+    expect(dubai.city).not.toBeNull()
+    expect(dubai.city.name).toBe('Dubai')
+    expect(dubai.country).toBe('UAE')
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

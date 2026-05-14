@@ -971,15 +971,11 @@ const BBOX_OVERRIDES = {
   // Each pair: smaller satellite bbox is shrunk to its own city footprint
   // so its parent metro's points don't fall inside it.
 
-  // Ajman AE (540K, lat 25.41) vs Sharjah AE (1.68M, lat 25.35). Ajman is a
-  // tiny emirate ~12 km NE of Sharjah CBD. Tighten Ajman to a small box
-  // 25.40-25.45 / 55.46-55.55 — Ajman city centre (25.41, 55.51) inside;
-  // Sharjah CBD (25.35, 55.42) and points east of it stay in Sharjah.
-  'Ajman|AE':           [25.40, 25.45, 55.46, 55.55],
-
-  // Sharjah AE — also tighten so Ajman's tight box is fully outside.
-  // Sharjah CBD 25.35, 55.42 → keep lat 25.30-25.40 / lon 55.30-55.55.
-  'Sharjah|AE':         [25.30, 25.40, 55.30, 55.55],
+  // v1.8.0 #118: Sharjah/Ajman WOF locality envelopes overlap. Keep Dubai's
+  // existing cell unchanged, expand Sharjah eastward from WOF, and clip Ajman
+  // to start at Sharjah's WOF north edge so the two cells only touch.
+  'Sharjah|AE':         [25.30, 25.398821, 55.30, 55.678456],
+  'Ajman|AE':           [25.398821, 25.45088, 55.423316, 55.630065],
 
   // v1.8.0 #118: WOF current locality envelopes improve UAE city coverage
   // without colliding with neighboring lookup cells. Dubai/Sharjah/Ajman need
