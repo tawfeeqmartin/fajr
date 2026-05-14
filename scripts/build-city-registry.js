@@ -308,6 +308,8 @@ const MUSLIM_POPULATION_CENTERS = [
 
   // ─── Malaysia non-capital ─────────────────────────────────────────────────
   { name: 'Shah Alam',  countryISO: 'MY', adminRegion: 'Selangor', lat: 3.0731, lon: 101.5183, elevation: 28, timezone: 'Asia/Kuala_Lumpur', population: 740000 },
+  { name: 'Petaling Jaya', countryISO: 'MY', adminRegion: 'Selangor', lat: 3.1074, lon: 101.6180, elevation: 45, timezone: 'Asia/Kuala_Lumpur', population: 639000 },
+  { name: 'Klang',      countryISO: 'MY', adminRegion: 'Selangor', lat: 3.1062, lon: 101.3994, elevation: 10, timezone: 'Asia/Kuala_Lumpur', population: 879000 },
   { name: 'George Town', countryISO: 'MY', adminRegion: 'Penang', lat: 5.4141, lon: 100.3288, elevation: 4, timezone: 'Asia/Kuala_Lumpur', population: 708000 },
   { name: 'Johor Bahru', countryISO: 'MY', adminRegion: 'Johor', lat: 1.4927, lon: 103.7414, elevation: 26, timezone: 'Asia/Kuala_Lumpur', population: 858000 },
   { name: 'Kuching',    countryISO: 'MY', adminRegion: 'Sarawak', lat: 1.5533, lon: 110.3592, elevation: 27, timezone: 'Asia/Kuching', population: 325000 },
@@ -819,11 +821,8 @@ const BBOX_OVERRIDES = {
   // south of central Cairo). v1.8.0 #118: western lon raised to 30.98 so
   // 6th of October no longer shadows Giza's western validation samples.
   'Giza|EG':            [29.6131, 30.10, 30.98, 31.22],
-  // v1.7.5 #47: Shah Alam (740K) is ~25 km west of KL (1.8M). Same-radius
-  // 0.15° bbox put Shah Alam at lon 101.32-101.72, KL at 101.39-101.99.
-  // KL CBD (3.14, 101.69) sat in both. Shrink Shah Alam's eastern lon to
-  // 101.55 (Shah Alam city centre 101.52 stays inside; KL CBD excluded).
-  'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.55],
+  // v1.7.5 #47 / v1.8.0 #118: Klang Valley overrides now live below in the
+  // WOF-backed runtime-cell block.
   // v1.7.5 #47: Johor Bahru (858K) sits across the Causeway from Singapore.
   // Same-radius 0.15° bbox extended south to lat 1.29 — well inside
   // Singapore's island. Trim southern lat to 1.43 (just north of Singapore's
@@ -917,9 +916,13 @@ const BBOX_OVERRIDES = {
   // Fes row and matches the OSM admin-8 envelope; use it to avoid broad
   // city-provenance leakage around the Fes lookup cell.
   'Fes|MA':             [33.97125, 34.076345, -5.078619, -4.937726],
-  // v1.7.22 #86: keep Shah Alam's own centre lon 101.5183 inside the bbox
-  // while still excluding KL CBD at lon ~101.69.
-  'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.55],
+  // v1.7.22 #86 / v1.8.0 #118: Klang Valley WOF-backed runtime cells.
+  // Petaling Jaya and Klang are distinct city rows so KL and Shah Alam no
+  // longer need to absorb those coordinates. Subang Jaya remains unbundled
+  // until the registry supports non-rectangular cells or reviewed splits.
+  'Klang|MY':           [2.917544, 3.220857, 101.348877, 101.497192],
+  'Shah Alam|MY':       [2.939489, 3.207902, 101.497192, 101.557617],
+  'Petaling Jaya|MY':   [3.04761, 3.208733, 101.557617, 101.661987],
   // v1.8.0 #118: Singapore/Johor WOF-backed seam. Singapore uses WOF
   // government-sourced west/east/south extents and clips north just below
   // Johor; Johor Bahru uses the WOF locality envelope clipped south at the
@@ -927,7 +930,7 @@ const BBOX_OVERRIDES = {
   // returning Johor Bahru for Singapore coordinates.
   'Singapore|SG':       [1.158699, 1.4499, 103.605701, 104.088483],
   'Johor Bahru|MY':     [1.45, 1.609285, 103.564621, 103.872185],
-  'Kuala Lumpur|MY':    [2.939, 3.339, 101.55, 101.99],
+  'Kuala Lumpur|MY':    [3.036487, 3.319571, 101.661987, 101.777344],
   // v1.8.0 #118: WOF locality envelopes remove the Basel/Mulhouse
   // cross-border validator warning without clipping either city centre.
   'Basel|CH':           [47.519297, 47.589902, 7.554659, 7.634148],

@@ -812,6 +812,108 @@
       ]
     },
     {
+      "cityKey": "Klang|MY",
+      "priority": ["klang-valley-metro", "wof-locality-runtime-bbox", "apac-p0", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added from WOF current locality geometry as the western Klang Valley cell."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Shah Alam|MY", "kind": "runtime-edge-touch", "status": "Klang east edge meets Shah Alam west edge at lon 101.497192." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102022835",
+          "ids": { "wofId": 102022835, "repo": "whosonfirst-data-admin-my", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "MY/klang/wof-locality-102022835.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime bbox uses the WOF current locality envelope."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Shah Alam|MY",
+      "priority": ["klang-valley-metro", "wof-locality-runtime-bbox", "apac-p0", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated from WOF current locality geometry and clipped between Klang and Petaling Jaya."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Klang|MY", "kind": "runtime-edge-touch", "status": "Shah Alam west edge meets Klang east edge at lon 101.497192." },
+        { "cityKey": "Petaling Jaya|MY", "kind": "runtime-edge-touch", "status": "Shah Alam east edge meets Petaling Jaya west edge at lon 101.557617." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102022833",
+          "ids": { "wofId": 102022833, "repo": "whosonfirst-data-admin-my", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "MY/shah-alam/wof-locality-102022833.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox spans lon 101.436768-101.596756; runtime clips west/east edges so Klang and Petaling Jaya keep their own city provenance."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Petaling Jaya|MY",
+      "priority": ["klang-valley-metro", "wof-locality-runtime-bbox", "apac-p0", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added from WOF current locality geometry and clipped as the western neighbor of Kuala Lumpur."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Shah Alam|MY", "kind": "runtime-edge-touch", "status": "Petaling Jaya west edge meets Shah Alam east edge at lon 101.557617." },
+        { "cityKey": "Kuala Lumpur|MY", "kind": "runtime-edge-touch", "status": "Petaling Jaya east edge meets Kuala Lumpur west edge at lon 101.661987." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102023395",
+          "ids": { "wofId": 102023395, "repo": "whosonfirst-data-admin-my", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "MY/petaling-jaya/wof-locality-102023395.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime bbox uses the WOF current locality envelope."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Kuala Lumpur|MY",
+      "priority": ["klang-valley-metro", "wof-locality-runtime-bbox", "apac-p0", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated from WOF current locality geometry and clipped west of Petaling Jaya."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Petaling Jaya|MY", "kind": "runtime-edge-touch", "status": "Kuala Lumpur west edge meets Petaling Jaya east edge at lon 101.661987." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102023407",
+          "ids": { "wofId": 102023407, "repo": "whosonfirst-data-admin-my", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "MY/kuala-lumpur/wof-locality-102023407.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox starts at lon 101.57959; runtime clips west edge to 101.661987 so Petaling Jaya keeps its own city provenance."]
+        }
+      ]
+    },
+    {
       "cityKey": "Windsor|CA",
       "priority": ["detroit-windsor-border", "wof-locality-runtime-bbox", "clipped"],
       "review": {

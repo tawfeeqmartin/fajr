@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T21:51:17.168Z",
+  "generated": "2026-05-14T22:06:46.714Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -8,7 +8,7 @@
     "population-centers": "Manual, sourced from UN World Cities + World Population Review 2024-2025"
   },
   "notes": "Cities sorted by bbox area ascending. detectLocation() linear-scans this array and returns the first bbox that contains (lat, lon) — smallest match wins. Each city carries an institutional `source` (mawaqit | national-authority | inherited) so apps can attribute timetable provenance to users. Method overrides are city-level institutional decisions documented in scripts/data/city-method-overrides.json with citation strings.",
-  "total": 481,
+  "total": 483,
   "cities": [
     {"name":"Alburikent (Dagestan)","countryISO":"RU","lat":42.9234,"lon":47.5089,"bbox":[42.92,42.94,47.5,47.52],"timezone":"Europe/Moscow","adminRegion":"Dagestan","population":11000,"elevation":50,"source":{"type":"mawaqit","slug":"alburkent-dzhuma-mechet-alburikent-367026-russia"}},
     {"name":"Isa Town","countryISO":"BH","lat":26.1762,"lon":50.5495,"bbox":[26.16,26.19,50.53,50.56],"timezone":"Asia/Bahrain","population":38000,"elevation":21,"source":{"type":"mawaqit","slug":"masjid-madina-issa-south-810-issa-town-bahrain"}},
@@ -45,7 +45,9 @@
     {"name":"Temara","countryISO":"MA","lat":33.9281,"lon":-6.9067,"bbox":[33.85,33.96,-7,-6.86],"timezone":"Africa/Casablanca","population":313000,"elevation":75,"source":{"type":"mawaqit","slug":"msjd-bd-llh-bn-ysyn-temara-12123-morocco"}},
     {"name":"Strasbourg","countryISO":"FR","lat":48.5734,"lon":7.7521,"bbox":[48.492024,48.646236,7.687934,7.79],"timezone":"Europe/Paris","adminRegion":"Grand Est","population":287000,"elevation":142,"source":{"type":"mawaqit","slug":"mosquee-quba-neudorf-strasbourg-67100-france"}},
     {"name":"Dearborn","countryISO":"US","lat":42.3223,"lon":-83.1763,"bbox":[42.32,42.4,-83.28,-83.08],"timezone":"America/Detroit","adminRegion":"Michigan","population":109000,"elevation":184,"methodOverride":"ISNA","altMethods":[{"method":"Tehran","source":"Iraqi-Lebanese Shia diaspora — Islamic Center of America (Dearborn) and other Najaf-Karbala diaspora institutions follow Tehran-style timing for the Twelver Shia community"}],"source":{"type":"national-authority","institution":"Islamic Society of North America"}},
+    {"name":"Shah Alam","countryISO":"MY","lat":3.0731,"lon":101.5183,"bbox":[2.939489,3.207902,101.497192,101.557617],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Selangor","population":740000,"elevation":28,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Luton","countryISO":"GB","lat":51.8787,"lon":-0.42,"bbox":[51.82,51.94,-0.5,-0.36],"timezone":"Europe/London","adminRegion":"Bedfordshire","population":213000,"elevation":122,"source":{"type":"inherited","from":"UK"}},
+    {"name":"Petaling Jaya","countryISO":"MY","lat":3.1074,"lon":101.618,"bbox":[3.04761,3.208733,101.557617,101.661987],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Selangor","population":639000,"elevation":45,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Bursa","countryISO":"TR","lat":40.1885,"lon":29.061,"bbox":[40.16606,40.253447,28.996355,29.20099],"timezone":"Europe/Istanbul","adminRegion":"Bursa Province","population":3139000,"elevation":100,"source":{"type":"inherited","from":"Turkey"}},
     {"name":"Dusseldorf","countryISO":"DE","lat":51.2277,"lon":6.7735,"bbox":[51.18,51.3,6.7,6.85],"timezone":"Europe/Berlin","nameLocal":"Düsseldorf","adminRegion":"North Rhine-Westphalia","population":619000,"elevation":38,"source":{"type":"inherited","from":"Germany"}},
     {"name":"Manama","countryISO":"BH","lat":26.2285,"lon":50.586,"bbox":[26.2,26.3,50.46,50.65],"timezone":"Asia/Bahrain","population":158000,"elevation":5,"source":{"type":"mawaqit","slug":"jm-lsyf-manama-seef-428-bahrain"}},
@@ -67,6 +69,7 @@
     {"name":"Dire Dawa","countryISO":"ET","lat":9.5898,"lon":41.855,"bbox":[9.5,9.68,41.78,41.95],"timezone":"Africa/Addis_Ababa","adminRegion":"Dire Dawa","population":466000,"elevation":1276,"source":{"type":"inherited","from":"Ethiopia"}},
     {"name":"Khartoum","countryISO":"SD","lat":15.5007,"lon":32.5599,"bbox":[15.4,15.6,32.5,32.66],"timezone":"Africa/Khartoum","elevation":381,"source":{"type":"national-authority","institution":"Egyptian General Authority of Survey"}},
     {"name":"Leeds","countryISO":"GB","lat":53.8008,"lon":-1.5491,"bbox":[53.74,53.87,-1.65,-1.4],"timezone":"Europe/London","adminRegion":"West Yorkshire","population":793000,"elevation":64,"source":{"type":"inherited","from":"UK"}},
+    {"name":"Kuala Lumpur","countryISO":"MY","lat":3.139,"lon":101.6869,"bbox":[3.036487,3.319571,101.661987,101.777344],"timezone":"Asia/Kuala_Lumpur","population":1809000,"elevation":22,"source":{"type":"mawaqit","slug":"surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2"}},
     {"name":"The Hague","countryISO":"NL","lat":52.0705,"lon":4.3007,"bbox":[52,52.18,4.2,4.4],"timezone":"Europe/Amsterdam","adminRegion":"South Holland","population":552000,"elevation":1,"source":{"type":"inherited","from":"Netherlands"}},
     {"name":"Sharjah","countryISO":"AE","lat":25.3463,"lon":55.4209,"bbox":[25.3,25.398821,55.3,55.678456],"timezone":"Asia/Dubai","nameLocal":"الشارقة","adminRegion":"Sharjah Emirate","population":1684000,"elevation":14,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Astana","countryISO":"KZ","lat":51.1694,"lon":71.4491,"bbox":[51.0694,51.2694,71.3491,71.5491],"timezone":"Asia/Almaty","elevation":347,"source":{"type":"national-authority","institution":"Muslim World League"}},
@@ -206,6 +209,7 @@
     {"name":"Wellington","countryISO":"NZ","lat":-41.2865,"lon":174.7762,"bbox":[-41.3865,-41.1865,174.6762,174.8762],"timezone":"Pacific/Auckland","elevation":13,"source":{"type":"inherited","from":"NZ"}},
     {"name":"Port Moresby","countryISO":"PG","lat":-9.4438,"lon":147.1803,"bbox":[-9.5438,-9.3438,147.0803,147.2803],"timezone":"Pacific/Port_Moresby","elevation":49,"source":{"type":"inherited","from":"PG"}},
     {"name":"Casablanca","countryISO":"MA","lat":33.5731,"lon":-7.5898,"bbox":[33.494823,33.647306,-7.738187,-7.459445],"timezone":"Africa/Casablanca","nameLocal":"الدار البيضاء","adminRegion":"Casablanca-Settat","population":3460000,"elevation":27,"source":{"type":"mawaqit","slug":"moulay-ismail-casablanca-20400-morocco"}},
+    {"name":"Klang","countryISO":"MY","lat":3.1062,"lon":101.3994,"bbox":[2.917544,3.220857,101.348877,101.497192],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Selangor","population":879000,"elevation":10,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Johor Bahru","countryISO":"MY","lat":1.4927,"lon":103.7414,"bbox":[1.45,1.609285,103.564621,103.872185],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Johor","population":858000,"elevation":26,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Antalya","countryISO":"TR","lat":36.8841,"lon":30.7056,"bbox":[36.821577,37.012346,30.583049,30.853306],"timezone":"Europe/Istanbul","adminRegion":"Antalya Province","population":1259000,"elevation":30,"source":{"type":"inherited","from":"Turkey"}},
     {"name":"Laval","countryISO":"CA","lat":45.6066,"lon":-73.7124,"bbox":[45.55,45.75,-73.86,-73.59],"timezone":"America/Toronto","population":438000,"elevation":39,"source":{"type":"mawaqit","slug":"iqra-laval-h7v-2v5-canada"}},
@@ -288,7 +292,6 @@
     {"name":"Kuching","countryISO":"MY","lat":1.5533,"lon":110.3592,"bbox":[1.4033,1.7033,110.2092,110.5092],"timezone":"Asia/Kuching","adminRegion":"Sarawak","population":325000,"elevation":27,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Miami","countryISO":"US","lat":25.7617,"lon":-80.1918,"bbox":[25.6117,25.9117,-80.3418,-80.0418],"timezone":"America/New_York","adminRegion":"Florida","population":467000,"elevation":2,"source":{"type":"inherited","from":"USA"}},
     {"name":"Khujand","countryISO":"TJ","lat":40.2854,"lon":69.6203,"bbox":[40.1354,40.4354,69.4703,69.7703],"timezone":"Asia/Dushanbe","nameLocal":"Хуҷанд","adminRegion":"Sughd","population":181000,"elevation":320,"source":{"type":"inherited","from":"Tajikistan"}},
-    {"name":"Shah Alam","countryISO":"MY","lat":3.0731,"lon":101.5183,"bbox":[2.8731,3.2731,101.3183,101.55],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Selangor","population":740000,"elevation":28,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Ankara","countryISO":"TR","lat":39.9334,"lon":32.8597,"bbox":[39.776496,40.032011,32.611664,33.007367],"timezone":"Europe/Istanbul","elevation":938,"source":{"type":"national-authority","institution":"Diyanet İşleri Başkanlığı"}},
     {"name":"Rotterdam","countryISO":"NL","lat":51.9244,"lon":4.4777,"bbox":[51.72,52,4.28,4.68],"timezone":"Europe/Amsterdam","adminRegion":"South Holland","population":651000,"elevation":0,"source":{"type":"mawaqit","slug":"pakistan-islamic-centre-rotterdam-rotterdam-3014-ed-netherlands"}},
     {"name":"Doha","countryISO":"QA","lat":25.2854,"lon":51.531,"bbox":[25.05,25.5,51.4,51.65],"timezone":"Asia/Qatar","population":2382000,"elevation":10,"source":{"type":"mawaqit","slug":"masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar"}},
@@ -369,7 +372,6 @@
     {"name":"Nampula","countryISO":"MZ","lat":-15.1167,"lon":39.2667,"bbox":[-15.3167,-14.9167,39.0667,39.4667],"timezone":"Africa/Maputo","population":743000,"elevation":441,"source":{"type":"mawaqit","slug":"masjid-fatimah-rua-monomotapa-3100-nampula-mozambique"}},
     {"name":"Rajshahi","countryISO":"BD","lat":24.3636,"lon":88.6241,"bbox":[24.1636,24.5636,88.4241,88.8241],"timezone":"Asia/Dhaka","nameLocal":"রাজশাহী","adminRegion":"Rajshahi Division","population":760000,"elevation":18,"source":{"type":"inherited","from":"Bangladesh"}},
     {"name":"Bahawalpur","countryISO":"PK","lat":29.3956,"lon":71.6722,"bbox":[29.1956,29.5956,71.4722,71.8722],"timezone":"Asia/Karachi","nameLocal":"بہاولپور","adminRegion":"Punjab","population":762000,"elevation":116,"source":{"type":"inherited","from":"Pakistan"}},
-    {"name":"Kuala Lumpur","countryISO":"MY","lat":3.139,"lon":101.6869,"bbox":[2.939,3.339,101.55,101.99],"timezone":"Asia/Kuala_Lumpur","population":1809000,"elevation":22,"source":{"type":"mawaqit","slug":"surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2"}},
     {"name":"Dubai","countryISO":"AE","lat":25.2048,"lon":55.2708,"bbox":[24.9,25.3,55.05,55.5],"timezone":"Asia/Dubai","nameLocal":"دبي","adminRegion":"Dubai Emirate","population":3604000,"elevation":5,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Al Ain","countryISO":"AE","lat":24.2075,"lon":55.7447,"bbox":[24.013749,24.414416,55.464609,56.018126],"timezone":"Asia/Dubai","nameLocal":"العين","adminRegion":"Abu Dhabi Emirate","population":766000,"elevation":295,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Hong Kong","countryISO":"HK","lat":22.3193,"lon":114.1694,"bbox":[22.16,22.55,113.85,114.43],"timezone":"Asia/Hong_Kong","population":7482000,"elevation":50,"source":{"type":"inherited","from":"HongKong"}},
