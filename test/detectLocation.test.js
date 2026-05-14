@@ -561,6 +561,22 @@ describe('detectLocation — issue #47 regression', () => {
     expect(klang.country).toBe('Malaysia')
   })
 
+  it('Sialkot WOF cell no longer shadows Gujranwala north-east edge', () => {
+    const gujranwalaEdge = detectLocation(32.42, 74.46)
+    expect(gujranwalaEdge.city?.name).toBe('Gujranwala')
+    expect(gujranwalaEdge.country).toBe('Pakistan')
+    expect(gujranwalaEdge.timezone).toBe('Asia/Karachi')
+
+    const sialkotCenter = detectLocation(32.4945, 74.5229)
+    expect(sialkotCenter.city?.name).toBe('Sialkot')
+    expect(sialkotCenter.country).toBe('Pakistan')
+    expect(sialkotCenter.timezone).toBe('Asia/Karachi')
+
+    const sialkotWestEdge = detectLocation(32.49, 74.495)
+    expect(sialkotWestEdge.city?.name).toBe('Sialkot')
+    expect(sialkotWestEdge.country).toBe('Pakistan')
+  })
+
   // Additional v1.7.5 regression cases (Reviewer C's "definitely wrong" list).
   it('Sharm el-Sheikh → country=Egypt with Egyptian method (was SaudiArabia/UmmAlQura)', () => {
     const loc = detectLocation(27.92, 34.33)

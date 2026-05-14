@@ -1064,11 +1064,11 @@ const BBOX_OVERRIDES = {
   // so Jaamuuq (lat 9.78) is outside.
   'Dire Dawa|ET':       [9.50, 9.68, 41.78, 41.95],
 
-  // v1.7.19 (#75): Sialkot PK (32.49, 74.52) vs Gujranwala PK (32.19, 74.19).
-  // Both Pakistan. Default formula bboxes overlap on lat 32.29-32.49 / lon
-  // 74.32-74.49. Tighten Sialkot to its own metro extent, leaving Gujranwala
-  // unambiguous below.
-  'Sialkot|PK':         [32.40, 32.60, 74.45, 74.65],
+  // v1.7.19 (#75) / v1.8.0 #118: Sialkot PK vs Gujranwala PK. The older
+  // hand-tightened Sialkot box still overlapped Gujranwala's north-east edge,
+  // so Gujranwala samples such as (32.42, 74.46) resolved to Sialkot. Use the
+  // reviewed WOF current locality envelope for Sialkot to remove that overlap.
+  'Sialkot|PK':         [32.471302, 32.536788, 74.494765, 74.594771],
 
   // v1.7.18: Manama BH (lat 26.23) vs Isa Town BH (lat 26.18). Isa Town
   // has tight 0.03° bbox at 26.16-26.19 / 50.53-50.56. Pre-existing

@@ -26,6 +26,16 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — Sialkot/Gujranwala city-geometry overlap
+
+- Updated `Sialkot|PK` to a reviewed WOF current locality envelope, removing
+  the previous overlap where Gujranwala north-east coordinates could resolve to
+  Sialkot city provenance.
+- Lahore and Gujranwala WOF rows were reviewed but left out of runtime changes
+  to avoid a broader coverage shift in this patch.
+- No prayer-time calculation math, public API, regional default, or method
+  dispatch changed.
+
 ### Fixed — Klang Valley city-geometry provenance
 
 - Added WOF-backed runtime rows for `Klang|MY` and `Petaling Jaya|MY`, and
