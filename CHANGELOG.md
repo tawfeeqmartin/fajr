@@ -50,6 +50,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   not reported as cross-country overlaps; Brazzaville/Kinshasa now stays
   tracked as a geometry-undercoverage/clipping review item instead of a false
   runtime overlap warning.
+- Tightened the Casablanca lookup cell to the reviewed WOF current county
+  envelope, which matches the OSM admin-8 city geometry while avoiding WOF's
+  deprecated/point-like locality rows.
 
 ### Changed — documentation doctrine cleanup
 

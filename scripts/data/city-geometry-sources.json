@@ -182,7 +182,13 @@
       "cityKey": "Casablanca|MA",
       "priority": ["phase-1-morocco", "habous", "large-metro-bbox"],
       "relatedAuthorityIds": { "habousVilleId": 58, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-14: runtime bbox updated to the current WOF county envelope because it matches the OSM admin-8 geometry and WOF's locality rows are deprecated/point-like."
+        ]
+      },
       "geometries": [
         {
           "provider": "osm",
@@ -200,9 +206,10 @@
           "ids": { "wofId": 890442533, "repo": "whosonfirst-data-admin-ma", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
           "cacheFile": "MA/casablanca/wof-county-890442533.geojson",
           "sourceConfidence": "medium",
-          "matchConfidence": "placetype-mismatch-candidate",
+          "matchConfidence": "placetype-mismatch-runtime-bbox",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF current county envelope is used as the reviewed runtime bbox after comparison with the OSM admin-8 candidate."]
         }
       ]
     },
