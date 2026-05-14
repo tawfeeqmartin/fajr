@@ -61,13 +61,19 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   geometry, compatible official/commune-level geometry, or should stay an audit
   gap rather than deriving runtime bboxes from OSM alone or broad WOF county
   rows.
-- Added UAE WOF locality source-map rows for Abu Dhabi, Al Ain,
-  Dubai/Sharjah/Ajman; shipped Abu Dhabi and Al Ain runtime bbox updates where
-  the WOF envelopes do not collide, while marking Dubai/Sharjah/Ajman for
-  clipping review.
-- Expanded Sharjah and Ajman runtime bboxes using clipped WOF locality extents:
-  Sharjah gains eastward coverage without moving south into Dubai, and Ajman
-  gains reviewed WOF extent while only edge-touching Sharjah.
+- Added UAE WOF locality source-map rows for Abu Dhabi, Al Ain, and the
+  Dubai/Sharjah/Ajman metro; shipped Abu Dhabi and Al Ain runtime bbox updates
+  where the WOF envelopes do not collide.
+- Clipped Dubai, Sharjah, and Ajman into adjacent runtime lookup cells:
+  Dubai keeps its centre while no longer overlapping Sharjah, Sharjah gains
+  eastward coverage, and Ajman gains reviewed WOF extent while only
+  edge-touching Sharjah.
+- Tightened ten large Turkey city lookup cells to reviewed WOF current locality
+  envelopes (`Istanbul`, `Ankara`, `Izmir`, `Bursa`, `Konya`, `Gaziantep`,
+  `Adana`, `Antalya`, `Samsun`, `Trabzon`) and left ambiguous Turkish WOF rows
+  for separate review.
+- Tightened the Giza lookup cell's western edge so the smaller 6th of October
+  cell no longer shadows Giza validation samples.
 
 ### Changed — documentation doctrine cleanup
 

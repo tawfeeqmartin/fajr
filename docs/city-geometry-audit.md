@@ -34,8 +34,9 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-25 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, and 5
-existing registry warning rows. It carries 17 OSM relation rows plus 21 WOF
+35 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
+Turkey large-city rows, and 5 existing registry warning rows. It carries 17
+OSM relation rows plus 31 WOF
 rows across reviewed locality/county candidates. Berrechid, Settat, and Fes
 now have WOF locality candidates; Jerusalem intentionally remains without a
 geometry candidate until a human routing decision is available.
@@ -121,9 +122,19 @@ The first UAE pass shows a different pattern:
   shipped city lookup cells without colliding with neighboring fajr rows, so
   they are runtime-ready.
 - Dubai, Sharjah, and Ajman also have current WOF locality envelopes, but their
-  rectangular envelopes overlap heavily. Sharjah and Ajman now use clipped WOF
-  extents that improve eastern/northern coverage while preserving Dubai
-  routing. Dubai remains unchanged pending a stronger clipping decision.
+  rectangular envelopes overlap heavily. Dubai, Sharjah, and Ajman now use
+  explicit clipped runtime cells: Dubai's northern edge meets Sharjah's
+  southern edge, and Ajman starts at Sharjah's WOF north edge.
+
+The first Turkey pass is cleaner:
+
+- Current WOF locality envelopes are runtime-ready for Istanbul, Ankara, Izmir,
+  Bursa, Konya, Gaziantep, Adana, Antalya, Samsun, and Trabzon. These replace
+  broad population-radius lookup cells and preserve each city centre.
+- Ambiguous Turkish rows remain source leads, not runtime inputs: Diyarbakir
+  and Eskisehir use superseding rows marked `mz:is_current = -1`, Kayseri is
+  point-like, and Mersin did not surface a clean city locality row in the WOF
+  scan.
 
 Reference URLs checked in this pass:
 
@@ -161,10 +172,15 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   matches the OSM admin-8 Fes envelope.
 - `Abu Dhabi|AE` and `Al Ain|AE`: expanded/tightened to reviewed WOF current
   locality envelopes.
-- `Sharjah|AE` and `Ajman|AE`: expanded to clipped WOF current locality
-  extents. Sharjah keeps its existing south/west edges to avoid changing Dubai
-  routing; Ajman starts at Sharjah's WOF north edge so the two cells only
-  touch. `Dubai|AE` remains unchanged pending deeper clipping review.
+- `Dubai|AE`, `Sharjah|AE`, and `Ajman|AE`: clipped into adjacent runtime
+  lookup cells after WOF current locality envelopes proved too overlapping to
+  ship directly. Dubai keeps its centre and existing west/east/south edges but
+  stops at Sharjah's south edge; Ajman starts at Sharjah's WOF north edge so
+  the three cells do not area-overlap.
+- `Istanbul|TR`, `Ankara|TR`, `Izmir|TR`, `Bursa|TR`, `Konya|TR`,
+  `Gaziantep|TR`, `Adana|TR`, `Antalya|TR`, `Samsun|TR`, and `Trabzon|TR`:
+  tightened to reviewed WOF current locality envelopes. Trabzon's previous
+  Georgia-edge safety intent is preserved by the tighter WOF cell.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.

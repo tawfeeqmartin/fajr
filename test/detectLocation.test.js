@@ -263,6 +263,37 @@ describe('detectLocation — Mawaqit institutional source', () => {
     expect(dubai.city).not.toBeNull()
     expect(dubai.city.name).toBe('Dubai')
     expect(dubai.country).toBe('UAE')
+
+    const sharjahSouthwest = detectLocation(25.3242, 55.4941)
+    expect(sharjahSouthwest.city).not.toBeNull()
+    expect(sharjahSouthwest.city.name).toBe('Sharjah')
+    expect(sharjahSouthwest.country).toBe('UAE')
+  })
+
+  it('Turkey WOF-tightened rows keep centers while dropping old broad corners', () => {
+    const rows = [
+      ['Istanbul', 41.0082, 28.9784, 41.35, 28.60],
+      ['Ankara', 39.9334, 32.8597, 40.20, 33.15],
+      ['Izmir', 38.4237, 27.1428, 38.20, 27.40],
+      ['Bursa', 40.1885, 29.0610, 40.40, 28.80],
+      ['Konya', 37.8746, 32.4932, 37.60, 32.75],
+      ['Gaziantep', 37.0662, 37.3833, 37.30, 37.10],
+      ['Adana', 37.0000, 35.3213, 36.75, 35.60],
+      ['Antalya', 36.8841, 30.7056, 37.15, 30.45],
+      ['Samsun', 41.2867, 36.3300, 41.55, 36.10],
+      ['Trabzon', 41.0027, 39.7168, 40.90, 39.85],
+    ]
+
+    for (const [name, centerLat, centerLon, oldCornerLat, oldCornerLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe('Turkey')
+
+      const oldCorner = detectLocation(oldCornerLat, oldCornerLon)
+      expect(oldCorner.city?.name, `${name} old broad corner should no longer resolve to ${name}`).not.toBe(name)
+      expect(oldCorner.country).toBe('Turkey')
+    }
   })
 })
 

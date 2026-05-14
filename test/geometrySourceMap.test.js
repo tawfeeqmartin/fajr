@@ -79,6 +79,16 @@ describe('city geometry source map', () => {
       ['Fes|MA', 'wof:locality:421190143'],
       ['Abu Dhabi|AE', 'wof:locality:421179641'],
       ['Al Ain|AE', 'wof:locality:421168687'],
+      ['Istanbul|TR', 'wof:locality:890460455'],
+      ['Ankara|TR', 'wof:locality:890460453'],
+      ['Izmir|TR', 'wof:locality:890461083'],
+      ['Bursa|TR', 'wof:locality:890461315'],
+      ['Konya|TR', 'wof:locality:890463545'],
+      ['Gaziantep|TR', 'wof:locality:890461631'],
+      ['Adana|TR', 'wof:locality:890461703'],
+      ['Antalya|TR', 'wof:locality:101912923'],
+      ['Samsun|TR', 'wof:locality:101911033'],
+      ['Trabzon|TR', 'wof:locality:101912783'],
       ['Brazzaville|CG', 'wof:locality:421180023'],
       ['Kinshasa|CD', 'wof:locality:421166913'],
     ])
@@ -103,9 +113,19 @@ describe('city geometry source map', () => {
     expect(statusFor('Fes|MA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Abu Dhabi|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Al Ain|AE')).toBe('runtime-bbox-shipped')
-    expect(statusFor('Dubai|AE')).toBe('needs-clipping-review')
+    expect(statusFor('Dubai|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Sharjah|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Ajman|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Istanbul|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Ankara|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Izmir|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Bursa|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Konya|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Gaziantep|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Adana|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Antalya|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Samsun|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Trabzon|TR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Brazzaville|CG')).toBe('needs-clipping-review')
     expect(statusFor('Kinshasa|CD')).toBe('needs-clipping-review')
   })
