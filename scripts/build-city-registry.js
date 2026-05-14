@@ -981,6 +981,12 @@ const BBOX_OVERRIDES = {
   // Sharjah CBD 25.35, 55.42 → keep lat 25.30-25.40 / lon 55.30-55.55.
   'Sharjah|AE':         [25.30, 25.40, 55.30, 55.55],
 
+  // v1.8.0 #118: WOF current locality envelopes improve UAE city coverage
+  // without colliding with neighboring lookup cells. Dubai/Sharjah/Ajman need
+  // separate clipping review because their WOF envelopes overlap heavily.
+  'Abu Dhabi|AE':       [24.195888, 24.590696, 54.254076, 54.841984],
+  'Al Ain|AE':          [24.013749, 24.414416, 55.464609, 56.018126],
+
   // Dammam SA (1.25M, lat 26.39) vs Khobar SA (626K, lat 26.22). 20 km
   // apart. Tighten Dammam to lat 26.32-26.55 so Khobar (26.22) is outside.
   // Khobar override remains 26.16-26.32.

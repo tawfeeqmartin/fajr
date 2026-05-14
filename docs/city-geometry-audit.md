@@ -34,11 +34,11 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-20 high-priority rows: 15 Morocco/Habous phase-1 rows and 5 existing registry
-warning rows. It carries 17 OSM relation rows plus 16 WOF rows across reviewed
-locality/county candidates. Berrechid, Settat, and Fes now have WOF locality
-candidates; Jerusalem intentionally remains without a geometry candidate until
-a human routing decision is available.
+25 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, and 5
+existing registry warning rows. It carries 17 OSM relation rows plus 21 WOF
+rows across reviewed locality/county candidates. Berrechid, Settat, and Fes
+now have WOF locality candidates; Jerusalem intentionally remains without a
+geometry candidate until a human routing decision is available.
 
 ```json
 {
@@ -115,6 +115,15 @@ county/prefecture bboxes or OSM alone. Either find a reviewed WOF locality
 polygon, verify an official/commune-level source with compatible licensing, or
 leave the row as a documented audit gap.
 
+The first UAE pass shows a different pattern:
+
+- Abu Dhabi and Al Ain have current WOF locality envelopes that expand the
+  shipped city lookup cells without colliding with neighboring fajr rows, so
+  they are runtime-ready.
+- Dubai, Sharjah, and Ajman also have current WOF locality envelopes, but their
+  rectangular envelopes overlap heavily. They are source-map rows for now and
+  need an explicit clipping rule before runtime bboxes should change.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -149,6 +158,9 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
 - `Fes|MA`: tightened to WOF current locality `421190143`; that row is named
   Fes-Ville-Nouvelle in WOF but supersedes the older Fes locality row and
   matches the OSM admin-8 Fes envelope.
+- `Abu Dhabi|AE` and `Al Ain|AE`: expanded/tightened to reviewed WOF current
+  locality envelopes. Dubai, Sharjah, and Ajman were added to the source map
+  but intentionally left unchanged at runtime pending clipping review.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.

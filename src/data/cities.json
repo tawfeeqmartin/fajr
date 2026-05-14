@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T09:56:40.667Z",
+  "generated": "2026-05-14T10:09:19.903Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -129,7 +129,6 @@
     {"name":"Maputo","countryISO":"MZ","lat":-25.9692,"lon":32.5732,"bbox":[-26.0692,-25.8692,32.4732,32.6732],"timezone":"Africa/Maputo","elevation":47,"source":{"type":"national-authority","institution":"Muslim World League"}},
     {"name":"Ramallah","countryISO":"PS","lat":31.9038,"lon":35.2034,"bbox":[31.8038,32.0038,35.1034,35.3034],"timezone":"Asia/Hebron","elevation":854,"source":{"type":"national-authority","institution":"Egyptian General Authority of Survey"}},
     {"name":"Riyadh","countryISO":"SA","lat":24.7136,"lon":46.6753,"bbox":[24.6136,24.8136,46.5753,46.7753],"timezone":"Asia/Riyadh","elevation":612,"source":{"type":"national-authority","institution":"Umm al-Qura University"}},
-    {"name":"Abu Dhabi","countryISO":"AE","lat":24.4539,"lon":54.3773,"bbox":[24.3539,24.5539,54.2773,54.4773],"timezone":"Asia/Dubai","elevation":27,"source":{"type":"national-authority","institution":"Umm al-Qura University"}},
     {"name":"Bern","countryISO":"CH","lat":46.948,"lon":7.4474,"bbox":[46.848,47.048,7.3474,7.5474],"timezone":"Europe/Zurich","elevation":540,"source":{"type":"inherited","from":"Switzerland"}},
     {"name":"Bucharest","countryISO":"RO","lat":44.4268,"lon":26.1025,"bbox":[44.3268,44.5268,26.0025,26.2025],"timezone":"Europe/Bucharest","elevation":96,"source":{"type":"inherited","from":"Romania"}},
     {"name":"Belgrade","countryISO":"RS","lat":44.7866,"lon":20.4489,"bbox":[44.6866,44.8866,20.3489,20.5489],"timezone":"Europe/Belgrade","elevation":117,"source":{"type":"inherited","from":"Serbia"}},
@@ -302,7 +301,6 @@
     {"name":"Bandar Abbas","countryISO":"IR","lat":27.1832,"lon":56.2666,"bbox":[26.9832,27.3832,56.0666,56.4666],"timezone":"Asia/Tehran","nameLocal":"بندرعباس","adminRegion":"Hormozgan","population":526000,"elevation":9,"source":{"type":"inherited","from":"Iran"}},
     {"name":"Kerman","countryISO":"IR","lat":30.2839,"lon":57.0834,"bbox":[30.0839,30.4839,56.8834,57.2834],"timezone":"Asia/Tehran","nameLocal":"کرمان","adminRegion":"Kerman","population":738000,"elevation":1755,"source":{"type":"inherited","from":"Iran"}},
     {"name":"Buraydah","countryISO":"SA","lat":26.326,"lon":43.975,"bbox":[26.126,26.526,43.775,44.175],"timezone":"Asia/Riyadh","nameLocal":"بريدة","adminRegion":"Qassim","population":745000,"elevation":619,"source":{"type":"inherited","from":"SaudiArabia"}},
-    {"name":"Al Ain","countryISO":"AE","lat":24.2075,"lon":55.7447,"bbox":[24.0075,24.4075,55.5447,55.9447],"timezone":"Asia/Dubai","nameLocal":"العين","adminRegion":"Abu Dhabi Emirate","population":766000,"elevation":295,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Port Said","countryISO":"EG","lat":31.2653,"lon":32.3019,"bbox":[31.0653,31.4653,32.1019,32.5019],"timezone":"Africa/Cairo","nameLocal":"بورسعيد","adminRegion":"Port Said","population":760000,"elevation":2,"source":{"type":"inherited","from":"Egypt"}},
     {"name":"Suez","countryISO":"EG","lat":29.9737,"lon":32.5263,"bbox":[29.7737,30.1737,32.3263,32.7263],"timezone":"Africa/Cairo","nameLocal":"السويس","adminRegion":"Suez","population":744000,"elevation":9,"source":{"type":"inherited","from":"Egypt"}},
     {"name":"Mansoura","countryISO":"EG","lat":31.0409,"lon":31.3785,"bbox":[30.8409,31.2409,31.1785,31.5785],"timezone":"Africa/Cairo","nameLocal":"المنصورة","adminRegion":"Dakahlia","population":960000,"elevation":6,"source":{"type":"inherited","from":"Egypt"}},
@@ -362,7 +360,9 @@
     {"name":"Kuala Lumpur","countryISO":"MY","lat":3.139,"lon":101.6869,"bbox":[2.939,3.339,101.55,101.99],"timezone":"Asia/Kuala_Lumpur","population":1809000,"elevation":22,"source":{"type":"mawaqit","slug":"surau-ar-raudhah-islamiah-kuala-lumpur-54200-malaysia-2"}},
     {"name":"Giza","countryISO":"EG","lat":30.0131,"lon":31.2089,"bbox":[29.6131,30.1,30.8089,31.22],"timezone":"Africa/Cairo","nameLocal":"الجيزة","adminRegion":"Giza","population":9200000,"elevation":30,"source":{"type":"inherited","from":"Egypt"}},
     {"name":"Dubai","countryISO":"AE","lat":25.2048,"lon":55.2708,"bbox":[24.9,25.35,55.05,55.5],"timezone":"Asia/Dubai","nameLocal":"دبي","adminRegion":"Dubai Emirate","population":3604000,"elevation":5,"source":{"type":"inherited","from":"UAE"}},
+    {"name":"Al Ain","countryISO":"AE","lat":24.2075,"lon":55.7447,"bbox":[24.013749,24.414416,55.464609,56.018126],"timezone":"Asia/Dubai","nameLocal":"العين","adminRegion":"Abu Dhabi Emirate","population":766000,"elevation":295,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Hong Kong","countryISO":"HK","lat":22.3193,"lon":114.1694,"bbox":[22.16,22.55,113.85,114.43],"timezone":"Asia/Hong_Kong","population":7482000,"elevation":50,"source":{"type":"inherited","from":"HongKong"}},
+    {"name":"Abu Dhabi","countryISO":"AE","lat":24.4539,"lon":54.3773,"bbox":[24.195888,24.590696,54.254076,54.841984],"timezone":"Asia/Dubai","elevation":27,"source":{"type":"national-authority","institution":"Umm al-Qura University"}},
     {"name":"Lahore","countryISO":"PK","lat":31.5497,"lon":74.3436,"bbox":[31.25,31.85,74.04,74.5],"timezone":"Asia/Karachi","nameLocal":"لاہور","adminRegion":"Punjab","population":13096000,"elevation":217,"source":{"type":"mawaqit","slug":"masjid-khatim-ul-nabiyyeen-lahore-54000-pakistan"}},
     {"name":"Osaka","countryISO":"JP","lat":34.6937,"lon":135.5023,"bbox":[34.3937,34.9937,135.2023,135.8023],"timezone":"Asia/Tokyo","adminRegion":"Osaka Prefecture","population":2691000,"elevation":24,"source":{"type":"inherited","from":"JP"}},
     {"name":"Faisalabad","countryISO":"PK","lat":31.4187,"lon":73.0791,"bbox":[31.1187,31.7187,72.7791,73.3791],"timezone":"Asia/Karachi","nameLocal":"فیصل آباد","adminRegion":"Punjab","population":3630000,"elevation":184,"source":{"type":"inherited","from":"Pakistan"}},

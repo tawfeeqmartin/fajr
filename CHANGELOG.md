@@ -61,6 +61,10 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   geometry, compatible official/commune-level geometry, or should stay an audit
   gap rather than deriving runtime bboxes from OSM alone or broad WOF county
   rows.
+- Added UAE WOF locality source-map rows for Abu Dhabi, Al Ain,
+  Dubai/Sharjah/Ajman; shipped Abu Dhabi and Al Ain runtime bbox updates where
+  the WOF envelopes do not collide, while marking Dubai/Sharjah/Ajman for
+  clipping review.
 
 ### Changed — documentation doctrine cleanup
 
