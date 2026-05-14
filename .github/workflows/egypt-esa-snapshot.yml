@@ -138,8 +138,10 @@ jobs:
           Promotion into eval/data/test/ remains a separate human review step (fajr#133 follow-up: multi-season accumulation needed for Egypt C → B promotion per docs/positions.md Promotion Criteria).
           EOF
 
-          gh pr create \
+          if ! gh pr create \
             --base master \
             --head "$branch" \
             --title "data(egypt): capture ESA daily snapshot ${ESA_SNAPSHOT_DATE}" \
-            --body-file /tmp/esa-snapshot-pr-body.md
+            --body-file /tmp/esa-snapshot-pr-body.md; then
+            echo "::warning::Snapshot branch pushed, but GitHub Actions could not create the PR. Open it manually from https://github.com/${{ github.repository }}/pull/new/${branch}."
+          fi
