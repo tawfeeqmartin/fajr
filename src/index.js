@@ -21,6 +21,20 @@ import { hilalVisibility } from './hilal.js'
 import { nightThirds } from './night.js'
 import { travelerMode } from './traveler.js'
 import { prayerNames, prayerName } from './locale.js'
+import { features, featureInfo } from './features.js'
+
+function explicitElevation(params) {
+  const override = params && params.override && typeof params.override === 'object'
+    ? params.override
+    : null
+  if (override && override.elevation !== undefined && override.elevation !== null) {
+    return Number(override.elevation)
+  }
+  if (params && params.elevation !== undefined && params.elevation !== null) {
+    return Number(params.elevation)
+  }
+  return null
+}
 
 /**
  * Calculate prayer times with all applicable corrections.
@@ -31,16 +45,18 @@ import { prayerNames, prayerName } from './locale.js'
  * @param {Date}   params.date
  * @param {number} [params.elevation=0]
  * @param {string} [params.method]  Override auto-detected method
+ * @param {object} [params.override] App-facing override object
  * @returns {object}
  */
 function prayerTimes(params) {
   let times = _prayerTimes(params)
-  if (params.elevation && params.elevation > 0) {
+  const elevation = explicitElevation(params)
+  if (elevation && elevation > 0) {
     // Pass latitude so the time-correction scales by 4 / cos(φ). Without it
     // the correction defaults to cos(0°) = 1 — underapplying the geometric
     // shift at non-equatorial latitudes (15% under at lat 33°, 50% under
     // at lat 60°). Bug fix v1.5.2.
-    times = applyElevationCorrection(times, params.elevation, params.latitude)
+    times = applyElevationCorrection(times, elevation, params.latitude)
   }
   return times
 }
@@ -192,6 +208,8 @@ export default {
   travelerMode,
   prayerNames,
   prayerName,
+  features,
+  featureInfo,
 }
 
 export {
@@ -210,4 +228,6 @@ export {
   travelerMode,
   prayerNames,
   prayerName,
+  features,
+  featureInfo,
 }

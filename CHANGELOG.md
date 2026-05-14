@@ -26,7 +26,26 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
-_No unreleased changes._
+### Added — settings metadata and caller overrides
+
+- Added `features()` and `featureInfo(key)` as structured metadata for
+  downstream app settings UIs. Initial keys cover calculation method, Asr
+  convention, elevation, tayakkun buffer, and Tarabishy high-latitude method.
+- Added the grouped `prayerTimes({ override: { method, elevation,
+  asrConvention } })` surface for user settings. Existing top-level `method`
+  and `elevation` remain supported; `override` takes priority when both are
+  present.
+- Added explicit Asr-convention override support. `override.asrConvention:
+  'hanafi'` applies Hanafi 2x shadow Asr and reports
+  `location.asrConventionSource: 'caller-explicit'`; `'standard'` applies 1x
+  shadow. Deprecated `override.madhab` is accepted as an alias for older UIs,
+  but remains Asr-convention vocabulary, not a full legal-madhhab taxonomy.
+
+### Honest caveats
+
+- Defaults are unchanged. Hanafi-majority country metadata still does not
+  silently mutate Asr calculation; the actual 2x-shadow calculation changes
+  only when the caller explicitly passes `override.asrConvention: 'hanafi'`.
 
 ## [1.8.1] — 2026-05-14
 

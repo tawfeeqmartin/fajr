@@ -34,7 +34,7 @@ npm install @tawfeeqmartin/fajr
 ```
 
 ```js
-import { prayerTimes } from '@tawfeeqmartin/fajr'
+import { prayerTimes, featureInfo, features } from '@tawfeeqmartin/fajr'
 
 const times = prayerTimes({
   latitude: 33.9716,
@@ -46,6 +46,7 @@ console.log(times.fajr)
 console.log(times.location)
 console.log(times.applied)
 console.log(times.notes)
+console.log(features().map(featureInfo))
 ```
 
 `fajr` is pure ESM and has no runtime network dependency. It runs in Node, modern browsers, React Native, Expo, Capacitor, Electron, Tauri, Deno, Bun, and edge runtimes. Native Swift/Kotlin/C#/Rust ports are tracked separately in [issue #44](https://github.com/tawfeeqmartin/fajr/issues/44).
@@ -101,6 +102,25 @@ console.log(times.notes)
 
 Use `location.asrConvention` for local Asr-convention metadata and `applied.asrSchool` for the formula actually used. These are **not** a full legal-madhhab taxonomy: Morocco, for example, is Maliki, while its relevant Asr-convention value is `standard` 1x shadow. The older `location.madhab` / `applied.madhab` fields are deprecated compatibility aliases; from v1.8.1 they mirror `standard` / `hanafi` Asr values and no longer return `shafii` for generic standard 1x Asr. Do not render them as "local madhhab." Hanafi-convention countries can report `location.asrConvention: 'hanafi'` while keeping `applied.asrSchool: 'standard'` when the selected timetable method uses standard 1x Asr. When that mismatch matters, `notes[]` includes an Asr-convention advisory.
 
+For user settings, prefer the grouped `override` object. It keeps the user's
+choice separate from the detected defaults and updates the provenance fields:
+
+```js
+const hanafi = prayerTimes({
+  latitude,
+  longitude,
+  date: new Date(),
+  override: {
+    asrConvention: 'hanafi', // or 'standard'
+    method: 'Diyanet',       // optional; otherwise auto-detected
+    elevation: 0,            // optional; explicit sea-level / uniform-city stance
+  },
+})
+
+console.log(hanafi.location.asrConventionSource) // 'caller-explicit'
+console.log(hanafi.applied.asrSchool)            // 'hanafi'
+```
+
 For regional defaults, read [docs/positions.md](docs/positions.md). For areas
 where authorities or valid methods differ, read
 [docs/known-disagreements.md](docs/known-disagreements.md).
@@ -123,7 +143,7 @@ console.log(thirds.lastThird)
 
 `fajr` improves the wasail, the means of calculating time. It does not issue religious rulings.
 
-For everyday use, the defaults are designed to be practical and transparent. For fasting, Eid, traveler rulings, high-latitude summers, high-elevation locations, or madhab-specific Asr timing:
+For everyday use, the defaults are designed to be practical and transparent. For fasting, Eid, traveler rulings, high-latitude summers, high-elevation locations, or Asr-convention-specific timing:
 
 1. Verify the resolved city and country.
 2. Check the calculation method, elevation stance, and Asr convention.
@@ -170,6 +190,7 @@ Use `fajr` when you want offline local computation plus:
 | `prayerTimes(params)` | Six prayer times plus imsak, sunrise/shuruq, sunset, provenance, notes |
 | `dayTimes(params)` | `prayerTimes` plus midnight and qiyam start |
 | `astronomical(lat, lon, date)` | Raw solar/twilight/Asr primitives with no regional offsets |
+| `features()`, `featureInfo(key)` | Structured settings metadata for app UIs |
 | `detectLocation(lat, lon)` | Bbox-precise city/country/method/elevation lookup |
 | `nearestCity(lat, lon)` | Display-only nearest-city label, never used for dispatch |
 | `qibla({ latitude, longitude })` | Qibla bearing |
@@ -209,13 +230,19 @@ For web/mobile apps:
 5. Let users override method/elevation/Asr convention when their local mosque differs.
 
 ```js
-import { prayerTimes, nearestCity } from '@tawfeeqmartin/fajr'
+import { prayerTimes, nearestCity, features, featureInfo } from '@tawfeeqmartin/fajr'
+
+const settings = features().map(featureInfo)
 
 const times = prayerTimes({
   latitude,
   longitude,
   date: new Date(),
-  elevation: gpsAltitude ?? undefined,
+  override: {
+    elevation: gpsAltitude ?? undefined,
+    asrConvention: userAsrConvention ?? undefined,
+    method: userMethod ?? undefined,
+  },
 })
 
 const label = times.location.city
