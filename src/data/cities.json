@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T09:46:53.462Z",
+  "generated": "2026-05-14T09:56:40.667Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -33,6 +33,7 @@
     {"name":"Beau Bassin-Rose Hill","countryISO":"MU","lat":-20.2289,"lon":57.4683,"bbox":[-20.3,-20.2,57.42,57.55],"timezone":"Indian/Mauritius","population":102000,"elevation":130,"source":{"type":"mawaqit","slug":"hunain-islamic-centre-beau-bassin-rose-hill-71608-mauritius"}},
     {"name":"Khartoum Bahri","countryISO":"SD","lat":15.6333,"lon":32.5333,"bbox":[15.61,15.72,32.5,32.62],"timezone":"Africa/Khartoum","population":700000,"elevation":380,"source":{"type":"mawaqit","slug":"msjd-lkhwjlb-l-tyq-bhry-11111-sudan"}},
     {"name":"Nicosia","countryISO":"CY","lat":35.1856,"lon":33.3823,"bbox":[35.13,35.24,33.32,33.45],"timezone":"Asia/Nicosia","population":326000,"elevation":220,"source":{"type":"inherited","from":"Cyprus"}},
+    {"name":"Fes","countryISO":"MA","lat":34.0331,"lon":-5.0003,"bbox":[33.97125,34.076345,-5.078619,-4.937726],"timezone":"Africa/Casablanca","nameLocal":"فاس","adminRegion":"Fès-Meknès","population":1112000,"elevation":408,"source":{"type":"mawaqit","slug":"masjid-aamrou-bn-laas-fes-30000-morocco-1"}},
     {"name":"Saint-Denis","countryISO":"RE","lat":-20.8823,"lon":55.4504,"bbox":[-20.95,-20.85,55.4,55.55],"timezone":"Indian/Reunion","adminRegion":"Réunion","population":153000,"elevation":20,"source":{"type":"inherited","from":"Reunion"}},
     {"name":"Temara","countryISO":"MA","lat":33.9281,"lon":-6.9067,"bbox":[33.85,33.96,-7,-6.86],"timezone":"Africa/Casablanca","population":313000,"elevation":75,"source":{"type":"mawaqit","slug":"msjd-bd-llh-bn-ysyn-temara-12123-morocco"}},
     {"name":"Luton","countryISO":"GB","lat":51.8787,"lon":-0.42,"bbox":[51.82,51.94,-0.5,-0.36],"timezone":"Europe/London","adminRegion":"Bedfordshire","population":213000,"elevation":122,"source":{"type":"inherited","from":"UK"}},
@@ -288,7 +289,6 @@
     {"name":"Cairo","countryISO":"EG","lat":30.0444,"lon":31.2357,"bbox":[29.84,30.24,31.22,31.56],"timezone":"Africa/Cairo","nameLocal":"القاهرة","population":10100000,"elevation":23,"source":{"type":"mawaqit","slug":"msjd-l-lm-lnf-nouveau-caire-4710001-egypt"}},
     {"name":"Antwerp","countryISO":"BE","lat":51.2194,"lon":4.4025,"bbox":[51.06,51.42,4.2,4.6],"timezone":"Europe/Brussels","adminRegion":"Antwerp Province","population":530000,"elevation":8,"source":{"type":"mawaqit","slug":"iccum-antwerp-2050-belgium"}},
     {"name":"Toronto","countryISO":"CA","lat":43.6532,"lon":-79.3832,"bbox":[43.45,43.85,-79.55,-79.18],"timezone":"America/Toronto","adminRegion":"Ontario","population":2794000,"elevation":76,"source":{"type":"mawaqit","slug":"darussalam-toronto-m9v-3b5-canada"}},
-    {"name":"Fes","countryISO":"MA","lat":34.0331,"lon":-5.0003,"bbox":[33.94,34.28,-5.3,-4.85],"timezone":"Africa/Casablanca","nameLocal":"فاس","adminRegion":"Fès-Meknès","population":1112000,"elevation":408,"source":{"type":"mawaqit","slug":"masjid-aamrou-bn-laas-fes-30000-morocco-1"}},
     {"name":"Boston","countryISO":"US","lat":42.3601,"lon":-71.0589,"bbox":[42.1601,42.5601,-71.2589,-70.8589],"timezone":"America/New_York","adminRegion":"Massachusetts","population":675000,"elevation":43,"source":{"type":"inherited","from":"USA"}},
     {"name":"Padang","countryISO":"ID","lat":-0.9492,"lon":100.3543,"bbox":[-1.1492,-0.7492,100.1543,100.5543],"timezone":"Asia/Jakarta","adminRegion":"West Sumatra","population":909000,"elevation":7,"source":{"type":"inherited","from":"Indonesia"}},
     {"name":"Kochi","countryISO":"IN","lat":9.9312,"lon":76.2673,"bbox":[9.7312,10.1312,76.0673,76.4673],"timezone":"Asia/Kolkata","nameLocal":"കൊച്ചി","adminRegion":"Kerala","population":677000,"elevation":7,"methodOverride":"KarachiShafi","altMethods":[{"method":"Karachi","source":"India country-default (AIMPLB Hanafi-majority via Jamiat Ulema-e-Hind / Deobandi convention) — default Hanafi Asr applies to Hanafi-minority North Indian diaspora communities in Kerala"}],"source":{"type":"national-authority","institution":"University of Islamic Sciences, Karachi (Shafi Asr)"}},

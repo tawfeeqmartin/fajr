@@ -53,6 +53,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Tightened the Casablanca lookup cell to the reviewed WOF current county
   envelope, which matches the OSM admin-8 city geometry while avoiding WOF's
   deprecated/point-like locality rows.
+- Tightened the Fes lookup cell to WOF current locality `421190143`, which
+  supersedes the older Fes WOF row and matches OSM admin-8 Fes closely enough
+  for the offline city lookup cell.
 
 ### Changed — documentation doctrine cleanup
 

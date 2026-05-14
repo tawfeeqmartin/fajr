@@ -1,6 +1,6 @@
 # City Geometry Audit
 
-Last refreshed: 2026-05-09
+Last refreshed: 2026-05-14
 
 `detectLocation()` intentionally ships a compact offline bbox registry rather
 than raw municipal polygons. The bbox layer is fast and small enough for
@@ -35,10 +35,10 @@ human review. It must not mutate the runtime registry automatically.
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
 20 high-priority rows: 15 Morocco/Habous phase-1 rows and 5 existing registry
-warning rows. It carries 17 candidate OSM relation IDs plus 11 WOF candidate
-IDs. Berrechid and Settat now have WOF locality candidates; Jerusalem
-intentionally remains without a geometry candidate until a human routing
-decision is available.
+warning rows. It carries 17 OSM relation rows plus 16 WOF rows across reviewed
+locality/county candidates. Berrechid, Settat, and Fes now have WOF locality
+candidates; Jerusalem intentionally remains without a geometry candidate until
+a human routing decision is available.
 
 ```json
 {
@@ -94,6 +94,12 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   `Oujda|MA`: tightened to reviewed WOF locality envelopes where the previous
   population-radius boxes materially over-covered surrounding areas and no
   adjacent-city clipping was needed.
+- `Casablanca|MA`: tightened to the WOF current county envelope after the WOF
+  locality rows proved deprecated/point-like and the county envelope matched
+  OSM admin-8 Casablanca closely enough for the offline lookup cell.
+- `Fes|MA`: tightened to WOF current locality `421190143`; that row is named
+  Fes-Ville-Nouvelle in WOF but supersedes the older Fes locality row and
+  matches the OSM admin-8 Fes envelope.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.

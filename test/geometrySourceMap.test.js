@@ -76,6 +76,7 @@ describe('city geometry source map', () => {
     const expected = new Map([
       ['Basel|CH', 'wof:locality:101748459'],
       ['Mulhouse|FR', 'wof:locality:101749573'],
+      ['Fes|MA', 'wof:locality:421190143'],
       ['Brazzaville|CG', 'wof:locality:421180023'],
       ['Kinshasa|CD', 'wof:locality:421166913'],
     ])
@@ -97,6 +98,7 @@ describe('city geometry source map', () => {
     expect(statusFor('Basel|CH')).toBe('runtime-bbox-shipped')
     expect(statusFor('Mulhouse|FR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Casablanca|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Fes|MA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Brazzaville|CG')).toBe('needs-clipping-review')
     expect(statusFor('Kinshasa|CD')).toBe('needs-clipping-review')
   })

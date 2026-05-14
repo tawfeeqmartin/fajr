@@ -261,7 +261,13 @@
       "cityKey": "Fes|MA",
       "priority": ["phase-1-morocco", "habous", "large-metro-bbox"],
       "relatedAuthorityIds": { "habousVilleId": 81, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-14: runtime bbox updated to WOF current locality 421190143. WOF names the current row Fes-Ville-Nouvelle, but its spr row supersedes the older Fes locality 421170491 and its envelope matches the OSM admin-8 Fes geometry."
+        ]
+      },
       "geometries": [
         {
           "provider": "osm",
@@ -275,13 +281,25 @@
         },
         {
           "provider": "wof",
+          "stableId": "wof:locality:421190143",
+          "ids": { "wofId": 421190143, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1, "supersedes": [421170491] },
+          "cacheFile": "MA/fes/wof-locality-421190143.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "superseding-current-locality",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF current locality row named Fes-Ville-Nouvelle; accepted because WOF marks it current and its bbox matches the OSM admin-8 Fes envelope."]
+        },
+        {
+          "provider": "wof",
           "stableId": "wof:locality:421170491",
           "ids": { "wofId": 421170491, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 0 },
           "cacheFile": "MA/fes/wof-locality-421170491.geojson",
           "sourceConfidence": "medium",
-          "matchConfidence": "candidate",
+          "matchConfidence": "superseded-by-current-locality",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "superseded-candidate",
+          "notes": ["Retained for audit history; WOF admin-ma latest marks current locality 421190143 as superseding this older Fes row."]
         }
       ]
     },
