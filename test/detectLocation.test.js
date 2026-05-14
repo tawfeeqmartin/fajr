@@ -521,6 +521,26 @@ describe('detectLocation — issue #47 regression', () => {
     expect(loc.country).toBe('Singapore')
   })
 
+  it('Singapore/Johor WOF-clipped cells keep northern Singapore and tighten Johor Bahru', () => {
+    const sembawang = detectLocation(1.449, 103.819)
+    expect(sembawang.city?.name).toBe('Singapore')
+    expect(sembawang.country).toBe('Singapore')
+    expect(sembawang.timezone).toBe('Asia/Singapore')
+
+    const johorCenter = detectLocation(1.4927, 103.7414)
+    expect(johorCenter.city?.name).toBe('Johor Bahru')
+    expect(johorCenter.country).toBe('Malaysia')
+    expect(johorCenter.timezone).toBe('Asia/Kuala_Lumpur')
+
+    const oldNorthCorner = detectLocation(1.68, 103.8)
+    expect(oldNorthCorner.city?.name).not.toBe('Johor Bahru')
+    expect(oldNorthCorner.country).toBe('Malaysia')
+
+    const oldEastCorner = detectLocation(1.5, 103.93)
+    expect(oldEastCorner.city?.name).not.toBe('Johor Bahru')
+    expect(oldEastCorner.country).toBe('Malaysia')
+  })
+
   // Additional v1.7.5 regression cases (Reviewer C's "definitely wrong" list).
   it('Sharm el-Sheikh → country=Egypt with Egyptian method (was SaudiArabia/UmmAlQura)', () => {
     const loc = detectLocation(27.92, 34.33)

@@ -477,13 +477,11 @@ function detectCountry(lat, lon) {
 
   // ─── Equatorial SE Asia — small countries first, before Malaysia bbox ─
   if (lat >= 4    && lat <= 5.1  && lon >= 114  && lon <= 115.5) return 'Brunei'
-  // v1.7.5: Singapore's bbox tightened — Johor Bahru MY (1.49, 103.74) was
-  // matched by Singapore's bbox 1.15-1.5 / 103.6-104.05. Singapore's actual
-  // territory is SOUTH of the Johor Strait at lat ~1.16-1.47, lon 103.6-
-  // 104.0. Tighten northern lat from 1.5 to 1.47 (excludes Johor Bahru
-  // 1.49). Singapore's northernmost point Woodlands is at 1.45 — still
-  // inside.
-  if (lat >= 1.15 && lat <= 1.47 && lon >= 103.6 && lon <= 104.05) return 'Singapore'
+  // v1.7.5: Singapore's bbox tightened so Johor Bahru MY (1.49, 103.74)
+  // no longer matched Singapore. v1.8.0 #118 extends the east edge to the
+  // reviewed WOF/Singapore-government geometry while preserving the north
+  // edge below Johor Bahru's centre.
+  if (lat >= 1.15 && lat <= 1.47 && lon >= 103.6 && lon <= 104.09) return 'Singapore'
   // v1.7.5: Malaysia's southern lat tightened from 0.5 to 1.0 — Narathiwat
   // TH (6.43, 101.82) and Pattani TH (6.87, 101.25) were in Malaysia's
   // bbox 0.5-8 / 99-120 (Malaysia listed BEFORE Thailand). Reorder
@@ -795,7 +793,7 @@ function detectCountry(lat, lon) {
 const COUNTRY_BBOX_TABLE = {
   Canada:       [[41.5, 70, -141, -52]],
   USA:          [[24, 49, -125, -66]],
-  Singapore:    [[1.15, 1.5, 103.6, 104.05]],
+  Singapore:    [[1.15, 1.47, 103.6, 104.09]],
   Malaysia:     [[0.5, 8, 99, 120]],
   Egypt:        [[21, 32, 24, 38]],
   SaudiArabia:  [[16, 33, 34, 56]],
