@@ -27,6 +27,15 @@ The rule of thumb:
 > fajr defaults to the strongest locally authoritative, empirically validated
 > position available, while surfacing disagreements and allowing override.
 
+The override path is now part of the public API rather than only a UX
+recommendation. Downstream apps should render settings from `features()` /
+`featureInfo(key)` where possible, and pass user choices through
+`prayerTimes({ override: { method, elevation, asrConvention } })`. The
+important doctrine remains unchanged: country Asr-convention metadata may
+suggest Hanafi or standard practice, but the actual returned Asr formula changes
+only when the selected method encodes it or the caller explicitly sets
+`override.asrConvention`.
+
 ## Confidence Grades
 
 | Grade | Meaning | Typical evidence |
@@ -131,7 +140,8 @@ For end-user UI, do not expose every source row. Show:
 - deprecated `location.madhab` / `applied.madhab` only as compatibility
   aliases for `standard | hanafi` Asr values, never as legal madhhab labels
 - `notes[]`, `validityWarnings[]`, and `disclaimer`
-- a clear override path for method, Asr convention, and elevation
+- a clear override path for method, Asr convention, and elevation via
+  `prayerTimes({ override: { method, asrConvention, elevation } })`
 
 For contributor work, do not add a new position simply because a paper or API
 exists. A stronger position needs at least one of:
