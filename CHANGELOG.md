@@ -46,6 +46,50 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Tightened the Basel and Mulhouse lookup cells to reviewed WOF locality
   envelopes, removing that cross-border validator warning while preserving both
   Mawaqit city centers.
+- Fixed the city-registry validator so bboxes that only touch at an edge are
+  not reported as cross-country overlaps; Brazzaville/Kinshasa now stays
+  tracked as a geometry-undercoverage/clipping review item instead of a false
+  runtime overlap warning.
+- Tightened the Casablanca lookup cell to the reviewed WOF current county
+  envelope, which matches the OSM admin-8 city geometry while avoiding WOF's
+  deprecated/point-like locality rows.
+- Tightened the Fes lookup cell to WOF current locality `421190143`, which
+  supersedes the older Fes WOF row and matches OSM admin-8 Fes closely enough
+  for the offline city lookup cell.
+- Documented the #118 Morocco geometry source boundary: remaining
+  Temara/Inezgane/Meknes/Tetouan/Sale work needs reviewed WOF locality
+  geometry, compatible official/commune-level geometry, or should stay an audit
+  gap rather than deriving runtime bboxes from OSM alone or broad WOF county
+  rows.
+- Added UAE WOF locality source-map rows for Abu Dhabi, Al Ain, and the
+  Dubai/Sharjah/Ajman metro; shipped Abu Dhabi and Al Ain runtime bbox updates
+  where the WOF envelopes do not collide.
+- Clipped Dubai, Sharjah, and Ajman into adjacent runtime lookup cells:
+  Dubai keeps its centre while no longer overlapping Sharjah, Sharjah gains
+  eastward coverage, and Ajman gains reviewed WOF extent while only
+  edge-touching Sharjah.
+- Tightened ten large Turkey city lookup cells to reviewed WOF current locality
+  envelopes (`Istanbul`, `Ankara`, `Izmir`, `Bursa`, `Konya`, `Gaziantep`,
+  `Adana`, `Antalya`, `Samsun`, `Trabzon`) and left ambiguous Turkish WOF rows
+  for separate review.
+- Tightened the Giza lookup cell's western edge so the smaller 6th of October
+  cell no longer shadows Giza validation samples.
+- Added a clipped WOF-backed `Windsor|CA` lookup cell and moved Detroit/Dearborn
+  north of the river seam so Windsor coordinates no longer resolve to US city
+  provenance.
+- Tightened `Geneva|CH` and added WOF-backed `Annemasse|FR` and
+  `Ferney-Voltaire|FR` lookup cells so adjacent French border towns no longer
+  resolve to Geneva/Switzerland.
+- Separated the `Strasbourg|FR` / `Kehl|DE` Rhine seam with clipped WOF-backed
+  lookup cells so Kehl no longer resolves to Strasbourg/France.
+- Extended Equatorial Guinea's country bbox by 0.01° north so Malabo's own
+  northern city samples remain in Equatorial Guinea instead of falling through
+  to Cameroon.
+- Tightened the `Brazzaville|CG` / `Kinshasa|CD` Congo River seam with
+  WOF-backed runtime cells so each capital's edge samples keep their own
+  country/timezone without filling the river gap.
+- Aligned Morocco WOF-backed geometry source-map statuses with shipped runtime
+  bboxes, leaving OSM-only rows as audit candidates pending license review.
 
 ### Changed — documentation doctrine cleanup
 
@@ -84,8 +128,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   a no-network advisory audit path for comparing reviewed cached GeoJSON
   geometries against the shipped city bbox registry.
 - Added `scripts/data/city-geometry-sources.json`, a seed source map for 20
-  high-priority bbox QA rows: Morocco/Habous phase-1 cities plus the current
-  Jerusalem, Brazzaville/Kinshasa, and Basel/Mulhouse validator-warning rows.
+  high-priority bbox QA rows: Morocco/Habous phase-1 cities plus Jerusalem
+  routing, Congo River clipping, and Basel/Mulhouse resolved-warning rows.
 - Added WOF candidate IDs for Morocco source-map rows where WOF has a plausible
   locality or reviewed lower-confidence county geometry, including Berrechid
   and Settat which previously had no geometry candidate.

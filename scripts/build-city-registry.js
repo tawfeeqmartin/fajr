@@ -375,6 +375,7 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Lille',      countryISO: 'FR', adminRegion: 'Hauts-de-France', lat: 50.6292, lon: 3.0573, elevation: 21, timezone: 'Europe/Paris', population: 233000 },
   { name: 'Bordeaux',   countryISO: 'FR', adminRegion: 'Nouvelle-Aquitaine', lat: 44.8378, lon: -0.5792, elevation: 22, timezone: 'Europe/Paris', population: 260000 },
   { name: 'Strasbourg', countryISO: 'FR', adminRegion: 'Grand Est', lat: 48.5734, lon: 7.7521, elevation: 142, timezone: 'Europe/Paris', population: 287000 },
+  { name: 'Kehl',       countryISO: 'DE', adminRegion: 'Baden-Württemberg', lat: 48.5838, lon: 7.8125, elevation: 139, timezone: 'Europe/Berlin', population: 37000 },
   { name: 'Hamburg',    countryISO: 'DE', adminRegion: 'Hamburg', lat: 53.5511, lon: 9.9937, elevation: 6, timezone: 'Europe/Berlin', population: 1899000 },
   { name: 'Munich',     countryISO: 'DE', adminRegion: 'Bavaria', lat: 48.1351, lon: 11.5820, elevation: 520, timezone: 'Europe/Berlin', population: 1488000 },
   { name: 'Frankfurt',  countryISO: 'DE', adminRegion: 'Hesse', lat: 50.1109, lon: 8.6821, elevation: 112, timezone: 'Europe/Berlin', population: 763000 },
@@ -386,6 +387,8 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Gothenburg', countryISO: 'SE', adminRegion: 'Västra Götaland County', lat: 57.7089, lon: 11.9746, elevation: 12, timezone: 'Europe/Stockholm', population: 583000 },
   { name: 'Zurich',     countryISO: 'CH', adminRegion: 'Zurich Canton', lat: 47.3769, lon: 8.5417, elevation: 408, timezone: 'Europe/Zurich', population: 421000 },
   { name: 'Geneva',     countryISO: 'CH', adminRegion: 'Geneva Canton', lat: 46.2044, lon: 6.1432, elevation: 375, timezone: 'Europe/Zurich', population: 203000 },
+  { name: 'Annemasse',  countryISO: 'FR', adminRegion: 'Auvergne-Rhône-Alpes', lat: 46.1840, lon: 6.2456, elevation: 435, timezone: 'Europe/Paris', population: 37000 },
+  { name: 'Ferney-Voltaire', countryISO: 'FR', adminRegion: 'Auvergne-Rhône-Alpes', lat: 46.2577, lon: 6.1155, elevation: 430, timezone: 'Europe/Paris', population: 10000 },
   { name: 'Barcelona',  countryISO: 'ES', adminRegion: 'Catalonia', lat: 41.3851, lon: 2.1734, elevation: 12, timezone: 'Europe/Madrid', population: 1620000 },
   { name: 'Milan',      countryISO: 'IT', adminRegion: 'Lombardy', lat: 45.4642, lon: 9.1900, elevation: 120, timezone: 'Europe/Rome', population: 1396000 },
 
@@ -433,6 +436,7 @@ const MUSLIM_POPULATION_CENTERS = [
 
   // ─── Dearborn (Detroit-adjacent) — for the DearbornDetroit override pinpoint ─
   { name: 'Dearborn',   countryISO: 'US', adminRegion: 'Michigan', lat: 42.3223, lon: -83.1763, elevation: 184, timezone: 'America/Detroit', population: 109000 },
+  { name: 'Windsor',    countryISO: 'CA', adminRegion: 'Ontario', lat: 42.3149, lon: -83.0364, elevation: 190, timezone: 'America/Toronto', population: 229000 },
 
   // ─── High-elevation stress cases ──────────────────────────────────────────
   { name: 'Sanaa',      nameLocal: 'صنعاء', countryISO: 'YE', adminRegion: "Amanat Al Asimah", lat: 15.3694, lon: 44.1910, elevation: 2253, timezone: 'Asia/Aden', population: 3293000 },
@@ -812,8 +816,9 @@ const BBOX_OVERRIDES = {
   // to Cairo. Giza city centre 30.01, 31.21 stays well inside; eastern lon
   // was 31.61, tightened to 31.22 (just east of Giza city centre, west of
   // Cairo CBD). Northern lat tightened from 30.41 to 30.10 (Giza proper is
-  // south of central Cairo).
-  'Giza|EG':            [29.6131, 30.10, 30.8089, 31.22],
+  // south of central Cairo). v1.8.0 #118: western lon raised to 30.98 so
+  // 6th of October no longer shadows Giza's western validation samples.
+  'Giza|EG':            [29.6131, 30.10, 30.98, 31.22],
   // v1.7.5 #47: Shah Alam (740K) is ~25 km west of KL (1.8M). Same-radius
   // 0.15° bbox put Shah Alam at lon 101.32-101.72, KL at 101.39-101.99.
   // KL CBD (3.14, 101.69) sat in both. Shrink Shah Alam's eastern lon to
@@ -829,18 +834,14 @@ const BBOX_OVERRIDES = {
   // southern Johor + northern Riau). Tighten to actual island.
   'Singapore|SG':       [1.16, 1.47, 103.6, 104.05],
   // v1.7.5 Reviewer C: Sharjah (1.68M) directly NE of Dubai (3.6M). Same-
-  // radius 0.3° bboxes overlapped over central Sharjah. Tighten Sharjah's
-  // southern lat to 25.25 (above Dubai centre's bbox max 25.5 still
-  // overlaps but Sharjah CBD 25.35 is inside both — give Sharjah priority
-  // by tightening Dubai's NORTHERN lat instead). Sharjah override only;
-  // Dubai stays formulaic.
+  // radius 0.3° bboxes overlapped over central Sharjah. Later #118 WOF
+  // review replaces this early Sharjah draft below and clips Dubai's northern
+  // edge to keep the two lookup cells adjacent instead of overlapping.
   'Sharjah|AE':         [25.25, 25.65, 55.20, 55.72],
-  // v1.7.5 Reviewer C: Dearborn (Detroit suburb) bbox extended N of the
-  // Detroit River into Windsor, Canada. Tighten northern lat to 42.40 —
-  // Dearborn city centre 42.32 stays inside; Windsor 42.31 also inside but
-  // engine-level countryISO check (added in v1.7.5) prevents Dearborn from
-  // matching when detectCountry(Windsor)=Canada.
-  'Dearborn|US':        [42.22, 42.40, -83.28, -83.08],
+  // v1.7.5 Reviewer C / v1.8.0 #118: Dearborn (Detroit suburb) bbox extended
+  // south across the Detroit River into Windsor. Clip to Dearborn's own side
+  // of the river seam; Dearborn city centre 42.3223 remains inside.
+  'Dearborn|US':        [42.32, 42.40, -83.28, -83.08],
 
   // ─── v1.7.8 (#54): systematic registry bbox-shrink ─────────────────────
   // Each entry resolves a specific bbox-internal failure documented in
@@ -861,7 +862,7 @@ const BBOX_OVERRIDES = {
   'Khartoum|SD':        [15.40, 15.60, 32.50, 32.66],
   'Omdurman|SD':        [15.50, 15.78, 32.30, 32.50],
   'Sharjah|AE':         [25.35, 25.65, 55.42, 55.72],
-  'Dubai|AE':           [24.90, 25.35, 55.05, 55.50],
+  'Dubai|AE':           [24.90, 25.30, 55.05, 55.50],
   'Inezgane|MA':        [30.32, 30.39, -9.58, -9.49],
   // v1.8.0 #118/#124: WOF-backed lookup cell, clipped so Agadir does not
   // steal adjacent Inezgane coordinates in detectLocation().
@@ -870,10 +871,14 @@ const BBOX_OVERRIDES = {
   'Amman|JO':           [31.85, 32.00, 35.83, 36.00],
   // v1.8.0 #118: WOF locality envelope; replaces broad population-radius box.
   'Berrechid|MA':       [33.230306, 33.299095, -7.613623, -7.545455],
-  'Casablanca|MA':      [33.40, 33.78, -7.78, -7.39],
+  // v1.8.0 #118: WOF current county envelope matches the OSM admin-8
+  // Casablanca geometry; WOF's locality row is deprecated/point-like.
+  'Casablanca|MA':      [33.494823, 33.647306, -7.738187, -7.459445],
   'Brussels|BE':        [50.65, 51.05, 4.15, 4.55],
   'Antwerp|BE':         [51.06, 51.42, 4.20, 4.60],
-  'Brazzaville|CG':     [-4.36, -4.16, 15.14, 15.25],
+  // v1.8.0 #118: WOF locality envelope; Kinshasa keeps a clipped north edge
+  // across the Congo River so neither capital swallows the other.
+  'Brazzaville|CG':     [-4.316619, -4.201672, 15.213081, 15.309825],
   'Akkar|LB':           [34.53, 34.69, 36.05, 36.30],
   'Utrecht|NL':         [51.94, 52.16, 4.97, 5.27],
   'Rotterdam|NL':       [51.72, 52.00, 4.28, 4.68],
@@ -901,8 +906,17 @@ const BBOX_OVERRIDES = {
   'Lomé|TG':            [6.10, 6.30, 1.10, 1.40],
   'Freetown|SL':        [8.39, 8.55, -13.27, -13.13],
   'Podgorica|ME':       [42.40, 42.50, 19.20, 19.40],
-  'Detroit|US':         [42.18, 42.46, -83.08, -82.92],
-  'Fes|MA':             [33.94, 34.28, -5.30, -4.85],
+  // v1.8.0 #118: Detroit/Windsor river seam. Keep Detroit north of the river
+  // split so Windsor's smaller Canadian lookup cell can win via Pass-B.
+  'Detroit|US':         [42.32, 42.46, -83.08, -82.92],
+  // v1.8.0 #118: WOF current locality row 101735855 for Windsor, Ontario,
+  // clipped at the Detroit River seam because the full WOF rectangle crosses
+  // north into Detroit/Dearborn.
+  'Windsor|CA':         [42.234158, 42.3199, -83.114853, -82.891136],
+  // v1.8.0 #118: WOF current locality row 421190143 supersedes the older
+  // Fes row and matches the OSM admin-8 envelope; use it to avoid broad
+  // city-provenance leakage around the Fes lookup cell.
+  'Fes|MA':             [33.97125, 34.076345, -5.078619, -4.937726],
   // v1.7.22 #86: keep Shah Alam's own centre lon 101.5183 inside the bbox
   // while still excluding KL CBD at lon ~101.69.
   'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.55],
@@ -948,14 +962,27 @@ const BBOX_OVERRIDES = {
   'Temara|MA':          [33.85, 33.96, -7.00, -6.86],
 
   // Geneva — formulaic 0.20 bbox extends west of Switzerland's lon 6.0.
-  'Geneva|CH':          [46.10, 46.30, 6.05, 6.25],
+  // v1.8.0 #118: WOF current locality envelope keeps Geneva city provenance
+  // inside Switzerland and stops stealing adjacent French border towns.
+  'Geneva|CH':          [46.177774, 46.234248, 6.110233, 6.175845],
+  // v1.8.0 #118: WOF current locality rows for French towns on the Geneva
+  // border. These are smaller Pass-B cells because detectCountry's broad
+  // Switzerland rectangle sees the first country at these coordinates.
+  'Annemasse|FR':       [46.176411, 46.201967, 6.216619, 6.278294],
+  'Ferney-Voltaire|FR': [46.237488, 46.266135, 6.088144, 6.12439],
+
+  // v1.8.0 #118: Strasbourg/Kehl Rhine seam. WOF locality rectangles overlap
+  // across the river, so clip Strasbourg's east edge just west of Kehl's WOF
+  // west edge and let Kehl use its reviewed WOF current locality envelope.
+  'Strasbourg|FR':      [48.492024, 48.646236, 7.687934, 7.79],
+  'Kehl|DE':            [48.485236, 48.641269, 7.79153, 7.956431],
 
   // Montevideo — formulaic 0.20 bbox extends south of Uruguay's lat-min.
   'Montevideo|UY':      [-34.95, -34.85, -56.27, -56.05],
 
-  // Kinshasa — tighten so Brazzaville (across the Congo river, lat -4.26)
-  // doesn't fall inside Kinshasa's bbox. Kinshasa centre lat -4.44.
-  'Kinshasa|CD':        [-4.55, -4.36, 15.20, 15.45],
+  // Kinshasa — WOF locality envelope clipped north at -4.36 so Brazzaville
+  // (across the Congo river, lat -4.26) does not fall inside Kinshasa.
+  'Kinshasa|CD':        [-4.647148, -4.36, 15.130611, 15.566205],
 
   // v1.7.8 Tier 5 polish — Kaédi MR center moved ~600m east into Mauritanian
   // bank (correction from Reviewer A geometry report). Population-radius
@@ -966,15 +993,33 @@ const BBOX_OVERRIDES = {
   // Each pair: smaller satellite bbox is shrunk to its own city footprint
   // so its parent metro's points don't fall inside it.
 
-  // Ajman AE (540K, lat 25.41) vs Sharjah AE (1.68M, lat 25.35). Ajman is a
-  // tiny emirate ~12 km NE of Sharjah CBD. Tighten Ajman to a small box
-  // 25.40-25.45 / 55.46-55.55 — Ajman city centre (25.41, 55.51) inside;
-  // Sharjah CBD (25.35, 55.42) and points east of it stay in Sharjah.
-  'Ajman|AE':           [25.40, 25.45, 55.46, 55.55],
+  // v1.8.0 #118: Dubai/Sharjah/Ajman WOF locality envelopes overlap. Clip
+  // Dubai's north edge to Sharjah's south edge, expand Sharjah eastward from
+  // WOF, and clip Ajman to start at Sharjah's WOF north edge so the runtime
+  // cells only touch.
+  'Sharjah|AE':         [25.30, 25.398821, 55.30, 55.678456],
+  'Ajman|AE':           [25.398821, 25.45088, 55.423316, 55.630065],
 
-  // Sharjah AE — also tighten so Ajman's tight box is fully outside.
-  // Sharjah CBD 25.35, 55.42 → keep lat 25.30-25.40 / lon 55.30-55.55.
-  'Sharjah|AE':         [25.30, 25.40, 55.30, 55.55],
+  // v1.8.0 #118: WOF current locality envelopes improve UAE city coverage
+  // without colliding with neighboring lookup cells. Dubai/Sharjah/Ajman use
+  // the clipped runtime cells above because their WOF envelopes overlap
+  // heavily.
+  'Abu Dhabi|AE':       [24.195888, 24.590696, 54.254076, 54.841984],
+  'Al Ain|AE':          [24.013749, 24.414416, 55.464609, 56.018126],
+
+  // v1.8.0 #118: reviewed WOF current locality envelopes for large Turkish
+  // city lookup cells. Ambiguous/point-like rows (Diyarbakir, Eskisehir,
+  // Kayseri, Mersin) stay on the existing formulaic cells pending review.
+  'Istanbul|TR':        [40.802662, 41.199662, 28.568308, 29.418991],
+  'Ankara|TR':          [39.776496, 40.032011, 32.611664, 33.007367],
+  'Izmir|TR':           [38.392484, 38.44875, 27.071401, 27.184235],
+  'Bursa|TR':           [40.16606, 40.253447, 28.996355, 29.20099],
+  'Konya|TR':           [37.749215, 38.017501, 32.389118, 32.591108],
+  'Gaziantep|TR':       [37.005549, 37.125921, 37.275644, 37.464959],
+  'Adana|TR':           [36.950137, 37.070731, 35.221663, 35.456651],
+  'Antalya|TR':         [36.821577, 37.012346, 30.583049, 30.853306],
+  'Samsun|TR':          [41.256092, 41.314632, 36.290671, 36.3846],
+  'Trabzon|TR':         [40.985525, 41.013493, 39.649901, 39.742612],
 
   // Dammam SA (1.25M, lat 26.39) vs Khobar SA (626K, lat 26.22). 20 km
   // apart. Tighten Dammam to lat 26.32-26.55 so Khobar (26.22) is outside.
@@ -1029,9 +1074,8 @@ const BBOX_OVERRIDES = {
   // These cities sit close to a neighbouring country's COUNTRY_BBOX_TABLE
   // edge. Tighten their bbox so internal samples stay in-country.
 
-  // Trabzon TR (lat 41.0, lon 39.7) is close to Georgia bbox lat 41.05.
-  // Tighten northern edge to 41.10 so internal samples don't cross border.
-  'Trabzon|TR':         [40.85, 41.10, 39.55, 39.90],
+  // Trabzon TR is now WOF-tightened above (#118), preserving the older
+  // country-edge intent while removing the broad population-radius cell.
 
   // Antalya TR (lat 36.88, lon 30.71) is at the Türkiye southern edge
   // lat 35. Bbox formula 0.30 = lat 36.58-37.18 keeps within Türkiye.

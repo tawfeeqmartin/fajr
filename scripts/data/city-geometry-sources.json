@@ -1,7 +1,7 @@
 {
   "$schema_doc": "Build-time source map for auditing src/data/cities.json city bboxes. This file stores stable external IDs, review state, authority IDs, and cache pointers only. Raw geometry stays outside git/npm in .cache/city-geometry.",
   "version": 1,
-  "updated": "2026-05-11",
+  "updated": "2026-05-14",
   "issue": 118,
   "cacheRoot": ".cache/city-geometry",
   "providers": {
@@ -37,7 +37,7 @@
       "priority": ["phase-1-morocco", "habous", "rabat-metro"],
       "relatedAuthorityIds": { "habousVilleId": 1, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": [
           "Morocco phase-1 row. Habous ID is prayer-time provenance, not geometry.",
@@ -63,7 +63,8 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime uses a clipped WOF-backed bbox to preserve distinct Rabat/Sale/Temara lookup cells."]
         }
       ]
     },
@@ -126,7 +127,7 @@
       "priority": ["phase-1-morocco", "habous", "agadir-metro"],
       "relatedAuthorityIds": { "habousVilleId": 117, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": [
           "Agadir is the official Habous table used for Inezgane as nearest official city.",
@@ -152,7 +153,8 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime uses a clipped WOF-backed bbox to preserve distinct Agadir/Inezgane lookup cells."]
         }
       ]
     },
@@ -182,7 +184,13 @@
       "cityKey": "Casablanca|MA",
       "priority": ["phase-1-morocco", "habous", "large-metro-bbox"],
       "relatedAuthorityIds": { "habousVilleId": 58, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-14: runtime bbox updated to the current WOF county envelope because it matches the OSM admin-8 geometry and WOF's locality rows are deprecated/point-like."
+        ]
+      },
       "geometries": [
         {
           "provider": "osm",
@@ -200,9 +208,10 @@
           "ids": { "wofId": 890442533, "repo": "whosonfirst-data-admin-ma", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
           "cacheFile": "MA/casablanca/wof-county-890442533.geojson",
           "sourceConfidence": "medium",
-          "matchConfidence": "placetype-mismatch-candidate",
+          "matchConfidence": "placetype-mismatch-runtime-bbox",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF current county envelope is used as the reviewed runtime bbox after comparison with the OSM admin-8 candidate."]
         }
       ]
     },
@@ -211,7 +220,7 @@
       "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 65, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -224,7 +233,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -233,7 +242,7 @@
       "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 61, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -246,7 +255,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -254,7 +263,13 @@
       "cityKey": "Fes|MA",
       "priority": ["phase-1-morocco", "habous", "large-metro-bbox"],
       "relatedAuthorityIds": { "habousVilleId": 81, "habousMatch": "direct" },
-      "review": { "status": "candidate", "issue": 118 },
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-14: runtime bbox updated to WOF current locality 421190143. WOF names the current row Fes-Ville-Nouvelle, but its spr row supersedes the older Fes locality 421170491 and its envelope matches the OSM admin-8 Fes geometry."
+        ]
+      },
       "geometries": [
         {
           "provider": "osm",
@@ -268,13 +283,25 @@
         },
         {
           "provider": "wof",
+          "stableId": "wof:locality:421190143",
+          "ids": { "wofId": 421190143, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1, "supersedes": [421170491] },
+          "cacheFile": "MA/fes/wof-locality-421190143.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "superseding-current-locality",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF current locality row named Fes-Ville-Nouvelle; accepted because WOF marks it current and its bbox matches the OSM admin-8 Fes envelope."]
+        },
+        {
+          "provider": "wof",
           "stableId": "wof:locality:421170491",
           "ids": { "wofId": 421170491, "repo": "whosonfirst-data-admin-ma", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 0 },
           "cacheFile": "MA/fes/wof-locality-421170491.geojson",
           "sourceConfidence": "medium",
-          "matchConfidence": "candidate",
+          "matchConfidence": "superseded-by-current-locality",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "superseded-candidate",
+          "notes": ["Retained for audit history; WOF admin-ma latest marks current locality 421190143 as superseding this older Fes row."]
         }
       ]
     },
@@ -283,7 +310,7 @@
       "priority": ["phase-1-morocco", "habous", "fes-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 82, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -306,7 +333,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -333,7 +360,7 @@
       "priority": ["phase-1-morocco", "habous", "north-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 14, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -356,7 +383,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -383,7 +410,7 @@
       "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 39, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -406,7 +433,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -415,7 +442,7 @@
       "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 31, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -438,7 +465,447 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Abu Dhabi|AE",
+      "priority": ["uae-metro", "wof-locality-runtime-bbox"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope; no neighboring UAE city bbox collision."]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421179641",
+          "ids": { "wofId": 421179641, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/abu-dhabi/wof-locality-421179641.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Al Ain|AE",
+      "priority": ["uae-metro", "wof-locality-runtime-bbox"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope; no neighboring UAE city bbox collision."]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421168687",
+          "ids": { "wofId": 421168687, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/al-ain/wof-locality-421168687.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Dubai|AE",
+      "priority": ["uae-metro", "wof-locality-runtime-bbox", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-14: WOF current locality envelope remains a candidate because it overlaps Sharjah/Ajman, but the runtime lookup cell now clips Dubai's north edge to Sharjah's south edge while preserving Dubai centre routing."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Sharjah|AE", "kind": "runtime-edge-touch", "status": "runtime bboxes clipped to touch at lat 25.30 without area overlap; WOF source envelopes still overlap" },
+        { "cityKey": "Ajman|AE", "kind": "runtime-separated", "status": "Dubai runtime bbox remains south of Ajman cell; WOF source envelopes still overlap" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421174961",
+          "ids": { "wofId": 421174961, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/dubai/wof-locality-421174961.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Full WOF locality bbox is not shipped directly; runtime bbox keeps prior west/east/south edges and clips north edge at 25.30."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Sharjah|AE",
+      "priority": ["uae-metro", "wof-locality-runtime-bbox", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox expanded eastward from WOF current locality envelope while clipping south edge to Dubai's new north edge and north edge to Ajman's south edge."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Dubai|AE", "kind": "runtime-edge-touch", "status": "runtime bboxes clipped to touch at lat 25.30 without area overlap" },
+        { "cityKey": "Ajman|AE", "kind": "runtime-edge-touch", "status": "runtime bboxes clipped to touch at lat 25.398821 without area overlap" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421168683",
+          "ids": { "wofId": 421168683, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/sharjah/wof-locality-421168683.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime bbox uses WOF current locality east/north extents and clips south edge to Dubai's north edge."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Ajman|AE",
+      "priority": ["uae-metro", "wof-locality-runtime-bbox", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated toward WOF current locality envelope and clipped to start at Sharjah's north edge."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Dubai|AE", "kind": "runtime-separated", "status": "Ajman runtime bbox remains north of Dubai cell" },
+        { "cityKey": "Sharjah|AE", "kind": "runtime-edge-touch", "status": "runtime bboxes clipped to touch at lat 25.398821 without area overlap" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:1126024975",
+          "ids": { "wofId": 1126024975, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "AE/ajman/wof-locality-1126024975.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime bbox uses WOF current locality lon/north extents and clips south edge to Sharjah's north edge."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Istanbul|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890460455",
+          "ids": { "wofId": 890460455, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/istanbul/wof-locality-890460455.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Ankara|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890460453",
+          "ids": { "wofId": 890460453, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/ankara/wof-locality-890460453.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Izmir|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope. WOF row name is İzmir."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890461083",
+          "ids": { "wofId": 890461083, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/izmir/wof-locality-890461083.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Bursa|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890461315",
+          "ids": { "wofId": 890461315, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/bursa/wof-locality-890461315.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Konya|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890463545",
+          "ids": { "wofId": 890463545, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/konya/wof-locality-890463545.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Gaziantep|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890461631",
+          "ids": { "wofId": 890461631, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/gaziantep/wof-locality-890461631.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Adana|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890461703",
+          "ids": { "wofId": 890461703, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/adana/wof-locality-890461703.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Antalya|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101912923",
+          "ids": { "wofId": 101912923, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/antalya/wof-locality-101912923.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Samsun|TR",
+      "priority": ["turkey-large-city", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101911033",
+          "ids": { "wofId": 101911033, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/samsun/wof-locality-101911033.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Trabzon|TR",
+      "priority": ["turkey-large-city", "country-edge", "wof-locality-runtime-bbox"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118, "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope, preserving the previous Georgia-edge tightening intent."] },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101912783",
+          "ids": { "wofId": 101912783, "repo": "whosonfirst-data-admin-tr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "TR/trabzon/wof-locality-101912783.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Windsor|CA",
+      "priority": ["detroit-windsor-border", "wof-locality-runtime-bbox", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added from WOF current locality row and clipped at the Detroit River seam so it does not overlap Detroit/Dearborn lookup cells."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Detroit|US", "kind": "runtime-edge-touch", "status": "Detroit runtime bbox starts at lat 42.32; Windsor clips north to 42.3199" },
+        { "cityKey": "Dearborn|US", "kind": "runtime-separated", "status": "Dearborn runtime bbox starts at lat 42.32; Windsor clips north to 42.3199" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101735855",
+          "ids": { "wofId": 101735855, "repo": "whosonfirst-data-admin-ca", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "CA/windsor/wof-locality-101735855.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox crosses the river into Detroit/Dearborn as a rectangle; runtime bbox clips north edge to 42.3199."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Geneva|CH",
+      "priority": ["geneva-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to WOF current locality envelope so adjacent French border towns do not resolve to Geneva."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Annemasse|FR", "kind": "runtime-separated", "status": "Geneva east edge stops west of Annemasse locality bbox" },
+        { "cityKey": "Ferney-Voltaire|FR", "kind": "runtime-separated", "status": "Geneva north edge stops south of Ferney-Voltaire locality bbox" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101748445",
+          "ids": { "wofId": 101748445, "repo": "whosonfirst-data-admin-ch", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "CH/geneva/wof-locality-101748445.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Annemasse|FR",
+      "priority": ["geneva-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added to stop Annemasse from resolving to Geneva/Switzerland."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Geneva|CH", "kind": "runtime-separated", "status": "Annemasse west edge starts east of Geneva locality bbox" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101757307",
+          "ids": { "wofId": 101757307, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "FR/annemasse/wof-locality-101757307.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Ferney-Voltaire|FR",
+      "priority": ["geneva-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added to stop Ferney-Voltaire from resolving to Geneva/Switzerland."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Geneva|CH", "kind": "runtime-separated", "status": "Ferney-Voltaire south edge starts north of Geneva locality bbox" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101753277",
+          "ids": { "wofId": 101753277, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "FR/ferney-voltaire/wof-locality-101753277.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Strasbourg|FR",
+      "priority": ["strasbourg-kehl-border", "wof-locality-runtime-bbox", "clipped", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated from WOF current locality row but clipped west of Kehl because the raw WOF rectangles overlap across the Rhine."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Kehl|DE", "kind": "runtime-separated", "status": "Strasbourg east edge stops at lon 7.79; Kehl starts at WOF west edge lon 7.79153" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101751113",
+          "ids": { "wofId": 101751113, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "FR/strasbourg/wof-locality-101751113.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox extends to lon 7.835923; runtime bbox clips east edge to 7.79 to avoid Kehl."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Kehl|DE",
+      "priority": ["strasbourg-kehl-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added from WOF current locality row so Kehl no longer resolves to Strasbourg/France."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Strasbourg|FR", "kind": "runtime-separated", "status": "Kehl starts east of Strasbourg's clipped runtime cell" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101753099",
+          "ids": { "wofId": 101753099, "repo": "whosonfirst-data-admin-de", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "DE/kehl/wof-locality-101753099.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -463,10 +930,14 @@
     },
     {
       "cityKey": "Brazzaville|CG",
-      "priority": ["current-validator-warning", "cross-border-overlap", "congo-river"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Kinshasa|CD", "kind": "bbox-overlap-cross-country" }
+      "priority": ["geometry-undercoverage", "edge-adjacent", "congo-river"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to the WOF current locality envelope; engine country table adds a matching Brazzaville micro-bbox so the city-country sanity filter accepts the eastern edge."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Kinshasa|CD", "kind": "runtime-separated", "status": "Brazzaville uses WOF envelope; Kinshasa north edge remains clipped at lat -4.36 to preserve the Congo River gap." }
       ],
       "geometries": [
         {
@@ -488,17 +959,21 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate",
-          "notes": ["WOF SQLite admin-cg latest lists this as the current locality row for Brazzaville; envelope still overlaps Kinshasa because the Congo River boundary is diagonal."]
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF SQLite admin-cg latest lists this as the current locality row for Brazzaville; runtime uses this envelope while Kinshasa remains clipped south of the river gap."]
         }
       ]
     },
     {
       "cityKey": "Kinshasa|CD",
-      "priority": ["current-validator-warning", "cross-border-overlap", "congo-river"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Brazzaville|CG", "kind": "bbox-overlap-cross-country" }
+      "priority": ["geometry-undercoverage", "edge-adjacent", "congo-river"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated from WOF current locality south/west/east edges while keeping the north edge clipped at -4.36 to avoid Brazzaville."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Brazzaville|CG", "kind": "runtime-separated", "status": "Kinshasa uses WOF south/west/east edges with north edge clipped at lat -4.36; Brazzaville uses its WOF envelope north of the gap." }
       ],
       "geometries": [
         {
@@ -520,17 +995,17 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate",
-          "notes": ["WOF SQLite admin-cd latest lists this as the current locality row for Kinshasa; envelope still overlaps Brazzaville because the Congo River boundary is diagonal."]
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF SQLite admin-cd latest lists this as the current locality row for Kinshasa; runtime clips north edge from -4.29471 to -4.36 to avoid Brazzaville across the Congo River."]
         }
       ]
     },
     {
       "cityKey": "Basel|CH",
-      "priority": ["current-validator-warning", "cross-border-overlap", "europe-p0"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Mulhouse|FR", "kind": "bbox-overlap-cross-country" }
+      "priority": ["resolved-validator-warning", "runtime-bbox-shipped", "europe-p0"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118 },
+      "neighborRelations": [
+        { "cityKey": "Mulhouse|FR", "kind": "resolved-bbox-overlap", "status": "runtime WOF-envelope bbox shipped in #130" }
       ],
       "geometries": [
         {
@@ -558,10 +1033,10 @@
     },
     {
       "cityKey": "Mulhouse|FR",
-      "priority": ["current-validator-warning", "cross-border-overlap", "europe-p0"],
-      "review": { "status": "candidate", "issue": 118 },
-      "expectedNeighborWarnings": [
-        { "cityKey": "Basel|CH", "kind": "bbox-overlap-cross-country" }
+      "priority": ["resolved-validator-warning", "runtime-bbox-shipped", "europe-p0"],
+      "review": { "status": "runtime-bbox-shipped", "issue": 118 },
+      "neighborRelations": [
+        { "cityKey": "Basel|CH", "kind": "resolved-bbox-overlap", "status": "runtime WOF-envelope bbox shipped in #130" }
       ],
       "geometries": [
         {

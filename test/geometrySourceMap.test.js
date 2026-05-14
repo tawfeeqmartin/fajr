@@ -60,16 +60,49 @@ describe('city geometry source map', () => {
     expect(forbiddenKeys).toEqual([])
   })
 
+  it('uses explicit neighbor relations instead of stale expected warnings', () => {
+    const staleKeys = []
+    collectKeys(sourceMap, 'expectedNeighborWarnings', staleKeys)
+    expect(staleKeys).toEqual([])
+  })
+
   it('requires a review reason for rows with no geometry candidates', () => {
     const blankEntries = sourceMap.cities.filter(entry => !(entry.geometries || []).length)
     expect(blankEntries.map(entry => entry.cityKey)).toEqual(['Jerusalem|PS'])
     expect(blankEntries[0].review.status).toBe('intentional-routing-anchor')
   })
 
-  it('keeps reviewed WOF locality candidates for cross-border warning pairs', () => {
+  it('keeps reviewed WOF locality candidates for audited border pairs', () => {
     const expected = new Map([
       ['Basel|CH', 'wof:locality:101748459'],
       ['Mulhouse|FR', 'wof:locality:101749573'],
+      ['Rabat|MA', 'wof:locality:421190103'],
+      ['Agadir|MA', 'wof:locality:421170495'],
+      ['Berrechid|MA', 'wof:locality:1125988395'],
+      ['Settat|MA', 'wof:locality:421190099'],
+      ['Fes|MA', 'wof:locality:421190143'],
+      ['Sefrou|MA', 'wof:locality:421190111'],
+      ['Tangier|MA', 'wof:locality:421190123'],
+      ['Nador|MA', 'wof:locality:421190085'],
+      ['Oujda|MA', 'wof:locality:421200921'],
+      ['Abu Dhabi|AE', 'wof:locality:421179641'],
+      ['Al Ain|AE', 'wof:locality:421168687'],
+      ['Istanbul|TR', 'wof:locality:890460455'],
+      ['Ankara|TR', 'wof:locality:890460453'],
+      ['Izmir|TR', 'wof:locality:890461083'],
+      ['Bursa|TR', 'wof:locality:890461315'],
+      ['Konya|TR', 'wof:locality:890463545'],
+      ['Gaziantep|TR', 'wof:locality:890461631'],
+      ['Adana|TR', 'wof:locality:890461703'],
+      ['Antalya|TR', 'wof:locality:101912923'],
+      ['Samsun|TR', 'wof:locality:101911033'],
+      ['Trabzon|TR', 'wof:locality:101912783'],
+      ['Windsor|CA', 'wof:locality:101735855'],
+      ['Geneva|CH', 'wof:locality:101748445'],
+      ['Annemasse|FR', 'wof:locality:101757307'],
+      ['Ferney-Voltaire|FR', 'wof:locality:101753277'],
+      ['Strasbourg|FR', 'wof:locality:101751113'],
+      ['Kehl|DE', 'wof:locality:101753099'],
       ['Brazzaville|CG', 'wof:locality:421180023'],
       ['Kinshasa|CD', 'wof:locality:421166913'],
     ])
@@ -85,6 +118,44 @@ describe('city geometry source map', () => {
       expect(geometry.sourceConfidence).toBe('high')
       expect(geometry.licenseUse).toBe('audit-and-reviewed-bbox-proposal')
     }
+  })
+
+  it('tracks runtime-shipped and needs-clipping geometry outcomes separately', () => {
+    expect(statusFor('Basel|CH')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Mulhouse|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Rabat|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Agadir|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Casablanca|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Berrechid|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Settat|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Fes|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Sefrou|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Tangier|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Nador|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Oujda|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Abu Dhabi|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Al Ain|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Dubai|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Sharjah|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Ajman|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Istanbul|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Ankara|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Izmir|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Bursa|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Konya|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Gaziantep|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Adana|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Antalya|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Samsun|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Trabzon|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Windsor|CA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Geneva|CH')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Annemasse|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Ferney-Voltaire|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Strasbourg|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Kehl|DE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Brazzaville|CG')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Kinshasa|CD')).toBe('runtime-bbox-shipped')
   })
 })
 
@@ -107,4 +178,20 @@ function collectForbiddenKeys(value, out, pathParts = []) {
     if (key === 'place_id' || key === 'placeId') out.push([...pathParts, key].join('.'))
     collectForbiddenKeys(child, out, [...pathParts, key])
   }
+}
+
+function collectKeys(value, targetKey, out, pathParts = []) {
+  if (!value || typeof value !== 'object') return
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectKeys(item, targetKey, out, [...pathParts, String(index)]))
+    return
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (key === targetKey) out.push([...pathParts, key].join('.'))
+    collectKeys(child, targetKey, out, [...pathParts, key])
+  }
+}
+
+function statusFor(cityKey) {
+  return sourceMap.cities.find(row => row.cityKey === cityKey)?.review?.status
 }

@@ -411,9 +411,9 @@ function detectCountry(lat, lon) {
   // territory (lat 3.75). Cameroon's bbox 1.7-13.1 / 8.5-16.2 catches
   // Malabo's (3.75, 8.77). EquatorialGuinea was listed first but its
   // northern lat was 2.35 — Malabo 3.75 was OUTSIDE. Expand
-  // EquatorialGuinea to 3.85 (covers Malabo) or restructure. Malabo's
-  // territory IS GQ — extend GQ.
-  if (lat >= 0.92 && lat <= 3.85 && lon >= 5.62 && lon <= 11.34) return 'EquatorialGuinea'
+  // EquatorialGuinea to 3.86 (covers Malabo's northern validation samples) or
+  // restructure. Malabo's territory IS GQ — extend GQ.
+  if (lat >= 0.92 && lat <= 3.86 && lon >= 5.62 && lon <= 11.34) return 'EquatorialGuinea'
   if (lat >= -3.96 && lat <= 2.32 && lon >= 8.70 && lon <= 14.50) return 'Gabon'
   // v1.7.5: DRCongo BEFORE RepublicOfTheCongo — Kinshasa CD (-4.44, 15.27)
   // and Luanda AO (-8.84, 13.29) — Luanda was matched by DRCongo's bbox
@@ -443,6 +443,11 @@ function detectCountry(lat, lon) {
   // -13.46 to -4.38; Angola first wins for Luanda.
   if (lat >= -4.47 && lat <= -2.30 && lon >= 29.00 && lon <= 30.85) return 'Burundi'
   if (lat >= -2.84 && lat <= -1.04 && lon >= 28.86 && lon <= 30.90) return 'Rwanda'
+  // v1.8.0 #118: Brazzaville's reviewed WOF locality envelope extends just
+  // east of the older RoC approximation. Keep this capital micro-bbox before
+  // DRCongo so city-country sanity checks do not reject Brazzaville's eastern
+  // edge while the broad RoC bbox remains conservative around Kinshasa.
+  if (lat >= -4.316619 && lat <= -4.201672 && lon >= 15.213081 && lon <= 15.309825) return 'RepublicOfTheCongo'
   // v1.7.5 #47: RoC's eastern lon tightened from 18.65 to 15.25 — Kinshasa
   // CD (-4.44, 15.27) was caught by RoC after the RoC-before-DRCongo
   // reorder. Brazzaville CG (-4.26, 15.24) still inside (just barely);
@@ -829,6 +834,7 @@ const COUNTRY_BBOX_TABLE = {
   Senegal:      [[12.3, 16.04, -17.6, -11.3]],
   Nigeria:      [[3.9, 14, 2.7, 14.7]],
   Cameroon:     [[1.7, 13.1, 8.5, 16.2]],
+  EquatorialGuinea: [[0.92, 3.86, 5.62, 11.34]],
   Brazil:       [[-33.75, 5.27, -73.99, -34.79]],
   Argentina:    [[-55.06, -21.78, -73.57, -53.65]],
   Paraguay:     [[-27.61, -19.29, -62.65, -54.26]],
@@ -845,7 +851,10 @@ const COUNTRY_BBOX_TABLE = {
   Burundi:      [[-4.47, -2.30, 29.00, 30.85]],
   Rwanda:       [[-2.84, -1.04, 28.86, 30.90]],
   Angola:       [[-18.04, -4.50, 11.68, 24.08]],
-  RepublicOfTheCongo: [[-5.04, 3.71, 11.20, 15.25]],
+  RepublicOfTheCongo: [
+    [-5.04, 3.71, 11.20, 15.25],
+    [-4.316619, -4.201672, 15.213081, 15.309825],
+  ],
   CentralAfricanRepublic: [[2.22, 11.01, 14.42, 27.46]],
   Afghanistan:  [[29.4, 38.5, 60.5, 74.95]],
   Bangladesh:   [[20.5, 26.6, 88.4, 92.7]],

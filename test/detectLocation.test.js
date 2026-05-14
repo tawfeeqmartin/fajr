@@ -183,6 +183,8 @@ describe('detectLocation — Mawaqit institutional source', () => {
   it('Morocco WOF-tightened rows keep centers while dropping old overbroad corners', () => {
     const rows = [
       ['Berrechid', 33.2659, -7.5867, 33.21, -7.64],
+      ['Casablanca', 33.5731, -7.5898, 33.70, -7.75],
+      ['Fes', 34.0331, -5.0003, 34.20, -5.25],
       ['Settat', 33.0017, -7.6166, 32.90, -7.75],
       ['Sefrou', 33.8311, -4.8294, 33.75, -4.90],
       ['Tangier', 35.7595, -5.8340, 35.60, -6.00],
@@ -217,6 +219,137 @@ describe('detectLocation — Mawaqit institutional source', () => {
 
       const oldEdge = detectLocation(oldEdgeLat, oldEdgeLon)
       expect(oldEdge.city?.name, `${name} old overbroad edge should no longer resolve to ${name}`).not.toBe(name)
+    }
+  })
+
+  it('Geneva border WOF cells keep Geneva while routing French border towns to France', () => {
+    const geneva = detectLocation(46.2044, 6.1432)
+    expect(geneva.city).not.toBeNull()
+    expect(geneva.city.name).toBe('Geneva')
+    expect(geneva.country).toBe('Switzerland')
+    expect(geneva.timezone).toBe('Europe/Zurich')
+
+    const annemasse = detectLocation(46.1944, 6.2377)
+    expect(annemasse.city).not.toBeNull()
+    expect(annemasse.city.name).toBe('Annemasse')
+    expect(annemasse.city.countryISO).toBe('FR')
+    expect(annemasse.country).toBe('France')
+    expect(annemasse.timezone).toBe('Europe/Paris')
+
+    const ferney = detectLocation(46.2558, 6.1081)
+    expect(ferney.city).not.toBeNull()
+    expect(ferney.city.name).toBe('Ferney-Voltaire')
+    expect(ferney.city.countryISO).toBe('FR')
+    expect(ferney.country).toBe('France')
+    expect(ferney.timezone).toBe('Europe/Paris')
+  })
+
+  it('Strasbourg/Kehl Rhine seam keeps each city on its own country side', () => {
+    const strasbourg = detectLocation(48.5734, 7.7521)
+    expect(strasbourg.city).not.toBeNull()
+    expect(strasbourg.city.name).toBe('Strasbourg')
+    expect(strasbourg.city.countryISO).toBe('FR')
+    expect(strasbourg.country).toBe('France')
+    expect(strasbourg.timezone).toBe('Europe/Paris')
+
+    const kehl = detectLocation(48.5722, 7.8156)
+    expect(kehl.city).not.toBeNull()
+    expect(kehl.city.name).toBe('Kehl')
+    expect(kehl.city.countryISO).toBe('DE')
+    expect(kehl.country).toBe('Germany')
+    expect(kehl.timezone).toBe('Europe/Berlin')
+  })
+
+  it('Brazzaville/Kinshasa Congo River seam keeps each capital on its own country side', () => {
+    const brazzaville = detectLocation(-4.30, 15.28)
+    expect(brazzaville.city).not.toBeNull()
+    expect(brazzaville.city.name).toBe('Brazzaville')
+    expect(brazzaville.city.countryISO).toBe('CG')
+    expect(brazzaville.country).toBe('RepublicOfTheCongo')
+    expect(brazzaville.timezone).toBe('Africa/Brazzaville')
+
+    const kinshasa = detectLocation(-4.50, 15.52)
+    expect(kinshasa.city).not.toBeNull()
+    expect(kinshasa.city.name).toBe('Kinshasa')
+    expect(kinshasa.city.countryISO).toBe('CD')
+    expect(kinshasa.country).toBe('DRCongo')
+    expect(kinshasa.timezone).toBe('Africa/Kinshasa')
+
+    const riverGap = detectLocation(-4.34, 15.26)
+    expect(riverGap.city).toBeNull()
+  })
+
+  it('UAE WOF locality rows expand Abu Dhabi/Al Ain city provenance without touching Dubai/Sharjah/Ajman', () => {
+    const rows = [
+      ['Abu Dhabi', 24.4539, 54.3773, 24.20, 54.80],
+      ['Al Ain', 24.2075, 55.7447, 24.20, 55.50],
+    ]
+
+    for (const [name, centerLat, centerLon, edgeLat, edgeLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe('UAE')
+
+      const edge = detectLocation(edgeLat, edgeLon)
+      expect(edge.city, `${name} reviewed WOF edge should resolve`).not.toBeNull()
+      expect(edge.city.name).toBe(name)
+      expect(edge.country).toBe('UAE')
+    }
+  })
+
+  it('UAE clipped WOF cells expand Sharjah/Ajman eastward without stealing Dubai', () => {
+    const rows = [
+      ['Sharjah', 25.3463, 55.4209, 25.35, 55.65],
+      ['Ajman', 25.4052, 55.5136, 25.405, 55.60],
+    ]
+
+    for (const [name, centerLat, centerLon, edgeLat, edgeLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe('UAE')
+
+      const edge = detectLocation(edgeLat, edgeLon)
+      expect(edge.city, `${name} clipped WOF edge should resolve`).not.toBeNull()
+      expect(edge.city.name).toBe(name)
+      expect(edge.country).toBe('UAE')
+    }
+
+    const dubai = detectLocation(25.2048, 55.2708)
+    expect(dubai.city).not.toBeNull()
+    expect(dubai.city.name).toBe('Dubai')
+    expect(dubai.country).toBe('UAE')
+
+    const sharjahSouthwest = detectLocation(25.3242, 55.4941)
+    expect(sharjahSouthwest.city).not.toBeNull()
+    expect(sharjahSouthwest.city.name).toBe('Sharjah')
+    expect(sharjahSouthwest.country).toBe('UAE')
+  })
+
+  it('Turkey WOF-tightened rows keep centers while dropping old broad corners', () => {
+    const rows = [
+      ['Istanbul', 41.0082, 28.9784, 41.35, 28.60],
+      ['Ankara', 39.9334, 32.8597, 40.20, 33.15],
+      ['Izmir', 38.4237, 27.1428, 38.20, 27.40],
+      ['Bursa', 40.1885, 29.0610, 40.40, 28.80],
+      ['Konya', 37.8746, 32.4932, 37.60, 32.75],
+      ['Gaziantep', 37.0662, 37.3833, 37.30, 37.10],
+      ['Adana', 37.0000, 35.3213, 36.75, 35.60],
+      ['Antalya', 36.8841, 30.7056, 37.15, 30.45],
+      ['Samsun', 41.2867, 36.3300, 41.55, 36.10],
+      ['Trabzon', 41.0027, 39.7168, 40.90, 39.85],
+    ]
+
+    for (const [name, centerLat, centerLon, oldCornerLat, oldCornerLon] of rows) {
+      const center = detectLocation(centerLat, centerLon)
+      expect(center.city, `${name} center should still resolve`).not.toBeNull()
+      expect(center.city.name).toBe(name)
+      expect(center.country).toBe('Turkey')
+
+      const oldCorner = detectLocation(oldCornerLat, oldCornerLon)
+      expect(oldCorner.city?.name, `${name} old broad corner should no longer resolve to ${name}`).not.toBe(name)
+      expect(oldCorner.country).toBe('Turkey')
     }
   })
 })
@@ -313,6 +446,23 @@ describe('detectLocation — smallest-bbox-first invariant', () => {
     expect(loc.recommendedMethod).toBe('ISNA')
     expect(loc.methodSource).toBe('city-institutional')
   })
+
+  it('Windsor Ontario resolves to Canada, not Detroit or Dearborn', () => {
+    const center = detectLocation(42.3149, -83.0364)
+    expect(center.city?.name).toBe('Windsor')
+    expect(center.city?.countryISO).toBe('CA')
+    expect(center.country).toBe('Canada')
+    expect(center.timezone).toBe('America/Toronto')
+
+    const west = detectLocation(42.30, -83.08)
+    expect(west.city?.name).toBe('Windsor')
+    expect(west.city?.countryISO).toBe('CA')
+    expect(west.country).toBe('Canada')
+
+    const detroit = detectLocation(42.3314, -83.0458)
+    expect(detroit.city?.name).toBe('Detroit')
+    expect(detroit.country).toBe('USA')
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -397,6 +547,13 @@ describe('detectLocation — issue #47 regression', () => {
   it('Hanoi VN → country=Vietnam (was Laos)', () => {
     const loc = detectLocation(21.03, 105.85)
     expect(loc.country).toBe('Vietnam')
+  })
+
+  it('Malabo northern bbox sample → city=Malabo, country=EquatorialGuinea', () => {
+    const loc = detectLocation(3.8519, 8.7786)
+    expect(loc.city?.name).toBe('Malabo')
+    expect(loc.city?.countryISO).toBe('GQ')
+    expect(loc.country).toBe('EquatorialGuinea')
   })
 
   it('Asunción PY → country=Paraguay (was Argentina)', () => {

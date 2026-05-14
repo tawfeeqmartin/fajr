@@ -1,6 +1,6 @@
 # City Geometry Audit
 
-Last refreshed: 2026-05-09
+Last refreshed: 2026-05-14
 
 `detectLocation()` intentionally ships a compact offline bbox registry rather
 than raw municipal polygons. The bbox layer is fast and small enough for
@@ -34,9 +34,12 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-20 high-priority rows: 15 Morocco/Habous phase-1 rows and 5 existing registry
-warning rows. It carries 17 candidate OSM relation IDs plus 11 WOF candidate
-IDs. Berrechid and Settat now have WOF locality candidates; Jerusalem
+41 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
+Turkey large-city rows, 1 Detroit/Windsor border row, 3 Geneva border rows, 2
+Strasbourg/Kehl border rows, and 5 existing registry warning rows. It carries
+17 OSM relation rows plus 37 WOF
+rows across reviewed locality/county candidates. Morocco rows with WOF-backed
+runtime status are separated from OSM-only audit candidates; Jerusalem
 intentionally remains without a geometry candidate until a human routing
 decision is available.
 
@@ -79,6 +82,100 @@ package bboxes without license review. WOF candidates are still candidates:
 locality records are preferred, while county-level WOF records are marked
 medium confidence because their placetype can over-cover the city row.
 
+## Source Findings
+
+The #118 Morocco pass now has enough evidence to separate runtime-ready bbox
+sources from source leads:
+
+- **WOF locality envelopes are runtime-usable after row review.** This is the
+  path used for Rabat, Agadir, Berrechid, Settat, Sefrou, Tangier, Nador,
+  Oujda, Fes, Basel, and Mulhouse. Current locality rows with matching OSM
+  admin-8 envelopes are the strongest candidates.
+- **WOF county envelopes are not automatically runtime-usable.** Casablanca is
+  the exception: its WOF locality rows were deprecated/point-like, while the
+  current county envelope matched OSM admin-8 closely. Sale, Meknes, Tetouan,
+  Temara, and Inezgane do not yet meet that bar; their available WOF rows are
+  either broad county/prefecture envelopes or point-like localadmin/locality
+  records.
+- **OSM relation geometry is audit-only for now.** It is useful as an
+  independent shape check and often carries `ref:MA:HCP`, but OSM-derived bbox
+  edits need license review before entering the MIT package.
+- **HDX / OCHA COD-AB Morocco is authoritative but too coarse for city-cell
+  tightening.** The public Morocco COD-AB package is HCP-derived, reviewed for
+  humanitarian use, and CC BY 3.0 IGO, but the available package is admin
+  level 0-2 only, not commune/city level.
+- **geoBoundaries currently does not solve the Morocco city layer.** The public
+  HDX geoBoundaries mirror exposes ADM0-ADM2 for Morocco, and current API
+  probes for MAR ADM3/ADM4 returned no layer.
+- **SIG-Maroc / HCP-linked commune files are a promising source lead, not a
+  runtime source yet.** SIG-Maroc publishes commune-level downloads and 2024
+  census joins, but the site itself says the geometry is assembled from
+  multiple sources; source and license provenance need review before any bbox
+  can be derived from it.
+
+Practical rule for the remaining Morocco rows: do not tighten from WOF
+county/prefecture bboxes or OSM alone. Either find a reviewed WOF locality
+polygon, verify an official/commune-level source with compatible licensing, or
+leave the row as a documented audit gap.
+
+The first UAE pass shows a different pattern:
+
+- Abu Dhabi and Al Ain have current WOF locality envelopes that expand the
+  shipped city lookup cells without colliding with neighboring fajr rows, so
+  they are runtime-ready.
+- Dubai, Sharjah, and Ajman also have current WOF locality envelopes, but their
+  rectangular envelopes overlap heavily. Dubai, Sharjah, and Ajman now use
+  explicit clipped runtime cells: Dubai's northern edge meets Sharjah's
+  southern edge, and Ajman starts at Sharjah's WOF north edge.
+
+The first Turkey pass is cleaner:
+
+- Current WOF locality envelopes are runtime-ready for Istanbul, Ankara, Izmir,
+  Bursa, Konya, Gaziantep, Adana, Antalya, Samsun, and Trabzon. These replace
+  broad population-radius lookup cells and preserve each city centre.
+- Ambiguous Turkish rows remain source leads, not runtime inputs: Diyarbakir
+  and Eskisehir use superseding rows marked `mz:is_current = -1`, Kayseri is
+  point-like, and Mersin did not surface a clean city locality row in the WOF
+  scan.
+
+The Detroit/Windsor border seam needs clipping rather than direct WOF copying:
+
+- Windsor, Ontario has a clean current WOF locality row, but its rectangular
+  envelope crosses the Detroit River into Detroit/Dearborn. The runtime cell is
+  clipped at the river seam while Detroit and Dearborn are clipped north of the
+  same seam.
+
+The Geneva/French-border seam is cleaner with WOF locality rows:
+
+- Geneva's old population-radius cell swallowed adjacent French towns. WOF
+  current locality rows let the runtime keep Geneva city provenance while
+  routing Annemasse and Ferney-Voltaire to France.
+
+The Strasbourg/Kehl Rhine seam requires a clipped WOF application:
+
+- Both cities have current WOF locality rows, but the raw rectangular
+  envelopes overlap across the Rhine. Strasbourg is clipped just west of
+  Kehl's WOF west edge; Kehl uses its WOF envelope.
+
+The Brazzaville/Kinshasa Congo River seam requires a clipped WOF application:
+
+- Brazzaville uses its WOF locality envelope. Kinshasa uses the WOF
+  south/west/east edges but keeps the north edge clipped at `-4.36` so the
+  runtime does not fill the river gap or absorb Brazzaville.
+
+Reference URLs checked in this pass:
+
+- HDX Morocco COD-AB:
+  `https://data.humdata.org/dataset/cod-ab-mar`
+- OCHA COD-AB guidance:
+  `https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/`
+- geoBoundaries API:
+  `https://www.geoboundaries.org/api.html`
+- SIG-Maroc administrative boundaries:
+  `https://www.sig-maroc.com/donnees/limites-administratives-maroc`
+- SIG-Maroc RGPH 2024 commune joins:
+  `https://sig-maroc.com/donnees/shapefiles-recensement-2024`
+
 ## Reviewed Runtime Changes
 
 The first runtime bbox edits from this workflow are Rabat and Agadir, applied
@@ -94,6 +191,38 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   `Oujda|MA`: tightened to reviewed WOF locality envelopes where the previous
   population-radius boxes materially over-covered surrounding areas and no
   adjacent-city clipping was needed.
+- `Casablanca|MA`: tightened to the WOF current county envelope after the WOF
+  locality rows proved deprecated/point-like and the county envelope matched
+  OSM admin-8 Casablanca closely enough for the offline lookup cell.
+- `Fes|MA`: tightened to WOF current locality `421190143`; that row is named
+  Fes-Ville-Nouvelle in WOF but supersedes the older Fes locality row and
+  matches the OSM admin-8 Fes envelope.
+- `Abu Dhabi|AE` and `Al Ain|AE`: expanded/tightened to reviewed WOF current
+  locality envelopes.
+- `Dubai|AE`, `Sharjah|AE`, and `Ajman|AE`: clipped into adjacent runtime
+  lookup cells after WOF current locality envelopes proved too overlapping to
+  ship directly. Dubai keeps its centre and existing west/east/south edges but
+  stops at Sharjah's south edge; Ajman starts at Sharjah's WOF north edge so
+  the three cells do not area-overlap.
+- `Istanbul|TR`, `Ankara|TR`, `Izmir|TR`, `Bursa|TR`, `Konya|TR`,
+  `Gaziantep|TR`, `Adana|TR`, `Antalya|TR`, `Samsun|TR`, and `Trabzon|TR`:
+  tightened to reviewed WOF current locality envelopes. Trabzon's previous
+  Georgia-edge safety intent is preserved by the tighter WOF cell.
+- `Windsor|CA`: added as a clipped WOF-backed lookup cell for the
+  Detroit/Windsor seam. `Detroit|US` and `Dearborn|US` now start north of the
+  seam, so Windsor no longer resolves to a US city.
+- `Geneva|CH`, `Annemasse|FR`, and `Ferney-Voltaire|FR`: tightened/added from
+  WOF current locality envelopes so French border-town coordinates no longer
+  resolve to Geneva/Switzerland.
+- `Strasbourg|FR` and `Kehl|DE`: separated at the Rhine seam so Kehl no
+  longer resolves to Strasbourg/France.
+- `Brazzaville|CG` and `Kinshasa|CD`: separated across the Congo River seam so
+  Brazzaville's east edge and Kinshasa's south/east edges resolve to their own
+  countries/timezones without filling the river gap.
+- Morocco WOF-backed runtime rows now have source-map status aligned with the
+  shipped registry bboxes: Rabat, Agadir, Berrechid, Settat, Fes, Sefrou,
+  Tangier, Nador, and Oujda. OSM-only rows remain audit candidates pending
+  license review.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.
@@ -122,14 +251,17 @@ separate reviewed workflows because their terms and APIs differ.
 
 ## First Audit Targets
 
-Start with rows where geometry quality affects source provenance or existing
-validator warnings:
+Start with rows where geometry quality affects source provenance, existing
+validator warnings, or known clipping gaps:
 
 - Morocco Habous clusters: Rabat/Sale/Temara, Agadir/Inezgane,
   Casablanca/Berrechid/Settat, Fes/Sefrou/Meknes, Tangier/Tetouan/Nador/Oujda.
-- Current registry warnings: Jerusalem PS/IL routing and Brazzaville/Kinshasa.
-  Basel/Mulhouse has reviewed WOF locality evidence and a tightened runtime
-  bbox; keep it as a regression target rather than an open warning.
+- Current registry warning: Jerusalem PS/IL routing.
+- Resolved geometry clipping gap: Brazzaville/Kinshasa. Brazzaville uses its
+  WOF locality envelope; Kinshasa uses WOF south/west/east edges with the north
+  edge still clipped at the existing river-safe boundary.
+- Resolved validator-warning regression target: Basel/Mulhouse. It has
+  reviewed WOF locality evidence and a tightened runtime bbox.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
   Dubai/Sharjah/Ajman, Singapore/Johor Bahru, Kuala Lumpur/Shah Alam,
   Toronto/Mississauga/Laval/Montreal, Lahore/Sialkot/Gujranwala,

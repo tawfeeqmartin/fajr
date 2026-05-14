@@ -1,422 +1,172 @@
 // بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
 // Bismillah ir-Rahman ir-Rahim
 /**
- * Fetch prayer times from Egypt's General Authority of Survey (ESA) VIEWSTATE form.
+ * Fetch today's official Egypt ESA (General Authority for Survey) prayer
+ * times for all 77 Egyptian cities, per fajr#133 / agot#114.
  *
- * The ESA publishes monthly prayer-time tables for 83 Egyptian cities at
- * http://www.esa.gov.eg/praytimes.aspx. This is an ASP.NET WebForms site
- * that requires VIEWSTATE and EVENTVALIDATION tokens to POST city selections.
+ * Earlier diagnosis (fajr#109 research, 2026-05-05): "ESA portal is JS-
+ * rendered ASP.NET VIEWSTATE form, raw HTTP scrape fails." That diagnosis
+ * is now WRONG (or no longer accurate as of 2026-05-13): hitting
+ * `esa.gov.eg/praytimes.aspx` (with HTTPS redirect-following + a normal
+ * browser User-Agent) returns a SERVER-SIDE-RENDERED table of today's
+ * prayer times for all 77 cities. No VIEWSTATE form-post needed for
+ * the current-day snapshot.
  *
- * Approach:
- * 1. Fetch the initial page to harvest VIEWSTATE/EVENTVALIDATION tokens
- * 2. POST the form with a city selection (using Arabic city name)
- * 3. Parse the returned HTML table to extract the monthly prayer times
- * 4. Verify response dates match requested dates (guard against parsing bugs)
- * 5. Emit JSON fixture for eval/data/test/ or eval/data/train/
+ * The form-post path IS needed for past/future dates (city + date
+ * selection). That's a separate effort (Puppeteer or VIEWSTATE-simulation)
+ * — this fetcher captures today's data and is designed to run daily,
+ * same shape as scripts/fetch-morocco-habous.js.
  *
- * Known limitation: The page uses JavaScript to render the dropdown dynamically.
- * This fetcher harvests the form tokens and POSTs directly, which works for
- * known city names (like القاهرة for Cairo, الأسكندرية for Alexandria) but may
- * require manual token refresh if the server's VIEWSTATE algorithm changes.
+ * Output schema matches existing eval/data/test fixtures (flat array of
+ * city records with top-level lat/lon/timezone + `dates: [...]`).
  *
- * Usage: node scripts/fetch-egypt-esa.js
+ * Output: eval/data/test/egypt-esa.json (overwrites — previous content was
+ * a stub documenting the JS-rendering blocker, which we now know is wrong).
+ *
+ * Usage:
+ *   node scripts/fetch-egypt-esa.js
+ *
+ * Classification: 🟢 Established — pure data fetch + parse; no shar'i
+ * judgment involved.
  */
 
-import { writeFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { writeFileSync, existsSync, mkdirSync } from 'node:fs'
+import { dirname } from 'node:path'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const TARGET_URL = 'https://www.esa.gov.eg/praytimes.aspx'
+const OUT_PATH = new URL('../eval/data/test/egypt-esa.json', import.meta.url).pathname
 
-// ESA city list: Arabic name → { English name, latitude, longitude, elevation }
-const CITIES = [
-  {
-    arabic: 'القـاهـرة',
-    city: 'Cairo',
-    latitude: 30.0626,
-    longitude: 31.2497,
-    elevation: 23,
-  },
-  {
-    arabic: 'الأسكندرية',
-    city: 'Alexandria',
-    latitude: 31.2001,
-    longitude: 29.9187,
-    elevation: 7,
-  },
-  {
-    arabic: 'أسوان',
-    city: 'Aswan',
-    latitude: 24.0889,
-    longitude: 32.8998,
-    elevation: 104,
-  },
-  {
-    arabic: 'الأقصر',
-    city: 'Luxor',
-    latitude: 25.6872,
-    longitude: 32.6396,
-    elevation: 71,
-  },
-  {
-    arabic: 'بورسعيد',
-    city: 'Port Said',
-    latitude: 31.2653,
-    longitude: 32.3019,
-    elevation: 3,
-  },
-  {
-    arabic: 'السويس',
-    city: 'Suez',
-    latitude: 29.9737,
-    longitude: 32.5263,
-    elevation: 12,
-  },
-  {
-    arabic: 'شرم الشيخ',
-    city: 'Sharm el-Sheikh',
-    latitude: 27.9158,
-    longitude: 34.3299,
-    elevation: 17,
-  },
-]
-
-const ESA_URL = 'http://www.esa.gov.eg/praytimes.aspx'
-const MONTH = 5  // May 2026
-const YEAR = 2026
-
-/**
- * Fetch and parse the initial ESA page to harvest VIEWSTATE/EVENTVALIDATION tokens.
- */
-async function getFormTokens() {
-  console.log(`Fetching initial ESA page: ${ESA_URL}`)
-  try {
-    const res = await fetch(`https://www.esa.gov.eg/praytimes.aspx`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
-      redirect: 'follow',
-    })
-    if (!res.ok) {
-      console.warn(`  WARNING: HTTP ${res.status} — page may not load correctly`)
-    }
-
-    const html = await res.text()
-
-    // Try to extract VIEWSTATE and EVENTVALIDATION tokens
-    // The page may be JavaScript-rendered, so these may not exist
-    const viewstateMatch = html.match(/name="__VIEWSTATE"\s+value="([^"]+)"/)
-    const viewstate = viewstateMatch ? viewstateMatch[1] : ''
-
-    const eventMatch = html.match(/name="__EVENTVALIDATION"\s+value="([^"]+)"/)
-    const eventvalidation = eventMatch ? eventMatch[1] : ''
-
-    if (!viewstate || !eventvalidation) {
-      console.warn('  WARNING: Could not harvest VIEWSTATE/EVENTVALIDATION tokens')
-      console.warn('  Likely the form is rendered client-side. Returning empty tokens.')
-      return { viewstate: '', eventvalidation: '' }
-    }
-
-    console.log(`  ✓ Harvested VIEWSTATE (${viewstate.substring(0, 40)}...)`)
-    console.log(`  ✓ Harvested EVENTVALIDATION (${eventvalidation.substring(0, 40)}...)`)
-    return { viewstate, eventvalidation }
-  } catch (err) {
-    console.error(`  ERROR fetching tokens: ${err.message}`)
-    return null
-  }
+// Coordinate + timezone lookup for the major Egyptian cities ESA publishes.
+// ESA serves 77 cities total; this map covers ~14 high-Muslim-population
+// ones for fajr's eval purposes. Rows without coords are skipped (eval
+// requires lat/lon for the per-city signed-bias check).
+const CITY_META = {
+  'القـاهـرة':       { english: 'Cairo',        lat: 30.0444, lon: 31.2357 },
+  'القاهرة':         { english: 'Cairo',        lat: 30.0444, lon: 31.2357 },
+  'الأسكندرية':      { english: 'Alexandria',   lat: 31.2001, lon: 29.9187 },
+  'طنطا':            { english: 'Tanta',        lat: 30.7865, lon: 31.0004 },
+  'طنطــا':          { english: 'Tanta',        lat: 30.7865, lon: 31.0004 },
+  'المنصورة':        { english: 'Mansoura',     lat: 31.0364, lon: 31.3807 },
+  'الزقازيق':        { english: 'Zagazig',      lat: 30.5877, lon: 31.5022 },
+  'الزقـازيق':       { english: 'Zagazig',      lat: 30.5877, lon: 31.5022 },
+  'أسيوط':           { english: 'Asyut',        lat: 27.1809, lon: 31.1837 },
+  'أسيــوط':         { english: 'Asyut',        lat: 27.1809, lon: 31.1837 },
+  'سوهاج':           { english: 'Sohag',        lat: 26.5569, lon: 31.6948 },
+  'سـوهاج':          { english: 'Sohag',        lat: 26.5569, lon: 31.6948 },
+  'بنى سويف':        { english: 'Beni Suef',    lat: 29.0661, lon: 31.0994 },
+  'المنيا':          { english: 'Minya',        lat: 28.0871, lon: 30.7618 },
+  'المنـيـا':        { english: 'Minya',        lat: 28.0871, lon: 30.7618 },
+  'قنا':             { english: 'Qena',         lat: 26.1551, lon: 32.7160 },
+  'قـــنا':          { english: 'Qena',         lat: 26.1551, lon: 32.7160 },
+  'أسوان':           { english: 'Aswan',        lat: 24.0889, lon: 32.8998 },
+  'أســوان':         { english: 'Aswan',        lat: 24.0889, lon: 32.8998 },
+  'الإسماعيلية':     { english: 'Ismailia',     lat: 30.5965, lon: 32.2715 },
+  'الغردقة':         { english: 'Hurghada',     lat: 27.2579, lon: 33.8116 },
+  'الغردقـة':        { english: 'Hurghada',     lat: 27.2579, lon: 33.8116 },
+  'دمياط':           { english: 'Damietta',     lat: 31.4165, lon: 31.8133 },
+  'دميـاط':          { english: 'Damietta',     lat: 31.4165, lon: 31.8133 },
+  'مطروح':           { english: 'Marsa Matruh', lat: 31.3543, lon: 27.2373 },
+  'مطـروح':          { english: 'Marsa Matruh', lat: 31.3543, lon: 27.2373 },
+  'الخارجة':         { english: 'Kharga Oasis', lat: 25.4513, lon: 30.5429 },
+  'الخارجـة':        { english: 'Kharga Oasis', lat: 25.4513, lon: 30.5429 },
 }
 
-/**
- * POST the ESA form to request prayer times for a specific city.
- * Returns the HTML response containing the monthly prayer table.
- */
-async function fetchCityTable(city, tokens) {
-  if (!tokens) {
-    console.warn(`  SKIP: No VIEWSTATE tokens available`)
-    return null
-  }
-
-  console.log(`  Posting form for city: ${city.city} (${city.arabic})`)
-
-  // Build the POST body. The ESA form uses DropDownList1 for city selection.
-  const body = new URLSearchParams()
-  body.append('__VIEWSTATE', tokens.viewstate)
-  body.append('__EVENTVALIDATION', tokens.eventvalidation)
-  body.append('__EVENTTARGET', 'ctl00$placeholder1$DropDownList1')
-  body.append('__EVENTARGUMENT', '')
-  body.append('ctl00$placeholder1$DropDownList1', city.arabic)
-  body.append('ctl00$placeholder1$Button1', 'عرض الجدول')  // "Show Table" button
-
-  try {
-    const res = await fetch(ESA_URL, {
-      method: 'POST',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; fajr-egypt-esa-fetcher/1.0)',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: body.toString(),
-    })
-
-    if (!res.ok) {
-      console.warn(`    WARNING: HTTP ${res.status}`)
-      return null
-    }
-
-    return await res.text()
-  } catch (err) {
-    console.error(`    ERROR: ${err.message}`)
-    return null
-  }
-}
-
-/**
- * Parse HTML table from ESA response.
- * Expected format: rows with 6 cells (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha)
- * and a date column (usually first or last).
- *
- * This is a conservative parser that looks for <table> elements and
- * attempts to extract prayer time values.
- */
-function parseEsaTable(html, city, year, month) {
-  const tableRegex = /<table[^>]*>[\s\S]*?<\/table>/gi
-  const tables = html.match(tableRegex)
-
-  if (!tables || tables.length === 0) {
-    console.warn(`    WARNING: No <table> elements found`)
-    return []
-  }
-
-  const results = []
-
-  // Try each table; the prayer times table should have consistent row counts
-  for (const table of tables) {
-    const rows = table.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || []
-
-    // Skip header/footer rows and look for data rows
-    for (let i = 1; i < rows.length; i++) {
-      const row = rows[i]
-      const cells = row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || []
-
-      if (cells.length < 6) continue  // Need at least date + 5 or 6 prayers
-
-      // Extract cell text
-      const cellTexts = cells.map(cell => {
-        // Strip HTML tags and trim
-        const text = cell.replace(/<[^>]*>/g, '').trim()
-        // Remove Arabic diacritics and extra spaces
-        return text.replace(/ً|ٌ|ٍ|َ|ُ|ِ|ّ|ْ/g, '').trim()
-      })
-
-      // Try to parse the row. Usually: [date, fajr, sunrise, dhuhr, asr, maghrib, isha] or similar
-      // Look for time patterns (HH:MM)
-      const timePattern = /^(\d{1,2}):(\d{2})$/
-      const timeIndices = cellTexts.map((t, i) => timePattern.test(t) ? i : -1).filter(i => i >= 0)
-
-      if (timeIndices.length < 5) continue  // Need at least 5 prayers
-
-      // Identify the date cell (usually first cell or one of the non-time cells)
-      let dateStr = null
-      for (let j = 0; j < cellTexts.length; j++) {
-        if (timeIndices.includes(j)) continue
-        const cell = cellTexts[j]
-        // Try to match DD/MM or DD-MM or similar
-        if (/^\d{1,2}[\/\-]\d{1,2}$/.test(cell)) {
-          dateStr = cell
-          break
-        }
-      }
-
-      if (!dateStr) continue
-
-      // Parse date (assume format is DD/MM or DD-MM for current month/year)
-      const dateMatch = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})$/)
-      if (!dateMatch) continue
-
-      const day = parseInt(dateMatch[1], 10)
-      const dateMonth = parseInt(dateMatch[2], 10)
-
-      // Verify the month matches what we requested
-      if (dateMonth !== month) {
-        console.warn(`    WARNING: Date month ${dateMonth} != requested month ${month}; skipping row`)
-        continue
-      }
-
-      // Extract the prayer times
-      const times = {}
-      const prayerNames = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha']
-      for (let p = 0; p < Math.min(6, timeIndices.length); p++) {
-        const idx = timeIndices[p]
-        const timeStr = cellTexts[idx]
-        if (p < prayerNames.length) {
-          times[prayerNames[p]] = timeStr
-        }
-      }
-
-      // Only include if we have at least fajr through isha (skip sunrise if needed)
-      if (!times.fajr || !times.dhuhr || !times.maghrib || !times.isha) {
-        continue
-      }
-
-      const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-
-      results.push({
-        date,
-        fajr: times.fajr,
-        sunrise: times.sunrise || null,
-        dhuhr: times.dhuhr,
-        asr: times.asr,
-        maghrib: times.maghrib,
-        isha: times.isha,
-      })
-    }
-
-    // If we found enough rows, this is likely the right table
-    if (results.length >= 5) break
-  }
-
-  return results
-}
-
-/**
- * Verify that parsed dates are in the expected month/year.
- * This is the v1.6.1 "reflect-check" to catch silent date-parsing bugs.
- */
-function verifyDateRange(dates, year, month) {
-  const expectedMonth = String(month).padStart(2, '0')
-
-  for (const entry of dates) {
-    const parts = entry.date.split('-')
-    if (parts.length !== 3) {
-      console.warn(`    WARNING: Invalid date format "${entry.date}"`)
-      return false
-    }
-
-    if (parts[0] !== String(year) || parts[1] !== expectedMonth) {
-      console.warn(`    WARNING: Date "${entry.date}" not in ${year}-${expectedMonth}; verify parsing`)
-      return false
-    }
-  }
-
-  return true
-}
+main().catch(err => { console.error(err); process.exit(1) })
 
 async function main() {
-  console.log(`\nEgypt ESA Prayer Time Fetcher\n${'='.repeat(50)}\n`)
+  console.log(`[esa-egypt] fetching ${TARGET_URL}`)
+  const res = await fetch(TARGET_URL, {
+    redirect: 'follow',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+      'Accept-Language': 'ar,en;q=0.9',
+    },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const html = await res.text()
+  console.log(`[esa-egypt] received ${html.length} bytes`)
 
-  // Harvest VIEWSTATE/EVENTVALIDATION tokens from the initial page load
-  const tokens = await getFormTokens()
+  const tableMatch = html.match(/<th[^>]*>المدينة<\/th>[\s\S]*?<\/table>/)
+  if (!tableMatch) throw new Error('Could not locate prayer-times table in response')
 
-  if (!tokens || !tokens.viewstate || !tokens.eventvalidation) {
-    console.log('\nFAILURE MODE TRIGGERED: VIEWSTATE form inaccessible.\n')
-    console.log('Root cause: The ESA praytimes.aspx page uses client-side JavaScript rendering.')
-    console.log('The VIEWSTATE/EVENTVALIDATION tokens are generated dynamically and are not')
-    console.log('present in the initial HTML response to static fetch() calls.\n')
+  const rowRe = /<tr[^>]*>[\s\S]*?<\/tr>/g
+  const rows = tableMatch[0].match(rowRe) || []
+  const cellRe = /<td[^>]*>([\s\S]*?)<\/td>/g
 
-    console.log('Path forward:')
-    console.log('1. Implement a headless browser scraper (Puppeteer/Playwright) to render the')
-    console.log('   page before extracting tokens.')
-    console.log('2. Consult the ESA development team for a machine-readable JSON/REST API.')
-    console.log('3. Monitor the Mawaqit mosque-published Egypt corpus for institutional alignment.')
-    console.log()
-    console.log('Writing empty test fixture with notes field as documented in CLAUDE.md...\n')
+  const records = []
+  let skipped = 0
+  for (const r of rows.slice(1)) {
+    const cells = []
+    let m
+    while ((m = cellRe.exec(r)) !== null) cells.push(m[1].replace(/<[^>]+>/g, '').trim())
+    if (cells.length < 9) continue
 
-    // Write the stub with empty dates and failure documentation
-    const stub = []
-    for (const city of CITIES) {
-      stub.push({
-        city: city.city,
-        country: 'Egypt',
-        latitude: city.latitude,
-        longitude: city.longitude,
-        elevation: city.elevation,
-        timezone: 'Africa/Cairo',
-        method: 'Egyptian (19.5°/17.5°)',
-        source: {
-          type: 'national-authority',
-          institution: 'Egyptian General Authority of Survey (EGSA)',
-          url: 'https://esa.gov.eg/praytimes.aspx',
-        },
-        notes: 'ESA VIEWSTATE form inaccessible — page uses client-side JavaScript rendering. Stub written as documented in CLAUDE.md failure modes. Future: implement Puppeteer/Playwright-based scraper or contact ESA for JSON API.',
-        dates: [],
-      })
-    }
+    const [cityAr, dateGreg, /*hijri*/, fajrAr, sunriseAr, dhuhrAr, asrAr, maghribAr, ishaAr] = cells
+    const meta = CITY_META[cityAr]
+    if (!meta) { skipped++; continue }
 
-    const outPath = join(__dirname, '..', 'eval', 'data', 'test', 'egypt-esa.json')
-    writeFileSync(outPath, JSON.stringify(stub, null, 2))
-    console.log(`✓ Wrote stub to ${outPath}`)
-    return
-  }
+    const fajr = arabicTime24(fajrAr)
+    const sunrise = arabicTime24(sunriseAr)
+    const dhuhr = arabicTime24(dhuhrAr)
+    const asr = arabicTime24(asrAr)
+    const maghrib = arabicTime24(maghribAr)
+    const isha = arabicTime24(ishaAr)
+    if ([fajr, sunrise, dhuhr, asr, maghrib, isha].some(t => t == null)) { skipped++; continue }
 
-  console.log(`\nFetching prayer times for ${CITIES.length} Egyptian cities...\n`)
-
-  const allCities = []
-
-  for (const city of CITIES) {
-    console.log(`\nProcessing: ${city.city}`)
-
-    const html = await fetchCityTable(city, tokens)
-    if (!html) {
-      console.log(`  SKIP: No response`)
-      continue
-    }
-
-    const dates = parseEsaTable(html, city, YEAR, MONTH)
-    console.log(`  → Parsed ${dates.length} days`)
-
-    if (dates.length === 0) {
-      console.log(`  SKIP: No valid rows parsed`)
-      continue
-    }
-
-    // Reflect-check: verify dates are in the expected month/year
-    if (!verifyDateRange(dates, YEAR, MONTH)) {
-      console.log(`  SKIP: Date verification failed`)
-      continue
-    }
-
-    // Filter to a representative sample (first 7 days)
-    const sample = dates.slice(0, 7)
-
-    allCities.push({
-      city: city.city,
+    records.push({
+      city: meta.english,
+      city_local: cityAr,
       country: 'Egypt',
-      latitude: city.latitude,
-      longitude: city.longitude,
-      elevation: city.elevation,
+      latitude: meta.lat,
+      longitude: meta.lon,
+      elevation: 0,
       timezone: 'Africa/Cairo',
-      method: 'Egyptian (19.5°/17.5°)',
-      source: {
-        type: 'national-authority',
-        institution: 'Egyptian General Authority of Survey (EGSA)',
-        url: 'https://esa.gov.eg/praytimes.aspx',
-      },
+      method: 'Egyptian (ESA — General Authority for Survey)',
+      source: 'Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)',
+      source_institution: 'Egyptian General Authority for Survey (ESA)',
+      source_method: 'Egyptian (19.5°/17.5°) per ESA',
+      source_url: TARGET_URL,
       source_fetched: new Date().toISOString(),
-      dates: sample,
+      dates: [{ date: dateGreg, fajr, sunrise, dhuhr, asr, maghrib, isha }],
     })
-
-    console.log(`  ✓ Added ${sample.length} days for ${city.city}`)
-
-    // Polite rate-limiting: 1 second between city requests
-    await new Promise(resolve => setTimeout(resolve, 1000))
   }
 
-  console.log(`\n${'='.repeat(50)}`)
-  console.log(`Summary: ${allCities.length} cities × 7 days = ${allCities.reduce((sum, c) => sum + c.dates.length, 0)} total records`)
-  console.log(`${'='.repeat(50)}\n`)
+  console.log(`[esa-egypt] parsed ${records.length} cities (skipped ${skipped} unmapped/malformed)`)
 
-  if (allCities.length === 0) {
-    console.log('ERROR: No cities fetched. Check logs above and ESA site status.')
-    return
+  // Verify-published-reference spot-check: Cairo Maghrib should be within
+  // a plausible window for any calendar date in Egypt (conservative
+  // [17:00, 20:00] covers all of Egypt's seasonal sunset range).
+  const cairo = records.find(r => r.city === 'Cairo')
+  if (cairo) {
+    const [h, mn] = cairo.dates[0].maghrib.split(':').map(Number)
+    const min = h * 60 + mn
+    if (min < 17 * 60 || min > 20 * 60) {
+      console.warn(`[verify-published-reference] WARN: Cairo Maghrib ${cairo.dates[0].maghrib} outside [17:00, 20:00] envelope`)
+    } else {
+      console.log(`[verify-published-reference] Cairo Maghrib ${cairo.dates[0].maghrib} ✓`)
+    }
   }
 
-  // Emit the JSON fixture
-  const outPath = join(__dirname, '..', 'eval', 'data', 'test', 'egypt-esa.json')
-  writeFileSync(outPath, JSON.stringify(allCities, null, 2))
-  console.log(`✓ Written ${outPath}`)
-  console.log(`\nFixture ready for eval.js integration.\n`)
+  if (!existsSync(dirname(OUT_PATH))) mkdirSync(dirname(OUT_PATH), { recursive: true })
+  writeFileSync(OUT_PATH, JSON.stringify(records, null, 2))
+  console.log(`[esa-egypt] wrote ${records.length} city records to ${OUT_PATH}`)
 }
 
-main().catch(err => {
-  console.error(`FATAL: ${err.message}`)
-  process.exit(1)
-})
+/**
+ * Convert Arabic 12-hour-with-meridiem time strings to 24-hour "HH:MM".
+ *   "4:24 ص"  → "04:24"    (AM = ص = صباحاً)
+ *   "7:40 م"  → "19:40"    (PM = م = مساءً)
+ *   "12:51 م" → "12:51"    (noon stays 12)
+ *   "12:5 ص"  → "00:05"    (midnight goes to 00)
+ */
+function arabicTime24(s) {
+  const m = s.match(/^(\d{1,2}):(\d{1,2})\s*([صم])/)
+  if (!m) return null
+  let h = parseInt(m[1], 10)
+  const mn = parseInt(m[2], 10)
+  const ap = m[3]
+  if (ap === 'م' && h !== 12) h += 12
+  if (ap === 'ص' && h === 12) h = 0
+  if (h < 0 || h > 23 || mn < 0 || mn > 59) return null
+  return `${String(h).padStart(2, '0')}:${String(mn).padStart(2, '0')}`
+}
