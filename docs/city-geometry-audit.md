@@ -34,9 +34,9 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-36 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
-Turkey large-city rows, 1 Detroit/Windsor border row, and 5 existing registry
-warning rows. It carries 17 OSM relation rows plus 32 WOF
+39 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
+Turkey large-city rows, 1 Detroit/Windsor border row, 3 Geneva border rows, and
+5 existing registry warning rows. It carries 17 OSM relation rows plus 35 WOF
 rows across reviewed locality/county candidates. Berrechid, Settat, and Fes
 now have WOF locality candidates; Jerusalem intentionally remains without a
 geometry candidate until a human routing decision is available.
@@ -143,6 +143,12 @@ The Detroit/Windsor border seam needs clipping rather than direct WOF copying:
   clipped at the river seam while Detroit and Dearborn are clipped north of the
   same seam.
 
+The Geneva/French-border seam is cleaner with WOF locality rows:
+
+- Geneva's old population-radius cell swallowed adjacent French towns. WOF
+  current locality rows let the runtime keep Geneva city provenance while
+  routing Annemasse and Ferney-Voltaire to France.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -191,6 +197,9 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
 - `Windsor|CA`: added as a clipped WOF-backed lookup cell for the
   Detroit/Windsor seam. `Detroit|US` and `Dearborn|US` now start north of the
   seam, so Windsor no longer resolves to a US city.
+- `Geneva|CH`, `Annemasse|FR`, and `Ferney-Voltaire|FR`: tightened/added from
+  WOF current locality envelopes so French border-town coordinates no longer
+  resolve to Geneva/Switzerland.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.

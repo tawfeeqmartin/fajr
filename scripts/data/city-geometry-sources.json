@@ -786,6 +786,79 @@
       ]
     },
     {
+      "cityKey": "Geneva|CH",
+      "priority": ["geneva-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to WOF current locality envelope so adjacent French border towns do not resolve to Geneva."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Annemasse|FR", "kind": "runtime-separated", "status": "Geneva east edge stops west of Annemasse locality bbox" },
+        { "cityKey": "Ferney-Voltaire|FR", "kind": "runtime-separated", "status": "Geneva north edge stops south of Ferney-Voltaire locality bbox" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101748445",
+          "ids": { "wofId": 101748445, "repo": "whosonfirst-data-admin-ch", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "CH/geneva/wof-locality-101748445.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Annemasse|FR",
+      "priority": ["geneva-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added to stop Annemasse from resolving to Geneva/Switzerland."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Geneva|CH", "kind": "runtime-separated", "status": "Annemasse west edge starts east of Geneva locality bbox" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101757307",
+          "ids": { "wofId": 101757307, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "FR/annemasse/wof-locality-101757307.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Ferney-Voltaire|FR",
+      "priority": ["geneva-border", "wof-locality-runtime-bbox", "europe-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added to stop Ferney-Voltaire from resolving to Geneva/Switzerland."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Geneva|CH", "kind": "runtime-separated", "status": "Ferney-Voltaire south edge starts north of Geneva locality bbox" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101753277",
+          "ids": { "wofId": 101753277, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "FR/ferney-voltaire/wof-locality-101753277.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
       "cityKey": "Jerusalem|PS",
       "priority": ["current-validator-warning", "intentional-routing-anchor", "human-review-required"],
       "review": {

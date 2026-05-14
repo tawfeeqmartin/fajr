@@ -77,6 +77,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added a clipped WOF-backed `Windsor|CA` lookup cell and moved Detroit/Dearborn
   north of the river seam so Windsor coordinates no longer resolve to US city
   provenance.
+- Tightened `Geneva|CH` and added WOF-backed `Annemasse|FR` and
+  `Ferney-Voltaire|FR` lookup cells so adjacent French border towns no longer
+  resolve to Geneva/Switzerland.
 
 ### Changed — documentation doctrine cleanup
 

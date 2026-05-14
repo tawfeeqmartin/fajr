@@ -222,6 +222,28 @@ describe('detectLocation — Mawaqit institutional source', () => {
     }
   })
 
+  it('Geneva border WOF cells keep Geneva while routing French border towns to France', () => {
+    const geneva = detectLocation(46.2044, 6.1432)
+    expect(geneva.city).not.toBeNull()
+    expect(geneva.city.name).toBe('Geneva')
+    expect(geneva.country).toBe('Switzerland')
+    expect(geneva.timezone).toBe('Europe/Zurich')
+
+    const annemasse = detectLocation(46.1944, 6.2377)
+    expect(annemasse.city).not.toBeNull()
+    expect(annemasse.city.name).toBe('Annemasse')
+    expect(annemasse.city.countryISO).toBe('FR')
+    expect(annemasse.country).toBe('France')
+    expect(annemasse.timezone).toBe('Europe/Paris')
+
+    const ferney = detectLocation(46.2558, 6.1081)
+    expect(ferney.city).not.toBeNull()
+    expect(ferney.city.name).toBe('Ferney-Voltaire')
+    expect(ferney.city.countryISO).toBe('FR')
+    expect(ferney.country).toBe('France')
+    expect(ferney.timezone).toBe('Europe/Paris')
+  })
+
   it('UAE WOF locality rows expand Abu Dhabi/Al Ain city provenance without touching Dubai/Sharjah/Ajman', () => {
     const rows = [
       ['Abu Dhabi', 24.4539, 54.3773, 24.20, 54.80],
