@@ -77,7 +77,7 @@ console.log(times.notes)
     elevation: 75,
     asrConvention: 'standard',
     methodSource: 'country-default',
-    asrConventionSource: 'method-implied',
+    asrConventionSource: 'country-default',
     elevationSource: 'city-registry',
   },
 
