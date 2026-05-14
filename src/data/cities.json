@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-11T21:49:44.300Z",
+  "generated": "2026-05-14T09:46:53.462Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -194,6 +194,7 @@
     {"name":"Sialkot","countryISO":"PK","lat":32.4945,"lon":74.5229,"bbox":[32.4,32.6,74.45,74.65],"timezone":"Asia/Karachi","adminRegion":"Punjab","population":656000,"elevation":256,"source":{"type":"inherited","from":"Pakistan"}},
     {"name":"Wellington","countryISO":"NZ","lat":-41.2865,"lon":174.7762,"bbox":[-41.3865,-41.1865,174.6762,174.8762],"timezone":"Pacific/Auckland","elevation":13,"source":{"type":"inherited","from":"NZ"}},
     {"name":"Port Moresby","countryISO":"PG","lat":-9.4438,"lon":147.1803,"bbox":[-9.5438,-9.3438,147.0803,147.2803],"timezone":"Pacific/Port_Moresby","elevation":49,"source":{"type":"inherited","from":"PG"}},
+    {"name":"Casablanca","countryISO":"MA","lat":33.5731,"lon":-7.5898,"bbox":[33.494823,33.647306,-7.738187,-7.459445],"timezone":"Africa/Casablanca","nameLocal":"الدار البيضاء","adminRegion":"Casablanca-Settat","population":3460000,"elevation":27,"source":{"type":"mawaqit","slug":"moulay-ismail-casablanca-20400-morocco"}},
     {"name":"Detroit","countryISO":"US","lat":42.3314,"lon":-83.0458,"bbox":[42.18,42.46,-83.08,-82.92],"timezone":"America/Detroit","adminRegion":"Michigan","population":632000,"elevation":183,"source":{"type":"inherited","from":"USA"}},
     {"name":"Kinshasa","countryISO":"CD","lat":-4.4419,"lon":15.2663,"bbox":[-4.55,-4.36,15.2,15.45],"timezone":"Africa/Kinshasa","elevation":280,"source":{"type":"inherited","from":"DRCongo"}},
     {"name":"Laval","countryISO":"CA","lat":45.6066,"lon":-73.7124,"bbox":[45.55,45.75,-73.86,-73.59],"timezone":"America/Toronto","population":438000,"elevation":39,"source":{"type":"mawaqit","slug":"iqra-laval-h7v-2v5-canada"}},
@@ -287,7 +288,6 @@
     {"name":"Cairo","countryISO":"EG","lat":30.0444,"lon":31.2357,"bbox":[29.84,30.24,31.22,31.56],"timezone":"Africa/Cairo","nameLocal":"القاهرة","population":10100000,"elevation":23,"source":{"type":"mawaqit","slug":"msjd-l-lm-lnf-nouveau-caire-4710001-egypt"}},
     {"name":"Antwerp","countryISO":"BE","lat":51.2194,"lon":4.4025,"bbox":[51.06,51.42,4.2,4.6],"timezone":"Europe/Brussels","adminRegion":"Antwerp Province","population":530000,"elevation":8,"source":{"type":"mawaqit","slug":"iccum-antwerp-2050-belgium"}},
     {"name":"Toronto","countryISO":"CA","lat":43.6532,"lon":-79.3832,"bbox":[43.45,43.85,-79.55,-79.18],"timezone":"America/Toronto","adminRegion":"Ontario","population":2794000,"elevation":76,"source":{"type":"mawaqit","slug":"darussalam-toronto-m9v-3b5-canada"}},
-    {"name":"Casablanca","countryISO":"MA","lat":33.5731,"lon":-7.5898,"bbox":[33.4,33.78,-7.78,-7.39],"timezone":"Africa/Casablanca","nameLocal":"الدار البيضاء","adminRegion":"Casablanca-Settat","population":3460000,"elevation":27,"source":{"type":"mawaqit","slug":"moulay-ismail-casablanca-20400-morocco"}},
     {"name":"Fes","countryISO":"MA","lat":34.0331,"lon":-5.0003,"bbox":[33.94,34.28,-5.3,-4.85],"timezone":"Africa/Casablanca","nameLocal":"فاس","adminRegion":"Fès-Meknès","population":1112000,"elevation":408,"source":{"type":"mawaqit","slug":"masjid-aamrou-bn-laas-fes-30000-morocco-1"}},
     {"name":"Boston","countryISO":"US","lat":42.3601,"lon":-71.0589,"bbox":[42.1601,42.5601,-71.2589,-70.8589],"timezone":"America/New_York","adminRegion":"Massachusetts","population":675000,"elevation":43,"source":{"type":"inherited","from":"USA"}},
     {"name":"Padang","countryISO":"ID","lat":-0.9492,"lon":100.3543,"bbox":[-1.1492,-0.7492,100.1543,100.5543],"timezone":"Asia/Jakarta","adminRegion":"West Sumatra","population":909000,"elevation":7,"source":{"type":"inherited","from":"Indonesia"}},

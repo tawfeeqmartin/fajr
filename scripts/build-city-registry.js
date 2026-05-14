@@ -870,7 +870,9 @@ const BBOX_OVERRIDES = {
   'Amman|JO':           [31.85, 32.00, 35.83, 36.00],
   // v1.8.0 #118: WOF locality envelope; replaces broad population-radius box.
   'Berrechid|MA':       [33.230306, 33.299095, -7.613623, -7.545455],
-  'Casablanca|MA':      [33.40, 33.78, -7.78, -7.39],
+  // v1.8.0 #118: WOF current county envelope matches the OSM admin-8
+  // Casablanca geometry; WOF's locality row is deprecated/point-like.
+  'Casablanca|MA':      [33.494823, 33.647306, -7.738187, -7.459445],
   'Brussels|BE':        [50.65, 51.05, 4.15, 4.55],
   'Antwerp|BE':         [51.06, 51.42, 4.20, 4.60],
   'Brazzaville|CG':     [-4.36, -4.16, 15.14, 15.25],
