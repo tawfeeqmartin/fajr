@@ -88,6 +88,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Tightened the `Brazzaville|CG` / `Kinshasa|CD` Congo River seam with
   WOF-backed runtime cells so each capital's edge samples keep their own
   country/timezone without filling the river gap.
+- Aligned Morocco WOF-backed geometry source-map statuses with shipped runtime
+  bboxes, leaving OSM-only rows as audit candidates pending license review.
 
 ### Changed — documentation doctrine cleanup
 

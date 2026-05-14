@@ -38,9 +38,10 @@ The source map stores metadata and cache pointers only. The current seed covers
 Turkey large-city rows, 1 Detroit/Windsor border row, 3 Geneva border rows, 2
 Strasbourg/Kehl border rows, and 5 existing registry warning rows. It carries
 17 OSM relation rows plus 37 WOF
-rows across reviewed locality/county candidates. Berrechid, Settat, and Fes
-now have WOF locality candidates; Jerusalem intentionally remains without a
-geometry candidate until a human routing decision is available.
+rows across reviewed locality/county candidates. Morocco rows with WOF-backed
+runtime status are separated from OSM-only audit candidates; Jerusalem
+intentionally remains without a geometry candidate until a human routing
+decision is available.
 
 ```json
 {
@@ -218,6 +219,10 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
 - `Brazzaville|CG` and `Kinshasa|CD`: separated across the Congo River seam so
   Brazzaville's east edge and Kinshasa's south/east edges resolve to their own
   countries/timezones without filling the river gap.
+- Morocco WOF-backed runtime rows now have source-map status aligned with the
+  shipped registry bboxes: Rabat, Agadir, Berrechid, Settat, Fes, Sefrou,
+  Tangier, Nador, and Oujda. OSM-only rows remain audit candidates pending
+  license review.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.

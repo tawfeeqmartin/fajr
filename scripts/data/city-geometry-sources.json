@@ -37,7 +37,7 @@
       "priority": ["phase-1-morocco", "habous", "rabat-metro"],
       "relatedAuthorityIds": { "habousVilleId": 1, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": [
           "Morocco phase-1 row. Habous ID is prayer-time provenance, not geometry.",
@@ -63,7 +63,8 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime uses a clipped WOF-backed bbox to preserve distinct Rabat/Sale/Temara lookup cells."]
         }
       ]
     },
@@ -126,7 +127,7 @@
       "priority": ["phase-1-morocco", "habous", "agadir-metro"],
       "relatedAuthorityIds": { "habousVilleId": 117, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": [
           "Agadir is the official Habous table used for Inezgane as nearest official city.",
@@ -152,7 +153,8 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime uses a clipped WOF-backed bbox to preserve distinct Agadir/Inezgane lookup cells."]
         }
       ]
     },
@@ -218,7 +220,7 @@
       "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 65, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -231,7 +233,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -240,7 +242,7 @@
       "priority": ["phase-1-morocco", "habous", "casablanca-settat-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 61, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -253,7 +255,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -308,7 +310,7 @@
       "priority": ["phase-1-morocco", "habous", "fes-cluster"],
       "relatedAuthorityIds": { "habousVilleId": 82, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -331,7 +333,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -358,7 +360,7 @@
       "priority": ["phase-1-morocco", "habous", "north-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 14, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -381,7 +383,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -408,7 +410,7 @@
       "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 39, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -431,7 +433,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
@@ -440,7 +442,7 @@
       "priority": ["phase-1-morocco", "habous", "north-east-morocco-border"],
       "relatedAuthorityIds": { "habousVilleId": 31, "habousMatch": "direct" },
       "review": {
-        "status": "candidate",
+        "status": "runtime-bbox-shipped",
         "issue": 118,
         "notes": ["2026-05-09: runtime bbox updated to reviewed WOF locality envelope."]
       },
@@ -463,7 +465,7 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate"
+          "reviewStatus": "runtime-bbox-shipped"
         }
       ]
     },
