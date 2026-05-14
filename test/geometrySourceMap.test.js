@@ -93,6 +93,8 @@ describe('city geometry source map', () => {
       ['Geneva|CH', 'wof:locality:101748445'],
       ['Annemasse|FR', 'wof:locality:101757307'],
       ['Ferney-Voltaire|FR', 'wof:locality:101753277'],
+      ['Strasbourg|FR', 'wof:locality:101751113'],
+      ['Kehl|DE', 'wof:locality:101753099'],
       ['Brazzaville|CG', 'wof:locality:421180023'],
       ['Kinshasa|CD', 'wof:locality:421166913'],
     ])
@@ -134,6 +136,8 @@ describe('city geometry source map', () => {
     expect(statusFor('Geneva|CH')).toBe('runtime-bbox-shipped')
     expect(statusFor('Annemasse|FR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Ferney-Voltaire|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Strasbourg|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Kehl|DE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Brazzaville|CG')).toBe('needs-clipping-review')
     expect(statusFor('Kinshasa|CD')).toBe('needs-clipping-review')
   })
