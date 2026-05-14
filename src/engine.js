@@ -2711,6 +2711,19 @@ function roundIhtiyat(date, dir) {
   return out
 }
 
+function asrConventionOverride(params) {
+  const override = params && params.override && typeof params.override === 'object'
+    ? params.override
+    : null
+  const raw = override && override.asrConvention != null
+    ? override.asrConvention
+    : (override && override.madhab != null ? override.madhab : null)
+  const value = String(raw || '').trim().toLowerCase()
+  if (value === 'hanafi') return 'hanafi'
+  if (value === 'standard' || value === 'shafi' || value === 'shafii') return 'standard'
+  return null
+}
+
 export function prayerTimes(params) {
   const { latitude, longitude, date } = params
 
@@ -2726,10 +2739,23 @@ export function prayerTimes(params) {
   // defaults; existing call-sites passing { elevation, method } continue to
   // hit the explicit-override branches below.
   // see autoresearch/proposals/v1.7.0-city-aware-location.md § "API surface"
-  const callerExplicitElevation = (params.elevation !== undefined && params.elevation !== null)
-  const callerExplicitMethod    = (typeof params.method === 'string' && params.method.length > 0)
+  const override = params && params.override && typeof params.override === 'object'
+    ? params.override
+    : null
+  const overrideMethod = override && typeof override.method === 'string' && override.method.length > 0
+    ? override.method
+    : null
+  const overrideElevation = override && override.elevation !== undefined && override.elevation !== null
+    ? override.elevation
+    : null
 
-  const elevationParam = callerExplicitElevation ? Number(params.elevation) : 0
+  const callerExplicitElevation = (overrideElevation !== null) || (params.elevation !== undefined && params.elevation !== null)
+  const callerExplicitMethod    = Boolean(overrideMethod || (typeof params.method === 'string' && params.method.length > 0))
+  const callerExplicitAsrConvention = asrConventionOverride(params)
+
+  const elevationParam = callerExplicitElevation
+    ? Number(overrideElevation !== null ? overrideElevation : params.elevation)
+    : 0
 
   const coords = new adhan.Coordinates(latitude, longitude)
 
@@ -2750,7 +2776,7 @@ export function prayerTimes(params) {
   // `methodFromString()` helper so the override is honoured directly.
   let params_, methodName, methodSource
   if (callerExplicitMethod) {
-    const r = methodFromString(params.method, country, latitude, coords)
+    const r = methodFromString(overrideMethod || params.method, country, latitude, coords)
     params_ = r.params
     methodName = r.methodName
     methodSource = 'caller-explicit'
@@ -2812,12 +2838,23 @@ export function prayerTimes(params) {
   // Hanafi)" — population descriptor, not dispatch override) don't suppress
   // COUNTRY_ASR_CONVENTION.
   const methodNameMentionsAsrComposition = /\+\s+(Shafi|Hanafi)\s+Asr/.test(methodName)
-  const countryAsrConvention = (methodSource !== 'caller-explicit' && country && !methodNameMentionsAsrComposition)
+
+  // v1.8.x #40: caller-explicit Asr convention override.
+  //
+  // Classification: 🟢 Established — standard 1× and Hanafi 2× are the two
+  // recognised Asr shadow factors already modeled by adhan.js. This is an
+  // explicit user/app choice, not an automatic country-default mutation.
+  if (callerExplicitAsrConvention === 'hanafi') params_.madhab = adhan.Madhab.Hanafi
+  if (callerExplicitAsrConvention === 'standard') params_.madhab = adhan.Madhab.Shafi
+
+  const countryAsrConvention = (!callerExplicitAsrConvention && methodSource !== 'caller-explicit' && country && !methodNameMentionsAsrComposition)
     ? COUNTRY_ASR_CONVENTION[country]
     : null
   const asrSchool = params_.madhab === adhan.Madhab.Hanafi ? 'hanafi' : 'standard'
-  const asrConvention = countryAsrConvention || asrSchool
-  const asrConventionSource = countryAsrConvention ? 'country-default' : 'method-implied'
+  const asrConvention = callerExplicitAsrConvention || countryAsrConvention || asrSchool
+  const asrConventionSource = callerExplicitAsrConvention
+    ? 'caller-explicit'
+    : (countryAsrConvention ? 'country-default' : 'method-implied')
   // Deprecated v1.7.21 aliases. Keep these for compatibility with published
   // consumers, but new integrations should use asrConvention/asrConventionSource.
   // v1.8.1 stops returning `shafii` for generic standard 1× Asr because the
@@ -2858,6 +2895,15 @@ export function prayerTimes(params) {
   // subset depending on UX. Currently emits the high-latitude note when
   // |lat| ≥ 48.6° per Odeh 2009 — see wiki/regions/iceland.md.
   const notes = []
+  if (callerExplicitAsrConvention) {
+    const label = callerExplicitAsrConvention === 'hanafi'
+      ? 'Hanafi 2× shadow'
+      : 'standard 1× shadow'
+    notes.push(
+      `Asr convention override applied: ${label}. This caller-explicit ` +
+      `choice takes priority over country metadata and method defaults.`
+    )
+  }
   if (asrConventionSource === 'country-default' && asrConvention !== asrSchool) {
     const metadataAsrLabel = asrConvention === 'hanafi' ? 'Hanafi 2× shadow' : 'standard 1× shadow'
     const appliedAsrLabel = asrSchool === 'hanafi' ? 'Hanafi 2× shadow' : 'standard 1× shadow'

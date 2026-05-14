@@ -140,17 +140,15 @@ export type Madhab = LegalMadhhab
 
 /** Deprecated legacy provenance alias for `AsrConventionSource`.
  *
- *  - `'caller-explicit'`: caller will pass an explicit Asr-convention override
- *    (planned for v1.8.x via #40 — not yet supported in v1.7.x).
+ *  - `'caller-explicit'`: caller passed an explicit Asr-convention override
+ *    via `prayerTimes({ override: { asrConvention } })`.
  *  - `'country-default'`: country is listed in the Asr-convention table and
  *    fajr reports the likely local Asr convention. This is metadata; it
  *    does not by itself mutate the calculation-facing Asr school.
  *  - `'method-implied'`: the selected method's calculation Asr school is what
  *    is reported. Mixed-madhab countries (Egypt, Saudi, Iraq, Lebanon, Syria,
  *    Western diaspora, etc.) intentionally fall through here.
- *
- *  Future v1.8.x will add `'caller-explicit'` once the override surface
- *  in #40 lands. */
+ */
 export type MadhabSource = 'caller-explicit' | 'country-default' | 'method-implied'
 
 /** How `prayerTimes` chose `location.asrConvention`. Same provenance values
@@ -321,6 +319,35 @@ export function nearestCity(
 // prayerTimes
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** App-facing override surface for settings UIs (v1.8.x+, #40).
+ *
+ *  All fields are optional. Omitted fields keep fajr's city/country defaults.
+ *  This object is the preferred shape for new apps because it keeps user
+ *  choices grouped separately from the coordinate/date inputs. Legacy top-level
+ *  `method` and `elevation` remain supported for backwards compatibility. */
+export interface PrayerTimesOverride {
+  /** Override the auto-detected method. Same accepted method-name strings as
+   *  legacy top-level `method`. Takes priority over `method` when both are
+   *  supplied. */
+  method?: string
+  /** Override the effective elevation in metres. Pass 0 to opt out of
+   *  city-registry elevation correction; pass a GPS/device altitude when the
+   *  app trusts it. Takes priority over legacy top-level `elevation`. */
+  elevation?: number
+  /** Override the actual Asr calculation convention for this call.
+   *  - `'standard'`: 1x shadow
+   *  - `'hanafi'`: 2x shadow
+   *
+   *  This changes `applied.asrSchool`, sets
+   *  `location.asrConventionSource === 'caller-explicit'`, and suppresses the
+   *  country-metadata mismatch advisory because the caller made an explicit
+   *  choice. */
+  asrConvention?: AsrConvention
+  /** Deprecated alias accepted for older settings UIs. Prefer
+   *  `asrConvention`; this is not a full legal-madhhab taxonomy. */
+  madhab?: AsrConvention | 'shafi' | 'shafii'
+}
+
 export interface PrayerTimesParams {
   latitude: number
   longitude: number
@@ -347,6 +374,9 @@ export interface PrayerTimesParams {
    *  resolution; the resulting `location.methodSource` is then
    *  `'caller-explicit'`. */
   method?: string
+  /** Preferred app-facing override object for user settings. New apps should
+   *  use this shape instead of adding more top-level parameters. */
+  override?: PrayerTimesOverride
 }
 
 export interface PrayerTimesResult {
@@ -607,6 +637,49 @@ export function tarabishyTimes(
   params: PrayerTimesParams,
   thresholdLat?: number,
 ): PrayerTimesResult
+
+// ─────────────────────────────────────────────────────────────────────────────
+// featureInfo — structured settings metadata (v1.8.x, fajr#40)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type FeatureKind = 'toggle' | 'radio' | 'numeric'
+
+export interface FeatureValue {
+  value: string | number | boolean
+  label: string
+  description: string
+}
+
+export interface FeatureRange {
+  min: number
+  max: number
+  step: number
+  unit: string
+}
+
+/** Structured metadata for app settings surfaces. `layman` is suitable for
+ *  non-specialist users; `technical`, `citation`, and `stance` support
+ *  provenance sheets and maintainer review. */
+export interface FeatureInfo {
+  key: string
+  kind: FeatureKind
+  title: string
+  technical: string
+  layman: string
+  default: string | number | boolean
+  values?: FeatureValue[]
+  range?: FeatureRange
+  docs: string
+  citation: string
+  stance: string
+}
+
+/** List feature keys known to `featureInfo()`. */
+export function features(): string[]
+
+/** Return structured metadata for one feature key, or null when unknown.
+ *  The returned object is a clone; mutating it does not affect future calls. */
+export function featureInfo(key: string): FeatureInfo | null
 
 // ─────────────────────────────────────────────────────────────────────────────
 // qibla
@@ -894,6 +967,8 @@ declare const fajr: {
   travelerMode:             typeof travelerMode
   prayerNames:              typeof prayerNames
   prayerName:               typeof prayerName
+  features:                 typeof features
+  featureInfo:              typeof featureInfo
 }
 
 export default fajr

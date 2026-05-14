@@ -46,18 +46,18 @@
 ### Bug health
 
 - Open critical: **0** ✅
-- Open advisory / tracking: **19**
+- Open advisory / tracking: **18**
   - #132 — [citation-gap, v1.9.0] Saudi MoIA primary fatwa for uniform-city-times stance (fajr#114 sub-issue)
   - #118 — [audit-gap] geometry-backed city bbox verification for reverse geolocation
   - #114 — [fajr↔agot] follow-up to PR #110: track and fill the open citation gaps surfaced by the position registry
-  - #105 — [fajr↔agot] documentation discipline: a SCOREBOARD that makes 'are we winning or losing' computable + glanceable
   - #103 — [fajr↔agot] Habous-Morocco rigorous calibration: per-city × per-season × multi-year empirical fixtures (Option C from agot#101)
   - #101 — [fajr↔agot] proposal: 5-layer canonical architecture — multi-institution per country, cited sources, empirical fixtures, fiqh validity, astronomical primitives
+  - #99 — [audit-gap] Mawaqit train+test fixtures are single-day snapshots; calibrations extrapolated without seasonal evidence
 - Closed last 30 days: **20**
 
 ### Test corpus
 
-- Tests: **399/399 passing** ✅
+- Tests: **409/409 passing** ✅
 
 ---
 

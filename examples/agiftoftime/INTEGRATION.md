@@ -32,8 +32,43 @@
 | **v1.7.24** | 2026-05-05 | bbox routing corrections (Track B audit). Hatay TR (Antakya / İskenderun) carve-out before Syria; Iğdır + Doğubeyazıt TR carve-out before Caucasus; Iran NW corner (Maku / Khoy / Urmia W. Azerbaijan IR province) early-Iran carve-out + main lat-max bump 39 → 39.8; Türkiye legacy single-bbox + Sudan duplicate dead-code removal. Train WMAE 0.9757 → 0.9757 (0.00 drift). 35/36 border-zone spot-checks pass; 1 pre-existing Kapan AM-AZ border issue tracked separately. | **Maybe** — apps querying border-zone coordinates that were previously misrouted (Antakya TR → Syria, Iğdır TR → Armenia, Maku IR → Armenia, Khoy IR → Azerbaijan) will now correctly resolve to their geographic countries. No prayer-time shift for any city in the current registry. If your app handles cross-border ambiguity by long-press / "verify location" UX, the v1.7.24 corrections reduce the cases where that prompt fires for misrouted cities. |
 | **v1.7.25** | 2026-05-05 | Track A + D batch (data + holdout-corpus expansion). 3 new fetcher scripts + fixtures: Indonesia myQuran (21 kabupaten × 7 days = 147 KEMENAG city-days, closing the KEMENAG dead-end), Morocco Habous (12 cities × 1 day, ministerial cross-reference for the v1.5.0 Mawaqit-Morocco train anchor), Egypt ESA (stub — VIEWSTATE form is JS-rendered, needs Puppeteer next round). Plus 5 Track D data corrections: Mosul/Tabriz citation URLs fixed, Lisbon elevation 2m→50m, Pattani population corrected (city vs province), Karbala/Najaf/Basra source.institution rewritten to Najaf hawza marajiʿ. Train WMAE unchanged (test holdout only, never gates the ratchet). | **No code change required**. Apps can use the new holdout fixtures for additional sanity checks if desired. The Track D corrections improve provenance display accuracy — `times.location.city.source.institution` strings for Karbala / Najaf / Basra are now scholar-correct. |
 | **v1.8.1** | 2026-05-14 | Morocco madhhab-alias cleanup. Deprecated `location.madhab` / `applied.madhab` now mirror `standard` / `hanafi` Asr values instead of returning `shafii` for generic standard 1× Asr. Morocco therefore reports `location.madhab: 'standard'`, not a Shafi legal-madhhab claim. | **Yes, QA guard only** — continue rendering `location.asrConvention` and `applied.asrSchool` as the primary fields. Add/update the Casablanca assertion so neither deprecated alias equals `'shafii'`. Keep CDN pinned until npm publishes a package that includes both this cleanup and the `astronomical()` export. |
+| **next v1.8.x** | TBD | Settings metadata + grouped override surface for fajr#40: `features()`, `featureInfo(key)`, and `prayerTimes({ override: { method, elevation, asrConvention } })`. | **Yes** — Settings UI should render from `featureInfo()` where possible, save user choices into the grouped `override` object, and use `location.asrConventionSource === 'caller-explicit'` / `applied.asrSchool` to prove an Asr override actually changed the calculation. |
 
 Below: per-feature integration recipes for each release that requires app-side code changes.
+
+### next v1.8.x — settings metadata + grouped overrides
+
+agiftoftime should stop hardcoding fajr-setting descriptions once this release
+is published. Render the Settings rows from fajr metadata and pass user choices
+through the grouped `override` object:
+
+```js
+import { featureInfo, features, prayerTimes } from '@tawfeeqmartin/fajr'
+
+const settingRows = features().map(featureInfo)
+
+const times = prayerTimes({
+  latitude,
+  longitude,
+  date: new Date(),
+  override: {
+    method: userMethod || undefined,
+    elevation: userElevationMeters ?? undefined,
+    asrConvention: userAsrConvention || undefined, // 'standard' | 'hanafi'
+  },
+})
+```
+
+Integration assertions to add downstream:
+
+- `featureInfo('asrConventionOverride').values` contains `auto`, `standard`, `hanafi`.
+- Karachi/Pakistan with `override.asrConvention: 'hanafi'` returns
+  `applied.asrSchool === 'hanafi'` and Asr later than the default.
+- Karachi/Pakistan with `override.asrConvention: 'standard'` returns
+  `location.asrConventionSource === 'caller-explicit'` and no
+  `Asr-convention advisory` note.
+- `override.elevation: 0` is the uniform-city/sea-level opt-out; positive
+  elevation still applies the horizon-dip correction.
 
 ### v1.6.x — silent country-dispatch expansion (no app changes)
 
