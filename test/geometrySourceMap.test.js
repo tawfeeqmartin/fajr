@@ -76,7 +76,15 @@ describe('city geometry source map', () => {
     const expected = new Map([
       ['Basel|CH', 'wof:locality:101748459'],
       ['Mulhouse|FR', 'wof:locality:101749573'],
+      ['Rabat|MA', 'wof:locality:421190103'],
+      ['Agadir|MA', 'wof:locality:421170495'],
+      ['Berrechid|MA', 'wof:locality:1125988395'],
+      ['Settat|MA', 'wof:locality:421190099'],
       ['Fes|MA', 'wof:locality:421190143'],
+      ['Sefrou|MA', 'wof:locality:421190111'],
+      ['Tangier|MA', 'wof:locality:421190123'],
+      ['Nador|MA', 'wof:locality:421190085'],
+      ['Oujda|MA', 'wof:locality:421200921'],
       ['Abu Dhabi|AE', 'wof:locality:421179641'],
       ['Al Ain|AE', 'wof:locality:421168687'],
       ['Istanbul|TR', 'wof:locality:890460455'],
@@ -115,8 +123,16 @@ describe('city geometry source map', () => {
   it('tracks runtime-shipped and needs-clipping geometry outcomes separately', () => {
     expect(statusFor('Basel|CH')).toBe('runtime-bbox-shipped')
     expect(statusFor('Mulhouse|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Rabat|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Agadir|MA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Casablanca|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Berrechid|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Settat|MA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Fes|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Sefrou|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Tangier|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Nador|MA')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Oujda|MA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Abu Dhabi|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Al Ain|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Dubai|AE')).toBe('runtime-bbox-shipped')
