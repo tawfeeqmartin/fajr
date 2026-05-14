@@ -32,11 +32,11 @@
  *                        country. A bbox extending across an international
  *                        border is a fail.
  *
- *   6. bbox-overlap:     Pairs of cities whose bboxes intersect are flagged
- *                        as WARN (not fail) — some overlaps are intentional
- *                        (metro + satellite city, where the smaller-bbox sort
- *                        order disambiguates correctly). The list is for
- *                        human review.
+ *   6. bbox-overlap:     Pairs of cities whose bboxes overlap by area are
+ *                        flagged as WARN (not fail) — some overlaps are
+ *                        intentional (metro + satellite city, where the
+ *                        smaller-bbox sort order disambiguates correctly).
+ *                        Edge-touching boxes are not overlaps.
  *
  * Run via: `node scripts/validate-city-registry.js`
  *
@@ -183,8 +183,8 @@ function bboxesIntersect(a, b) {
   // a, b are [latMin, latMax, lonMin, lonMax]. Strict overlap (touching
   // edges only is NOT counted — we use a small epsilon).
   const eps = 1e-9
-  return !(a[1] < b[0] - eps || a[0] > b[1] + eps ||
-           a[3] < b[2] - eps || a[2] > b[3] + eps)
+  return !(a[1] <= b[0] + eps || a[0] >= b[1] - eps ||
+           a[3] <= b[2] + eps || a[2] >= b[3] - eps)
 }
 
 function bboxArea(bbox) {

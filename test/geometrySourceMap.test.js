@@ -60,13 +60,19 @@ describe('city geometry source map', () => {
     expect(forbiddenKeys).toEqual([])
   })
 
+  it('uses explicit neighbor relations instead of stale expected warnings', () => {
+    const staleKeys = []
+    collectKeys(sourceMap, 'expectedNeighborWarnings', staleKeys)
+    expect(staleKeys).toEqual([])
+  })
+
   it('requires a review reason for rows with no geometry candidates', () => {
     const blankEntries = sourceMap.cities.filter(entry => !(entry.geometries || []).length)
     expect(blankEntries.map(entry => entry.cityKey)).toEqual(['Jerusalem|PS'])
     expect(blankEntries[0].review.status).toBe('intentional-routing-anchor')
   })
 
-  it('keeps reviewed WOF locality candidates for cross-border warning pairs', () => {
+  it('keeps reviewed WOF locality candidates for audited border pairs', () => {
     const expected = new Map([
       ['Basel|CH', 'wof:locality:101748459'],
       ['Mulhouse|FR', 'wof:locality:101749573'],
@@ -85,6 +91,13 @@ describe('city geometry source map', () => {
       expect(geometry.sourceConfidence).toBe('high')
       expect(geometry.licenseUse).toBe('audit-and-reviewed-bbox-proposal')
     }
+  })
+
+  it('tracks runtime-shipped and needs-clipping geometry outcomes separately', () => {
+    expect(statusFor('Basel|CH')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Mulhouse|FR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Brazzaville|CG')).toBe('needs-clipping-review')
+    expect(statusFor('Kinshasa|CD')).toBe('needs-clipping-review')
   })
 })
 
@@ -107,4 +120,20 @@ function collectForbiddenKeys(value, out, pathParts = []) {
     if (key === 'place_id' || key === 'placeId') out.push([...pathParts, key].join('.'))
     collectForbiddenKeys(child, out, [...pathParts, key])
   }
+}
+
+function collectKeys(value, targetKey, out, pathParts = []) {
+  if (!value || typeof value !== 'object') return
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectKeys(item, targetKey, out, [...pathParts, String(index)]))
+    return
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (key === targetKey) out.push([...pathParts, key].join('.'))
+    collectKeys(child, targetKey, out, [...pathParts, key])
+  }
+}
+
+function statusFor(cityKey) {
+  return sourceMap.cities.find(row => row.cityKey === cityKey)?.review?.status
 }

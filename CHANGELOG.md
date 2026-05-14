@@ -46,6 +46,10 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Tightened the Basel and Mulhouse lookup cells to reviewed WOF locality
   envelopes, removing that cross-border validator warning while preserving both
   Mawaqit city centers.
+- Fixed the city-registry validator so bboxes that only touch at an edge are
+  not reported as cross-country overlaps; Brazzaville/Kinshasa now stays
+  tracked as a geometry-undercoverage/clipping review item instead of a false
+  runtime overlap warning.
 
 ### Changed — documentation doctrine cleanup
 
@@ -84,8 +88,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   a no-network advisory audit path for comparing reviewed cached GeoJSON
   geometries against the shipped city bbox registry.
 - Added `scripts/data/city-geometry-sources.json`, a seed source map for 20
-  high-priority bbox QA rows: Morocco/Habous phase-1 cities plus the current
-  Jerusalem, Brazzaville/Kinshasa, and Basel/Mulhouse validator-warning rows.
+  high-priority bbox QA rows: Morocco/Habous phase-1 cities plus Jerusalem
+  routing, Congo River clipping, and Basel/Mulhouse resolved-warning rows.
 - Added WOF candidate IDs for Morocco source-map rows where WOF has a plausible
   locality or reviewed lower-confidence county geometry, including Berrechid
   and Settat which previously had no geometry candidate.
