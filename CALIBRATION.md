@@ -105,6 +105,36 @@ praytimes.org / muslimsalat.com) provide breadth but not arbitration.
 
 ---
 
+## Calibration health metadata (v1.8.1)
+
+This table is the per-source health layer requested in fajr#105. It answers:
+what correction is currently applied, when the source was last refreshed, how
+large the fixture is, and whether the evidence is fresh enough to support a
+default. It is intentionally conservative: holdout WMAE remains diagnostic, and
+large mosque-yearly corpora are treated as evidence to inspect before promoting
+calibration changes.
+
+| Stance / region | Current correction in fajr | Last source refresh | Fixture depth | Current residual | Health verdict |
+|---|---|---:|---|---|---|
+| **Morocco official timetable** | Morocco 19°/17° + Dhuhr +5 min + Maghrib +5 min. Single canonical Morocco stance; no `MoroccoHabous` / `MoroccoMawaqit` alias split. | 2026-05-05 (`morocco-habous-monthly.json`), with recurring Habous snapshot workflow staged under `fixtures/habous-morocco/`. | Habous monthly: 33 cities × 30 days = 990 entry-dates; Mawaqit yearly: 42 mosques × 366 days = 15,372 rows before corrupt-row filtering. | Habous monthly WMAE 1.26 min; Mawaqit full-year Dhuhr mean bias -0.15 min and Maghrib mean bias +0.76 min. | 🟢 fresh / A-grade. Source-backed and seasonally stress-tested; Sunrise treated as mosque-practice sanity signal, not calibration target. |
+| **Türkiye / Diyanet** | Diyanet 18°/17° preset + Path A -1 min Maghrib/Isha adjustment. | 2026-04-30 fetch, covering 2026-04-26 to 2026-05-06. | Train fixture: 3 cities × 10 days = 30 entry-dates. | Train WMAE 0.50 min. | 🟢 accurate but 🟡 sparse. Strong official source, but promotion to A still needs multi-season/yearly fixture depth. |
+| **Malaysia / JAKIM** | JAKIM method + Path A Dhuhr +2 min, Asr +1 min, Isha +1 min. | 2026-04-30 fetch, covering 2026-04-01 to 2026-04-10. | Train fixture: 3 zones × 10 days = 30 entry-dates. | Train WMAE 0.45 min. | 🟢 accurate but 🟡 sparse. Proxy channel via waktusolat.app remains acceptable but should eventually be replaced or corroborated by direct JAKIM/e-Solat ingestion. |
+| **Singapore / MUIS** | MUIS/Singapore official method; no Path A offset. | 2026 annual data.gov.sg fixture. | Holdout fixture: Singapore × 365 days. | Holdout WMAE 0.45 min. | 🟢 fresh / A-grade. Point-sized geography and official open-data annual table. |
+| **Egypt / ESA** | Egyptian 19.5°/17.5° + Standard 1× Asr publication. No Path A offset. | 2026-05-13 curated ESA fixture; daily snapshot workflow captured 2026-05-14 under `fixtures/egypt-esa/`. | Holdout fixture: 15 cities × 1 day; source-capture workflow now accumulates daily snapshots for future promotion. | ESA holdout WMAE 0.68 min. | 🟢 promising but 🟡 sparse. Supports future promotion once multi-day / multi-season snapshots are curated. |
+| **Indonesia / KEMENAG** | JAKIM/Singapore-shaped regional dispatch for Indonesia; no current Path A offset. | 2026 KEMENAG/myQuran fixtures in holdout. | KEMENAG holdout: 34 provincial capitals × 31 days = 1,054 entry-dates; myQuran sample: 147 entry-dates. | KEMENAG holdout WMAE 2.27 min; myQuran wrapper WMAE 6.81 min, mostly source-shape/noise rather than authority disagreement. | 🟡 needs regional calibration review. Strong authority, but Maghrib bias exceeds A-grade threshold and per-province zones need careful treatment. |
+| **United Kingdom / London** | MoonsightingCommittee default; no London Path A offset currently applied. | 2026 Mawaqit UK yearly + Aladhan Moonsighting yearly fixtures. | Mawaqit UK yearly: 5 mosques × 366 days; Aladhan comparator: 3 cities × 365 days. | London Maghrib/Dhuhr disagreement remains source-arbitration work; current known-disagreement entry treats the fixture as DST-sensitive. | 🟡 active arbitration. Do not calibrate from the raw yearly file until BST/GMT encoding is resolved. |
+| **Saudi Arabia / Umm al-Qura** | Umm al-Qura default; Isha interval convention; elevation correction applies when city elevation is resolved unless caller opts out with `elevation: 0`. | 2026 Mawaqit Saudi yearly holdout exists; GPH/MoIA primary source remains unreachable from current network. | Mawaqit Saudi yearly: 6 mosques × 366 days; Aladhan train cells cover Makkah/Madinah/Riyadh. | Train Saudi cells remain sub-minute to Aladhan; direct Haramain/GPH institutional WMAE not yet available. | 🟡 primary-source gap. Keep Saudi uniform-city-time rationale as citation-gap #132 until MoIA/GPH text or source tables are retrieved. |
+| **Fallback / calc-vs-calc world coverage** | Country default where known; ISNA fallback when no country bbox matches. | Ongoing Aladhan/praytimes/muslimsalat holdout snapshots. | Thousands of holdout cells across world fixtures. | Holdout WMAE 7.50 min overall, dominated by noisy aggregators and high-latitude method divergence. | ⚪ diagnostic only. Useful for math drift and coverage smoke, not for institutional calibration. |
+
+Health verdict meanings:
+
+- **🟢 fresh** — source-backed and recent enough to support product wording.
+- **🟡 sparse** — useful evidence, but not enough seasonal/source depth for stronger claims.
+- **🟡 active arbitration** — fixture exists but source interpretation or institutional precedence is unresolved.
+- **⚪ diagnostic only** — calc-vs-calc or noisy aggregator data; never a ratchet authority by itself.
+
+---
+
 ## Per-region accuracy (current, post-v1.7.19)
 
 These numbers are from the most recent eval run on master (2026-05-03). They
