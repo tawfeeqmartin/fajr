@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T22:06:46.714Z",
+  "generated": "2026-05-14T22:12:36.873Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -25,6 +25,7 @@
     {"name":"Basel","countryISO":"CH","lat":47.5596,"lon":7.5886,"bbox":[47.519297,47.589902,7.554659,7.634148],"timezone":"Europe/Zurich","population":173000,"elevation":260,"source":{"type":"mawaqit","slug":"masjid-arrahma-bale-4057-switzerland"}},
     {"name":"Inezgane","countryISO":"MA","lat":30.3552,"lon":-9.5378,"bbox":[30.32,30.39,-9.58,-9.49],"timezone":"Africa/Casablanca","population":130000,"elevation":33,"source":{"type":"mawaqit","slug":"msjd-lbrr-nzkn-86150-morocco"}},
     {"name":"Izmir","countryISO":"TR","lat":38.4237,"lon":27.1428,"bbox":[38.392484,38.44875,27.071401,27.184235],"timezone":"Europe/Istanbul","adminRegion":"Izmir Province","population":4367000,"elevation":25,"source":{"type":"inherited","from":"Turkey"}},
+    {"name":"Sialkot","countryISO":"PK","lat":32.4945,"lon":74.5229,"bbox":[32.471302,32.536788,74.494765,74.594771],"timezone":"Asia/Karachi","adminRegion":"Punjab","population":656000,"elevation":256,"source":{"type":"inherited","from":"Pakistan"}},
     {"name":"Niagara Falls","countryISO":"CA","lat":43.0896,"lon":-79.0849,"bbox":[43.05,43.13,-79.13,-79.04],"timezone":"America/Toronto","adminRegion":"Ontario","population":88000,"elevation":167,"source":{"type":"inherited","from":"Canada"}},
     {"name":"Nador","countryISO":"MA","lat":35.1741,"lon":-2.9287,"bbox":[35.126272,35.223768,-2.962899,-2.88235],"timezone":"Africa/Casablanca","population":188000,"elevation":6,"source":{"type":"mawaqit","slug":"masjid-al-falah-nador-66000-morocco"}},
     {"name":"Settat","countryISO":"MA","lat":33.0017,"lon":-7.6166,"bbox":[32.959792,33.036468,-7.679587,-7.576121],"timezone":"Africa/Casablanca","population":142000,"elevation":369,"source":{"type":"mawaqit","slug":"mosquee-imam-tarmidi-settat-26000-morocco"}},
@@ -205,7 +206,6 @@
     {"name":"Ulaanbaatar","countryISO":"MN","lat":47.8864,"lon":106.9057,"bbox":[47.7864,47.9864,106.8057,107.0057],"timezone":"Asia/Ulaanbaatar","elevation":1310,"source":{"type":"inherited","from":"MN"}},
     {"name":"Pyongyang","countryISO":"KP","lat":39.0392,"lon":125.7625,"bbox":[38.9392,39.1392,125.6625,125.8625],"timezone":"Asia/Pyongyang","elevation":38,"source":{"type":"inherited","from":"KP"}},
     {"name":"Santiago","countryISO":"CL","lat":-33.4489,"lon":-70.6693,"bbox":[-33.5489,-33.3489,-70.7693,-70.5693],"timezone":"America/Santiago","elevation":520,"source":{"type":"inherited","from":"CL"}},
-    {"name":"Sialkot","countryISO":"PK","lat":32.4945,"lon":74.5229,"bbox":[32.4,32.6,74.45,74.65],"timezone":"Asia/Karachi","adminRegion":"Punjab","population":656000,"elevation":256,"source":{"type":"inherited","from":"Pakistan"}},
     {"name":"Wellington","countryISO":"NZ","lat":-41.2865,"lon":174.7762,"bbox":[-41.3865,-41.1865,174.6762,174.8762],"timezone":"Pacific/Auckland","elevation":13,"source":{"type":"inherited","from":"NZ"}},
     {"name":"Port Moresby","countryISO":"PG","lat":-9.4438,"lon":147.1803,"bbox":[-9.5438,-9.3438,147.0803,147.2803],"timezone":"Pacific/Port_Moresby","elevation":49,"source":{"type":"inherited","from":"PG"}},
     {"name":"Casablanca","countryISO":"MA","lat":33.5731,"lon":-7.5898,"bbox":[33.494823,33.647306,-7.738187,-7.459445],"timezone":"Africa/Casablanca","nameLocal":"الدار البيضاء","adminRegion":"Casablanca-Settat","population":3460000,"elevation":27,"source":{"type":"mawaqit","slug":"moulay-ismail-casablanca-20400-morocco"}},

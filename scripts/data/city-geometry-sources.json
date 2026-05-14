@@ -914,6 +914,31 @@
       ]
     },
     {
+      "cityKey": "Sialkot|PK",
+      "priority": ["pakistan-punjab-metro", "wof-locality-runtime-bbox", "overlap-fix", "apac-p0"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to WOF current locality geometry to remove overlap with Gujranwala's north-east edge."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Gujranwala|PK", "kind": "runtime-separated", "status": "Sialkot west edge now starts east of Gujranwala's runtime east edge." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421175525",
+          "ids": { "wofId": 421175525, "repo": "whosonfirst-data-admin-pk", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "PK/sialkot/wof-locality-421175525.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Runtime bbox uses the WOF current locality envelope. Lahore and Gujranwala WOF rows were reviewed but not shipped in this PR to avoid broad coverage changes."]
+        }
+      ]
+    },
+    {
       "cityKey": "Windsor|CA",
       "priority": ["detroit-windsor-border", "wof-locality-runtime-bbox", "clipped"],
       "review": {

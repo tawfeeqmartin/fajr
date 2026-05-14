@@ -188,6 +188,18 @@ Alam:
 - This is a provenance/routing fix, not a prayer-math change. The Malaysia
   timezone and country default remain unchanged across the cluster.
 
+The Pakistan Punjab Sialkot/Gujranwala overlap has a small, source-backed fix:
+
+- WOF has current locality rows for Lahore, Gujranwala, and Sialkot. This pass
+  ships only Sialkot because the concrete runtime bug was a remaining overlap:
+  Gujranwala north-east coordinates such as `(32.42, 74.46)` resolved to
+  Sialkot.
+- Sialkot now uses the reviewed WOF current locality envelope. Lahore and
+  Gujranwala WOF rows remain reviewed leads, not runtime changes, to avoid a
+  broader coverage shift in the same PR.
+- This is a Pakistan city-provenance fix only. Country, timezone, and Karachi
+  method routing remain unchanged.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -251,6 +263,8 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
 - `Kuala Lumpur|MY`, `Shah Alam|MY`, `Petaling Jaya|MY`, and `Klang|MY`:
   converted from a two-cell KL/Shah approximation into WOF-backed Klang Valley
   city cells. Petaling Jaya and Klang now exist as explicit registry rows.
+- `Sialkot|PK`: moved to a reviewed WOF current locality envelope so
+  Gujranwala north-east coordinates no longer resolve to Sialkot.
 - Morocco WOF-backed runtime rows now have source-map status aligned with the
   shipped registry bboxes: Rabat, Agadir, Berrechid, Settat, Fes, Sefrou,
   Tangier, Nador, and Oujda. OSM-only rows remain audit candidates pending
@@ -300,9 +314,12 @@ validator warnings, or known clipping gaps:
 - Resolved high-risk metro cluster: Kuala Lumpur/Shah Alam. It now has
   reviewed WOF source-map rows plus explicit Petaling Jaya and Klang registry
   rows, preserving Malaysia/JAKIM provenance at city level.
+- Resolved high-risk overlap: Sialkot/Gujranwala. Sialkot now has a reviewed
+  WOF source-map row and no longer shadows Gujranwala's north-east edge.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
   Dubai/Sharjah/Ajman, Toronto/Mississauga/Laval/Montreal,
-  Lahore/Sialkot/Gujranwala, Basra/Ahvaz/Kuwait City, Damascus/Homs/Gaziantep.
+  Lahore/Gujranwala broader coverage, Basra/Ahvaz/Kuwait City,
+  Damascus/Homs/Gaziantep.
 - Large heuristic bboxes such as Karachi, Istanbul, Jakarta, Bangalore, Dhaka,
   Tokyo, Seoul, Moscow, Melbourne, Sydney, Shanghai, Lagos, London, New York.
 
