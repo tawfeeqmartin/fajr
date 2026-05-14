@@ -812,8 +812,9 @@ const BBOX_OVERRIDES = {
   // to Cairo. Giza city centre 30.01, 31.21 stays well inside; eastern lon
   // was 31.61, tightened to 31.22 (just east of Giza city centre, west of
   // Cairo CBD). Northern lat tightened from 30.41 to 30.10 (Giza proper is
-  // south of central Cairo).
-  'Giza|EG':            [29.6131, 30.10, 30.8089, 31.22],
+  // south of central Cairo). v1.8.0 #118: western lon raised to 30.98 so
+  // 6th of October no longer shadows Giza's western validation samples.
+  'Giza|EG':            [29.6131, 30.10, 30.98, 31.22],
   // v1.7.5 #47: Shah Alam (740K) is ~25 km west of KL (1.8M). Same-radius
   // 0.15° bbox put Shah Alam at lon 101.32-101.72, KL at 101.39-101.99.
   // KL CBD (3.14, 101.69) sat in both. Shrink Shah Alam's eastern lon to
@@ -829,11 +830,9 @@ const BBOX_OVERRIDES = {
   // southern Johor + northern Riau). Tighten to actual island.
   'Singapore|SG':       [1.16, 1.47, 103.6, 104.05],
   // v1.7.5 Reviewer C: Sharjah (1.68M) directly NE of Dubai (3.6M). Same-
-  // radius 0.3° bboxes overlapped over central Sharjah. Tighten Sharjah's
-  // southern lat to 25.25 (above Dubai centre's bbox max 25.5 still
-  // overlaps but Sharjah CBD 25.35 is inside both — give Sharjah priority
-  // by tightening Dubai's NORTHERN lat instead). Sharjah override only;
-  // Dubai stays formulaic.
+  // radius 0.3° bboxes overlapped over central Sharjah. Later #118 WOF
+  // review replaces this early Sharjah draft below and clips Dubai's northern
+  // edge to keep the two lookup cells adjacent instead of overlapping.
   'Sharjah|AE':         [25.25, 25.65, 55.20, 55.72],
   // v1.7.5 Reviewer C: Dearborn (Detroit suburb) bbox extended N of the
   // Detroit River into Windsor, Canada. Tighten northern lat to 42.40 —
@@ -861,7 +860,7 @@ const BBOX_OVERRIDES = {
   'Khartoum|SD':        [15.40, 15.60, 32.50, 32.66],
   'Omdurman|SD':        [15.50, 15.78, 32.30, 32.50],
   'Sharjah|AE':         [25.35, 25.65, 55.42, 55.72],
-  'Dubai|AE':           [24.90, 25.35, 55.05, 55.50],
+  'Dubai|AE':           [24.90, 25.30, 55.05, 55.50],
   'Inezgane|MA':        [30.32, 30.39, -9.58, -9.49],
   // v1.8.0 #118/#124: WOF-backed lookup cell, clipped so Agadir does not
   // steal adjacent Inezgane coordinates in detectLocation().
@@ -971,17 +970,33 @@ const BBOX_OVERRIDES = {
   // Each pair: smaller satellite bbox is shrunk to its own city footprint
   // so its parent metro's points don't fall inside it.
 
-  // v1.8.0 #118: Sharjah/Ajman WOF locality envelopes overlap. Keep Dubai's
-  // existing cell unchanged, expand Sharjah eastward from WOF, and clip Ajman
-  // to start at Sharjah's WOF north edge so the two cells only touch.
+  // v1.8.0 #118: Dubai/Sharjah/Ajman WOF locality envelopes overlap. Clip
+  // Dubai's north edge to Sharjah's south edge, expand Sharjah eastward from
+  // WOF, and clip Ajman to start at Sharjah's WOF north edge so the runtime
+  // cells only touch.
   'Sharjah|AE':         [25.30, 25.398821, 55.30, 55.678456],
   'Ajman|AE':           [25.398821, 25.45088, 55.423316, 55.630065],
 
   // v1.8.0 #118: WOF current locality envelopes improve UAE city coverage
-  // without colliding with neighboring lookup cells. Dubai/Sharjah/Ajman need
-  // separate clipping review because their WOF envelopes overlap heavily.
+  // without colliding with neighboring lookup cells. Dubai/Sharjah/Ajman use
+  // the clipped runtime cells above because their WOF envelopes overlap
+  // heavily.
   'Abu Dhabi|AE':       [24.195888, 24.590696, 54.254076, 54.841984],
   'Al Ain|AE':          [24.013749, 24.414416, 55.464609, 56.018126],
+
+  // v1.8.0 #118: reviewed WOF current locality envelopes for large Turkish
+  // city lookup cells. Ambiguous/point-like rows (Diyarbakir, Eskisehir,
+  // Kayseri, Mersin) stay on the existing formulaic cells pending review.
+  'Istanbul|TR':        [40.802662, 41.199662, 28.568308, 29.418991],
+  'Ankara|TR':          [39.776496, 40.032011, 32.611664, 33.007367],
+  'Izmir|TR':           [38.392484, 38.44875, 27.071401, 27.184235],
+  'Bursa|TR':           [40.16606, 40.253447, 28.996355, 29.20099],
+  'Konya|TR':           [37.749215, 38.017501, 32.389118, 32.591108],
+  'Gaziantep|TR':       [37.005549, 37.125921, 37.275644, 37.464959],
+  'Adana|TR':           [36.950137, 37.070731, 35.221663, 35.456651],
+  'Antalya|TR':         [36.821577, 37.012346, 30.583049, 30.853306],
+  'Samsun|TR':          [41.256092, 41.314632, 36.290671, 36.3846],
+  'Trabzon|TR':         [40.985525, 41.013493, 39.649901, 39.742612],
 
   // Dammam SA (1.25M, lat 26.39) vs Khobar SA (626K, lat 26.22). 20 km
   // apart. Tighten Dammam to lat 26.32-26.55 so Khobar (26.22) is outside.
@@ -1036,9 +1051,8 @@ const BBOX_OVERRIDES = {
   // These cities sit close to a neighbouring country's COUNTRY_BBOX_TABLE
   // edge. Tighten their bbox so internal samples stay in-country.
 
-  // Trabzon TR (lat 41.0, lon 39.7) is close to Georgia bbox lat 41.05.
-  // Tighten northern edge to 41.10 so internal samples don't cross border.
-  'Trabzon|TR':         [40.85, 41.10, 39.55, 39.90],
+  // Trabzon TR is now WOF-tightened above (#118), preserving the older
+  // country-edge intent while removing the broad population-radius cell.
 
   // Antalya TR (lat 36.88, lon 30.71) is at the Türkiye southern edge
   // lat 35. Bbox formula 0.30 = lat 36.58-37.18 keeps within Türkiye.
