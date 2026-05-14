@@ -156,6 +156,12 @@ The Strasbourg/Kehl Rhine seam requires a clipped WOF application:
   envelopes overlap across the Rhine. Strasbourg is clipped just west of
   Kehl's WOF west edge; Kehl uses its WOF envelope.
 
+The Brazzaville/Kinshasa Congo River seam requires a clipped WOF application:
+
+- Brazzaville uses its WOF locality envelope. Kinshasa uses the WOF
+  south/west/east edges but keeps the north edge clipped at `-4.36` so the
+  runtime does not fill the river gap or absorb Brazzaville.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -209,6 +215,9 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   resolve to Geneva/Switzerland.
 - `Strasbourg|FR` and `Kehl|DE`: separated at the Rhine seam so Kehl no
   longer resolves to Strasbourg/France.
+- `Brazzaville|CG` and `Kinshasa|CD`: separated across the Congo River seam so
+  Brazzaville's east edge and Kinshasa's south/east edges resolve to their own
+  countries/timezones without filling the river gap.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.
@@ -243,9 +252,9 @@ validator warnings, or known clipping gaps:
 - Morocco Habous clusters: Rabat/Sale/Temara, Agadir/Inezgane,
   Casablanca/Berrechid/Settat, Fes/Sefrou/Meknes, Tangier/Tetouan/Nador/Oujda.
 - Current registry warning: Jerusalem PS/IL routing.
-- Known geometry clipping gap: Brazzaville/Kinshasa. Their runtime bboxes are
-  edge-adjacent, but WOF locality envelopes still under-cover/overlap across
-  the diagonal Congo River boundary, so this remains a source-review target.
+- Resolved geometry clipping gap: Brazzaville/Kinshasa. Brazzaville uses its
+  WOF locality envelope; Kinshasa uses WOF south/west/east edges with the north
+  edge still clipped at the existing river-safe boundary.
 - Resolved validator-warning regression target: Basel/Mulhouse. It has
   reviewed WOF locality evidence and a tightened runtime bbox.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,

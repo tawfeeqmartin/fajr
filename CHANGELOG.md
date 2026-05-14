@@ -85,6 +85,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Extended Equatorial Guinea's country bbox by 0.01° north so Malabo's own
   northern city samples remain in Equatorial Guinea instead of falling through
   to Cameroon.
+- Tightened the `Brazzaville|CG` / `Kinshasa|CD` Congo River seam with
+  WOF-backed runtime cells so each capital's edge samples keep their own
+  country/timezone without filling the river gap.
 
 ### Changed — documentation doctrine cleanup
 

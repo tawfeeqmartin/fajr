@@ -138,8 +138,8 @@ describe('city geometry source map', () => {
     expect(statusFor('Ferney-Voltaire|FR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Strasbourg|FR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Kehl|DE')).toBe('runtime-bbox-shipped')
-    expect(statusFor('Brazzaville|CG')).toBe('needs-clipping-review')
-    expect(statusFor('Kinshasa|CD')).toBe('needs-clipping-review')
+    expect(statusFor('Brazzaville|CG')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Kinshasa|CD')).toBe('runtime-bbox-shipped')
   })
 })
 

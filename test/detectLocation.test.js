@@ -260,6 +260,25 @@ describe('detectLocation — Mawaqit institutional source', () => {
     expect(kehl.timezone).toBe('Europe/Berlin')
   })
 
+  it('Brazzaville/Kinshasa Congo River seam keeps each capital on its own country side', () => {
+    const brazzaville = detectLocation(-4.30, 15.28)
+    expect(brazzaville.city).not.toBeNull()
+    expect(brazzaville.city.name).toBe('Brazzaville')
+    expect(brazzaville.city.countryISO).toBe('CG')
+    expect(brazzaville.country).toBe('RepublicOfTheCongo')
+    expect(brazzaville.timezone).toBe('Africa/Brazzaville')
+
+    const kinshasa = detectLocation(-4.50, 15.52)
+    expect(kinshasa.city).not.toBeNull()
+    expect(kinshasa.city.name).toBe('Kinshasa')
+    expect(kinshasa.city.countryISO).toBe('CD')
+    expect(kinshasa.country).toBe('DRCongo')
+    expect(kinshasa.timezone).toBe('Africa/Kinshasa')
+
+    const riverGap = detectLocation(-4.34, 15.26)
+    expect(riverGap.city).toBeNull()
+  })
+
   it('UAE WOF locality rows expand Abu Dhabi/Al Ain city provenance without touching Dubai/Sharjah/Ajman', () => {
     const rows = [
       ['Abu Dhabi', 24.4539, 54.3773, 24.20, 54.80],
