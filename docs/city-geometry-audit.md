@@ -172,6 +172,22 @@ The Singapore/Johor Bahru border seam also requires clipping:
   spelling row. The runtime cell uses the WOF north/east/west extents and clips
   south to `1.45`, preserving city provenance on both sides of the Causeway.
 
+The Klang Valley metro should not be represented as only Kuala Lumpur and Shah
+Alam:
+
+- WOF has current locality rows for Kuala Lumpur, Shah Alam, Petaling Jaya,
+  Subang Jaya, and Klang. Petaling Jaya and Klang are now bundled as distinct
+  registry rows, all inheriting the Malaysia/JAKIM country default.
+- Kuala Lumpur, Petaling Jaya, and Klang use current WOF locality envelopes
+  directly. Shah Alam clips between Klang and Petaling Jaya, and Kuala Lumpur
+  clips west of Petaling Jaya, so each runtime rectangle validates to itself.
+- Subang Jaya remains a reviewed-but-unshipped lead: its WOF rectangle is
+  nested inside Petaling Jaya, and a single rectangular runtime cell would break
+  the current validator. It should wait for polygon/split-cell support or a
+  separate reviewed local source.
+- This is a provenance/routing fix, not a prayer-math change. The Malaysia
+  timezone and country default remain unchanged across the cluster.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -232,6 +248,9 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   Northern Singapore coordinates now keep Singapore city/timezone provenance,
   while the old overbroad Johor Bahru north/east corners no longer resolve to
   Johor Bahru city provenance.
+- `Kuala Lumpur|MY`, `Shah Alam|MY`, `Petaling Jaya|MY`, and `Klang|MY`:
+  converted from a two-cell KL/Shah approximation into WOF-backed Klang Valley
+  city cells. Petaling Jaya and Klang now exist as explicit registry rows.
 - Morocco WOF-backed runtime rows now have source-map status aligned with the
   shipped registry bboxes: Rabat, Agadir, Berrechid, Settat, Fes, Sefrou,
   Tangier, Nador, and Oujda. OSM-only rows remain audit candidates pending
@@ -278,10 +297,12 @@ validator warnings, or known clipping gaps:
 - Resolved high-risk border cluster: Singapore/Johor Bahru. It now has
   reviewed WOF source-map rows and clipped runtime cells that preserve the
   MUIS/JAKIM source boundary.
+- Resolved high-risk metro cluster: Kuala Lumpur/Shah Alam. It now has
+  reviewed WOF source-map rows plus explicit Petaling Jaya and Klang registry
+  rows, preserving Malaysia/JAKIM provenance at city level.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
-  Dubai/Sharjah/Ajman, Kuala Lumpur/Shah Alam, Toronto/Mississauga/Laval/
-  Montreal, Lahore/Sialkot/Gujranwala, Basra/Ahvaz/Kuwait City,
-  Damascus/Homs/Gaziantep.
+  Dubai/Sharjah/Ajman, Toronto/Mississauga/Laval/Montreal,
+  Lahore/Sialkot/Gujranwala, Basra/Ahvaz/Kuwait City, Damascus/Homs/Gaziantep.
 - Large heuristic bboxes such as Karachi, Istanbul, Jakarta, Bangalore, Dhaka,
   Tokyo, Seoul, Moscow, Melbourne, Sydney, Shanghai, Lagos, London, New York.
 

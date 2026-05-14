@@ -541,6 +541,26 @@ describe('detectLocation — issue #47 regression', () => {
     expect(oldEastCorner.country).toBe('Malaysia')
   })
 
+  it('Klang Valley WOF-clipped cells preserve local city provenance', () => {
+    const kualaLumpur = detectLocation(3.139, 101.6869)
+    expect(kualaLumpur.city?.name).toBe('Kuala Lumpur')
+    expect(kualaLumpur.country).toBe('Malaysia')
+    expect(kualaLumpur.timezone).toBe('Asia/Kuala_Lumpur')
+
+    const petalingJaya = detectLocation(3.1074, 101.6180)
+    expect(petalingJaya.city?.name).toBe('Petaling Jaya')
+    expect(petalingJaya.country).toBe('Malaysia')
+    expect(petalingJaya.timezone).toBe('Asia/Kuala_Lumpur')
+
+    const shahAlam = detectLocation(3.0844, 101.5246)
+    expect(shahAlam.city?.name).toBe('Shah Alam')
+    expect(shahAlam.country).toBe('Malaysia')
+
+    const klang = detectLocation(3.1062, 101.3994)
+    expect(klang.city?.name).toBe('Klang')
+    expect(klang.country).toBe('Malaysia')
+  })
+
   // Additional v1.7.5 regression cases (Reviewer C's "definitely wrong" list).
   it('Sharm el-Sheikh → country=Egypt with Egyptian method (was SaudiArabia/UmmAlQura)', () => {
     const loc = detectLocation(27.92, 34.33)

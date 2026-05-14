@@ -26,6 +26,17 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — Klang Valley city-geometry provenance
+
+- Added WOF-backed runtime rows for `Klang|MY` and `Petaling Jaya|MY`, and
+  updated `Kuala Lumpur|MY` / `Shah Alam|MY` toward reviewed WOF locality
+  envelopes.
+- Klang Valley lookup now preserves distinct city provenance for Kuala Lumpur,
+  Petaling Jaya, Shah Alam, and Klang instead of routing the western metro
+  area through overbroad Kuala Lumpur/Shah Alam cells.
+- No prayer-time calculation math, public API, regional default, or method
+  dispatch changed.
+
 ### Fixed — Singapore/Johor city-geometry seam
 
 - Added reviewed WOF source-map rows for `Singapore|SG` and `Johor Bahru|MY`.
