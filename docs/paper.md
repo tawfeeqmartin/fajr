@@ -4,12 +4,12 @@
 
 *Independent Research, 2026*
 
-> **Last refreshed:** 2026-05-06 (v1.8.0). This paper preserves the historical
+> **Last refreshed:** 2026-05-14 (v1.8.1). This paper preserves the historical
 > Experiment 1-7 narrative and v1.0 milestone. The live current WMAE and corpus
 > counts are reported in [SCOREBOARD.md](../SCOREBOARD.md) and
 > [`docs/progress.md`](progress.md).
 >
-> **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration; 4 train institutions + 6 holdout institutions), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, the v1.7.x city registry (**477 cities across 168 countries**, post-v1.7.19) and offline `nearestCity` lookup — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
+> **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration; 4 train institutions + 6 holdout institutions), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, the v1.7.x–v1.8.x city registry (**481 cities across 168 countries**, post-v1.8.1) and offline `nearestCity` lookup, plus the Layer 1 raw `astronomical(lat, lon, date)` primitives shipped in v1.8.1 — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
 
 ---
 

@@ -1,9 +1,12 @@
 # Calibration Recipe — Path A WMAE Improvements
 
-> **Last refreshed:** 2026-05-06 (v1.8.0). This remains the Path A calibration
+> **Last refreshed:** 2026-05-14 (v1.8.1). This remains the Path A calibration
 > methodology guide, not the live scoreboard. Current WMAE, corpus counts, and
 > per-source residuals live in [SCOREBOARD.md](../SCOREBOARD.md) and
-> [docs/progress.md](progress.md).
+> [docs/progress.md](progress.md). The v1.8.1 release shipped no calibration
+> changes — train WMAE 0.9757 is unchanged from v1.7.16 baseline; see the
+> SCOREBOARD for the current corpus expansion (55 → 122 mosques, real Egypt
+> ESA institutional fixture).
 >
 > A durable methodology guide for finding, validating, and shipping per-source calibration corrections that decrease train WMAE without violating the ratchet. The JAKIM offset shipped in v1.4.1 is the worked example — every step below references that change as the canonical demonstration.
 >

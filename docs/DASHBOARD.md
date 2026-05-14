@@ -23,4 +23,5 @@ The dashboard includes:
 See `dashboard.html` for the interactive version.
 
 ## Last refreshed
+- 2026-05-14 by fajr-claude (v1.8.1 release roll; historical narrative unchanged, current numbers live in `SCOREBOARD.md` + `docs/progress.md`; Layer 1 `astronomical()` primitive shipped this release)
 - 2026-05-06 by fajr-codex (doctrine cleanup; current numbers delegated to `SCOREBOARD.md` + `docs/progress.md`)
