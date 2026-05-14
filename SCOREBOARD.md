@@ -19,7 +19,7 @@
 | JAKIM (via waktusolat.app) | 0.4548 | 0.0% | 🟢 stable |
 
 **Overall train WMAE:** 0.9757 min (215 entry-dates across 12 fixture files)
-**Holdout WMAE:** 7.4996 min (53541 entry-dates across 204 fixture files)
+**Holdout WMAE:** 7.3646 min (54639 entry-dates across 204 fixture files)
 
 > Holdout WMAE is reported for transparency only — it is never used to gate the ratchet.
 > A large holdout number (e.g. 8+ min) reflects low-quality third-party aggregators and
@@ -41,12 +41,12 @@
 
 - Cities in registry: **481**
 - Train fixtures: **12 files** / **215 entry-dates**
-- Holdout fixtures: **204 files** / **53541 entry-dates**
+- Holdout fixtures: **204 files** / **54639 entry-dates**
 
 ### Bug health
 
 - Open critical: **0** ✅
-- Open advisory / tracking: **18**
+- Open advisory / tracking: **16**
   - #132 — [citation-gap, v1.9.0] Saudi MoIA primary fatwa for uniform-city-times stance (fajr#114 sub-issue)
   - #118 — [audit-gap] geometry-backed city bbox verification for reverse geolocation
   - #114 — [fajr↔agot] follow-up to PR #110: track and fill the open citation gaps surfaced by the position registry
@@ -57,7 +57,7 @@
 
 ### Test corpus
 
-- Tests: **409/409 passing** ✅
+- Tests: **411/411 passing** ✅
 
 ---
 
@@ -75,7 +75,7 @@
 
 ## Trajectory verdict (rolling 30 days)
 
-**Rolling 30-day window (99 runs):**
+**Rolling 30-day window (100 runs):**
 - Train WMAE: 1.1667 → 0.9757 (-16.4%)
 - Direction: 📈 improving
 

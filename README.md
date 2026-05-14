@@ -143,7 +143,7 @@ console.log(thirds.lastThird)
 
 `fajr` improves the wasail, the means of calculating time. It does not issue religious rulings.
 
-For everyday use, the defaults are designed to be practical and transparent. For fasting, Eid, traveler rulings, high-latitude summers, high-elevation locations, or madhab-specific Asr timing:
+For everyday use, the defaults are designed to be practical and transparent. For fasting, Eid, traveler rulings, high-latitude summers, high-elevation locations, or Asr-convention-specific timing:
 
 1. Verify the resolved city and country.
 2. Check the calculation method, elevation stance, and Asr convention.

@@ -34,7 +34,7 @@ describe('#40 — structured feature metadata', () => {
       key: 'asrConventionOverride',
       kind: 'radio',
       default: 'auto',
-      citation: 'docs/positions.md#app-facing-vocabulary',
+      citation: 'https://github.com/tawfeeqmartin/fajr/blob/master/docs/positions.md#product-guidance',
     })
     expect(info.layman).toMatch(/standard 1x shadow or Hanafi 2x shadow/i)
     expect(info.values.map(v => v.value)).toEqual(['auto', 'standard', 'hanafi'])
@@ -49,6 +49,12 @@ describe('#40 — structured feature metadata', () => {
 
   it('returns null for unknown feature keys', () => {
     expect(featureInfo('not-a-feature')).toBeNull()
+  })
+
+  it('returns null for inherited/prototype property names', () => {
+    expect(featureInfo('toString')).toBeNull()
+    expect(featureInfo('constructor')).toBeNull()
+    expect(featureInfo('__proto__')).toBeNull()
   })
 })
 
@@ -109,6 +115,22 @@ describe('#40 — prayerTimes override object', () => {
     })
     expect(r.location.asrConvention).toBe('hanafi')
     expect(r.applied.asrSchool).toBe('hanafi')
+  })
+
+  it('override.elevation=0 suppresses city-registry elevation correction', () => {
+    const auto = prayerTimes({ latitude: 24.7136, longitude: 46.6753, date: DATE })
+    const uniformCity = prayerTimes({
+      latitude: 24.7136,
+      longitude: 46.6753,
+      date: DATE,
+      override: { elevation: 0 },
+    })
+    expect(auto.location.elevationSource).toBe('city-registry')
+    expect(auto.corrections.elevation).toBe(true)
+    expect(uniformCity.location.elevation).toBe(0)
+    expect(uniformCity.location.elevationSource).toBe('caller-explicit')
+    expect(uniformCity.corrections.elevation).toBe(false)
+    expect(uniformCity.corrections.elevationCorrectionMin).toBeUndefined()
   })
 
   it('override.elevation takes priority over the city registry and legacy elevation param', () => {

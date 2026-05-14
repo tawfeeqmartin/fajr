@@ -3016,8 +3016,8 @@ export function prayerTimes(params) {
   // best-guess defaults.
   //
   // asrConventionSource provenance:
-  //   'caller-explicit' — caller passed an explicit Asr-convention override (v1.8.x
-  //     via #40 — not yet wired here)
+  //   'caller-explicit' — caller passed an explicit Asr-convention override
+  //     via prayerTimes({ override: { asrConvention } })
   //   'country-default' — country listed in COUNTRY_ASR_CONVENTION; fajr
   //     reports the likely local Asr convention (Pakistan → Hanafi,
   //     Indonesia → standard). This is metadata; it does not by itself

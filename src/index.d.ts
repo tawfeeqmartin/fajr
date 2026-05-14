@@ -344,7 +344,8 @@ export interface PrayerTimesOverride {
    *  choice. */
   asrConvention?: AsrConvention
   /** Deprecated alias accepted for older settings UIs. Prefer
-   *  `asrConvention`; this is not a full legal-madhhab taxonomy. */
+   *  `asrConvention`; this is not a full legal-madhhab taxonomy. `shafi` and
+   *  `shafii` are accepted only as legacy spellings for standard 1x Asr. */
   madhab?: AsrConvention | 'shafi' | 'shafii'
 }
 

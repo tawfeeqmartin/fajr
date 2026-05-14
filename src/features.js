@@ -26,8 +26,8 @@ const FEATURE_INFO = Object.freeze({
       Object.freeze({ value: 'MWL', label: 'Muslim World League', description: 'MWL 18 degree Fajr and 17 degree Isha preset.' }),
       Object.freeze({ value: 'ISNA', label: 'ISNA', description: 'North America 15 degree Fajr and 15 degree Isha preset.' }),
     ]),
-    docs: 'README.md#app-integration-pattern',
-    citation: 'docs/positions.md',
+    docs: 'https://github.com/tawfeeqmartin/fajr#app-integration-pattern',
+    citation: 'https://github.com/tawfeeqmartin/fajr/blob/master/docs/positions.md#product-guidance',
     stance: 'Prefer auto-detection, then let users match their mosque when local practice differs.',
   }),
 
@@ -43,8 +43,8 @@ const FEATURE_INFO = Object.freeze({
       Object.freeze({ value: 'standard', label: 'Standard', description: '1x shadow Asr, used by Shafi, Maliki, Hanbali-standard, and many institutional timetables.' }),
       Object.freeze({ value: 'hanafi', label: 'Hanafi', description: '2x shadow Asr.' }),
     ]),
-    docs: 'README.md#what-you-get',
-    citation: 'docs/positions.md#app-facing-vocabulary',
+    docs: 'https://github.com/tawfeeqmartin/fajr#what-you-get',
+    citation: 'https://github.com/tawfeeqmartin/fajr/blob/master/docs/positions.md#product-guidance',
     stance: 'Asr convention is a prayer-time shadow factor, not a full legal-madhhab label.',
   }),
 
@@ -56,8 +56,8 @@ const FEATURE_INFO = Object.freeze({
     layman: 'Leave automatic unless your mosque publishes uniform city times or your device altitude is reliable.',
     default: 'auto',
     range: Object.freeze({ min: -500, max: 9000, step: 1, unit: 'm' }),
-    docs: 'knowledge/wiki/corrections/elevation.md',
-    citation: 'knowledge/wiki/corrections/elevation.md',
+    docs: 'https://github.com/tawfeeqmartin/fajr/blob/master/knowledge/wiki/corrections/elevation.md',
+    citation: 'https://github.com/tawfeeqmartin/fajr/blob/master/knowledge/wiki/corrections/elevation.md',
     stance: 'Elevation can shift sunrise earlier and Maghrib later; local institutional practice should decide whether to apply it.',
   }),
 
@@ -69,8 +69,8 @@ const FEATURE_INFO = Object.freeze({
     layman: 'Delay the displayed Fajr time by a few minutes when you want extra observer certainty. Do not use it as an imsak replacement.',
     default: 0,
     range: Object.freeze({ min: 0, max: 10, step: 1, unit: 'min' }),
-    docs: 'README.md#main-apis',
-    citation: 'Aabed 2015',
+    docs: 'https://github.com/tawfeeqmartin/fajr#main-apis',
+    citation: 'https://github.com/tawfeeqmartin/fajr/blob/master/knowledge/wiki/methods/fajr-angle-empirics.md',
     stance: 'Opt-in only. fajr keeps the calculated Fajr time as the default and exposes imsak separately for fasting safety.',
   }),
 
@@ -82,8 +82,8 @@ const FEATURE_INFO = Object.freeze({
     layman: 'Use a published high-latitude alternative only when your community chooses it.',
     default: false,
     range: Object.freeze({ min: 45, max: 60, step: 0.5, unit: 'deg' }),
-    docs: 'README.md#main-apis',
-    citation: 'Tarabishy 2014',
+    docs: 'https://github.com/tawfeeqmartin/fajr#main-apis',
+    citation: 'https://github.com/tawfeeqmartin/fajr/blob/master/knowledge/wiki/regions/high-latitude.md',
     stance: 'Limited-precedent alternative. fajr default remains the established high-latitude rule.',
   }),
 })
@@ -93,6 +93,7 @@ export function features() {
 }
 
 export function featureInfo(key) {
+  if (!Object.hasOwn(FEATURE_INFO, key)) return null
   const info = FEATURE_INFO[key]
-  return info ? JSON.parse(JSON.stringify(info)) : null
+  return JSON.parse(JSON.stringify(info))
 }
