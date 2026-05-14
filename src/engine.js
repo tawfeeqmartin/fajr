@@ -3194,3 +3194,104 @@ export function applyTayakkunBuffer(times, mins = 5) {
 
   return adjusted
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Layer 1 — Astronomical primitives (v1.8.x, fajr#101 agot-claude)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Per the 5-layer canonical architecture proposal in fajr#101:
+//
+//   Layer 1 — pure deterministic astronomical primitives, always exposed,
+//   never modified by institutional offsets. Always returned alongside
+//   institutional results so consumers can verify.
+//
+// This is the read-only, side-effect-free wrapper around adhan.js's raw
+// computations. It complements `prayerTimes()` (which applies institutional
+// method + buffers + Path A calibrations) by exposing the underlying
+// astronomical events directly: solar noon, apparent sunrise/sunset, and
+// parameterised Fajr/Isha/Asr accessors.
+//
+// Use cases:
+//   - Layer 4 validity warnings (already in src/validity.js) reference these
+//     to detect "Maghrib before astronomical sunset" type violations
+//   - Downstream apps wanting to surface "calculated method time vs raw
+//     astronomical time" in provenance UI
+//   - Scholarly tooling computing prayer times at arbitrary depression angles
+//   - Cross-validation against other implementations
+//
+// Classification: 🟢 Established — pure astronomy, no shar'i interpretation.
+
+/**
+ * Astronomical primitives for a given coordinate + date.
+ *
+ * Returns an object exposing:
+ *   - `solarNoon`: instant the sun crosses the local meridian (EoT-corrected)
+ *   - `apparentSunrise`: upper-limb crossing the geometric horizon with
+ *     standard 0.833° refraction (sea-level; no elevation correction applied)
+ *   - `apparentSunset`: same, evening crossing
+ *   - `fajrAt(angleDeg)`: instant the sun reaches `angleDeg` below horizon
+ *     (pre-dawn). Caller passes the depression angle — e.g. `fajrAt(18)`
+ *     for MWL, `fajrAt(19.5)` for Egyptian, `fajrAt(15)` for ISNA. No
+ *     institutional default is implied.
+ *   - `ishaAt(angleDeg)`: instant the sun reaches `angleDeg` below horizon
+ *     (post-twilight).
+ *   - `asrAt(shadowFactor)`: Asr time at the given shadow-length factor
+ *     (1 = Shafi'i/Maliki/Hanbali standard, 2 = Hanafi).
+ *
+ * All times are UTC `Date` instances at second-precision (unrounded). No
+ * elevation correction, no per-country buffers, no method-implied offsets.
+ *
+ * The accessor functions (`fajrAt`/`ishaAt`/`asrAt`) re-instantiate adhan.js
+ * with the requested parameter each call. They're pure — caller can hold
+ * the returned object and call accessors multiple times safely.
+ *
+ * @param {number} latitude  Decimal degrees, [-90, 90]
+ * @param {number} longitude Decimal degrees, [-180, 180]
+ * @param {Date}   date      Any Date in the target day (UTC noon recommended
+ *                           for stability across timezones)
+ * @returns {object} Astronomical primitives — see jsdoc above for shape
+ */
+export function astronomical(latitude, longitude, date) {
+  const coords = new adhan.Coordinates(latitude, longitude)
+
+  // Use a baseline calc for the convenience times. Solar noon / apparent
+  // sunrise / apparent sunset don't depend on Fajr or Isha angles, so any
+  // baseline works. We pick 18°/17° (MWL) for the baseline because that's
+  // the calc state most consumers will recognise.
+  const baseParams = adhan.CalculationMethod.Other()
+  baseParams.fajrAngle = 18
+  baseParams.ishaAngle = 17
+  baseParams.rounding = adhan.Rounding.None
+  const baseline = new adhan.PrayerTimes(coords, date, baseParams)
+
+  return {
+    solarNoon: baseline.dhuhr,
+    apparentSunrise: baseline.sunrise,
+    apparentSunset: baseline.sunset,
+
+    fajrAt(angleDeg) {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = angleDeg
+      p.ishaAngle = 17  // unused by .fajr output
+      p.rounding = adhan.Rounding.None
+      return new adhan.PrayerTimes(coords, date, p).fajr
+    },
+
+    ishaAt(angleDeg) {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18  // unused by .isha output
+      p.ishaAngle = angleDeg
+      p.rounding = adhan.Rounding.None
+      return new adhan.PrayerTimes(coords, date, p).isha
+    },
+
+    asrAt(shadowFactor) {
+      const p = adhan.CalculationMethod.Other()
+      p.fajrAngle = 18
+      p.ishaAngle = 17
+      p.madhab = shadowFactor === 2 ? adhan.Madhab.Hanafi : adhan.Madhab.Shafi
+      p.rounding = adhan.Rounding.None
+      return new adhan.PrayerTimes(coords, date, p).asr
+    },
+  }
+}

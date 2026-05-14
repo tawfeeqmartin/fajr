@@ -523,6 +523,72 @@ export function applyTayakkunBuffer(
   mins?: number,
 ): PrayerTimesResult
 
+// ─────────────────────────────────────────────────────────────────────────────
+// astronomical — Layer 1 primitives (v1.8.x, fajr#101 agot-claude)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Return type of `astronomical(lat, lon, date)`. Pure deterministic
+ *  astronomical events for the given coordinate + date, with no
+ *  institutional offsets, no elevation correction, no per-country buffers.
+ *
+ *  Layer 1 of agot-claude's 5-layer canonical architecture (fajr#101): the
+ *  primitives that fajr's institutional layers build on. Returned alongside
+ *  institutional results (via `prayerTimes()`) so consumers can verify
+ *  what's calc-vs-institutional. */
+export interface AstronomicalPrimitives {
+  /** Instant the sun crosses the local meridian (solar noon, EoT-corrected). */
+  solarNoon: Date
+  /** Upper-limb crossing the geometric horizon with standard 0.833° refraction
+   *  (sea-level — no elevation correction applied). */
+  apparentSunrise: Date
+  /** Evening upper-limb crossing the geometric horizon with standard
+   *  refraction (sea-level). */
+  apparentSunset: Date
+  /** Instant the sun reaches `angleDeg` below the horizon, pre-dawn.
+   *  Caller passes the depression angle they want:
+   *    - `fajrAt(18)` for MWL
+   *    - `fajrAt(19.5)` for Egyptian
+   *    - `fajrAt(15)` for ISNA
+   *  No institutional default is implied; this is the raw astronomical
+   *  event at the requested angle. */
+  fajrAt: (angleDeg: number) => Date
+  /** Instant the sun reaches `angleDeg` below the horizon, post-twilight.
+   *  Same shape as `fajrAt`. */
+  ishaAt: (angleDeg: number) => Date
+  /** Asr time at the given shadow-length factor. `1` = Shafi'i/Maliki/
+   *  Hanbali standard; `2` = Hanafi. */
+  asrAt: (shadowFactor: number) => Date
+}
+
+/** Compute astronomical primitives for a coordinate + date.
+ *
+ *  Layer 1 of agot-claude's 5-layer canonical architecture (fajr#101).
+ *  Pure deterministic: no method dispatch, no elevation correction, no
+ *  per-country buffers. The returned object's accessor functions
+ *  (`fajrAt`/`ishaAt`/`asrAt`) re-instantiate adhan.js with the requested
+ *  parameter each call.
+ *
+ *  Use cases:
+ *  - Layer 4 validity warnings reference these primitives to detect
+ *    "Maghrib before astronomical sunset" type violations
+ *  - Apps wanting "calculated method time vs raw astronomical time" in
+ *    provenance UI
+ *  - Scholarly tooling computing prayer times at arbitrary depression
+ *    angles for research
+ *  - Cross-validation against other implementations
+ *
+ *  🟢 Established — pure astronomy, no shar'i interpretation.
+ *
+ *  @param latitude  Decimal degrees, [-90, 90]
+ *  @param longitude Decimal degrees, [-180, 180]
+ *  @param date      Any Date in the target day (UTC noon recommended for
+ *                   stability across timezones) */
+export function astronomical(
+  latitude: number,
+  longitude: number,
+  date: Date,
+): AstronomicalPrimitives
+
 /** Compute prayer times using Tarabishy's (2014) latitude-truncation method.
  *
  *  🟡 Limited precedent — Tarabishy 2014 argues 45° is the highest latitude
@@ -819,6 +885,7 @@ declare const fajr: {
   nearestCity:              typeof nearestCity
   applyElevationCorrection: typeof applyElevationCorrection
   applyTayakkunBuffer:      typeof applyTayakkunBuffer
+  astronomical:             typeof astronomical
   qibla:                    typeof qibla
   hijri:                    typeof hijri
   hilalVisibility:          typeof hilalVisibility
