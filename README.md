@@ -4,11 +4,11 @@
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Last refreshed: 2026-05-08
+Last refreshed: 2026-05-14
 
 `fajr` is an offline JavaScript library for Islamic prayer times, qibla, Hijri dates, and hilal visibility. It builds on [`adhan.js`](https://github.com/batoulapps/adhan-js), then adds:
 
-- GPS-aware method dispatch across 168 countries and 477 city boxes.
+- GPS-aware method dispatch across 168 countries and 481 city boxes.
 - Provenance fields that explain which method, elevation, and Asr convention were used.
 - Per-prayer ihtiyat-aware rounding and an explicit `imsak` field.
 - Three-criterion hilal visibility: Odeh 2004, Yallop 1997, and Shaukat 2002.
@@ -136,10 +136,10 @@ This is the same stance used by the reference downstream app, [A Gift of Time](h
 
 | Area | Current state |
 |---|---|
-| Repository version | `1.8.0` in `package.json`; published npm version may lag until release |
-| City/country dispatch | 477 cities, 168 countries |
+| Repository version | `1.8.1` in `package.json`; published npm version may lag until release |
+| City/country dispatch | 481 cities, 168 countries |
 | Train eval | 215 entries, WMAE 0.9757 min |
-| Holdout eval | 29,004 entries, WMAE 7.3599 min |
+| Holdout eval | 54,639 entries, WMAE 7.3646 min |
 | Reference layers | Mawaqit, Diyanet, JAKIM, KEMENAG, MUIS, Habous, Aladhan, praytimes.org, Who's On First |
 | Hilal validation | 78 documented committee decisions across 15 Hijri month onsets |
 | Runtime dependency | `adhan` only |
@@ -169,6 +169,7 @@ Use `fajr` when you want offline local computation plus:
 |---|---|
 | `prayerTimes(params)` | Six prayer times plus imsak, sunrise/shuruq, sunset, provenance, notes |
 | `dayTimes(params)` | `prayerTimes` plus midnight and qiyam start |
+| `astronomical(lat, lon, date)` | Raw solar/twilight/Asr primitives with no regional offsets |
 | `detectLocation(lat, lon)` | Bbox-precise city/country/method/elevation lookup |
 | `nearestCity(lat, lon)` | Display-only nearest-city label, never used for dispatch |
 | `qibla({ latitude, longitude })` | Qibla bearing |
@@ -182,6 +183,20 @@ Use `fajr` when you want offline local computation plus:
 | `prayerNames`, `prayerName()` | Localized prayer labels |
 
 TypeScript declarations ship with the package.
+
+Use `astronomical()` when an app needs the raw Layer 1 events behind a
+regional default:
+
+```js
+import { astronomical, prayerTimes } from '@tawfeeqmartin/fajr'
+
+const date = new Date('2026-05-05T12:00:00Z')
+const raw = astronomical(33.5731, -7.5898, date)
+const official = prayerTimes({ latitude: 33.5731, longitude: -7.5898, date })
+
+console.log(raw.apparentSunset)
+console.log(official.maghrib) // Morocco default includes institutional buffer/rounding
+```
 
 ## App Integration Pattern
 

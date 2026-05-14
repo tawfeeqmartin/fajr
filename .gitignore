@@ -23,3 +23,21 @@ eval/results/*.csv
 eval/results/*.json
 node_modules/
 npm-debug.log*
+
+# Strategic / internal docs — drafts and outreach that shouldn't be in the
+# public repo or shipped via npm. Keep locally for ongoing work; do not commit.
+docs/scholar-cover-email.md
+docs/scholar-review-brief.md
+docs/scholar-*.md
+docs/papers-review-*.md
+docs/cross-repo-coordination-setup.md
+docs/*-strategy.md
+docs/*-outreach.md
+docs/*-pitch.md
+docs/*-investor*.md
+docs/*-launch-plan*.md
+docs/internal-*.md
+
+# Codex variant of CLAUDE.md (intentionally local-only; CLAUDE.md is the
+# public-tracked agent-instructions file)
+AGENTS.md

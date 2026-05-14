@@ -26,6 +26,22 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+_No unreleased changes._
+
+## [1.8.1] — 2026-05-14
+
+### Added — Layer 1 astronomical primitives
+
+- Added the public `astronomical(latitude, longitude, date)` export from
+  fajr#101 / PR #136. It returns raw deterministic astronomical primitives
+  (`solarNoon`, `apparentSunrise`, `apparentSunset`, `fajrAt(angleDeg)`,
+  `ishaAt(angleDeg)`, and `asrAt(shadowFactor)`) with no regional method
+  dispatch, elevation correction, institutional offsets, or per-prayer
+  rounding.
+- Added TypeScript declarations and focused tests for the raw-vs-institutional
+  split. This gives downstream apps a clean way to show "raw astronomy vs
+  official timetable default" without reimplementing solar math.
+
 ### Fixed — deprecated madhab alias values
 
 - Resolved the agiftoftime QA finding from [#88](https://github.com/tawfeeqmartin/fajr/issues/88):
