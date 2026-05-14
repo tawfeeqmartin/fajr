@@ -103,7 +103,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if git diff --quiet -- fixtures/egypt-esa/daily; then
+          # git diff does not report untracked files, which is exactly what a
+          # new daily snapshot is before git add. Use porcelain status so the
+          # first capture for a date opens a PR instead of being mistaken for
+          # an already-existing snapshot.
+          if [ -z "$(git status --porcelain -- fixtures/egypt-esa/daily)" ]; then
             echo "No new ESA snapshot to commit (already exists for today)."
             exit 0
           fi
