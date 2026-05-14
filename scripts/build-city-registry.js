@@ -904,7 +904,10 @@ const BBOX_OVERRIDES = {
   'Freetown|SL':        [8.39, 8.55, -13.27, -13.13],
   'Podgorica|ME':       [42.40, 42.50, 19.20, 19.40],
   'Detroit|US':         [42.18, 42.46, -83.08, -82.92],
-  'Fes|MA':             [33.94, 34.28, -5.30, -4.85],
+  // v1.8.0 #118: WOF current locality row 421190143 supersedes the older
+  // Fes row and matches the OSM admin-8 envelope; use it to avoid broad
+  // city-provenance leakage around the Fes lookup cell.
+  'Fes|MA':             [33.97125, 34.076345, -5.078619, -4.937726],
   // v1.7.22 #86: keep Shah Alam's own centre lon 101.5183 inside the bbox
   // while still excluding KL CBD at lon ~101.69.
   'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.55],

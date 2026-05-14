@@ -184,6 +184,7 @@ describe('detectLocation — Mawaqit institutional source', () => {
     const rows = [
       ['Berrechid', 33.2659, -7.5867, 33.21, -7.64],
       ['Casablanca', 33.5731, -7.5898, 33.70, -7.75],
+      ['Fes', 34.0331, -5.0003, 34.20, -5.25],
       ['Settat', 33.0017, -7.6166, 32.90, -7.75],
       ['Sefrou', 33.8311, -4.8294, 33.75, -4.90],
       ['Tangier', 35.7595, -5.8340, 35.60, -6.00],
