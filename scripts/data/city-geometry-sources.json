@@ -929,9 +929,13 @@
     {
       "cityKey": "Brazzaville|CG",
       "priority": ["geometry-undercoverage", "edge-adjacent", "congo-river"],
-      "review": { "status": "needs-clipping-review", "issue": 118 },
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated to the WOF current locality envelope; engine country table adds a matching Brazzaville micro-bbox so the city-country sanity filter accepts the eastern edge."]
+      },
       "neighborRelations": [
-        { "cityKey": "Kinshasa|CD", "kind": "bbox-edge-touch", "status": "runtime-adjacent; WOF envelopes still need clipping review" }
+        { "cityKey": "Kinshasa|CD", "kind": "runtime-separated", "status": "Brazzaville uses WOF envelope; Kinshasa north edge remains clipped at lat -4.36 to preserve the Congo River gap." }
       ],
       "geometries": [
         {
@@ -953,17 +957,21 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate",
-          "notes": ["WOF SQLite admin-cg latest lists this as the current locality row for Brazzaville; envelope still overlaps Kinshasa because the Congo River boundary is diagonal."]
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF SQLite admin-cg latest lists this as the current locality row for Brazzaville; runtime uses this envelope while Kinshasa remains clipped south of the river gap."]
         }
       ]
     },
     {
       "cityKey": "Kinshasa|CD",
       "priority": ["geometry-undercoverage", "edge-adjacent", "congo-river"],
-      "review": { "status": "needs-clipping-review", "issue": 118 },
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated from WOF current locality south/west/east edges while keeping the north edge clipped at -4.36 to avoid Brazzaville."]
+      },
       "neighborRelations": [
-        { "cityKey": "Brazzaville|CG", "kind": "bbox-edge-touch", "status": "runtime-adjacent; WOF envelopes still need clipping review" }
+        { "cityKey": "Brazzaville|CG", "kind": "runtime-separated", "status": "Kinshasa uses WOF south/west/east edges with north edge clipped at lat -4.36; Brazzaville uses its WOF envelope north of the gap." }
       ],
       "geometries": [
         {
@@ -985,8 +993,8 @@
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate",
-          "notes": ["WOF SQLite admin-cd latest lists this as the current locality row for Kinshasa; envelope still overlaps Brazzaville because the Congo River boundary is diagonal."]
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["WOF SQLite admin-cd latest lists this as the current locality row for Kinshasa; runtime clips north edge from -4.29471 to -4.36 to avoid Brazzaville across the Congo River."]
         }
       ]
     },

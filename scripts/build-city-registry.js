@@ -876,7 +876,9 @@ const BBOX_OVERRIDES = {
   'Casablanca|MA':      [33.494823, 33.647306, -7.738187, -7.459445],
   'Brussels|BE':        [50.65, 51.05, 4.15, 4.55],
   'Antwerp|BE':         [51.06, 51.42, 4.20, 4.60],
-  'Brazzaville|CG':     [-4.36, -4.16, 15.14, 15.25],
+  // v1.8.0 #118: WOF locality envelope; Kinshasa keeps a clipped north edge
+  // across the Congo River so neither capital swallows the other.
+  'Brazzaville|CG':     [-4.316619, -4.201672, 15.213081, 15.309825],
   'Akkar|LB':           [34.53, 34.69, 36.05, 36.30],
   'Utrecht|NL':         [51.94, 52.16, 4.97, 5.27],
   'Rotterdam|NL':       [51.72, 52.00, 4.28, 4.68],
@@ -978,9 +980,9 @@ const BBOX_OVERRIDES = {
   // Montevideo — formulaic 0.20 bbox extends south of Uruguay's lat-min.
   'Montevideo|UY':      [-34.95, -34.85, -56.27, -56.05],
 
-  // Kinshasa — tighten so Brazzaville (across the Congo river, lat -4.26)
-  // doesn't fall inside Kinshasa's bbox. Kinshasa centre lat -4.44.
-  'Kinshasa|CD':        [-4.55, -4.36, 15.20, 15.45],
+  // Kinshasa — WOF locality envelope clipped north at -4.36 so Brazzaville
+  // (across the Congo river, lat -4.26) does not fall inside Kinshasa.
+  'Kinshasa|CD':        [-4.647148, -4.36, 15.130611, 15.566205],
 
   // v1.7.8 Tier 5 polish — Kaédi MR center moved ~600m east into Mauritanian
   // bank (correction from Reviewer A geometry report). Population-radius
