@@ -26,6 +26,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+## [1.9.0] — 2026-05-14
+
 ### Added — settings metadata and caller overrides
 
 - Added `features()` and `featureInfo(key)` as structured metadata for
