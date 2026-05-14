@@ -389,6 +389,23 @@ describe('detectLocation — smallest-bbox-first invariant', () => {
     expect(loc.recommendedMethod).toBe('ISNA')
     expect(loc.methodSource).toBe('city-institutional')
   })
+
+  it('Windsor Ontario resolves to Canada, not Detroit or Dearborn', () => {
+    const center = detectLocation(42.3149, -83.0364)
+    expect(center.city?.name).toBe('Windsor')
+    expect(center.city?.countryISO).toBe('CA')
+    expect(center.country).toBe('Canada')
+    expect(center.timezone).toBe('America/Toronto')
+
+    const west = detectLocation(42.30, -83.08)
+    expect(west.city?.name).toBe('Windsor')
+    expect(west.city?.countryISO).toBe('CA')
+    expect(west.country).toBe('Canada')
+
+    const detroit = detectLocation(42.3314, -83.0458)
+    expect(detroit.city?.name).toBe('Detroit')
+    expect(detroit.country).toBe('USA')
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -433,6 +433,7 @@ const MUSLIM_POPULATION_CENTERS = [
 
   // ─── Dearborn (Detroit-adjacent) — for the DearbornDetroit override pinpoint ─
   { name: 'Dearborn',   countryISO: 'US', adminRegion: 'Michigan', lat: 42.3223, lon: -83.1763, elevation: 184, timezone: 'America/Detroit', population: 109000 },
+  { name: 'Windsor',    countryISO: 'CA', adminRegion: 'Ontario', lat: 42.3149, lon: -83.0364, elevation: 190, timezone: 'America/Toronto', population: 229000 },
 
   // ─── High-elevation stress cases ──────────────────────────────────────────
   { name: 'Sanaa',      nameLocal: 'صنعاء', countryISO: 'YE', adminRegion: "Amanat Al Asimah", lat: 15.3694, lon: 44.1910, elevation: 2253, timezone: 'Asia/Aden', population: 3293000 },
@@ -834,12 +835,10 @@ const BBOX_OVERRIDES = {
   // review replaces this early Sharjah draft below and clips Dubai's northern
   // edge to keep the two lookup cells adjacent instead of overlapping.
   'Sharjah|AE':         [25.25, 25.65, 55.20, 55.72],
-  // v1.7.5 Reviewer C: Dearborn (Detroit suburb) bbox extended N of the
-  // Detroit River into Windsor, Canada. Tighten northern lat to 42.40 —
-  // Dearborn city centre 42.32 stays inside; Windsor 42.31 also inside but
-  // engine-level countryISO check (added in v1.7.5) prevents Dearborn from
-  // matching when detectCountry(Windsor)=Canada.
-  'Dearborn|US':        [42.22, 42.40, -83.28, -83.08],
+  // v1.7.5 Reviewer C / v1.8.0 #118: Dearborn (Detroit suburb) bbox extended
+  // south across the Detroit River into Windsor. Clip to Dearborn's own side
+  // of the river seam; Dearborn city centre 42.3223 remains inside.
+  'Dearborn|US':        [42.32, 42.40, -83.28, -83.08],
 
   // ─── v1.7.8 (#54): systematic registry bbox-shrink ─────────────────────
   // Each entry resolves a specific bbox-internal failure documented in
@@ -902,7 +901,13 @@ const BBOX_OVERRIDES = {
   'Lomé|TG':            [6.10, 6.30, 1.10, 1.40],
   'Freetown|SL':        [8.39, 8.55, -13.27, -13.13],
   'Podgorica|ME':       [42.40, 42.50, 19.20, 19.40],
-  'Detroit|US':         [42.18, 42.46, -83.08, -82.92],
+  // v1.8.0 #118: Detroit/Windsor river seam. Keep Detroit north of the river
+  // split so Windsor's smaller Canadian lookup cell can win via Pass-B.
+  'Detroit|US':         [42.32, 42.46, -83.08, -82.92],
+  // v1.8.0 #118: WOF current locality row 101735855 for Windsor, Ontario,
+  // clipped at the Detroit River seam because the full WOF rectangle crosses
+  // north into Detroit/Dearborn.
+  'Windsor|CA':         [42.234158, 42.3199, -83.114853, -82.891136],
   // v1.8.0 #118: WOF current locality row 421190143 supersedes the older
   // Fes row and matches the OSM admin-8 envelope; use it to avoid broad
   // city-provenance leakage around the Fes lookup cell.

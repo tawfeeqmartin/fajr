@@ -89,6 +89,7 @@ describe('city geometry source map', () => {
       ['Antalya|TR', 'wof:locality:101912923'],
       ['Samsun|TR', 'wof:locality:101911033'],
       ['Trabzon|TR', 'wof:locality:101912783'],
+      ['Windsor|CA', 'wof:locality:101735855'],
       ['Brazzaville|CG', 'wof:locality:421180023'],
       ['Kinshasa|CD', 'wof:locality:421166913'],
     ])
@@ -126,6 +127,7 @@ describe('city geometry source map', () => {
     expect(statusFor('Antalya|TR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Samsun|TR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Trabzon|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Windsor|CA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Brazzaville|CG')).toBe('needs-clipping-review')
     expect(statusFor('Kinshasa|CD')).toBe('needs-clipping-review')
   })

@@ -760,6 +760,32 @@
       ]
     },
     {
+      "cityKey": "Windsor|CA",
+      "priority": ["detroit-windsor-border", "wof-locality-runtime-bbox", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox added from WOF current locality row and clipped at the Detroit River seam so it does not overlap Detroit/Dearborn lookup cells."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Detroit|US", "kind": "runtime-edge-touch", "status": "Detroit runtime bbox starts at lat 42.32; Windsor clips north to 42.3199" },
+        { "cityKey": "Dearborn|US", "kind": "runtime-separated", "status": "Dearborn runtime bbox starts at lat 42.32; Windsor clips north to 42.3199" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101735855",
+          "ids": { "wofId": 101735855, "repo": "whosonfirst-data-admin-ca", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "CA/windsor/wof-locality-101735855.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox crosses the river into Detroit/Dearborn as a rectangle; runtime bbox clips north edge to 42.3199."]
+        }
+      ]
+    },
+    {
       "cityKey": "Jerusalem|PS",
       "priority": ["current-validator-warning", "intentional-routing-anchor", "human-review-required"],
       "review": {

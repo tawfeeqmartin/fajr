@@ -34,9 +34,9 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-35 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
-Turkey large-city rows, and 5 existing registry warning rows. It carries 17
-OSM relation rows plus 31 WOF
+36 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
+Turkey large-city rows, 1 Detroit/Windsor border row, and 5 existing registry
+warning rows. It carries 17 OSM relation rows plus 32 WOF
 rows across reviewed locality/county candidates. Berrechid, Settat, and Fes
 now have WOF locality candidates; Jerusalem intentionally remains without a
 geometry candidate until a human routing decision is available.
@@ -136,6 +136,13 @@ The first Turkey pass is cleaner:
   point-like, and Mersin did not surface a clean city locality row in the WOF
   scan.
 
+The Detroit/Windsor border seam needs clipping rather than direct WOF copying:
+
+- Windsor, Ontario has a clean current WOF locality row, but its rectangular
+  envelope crosses the Detroit River into Detroit/Dearborn. The runtime cell is
+  clipped at the river seam while Detroit and Dearborn are clipped north of the
+  same seam.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -181,6 +188,9 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
   `Gaziantep|TR`, `Adana|TR`, `Antalya|TR`, `Samsun|TR`, and `Trabzon|TR`:
   tightened to reviewed WOF current locality envelopes. Trabzon's previous
   Georgia-edge safety intent is preserved by the tighter WOF cell.
+- `Windsor|CA`: added as a clipped WOF-backed lookup cell for the
+  Detroit/Windsor seam. `Detroit|US` and `Dearborn|US` now start north of the
+  seam, so Windsor no longer resolves to a US city.
 
 These are provenance/routing fixes only. They do not change prayer-time
 calculation math or imply that rectangles now encode municipal boundaries.
