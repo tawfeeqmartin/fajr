@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T10:43:14.377Z",
+  "generated": "2026-05-14T10:48:16.990Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -8,13 +8,16 @@
     "population-centers": "Manual, sourced from UN World Cities + World Population Review 2024-2025"
   },
   "notes": "Cities sorted by bbox area ascending. detectLocation() linear-scans this array and returns the first bbox that contains (lat, lon) — smallest match wins. Each city carries an institutional `source` (mawaqit | national-authority | inherited) so apps can attribute timetable provenance to users. Method overrides are city-level institutional decisions documented in scripts/data/city-method-overrides.json with citation strings.",
-  "total": 478,
+  "total": 480,
   "cities": [
     {"name":"Alburikent (Dagestan)","countryISO":"RU","lat":42.9234,"lon":47.5089,"bbox":[42.92,42.94,47.5,47.52],"timezone":"Europe/Moscow","adminRegion":"Dagestan","population":11000,"elevation":50,"source":{"type":"mawaqit","slug":"alburkent-dzhuma-mechet-alburikent-367026-russia"}},
     {"name":"Isa Town","countryISO":"BH","lat":26.1762,"lon":50.5495,"bbox":[26.16,26.19,50.53,50.56],"timezone":"Asia/Bahrain","population":38000,"elevation":21,"source":{"type":"mawaqit","slug":"masjid-madina-issa-south-810-issa-town-bahrain"}},
+    {"name":"Ferney-Voltaire","countryISO":"FR","lat":46.2577,"lon":6.1155,"bbox":[46.237488,46.266135,6.088144,6.12439],"timezone":"Europe/Paris","adminRegion":"Auvergne-Rhône-Alpes","population":10000,"elevation":430,"source":{"type":"inherited","from":"France"}},
+    {"name":"Annemasse","countryISO":"FR","lat":46.184,"lon":6.2456,"bbox":[46.176411,46.201967,6.216619,6.278294],"timezone":"Europe/Paris","adminRegion":"Auvergne-Rhône-Alpes","population":37000,"elevation":435,"source":{"type":"inherited","from":"France"}},
     {"name":"Sefrou","countryISO":"MA","lat":33.8311,"lon":-4.8294,"bbox":[33.809375,33.844543,-4.853352,-4.804161],"timezone":"Africa/Casablanca","population":79000,"elevation":850,"source":{"type":"mawaqit","slug":"mosquee-ahel-sefrou-sefrou-31000-morocco"}},
     {"name":"Trabzon","countryISO":"TR","lat":41.0027,"lon":39.7168,"bbox":[40.985525,41.013493,39.649901,39.742612],"timezone":"Europe/Istanbul","adminRegion":"Trabzon Province","population":808000,"elevation":39,"source":{"type":"inherited","from":"Turkey"}},
     {"name":"Jerusalem","countryISO":"PS","lat":31.7683,"lon":35.2137,"bbox":[31.74,31.8,35.55,35.6],"timezone":"Asia/Hebron","population":936000,"elevation":754,"source":{"type":"mawaqit","slug":"msjd-lsyd-zynb-jerusalem-97200-palestinian-territories"}},
+    {"name":"Geneva","countryISO":"CH","lat":46.2044,"lon":6.1432,"bbox":[46.177774,46.234248,6.110233,6.175845],"timezone":"Europe/Zurich","adminRegion":"Geneva Canton","population":203000,"elevation":375,"source":{"type":"mawaqit","slug":"fondation-culturelle-islamique-de-geneve-geneve-1209-switzerland"}},
     {"name":"Berrechid","countryISO":"MA","lat":33.2659,"lon":-7.5867,"bbox":[33.230306,33.299095,-7.613623,-7.545455],"timezone":"Africa/Casablanca","population":136000,"elevation":175,"source":{"type":"mawaqit","slug":"mosquee-brahimm-lkhlalil-berrchid-26100-morocco"}},
     {"name":"Mamoudzou","countryISO":"YT","lat":-12.7806,"lon":45.2278,"bbox":[-12.81,-12.74,45.2,45.27],"timezone":"Indian/Mayotte","population":71000,"elevation":14,"source":{"type":"inherited","from":"Mayotte"}},
     {"name":"Mulhouse","countryISO":"FR","lat":47.7508,"lon":7.3359,"bbox":[47.721942,47.783092,7.282525,7.368264],"timezone":"Europe/Paris","population":109000,"elevation":240,"source":{"type":"mawaqit","slug":"association-des-musulmans-des-coteaux-mulhouse"}},
@@ -88,7 +91,6 @@
     {"name":"Akkar","countryISO":"LB","lat":34.5391,"lon":36.1233,"bbox":[34.53,34.69,36.05,36.3],"timezone":"Asia/Beirut","adminRegion":"Akkar Governorate","population":109000,"elevation":35,"source":{"type":"mawaqit","slug":"the-great-prophet-muhammad-mosque-al-baradah-akkar-900001-lebanon"}},
     {"name":"Georgetown","countryISO":"GY","lat":6.8013,"lon":-58.1551,"bbox":[6.7013,6.9013,-58.2551,-58.0551],"timezone":"America/Guyana","elevation":9,"source":{"type":"inherited","from":"GY"}},
     {"name":"Victoria","countryISO":"SC","lat":-4.6191,"lon":55.4513,"bbox":[-4.7191,-4.5191,55.3513,55.5513],"timezone":"Indian/Mahe","elevation":5,"source":{"type":"inherited","from":"Seychelles"}},
-    {"name":"Geneva","countryISO":"CH","lat":46.2044,"lon":6.1432,"bbox":[46.1,46.3,6.05,6.25],"timezone":"Europe/Zurich","adminRegion":"Geneva Canton","population":203000,"elevation":375,"source":{"type":"mawaqit","slug":"fondation-culturelle-islamique-de-geneve-geneve-1209-switzerland"}},
     {"name":"Taourirt","countryISO":"MA","lat":34.4115,"lon":-2.8975,"bbox":[34.3115,34.5115,-2.9975,-2.7975],"timezone":"Africa/Casablanca","population":80000,"elevation":425,"source":{"type":"mawaqit","slug":"jamii-ibrahim-lkhalil-taourirt-65000-morocco-1"}},
     {"name":"Ifrane","countryISO":"MA","lat":33.5228,"lon":-5.1106,"bbox":[33.4228,33.6228,-5.2106,-5.0106],"timezone":"Africa/Casablanca","population":14000,"elevation":1664,"source":{"type":"mawaqit","slug":"mosquee-universite-alakhawayn-ifrane-53000-morocco"}},
     {"name":"Zagreb","countryISO":"HR","lat":45.815,"lon":15.9819,"bbox":[45.715,45.915,15.8819,16.0819],"timezone":"Europe/Zagreb","elevation":122,"source":{"type":"inherited","from":"Croatia"}},

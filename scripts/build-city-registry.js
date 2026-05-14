@@ -386,6 +386,8 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Gothenburg', countryISO: 'SE', adminRegion: 'Västra Götaland County', lat: 57.7089, lon: 11.9746, elevation: 12, timezone: 'Europe/Stockholm', population: 583000 },
   { name: 'Zurich',     countryISO: 'CH', adminRegion: 'Zurich Canton', lat: 47.3769, lon: 8.5417, elevation: 408, timezone: 'Europe/Zurich', population: 421000 },
   { name: 'Geneva',     countryISO: 'CH', adminRegion: 'Geneva Canton', lat: 46.2044, lon: 6.1432, elevation: 375, timezone: 'Europe/Zurich', population: 203000 },
+  { name: 'Annemasse',  countryISO: 'FR', adminRegion: 'Auvergne-Rhône-Alpes', lat: 46.1840, lon: 6.2456, elevation: 435, timezone: 'Europe/Paris', population: 37000 },
+  { name: 'Ferney-Voltaire', countryISO: 'FR', adminRegion: 'Auvergne-Rhône-Alpes', lat: 46.2577, lon: 6.1155, elevation: 430, timezone: 'Europe/Paris', population: 10000 },
   { name: 'Barcelona',  countryISO: 'ES', adminRegion: 'Catalonia', lat: 41.3851, lon: 2.1734, elevation: 12, timezone: 'Europe/Madrid', population: 1620000 },
   { name: 'Milan',      countryISO: 'IT', adminRegion: 'Lombardy', lat: 45.4642, lon: 9.1900, elevation: 120, timezone: 'Europe/Rome', population: 1396000 },
 
@@ -957,7 +959,14 @@ const BBOX_OVERRIDES = {
   'Temara|MA':          [33.85, 33.96, -7.00, -6.86],
 
   // Geneva — formulaic 0.20 bbox extends west of Switzerland's lon 6.0.
-  'Geneva|CH':          [46.10, 46.30, 6.05, 6.25],
+  // v1.8.0 #118: WOF current locality envelope keeps Geneva city provenance
+  // inside Switzerland and stops stealing adjacent French border towns.
+  'Geneva|CH':          [46.177774, 46.234248, 6.110233, 6.175845],
+  // v1.8.0 #118: WOF current locality rows for French towns on the Geneva
+  // border. These are smaller Pass-B cells because detectCountry's broad
+  // Switzerland rectangle sees the first country at these coordinates.
+  'Annemasse|FR':       [46.176411, 46.201967, 6.216619, 6.278294],
+  'Ferney-Voltaire|FR': [46.237488, 46.266135, 6.088144, 6.12439],
 
   // Montevideo — formulaic 0.20 bbox extends south of Uruguay's lat-min.
   'Montevideo|UY':      [-34.95, -34.85, -56.27, -56.05],
