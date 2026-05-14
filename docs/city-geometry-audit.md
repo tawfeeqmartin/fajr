@@ -163,6 +163,15 @@ The Brazzaville/Kinshasa Congo River seam requires a clipped WOF application:
   south/west/east edges but keeps the north edge clipped at `-4.36` so the
   runtime does not fill the river gap or absorb Brazzaville.
 
+The Singapore/Johor Bahru border seam also requires clipping:
+
+- Singapore has a current WOF locality row sourced to Singapore government
+  geometry. The full rectangle reaches north of fajr's safe city seam, so the
+  runtime cell uses the WOF west/east/south edges and clips north to `1.4499`.
+- Johor Bahru has a current WOF locality row, plus a point-like alternate
+  spelling row. The runtime cell uses the WOF north/east/west extents and clips
+  south to `1.45`, preserving city provenance on both sides of the Causeway.
+
 Reference URLs checked in this pass:
 
 - HDX Morocco COD-AB:
@@ -219,6 +228,10 @@ from neighboring Morocco rows during `detectLocation()`'s smallest-match scan:
 - `Brazzaville|CG` and `Kinshasa|CD`: separated across the Congo River seam so
   Brazzaville's east edge and Kinshasa's south/east edges resolve to their own
   countries/timezones without filling the river gap.
+- `Singapore|SG` and `Johor Bahru|MY`: separated at the Causeway seam.
+  Northern Singapore coordinates now keep Singapore city/timezone provenance,
+  while the old overbroad Johor Bahru north/east corners no longer resolve to
+  Johor Bahru city provenance.
 - Morocco WOF-backed runtime rows now have source-map status aligned with the
   shipped registry bboxes: Rabat, Agadir, Berrechid, Settat, Fes, Sefrou,
   Tangier, Nador, and Oujda. OSM-only rows remain audit candidates pending
@@ -262,10 +275,13 @@ validator warnings, or known clipping gaps:
   edge still clipped at the existing river-safe boundary.
 - Resolved validator-warning regression target: Basel/Mulhouse. It has
   reviewed WOF locality evidence and a tightened runtime bbox.
+- Resolved high-risk border cluster: Singapore/Johor Bahru. It now has
+  reviewed WOF source-map rows and clipped runtime cells that preserve the
+  MUIS/JAKIM source boundary.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
-  Dubai/Sharjah/Ajman, Singapore/Johor Bahru, Kuala Lumpur/Shah Alam,
-  Toronto/Mississauga/Laval/Montreal, Lahore/Sialkot/Gujranwala,
-  Basra/Ahvaz/Kuwait City, Damascus/Homs/Gaziantep.
+  Dubai/Sharjah/Ajman, Kuala Lumpur/Shah Alam, Toronto/Mississauga/Laval/
+  Montreal, Lahore/Sialkot/Gujranwala, Basra/Ahvaz/Kuwait City,
+  Damascus/Homs/Gaziantep.
 - Large heuristic bboxes such as Karachi, Istanbul, Jakarta, Bangalore, Dhaka,
   Tokyo, Seoul, Moscow, Melbourne, Sydney, Shanghai, Lagos, London, New York.
 

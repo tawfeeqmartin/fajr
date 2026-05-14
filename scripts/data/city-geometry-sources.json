@@ -762,6 +762,56 @@
       ]
     },
     {
+      "cityKey": "Singapore|SG",
+      "priority": ["singapore-johor-border", "wof-locality-runtime-bbox", "apac-p0", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox updated from WOF current locality geometry sourced to Singapore government data, with north edge clipped just below Johor Bahru's runtime cell."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Johor Bahru|MY", "kind": "runtime-separated", "status": "Singapore north edge stops at lat 1.4499; Johor Bahru starts at lat 1.45." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102032341",
+          "ids": { "wofId": 102032341, "repo": "whosonfirst-data-admin-sg", "placetype": "locality", "srcGeom": "sg-sggov", "mzIsCurrent": 1 },
+          "cacheFile": "SG/singapore/wof-locality-102032341.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox extends north to 1.470775; runtime clips to 1.4499 to preserve the Singapore/Johor city seam."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Johor Bahru|MY",
+      "priority": ["singapore-johor-border", "wof-locality-runtime-bbox", "apac-p0", "clipped"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": ["2026-05-14: runtime bbox tightened from the WOF current locality envelope while preserving the Causeway seam with Singapore."]
+      },
+      "neighborRelations": [
+        { "cityKey": "Singapore|SG", "kind": "runtime-separated", "status": "Johor Bahru south edge starts at lat 1.45; Singapore north edge stops at lat 1.4499." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102022781",
+          "ids": { "wofId": 102022781, "repo": "whosonfirst-data-admin-my", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "MY/johor-bahru/wof-locality-102022781.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Full WOF locality bbox starts at lat 1.4116; runtime clips south edge to 1.45 so Johor Bahru does not cover northern Singapore. WOF also has point-like alternate spelling row 1126049075 (Johor Baharu), but it is not a runtime bbox source."]
+        }
+      ]
+    },
+    {
       "cityKey": "Windsor|CA",
       "priority": ["detroit-windsor-border", "wof-locality-runtime-bbox", "clipped"],
       "review": {

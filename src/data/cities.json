@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T11:01:17.808Z",
+  "generated": "2026-05-14T21:51:17.168Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -206,6 +206,7 @@
     {"name":"Wellington","countryISO":"NZ","lat":-41.2865,"lon":174.7762,"bbox":[-41.3865,-41.1865,174.6762,174.8762],"timezone":"Pacific/Auckland","elevation":13,"source":{"type":"inherited","from":"NZ"}},
     {"name":"Port Moresby","countryISO":"PG","lat":-9.4438,"lon":147.1803,"bbox":[-9.5438,-9.3438,147.0803,147.2803],"timezone":"Pacific/Port_Moresby","elevation":49,"source":{"type":"inherited","from":"PG"}},
     {"name":"Casablanca","countryISO":"MA","lat":33.5731,"lon":-7.5898,"bbox":[33.494823,33.647306,-7.738187,-7.459445],"timezone":"Africa/Casablanca","nameLocal":"الدار البيضاء","adminRegion":"Casablanca-Settat","population":3460000,"elevation":27,"source":{"type":"mawaqit","slug":"moulay-ismail-casablanca-20400-morocco"}},
+    {"name":"Johor Bahru","countryISO":"MY","lat":1.4927,"lon":103.7414,"bbox":[1.45,1.609285,103.564621,103.872185],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Johor","population":858000,"elevation":26,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Antalya","countryISO":"TR","lat":36.8841,"lon":30.7056,"bbox":[36.821577,37.012346,30.583049,30.853306],"timezone":"Europe/Istanbul","adminRegion":"Antalya Province","population":1259000,"elevation":30,"source":{"type":"inherited","from":"Turkey"}},
     {"name":"Laval","countryISO":"CA","lat":45.6066,"lon":-73.7124,"bbox":[45.55,45.75,-73.86,-73.59],"timezone":"America/Toronto","population":438000,"elevation":39,"source":{"type":"mawaqit","slug":"iqra-laval-h7v-2v5-canada"}},
     {"name":"Konya","countryISO":"TR","lat":37.8746,"lon":32.4932,"bbox":[37.749215,38.017501,32.389118,32.591108],"timezone":"Europe/Istanbul","adminRegion":"Konya Province","population":2296000,"elevation":1016,"source":{"type":"inherited","from":"Turkey"}},
@@ -288,7 +289,6 @@
     {"name":"Miami","countryISO":"US","lat":25.7617,"lon":-80.1918,"bbox":[25.6117,25.9117,-80.3418,-80.0418],"timezone":"America/New_York","adminRegion":"Florida","population":467000,"elevation":2,"source":{"type":"inherited","from":"USA"}},
     {"name":"Khujand","countryISO":"TJ","lat":40.2854,"lon":69.6203,"bbox":[40.1354,40.4354,69.4703,69.7703],"timezone":"Asia/Dushanbe","nameLocal":"Хуҷанд","adminRegion":"Sughd","population":181000,"elevation":320,"source":{"type":"inherited","from":"Tajikistan"}},
     {"name":"Shah Alam","countryISO":"MY","lat":3.0731,"lon":101.5183,"bbox":[2.8731,3.2731,101.3183,101.55],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Selangor","population":740000,"elevation":28,"source":{"type":"inherited","from":"Malaysia"}},
-    {"name":"Johor Bahru","countryISO":"MY","lat":1.4927,"lon":103.7414,"bbox":[1.45,1.6927,103.5414,103.9414],"timezone":"Asia/Kuala_Lumpur","adminRegion":"Johor","population":858000,"elevation":26,"source":{"type":"inherited","from":"Malaysia"}},
     {"name":"Ankara","countryISO":"TR","lat":39.9334,"lon":32.8597,"bbox":[39.776496,40.032011,32.611664,33.007367],"timezone":"Europe/Istanbul","elevation":938,"source":{"type":"national-authority","institution":"Diyanet İşleri Başkanlığı"}},
     {"name":"Rotterdam","countryISO":"NL","lat":51.9244,"lon":4.4777,"bbox":[51.72,52,4.28,4.68],"timezone":"Europe/Amsterdam","adminRegion":"South Holland","population":651000,"elevation":0,"source":{"type":"mawaqit","slug":"pakistan-islamic-centre-rotterdam-rotterdam-3014-ed-netherlands"}},
     {"name":"Doha","countryISO":"QA","lat":25.2854,"lon":51.531,"bbox":[25.05,25.5,51.4,51.65],"timezone":"Asia/Qatar","population":2382000,"elevation":10,"source":{"type":"mawaqit","slug":"masjid-imam-muhammad-bin-abdul-wahhab-doha-00000-qatar"}},
@@ -296,8 +296,8 @@
     {"name":"Giza","countryISO":"EG","lat":30.0131,"lon":31.2089,"bbox":[29.6131,30.1,30.98,31.22],"timezone":"Africa/Cairo","nameLocal":"الجيزة","adminRegion":"Giza","population":9200000,"elevation":30,"source":{"type":"inherited","from":"Egypt"}},
     {"name":"Rawalpindi","countryISO":"PK","lat":33.5651,"lon":73.0169,"bbox":[33.3,33.6,72.8,73.2],"timezone":"Asia/Karachi","nameLocal":"راولپنڈی","adminRegion":"Punjab","population":2099000,"elevation":508,"source":{"type":"inherited","from":"Pakistan"}},
     {"name":"Kinshasa","countryISO":"CD","lat":-4.4419,"lon":15.2663,"bbox":[-4.647148,-4.36,15.130611,15.566205],"timezone":"Africa/Kinshasa","elevation":280,"source":{"type":"inherited","from":"DRCongo"}},
-    {"name":"Singapore","countryISO":"SG","lat":1.3521,"lon":103.8198,"bbox":[1.16,1.44,103.6,104.05],"timezone":"Asia/Singapore","population":5454000,"elevation":15,"source":{"type":"mawaqit","slug":"al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore"}},
     {"name":"Cairo","countryISO":"EG","lat":30.0444,"lon":31.2357,"bbox":[29.84,30.24,31.22,31.56],"timezone":"Africa/Cairo","nameLocal":"القاهرة","population":10100000,"elevation":23,"source":{"type":"mawaqit","slug":"msjd-l-lm-lnf-nouveau-caire-4710001-egypt"}},
+    {"name":"Singapore","countryISO":"SG","lat":1.3521,"lon":103.8198,"bbox":[1.158699,1.4499,103.605701,104.088483],"timezone":"Asia/Singapore","population":5454000,"elevation":15,"source":{"type":"mawaqit","slug":"al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore"}},
     {"name":"Antwerp","countryISO":"BE","lat":51.2194,"lon":4.4025,"bbox":[51.06,51.42,4.2,4.6],"timezone":"Europe/Brussels","adminRegion":"Antwerp Province","population":530000,"elevation":8,"source":{"type":"mawaqit","slug":"iccum-antwerp-2050-belgium"}},
     {"name":"Toronto","countryISO":"CA","lat":43.6532,"lon":-79.3832,"bbox":[43.45,43.85,-79.55,-79.18],"timezone":"America/Toronto","adminRegion":"Ontario","population":2794000,"elevation":76,"source":{"type":"mawaqit","slug":"darussalam-toronto-m9v-3b5-canada"}},
     {"name":"Boston","countryISO":"US","lat":42.3601,"lon":-71.0589,"bbox":[42.1601,42.5601,-71.2589,-70.8589],"timezone":"America/New_York","adminRegion":"Massachusetts","population":675000,"elevation":43,"source":{"type":"inherited","from":"USA"}},

@@ -97,6 +97,8 @@ describe('city geometry source map', () => {
       ['Antalya|TR', 'wof:locality:101912923'],
       ['Samsun|TR', 'wof:locality:101911033'],
       ['Trabzon|TR', 'wof:locality:101912783'],
+      ['Singapore|SG', 'wof:locality:102032341'],
+      ['Johor Bahru|MY', 'wof:locality:102022781'],
       ['Windsor|CA', 'wof:locality:101735855'],
       ['Geneva|CH', 'wof:locality:101748445'],
       ['Annemasse|FR', 'wof:locality:101757307'],
@@ -148,6 +150,8 @@ describe('city geometry source map', () => {
     expect(statusFor('Antalya|TR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Samsun|TR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Trabzon|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Singapore|SG')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Johor Bahru|MY')).toBe('runtime-bbox-shipped')
     expect(statusFor('Windsor|CA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Geneva|CH')).toBe('runtime-bbox-shipped')
     expect(statusFor('Annemasse|FR')).toBe('runtime-bbox-shipped')

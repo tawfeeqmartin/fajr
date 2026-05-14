@@ -920,8 +920,13 @@ const BBOX_OVERRIDES = {
   // v1.7.22 #86: keep Shah Alam's own centre lon 101.5183 inside the bbox
   // while still excluding KL CBD at lon ~101.69.
   'Shah Alam|MY':       [2.8731, 3.2731, 101.3183, 101.55],
-  'Singapore|SG':       [1.16, 1.44, 103.6, 104.05],
-  'Johor Bahru|MY':     [1.45, 1.6927, 103.5414, 103.9414],
+  // v1.8.0 #118: Singapore/Johor WOF-backed seam. Singapore uses WOF
+  // government-sourced west/east/south extents and clips north just below
+  // Johor; Johor Bahru uses the WOF locality envelope clipped south at the
+  // Causeway seam. This restores northern Singapore city provenance without
+  // returning Johor Bahru for Singapore coordinates.
+  'Singapore|SG':       [1.158699, 1.4499, 103.605701, 104.088483],
+  'Johor Bahru|MY':     [1.45, 1.609285, 103.564621, 103.872185],
   'Kuala Lumpur|MY':    [2.939, 3.339, 101.55, 101.99],
   // v1.8.0 #118: WOF locality envelopes remove the Basel/Mulhouse
   // cross-border validator warning without clipping either city centre.

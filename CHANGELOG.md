@@ -26,6 +26,16 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — Singapore/Johor city-geometry seam
+
+- Added reviewed WOF source-map rows for `Singapore|SG` and `Johor Bahru|MY`.
+- Clipped the runtime city bboxes at the Causeway seam so northern Singapore
+  coordinates keep Singapore city/timezone provenance, while old overbroad
+  Johor Bahru north/east corners no longer resolve to Johor Bahru city
+  provenance.
+- No prayer-time calculation math, public API, regional default, or method
+  dispatch changed.
+
 ## [1.9.0] — 2026-05-14
 
 ### Added — settings metadata and caller overrides
