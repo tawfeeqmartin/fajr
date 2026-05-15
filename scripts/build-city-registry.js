@@ -121,7 +121,8 @@ const ISO_TO_ENGINE_COUNTRY = {
   'FR': 'France',   'CA': 'Canada',   'FI': 'Finland', 'IS': 'Iceland',
   'NO': 'Norway',
   // v1.7.8 (#54) Tier 2: new country additions
-  'HK': 'HongKong', 'CY': 'Cyprus',   'YT': 'Mayotte', 'EH': 'WesternSahara',
+  'HK': 'HongKong', 'CN': 'China',    'CY': 'Cyprus',   'YT': 'Mayotte',
+  'EH': 'WesternSahara',
   'RE': 'Reunion',
 }
 
@@ -457,6 +458,7 @@ const MUSLIM_POPULATION_CENTERS = [
   // ─── v1.7.8 (#54) Tier 4: highest-priority city adds ─────────────────────
   { name: 'Osaka',      countryISO: 'JP', adminRegion: 'Osaka Prefecture', lat: 34.6937, lon: 135.5023, elevation: 24, timezone: 'Asia/Tokyo', population: 2691000 },
   { name: 'Shanghai',   countryISO: 'CN', adminRegion: 'Shanghai', lat: 31.2304, lon: 121.4737, elevation: 4, timezone: 'Asia/Shanghai', population: 26320000 },
+  { name: 'Shenzhen',   countryISO: 'CN', adminRegion: 'Guangdong', lat: 22.5431, lon: 114.0579, elevation: 4, timezone: 'Asia/Shanghai', population: 17560000 },
   { name: 'Bilbao',     countryISO: 'ES', adminRegion: 'Basque Country', lat: 43.2630, lon: -2.9350, elevation: 19, timezone: 'Europe/Madrid', population: 346000 },
   { name: 'Sharm el-Sheikh', countryISO: 'EG', adminRegion: 'South Sinai Governorate', lat: 27.9158, lon: 34.3299, elevation: 4, timezone: 'Africa/Cairo', population: 73000, nameLocal: 'شرم الشيخ' },
   { name: 'Hafar Al-Batin', countryISO: 'SA', adminRegion: 'Eastern Province', lat: 28.4337, lon: 45.9601, elevation: 380, timezone: 'Asia/Riyadh', population: 391000, nameLocal: 'حفر الباطن' },
@@ -944,7 +946,11 @@ const BBOX_OVERRIDES = {
 
   // v1.7.8 Tier 2: tighten new-country anchor bboxes to fit within their
   // own COUNTRY_BBOX_TABLE entries (avoid cross-border samples).
-  'Hong Kong|HK':       [22.16, 22.55, 113.85, 114.43],
+  'Hong Kong|HK':       [22.16, 22.535, 113.85, 114.43],
+  // v1.9.2 #118: geoBoundaries CHN ADM2 Shenzhenshi confirms the China-side
+  // context, but its rectangle overlaps northern Hong Kong. Ship only a
+  // Shenzhen urban-core guardrail for the known Futian/Luohu failure.
+  'Shenzhen|CN':         [22.535, 22.58, 114.04, 114.14],
   'Saint-Denis|RE':     [-20.95, -20.85, 55.40, 55.55],
   'Mamoudzou|YT':       [-12.81, -12.74, 45.20, 45.27],
   'Laayoune|EH':        [27.10, 27.20, -13.25, -13.13],

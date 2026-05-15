@@ -609,6 +609,10 @@ function detectCountry(lat, lon) {
   if (lat >= 41.58 && lat <= 52.15 && lon >= 87.74 && lon <= 119.93) return 'Mongolia'
   // v1.7.8 (#54): Hong Kong — SAR with own published timetables (Trustees of
   // Islamic Community Fund). ~296K Muslims. BEFORE China.
+  // v1.9.2 (#118): Shenzhen CN sits inside Hong Kong's rectangular bbox. Keep
+  // this narrow urban-core guardrail first so Futian/Luohu-style coordinates
+  // do not inherit Hong Kong country/city provenance.
+  if (lat >= 22.535 && lat <= 22.58 && lon >= 114.04 && lon <= 114.14) return 'China'
   if (lat >= 22.15 && lat <= 22.56 && lon >= 113.83 && lon <= 114.45) return 'HongKong'
   if (lat >= 18.16 && lat <= 53.56 && lon >= 73.50 && lon <= 134.77) return 'China'
 

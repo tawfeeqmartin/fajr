@@ -33,6 +33,9 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added conservative `Khasab|OM`, `Dibba Al-Baya|OM`, and `Madha|OM`
   city-centre guardrails so Omani Musandam/Madha coordinates no longer inherit
   UAE country provenance.
+- Added a `Shenzhen|CN` geoBoundaries-backed urban-core guardrail so
+  Futian/Luohu-style Shenzhen coordinates no longer inherit Hong Kong
+  city/country provenance from the broad Hong Kong rectangle.
 - Added an Oman guardrail in country detection ahead of the broad UAE rectangle,
   preserving UAE city routing while returning Oman defaults and `Asia/Muscat`
   for the Omani guardrail coordinates.

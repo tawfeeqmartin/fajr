@@ -591,6 +591,25 @@ describe('detectLocation — issue #47 regression', () => {
     expect(oldEastCorner.country).toBe('Malaysia')
   })
 
+  it('Shenzhen city cell prevents Hong Kong bbox from swallowing Shenzhen coordinates', () => {
+    const hongKong = detectLocation(22.3193, 114.1694)
+    expect(hongKong.city?.name).toBe('Hong Kong')
+    expect(hongKong.country).toBe('HongKong')
+    expect(hongKong.timezone).toBe('Asia/Hong_Kong')
+
+    const futian = detectLocation(22.5431, 114.0579)
+    expect(futian.city?.name).toBe('Shenzhen')
+    expect(futian.city?.countryISO).toBe('CN')
+    expect(futian.country).toBe('China')
+    expect(futian.timezone).toBe('Asia/Shanghai')
+    expect(futian.recommendedMethod).toBe('MoonsightingCommittee')
+    expect(futian.source.from).toBe('China')
+
+    const luohu = detectLocation(22.5485, 114.1178)
+    expect(luohu.city?.name).toBe('Shenzhen')
+    expect(luohu.country).toBe('China')
+  })
+
   it('Klang Valley WOF-clipped cells preserve local city provenance', () => {
     const kualaLumpur = detectLocation(3.139, 101.6869)
     expect(kualaLumpur.city?.name).toBe('Kuala Lumpur')

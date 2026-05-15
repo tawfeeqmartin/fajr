@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-15T02:01:11.493Z",
+  "generated": "2026-05-15T02:14:35.132Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -8,7 +8,7 @@
     "population-centers": "Manual, sourced from UN World Cities + World Population Review 2024-2025"
   },
   "notes": "Cities sorted by bbox area ascending. detectLocation() linear-scans this array and returns the first bbox that contains (lat, lon) — smallest match wins. Each city carries an institutional `source` (mawaqit | national-authority | inherited) so apps can attribute timetable provenance to users. Method overrides are city-level institutional decisions documented in scripts/data/city-method-overrides.json with citation strings.",
-  "total": 487,
+  "total": 488,
   "cities": [
     {"name":"Alburikent (Dagestan)","countryISO":"RU","lat":42.9234,"lon":47.5089,"bbox":[42.92,42.94,47.5,47.52],"timezone":"Europe/Moscow","adminRegion":"Dagestan","population":11000,"elevation":50,"source":{"type":"mawaqit","slug":"alburkent-dzhuma-mechet-alburikent-367026-russia"}},
     {"name":"Isa Town","countryISO":"BH","lat":26.1762,"lon":50.5495,"bbox":[26.16,26.19,50.53,50.56],"timezone":"Asia/Bahrain","population":38000,"elevation":21,"source":{"type":"mawaqit","slug":"masjid-madina-issa-south-810-issa-town-bahrain"}},
@@ -19,6 +19,7 @@
     {"name":"Madha","countryISO":"OM","lat":25.2834,"lon":56.3328,"bbox":[25.26,25.31,56.3,56.36],"timezone":"Asia/Muscat","nameLocal":"مدحاء","adminRegion":"Musandam Governorate","population":2260,"elevation":90,"source":{"type":"inherited","from":"Oman"}},
     {"name":"Jerusalem","countryISO":"PS","lat":31.7683,"lon":35.2137,"bbox":[31.74,31.8,35.55,35.6],"timezone":"Asia/Hebron","population":936000,"elevation":754,"source":{"type":"mawaqit","slug":"msjd-lsyd-zynb-jerusalem-97200-palestinian-territories"}},
     {"name":"Geneva","countryISO":"CH","lat":46.2044,"lon":6.1432,"bbox":[46.177774,46.234248,6.110233,6.175845],"timezone":"Europe/Zurich","adminRegion":"Geneva Canton","population":203000,"elevation":375,"source":{"type":"mawaqit","slug":"fondation-culturelle-islamique-de-geneve-geneve-1209-switzerland"}},
+    {"name":"Shenzhen","countryISO":"CN","lat":22.5431,"lon":114.0579,"bbox":[22.535,22.58,114.04,114.14],"timezone":"Asia/Shanghai","adminRegion":"Guangdong","population":17560000,"elevation":4,"source":{"type":"inherited","from":"China"}},
     {"name":"Berrechid","countryISO":"MA","lat":33.2659,"lon":-7.5867,"bbox":[33.230306,33.299095,-7.613623,-7.545455],"timezone":"Africa/Casablanca","population":136000,"elevation":175,"source":{"type":"mawaqit","slug":"mosquee-brahimm-lkhlalil-berrchid-26100-morocco"}},
     {"name":"Mamoudzou","countryISO":"YT","lat":-12.7806,"lon":45.2278,"bbox":[-12.81,-12.74,45.2,45.27],"timezone":"Indian/Mayotte","population":71000,"elevation":14,"source":{"type":"inherited","from":"Mayotte"}},
     {"name":"Al Buraimi","countryISO":"OM","lat":24.2509,"lon":55.7931,"bbox":[24.22,24.29,55.77,55.84],"timezone":"Asia/Muscat","adminRegion":"Al Buraimi Governorate","population":117000,"elevation":299,"source":{"type":"inherited","from":"Oman"}},
@@ -115,7 +116,7 @@
     {"name":"Washington D.C.","countryISO":"US","lat":38.9072,"lon":-77.0369,"bbox":[38.8072,39.0072,-77.1369,-76.9369],"timezone":"America/New_York","elevation":7,"source":{"type":"national-authority","institution":"Islamic Society of North America"}},
     {"name":"Riga","countryISO":"LV","lat":56.9496,"lon":24.1052,"bbox":[56.8496,57.0496,24.0052,24.2052],"timezone":"Europe/Riga","elevation":7,"source":{"type":"inherited","from":"Latvia"}},
     {"name":"Stockholm","countryISO":"SE","lat":59.3293,"lon":18.0686,"bbox":[59.2293,59.4293,17.9686,18.1686],"timezone":"Europe/Stockholm","elevation":28,"source":{"type":"inherited","from":"Sweden"}},
-    {"name":"Beijing","countryISO":"CN","lat":39.9042,"lon":116.4074,"bbox":[39.8042,40.0042,116.3074,116.5074],"timezone":"Asia/Shanghai","elevation":44,"source":{"type":"inherited","from":"CN"}},
+    {"name":"Beijing","countryISO":"CN","lat":39.9042,"lon":116.4074,"bbox":[39.8042,40.0042,116.3074,116.5074],"timezone":"Asia/Shanghai","elevation":44,"source":{"type":"inherited","from":"China"}},
     {"name":"Buenos Aires","countryISO":"AR","lat":-34.6037,"lon":-58.3816,"bbox":[-34.7037,-34.5037,-58.4816,-58.2816],"timezone":"America/Argentina/Buenos_Aires","elevation":25,"source":{"type":"inherited","from":"AR"}},
     {"name":"Asunción","countryISO":"PY","lat":-25.2637,"lon":-57.5759,"bbox":[-25.3637,-25.1637,-57.6759,-57.4759],"timezone":"America/Asuncion","elevation":43,"source":{"type":"inherited","from":"PY"}},
     {"name":"Praia","countryISO":"CV","lat":14.933,"lon":-23.5133,"bbox":[14.833,15.033,-23.6133,-23.4133],"timezone":"Atlantic/Cape_Verde","elevation":35,"source":{"type":"inherited","from":"CapeVerde"}},
@@ -378,7 +379,7 @@
     {"name":"Rajshahi","countryISO":"BD","lat":24.3636,"lon":88.6241,"bbox":[24.1636,24.5636,88.4241,88.8241],"timezone":"Asia/Dhaka","nameLocal":"রাজশাহী","adminRegion":"Rajshahi Division","population":760000,"elevation":18,"source":{"type":"inherited","from":"Bangladesh"}},
     {"name":"Bahawalpur","countryISO":"PK","lat":29.3956,"lon":71.6722,"bbox":[29.1956,29.5956,71.4722,71.8722],"timezone":"Asia/Karachi","nameLocal":"بہاولپور","adminRegion":"Punjab","population":762000,"elevation":116,"source":{"type":"inherited","from":"Pakistan"}},
     {"name":"Dubai","countryISO":"AE","lat":25.2048,"lon":55.2708,"bbox":[24.9,25.3,55.05,55.5],"timezone":"Asia/Dubai","nameLocal":"دبي","adminRegion":"Dubai Emirate","population":3604000,"elevation":5,"source":{"type":"inherited","from":"UAE"}},
-    {"name":"Hong Kong","countryISO":"HK","lat":22.3193,"lon":114.1694,"bbox":[22.16,22.55,113.85,114.43],"timezone":"Asia/Hong_Kong","population":7482000,"elevation":50,"source":{"type":"inherited","from":"HongKong"}},
+    {"name":"Hong Kong","countryISO":"HK","lat":22.3193,"lon":114.1694,"bbox":[22.16,22.535,113.85,114.43],"timezone":"Asia/Hong_Kong","population":7482000,"elevation":50,"source":{"type":"inherited","from":"HongKong"}},
     {"name":"Abu Dhabi","countryISO":"AE","lat":24.4539,"lon":54.3773,"bbox":[24.195888,24.590696,54.254076,54.841984],"timezone":"Asia/Dubai","elevation":27,"source":{"type":"national-authority","institution":"Umm al-Qura University"}},
     {"name":"Lahore","countryISO":"PK","lat":31.5497,"lon":74.3436,"bbox":[31.25,31.85,74.04,74.5],"timezone":"Asia/Karachi","nameLocal":"لاہور","adminRegion":"Punjab","population":13096000,"elevation":217,"source":{"type":"mawaqit","slug":"masjid-khatim-ul-nabiyyeen-lahore-54000-pakistan"}},
     {"name":"Istanbul","countryISO":"TR","lat":41.0082,"lon":28.9784,"bbox":[40.802662,41.199662,28.568308,29.418991],"timezone":"Europe/Istanbul","nameLocal":"İstanbul","adminRegion":"Istanbul Province","population":15462000,"elevation":39,"source":{"type":"inherited","from":"Turkey"}},
@@ -487,7 +488,7 @@
     {"name":"Mumbai","countryISO":"IN","lat":19.076,"lon":72.8777,"bbox":[18.676,19.476,72.4777,73.2777],"timezone":"Asia/Kolkata","nameLocal":"मुंबई","adminRegion":"Maharashtra","population":12478000,"elevation":14,"source":{"type":"inherited","from":"India"}},
     {"name":"Ahmedabad","countryISO":"IN","lat":23.0225,"lon":72.5714,"bbox":[22.6225,23.4225,72.1714,72.9714],"timezone":"Asia/Kolkata","nameLocal":"અમદાવાદ","adminRegion":"Gujarat","population":5570000,"elevation":53,"source":{"type":"inherited","from":"India"}},
     {"name":"São Paulo","countryISO":"BR","lat":-23.5505,"lon":-46.6333,"bbox":[-23.9505,-23.1505,-47.0333,-46.2333],"timezone":"America/Sao_Paulo","adminRegion":"São Paulo State","population":12325000,"elevation":760,"source":{"type":"mawaqit","slug":"mesquita-khaled-ibn-08021290-sao-paulo-brazil"}},
-    {"name":"Shanghai","countryISO":"CN","lat":31.2304,"lon":121.4737,"bbox":[30.8304,31.6304,121.0737,121.8737],"timezone":"Asia/Shanghai","adminRegion":"Shanghai","population":26320000,"elevation":4,"source":{"type":"inherited","from":"CN"}},
+    {"name":"Shanghai","countryISO":"CN","lat":31.2304,"lon":121.4737,"bbox":[30.8304,31.6304,121.0737,121.8737],"timezone":"Asia/Shanghai","adminRegion":"Shanghai","population":26320000,"elevation":4,"source":{"type":"inherited","from":"China"}},
     {"name":"Lagos","countryISO":"NG","lat":6.5244,"lon":3.3792,"bbox":[6.1244,6.9244,2.9792,3.7792],"timezone":"Africa/Lagos","adminRegion":"Lagos State","population":15388000,"elevation":14,"source":{"type":"inherited","from":"Nigeria"}},
     {"name":"Seoul","countryISO":"KR","lat":37.5665,"lon":126.978,"bbox":[37.1665,37.9665,126.578,127.378],"timezone":"Asia/Seoul","population":9776000,"elevation":38,"source":{"type":"mawaqit","slug":"masjid-noor-seoul-seoul-05000-south-korea"}},
     {"name":"Alexandria","countryISO":"EG","lat":31.2001,"lon":29.9187,"bbox":[30.8001,31.6001,29.5187,30.3187],"timezone":"Africa/Cairo","nameLocal":"الإسكندرية","adminRegion":"Alexandria","population":5380000,"elevation":5,"source":{"type":"inherited","from":"Egypt"}},
