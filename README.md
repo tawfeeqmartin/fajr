@@ -27,6 +27,7 @@ Core docs:
 - [docs/city-geometry-audit.md](docs/city-geometry-audit.md) - build-time QA plan for reverse-geolocation bboxes.
 - [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) - app-side integration guide for [A Gift of Time](https://agiftoftime.app).
 - [docs/downstream-apps.md](docs/downstream-apps.md) - downstream app UX, QA, and release-handoff patterns.
+- [docs/qa-process.md](docs/qa-process.md) - maintainer release preflight and QA handoff checklist.
 
 ## Install
 
@@ -323,6 +324,7 @@ Hilal output is astronomical possibility, not a religious ruling. See [docs/hila
 | Generated eval dashboard | [docs/progress.md](docs/progress.md) |
 | Integration in A Gift of Time | [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) |
 | Downstream app playbook | [docs/downstream-apps.md](docs/downstream-apps.md) |
+| Maintainer QA process | [docs/qa-process.md](docs/qa-process.md) |
 | Source inventory | [docs/data-sources.md](docs/data-sources.md) |
 | City bbox geometry audit | [docs/city-geometry-audit.md](docs/city-geometry-audit.md) |
 | Scholarly review brief | [docs/scholar-review-brief.md](docs/scholar-review-brief.md) |

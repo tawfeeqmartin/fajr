@@ -48,8 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm test
+      - name: Run release preflight
+        run: npm run preflight:release
 
       - name: Verify tag matches package.json version
         run: |

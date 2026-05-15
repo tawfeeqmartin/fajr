@@ -26,6 +26,17 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Added — release preflight QA
+
+- Added `npm run preflight:release`, a reusable maintainer release gate that
+  runs diff whitespace checks, the Vitest suite, the deterministic city
+  registry validator, generated registry sync verification, and
+  `npm pack --dry-run`.
+- Wired the npm publish workflow to run the same preflight command before
+  publishing a release tag.
+- Added `docs/qa-process.md` and linked it from the README so issue #49 has a
+  concrete release-process artifact alongside the downstream app playbook.
+
 ### Added — downstream app integration playbook
 
 - Added `docs/downstream-apps.md`, capturing agiftoftime-derived patterns for
