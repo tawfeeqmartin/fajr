@@ -593,12 +593,18 @@
     },
     {
       "cityKey": "Al Ain|AE",
-      "priority": ["uae-metro", "wof-locality-runtime-bbox"],
+      "priority": ["uae-metro", "wof-locality-runtime-bbox", "clipped"],
       "review": {
         "status": "runtime-bbox-shipped",
         "issue": 118,
-        "notes": ["2026-05-14: runtime bbox updated to reviewed WOF current locality envelope; no neighboring UAE city bbox collision."]
+        "notes": [
+          "2026-05-14: runtime bbox updated from reviewed WOF current locality envelope.",
+          "2026-05-15: east edge clipped before the Al Buraimi guardrail because the raw WOF envelope crosses the Oman/UAE twin-city seam."
+        ]
       },
+      "neighborRelations": [
+        { "cityKey": "Al Buraimi|OM", "kind": "cross-border-twin-city", "status": "Al Ain runtime cell is clipped west of the Al Buraimi guardrail" }
+      ],
       "geometries": [
         {
           "provider": "wof",
@@ -606,9 +612,47 @@
           "ids": { "wofId": 421168687, "repo": "whosonfirst-data-admin-ae", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "AE/al-ain/wof-locality-421168687.geojson",
           "sourceConfidence": "high",
-          "matchConfidence": "candidate",
+          "matchConfidence": "clipped-runtime-bbox",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
           "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Al Buraimi|OM",
+      "priority": ["oman-uae-border", "al-ain-buraimi-seam", "city-center-guardrail"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: added a clipped city-centre guardrail cell so Al Buraimi does not resolve to UAE/Al Ain. WOF has a point-like locality row plus a broader county row; neither is copied directly as a full city polygon."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Al Ain|AE", "kind": "cross-border-twin-city", "status": "runtime cells intentionally overlap at source-envelope level but the Al Buraimi guardrail is smaller and country-detected as Oman" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421177367",
+          "ids": { "wofId": 421177367, "repo": "whosonfirst-data-admin-om", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": -1 },
+          "cacheFile": "OM/al-buraimi/wof-locality-421177367.geojson",
+          "sourceConfidence": "low",
+          "matchConfidence": "point-like-runtime-guardrail",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Point-like WOF locality row anchors the city centre only; runtime bbox is a conservative guardrail cell, not the full city extent."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:421184225",
+          "ids": { "wofId": 421184225, "repo": "whosonfirst-data-admin-om", "placetype": "county", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "OM/al-buraimi/wof-county-421184225.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["County row confirms the Omani side of the seam but is too broad to copy into the runtime city registry."]
         }
       ]
     },

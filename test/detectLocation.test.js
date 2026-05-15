@@ -298,6 +298,27 @@ describe('detectLocation — Mawaqit institutional source', () => {
     }
   })
 
+  it('Al Ain/Al Buraimi seam keeps the Omani twin-city centre out of UAE routing', () => {
+    const alAin = detectLocation(24.2075, 55.7447)
+    expect(alAin.city).not.toBeNull()
+    expect(alAin.city.name).toBe('Al Ain')
+    expect(alAin.city.countryISO).toBe('AE')
+    expect(alAin.country).toBe('UAE')
+    expect(alAin.timezone).toBe('Asia/Dubai')
+    expect(alAin.recommendedMethod).toBe('UmmAlQura')
+
+    const alBuraimi = detectLocation(24.2509, 55.7931)
+    expect(alBuraimi.city).not.toBeNull()
+    expect(alBuraimi.city.name).toBe('Al Buraimi')
+    expect(alBuraimi.city.countryISO).toBe('OM')
+    expect(alBuraimi.country).toBe('Oman')
+    expect(alBuraimi.timezone).toBe('Asia/Muscat')
+    expect(alBuraimi.recommendedMethod).toBe('Kuwait')
+    expect(alBuraimi.methodSource).toBe('country-default')
+    expect(alBuraimi.source.type).toBe('inherited')
+    expect(alBuraimi.source.from).toBe('Oman')
+  })
+
   it('UAE clipped WOF cells expand Sharjah/Ajman eastward without stealing Dubai', () => {
     const rows = [
       ['Sharjah', 25.3463, 55.4209, 25.35, 55.65],

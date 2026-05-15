@@ -26,6 +26,16 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — Al Buraimi / Al Ain border routing
+
+- Added a conservative `Al Buraimi|OM` city-centre guardrail so Al Buraimi no
+  longer resolves to UAE / Al Ain city provenance.
+- Added an Oman guardrail in country detection ahead of the broad UAE rectangle,
+  preserving Al Ain routing while returning Oman defaults and `Asia/Muscat` for
+  Al Buraimi centre coordinates.
+- No prayer-time math, public API, or regional method policy changed beyond
+  correcting the country/city provenance for this border case.
+
 ### Fixed — Geometry source-map status alignment
 
 - Marked the Basel and Mulhouse WOF locality rows as row-level

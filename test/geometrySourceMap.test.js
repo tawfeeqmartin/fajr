@@ -142,6 +142,7 @@ describe('city geometry source map', () => {
     expect(statusFor('Oujda|MA')).toBe('runtime-bbox-shipped')
     expect(statusFor('Abu Dhabi|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Al Ain|AE')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Al Buraimi|OM')).toBe('runtime-bbox-shipped')
     expect(statusFor('Dubai|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Sharjah|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Ajman|AE')).toBe('runtime-bbox-shipped')
@@ -172,7 +173,41 @@ describe('city geometry source map', () => {
     expect(statusFor('Kinshasa|CD')).toBe('runtime-bbox-shipped')
   })
 
-  it('marks the WOF row-level source as shipped for direct WOF runtime bboxes', () => {
+  it('documents the Al Buraimi guardrail as WOF-supported but clipped to city centre', () => {
+    const entry = sourceMap.cities.find(row => row.cityKey === 'Al Buraimi|OM')
+    expect(entry).toBeTruthy()
+    expect(entry.review.status).toBe('runtime-bbox-shipped')
+    expect(entry.priority).toContain('al-ain-buraimi-seam')
+    expect(entry.neighborRelations).toEqual([
+      expect.objectContaining({
+        cityKey: 'Al Ain|AE',
+        kind: 'cross-border-twin-city',
+      }),
+    ])
+
+    const locality = entry.geometries.find(row => row.stableId === 'wof:locality:421177367')
+    expect(locality).toMatchObject({
+      provider: 'wof',
+      sourceConfidence: 'low',
+      matchConfidence: 'point-like-runtime-guardrail',
+      reviewStatus: 'runtime-bbox-shipped',
+    })
+    expect(locality.ids).toMatchObject({
+      repo: 'whosonfirst-data-admin-om',
+      placetype: 'locality',
+      mzIsCurrent: -1,
+    })
+
+    const county = entry.geometries.find(row => row.stableId === 'wof:county:421184225')
+    expect(county).toMatchObject({
+      provider: 'wof',
+      sourceConfidence: 'medium',
+      matchConfidence: 'placetype-mismatch-context',
+      reviewStatus: 'candidate',
+    })
+  })
+
+  it('marks the WOF row-level source as shipped for WOF-supported runtime bboxes', () => {
     const clippedRuntimeRows = new Set([
       // Dubai uses a clipped lookup cell from the WOF lead, not the full WOF
       // envelope, so the geometry row remains a candidate by design.
