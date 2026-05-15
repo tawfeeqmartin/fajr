@@ -26,6 +26,24 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Added — Mawaqit yearly degenerate-calendar filter
+
+- Added an opt-in `--filter-degenerate` flag to
+  `scripts/fetch-mawaqit-yearly.js` that skips mosque pages whose embedded
+  yearly calendar is structurally implausible (static Fajr/Isha across the
+  year, mean Fajr-Sunrise gap < 45 min at sub-tropical latitudes, etc.).
+- Added `scripts/lib/mosque-calendar-quality.js` with the heuristics
+  (`summarizeCalendar`, `detectIssues`, `assessCalendarQuality`,
+  `isCalendarDegenerate`) and 7 Vitest cases covering healthy + static-Fajr
+  + static-Isha + short-Fajr-Sunrise-gap calendars.
+- Documented the audit in `docs/data-sources.md`: a 2026-05-15 scan of
+  125 mosques across 21 yearly fixtures flagged 6 mosques as degenerate,
+  which account for the bulk of the inflated holdout WMAE in the India
+  (33.3), Senegal (11.4), and Canada (16.7) yearly fixtures.
+- Existing `eval/data/test/mawaqit-*-yearly.json` fixtures are not
+  modified — the fix is tooling-only, with a separate corpus-quality
+  review PR required before any regenerated fixture lands.
+
 ### Added — release preflight QA
 
 - Added `npm run preflight:release`, a reusable maintainer release gate that

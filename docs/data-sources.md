@@ -258,6 +258,34 @@ node scripts/fetch-mawaqit-yearly.js \
 Do not commit a regenerated eval fixture from an autoresearch/script cleanup
 PR; fixture replacement needs a separate corpus-quality review.
 
+A second known artifact in the Mawaqit yearly corpora is **per-mosque
+calendar degeneracy** — a small number of mosque pages publish a calendar
+that is structurally implausible (single fixed Fajr time for the entire
+year, identical Isha 20:15 every day, mean Fajr-Sunrise gap of ~35 min at
+13°N where it should be ~80 min, etc.). These are mosques whose admins
+typed an Iqama target once and never recalibrated to the astronomical
+adhan times.
+
+A 2026-05-15 audit (scan of 125 mosques across 21 yearly fixtures) flagged
+6 mosques as degenerate, which together account for nearly all of the
+inflated WMAE in three holdout fixtures (India 33.3, Senegal 11.4, Canada
+16.7). The audit detail and full filtering thresholds live in
+[`scripts/lib/mosque-calendar-quality.js`](../scripts/lib/mosque-calendar-quality.js).
+
+Future Mawaqit yearly fetches can opt into filtering with
+`--filter-degenerate`:
+
+```bash
+node scripts/fetch-mawaqit-yearly.js \
+  --country "India" \
+  --filter-degenerate \
+  --out eval/data/test/mawaqit-india-yearly.json
+```
+
+As with clock normalization, do not regenerate an existing fixture from a
+tooling PR — refreshing the corpus requires a separate corpus-quality
+review PR.
+
 ## Institutional References Not Yet Fully Fixture-Backed
 
 These sources are important for citation and future ingestion, but a named
