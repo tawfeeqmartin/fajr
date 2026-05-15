@@ -100,13 +100,20 @@ export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-d
  *  - `'caller-explicit'`: the caller passed `elevation:` in the params object
  *    (any value, including 0). Apps matching uniform city timetable practice
  *    should pass `elevation: 0` to opt out of geometric horizon-dip correction.
+ *  - `'country-uniform-timetable'`: the country default follows a uniform
+ *    city/region timetable, so fajr suppresses city-registry elevation unless
+ *    the caller explicitly passes an elevation.
  *  - `'city-registry'`: the matched city in the registry has an `elevation`
  *    field; fajr used that and applied `applyElevationCorrection` inline so
  *    the returned times are already-corrected.
  *  - `'default-zero'`: no city matched (or the matched city had no elevation
  *    field), and the caller did not pass elevation. fajr fell through to 0
  *    (sea level) silently — the safest default. */
-export type ElevationSource = 'caller-explicit' | 'city-registry' | 'default-zero'
+export type ElevationSource =
+  | 'caller-explicit'
+  | 'country-uniform-timetable'
+  | 'city-registry'
+  | 'default-zero'
 
 /** Asr calculation school actually applied.
  *  - `'standard'`: 1× shadow Asr, used by Shafi'i/Maliki/Hanbali-standard

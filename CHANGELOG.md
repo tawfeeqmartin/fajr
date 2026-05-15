@@ -26,6 +26,23 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — Morocco official-table default
+
+- Morocco country-default calls now follow the official Habous uniform
+  city/region timetable stance by default: city-registry elevation is not
+  auto-applied unless the caller explicitly passes a non-zero elevation.
+  This fixes the public no-options path that could make Moroccan Maghrib
+  2-4 minutes later than the official Habous table for inland cities.
+- Fixed explicit `method: 'Morocco'` so it preserves the canonical
+  Morocco +5 Dhuhr / +5 Maghrib Path A buffers instead of silently returning
+  bare 19°/17° times.
+- Added the public TypeScript `ElevationSource` value
+  `'country-uniform-timetable'` for this provenance path.
+- Updated the live Habous validator to gate the five prayer times separately
+  from Shuruq, matching the fixture policy: Shuruq remains a loose source
+  sanity signal because Morocco may publish it as an end-of-Fajr-window
+  practice marker rather than pure astronomical sunrise.
+
 ### Added — Mawaqit yearly degenerate-calendar filter
 
 - Added an opt-in `--filter-degenerate` flag to

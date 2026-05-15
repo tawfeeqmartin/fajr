@@ -63,6 +63,13 @@ fields are:
 Do not render deprecated `location.madhab` / `applied.madhab` as legal-madhhab
 labels. Use `location.asrConvention` and `applied.asrSchool`.
 
+For Morocco, `location.elevationSource === 'country-uniform-timetable'` is the
+expected official-table default: fajr is following Habous/Mawaqit city-region
+tables instead of applying observer elevation automatically. Keep explicit
+positive elevation available for users or mosques that intentionally follow
+observer-elevation horizon correction, but do not treat this source as missing
+elevation data.
+
 ## Respect Null
 
 `detectLocation()` returns `city: null` when it cannot identify a city

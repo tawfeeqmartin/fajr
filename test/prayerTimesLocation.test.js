@@ -6,7 +6,7 @@
  * These cover the new behavioural contract:
  *   - location field always populated
  *   - methodSource: caller-explicit > city-institutional > country-default > fallback
- *   - elevationSource: caller-explicit > city-registry > default-zero
+ *   - elevationSource: caller-explicit > country-uniform-timetable > city-registry > default-zero
  *   - auto-elevation note when caller silent and city.elevation is set
  *   - auto-method note when caller silent and city.methodOverride is set
  *   - back-compat: caller-explicit elevation/method preserves prior behaviour

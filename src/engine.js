@@ -1028,6 +1028,19 @@ const COUNTRY_ASR_CONVENTION = {
   // Lebanon/Syria are religiously plural, and Western diaspora is heterogeneous.
 }
 
+const UNIFORM_CITY_TIMETABLE_COUNTRIES = new Set([
+  // Morocco's official Habous tables are city/region timetables, not
+  // observer-elevation timetables. Auto-applying registry elevation made the
+  // public no-options path drift 2-4 min late on Maghrib vs Habous for inland
+  // Moroccan cities. Keep the country default uniform; caller-explicit
+  // elevation still applies for users/apps that intentionally want observer
+  // horizon correction.
+  // Classification: 🟡→🟢 (official institutional timetable stance);
+  // see knowledge/wiki/regions/morocco.md and
+  // knowledge/wiki/corrections/elevation.md.
+  'Morocco',
+])
+
 /**
  * Select calculation method and method name for a country/location.
  *
@@ -2619,16 +2632,15 @@ function methodFromString(name, country, lat, _coords) {
       return { params: p, methodName: 'Russia (DUMR, 16°/15° + TwilightAngle)' }
     }
     case 'Morocco': {
-      // v1.7.25: Aligned with the flipped country default — Habous-aligned
-      // ministerial astronomical (no +5 buffers). Pre-v1.7.25 this case
-      // returned the v1.5.0 +5 Maghrib Path A buffer; that behavior now
-      // requires explicit `method: 'MoroccoMawaqit'` (which also re-applies
-      // the v1.7.16 +5 Dhuhr buffer for full mosque-published parity).
-      // Same logic as selectMethod's Morocco branch — kept in sync.
+      // Same canonical Morocco stance as selectMethod('Morocco'): 19°/17°
+      // with the +5 Dhuhr and +5 Maghrib Habous/Mawaqit Path A buffers.
+      // Caller-explicit `method: 'Morocco'` should not silently drop the
+      // institutional buffers that the country-default path applies.
       const p = adhan.CalculationMethod.Other()
       p.fajrAngle = 19
       p.ishaAngle = 17
-      return { params: p, methodName: 'Morocco (19°/17°, Habous-aligned ministerial astronomical)' }
+      p.methodAdjustments = { ...(p.methodAdjustments || {}), dhuhr: 5, maghrib: 5 }
+      return { params: p, methodName: 'Morocco (19°/17° + +5min Dhuhr/+5min Maghrib ihtiyati per Path A community calibration)' }
     }
     case 'Tunisia': {
       const p = adhan.CalculationMethod.Other()
@@ -2882,17 +2894,22 @@ export function prayerTimes(params) {
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
   const times = new adhan.PrayerTimes(coords, date, params_)
 
-  // ── Effective elevation: caller-explicit > city-registry > default-zero
+  // ── Effective elevation: caller-explicit > country-uniform-timetable > city-registry > default-zero
   //
-  // The city-registry path triggers automatic elevation correction inside
-  // this function. The caller-explicit path defers to src/index.js's wrapper
-  // (which calls applyElevationCorrection when params.elevation > 0) so the
-  // existing wrapper behaviour is unchanged for back-compat. The default-zero
-  // path applies no correction.
+  // The country-uniform-timetable path keeps official city/region timetable
+  // countries aligned with their published tables unless the caller explicitly
+  // opts into observer-elevation correction. The city-registry path triggers
+  // automatic elevation correction inside this function. The caller-explicit
+  // path defers to src/index.js's wrapper (which calls applyElevationCorrection
+  // when params.elevation > 0) so the existing wrapper behaviour is unchanged
+  // for back-compat. The default-zero path applies no correction.
   let effectiveElevation, elevationSource
   if (callerExplicitElevation) {
     effectiveElevation = elevationParam
     elevationSource = 'caller-explicit'
+  } else if (country && UNIFORM_CITY_TIMETABLE_COUNTRIES.has(country)) {
+    effectiveElevation = 0
+    elevationSource = 'country-uniform-timetable'
   } else if (loc.city && loc.city.elevation != null) {
     effectiveElevation = loc.city.elevation
     elevationSource = 'city-registry'
@@ -2949,6 +2966,14 @@ export function prayerTimes(params) {
       ` → Maghrib +${dipMin.toFixed(1)} min later, Shuruq -${dipMin.toFixed(1)} min earlier vs sea-level.` +
       ` Saudi/Umm al-Qura published city timetables are uniform; UAE (Burj Khalifa) + Malaysia apply elevation-aware guidance.` +
       ` To match a uniform city timetable, pass elevation: 0.`
+    )
+  }
+  if (elevationSource === 'country-uniform-timetable') {
+    notes.push(
+      `${country} official tables are uniform city/region timetables, so fajr ` +
+      `does not auto-apply city-registry elevation for the country default. ` +
+      `Pass an explicit non-zero elevation only when your local mosque or ` +
+      `use case follows observer-elevation horizon correction.`
     )
   }
   if (methodSource === 'city-institutional') {

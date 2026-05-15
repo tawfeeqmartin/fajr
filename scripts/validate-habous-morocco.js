@@ -15,6 +15,7 @@
  * Usage:
  *   node scripts/validate-habous-morocco.js --city Casablanca --allow-insecure-habous-cert
  *   node scripts/validate-habous-morocco.js --limit 10 --allow-insecure-habous-cert
+ *   node scripts/validate-habous-morocco.js --core-threshold-min 3 --shuruq-threshold-min 10
  *
  * The explicit cert flag is needed in some Node environments because Habous's
  * TLS chain can fail Node's bundled CA verification even when curl succeeds.
@@ -52,10 +53,13 @@ for (let i = 2; i < process.argv.length; i++) {
 const allowInsecureHabousCert = args.has('allow-insecure-habous-cert')
 const cityFilter = args.get('city')
 const limit = args.has('limit') ? Number(args.get('limit')) : null
-const thresholdMin = args.has('threshold-min') ? Number(args.get('threshold-min')) : 5
+const coreThresholdMin = args.has('core-threshold-min')
+  ? Number(args.get('core-threshold-min'))
+  : (args.has('threshold-min') ? Number(args.get('threshold-min')) : 3)
+const shuruqThresholdMin = args.has('shuruq-threshold-min') ? Number(args.get('shuruq-threshold-min')) : 10
 
-if (Number.isNaN(limit) || Number.isNaN(thresholdMin)) {
-  console.error('Usage error: --limit and --threshold-min must be numbers.')
+if (Number.isNaN(limit) || Number.isNaN(coreThresholdMin) || Number.isNaN(shuruqThresholdMin)) {
+  console.error('Usage error: --limit, --core-threshold-min, --threshold-min, and --shuruq-threshold-min must be numbers.')
   process.exit(2)
 }
 
@@ -196,6 +200,7 @@ let failCount = 0
 
 console.log(`[habous-morocco] comparing ${mappings.length} mapped city row(s) for ${date.toISOString().slice(0, 10)} (Africa/Casablanca)`)
 console.log(`[habous-morocco] source: ${habousMap.source.monthlyUrl}`)
+console.log(`[habous-morocco] thresholds: five prayers <= ${coreThresholdMin} min; Shuruq <= ${shuruqThresholdMin} min`)
 console.log('')
 console.log('City                  | Habous city      | Match                 | Fajr | Shuruq | Dhuhr | Asr | Maghrib | Isha | Worst')
 console.log('----------------------|------------------|-----------------------|------|--------|-------|-----|---------|------|------')
@@ -216,7 +221,8 @@ for (const row of mappings) {
     const calcHHMM = formatInMorocco(calc[key])
     const delta = signedDelta(calcHHMM, official[key])
     worstAbs = Math.max(worstAbs, Math.abs(delta))
-    if (Math.abs(delta) > thresholdMin) failCount++
+    const threshold = key === 'shuruq' ? shuruqThresholdMin : coreThresholdMin
+    if (Math.abs(delta) > threshold) failCount++
     return [key, delta]
   }))
 
@@ -235,7 +241,7 @@ for (const row of mappings) {
 console.log('')
 console.log(`[habous-morocco] worst absolute delta: ${worstAbs.toFixed(0)} min`)
 if (failCount) {
-  console.error(`[habous-morocco] ${failCount} prayer delta(s) exceeded threshold ${thresholdMin} min.`)
+  console.error(`[habous-morocco] ${failCount} prayer delta(s) exceeded thresholds: five prayers ${coreThresholdMin} min, Shuruq ${shuruqThresholdMin} min.`)
   process.exit(1)
 }
-console.log(`[habous-morocco] all deltas within threshold ${thresholdMin} min.`)
+console.log(`[habous-morocco] all deltas within thresholds: five prayers ${coreThresholdMin} min, Shuruq ${shuruqThresholdMin} min.`)
