@@ -1396,6 +1396,84 @@
       ]
     },
     {
+      "cityKey": "Detroit|US",
+      "priority": ["detroit-windsor-border", "detroit-dearborn", "source-map-only", "americas-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Detroit is already hand-clipped against Windsor and Dearborn at runtime; preserve US Census-backed WOF evidence before any future paired bbox review."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Windsor|CA", "kind": "runtime-edge-touch", "status": "Windsor runtime bbox clips north to 42.3199; Detroit starts at lat 42.32." },
+        { "cityKey": "Dearborn|US", "kind": "runtime-edge-touch", "status": "Detroit and Dearborn runtime boxes touch at lon -83.08 without area overlap." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:85951091",
+          "ids": { "wofId": 85951091, "repo": "whosonfirst-data-admin-us", "placetype": "locality", "srcGeom": "uscensus", "mzIsCurrent": 1 },
+          "cacheFile": "US/detroit/wof-locality-85951091.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["US Census-backed WOF locality row. The current runtime bbox is an intentionally clipped lookup cell, not this full envelope."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:localadmin:404506393",
+          "ids": { "wofId": 404506393, "repo": "whosonfirst-data-admin-us", "placetype": "localadmin", "srcGeom": "uscensus", "mzIsCurrent": 1 },
+          "cacheFile": "US/detroit/wof-localadmin-404506393.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["US Census-backed WOF localadmin row with the same reviewed envelope as the locality row; context only, not a direct locality replacement."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Dearborn|US",
+      "priority": ["detroit-windsor-border", "detroit-dearborn", "source-map-only", "americas-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Dearborn has a city-institutional method override, so keep geometry provenance explicit before any future bbox clipping review."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Windsor|CA", "kind": "runtime-separated", "status": "Windsor runtime bbox clips north to 42.3199; Dearborn starts at lat 42.32." },
+        { "cityKey": "Detroit|US", "kind": "runtime-edge-touch", "status": "Dearborn and Detroit runtime boxes touch at lon -83.08 without area overlap." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:85951061",
+          "ids": { "wofId": 85951061, "repo": "whosonfirst-data-admin-us", "placetype": "locality", "srcGeom": "uscensus", "mzIsCurrent": 1 },
+          "cacheFile": "US/dearborn/wof-locality-85951061.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["US Census-backed WOF locality row. Runtime remains a hand-clipped guardrail around the city-institutional Dearborn lookup cell."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:localadmin:404508577",
+          "ids": { "wofId": 404508577, "repo": "whosonfirst-data-admin-us", "placetype": "localadmin", "srcGeom": "uscensus", "mzIsCurrent": 1 },
+          "cacheFile": "US/dearborn/wof-localadmin-404508577.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["US Census-backed WOF localadmin row with the same reviewed envelope as the locality row; context only, not a direct locality replacement."]
+        }
+      ]
+    },
+    {
       "cityKey": "Toronto|CA",
       "priority": ["canada-metro", "toronto-mississauga", "source-map-only", "americas-p0"],
       "review": {

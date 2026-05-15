@@ -51,6 +51,15 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Preserved WOF locality rows where available and Statistics Canada-derived WOF
   county/context rows for Toronto, Montreal, and Laval.
 
+### Added — Detroit/Dearborn geometry source-map candidates
+
+- Added audit-only US Census-backed WOF locality/localadmin candidates for
+  Detroit and Dearborn, completing the source-map evidence around the already
+  shipped Windsor river-seam guardrail.
+- Kept the rows source-map-only; no runtime bbox, country/method dispatch,
+  city-institutional override, public API, package data, or prayer-time
+  behavior changed.
+
 ## [1.9.2] — 2026-05-15
 
 ### Fixed — Al Buraimi / Al Ain border routing

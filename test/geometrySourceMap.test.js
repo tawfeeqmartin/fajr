@@ -116,6 +116,8 @@ describe('city geometry source map', () => {
       ['Mississauga|CA', 'wof:locality:101735893'],
       ['Laval|CA', 'wof:locality:101737759'],
       ['Windsor|CA', 'wof:locality:101735855'],
+      ['Detroit|US', 'wof:locality:85951091'],
+      ['Dearborn|US', 'wof:locality:85951061'],
       ['Geneva|CH', 'wof:locality:101748445'],
       ['Annemasse|FR', 'wof:locality:101757307'],
       ['Ferney-Voltaire|FR', 'wof:locality:101753277'],
@@ -385,6 +387,30 @@ describe('city geometry source map', () => {
       for (const stableId of stableIds) {
         const geometry = entry.geometries.find(row => row.stableId === stableId)
         expect(geometry, `${cityKey} ${stableId}`).toBeTruthy()
+        expect(geometry.reviewStatus, `${cityKey} ${stableId}`).toBe('candidate')
+      }
+    }
+  })
+
+  it('keeps Detroit/Dearborn geometry source-map-only around the shipped Windsor seam', () => {
+    const expected = new Map([
+      ['Detroit|US', ['wof:locality:85951091', 'wof:localadmin:404506393']],
+      ['Dearborn|US', ['wof:locality:85951061', 'wof:localadmin:404508577']],
+    ])
+
+    for (const [cityKey, stableIds] of expected) {
+      const entry = sourceMap.cities.find(row => row.cityKey === cityKey)
+      expect(entry, cityKey).toBeTruthy()
+      expect(entry.review.status, cityKey).toBe('candidate')
+      expect(entry.priority, cityKey).toContain('detroit-windsor-border')
+      expect(entry.priority, cityKey).toContain('source-map-only')
+
+      for (const stableId of stableIds) {
+        const geometry = entry.geometries.find(row => row.stableId === stableId)
+        expect(geometry, `${cityKey} ${stableId}`).toBeTruthy()
+        expect(geometry.ids.repo, `${cityKey} ${stableId}`).toBe('whosonfirst-data-admin-us')
+        expect(geometry.ids.srcGeom, `${cityKey} ${stableId}`).toBe('uscensus')
+        expect(geometry.ids.mzIsCurrent, `${cityKey} ${stableId}`).toBe(1)
         expect(geometry.reviewStatus, `${cityKey} ${stableId}`).toBe('candidate')
       }
     }
