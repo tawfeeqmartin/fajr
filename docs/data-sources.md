@@ -1,6 +1,6 @@
 # Data Sources
 
-Last refreshed: 2026-05-08
+Last refreshed: 2026-05-15
 
 This page explains what fajr validates against, how each source should be
 trusted, and where the raw source details live. It is not the source of truth
@@ -45,7 +45,7 @@ latest generated run:
 | Set | Entries | Fixture files | Role |
 |---|---:|---:|---|
 | Train | 215 | 12 | Ratchet-gated. |
-| Holdout | 29,004 | 186 | Diagnostic only; do not optimize against this aggregate. |
+| Holdout | 54,639 | 204 | Diagnostic only; do not optimize against this aggregate. |
 
 ### Train Sources
 
@@ -77,7 +77,7 @@ eval/data/train/waktusolat.json
 
 | Source | Entries | Current role | Notes |
 |---|---:|---|---|
-| Mawaqit yearly corpora | 20,296 | Mosque-published seasonal diagnostic | Large and useful, but contains mosque-level variance and occasional stale/corrupt rows. Analyze before calibrating. |
+| Mawaqit yearly corpora | 45,916 | Mosque-published seasonal diagnostic | Large and useful, but contains mosque-level variance, clock-encoding artifacts, and occasional stale/corrupt rows. Analyze before calibrating. |
 | Morocco Habous monthly | 990 | Official institutional diagnostic | Strong Morocco validation source; supports the canonical Morocco official-timetable position. |
 | MUIS Singapore | 365 | Official institutional diagnostic | Clean licensed annual source; currently one of fajr's strongest institutional matches. |
 | KEMENAG Indonesia | 1,054 | Official institutional diagnostic | Broad provincial coverage; use for Indonesia position work, not as a blind global correction. |
@@ -88,7 +88,7 @@ eval/data/train/waktusolat.json
 | Stress fixtures | varied | Edge-case validation | High latitude, polar, equator, and high elevation behavior. |
 
 Holdout fixture files are intentionally numerous (`eval/data/test/` currently
-contains 186 fixture files). Use [docs/progress.md](progress.md) for the
+contains 204 fixture files). Use [docs/progress.md](progress.md) for the
 current per-source WMAE table rather than hand-maintaining that table here.
 
 ## Major Source Notes

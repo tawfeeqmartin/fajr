@@ -1,6 +1,6 @@
 # fajr — accuracy + scholarly methodology
 
-Last refreshed: 2026-05-14 (v1.8.1)
+Last refreshed: 2026-05-15 (v1.9.3)
 
 ## What this document is
 
@@ -33,14 +33,14 @@ the top of this file always reflects the most recent version on npm.
 > calc-vs-calc comparison cells with known data-quality issues (date-format
 > drift, pre-fix Aladhan corruption surfaced in the v1.6.1 fix, high-latitude
 > outliers like Longyearbyen 78°N, Oslo 60°N, Reykjavík 64°N, plus the
-> muslimsalat.com aggregator at 26 min WMAE). The institutional-train WMAE
-> (**0.98 min** as of v1.7.16, against Mawaqit / Diyanet / JAKIM mosque- and
-> government-published reality) is the headline number that drives the
-> ratchet — and **broke the 1-minute barrier in v1.7.16** via Morocco Dhuhr +5
-> + JAKIM Dhuhr +2 / Asr +1 Path A calibrations. Holdout numbers are
+> muslimsalat.com aggregator at 26 min WMAE). The train-ratchet WMAE
+> (**0.98 min** as of v1.9.3, against Mawaqit / Diyanet / JAKIM plus bounded
+> Aladhan calc-consistency cells) is the headline number that drives the
+> ratchet; it first broke the 1-minute barrier in v1.7.16 via Morocco Dhuhr +5
+> and JAKIM Dhuhr +2 / Asr +1 Path A calibrations. Holdout numbers are
 > informational only — they are reported because hiding them would be
 > dishonest, but they should not be read as fajr's accuracy claim. See
-> [Per-region accuracy](#per-region-accuracy-current-post-v1719) for the
+> [Per-region accuracy](#per-region-accuracy-current-v193) for the
 > breakdown.
 
 > **🟢 Audit closure (2026-05-05) — Morocco Path A empirically validated
@@ -98,14 +98,17 @@ calibration.
 | **praytimes.org** | [praytimes.org](https://praytimes.org) | Hamid Zarrabi's reference JavaScript implementation of the standard methods. | Calc-vs-calc independent JS implementation cross-validation. See `scripts/fetch-praytimes.js`. |
 | **muslimsalat.com** | [muslimsalat.com](https://muslimsalat.com) | Third-party prayer-time aggregator. | Holdout cross-reference. See `scripts/fetch-muslimsalat.js`. |
 
-The institutional-train sources (Mawaqit / Diyanet / JAKIM / MUIS / KEMENAG)
-are the ones whose pass/fail discipline drives the ratchet in
-[`eval/compare.js`](eval/compare.js). The calc-vs-calc sources (AlAdhan /
-praytimes.org / muslimsalat.com) provide breadth but not arbitration.
+The current train-ratchet sources (Mawaqit / Diyanet / JAKIM plus bounded
+Aladhan calc-consistency cells) are the ones whose pass/fail discipline drives
+[`eval/compare.js`](eval/compare.js). MUIS, KEMENAG, Habous, ESA, praytimes.org,
+muslimsalat.com, and most yearly Mawaqit corpora are currently holdout or
+diagnostic sources unless explicitly promoted. Calc-vs-calc sources provide
+breadth and math-drift detection; they do not arbitrate local institutional
+practice by themselves.
 
 ---
 
-## Calibration health metadata (v1.8.1)
+## Calibration health metadata (v1.9.3)
 
 This table is the per-source health layer requested in fajr#105. It answers:
 what correction is currently applied, when the source was last refreshed, how
@@ -116,7 +119,7 @@ calibration changes.
 
 | Stance / region | Current correction in fajr | Last source refresh | Fixture depth | Current residual | Health verdict |
 |---|---|---:|---|---|---|
-| **Morocco official timetable** | Morocco 19°/17° + Dhuhr +5 min + Maghrib +5 min. Single canonical Morocco stance; no `MoroccoHabous` / `MoroccoMawaqit` alias split. | 2026-05-05 (`morocco-habous-monthly.json`), with recurring Habous snapshot workflow staged under `fixtures/habous-morocco/`. | Habous monthly: 33 cities × 30 days = 990 entry-dates; Mawaqit yearly: 42 mosques × 366 days = 15,372 rows before corrupt-row filtering. | Habous monthly WMAE 1.26 min; Mawaqit full-year Dhuhr mean bias -0.15 min and Maghrib mean bias +0.76 min. | 🟢 fresh / A-grade. Source-backed and seasonally stress-tested; Sunrise treated as mosque-practice sanity signal, not calibration target. |
+| **Morocco official timetable** | Morocco 19°/17° + Dhuhr +5 min + Maghrib +5 min. Single canonical Morocco stance; no `MoroccoHabous` / `MoroccoMawaqit` alias split. v1.9.3 also makes the no-options country default follow the official uniform city/region timetable stance: no automatic observer-elevation correction unless elevation is explicit. | 2026-05-15 live Habous check; monthly Habous snapshot archived under `fixtures/habous-morocco/`; recurring snapshot workflow active. | Habous monthly: 33 cities × 30 days = 990 entry-dates; Mawaqit yearly: 42 mosques × 366 days = 15,372 rows before corrupt-row filtering. | Habous monthly WMAE 1.26 min; live 2026-05-15 check found all 33 mapped Moroccan cities within 3 min for the five prayer times; Mawaqit full-year Dhuhr mean bias -0.15 min and Maghrib mean bias +0.76 min. | 🟢 fresh / A-grade. Source-backed and seasonally stress-tested; Shuruq/Sunrise is treated as mosque-practice sanity signal, not calibration target. |
 | **Türkiye / Diyanet** | Diyanet 18°/17° preset + Path A -1 min Maghrib/Isha adjustment. | 2026-04-30 fetch, covering 2026-04-26 to 2026-05-06. | Train fixture: 3 cities × 10 days = 30 entry-dates. | Train WMAE 0.50 min. | 🟢 accurate but 🟡 sparse. Strong official source, but promotion to A still needs multi-season/yearly fixture depth. |
 | **Malaysia / JAKIM** | JAKIM method + Path A Dhuhr +2 min, Asr +1 min, Isha +1 min. | 2026-04-30 fetch, covering 2026-04-01 to 2026-04-10. | Train fixture: 3 zones × 10 days = 30 entry-dates. | Train WMAE 0.45 min. | 🟢 accurate but 🟡 sparse. Proxy channel via waktusolat.app remains acceptable but should eventually be replaced or corroborated by direct JAKIM/e-Solat ingestion. |
 | **Singapore / MUIS** | MUIS/Singapore official method; no Path A offset. | 2026 annual data.gov.sg fixture. | Holdout fixture: Singapore × 365 days. | Holdout WMAE 0.45 min. | 🟢 fresh / A-grade. Point-sized geography and official open-data annual table. |
@@ -124,7 +127,7 @@ calibration changes.
 | **Indonesia / KEMENAG** | JAKIM/Singapore-shaped regional dispatch for Indonesia; no current Path A offset. | 2026 KEMENAG/myQuran fixtures in holdout. | KEMENAG holdout: 34 provincial capitals × 31 days = 1,054 entry-dates; myQuran sample: 147 entry-dates. | KEMENAG holdout WMAE 2.27 min; myQuran wrapper WMAE 6.81 min, mostly source-shape/noise rather than authority disagreement. | 🟡 needs regional calibration review. Strong authority, but Maghrib bias exceeds A-grade threshold and per-province zones need careful treatment. |
 | **United Kingdom / London** | MoonsightingCommittee default; no London Path A offset currently applied. | 2026 Mawaqit UK yearly + Aladhan Moonsighting yearly fixtures. | Mawaqit UK yearly: 5 mosques × 366 days; Aladhan comparator: 3 cities × 365 days. | London Maghrib/Dhuhr disagreement remains source-arbitration work; current known-disagreement entry treats the fixture as DST-sensitive. | 🟡 active arbitration. Do not calibrate from the raw yearly file until BST/GMT encoding is resolved. |
 | **Saudi Arabia / Umm al-Qura** | Umm al-Qura default; Isha interval convention; elevation correction applies when city elevation is resolved unless caller opts out with `elevation: 0`. | 2026 Mawaqit Saudi yearly holdout exists; GPH/MoIA primary source remains unreachable from current network. | Mawaqit Saudi yearly: 6 mosques × 366 days; Aladhan train cells cover Makkah/Madinah/Riyadh. | Train Saudi cells remain sub-minute to Aladhan; direct Haramain/GPH institutional WMAE not yet available. | 🟡 primary-source gap. Keep Saudi uniform-city-time rationale as citation-gap #132 until MoIA/GPH text or source tables are retrieved. |
-| **Fallback / calc-vs-calc world coverage** | Country default where known; ISNA fallback when no country bbox matches. | Ongoing Aladhan/praytimes/muslimsalat holdout snapshots. | Thousands of holdout cells across world fixtures. | Holdout WMAE 7.50 min overall, dominated by noisy aggregators and high-latitude method divergence. | ⚪ diagnostic only. Useful for math drift and coverage smoke, not for institutional calibration. |
+| **Fallback / calc-vs-calc world coverage** | Country default where known; ISNA fallback when no country bbox matches. | Ongoing Aladhan/praytimes/muslimsalat holdout snapshots. | Thousands of holdout cells across world fixtures. | Holdout WMAE 7.36 min overall, dominated by noisy aggregators, degenerate yearly calendars, and high-latitude method divergence. | ⚪ diagnostic only. Useful for math drift and coverage smoke, not for institutional calibration. |
 
 Health verdict meanings:
 
@@ -135,9 +138,10 @@ Health verdict meanings:
 
 ---
 
-## Per-region accuracy (current, post-v1.7.19)
+## Per-region accuracy (current, v1.9.3)
 
-These numbers are from the most recent eval run on master (2026-05-03). They
+These numbers are from the most recent generated progress snapshot on master
+(2026-05-14T21:19:41Z). They
 are also live in [`eval/results/runs.jsonl`](eval/results/runs.jsonl) — the
 last record is always the current state.
 
@@ -146,9 +150,9 @@ last record is always the current state.
 | Corpus | WMAE (min) | Entries | Notes |
 |---|---|---|---|
 | **Train** (institutional ground truth) | **0.98** | 215 | Mawaqit / Diyanet / JAKIM — drives the ratchet. **Broke the 1-minute barrier in v1.7.16** via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations. |
-| Holdout (diagnostic only) | 7.36 | 29004 | Informational only — expanded yearly mosque/institutional/calc-vs-calc holdout includes noisy aggregators, seasonal mosque variance, and high-latitude / source-quality outliers. See caveat at top of file and [SCOREBOARD.md](SCOREBOARD.md). |
+| Holdout (diagnostic only) | 7.36 | 54639 | Informational only — expanded yearly mosque/institutional/calc-vs-calc holdout includes noisy aggregators, seasonal mosque variance, degenerate yearly calendars, and high-latitude / source-quality outliers. See caveat at top of file and [SCOREBOARD.md](SCOREBOARD.md). |
 
-### Per-source breakdown (v1.7.19)
+### Per-source breakdown (v1.9.3)
 
 | Source | Train WMAE | Entries | v1.7.16 Δ |
 |---|---|---|---|
@@ -162,7 +166,7 @@ offsets stayed inside their target regions — region-bounded calibrations
 should NOT move sources outside the targeted regions, and the empirical
 data confirms they don't.
 
-### Per-prayer signed bias (train, post-v1.7.19)
+### Per-prayer signed bias (train, v1.9.3)
 
 | Prayer | MAE (min) | Signed bias (min) | Direction |
 |---|---|---|---|
@@ -277,8 +281,8 @@ country / region. Each is tagged with a scholarly classification per
 | Russia / Bulgaria / Greece / European-east cluster | MWL | 🟡 Limited precedent | Aladhan world-default fallback | (no single institutional publisher) |
 | 163-country world | varied per `COUNTRY_BBOX_TABLE` | 🟢 / 🟡→🟢 / 🟡 per region | See [`src/engine.js`](src/engine.js) `selectMethod` cases — every dispatched method has an institution noted inline | (per-country) |
 
-The full country-by-country dispatch (**168 countries** in `detectCountry`'s
-if-chain after v1.7.19, plus the broader `COUNTRY_BBOX_TABLE` for Pass-B
+The full country-by-country dispatch (**168 countries** across the runtime
+country detection paths, plus the broader `COUNTRY_BBOX_TABLE` for Pass-B
 fallback) is in [`src/engine.js`](src/engine.js). The `methodName` string
 returned with every `prayerTimes()` call carries both the dispatched method
 label and the country that triggered it.

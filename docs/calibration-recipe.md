@@ -1,12 +1,11 @@
 # Calibration Recipe — Path A WMAE Improvements
 
-> **Last refreshed:** 2026-05-14 (v1.8.1). This remains the Path A calibration
+> **Last refreshed:** 2026-05-15 (v1.9.3). This remains the Path A calibration
 > methodology guide, not the live scoreboard. Current WMAE, corpus counts, and
 > per-source residuals live in [SCOREBOARD.md](../SCOREBOARD.md) and
-> [docs/progress.md](progress.md). The v1.8.1 release shipped no calibration
-> changes — train WMAE 0.9757 is unchanged from v1.7.16 baseline; see the
-> SCOREBOARD for the current corpus expansion (55 → 122 mosques, real Egypt
-> ESA institutional fixture).
+> [docs/progress.md](progress.md). v1.9.3 shipped Morocco uniform-timetable
+> provenance and Mawaqit source-quality tooling, not a new train-ratchet
+> calibration — train WMAE 0.9757 is unchanged from the v1.7.16 breakthrough.
 >
 > A durable methodology guide for finding, validating, and shipping per-source calibration corrections that decrease train WMAE without violating the ratchet. The JAKIM offset shipped in v1.4.1 is the worked example — every step below references that change as the canonical demonstration.
 >
@@ -258,9 +257,9 @@ CORPUS CURATION SIDE-EFFECT (if applicable)
 
 ## What's left on the table — current state and priorities
 
-As of v1.7.19 (post Karpathy autoresearch ratchet session in v1.7.16 + city
-registry expansion in v1.7.18 + engine bbox-table fixes in v1.7.19), the
-train residuals look like this:
+As of v1.9.3 (post Karpathy autoresearch ratchet session in v1.7.16, city
+registry growth through v1.9.x, and Morocco uniform-timetable provenance in
+v1.9.3), the train residuals still look like this:
 
 ```
 Per-source agreement (train, post-v1.7.16)

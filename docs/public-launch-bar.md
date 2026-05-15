@@ -36,8 +36,8 @@ These are the items that should close before a broad social announcement.
 
 | Blocker | Why it matters | Tracking |
 |---|---|---|
-| Documentation coherence pass | A new user should not see stale release numbers, outdated architecture claims, or contradictory calibration framing. `CALIBRATION.md` still says v1.8.1 in its header while the repo is v1.9.3. | This page, then a docs cleanup PR |
-| Architecture framing | Layer 1 and Layer 4 are shipped. Layers 2, 3, and 5 are still design/research tracks. Public docs should not imply the whole 5-layer architecture is already shipped. | #101 |
+| Documentation coherence pass | A new user should not see stale release numbers, outdated architecture claims, or contradictory calibration framing. Public-facing docs should be checked whenever v1.x ships a behavior/provenance release. | This page plus the next docs cleanup PR |
+| Architecture framing | Layer 1 and Layer 4 are shipped. Layers 2, 3, and 5 are still design/research tracks. Public docs should not imply the whole 5-layer architecture is already shipped. | #101; README Architecture Status |
 | Morocco fixture promotion decision | Morocco is strong enough for tester sharing, but the public accuracy claim should say exactly which Habous/Mawaqit evidence is train, holdout, monthly, or yearly. | #92, #103 |
 | Distribution path | npm ESM and esm.sh are working. A UMD/IIFE bundle is still useful for standalone-script/native-webview consumers and should be either shipped or explicitly deferred. | #46 |
 | Open-issue triage | Advisory issues can stay open, but each should have a current owner/next action or a clear deferral note. | SCOREBOARD open issue list |
