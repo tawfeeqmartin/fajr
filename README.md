@@ -177,6 +177,29 @@ eval charts are generated in [docs/progress.md](docs/progress.md).
 
 ![WMAE over time](docs/charts/wmae-trend.svg)
 
+## Architecture Status
+
+The shipped v1.x surface is intentionally smaller than the full architecture
+roadmap in issue #101.
+
+Shipped today:
+
+- Layer 1 raw astronomical primitives via `astronomical(lat, lon, date)`.
+- Layer 4 validity and provenance signals via `validityWarnings[]`, `notes[]`,
+  `location`, `applied`, and `corrections`.
+- App-facing settings metadata and caller overrides via `features()`,
+  `featureInfo(key)`, and `prayerTimes({ override: { ... } })`.
+
+Still research/design work:
+
+- Layer 2 multi-institution-per-country registry.
+- Layer 3 fixture-publishing convention beyond the current eval/fixture split.
+- Layer 5 full alternatives/provenance assembly for every local authority.
+
+Until those land, `fajr` chooses one documented default for a coordinate,
+surfaces disagreements through `notes[]` / `altMethods`, and lets callers
+override method, Asr convention, and elevation.
+
 ## Why fajr Instead of adhan-js or AlAdhan?
 
 Use `adhan-js` when you already know the method and want the small standard calculation library. Use AlAdhan when you want a hosted API with address-string lookup.
