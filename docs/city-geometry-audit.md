@@ -34,13 +34,13 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-60 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+62 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
 source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
 rows, 1 Hong Kong/Shenzhen border row, 2 Singapore/Johor rows, 4 Klang Valley
 rows, 1 Pakistan overlap row, 4 Toronto/Montreal Canada metro rows,
-1 Detroit/Windsor border row, 3 Geneva border rows, 2 Strasbourg/Kehl border
+3 Detroit/Dearborn/Windsor border rows, 3 Geneva border rows, 2 Strasbourg/Kehl border
 rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries
-17 OSM relation rows plus 64 WOF rows and 14
+17 OSM relation rows plus 68 WOF rows and 14
 geoBoundaries rows across reviewed locality/county/admin candidates. Morocco rows with
 WOF-backed runtime status are separated from OSM-only audit candidates;
 Jerusalem intentionally remains without a geometry candidate until a human
@@ -157,6 +157,9 @@ The Detroit/Windsor border seam needs clipping rather than direct WOF copying:
   envelope crosses the Detroit River into Detroit/Dearborn. The runtime cell is
   clipped at the river seam while Detroit and Dearborn are clipped north of the
   same seam.
+- Detroit and Dearborn now have US Census-backed WOF locality/localadmin rows
+  preserved as source-map-only candidates. They document the evidence around
+  the shipped seam but do not replace the current hand-clipped runtime cells.
 
 The Geneva/French-border seam is cleaner with WOF locality rows:
 
