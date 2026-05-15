@@ -29,6 +29,7 @@ distribution shape, and open tracking issues should tell the same story.
 | Critical issues | SCOREBOARD reports 0 open critical issues. | Met |
 | Morocco default | v1.9.3 follows the official uniform city/region timetable stance: country default elevation is `0`, `elevationSource` is `country-uniform-timetable`, and automatic observer-elevation correction is off unless explicit. | Met |
 | Downstream app | agiftoftime PR #53 merged; app is bumped to fajr v1.9.3 and issue #52 is closed after downstream compatibility validation. | Met |
+| Architecture framing | README now separates shipped Layer 1 / Layer 4 / settings surfaces from Layer 2/3/5 research tracks. | Met |
 
 ## Public-Launch Blockers
 
@@ -36,10 +37,7 @@ These are the items that should close before a broad social announcement.
 
 | Blocker | Why it matters | Tracking |
 |---|---|---|
-| Documentation coherence pass | A new user should not see stale release numbers, outdated architecture claims, or contradictory calibration framing. Public-facing docs should be checked whenever v1.x ships a behavior/provenance release. | This page plus the next docs cleanup PR |
-| Architecture framing | Layer 1 and Layer 4 are shipped. Layers 2, 3, and 5 are still design/research tracks. Public docs should not imply the whole 5-layer architecture is already shipped. | #101; README Architecture Status |
 | Morocco fixture promotion decision | Morocco is strong enough for tester sharing, but the public accuracy claim should say exactly which Habous/Mawaqit evidence is train, holdout, monthly, or yearly. | #92, #103 |
-| Distribution path | npm ESM and esm.sh are working. A UMD/IIFE bundle is still useful for standalone-script/native-webview consumers and should be either shipped or explicitly deferred. | #46 |
 | Open-issue triage | Advisory issues can stay open, but each should have a current owner/next action or a clear deferral note. | SCOREBOARD open issue list |
 
 ## Non-Blockers
@@ -50,6 +48,7 @@ new critical regression appears.
 | Item | Reason |
 |---|---|
 | Native ports | Swift/Kotlin/C#/Rust are useful distribution work, not a prerequisite for validating the JS library. |
+| UMD/IIFE bundle | npm ESM and esm.sh already cover the validated public/tester path. A single-file bundle remains useful for standalone-script and JavaScriptCore consumers, but should ship as a package-shape PR with maintainer review, not as a launch-path surprise. |
 | GitHub Packages dual-publish | npm remains the source of truth for the public JS package. |
 | Research leads such as London, Egypt, and Diyanet Asr | They are known accuracy opportunities, not regressions in the current shipped contract. |
 | Knowledgebase cleanup pages | Important for contributor sanity, but not a runtime risk unless they contradict shipped behavior. |
@@ -88,11 +87,9 @@ For now, fajr is in targeted tester share.
 
 ## Next Actions
 
-1. Run a docs coherence PR: README, CALIBRATION, `docs/data-sources.md`,
-   `docs/positions.md`, and `examples/agiftoftime/INTEGRATION.md` should align
-   with v1.9.3 and the current public-beta stance.
-2. Resolve #101 by demoting unshipped architecture layers to v2/research
-   language while keeping shipped Layer 1 and Layer 4 prominent.
-3. Decide #46: ship UMD/IIFE now or explicitly defer it from the public launch.
-4. Convert #92/#103 into either a promoted Morocco fixture tier or a documented
+1. Convert #92/#103 into either a promoted Morocco fixture tier or a documented
    post-launch calibration project with exact evidence boundaries.
+2. Add current deferral/owner notes to the remaining advisory issues so the
+   tracker reads as managed, not abandoned.
+3. Keep #46 on the distribution roadmap, but do not block the public Morocco
+   tester path on UMD/IIFE.
