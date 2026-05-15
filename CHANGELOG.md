@@ -26,6 +26,13 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Changed — Asr convention wording in hand-curated docs
+
+- Cleaned `docs/paper.md` and `docs/calibration-recipe.md` so they describe
+  standard 1x Asr as an Asr convention, not as a Shafi legal-madhhab label.
+- This is documentation-only and supports the v1.8.1
+  `location.asrConvention` / `applied.asrSchool` naming model.
+
 ### Added — Morocco Habous monthly source archive
 
 - Added the first archived Morocco Habous monthly source snapshot under

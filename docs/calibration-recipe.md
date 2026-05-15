@@ -285,7 +285,7 @@ v1.7.15, 0.6814 at v1.4.4, 1.0394 at v1.4.1, 1.2472 at v1.0 baseline).
 > and `2026-05-03-17-36-iteration-2-jakim-dhuhr-asr-extension.md`.
 >
 > **Asr +1.36-min signed bias** against the train aggregate reflects the
-> JAKIM Asr +1 ihtiyati addition + the well-known Shafi/Hanafi
+> JAKIM Asr +1 ihtiyati addition + the well-known standard/Hanafi
 > shadow-formula choice + Diyanet's +1.0 ihtiyat-unsafe-direction systematic
 > (deferred per [#71](https://github.com/tawfeeqmartin/fajr/issues/71) — closing
 > it would shift Asr earlier, breaching the rounds-UP convention).

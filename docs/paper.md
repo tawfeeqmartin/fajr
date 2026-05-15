@@ -98,7 +98,7 @@ The stated accuracy is ±0.0003° in solar zenith angle for dates between −200
 | Fajr   | Morning astronomical twilight begins | −12° to −20° (method-dependent) |
 | Sunrise | Upper limb of sun crosses geometric horizon | −0.833° (refraction + semidiameter) |
 | Dhuhr  | Sun transits meridian (solar noon) | Maximum altitude |
-| Asr    | Shadow equals object height (Shafi'i) or 2× height (Hanafi) | Method-dependent |
+| Asr    | Shadow equals object height (standard 1x convention) or 2x height (Hanafi convention) | Method-dependent |
 | Maghrib | Sun sets (upper limb below horizon) | −0.833° |
 | Isha   | Evening astronomical twilight ends | −12° to −18° (method-dependent) |
 
@@ -119,7 +119,7 @@ For Asr, the target hour angle is computed from:
 cot(altitude) = cot(latitude − declination) + shadow_factor
 ```
 
-Where `shadow_factor = 1` for Shafi'i/Maliki/Hanbali and `shadow_factor = 2` for Hanafi. This produces a difference of 20–40 minutes depending on latitude and season.
+Where `shadow_factor = 1` is the standard 1x Asr convention used by Shafi'i, Maliki, Hanbali, and many institutional timetables, while `shadow_factor = 2` is the Hanafi convention. fajr treats this as Asr-convention metadata, not as a full legal-madhhab taxonomy. This produces a difference of 20–40 minutes depending on latitude and season.
 
 ### 3.5 Elevation Dip Angle
 
@@ -300,7 +300,7 @@ The dominant improvement occurred at Experiment 3 (−19.08 min), confirming tha
 |--------|-----------|-------|
 | Fajr   | 1.82 | Weighted ×1.5; residual angle variance across references |
 | Dhuhr  | 0.31 | Near-exact; purely astronomical |
-| Asr    | 0.67 | Post Hanafi correction; some Shafi'i/Hanafi city ambiguity |
+| Asr    | 0.67 | Post Hanafi-convention correction; some standard/Hanafi city ambiguity |
 | Maghrib | 0.44 | Refraction well modeled |
 | Isha   | 1.21 | Angle sensitivity; some method ambiguity |
 
@@ -403,7 +403,7 @@ Islamic prayer time computation is a domain where astronomical precision meets f
 
 Future work should address: (1) integration of actual atmospheric data (temperature, pressure) for real-time refraction correction; (2) formal fiqh consultation for high-latitude method selection; (3) further expansion of the institutional-reference corpus beyond the current 4 train + 6 holdout sources (target: native national-awqaf APIs for Indonesia/Saudi/Egypt/Pakistan, see [`docs/calibration-recipe.md`](calibration-recipe.md)); (4) extension of AutoResearch to regional method databases including the v1.7.x city-method-overrides for sub-national jurisdictions (Lucknow / Kerala / Bangsamoro shipped v1.7.2).
 
-**Post-v1.0 evolution (v1.1–v1.7.19).** Subsequent releases tightened both the engine and its review pipeline: a multi-source ratchet replaced the single-Aladhan baseline (v1.2–v1.5), Path A cross-source corroboration was formalised in `eval/compare.js` (v1.4.x), country-level method dispatch expanded from ~12 countries to **168 countries** (v1.6.x–v1.7.19), explicit `madhab = Shafi` was set for Maldives and Sri Lanka per [issue #26](https://github.com/tawfeeqmartin/fajr/issues/26) (v1.7.1), a city-aware offline registry was added with `detectLocation` (v1.7.0–v1.7.3) and grown to **477 cities** (v1.7.18–v1.7.19), Umm al-Qura Hijri replaced an over-correcting Kuwaiti algorithm per [issue #48](https://github.com/tawfeeqmartin/fajr/issues/48) (v1.7.6), a silent auto-elevation bug that was inflating Maghrib bias was diagnosed and fixed per [issue #50](https://github.com/tawfeeqmartin/fajr/issues/50) (v1.7.6), the first **Karpathy autoresearch ratchet session** broke the 1-minute train-WMAE barrier (1.0668 → 0.9757) via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations (v1.7.16), and engine bbox-table fixes resolved 6 country-edge misroutings ([issue #75](https://github.com/tawfeeqmartin/fajr/issues/75); v1.7.19). The current paper headline numbers reflect the v1.7.19 baseline.
+**Post-v1.0 evolution (v1.1–v1.7.19).** Subsequent releases tightened both the engine and its review pipeline: a multi-source ratchet replaced the single-Aladhan baseline (v1.2–v1.5), Path A cross-source corroboration was formalised in `eval/compare.js` (v1.4.x), country-level method dispatch expanded from ~12 countries to **168 countries** (v1.6.x–v1.7.19), explicit standard 1x Asr convention was set for Maldives and Sri Lanka per [issue #26](https://github.com/tawfeeqmartin/fajr/issues/26) (v1.7.1), a city-aware offline registry was added with `detectLocation` (v1.7.0–v1.7.3) and grown to **477 cities** (v1.7.18–v1.7.19), Umm al-Qura Hijri replaced an over-correcting Kuwaiti algorithm per [issue #48](https://github.com/tawfeeqmartin/fajr/issues/48) (v1.7.6), a silent auto-elevation bug that was inflating Maghrib bias was diagnosed and fixed per [issue #50](https://github.com/tawfeeqmartin/fajr/issues/50) (v1.7.6), the first **Karpathy autoresearch ratchet session** broke the 1-minute train-WMAE barrier (1.0668 → 0.9757) via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations (v1.7.16), and engine bbox-table fixes resolved 6 country-edge misroutings ([issue #75](https://github.com/tawfeeqmartin/fajr/issues/75); v1.7.19). The current paper headline numbers reflect the v1.7.19 baseline.
 
 *Bismillah al-Rahman al-Rahim.*
 
