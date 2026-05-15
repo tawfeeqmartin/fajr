@@ -1370,6 +1370,266 @@
       ]
     },
     {
+      "cityKey": "Karachi|PK",
+      "priority": ["south-asia-mega-city", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Karachi has a broad population-radius runtime box; use reviewed locality/county evidence before any paired Sindh metro clipping."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421191101",
+          "ids": { "wofId": 421191101, "repo": "whosonfirst-data-admin-pk", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "PK/karachi/wof-locality-421191101.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:1108692233",
+          "ids": { "wofId": 1108692233, "repo": "whosonfirst-data-admin-pk", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "PK/karachi/wof-county-1108692233.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["County/context row only; not a direct replacement for the Karachi city lookup cell."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Hyderabad|PK",
+      "priority": ["south-asia-city", "pakistan-sindh", "heuristic-bbox", "source-map-only"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Hyderabad PK uses a broad heuristic runtime box and should be reviewed with Karachi/Sindh neighbors before any bbox change."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421168813",
+          "ids": { "wofId": 421168813, "repo": "whosonfirst-data-admin-pk", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "PK/hyderabad/wof-locality-421168813.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Mumbai|IN",
+      "priority": ["south-asia-mega-city", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Mumbai's runtime box is a broad metro heuristic and should be reviewed with Navi Mumbai/Thane context before any bbox change."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102030609",
+          "ids": { "wofId": 102030609, "repo": "whosonfirst-data-admin-in", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "IN/mumbai/wof-locality-102030609.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:890509223",
+          "ids": { "wofId": 890509223, "repo": "whosonfirst-data-admin-in", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "IN/mumbai/wof-county-890509223.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["County/context row only; not a direct replacement for the Mumbai city lookup cell."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Ahmedabad|IN",
+      "priority": ["south-asia-mega-city", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Ahmedabad uses a broad heuristic runtime box and is also close to the Pakistan country-bbox guardrail documented in engine comments."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102031017",
+          "ids": { "wofId": 102031017, "repo": "whosonfirst-data-admin-in", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "IN/ahmedabad/wof-locality-102031017.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Bangalore|IN",
+      "priority": ["south-asia-mega-city", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Bangalore has a broad runtime box and should be reviewed with Bengaluru metro/county context before any bbox tightening."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102030819",
+          "ids": { "wofId": 102030819, "repo": "whosonfirst-data-admin-in", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "IN/bangalore/wof-locality-102030819.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:890511315",
+          "ids": { "wofId": 890511315, "repo": "whosonfirst-data-admin-in", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "IN/bangalore/wof-county-890511315.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["County/context row only; not a direct replacement for the Bangalore city lookup cell."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Chennai|IN",
+      "priority": ["south-asia-mega-city", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Chennai has a broad runtime box; WOF locality/county rows agree on the same envelope but still need neighbor review before runtime adoption."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102029537",
+          "ids": { "wofId": 102029537, "repo": "whosonfirst-data-admin-in", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "IN/chennai/wof-locality-102029537.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:890505403",
+          "ids": { "wofId": 890505403, "repo": "whosonfirst-data-admin-in", "placetype": "county", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "IN/chennai/wof-county-890505403.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["County/context row only; not a direct replacement for the Chennai city lookup cell."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Hyderabad|IN",
+      "priority": ["south-asia-mega-city", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Hyderabad IN has a broad runtime box and WOF reports a current locality row superseding older neighborhood/locality records."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:102030059",
+          "ids": { "wofId": 102030059, "repo": "whosonfirst-data-admin-in", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "IN/hyderabad/wof-locality-102030059.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF locality row supersedes older Hyderabad neighborhood/locality rows 85904069 and 1125994633."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Dhaka|BD",
+      "priority": ["south-asia-mega-city", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Dhaka has current WOF locality/county rows plus geoBoundaries ADM2 district context; retain all as evidence before any city/district clipping review."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421181477",
+          "ids": { "wofId": 421181477, "repo": "whosonfirst-data-admin-bd", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "BD/dhaka/wof-locality-421181477.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:421187803",
+          "ids": { "wofId": 421187803, "repo": "whosonfirst-data-admin-bd", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "BD/dhaka/wof-county-421187803.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["County/context row only; not a direct replacement for the Dhaka city lookup cell."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:BGD-ADM2-16705992:16705992B90744549146712",
+          "ids": {
+            "boundaryId": "BGD-ADM2-16705992",
+            "boundaryISO": "BGD",
+            "shapeId": "16705992B90744549146712",
+            "releaseType": "gbOpen",
+            "boundaryType": "ADM2",
+            "boundaryYearRepresented": "2020",
+            "boundarySource": "Bangladesh Bureau of Statistics (BBS), OCHA ROAP",
+            "boundaryLicense": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)"
+          },
+          "cacheFile": "BD/dhaka/geoboundaries-bgd-adm2-16705992-dhaka.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "adm2-context-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["ADM2 district context only; not a direct city-locality replacement."]
+        }
+      ]
+    },
+    {
       "cityKey": "Windsor|CA",
       "priority": ["detroit-windsor-border", "wof-locality-runtime-bbox", "clipped"],
       "review": {
