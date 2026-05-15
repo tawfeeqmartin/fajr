@@ -18,6 +18,7 @@ Status: **v1.x public beta**. The API is usable and tested, but calculation defa
 
 Core docs:
 
+- [docs/public-launch-bar.md](docs/public-launch-bar.md) - what blocks a broad public announcement vs targeted tester sharing.
 - [docs/positions.md](docs/positions.md) - canonical regional defaults and confidence grades.
 - [docs/known-disagreements.md](docs/known-disagreements.md) - where local authorities or valid methods differ.
 - [CALIBRATION.md](CALIBRATION.md) - accuracy methodology, ratchet rules, and current caveats.
