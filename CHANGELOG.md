@@ -37,6 +37,16 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   coverage, source metadata, sorted dates, and HH:MM prayer rows before any
   later promotion into `eval/data/`.
 
+### Added — Egypt geometry source-map candidates
+
+- Added audit-only WOF source-map candidates for Cairo, Giza, and 6th of
+  October. These preserve the Cairo/Giza/6th metro geometry research without
+  changing runtime bboxes.
+- Marked the Egypt rows `source-map-only` / `needs-clipping-review` because
+  the available WOF evidence is mixed: Cairo has a real locality but existing
+  runtime coverage includes New Cairo; Giza/New Cairo rows are point-like; and
+  6th of October is county-level.
+
 ## [1.9.1] — 2026-05-14
 
 ### Fixed — Sialkot/Gujranwala city-geometry overlap

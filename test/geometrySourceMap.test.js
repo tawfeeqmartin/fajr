@@ -171,6 +171,28 @@ describe('city geometry source map', () => {
     expect(statusFor('Brazzaville|CG')).toBe('runtime-bbox-shipped')
     expect(statusFor('Kinshasa|CD')).toBe('runtime-bbox-shipped')
   })
+
+  it('keeps Egypt metro geometry as source-map-only until clipping is reviewed', () => {
+    const expected = new Map([
+      ['Cairo|EG', ['wof:locality:421174399', 'wof:locality:421175733']],
+      ['Giza|EG', ['wof:locality:421204393', 'wof:county:1092021173', 'wof:county:1092021203']],
+      ['6th of October|EG', ['wof:county:1092014009']],
+    ])
+
+    for (const [cityKey, stableIds] of expected) {
+      const entry = sourceMap.cities.find(row => row.cityKey === cityKey)
+      expect(entry, cityKey).toBeTruthy()
+      expect(entry.review.status, cityKey).toBe('candidate')
+      expect(entry.priority, cityKey).toContain('source-map-only')
+      expect(entry.priority, cityKey).toContain('needs-clipping-review')
+
+      for (const stableId of stableIds) {
+        const geometry = entry.geometries.find(row => row.stableId === stableId)
+        expect(geometry, `${cityKey} ${stableId}`).toBeTruthy()
+        expect(geometry.reviewStatus, `${cityKey} ${stableId}`).toBe('candidate')
+      }
+    }
+  })
 })
 
 function slug(city) {
