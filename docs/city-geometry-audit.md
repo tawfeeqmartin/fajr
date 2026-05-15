@@ -39,8 +39,8 @@ source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
 rows, 1 Hong Kong/Shenzhen border row, 2 Singapore/Johor rows, 4 Klang Valley
 rows, 1 Pakistan overlap row, 1 Detroit/Windsor border row, 3 Geneva border
 rows, 2 Strasbourg/Kehl border rows, 2 Congo River rows, and 3 carry-over
-registry-warning rows. It carries 17 OSM relation rows plus 58 WOF rows and 1
-geoBoundaries row across reviewed locality/county candidates. Morocco rows with
+registry-warning rows. It carries 17 OSM relation rows plus 58 WOF rows and 14
+geoBoundaries rows across reviewed locality/county/admin candidates. Morocco rows with
 WOF-backed runtime status are separated from OSM-only audit candidates;
 Jerusalem intentionally remains without a geometry candidate until a human
 routing decision is available.
@@ -230,6 +230,8 @@ Reference URLs checked in this pass:
   `https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/`
 - geoBoundaries API:
   `https://www.geoboundaries.org/api.html`
+- geoBoundaries EGY ADM2 metadata (CAPMAS/OCHA via HDX, CC BY 3.0 IGO):
+  `https://www.geoboundaries.org/api/current/gbOpen/EGY/ADM2/`
 - SIG-Maroc administrative boundaries:
   `https://www.sig-maroc.com/donnees/limites-administratives-maroc`
 - SIG-Maroc RGPH 2024 commune joins:
@@ -302,6 +304,7 @@ With reviewed IDs and cached GeoJSON present:
 ```bash
 node scripts/fetch-city-geometry-cache.js --provider wof --dry-run
 node scripts/fetch-city-geometry-cache.js --provider wof
+node scripts/fetch-city-geometry-cache.js --provider geoboundaries --city Cairo
 node scripts/audit-city-geometry.js
 node scripts/audit-city-geometry.js --format json
 node scripts/audit-city-geometry.js --sources scripts/data/city-geometry-sources.json --cache-dir .cache/city-geometry
@@ -312,10 +315,11 @@ and prints a setup message. If the source map exists but cached GeoJSON is
 absent, the report lists `cache-file-not-found`; that is expected until a
 reviewer fetches raw geometry into `.cache/city-geometry/`.
 
-`fetch-city-geometry-cache.js` currently hydrates WOF candidates only. It uses
-the explicit WOF repository metadata in the source map, writes raw GeoJSON to
-`.cache/city-geometry/`, and leaves OSM/Overture/official fetch paths to
-separate reviewed workflows because their terms and APIs differ.
+`fetch-city-geometry-cache.js` currently hydrates WOF candidates and reviewed
+geoBoundaries source-map rows. WOF uses explicit repository metadata in the
+source map. geoBoundaries uses the provider API, then extracts exactly one
+reviewed `shapeID` into the local cache. OSM/Overture/other official fetch
+paths remain separate reviewed workflows because their terms and APIs differ.
 
 ## First Audit Targets
 
@@ -340,9 +344,10 @@ validator warnings, or known clipping gaps:
   WOF source-map row and no longer shadows Gujranwala's north-east edge.
 - Source-mapped but not runtime-safe yet: Cairo/Giza/6th of October. WOF has a
   real Cairo locality, point-like Giza/New Cairo localities, and split
-  county-level Giza/6th-of-October candidates. These rows are now preserved as
-  source leads, but runtime bboxes should wait for a reviewed clipping design
-  or official Egyptian municipal geometry.
+  county-level Giza/6th-of-October candidates. geoBoundaries gbOpen EGY ADM2
+  now adds CAPMAS/OCHA district geometry for central Cairo, New Cairo, Giza,
+  and 6th-of-October/Sheikh Zayed context under CC BY 3.0 IGO. These rows are
+  source leads only; runtime bboxes should wait for a reviewed clipping design.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
   Dubai/Sharjah/Ajman, Toronto/Mississauga/Laval/Montreal,
   Lahore/Gujranwala broader coverage, Basra/Ahvaz/Kuwait City,
