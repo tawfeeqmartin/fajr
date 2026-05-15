@@ -34,15 +34,16 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-55 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+56 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
 source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
-rows, 2 Singapore/Johor rows, 4 Klang Valley rows, 1 Pakistan overlap row, 1
-Detroit/Windsor border row, 3 Geneva border rows, 2 Strasbourg/Kehl border
-rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries 17
-OSM relation rows plus 58 WOF rows across reviewed locality/county candidates.
-Morocco rows with WOF-backed runtime status are separated from OSM-only audit
-candidates; Jerusalem intentionally remains without a geometry candidate until
-a human routing decision is available.
+rows, 1 Hong Kong/Shenzhen border row, 2 Singapore/Johor rows, 4 Klang Valley
+rows, 1 Pakistan overlap row, 1 Detroit/Windsor border row, 3 Geneva border
+rows, 2 Strasbourg/Kehl border rows, 2 Congo River rows, and 3 carry-over
+registry-warning rows. It carries 17 OSM relation rows plus 58 WOF rows and 1
+geoBoundaries row across reviewed locality/county candidates. Morocco rows with
+WOF-backed runtime status are separated from OSM-only audit candidates;
+Jerusalem intentionally remains without a geometry candidate until a human
+routing decision is available.
 
 ```json
 {
@@ -182,6 +183,16 @@ The Singapore/Johor Bahru border seam also requires clipping:
 - Johor Bahru has a current WOF locality row, plus a point-like alternate
   spelling row. The runtime cell uses the WOF north/east/west extents and clips
   south to `1.45`, preserving city provenance on both sides of the Causeway.
+
+The Hong Kong/Shenzhen border needs a China-side city cell:
+
+- Hong Kong's country/city rectangle must be checked before China's broad
+  country rectangle, but that rectangle can swallow Shenzhen-side coordinates.
+  geoBoundaries gbOpen CHN ADM2 `Shenzhenshi` is PDDL and provides a reviewed
+  China-side context. Its full rectangle overlaps northern Hong Kong, so the
+  runtime ships a smaller Futian/Luohu urban-core guardrail rather than the
+  full ADM2 envelope, and clips Hong Kong's city row north edge to touch that
+  guardrail without overlapping it.
 
 The Klang Valley metro should not be represented as only Kuala Lumpur and Shah
 Alam:

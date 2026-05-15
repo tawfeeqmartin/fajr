@@ -1021,6 +1021,33 @@
       ]
     },
     {
+      "cityKey": "Shenzhen|CN",
+      "priority": ["hong-kong-shenzhen-border", "apac-p0", "geoboundaries-runtime-bbox", "city-center-guardrail"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: runtime bbox added as a Shenzhen urban-core guardrail so Futian/Luohu coordinates do not resolve to Hong Kong. geoBoundaries gbOpen CHN ADM2 Shenzhenshi confirms the China-side context, but its full rectangle overlaps northern Hong Kong; the wider Shenzhenxian ADM2 row is also not copied."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Hong Kong|HK", "kind": "cross-border-neighbor", "status": "Shenzhen urban-core guardrail is smaller than Hong Kong's broad country/city rectangle and wins city lookup for Futian/Luohu coordinates." }
+      ],
+      "geometries": [
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:CHN-ADM2-17275852:17275852B31711539663260",
+          "ids": { "boundaryId": "CHN-ADM2-17275852", "shapeId": "17275852B31711539663260", "shapeName": "Shenzhenshi", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2017" },
+          "cacheFile": "CN/shenzhen/geoboundaries-chn-adm2-shenzhenshi.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "clipped-runtime-bbox",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["geoBoundaries reports source National Administration of Surveying, Mapping and Geoinformation of China / Revolutionary GIS and PDDL v1.0 license for the CHN ADM2 gbOpen layer."]
+        }
+      ]
+    },
+    {
       "cityKey": "Singapore|SG",
       "priority": ["singapore-johor-border", "wof-locality-runtime-bbox", "apac-p0", "clipped"],
       "review": {

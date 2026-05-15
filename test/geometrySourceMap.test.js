@@ -159,6 +159,7 @@ describe('city geometry source map', () => {
     expect(statusFor('Antalya|TR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Samsun|TR')).toBe('runtime-bbox-shipped')
     expect(statusFor('Trabzon|TR')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Shenzhen|CN')).toBe('runtime-bbox-shipped')
     expect(statusFor('Singapore|SG')).toBe('runtime-bbox-shipped')
     expect(statusFor('Johor Bahru|MY')).toBe('runtime-bbox-shipped')
     expect(statusFor('Klang|MY')).toBe('runtime-bbox-shipped')
@@ -252,6 +253,32 @@ describe('city geometry source map', () => {
     }
   })
 
+  it('documents Shenzhen as a geoBoundaries-backed Hong Kong border fix', () => {
+    const entry = sourceMap.cities.find(row => row.cityKey === 'Shenzhen|CN')
+    expect(entry).toBeTruthy()
+    expect(entry.review.status).toBe('runtime-bbox-shipped')
+    expect(entry.priority).toContain('hong-kong-shenzhen-border')
+    expect(entry.priority).toContain('geoboundaries-runtime-bbox')
+
+    const geometry = entry.geometries.find(row =>
+      row.stableId === 'geoboundaries:CHN-ADM2-17275852:17275852B31711539663260'
+    )
+    expect(geometry).toMatchObject({
+      provider: 'geoboundaries',
+      sourceConfidence: 'high',
+      matchConfidence: 'clipped-runtime-bbox',
+      licenseUse: 'audit-and-reviewed-bbox-proposal',
+      reviewStatus: 'runtime-bbox-shipped',
+    })
+    expect(geometry.ids).toMatchObject({
+      boundaryId: 'CHN-ADM2-17275852',
+      shapeId: '17275852B31711539663260',
+      shapeName: 'Shenzhenshi',
+      releaseType: 'gbOpen',
+      boundaryType: 'ADM2',
+    })
+  })
+
   it('marks the WOF row-level source as shipped for WOF-supported runtime bboxes', () => {
     const clippedRuntimeRows = new Set([
       // Dubai uses a clipped lookup cell from the WOF lead, not the full WOF
@@ -262,6 +289,7 @@ describe('city geometry source map', () => {
     for (const entry of sourceMap.cities) {
       if (entry.review.status !== 'runtime-bbox-shipped') continue
       if (clippedRuntimeRows.has(entry.cityKey)) continue
+      if (!(entry.geometries || []).some(geometry => geometry.provider === 'wof')) continue
 
       const shippedWofRows = (entry.geometries || [])
         .filter(geometry => geometry.provider === 'wof')
