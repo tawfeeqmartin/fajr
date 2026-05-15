@@ -78,6 +78,15 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Kept all rows source-map-only; no runtime bbox, country/method dispatch,
   public API, package data, or prayer-time behavior changed.
 
+### Added — Jakarta geometry source-map candidates
+
+- Added source-map-only geometry rows for the broad Jakarta heuristic city box:
+  current WOF Jakarta Raya region/county context plus geoBoundaries BPS/OCHA
+  ADM2 municipality rows.
+- Kept Jakarta source-map-only because the old WOF locality rows are not
+  current and a runtime fix needs a paired Jabodetabek design with neighboring
+  cities.
+
 ## [1.9.2] — 2026-05-15
 
 ### Fixed — Al Buraimi / Al Ain border routing

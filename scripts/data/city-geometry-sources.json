@@ -1630,6 +1630,185 @@
       ]
     },
     {
+      "cityKey": "Jakarta|ID",
+      "priority": ["jakarta-jabodetabek", "heuristic-bbox", "source-map-only", "apac-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. The old WOF locality rows for Jakarta are not current; preserve the current WOF region/county rows and geoBoundaries ADM2 municipalities before any Jabodetabek clipping review."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:region:85672001",
+          "ids": { "wofId": 85672001, "repo": "whosonfirst-data-admin-id", "placetype": "region", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "ID/jakarta/wof-region-85672001.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Jakarta Raya region row; context only, not a direct city-locality replacement."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:102072841",
+          "ids": { "wofId": 102072841, "repo": "whosonfirst-data-admin-id", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "ID/jakarta/wof-county-102072841-jakarta-barat.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Jakarta Barat row; context only."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:102073177",
+          "ids": { "wofId": 102073177, "repo": "whosonfirst-data-admin-id", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "ID/jakarta/wof-county-102073177-jakarta-pusat.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Jakarta Pusat row; context only."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:102072667",
+          "ids": { "wofId": 102072667, "repo": "whosonfirst-data-admin-id", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "ID/jakarta/wof-county-102072667-jakarta-selatan.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Jakarta Selatan row; context only."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:102073493",
+          "ids": { "wofId": 102073493, "repo": "whosonfirst-data-admin-id", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "ID/jakarta/wof-county-102073493-jakarta-timur.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Jakarta Timur row; context only."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:102073125",
+          "ids": { "wofId": 102073125, "repo": "whosonfirst-data-admin-id", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "ID/jakarta/wof-county-102073125-jakarta-utara.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Jakarta Utara row; context only."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:IDN-ADM2-22746128:22746128B58252967349746",
+          "ids": {
+            "boundaryId": "IDN-ADM2-22746128",
+            "boundaryISO": "IDN",
+            "shapeId": "22746128B58252967349746",
+            "releaseType": "gbOpen",
+            "boundaryType": "ADM2",
+            "boundaryYearRepresented": "2020",
+            "boundarySource": "Badan Pusat Statistik (BPS - Statistics Indonesia), World Food Programme, OCHA ROAP",
+            "boundaryLicense": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)"
+          },
+          "cacheFile": "ID/jakarta/geoboundaries-idn-adm2-22746128-jakarta-barat.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "adm2-context-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["ADM2 municipality context only; not a direct city-locality replacement."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:IDN-ADM2-22746128:22746128B21128962092426",
+          "ids": {
+            "boundaryId": "IDN-ADM2-22746128",
+            "boundaryISO": "IDN",
+            "shapeId": "22746128B21128962092426",
+            "releaseType": "gbOpen",
+            "boundaryType": "ADM2",
+            "boundaryYearRepresented": "2020",
+            "boundarySource": "Badan Pusat Statistik (BPS - Statistics Indonesia), World Food Programme, OCHA ROAP",
+            "boundaryLicense": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)"
+          },
+          "cacheFile": "ID/jakarta/geoboundaries-idn-adm2-22746128-jakarta-pusat.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "adm2-context-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["ADM2 municipality context only; not a direct city-locality replacement."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:IDN-ADM2-22746128:22746128B93686700937380",
+          "ids": {
+            "boundaryId": "IDN-ADM2-22746128",
+            "boundaryISO": "IDN",
+            "shapeId": "22746128B93686700937380",
+            "releaseType": "gbOpen",
+            "boundaryType": "ADM2",
+            "boundaryYearRepresented": "2020",
+            "boundarySource": "Badan Pusat Statistik (BPS - Statistics Indonesia), World Food Programme, OCHA ROAP",
+            "boundaryLicense": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)"
+          },
+          "cacheFile": "ID/jakarta/geoboundaries-idn-adm2-22746128-jakarta-selatan.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "adm2-context-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["ADM2 municipality context only; not a direct city-locality replacement."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:IDN-ADM2-22746128:22746128B5353616278909",
+          "ids": {
+            "boundaryId": "IDN-ADM2-22746128",
+            "boundaryISO": "IDN",
+            "shapeId": "22746128B5353616278909",
+            "releaseType": "gbOpen",
+            "boundaryType": "ADM2",
+            "boundaryYearRepresented": "2020",
+            "boundarySource": "Badan Pusat Statistik (BPS - Statistics Indonesia), World Food Programme, OCHA ROAP",
+            "boundaryLicense": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)"
+          },
+          "cacheFile": "ID/jakarta/geoboundaries-idn-adm2-22746128-jakarta-timur.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "adm2-context-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["ADM2 municipality context only; not a direct city-locality replacement."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:IDN-ADM2-22746128:22746128B85966169947265",
+          "ids": {
+            "boundaryId": "IDN-ADM2-22746128",
+            "boundaryISO": "IDN",
+            "shapeId": "22746128B85966169947265",
+            "releaseType": "gbOpen",
+            "boundaryType": "ADM2",
+            "boundaryYearRepresented": "2020",
+            "boundarySource": "Badan Pusat Statistik (BPS - Statistics Indonesia), World Food Programme, OCHA ROAP",
+            "boundaryLicense": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)"
+          },
+          "cacheFile": "ID/jakarta/geoboundaries-idn-adm2-22746128-jakarta-utara.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "adm2-context-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["ADM2 municipality context only; not a direct city-locality replacement."]
+        }
+      ]
+    },
+    {
       "cityKey": "Windsor|CA",
       "priority": ["detroit-windsor-border", "wof-locality-runtime-bbox", "clipped"],
       "review": {

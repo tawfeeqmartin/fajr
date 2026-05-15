@@ -34,14 +34,15 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-70 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+71 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
 source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
 rows, 1 Hong Kong/Shenzhen border row, 2 Singapore/Johor rows, 4 Klang Valley
 rows, 1 Pakistan overlap row, 8 South Asia large-city source-map rows,
+1 Jakarta/Jabodetabek source-map row,
 4 Toronto/Montreal Canada metro rows,
 3 Detroit/Dearborn/Windsor border rows, 3 Geneva border rows, 2 Strasbourg/Kehl border
 rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries
-17 OSM relation rows plus 81 WOF rows and 15
+17 OSM relation rows plus 87 WOF rows and 20
 geoBoundaries rows across reviewed locality/county/admin candidates. Morocco rows with
 WOF-backed runtime status are separated from OSM-only audit candidates;
 Jerusalem intentionally remains without a geometry candidate until a human
@@ -163,6 +164,15 @@ The South Asia large-city pass is source-map-only:
   heuristic boxes, and tightening them needs paired neighbor review for dense
   metros such as Karachi/Sindh, Mumbai/Navi Mumbai/Thane, Bangalore/Bengaluru
   metro, and Dhaka district/city boundaries.
+
+The Jakarta/Jabodetabek pass is also source-map-only:
+
+- The old WOF Jakarta locality rows are not current. The source map instead
+  records the current WOF Jakarta Raya region row, five current WOF county
+  rows, and five geoBoundaries/BPS/OCHA ADM2 municipality rows.
+- Runtime remains a single broad `Jakarta|ID` lookup cell until Bekasi, Depok,
+  Tangerang, South Tangerang, and internal DKI municipality routing can be
+  reviewed as a paired metro design.
 
 The Detroit/Windsor border seam needs clipping rather than direct WOF copying:
 
