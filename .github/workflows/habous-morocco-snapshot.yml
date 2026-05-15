@@ -92,7 +92,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if git diff --quiet -- fixtures/habous-morocco/monthly; then
+          if [ -z "$(git status --porcelain -- fixtures/habous-morocco/monthly)" ]; then
             echo "No new Habous monthly snapshot to commit."
             exit 0
           fi
