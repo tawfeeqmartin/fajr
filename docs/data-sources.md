@@ -111,6 +111,9 @@ for Morocco unless a caller explicitly passes a non-zero `elevation` or
 Habous/Mawaqit city tables; apps can still opt into observer-elevation horizon
 correction when a local mosque or use case requires it.
 
+For the public-claim boundary around this evidence, see
+[`docs/morocco-evidence.md`](morocco-evidence.md).
+
 Snapshot tooling:
 
 - [`scripts/fetch-habous-morocco-month.js`](../scripts/fetch-habous-morocco-month.js)
