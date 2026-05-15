@@ -4,11 +4,11 @@
 [![npm version](https://img.shields.io/npm/v/@tawfeeqmartin/fajr.svg)](https://www.npmjs.com/package/@tawfeeqmartin/fajr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Last refreshed: 2026-05-14
+Last refreshed: 2026-05-15
 
 `fajr` is an offline JavaScript library for Islamic prayer times, qibla, Hijri dates, and hilal visibility. It builds on [`adhan.js`](https://github.com/batoulapps/adhan-js), then adds:
 
-- GPS-aware method dispatch across 168 countries and 481 city boxes.
+- GPS-aware method dispatch across 168 countries and 488 city boxes.
 - Provenance fields that explain which method, elevation, and Asr convention were used.
 - Per-prayer ihtiyat-aware rounding and an explicit `imsak` field.
 - Three-criterion hilal visibility: Odeh 2004, Yallop 1997, and Shaukat 2002.
