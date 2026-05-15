@@ -98,7 +98,7 @@ export type MethodSource = 'caller-explicit' | 'city-institutional' | 'country-d
 /** How `prayerTimes` chose the elevation for a given coordinate.
  *
  *  - `'caller-explicit'`: the caller passed `elevation:` in the params object
- *    (any value, including 0). Apps following the Saudi/jama'ah-unity stance
+ *    (any value, including 0). Apps matching uniform city timetable practice
  *    should pass `elevation: 0` to opt out of geometric horizon-dip correction.
  *  - `'city-registry'`: the matched city in the registry has an `elevation`
  *    field; fajr used that and applied `applyElevationCorrection` inline so
@@ -356,7 +356,7 @@ export interface PrayerTimesParams {
   /** Meters above sea level. When omitted (or set to `undefined`), fajr
    *  auto-resolves elevation from the bundled city registry — apps that
    *  want city-registry elevation should NOT pass this parameter. To opt
-   *  out of elevation correction (e.g. Saudi/jama'ah-unity stance), pass
+   *  out of elevation correction (e.g. uniform city timetable practice), pass
    *  `elevation: 0` explicitly — the engine then treats this as caller-
    *  explicit sea-level and skips the geometric horizon-dip correction.
    *  Apps that already have a GPS-supplied altitude should pass it through;

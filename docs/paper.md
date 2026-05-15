@@ -4,18 +4,18 @@
 
 *Independent Research, 2026*
 
-> **Last refreshed:** 2026-05-14 (v1.8.1). This paper preserves the historical
+> **Last refreshed:** 2026-05-15 (v1.9.2). This paper preserves the historical
 > Experiment 1-7 narrative and v1.0 milestone. The live current WMAE and corpus
 > counts are reported in [SCOREBOARD.md](../SCOREBOARD.md) and
 > [`docs/progress.md`](progress.md).
 >
-> **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration; 4 train institutions + 6 holdout institutions), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, the v1.7.x–v1.8.x city registry (**481 cities across 168 countries**, post-v1.8.1) and offline `nearestCity` lookup, plus the Layer 1 raw `astronomical(lat, lon, date)` primitives shipped in v1.8.1 — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
+> **Snapshot:** this paper documents fajr's Experiment 1–7 narrative through the v1.0 milestone. For the current state of the library — multi-source eval (Path A cross-source corroboration; 4 train institutions + 6 holdout institutions), three-criterion hilal (Odeh 2004 + Yallop 1997 + Shaukat 2002), high-latitude advisories per Odeh 2009, opt-in Aabed-2015 tayakkun buffer and Tarabishy-2014 method, the v1.7.x–v1.9.x city registry (**488 cities across 168 countries**, post-v1.9.2) and offline `nearestCity` lookup, plus the Layer 1 raw `astronomical(lat, lon, date)` primitives shipped in v1.8.1 — see [`docs/progress.md`](progress.md), [`docs/papers-review-2026-05-01.md`](papers-review-2026-05-01.md), and the [README](../README.md). The body below is preserved as a research-history record.
 
 ---
 
 ## Abstract
 
-Islamic prayer times are among the most computed religious quantities in the world, yet widely deployed software continues to produce errors of 5–25 minutes relative to authoritative reference sources. This paper identifies three structural causes: hardcoded calculation methods that ignore regional fiqh authority, complete omission of elevation from standard implementations, and ad hoc high-latitude approximations that lack scholarly grounding. We describe an automated experiment framework (AutoResearch) that iterates over algorithm configurations and validates them against USNO Solar Calculator outputs for 18 geographically diverse cities, using a Weighted Mean Absolute Error (WMAE) metric that applies a 1.5× penalty to Fajr and Maghrib — the two prayers most sensitive to twilight angle selection. Over seven experiments, WMAE fell from 24.17 minutes to 1.55 minutes, a 93.6% reduction. A key finding is that the choice of fiqh calculation method (angle pair) is the dominant source of error, causing 5–15 minute variations that dwarf atmospheric and algorithmic factors. Regarding elevation: while the dip angle formula provides physically correct adjustments of several minutes at altitude, USNO's Solar Calculator returns identical times regardless of observer elevation. Investigation of actual fatwa and institutional practice reveals a landscape split between physics-first jurisdictions (UAE: Burj Khalifa three-zone fatwa; Malaysia: JAKIM systematic altitude adoption) and congregation-unity jurisdictions (Saudi Arabia: deliberate non-adoption). The paper grounds the mathematical framework in the Quran (Al-Isra 17:78, Hud 11:114, Ta-Ha 20:130), the Hadith of Jibril (Tirmidhi 149), and the classical muwaqqit tradition of Al-Battani, Al-Biruni, and Ibn al-Shatir. We propose a scholarly oversight classification (green/yellow/red) to guide deployment. The solar position algorithm used throughout is the NREL Solar Position Algorithm (Reda & Andreas, 2004), accurate to ±0.0003°.
+Islamic prayer times are among the most computed religious quantities in the world, yet widely deployed software continues to produce errors of 5–25 minutes relative to authoritative reference sources. This paper identifies three structural causes: hardcoded calculation methods that ignore regional fiqh authority, complete omission of elevation from standard implementations, and ad hoc high-latitude approximations that lack scholarly grounding. We describe an automated experiment framework (AutoResearch) that iterates over algorithm configurations and validates them against USNO Solar Calculator outputs for 18 geographically diverse cities, using a Weighted Mean Absolute Error (WMAE) metric that applies a 1.5× penalty to Fajr and Maghrib — the two prayers most sensitive to twilight angle selection. Over seven experiments, WMAE fell from 24.17 minutes to 1.55 minutes, a 93.6% reduction. A key finding is that the choice of fiqh calculation method (angle pair) is the dominant source of error, causing 5–15 minute variations that dwarf atmospheric and algorithmic factors. Regarding elevation: while the dip angle formula provides physically correct adjustments of several minutes at altitude, USNO's Solar Calculator returns identical times regardless of observer elevation. Investigation of actual fatwa and institutional practice reveals a landscape with elevation-aware jurisdictions (UAE: Burj Khalifa three-zone fatwa; Malaysia: JAKIM systematic altitude adoption) and jurisdictions that operationally standardize published city timetables (Saudi Arabia: Umm al-Qura scheduling; elevation/high-rise rationale still a citation gap). The paper grounds the mathematical framework in the Quran (Al-Isra 17:78, Hud 11:114, Ta-Ha 20:130), the Hadith of Jibril (Tirmidhi 149), and the classical muwaqqit tradition of Al-Battani, Al-Biruni, and Ibn al-Shatir. We propose a scholarly oversight classification (green/yellow/red) to guide deployment. The solar position algorithm used throughout is the NREL Solar Position Algorithm (Reda & Andreas, 2004), accurate to ±0.0003°.
 
 **Keywords:** Islamic prayer times, solar position algorithm, fiqh, elevation, twilight, AutoResearch, WMAE
 
@@ -29,7 +29,7 @@ Despite this importance, widely used prayer time applications and libraries cont
 
 **Problem 1 — Hardcoded calculation methods.** The twilight angles used to define Fajr and Isha vary by fiqh school and regional authority. The Muslim World League uses 18°/17°, ISNA uses 15°/15°, and Umm al-Qura uses a fixed duration after Maghrib. Applications that hardcode one method produce errors of 5–15 minutes for users in regions that follow a different authority — errors larger than all other sources combined.
 
-**Problem 2 — No elevation modeling.** Standard implementations compute prayer times for sea-level observers. At altitude, the geometric horizon dips, advancing Fajr and delaying Maghrib. The physics is well understood (dip angle ≈ arccos(R / (R + h))), yet most libraries ignore it entirely. Real-world institutional practice is split: some jurisdictions have issued fatwas adopting elevation adjustments; others explicitly reject them for congregation unity.
+**Problem 2 — No elevation modeling.** Standard implementations compute prayer times for sea-level observers. At altitude, the geometric horizon dips, advancing Fajr and delaying Maghrib. The physics is well understood (dip angle ≈ arccos(R / (R + h))), yet most libraries ignore it entirely. Real-world institutional practice is split: some jurisdictions have issued fatwas adopting elevation adjustments; others publish uniform city timetables where the rationale for rejecting per-observer elevation remains unresolved.
 
 **Problem 3 — Ad hoc high-latitude handling.** At latitudes above ~48°, twilight angles may never be reached during summer months. The methods used to handle this — nearest latitude, angle-based, midnight rule — are mathematically inconsistent and rarely match the local religious authority's ruling.
 
@@ -180,9 +180,9 @@ Investigation of fatwa and institutional practice reveals a clear split:
 - **Malaysia — JAKIM systematic adoption:** JAKIM (the Department of Islamic Development Malaysia) systematically applies altitude corrections in its national prayer time tables. The East Malaysia regions, with significant elevation variation, benefit materially from this approach.
 - **Saudi Arabia (academic):** Saudi academic literature (e.g., work from King Abdulaziz University) acknowledges the physical reality of elevation effects and discusses them.
 
-**Congregation-unity jurisdictions (do not adopt):**
+**Uniform-timetable jurisdictions (rationale still being sourced):**
 
-- **Saudi Arabia (official):** Despite academic acknowledgment, the official Saudi prayer time authority deliberately does not apply elevation adjustments. The reasoning is congregation unity: in a country where adhan is broadcast nationally and prayer is a public act, having different times for different floors of buildings would fragment the community. The Umm al-Qura calendar uses sea-level calculations for the entire country.
+- **Saudi Arabia (official):** Retrieved MoIA/SPA sources support operational standardization around Umm al-Qura adhan/prayer scheduling, and Saudi city timetables are published uniformly. fajr has not yet recovered a primary Saudi ruling saying this is because of jama'ah unity or directly rejecting high-rise/elevation-specific prayer times, so the rationale remains a citation gap tracked in issue #132.
 
 **Scholarly classification:**
 
@@ -192,7 +192,7 @@ Investigation of fatwa and institutional practice reveals a clear split:
 | Moderate altitude (<500 m above city baseline) | Yellow | Effect is small but physically real; fiqh opinion divided |
 | High altitude (>500 m above city baseline) or aviation | Yellow–Green | Physical effect significant; jurisdiction-dependent convention |
 | Tall buildings in UAE-style jurisdiction | Green | Explicit fatwa exists; apply dip correction |
-| Saudi Arabia any altitude | Green (sea-level) | Explicit institutional non-adoption; use sea-level |
+| Saudi official city-timetable practice | Yellow | Published timetables are uniform; primary elevation/high-rise rationale still unresolved |
 
 The key principle: elevation adjustments are physically correct but their adoption is a fiqh/institutional decision, not a purely technical one.
 
@@ -351,15 +351,15 @@ The experiment trajectory demonstrates unambiguously that method selection cause
 
 ### 8.2 The Elevation Gap Between Physics and Convention
 
-Elevation adjustments are physically correct and materially significant (2–5 minutes at high buildings, more in mountainous regions). The UAE has formalized this with a fatwa. Malaysia has institutionalized it nationally. Yet Saudi Arabia — home of the two holiest sites — deliberately does not adopt it, for legitimate reasons of communal worship.
+Elevation adjustments are physically correct and materially significant (2–5 minutes at high buildings, more in mountainous regions). The UAE has formalized this with a fatwa. Malaysia has institutionalized it nationally. Saudi Arabia — home of the two holiest sites — publishes uniform Umm al-Qura city timetables, but this repository has not yet recovered a primary ruling explaining the elevation/high-rise rationale.
 
-This is not a case where one side is right and the other wrong. It is a case where physical reality and social/religious convention can diverge, and where the conventions carry genuine religious weight. An application serving Saudi users should use sea-level calculations. An application for Burj Khalifa residents should use elevation-adjusted times. The decision is not technical but jurisdictional.
+This is not a case where one side is right and the other wrong. It is a case where physical reality and social/religious convention can diverge, and where the conventions carry genuine religious weight. An application serving Saudi users should expose Umm al-Qura provenance and offer `elevation: 0` when users want to match uniform published city timetables. An application for Burj Khalifa residents should use elevation-adjusted times. The decision is not technical but jurisdictional.
 
-### 8.3 The Saudi vs UAE Contrast
+### 8.3 The Saudi Uniform-Timetable vs UAE Elevation-Aware Contrast
 
-The Saudi–UAE contrast illustrates a deeper tension in applied religious astronomy: *individualized precision versus communal synchrony*. Saudi practice holds that salah is a communal act and that the adhan heard across a city should produce unified worship. UAE practice, driven by the extreme altitude scenario of supertall buildings, holds that the physical phenomenon (the sun setting behind the geographic horizon) is the canonical trigger regardless of social coordination costs.
+The Saudi–UAE contrast illustrates a deeper tension in applied religious astronomy: *individualized precision versus communal synchrony*. Saudi practice, as observed in official city timetables and MoIA operational instructions around Umm al-Qura scheduling, produces centralized timetable uniformity. The common jama'ah-unity explanation is plausible but not yet primary-sourced in this repository. UAE practice, driven by the extreme altitude scenario of supertall buildings, holds that the physical phenomenon (the sun setting behind the geographic horizon) is the canonical trigger regardless of social coordination costs.
 
-Both positions are fiqh-grounded and defensible. The Quran specifies natural phenomena as triggers; the hadith of Jibril emphasizes observable events. A muwaqqit advising on a supertall building in Riyadh today would face precisely this tension, without clear scholarly consensus.
+Both patterns are fiqh-significant, but the Saudi rationale should not be overstated until a primary source is retrieved. The Quran specifies natural phenomena as triggers; the hadith of Jibril emphasizes observable events. A muwaqqit advising on a supertall building in Riyadh today would face precisely this tension, without clear scholarly consensus.
 
 ### 8.4 The Atmospheric 2-Minute Floor
 
@@ -379,7 +379,7 @@ We propose a three-tier classification to guide deployment decisions:
 
 **Examples by context:**
 
-- Mobile app for Saudi users → Green (Umm al-Qura, sea-level)
+- Mobile app for Saudi users → Umm al-Qura; expose elevation provenance and allow `elevation: 0` for uniform city timetable practice
 - Mobile app for Muslims in Norway → Yellow (MWL + midnight rule, but local imams may differ)
 - Prayer app for ISS astronauts → Red (requires novel fatwa; 16 sunrises/day)
 - Smart building system in Dubai supertall → Green (UAE fatwa exists, apply elevation)
