@@ -52,6 +52,7 @@ function hijriToJd(year, month, day) {
 
 const SUN_HORIZON_DEG  = -0.8333   // standard refraction + solar radius
 const MOON_HORIZON_DEG = -0.5833   // standard refraction; lunar parallax handled by topocentric()
+const ALTITUDE_CROSSING_SCAN_STEP_DAYS = 5 / 1440  // 5-minute bracket scan, refined by bisection
 
 // Find the JD where solar topocentric altitude crosses the given threshold,
 // going downward — i.e., sunset on the Gregorian day enclosing the supplied
@@ -95,11 +96,16 @@ function solarAltitude(sun, lat, lon, jd) {
 // Bisection to find the JD where altitudeFn(jd) crosses `threshold` going downward.
 // Returns null if no downward crossing within [jdLo, jdHi].
 function findAltitudeCrossing(altitudeFn, threshold, jdLo, jdHi) {
-  // Coarse scan
-  const STEP = 1 / 1440  // 1-minute steps
+  if (jdHi <= jdLo) return null
+
+  // Coarse scan to bracket the setting event. Solar/lunar apparent altitude is
+  // smooth at horizon scale; once bracketed, bisection recovers sub-second
+  // crossing precision without sampling every minute of a 12-24h search window.
+  const step = Math.min(ALTITUDE_CROSSING_SCAN_STEP_DAYS, jdHi - jdLo)
   let prevJd = jdLo
   let prevAlt = altitudeFn(prevJd) - threshold
-  for (let jd = jdLo + STEP; jd <= jdHi; jd += STEP) {
+  while (prevJd < jdHi) {
+    const jd = Math.min(prevJd + step, jdHi)
     const alt = altitudeFn(jd) - threshold
     if (prevAlt > 0 && alt <= 0) {
       // bracketed — refine via bisection

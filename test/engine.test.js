@@ -20,6 +20,10 @@ import { applyElevationCorrection } from '../src/engine.js'
 const TEST_DATE = new Date('2026-04-15T12:00:00Z')
 const PRAYERS = ['fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']
 
+function expectIsoWithinSeconds(actual, expected, seconds = 1) {
+  expect(Math.abs(Date.parse(actual) - Date.parse(expected))).toBeLessThanOrEqual(seconds * 1000)
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Region detection (via the methodName label that prayerTimes returns)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -366,6 +370,32 @@ describe('hilalVisibility', () => {
     expect(r.shaukat).toHaveProperty('lagMinutes')
     // Agreement flag
     expect(typeof r.criteriaAgree).toBe('boolean')
+  })
+
+  it('keeps sunset and moonset crossings stable for representative hilal cases', () => {
+    const cases = [
+      [
+        { year: 1446, month: 9, latitude: 30.04, longitude: 31.24 },
+        '2025-02-28T15:53:25.284Z',
+        '2025-02-28T16:28:28.273Z',
+      ],
+      [
+        { year: 1445, month: 9, latitude: 25.20, longitude: 55.27 },
+        '2024-03-10T14:25:37.146Z',
+        '2024-03-10T14:34:14.609Z',
+      ],
+      [
+        { year: 1444, month: 10, latitude: 24.71, longitude: 46.68 },
+        '2023-04-20T15:17:36.145Z',
+        '2023-04-20T15:39:36.612Z',
+      ],
+    ]
+
+    for (const [params, sunsetUTC, moonsetUTC] of cases) {
+      const r = hilalVisibility(params)
+      expectIsoWithinSeconds(r.sunsetUTC, sunsetUTC)
+      expectIsoWithinSeconds(r.moonsetUTC, moonsetUTC)
+    }
   })
 
   it('classifies Ramadan 1444 (Riyadh, age 22h) as visible', () => {
