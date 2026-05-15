@@ -26,6 +26,13 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Added — downstream app integration playbook
+
+- Added `docs/downstream-apps.md`, capturing agiftoftime-derived patterns for
+  lazy loading, provenance-driven UI, null location handling, user-facing copy,
+  release validation, permission bundling, and cross-repo release handoff.
+- Linked the playbook from the README core docs and documentation map.
+
 ### Added — Egypt geoBoundaries source-map candidates
 
 - Added geoBoundaries gbOpen EGY ADM2 source-map rows for the Cairo/Giza/6th
