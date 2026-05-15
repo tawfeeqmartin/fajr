@@ -55,6 +55,14 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Kept all rows source-map-only; no runtime bbox, country/method dispatch,
   public API, package data, or prayer-time behavior changed.
 
+### Added — Mawaqit yearly clock-normalization tooling
+
+- Added an opt-in `--source-clock-timezone UTC --target-timezone <IANA>` path
+  to `scripts/fetch-mawaqit-yearly.js` so GMT-year-round embedded calendars
+  can be converted to local clock before future fixture review.
+- Documented the UK `Europe/London` re-fetch command for issue #70 without
+  mutating `eval/data/`.
+
 ### Added — downstream app integration playbook
 
 - Added `docs/downstream-apps.md`, capturing agiftoftime-derived patterns for

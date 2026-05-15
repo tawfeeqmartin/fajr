@@ -26,6 +26,8 @@
  *   node scripts/fetch-mawaqit-yearly.js --limit 5            # first N slugs
  *   node scripts/fetch-mawaqit-yearly.js --out <path>         # custom output path
  *   node scripts/fetch-mawaqit-yearly.js --year 2025          # tag the calendar's year
+ *   node scripts/fetch-mawaqit-yearly.js --country "United Kingdom" \
+ *     --source-clock-timezone UTC --target-timezone Europe/London
  *
  * Rate limits: 2 sec between requests to mawaqit.net (be polite to a
  * free institutional resource that the global Muslim community
@@ -38,6 +40,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname } from 'node:path'
+import { normalizeClockTimeForZone } from './lib/timezone-clock.js'
 
 const REGISTRY_PATH = new URL('./data/mawaqit-mosques.json', import.meta.url).pathname
 const DEFAULT_OUT = new URL('../eval/data/test/mawaqit-yearly.json', import.meta.url).pathname
@@ -71,11 +74,12 @@ async function main() {
         failures.push({ slug: m.slug, reason: 'no-calendar' })
         continue
       }
-      const dates = calendarToDates(fetched.calendar, targetYear, fetched.iqamaCalendar)
       // Coord priority: mosque-page embed > registry > 0 fallback.
       const latitude = fetched.latitude ?? m.lat ?? m.latitude ?? 0
       const longitude = fetched.longitude ?? m.lng ?? m.longitude ?? 0
       const mosqueName = fetched.name || m.name
+      const clockNormalization = clockNormalizationFor(m)
+      const dates = calendarToDates(fetched.calendar, targetYear, fetched.iqamaCalendar, clockNormalization)
       records.push({
         city: m.city || m.cityName || 'unknown',
         country: m.country || 'unknown',
@@ -90,6 +94,10 @@ async function main() {
         source_url: `https://mawaqit.net/en/m/${m.slug}`,
         source_fetched: new Date().toISOString(),
         source_year: targetYear,
+        ...(clockNormalization ? {
+          source_clock_timezone: clockNormalization.sourceTimeZone,
+          clock_normalized_to_timezone: clockNormalization.targetTimeZone,
+        } : {}),
         dates,
       })
       console.log(`OK (${dates.length} days, ${latitude.toFixed(2)}/${longitude.toFixed(2)})`)
@@ -178,7 +186,7 @@ function extractBalancedArray(html, start) {
   return null
 }
 
-function calendarToDates(calendar, year, iqamaCalendar = null) {
+function calendarToDates(calendar, year, iqamaCalendar = null, clockNormalization = null) {
   if (!Array.isArray(calendar)) return []
   const out = []
   for (let monthIdx = 0; monthIdx < calendar.length; monthIdx++) {
@@ -219,10 +227,34 @@ function calendarToDates(calendar, year, iqamaCalendar = null) {
           fajr: iq[0], dhuhr: iq[1], asr: iq[2], maghrib: iq[3], isha: iq[4],
         }
       }
-      out.push(row)
+      out.push(normalizeRowClock(row, clockNormalization))
     }
   }
   return out
+}
+
+function clockNormalizationFor(mosque) {
+  const sourceTimeZone = args['source-clock-timezone']
+  if (!sourceTimeZone) return null
+  return {
+    sourceTimeZone,
+    targetTimeZone: args['target-timezone'] || mosque.timezone || 'UTC',
+  }
+}
+
+function normalizeRowClock(row, clockNormalization) {
+  if (!clockNormalization) return row
+
+  const normalized = { ...row }
+  for (const key of ['fajr', 'sunrise', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+    if (!normalized[key]) continue
+    normalized[key] = normalizeClockTimeForZone({
+      date: row.date,
+      time: normalized[key],
+      ...clockNormalization,
+    })
+  }
+  return normalized
 }
 
 function parseArgs(argv) {
