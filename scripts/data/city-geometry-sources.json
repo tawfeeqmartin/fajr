@@ -1396,6 +1396,133 @@
       ]
     },
     {
+      "cityKey": "Toronto|CA",
+      "priority": ["canada-metro", "toronto-mississauga", "source-map-only", "americas-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Toronto and Mississauga already have hand-clipped runtime boxes; record reviewed WOF locality/county context before proposing any bbox changes."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Mississauga|CA", "kind": "same-metro-neighbor", "status": "Runtime boxes are already hand-clipped; source-map rows preserve evidence for later review." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101735835",
+          "ids": { "wofId": 101735835, "repo": "whosonfirst-data-admin-ca", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "CA/toronto/wof-locality-101735835.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:890457465",
+          "ids": { "wofId": 890457465, "repo": "whosonfirst-data-admin-ca", "placetype": "county", "srcGeom": "statcan", "mzIsCurrent": 1 },
+          "cacheFile": "CA/toronto/wof-county-890457465.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Statistics Canada-derived county/context row; not a direct city-locality replacement."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Mississauga|CA",
+      "priority": ["canada-metro", "toronto-mississauga", "source-map-only", "americas-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Mississauga sits inside the Toronto metro seam and needs a paired clipping review before any runtime bbox change."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Toronto|CA", "kind": "same-metro-neighbor", "status": "Runtime boxes are already hand-clipped; source-map rows preserve evidence for later review." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101735893",
+          "ids": { "wofId": 101735893, "repo": "whosonfirst-data-admin-ca", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "CA/mississauga/wof-locality-101735893.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "Montreal|CA",
+      "priority": ["canada-metro", "montreal-laval", "source-map-only", "americas-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. WOF search surfaced a current Statistics Canada-derived county row for Montreal; keep it as context until a locality/official municipal source is reviewed."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Laval|CA", "kind": "same-metro-neighbor", "status": "Runtime boxes are already hand-clipped; source-map rows preserve evidence for later review." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:county:890458661",
+          "ids": { "wofId": 890458661, "repo": "whosonfirst-data-admin-ca", "placetype": "county", "srcGeom": "statcan", "mzIsCurrent": 1 },
+          "cacheFile": "CA/montreal/wof-county-890458661.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Statistics Canada-derived county/context row; not a direct city-locality replacement."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Laval|CA",
+      "priority": ["canada-metro", "montreal-laval", "source-map-only", "americas-p0"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Laval sits inside the Montreal metro seam and needs a paired clipping review before any runtime bbox change."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Montreal|CA", "kind": "same-metro-neighbor", "status": "Runtime boxes are already hand-clipped; source-map rows preserve evidence for later review." }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101737759",
+          "ids": { "wofId": 101737759, "repo": "whosonfirst-data-admin-ca", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "CA/laval/wof-locality-101737759.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:890457693",
+          "ids": { "wofId": 890457693, "repo": "whosonfirst-data-admin-ca", "placetype": "county", "srcGeom": "statcan", "mzIsCurrent": 1 },
+          "cacheFile": "CA/laval/wof-county-890457693.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Statistics Canada-derived county/context row; not a direct city-locality replacement."]
+        }
+      ]
+    },
+    {
       "cityKey": "Geneva|CH",
       "priority": ["geneva-border", "wof-locality-runtime-bbox", "europe-p0"],
       "review": {
