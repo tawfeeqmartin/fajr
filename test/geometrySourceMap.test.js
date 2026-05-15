@@ -143,6 +143,9 @@ describe('city geometry source map', () => {
     expect(statusFor('Abu Dhabi|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Al Ain|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Al Buraimi|OM')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Khasab|OM')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Dibba Al-Baya|OM')).toBe('runtime-bbox-shipped')
+    expect(statusFor('Madha|OM')).toBe('runtime-bbox-shipped')
     expect(statusFor('Dubai|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Sharjah|AE')).toBe('runtime-bbox-shipped')
     expect(statusFor('Ajman|AE')).toBe('runtime-bbox-shipped')
@@ -205,6 +208,48 @@ describe('city geometry source map', () => {
       matchConfidence: 'placetype-mismatch-context',
       reviewStatus: 'candidate',
     })
+  })
+
+  it('documents Musandam and Madha guardrails as WOF point plus county context', () => {
+    const rows = [
+      ['Khasab|OM', 'wof:locality:890443207', 'wof:county:1108721073', 'musandam-exclave'],
+      ['Dibba Al-Baya|OM', 'wof:locality:1310693245', 'wof:county:1108721075', 'musandam-exclave'],
+      ['Madha|OM', 'wof:locality:1260383081', 'wof:county:1108721093', 'madha-exclave'],
+    ]
+
+    for (const [cityKey, localityId, countyId, priority] of rows) {
+      const entry = sourceMap.cities.find(row => row.cityKey === cityKey)
+      expect(entry, cityKey).toBeTruthy()
+      expect(entry.review.status).toBe('runtime-bbox-shipped')
+      expect(entry.priority).toContain(priority)
+      expect(entry.priority).toContain('city-center-guardrail')
+
+      const locality = entry.geometries.find(row => row.stableId === localityId)
+      expect(locality, `${cityKey} locality`).toMatchObject({
+        provider: 'wof',
+        sourceConfidence: 'low',
+        matchConfidence: 'point-like-runtime-guardrail',
+        reviewStatus: 'runtime-bbox-shipped',
+      })
+      expect(locality.ids).toMatchObject({
+        repo: 'whosonfirst-data-admin-om',
+        placetype: 'locality',
+        mzIsCurrent: -1,
+      })
+
+      const county = entry.geometries.find(row => row.stableId === countyId)
+      expect(county, `${cityKey} county`).toMatchObject({
+        provider: 'wof',
+        sourceConfidence: 'medium',
+        matchConfidence: 'placetype-mismatch-context',
+        reviewStatus: 'candidate',
+      })
+      expect(county.ids).toMatchObject({
+        repo: 'whosonfirst-data-admin-om',
+        placetype: 'county',
+        mzIsCurrent: 1,
+      })
+    }
   })
 
   it('marks the WOF row-level source as shipped for WOF-supported runtime bboxes', () => {

@@ -61,6 +61,12 @@ function detectCountry(lat, lon) {
   // of Al Ain. Keep this Oman guardrail before the broad UAE rectangle so the
   // Omani city centre does not inherit UAE/Al Ain provenance.
   if (lat >= 24.22 && lat <= 24.29 && lon >= 55.77 && lon <= 55.84) return 'Oman'
+  // v1.9.2 (#118): Omani Musandam/Madha city-centre guardrails inside the
+  // broad UAE rectangle. These are intentionally narrow; full enclave/county
+  // polygons stay in the build-time geometry audit, not runtime country logic.
+  if (lat >= 26.15 && lat <= 26.22 && lon >= 56.21 && lon <= 56.29) return 'Oman'
+  if (lat >= 25.60 && lat <= 25.67 && lon >= 56.23 && lon <= 56.31) return 'Oman'
+  if (lat >= 25.26 && lat <= 25.31 && lon >= 56.30 && lon <= 56.36) return 'Oman'
   if (lat >= 22   && lat <= 26.5 && lon >= 51   && lon <= 56.5) return 'UAE'
   if (lat >= 16   && lat <= 26.5 && lon >= 51.7 && lon <= 60)   return 'Oman'
   // v1.7.5: Yemen's western lon tightened from 42 to 42.5 — swallowed

@@ -657,6 +657,120 @@
       ]
     },
     {
+      "cityKey": "Khasab|OM",
+      "priority": ["oman-uae-border", "musandam-exclave", "city-center-guardrail"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: added a narrow city-centre guardrail so Khasab/Musandam does not resolve to UAE. WOF has point-like historical locality rows plus a broad current county row; runtime uses neither raw envelope directly."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Ras al-Khaimah|AE", "kind": "cross-border-neighbor", "status": "Khasab guardrail is east/north of the Ras al-Khaimah runtime cell" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:890443207",
+          "ids": { "wofId": 890443207, "repo": "whosonfirst-data-admin-om", "placetype": "locality", "srcGeom": "unknown", "mzIsCurrent": -1 },
+          "cacheFile": "OM/khasab/wof-locality-890443207.geojson",
+          "sourceConfidence": "low",
+          "matchConfidence": "point-like-runtime-guardrail",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Point-like WOF locality row anchors Khasab city centre; runtime bbox is a conservative guardrail cell."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:1108721073",
+          "ids": { "wofId": 1108721073, "repo": "whosonfirst-data-admin-om", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "OM/khasab/wof-county-1108721073.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Khasab county confirms Musandam context but is too broad to copy into the runtime city registry."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Dibba Al-Baya|OM",
+      "priority": ["oman-uae-border", "musandam-exclave", "city-center-guardrail"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: added a narrow city-centre guardrail so Dibba Al-Baya does not resolve to UAE. WOF has a point-like locality row plus a broad current Daba county row; runtime uses neither raw envelope directly."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Fujairah|AE", "kind": "cross-border-neighbor", "status": "Dibba Al-Baya guardrail is north of the Fujairah runtime cell" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:1310693245",
+          "ids": { "wofId": 1310693245, "repo": "whosonfirst-data-admin-om", "placetype": "locality", "srcGeom": "geonames", "mzIsCurrent": -1 },
+          "cacheFile": "OM/dibba-al-baya/wof-locality-1310693245.geojson",
+          "sourceConfidence": "low",
+          "matchConfidence": "point-like-runtime-guardrail",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Point-like WOF locality row anchors the Omani Dibba Al-Baya centre; runtime bbox is a conservative guardrail cell."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:1108721075",
+          "ids": { "wofId": 1108721075, "repo": "whosonfirst-data-admin-om", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "OM/dibba-al-baya/wof-county-1108721075.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Daba county confirms Omani context but is too broad and adjacent to UAE Dibba/Fujairah routing."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Madha|OM",
+      "priority": ["oman-uae-border", "madha-exclave", "city-center-guardrail"],
+      "review": {
+        "status": "runtime-bbox-shipped",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: added a narrow city-centre guardrail so Madha does not resolve to UAE. WOF has a point-like Madha' al Jadidah locality row plus a current Madha county row; runtime uses a small centre cell only."
+        ]
+      },
+      "neighborRelations": [
+        { "cityKey": "Fujairah|AE", "kind": "enclave-neighbor", "status": "Madha guardrail is separate from the Fujairah runtime cell" }
+      ],
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:1260383081",
+          "ids": { "wofId": 1260383081, "repo": "whosonfirst-data-admin-om", "placetype": "locality", "srcGeom": "geonames", "mzIsCurrent": -1 },
+          "cacheFile": "OM/madha/wof-locality-1260383081.geojson",
+          "sourceConfidence": "low",
+          "matchConfidence": "point-like-runtime-guardrail",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "runtime-bbox-shipped",
+          "notes": ["Point-like WOF locality row anchors Madha's populated centre; runtime bbox is a conservative guardrail cell."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:1108721093",
+          "ids": { "wofId": 1108721093, "repo": "whosonfirst-data-admin-om", "placetype": "county", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "OM/madha/wof-county-1108721093.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-context",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF Madha county confirms the Omani enclave context but is too broad for direct runtime city lookup."]
+        }
+      ]
+    },
+    {
       "cityKey": "Dubai|AE",
       "priority": ["uae-metro", "wof-locality-runtime-bbox", "clipped"],
       "review": {
