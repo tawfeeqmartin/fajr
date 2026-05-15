@@ -112,6 +112,9 @@ describe('city geometry source map', () => {
       ['Petaling Jaya|MY', 'wof:locality:102023395'],
       ['Kuala Lumpur|MY', 'wof:locality:102023407'],
       ['Sialkot|PK', 'wof:locality:421175525'],
+      ['Toronto|CA', 'wof:locality:101735835'],
+      ['Mississauga|CA', 'wof:locality:101735893'],
+      ['Laval|CA', 'wof:locality:101737759'],
       ['Windsor|CA', 'wof:locality:101735855'],
       ['Geneva|CH', 'wof:locality:101748445'],
       ['Annemasse|FR', 'wof:locality:101757307'],
@@ -360,6 +363,29 @@ describe('city geometry source map', () => {
           boundaryType: 'ADM2',
           boundaryYearRepresented: '2020',
         })
+      }
+    }
+  })
+
+  it('keeps Canada metro geometry as source-map-only until seams are reviewed', () => {
+    const expected = new Map([
+      ['Toronto|CA', ['wof:locality:101735835', 'wof:county:890457465']],
+      ['Mississauga|CA', ['wof:locality:101735893']],
+      ['Montreal|CA', ['wof:county:890458661']],
+      ['Laval|CA', ['wof:locality:101737759', 'wof:county:890457693']],
+    ])
+
+    for (const [cityKey, stableIds] of expected) {
+      const entry = sourceMap.cities.find(row => row.cityKey === cityKey)
+      expect(entry, cityKey).toBeTruthy()
+      expect(entry.review.status, cityKey).toBe('candidate')
+      expect(entry.priority, cityKey).toContain('canada-metro')
+      expect(entry.priority, cityKey).toContain('source-map-only')
+
+      for (const stableId of stableIds) {
+        const geometry = entry.geometries.find(row => row.stableId === stableId)
+        expect(geometry, `${cityKey} ${stableId}`).toBeTruthy()
+        expect(geometry.reviewStatus, `${cityKey} ${stableId}`).toBe('candidate')
       }
     }
   })

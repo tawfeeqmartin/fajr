@@ -34,12 +34,13 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-56 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+60 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
 source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
 rows, 1 Hong Kong/Shenzhen border row, 2 Singapore/Johor rows, 4 Klang Valley
-rows, 1 Pakistan overlap row, 1 Detroit/Windsor border row, 3 Geneva border
-rows, 2 Strasbourg/Kehl border rows, 2 Congo River rows, and 3 carry-over
-registry-warning rows. It carries 17 OSM relation rows plus 58 WOF rows and 14
+rows, 1 Pakistan overlap row, 4 Toronto/Montreal Canada metro rows,
+1 Detroit/Windsor border row, 3 Geneva border rows, 2 Strasbourg/Kehl border
+rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries
+17 OSM relation rows plus 64 WOF rows and 14
 geoBoundaries rows across reviewed locality/county/admin candidates. Morocco rows with
 WOF-backed runtime status are separated from OSM-only audit candidates;
 Jerusalem intentionally remains without a geometry candidate until a human
@@ -342,6 +343,11 @@ validator warnings, or known clipping gaps:
   rows, preserving Malaysia/JAKIM provenance at city level.
 - Resolved high-risk overlap: Sialkot/Gujranwala. Sialkot now has a reviewed
   WOF source-map row and no longer shadows Gujranwala's north-east edge.
+- Source-mapped but not runtime-safe yet: Toronto/Mississauga and
+  Montreal/Laval. WOF has current locality rows for Toronto, Mississauga, and
+  Laval, plus Statistics Canada-derived county/context rows for Toronto,
+  Montreal, and Laval. These rows are preserved as source leads; runtime bboxes
+  should wait for paired metro-seam clipping review.
 - Source-mapped but not runtime-safe yet: Cairo/Giza/6th of October. WOF has a
   real Cairo locality, point-like Giza/New Cairo localities, and split
   county-level Giza/6th-of-October candidates. geoBoundaries gbOpen EGY ADM2
@@ -349,8 +355,7 @@ validator warnings, or known clipping gaps:
   and 6th-of-October/Sheikh Zayed context under CC BY 3.0 IGO. These rows are
   source leads only; runtime bboxes should wait for a reviewed clipping design.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
-  Dubai/Sharjah/Ajman, Toronto/Mississauga/Laval/Montreal,
-  Lahore/Gujranwala broader coverage, Basra/Ahvaz/Kuwait City,
+  Dubai/Sharjah/Ajman, Lahore/Gujranwala broader coverage, Basra/Ahvaz/Kuwait City,
   Damascus/Homs/Gaziantep.
 - Large heuristic bboxes such as Karachi, Istanbul, Jakarta, Bangalore, Dhaka,
   Tokyo, Seoul, Moscow, Melbourne, Sydney, Shanghai, Lagos, London, New York.

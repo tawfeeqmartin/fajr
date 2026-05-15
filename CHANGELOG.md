@@ -36,6 +36,14 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Kept all Egypt rows source-map-only; no runtime bbox, country/method
   dispatch, prayer-time math, public API, or npm package data changed.
 
+### Added — Canada metro geometry source-map candidates
+
+- Added audit-only WOF source-map candidates for Toronto, Mississauga,
+  Montreal, and Laval so the Canada metro seam can be reviewed without changing
+  runtime city bboxes.
+- Preserved WOF locality rows where available and Statistics Canada-derived WOF
+  county/context rows for Toronto, Montreal, and Laval.
+
 ## [1.9.2] — 2026-05-15
 
 ### Fixed — Al Buraimi / Al Ain border routing
