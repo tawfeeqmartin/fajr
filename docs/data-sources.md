@@ -243,6 +243,21 @@ Raw/source locations:
 - `scripts/fetch-mawaqit.js`
 - `scripts/fetch-mawaqit-yearly.js`
 
+For the UK yearly corpus, the existing fixture is known to contain a
+GMT/BST clock-encoding artifact. Re-fetch with explicit source-clock
+normalization before using it for calibration:
+
+```bash
+node scripts/fetch-mawaqit-yearly.js \
+  --country "United Kingdom" \
+  --source-clock-timezone UTC \
+  --target-timezone Europe/London \
+  --out eval/data/test/mawaqit-uk-yearly.json
+```
+
+Do not commit a regenerated eval fixture from an autoresearch/script cleanup
+PR; fixture replacement needs a separate corpus-quality review.
+
 ## Institutional References Not Yet Fully Fixture-Backed
 
 These sources are important for citation and future ingestion, but a named
