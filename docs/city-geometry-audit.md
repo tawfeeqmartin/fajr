@@ -316,6 +316,11 @@ validator warnings, or known clipping gaps:
   rows, preserving Malaysia/JAKIM provenance at city level.
 - Resolved high-risk overlap: Sialkot/Gujranwala. Sialkot now has a reviewed
   WOF source-map row and no longer shadows Gujranwala's north-east edge.
+- Source-mapped but not runtime-safe yet: Cairo/Giza/6th of October. WOF has a
+  real Cairo locality, point-like Giza/New Cairo localities, and split
+  county-level Giza/6th-of-October candidates. These rows are now preserved as
+  source leads, but runtime bboxes should wait for a reviewed clipping design
+  or official Egyptian municipal geometry.
 - High-risk metro/border clusters: Cairo/Giza/6th of October,
   Dubai/Sharjah/Ajman, Toronto/Mississauga/Laval/Montreal,
   Lahore/Gujranwala broader coverage, Basra/Ahvaz/Kuwait City,

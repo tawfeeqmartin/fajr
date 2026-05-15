@@ -1,7 +1,7 @@
 {
   "$schema_doc": "Build-time source map for auditing src/data/cities.json city bboxes. This file stores stable external IDs, review state, authority IDs, and cache pointers only. Raw geometry stays outside git/npm in .cache/city-geometry.",
   "version": 1,
-  "updated": "2026-05-14",
+  "updated": "2026-05-15",
   "issue": 118,
   "cacheRoot": ".cache/city-geometry",
   "providers": {
@@ -466,6 +466,107 @@
           "matchConfidence": "candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
           "reviewStatus": "runtime-bbox-shipped"
+        }
+      ]
+    },
+    {
+      "cityKey": "Cairo|EG",
+      "priority": ["egypt-metro", "cairo-giza-6october", "source-map-only", "needs-clipping-review"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: WOF source-map candidate only. Do not tighten runtime Cairo directly from the WOF locality envelope because the shipped Cairo row intentionally covers the New Cairo/east-Cairo corridor; direct WOF copying would drop existing city provenance."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421174399",
+          "ids": { "wofId": 421174399, "repo": "whosonfirst-data-admin-eg", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "EG/cairo/wof-locality-421174399.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Real Cairo locality geometry, but not sufficient by itself for the current runtime cell because east-Cairo/New Cairo coverage needs a separate reviewed design."]
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421175733",
+          "ids": { "wofId": 421175733, "repo": "whosonfirst-data-admin-eg", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "EG/cairo/wof-locality-421175733.geojson",
+          "sourceConfidence": "low",
+          "matchConfidence": "point-like-related-locality-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["New Cairo is point-like in WOF and is recorded only as a source lead for the east-Cairo coverage question."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Giza|EG",
+      "priority": ["egypt-metro", "cairo-giza-6october", "source-map-only", "needs-clipping-review"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: WOF source-map candidate only. Giza has a point-like WOF locality plus split county candidates; none is safe as a direct runtime replacement for the current clipped Giza row."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:421204393",
+          "ids": { "wofId": 421204393, "repo": "whosonfirst-data-admin-eg", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "EG/giza/wof-locality-421204393.geojson",
+          "sourceConfidence": "low",
+          "matchConfidence": "point-like-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:1092021173",
+          "ids": { "wofId": 1092021173, "repo": "whosonfirst-data-admin-eg", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "EG/giza/wof-county-1092021173.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "wof",
+          "stableId": "wof:county:1092021203",
+          "ids": { "wofId": 1092021203, "repo": "whosonfirst-data-admin-eg", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "EG/giza/wof-county-1092021203.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "cityKey": "6th of October|EG",
+      "priority": ["egypt-metro", "cairo-giza-6october", "source-map-only", "needs-clipping-review"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: WOF county candidate is promising for west/north undercoverage, but the geometry needs manual review before any runtime bbox change because it is county-level and may not contain the current registry center cleanly."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:county:1092014009",
+          "ids": { "wofId": 1092014009, "repo": "whosonfirst-data-admin-eg", "placetype": "county", "srcGeom": "meso", "mzIsCurrent": 1 },
+          "cacheFile": "EG/6th-of-october/wof-county-1092014009.geojson",
+          "sourceConfidence": "medium",
+          "matchConfidence": "placetype-mismatch-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
         }
       ]
     },
