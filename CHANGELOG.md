@@ -37,6 +37,16 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added `docs/qa-process.md` and linked it from the README so issue #49 has a
   concrete release-process artifact alongside the downstream app playbook.
 
+### Fixed — Saudi elevation citation wording
+
+- Narrowed stale docs/type-comment wording around Saudi elevation practice:
+  fajr now says Saudi sources support uniform Umm al-Qura city timetable
+  practice, while the high-rise/elevation rationale remains an open citation
+  gap tracked in issue #132.
+- Cleaned `docs/paper.md`, `docs/scholar-review-brief.md`, and
+  `src/index.d.ts` comments so they no longer present the jama'ah-unity
+  explanation as a retrieved primary Saudi policy.
+
 ### Added — downstream app integration playbook
 
 - Added `docs/downstream-apps.md`, capturing agiftoftime-derived patterns for
