@@ -28,6 +28,15 @@
  *   node scripts/fetch-mawaqit-yearly.js --year 2025          # tag the calendar's year
  *   node scripts/fetch-mawaqit-yearly.js --country "United Kingdom" \
  *     --source-clock-timezone UTC --target-timezone Europe/London
+ *   node scripts/fetch-mawaqit-yearly.js --filter-degenerate   # skip mosques
+ *                                                              # whose embedded
+ *                                                              # calendars look
+ *                                                              # manually-set
+ *                                                              # rather than
+ *                                                              # astronomically
+ *                                                              # computed. See
+ *                                                              # scripts/lib/mosque-calendar-quality.js
+ *                                                              # for thresholds.
  *
  * Rate limits: 2 sec between requests to mawaqit.net (be polite to a
  * free institutional resource that the global Muslim community
@@ -41,6 +50,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { normalizeClockTimeForZone } from './lib/timezone-clock.js'
+import { assessCalendarQuality } from './lib/mosque-calendar-quality.js'
 
 const REGISTRY_PATH = new URL('./data/mawaqit-mosques.json', import.meta.url).pathname
 const DEFAULT_OUT = new URL('../eval/data/test/mawaqit-yearly.json', import.meta.url).pathname
@@ -80,6 +90,15 @@ async function main() {
       const mosqueName = fetched.name || m.name
       const clockNormalization = clockNormalizationFor(m)
       const dates = calendarToDates(fetched.calendar, targetYear, fetched.iqamaCalendar, clockNormalization)
+      if (args['filter-degenerate']) {
+        const { issues } = assessCalendarQuality(dates)
+        if (issues.length > 0) {
+          console.log(`SKIP-DEGENERATE (${issues.join(',')})`)
+          failures.push({ slug: m.slug, reason: 'degenerate-calendar:' + issues.join(',') })
+          if (i < slugs.length - 1) await sleep(RATE_LIMIT_MS)
+          continue
+        }
+      }
       records.push({
         city: m.city || m.cityName || 'unknown',
         country: m.country || 'unknown',
