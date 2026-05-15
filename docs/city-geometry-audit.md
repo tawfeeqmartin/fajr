@@ -34,13 +34,14 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-62 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+70 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
 source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
 rows, 1 Hong Kong/Shenzhen border row, 2 Singapore/Johor rows, 4 Klang Valley
-rows, 1 Pakistan overlap row, 4 Toronto/Montreal Canada metro rows,
+rows, 1 Pakistan overlap row, 8 South Asia large-city source-map rows,
+4 Toronto/Montreal Canada metro rows,
 3 Detroit/Dearborn/Windsor border rows, 3 Geneva border rows, 2 Strasbourg/Kehl border
 rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries
-17 OSM relation rows plus 68 WOF rows and 14
+17 OSM relation rows plus 81 WOF rows and 15
 geoBoundaries rows across reviewed locality/county/admin candidates. Morocco rows with
 WOF-backed runtime status are separated from OSM-only audit candidates;
 Jerusalem intentionally remains without a geometry candidate until a human
@@ -150,6 +151,18 @@ The first Turkey pass is cleaner:
   and Eskisehir use superseding rows marked `mz:is_current = -1`, Kayseri is
   point-like, and Mersin did not surface a clean city locality row in the WOF
   scan.
+
+The South Asia large-city pass is source-map-only:
+
+- Karachi, Hyderabad PK, Mumbai, Ahmedabad, Bangalore, Chennai, Hyderabad IN,
+  and Dhaka have current WOF locality rows. Several also have county/context
+  rows.
+- Dhaka also keeps geoBoundaries BGD ADM2 Dhaka district context because the
+  official district layer is useful evidence but not a municipal city polygon.
+- These rows are not runtime-safe yet: the current registry cells are broad
+  heuristic boxes, and tightening them needs paired neighbor review for dense
+  metros such as Karachi/Sindh, Mumbai/Navi Mumbai/Thane, Bangalore/Bengaluru
+  metro, and Dhaka district/city boundaries.
 
 The Detroit/Windsor border seam needs clipping rather than direct WOF copying:
 

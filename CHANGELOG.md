@@ -67,6 +67,17 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 - Added a source-map test so the Windsor row stays aligned with the raw WOF
   provenance while retaining its `runtime-bbox-shipped` status.
 
+### Added — South Asia large-city geometry source-map candidates
+
+- Added source-map-only geometry rows for broad South Asia heuristic city boxes:
+  Karachi, Hyderabad PK, Mumbai, Ahmedabad, Bangalore, Chennai, Hyderabad IN,
+  and Dhaka.
+- Preserved current WOF locality rows where available, WOF county/context rows
+  where useful, and geoBoundaries BGD ADM2 Dhaka district context as
+  official/permissive district evidence.
+- Kept all rows source-map-only; no runtime bbox, country/method dispatch,
+  public API, package data, or prayer-time behavior changed.
+
 ## [1.9.2] — 2026-05-15
 
 ### Fixed — Al Buraimi / Al Ain border routing

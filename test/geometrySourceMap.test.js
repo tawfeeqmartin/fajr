@@ -112,6 +112,13 @@ describe('city geometry source map', () => {
       ['Petaling Jaya|MY', 'wof:locality:102023395'],
       ['Kuala Lumpur|MY', 'wof:locality:102023407'],
       ['Sialkot|PK', 'wof:locality:421175525'],
+      ['Karachi|PK', 'wof:locality:421191101'],
+      ['Hyderabad|PK', 'wof:locality:421168813'],
+      ['Mumbai|IN', 'wof:locality:102030609'],
+      ['Ahmedabad|IN', 'wof:locality:102031017'],
+      ['Bangalore|IN', 'wof:locality:102030819'],
+      ['Chennai|IN', 'wof:locality:102029537'],
+      ['Hyderabad|IN', 'wof:locality:102030059'],
       ['Toronto|CA', 'wof:locality:101735835'],
       ['Mississauga|CA', 'wof:locality:101735893'],
       ['Laval|CA', 'wof:locality:101737759'],
@@ -390,6 +397,48 @@ describe('city geometry source map', () => {
         expect(geometry.reviewStatus, `${cityKey} ${stableId}`).toBe('candidate')
       }
     }
+  })
+
+  it('keeps South Asia mega-city geometry as source-map-only until metro seams are reviewed', () => {
+    const expected = new Map([
+      ['Karachi|PK', ['wof:locality:421191101', 'wof:county:1108692233']],
+      ['Hyderabad|PK', ['wof:locality:421168813']],
+      ['Mumbai|IN', ['wof:locality:102030609', 'wof:county:890509223']],
+      ['Ahmedabad|IN', ['wof:locality:102031017']],
+      ['Bangalore|IN', ['wof:locality:102030819', 'wof:county:890511315']],
+      ['Chennai|IN', ['wof:locality:102029537', 'wof:county:890505403']],
+      ['Hyderabad|IN', ['wof:locality:102030059']],
+      ['Dhaka|BD', [
+        'wof:locality:421181477',
+        'wof:county:421187803',
+        'geoboundaries:BGD-ADM2-16705992:16705992B90744549146712',
+      ]],
+    ])
+
+    for (const [cityKey, stableIds] of expected) {
+      const entry = sourceMap.cities.find(row => row.cityKey === cityKey)
+      expect(entry, cityKey).toBeTruthy()
+      expect(entry.review.status, cityKey).toBe('candidate')
+      expect(entry.priority, cityKey).toContain('source-map-only')
+      expect(entry.priority, cityKey).toContain('heuristic-bbox')
+
+      for (const stableId of stableIds) {
+        const geometry = entry.geometries.find(row => row.stableId === stableId)
+        expect(geometry, `${cityKey} ${stableId}`).toBeTruthy()
+        expect(geometry.reviewStatus, `${cityKey} ${stableId}`).toBe('candidate')
+      }
+    }
+
+    const dhaka = sourceMap.cities.find(row => row.cityKey === 'Dhaka|BD')
+    const dhakaGeometry = dhaka.geometries.find(row => row.provider === 'geoboundaries')
+    expect(dhakaGeometry.matchConfidence).toBe('adm2-context-candidate')
+    expect(dhakaGeometry.ids).toMatchObject({
+      boundaryId: 'BGD-ADM2-16705992',
+      shapeId: '16705992B90744549146712',
+      releaseType: 'gbOpen',
+      boundaryType: 'ADM2',
+      boundaryYearRepresented: '2020',
+    })
   })
 
   it('keeps Windsor source provenance aligned with the raw WOF record', () => {
