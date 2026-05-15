@@ -26,6 +26,14 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Fixed — Geometry source-map status alignment
+
+- Marked the Basel and Mulhouse WOF locality rows as row-level
+  `runtime-bbox-shipped`, matching the already-shipped city-level runtime bbox
+  status from the geometry audit.
+- Added a source-map test so future direct WOF-backed runtime bboxes keep at
+  least one row-level WOF geometry marked as shipped.
+
 ### Changed — Asr convention wording in hand-curated docs
 
 - Cleaned `docs/paper.md` and `docs/calibration-recipe.md` so they describe

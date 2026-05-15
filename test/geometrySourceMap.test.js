@@ -172,6 +172,25 @@ describe('city geometry source map', () => {
     expect(statusFor('Kinshasa|CD')).toBe('runtime-bbox-shipped')
   })
 
+  it('marks the WOF row-level source as shipped for direct WOF runtime bboxes', () => {
+    const clippedRuntimeRows = new Set([
+      // Dubai uses a clipped lookup cell from the WOF lead, not the full WOF
+      // envelope, so the geometry row remains a candidate by design.
+      'Dubai|AE',
+    ])
+
+    for (const entry of sourceMap.cities) {
+      if (entry.review.status !== 'runtime-bbox-shipped') continue
+      if (clippedRuntimeRows.has(entry.cityKey)) continue
+
+      const shippedWofRows = (entry.geometries || [])
+        .filter(geometry => geometry.provider === 'wof')
+        .filter(geometry => geometry.reviewStatus === 'runtime-bbox-shipped')
+
+      expect(shippedWofRows.length, entry.cityKey).toBeGreaterThan(0)
+    }
+  })
+
   it('keeps Egypt metro geometry as source-map-only until clipping is reviewed', () => {
     const expected = new Map([
       ['Cairo|EG', ['wof:locality:421174399', 'wof:locality:421175733']],

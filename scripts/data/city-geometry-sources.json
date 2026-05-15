@@ -1302,9 +1302,9 @@
           "ids": { "wofId": 101748459, "repo": "whosonfirst-data-admin-ch", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "CH/basel/wof-locality-101748459.geojson",
           "sourceConfidence": "high",
-          "matchConfidence": "candidate",
+          "matchConfidence": "runtime-bbox",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate",
+          "reviewStatus": "runtime-bbox-shipped",
           "notes": ["WOF SQLite admin-ch latest lists this as the current locality row for Basel; bbox aligns with the OSM municipal envelope."]
         }
       ]
@@ -1333,9 +1333,9 @@
           "ids": { "wofId": 101749573, "repo": "whosonfirst-data-admin-fr", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
           "cacheFile": "FR/mulhouse/wof-locality-101749573.geojson",
           "sourceConfidence": "high",
-          "matchConfidence": "candidate",
+          "matchConfidence": "runtime-bbox",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
-          "reviewStatus": "candidate",
+          "reviewStatus": "runtime-bbox-shipped",
           "notes": ["WOF SQLite admin-fr latest lists this as the current locality row for Mulhouse; bbox aligns with the OSM municipal envelope."]
         }
       ]
