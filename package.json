@@ -40,6 +40,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "compare": "node eval/compare.js",
+    "preflight:release": "node scripts/preflight-release.js",
     "validate:aabed": "node scripts/validate-against-aabed-2015.js",
     "validate:hilal": "node scripts/validate-hilal.js",
     "validate:lunar-jpl": "node scripts/validate-lunar-against-jpl.js",
