@@ -60,6 +60,13 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   city-institutional override, public API, package data, or prayer-time
   behavior changed.
 
+### Fixed — Windsor geometry source-map provenance
+
+- Corrected the `Windsor|CA` WOF source-map row to record the raw WOF
+  `src:geom` value as `quattroshapes`.
+- Added a source-map test so the Windsor row stays aligned with the raw WOF
+  provenance while retaining its `runtime-bbox-shipped` status.
+
 ## [1.9.2] — 2026-05-15
 
 ### Fixed — Al Buraimi / Al Ain border routing
