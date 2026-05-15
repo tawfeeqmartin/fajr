@@ -441,6 +441,51 @@ describe('city geometry source map', () => {
     })
   })
 
+  it('keeps Jakarta/Jabodetabek geometry as source-map-only until neighbor cells exist', () => {
+    const entry = sourceMap.cities.find(row => row.cityKey === 'Jakarta|ID')
+    expect(entry).toBeTruthy()
+    expect(entry.review.status).toBe('candidate')
+    expect(entry.priority).toContain('jakarta-jabodetabek')
+    expect(entry.priority).toContain('source-map-only')
+
+    const wofRows = entry.geometries.filter(row => row.provider === 'wof')
+    expect(wofRows.map(row => row.stableId)).toEqual([
+      'wof:region:85672001',
+      'wof:county:102072841',
+      'wof:county:102073177',
+      'wof:county:102072667',
+      'wof:county:102073493',
+      'wof:county:102073125',
+    ])
+    for (const row of wofRows) {
+      expect(row.ids.repo).toBe('whosonfirst-data-admin-id')
+      expect(row.ids.srcGeom).toBe('meso')
+      expect(row.ids.mzIsCurrent).toBe(1)
+      expect(row.matchConfidence).toBe('placetype-mismatch-context')
+      expect(row.reviewStatus).toBe('candidate')
+    }
+
+    const officialRows = entry.geometries.filter(row => row.provider === 'geoboundaries')
+    expect(officialRows.map(row => row.ids.shapeId)).toEqual([
+      '22746128B58252967349746',
+      '22746128B21128962092426',
+      '22746128B93686700937380',
+      '22746128B5353616278909',
+      '22746128B85966169947265',
+    ])
+    for (const row of officialRows) {
+      expect(row.ids).toMatchObject({
+        boundaryId: 'IDN-ADM2-22746128',
+        boundaryISO: 'IDN',
+        releaseType: 'gbOpen',
+        boundaryType: 'ADM2',
+        boundaryYearRepresented: '2020',
+      })
+      expect(row.matchConfidence).toBe('adm2-context-candidate')
+      expect(row.reviewStatus).toBe('candidate')
+    }
+  })
+
   it('keeps Windsor source provenance aligned with the raw WOF record', () => {
     const entry = sourceMap.cities.find(row => row.cityKey === 'Windsor|CA')
     const geometry = entry?.geometries?.find(row => row.stableId === 'wof:locality:101735855')
