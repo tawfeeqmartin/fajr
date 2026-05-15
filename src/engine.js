@@ -57,6 +57,10 @@ function detectCountry(lat, lon) {
   if (lat >= 25.5 && lat <= 26.5 && lon >= 50.4 && lon <= 50.85) return 'Bahrain'
   if (lat >= 24   && lat <= 26.5 && lon >= 50.5 && lon <= 51.7) return 'Qatar'
   if (lat >= 28.5 && lat <= 30.2 && lon >= 46.5 && lon <= 48.5) return 'Kuwait'
+  // v1.9.2 (#118): Al Buraimi OM is a twin-city border case immediately east
+  // of Al Ain. Keep this Oman guardrail before the broad UAE rectangle so the
+  // Omani city centre does not inherit UAE/Al Ain provenance.
+  if (lat >= 24.22 && lat <= 24.29 && lon >= 55.77 && lon <= 55.84) return 'Oman'
   if (lat >= 22   && lat <= 26.5 && lon >= 51   && lon <= 56.5) return 'UAE'
   if (lat >= 16   && lat <= 26.5 && lon >= 51.7 && lon <= 60)   return 'Oman'
   // v1.7.5: Yemen's western lon tightened from 42 to 42.5 — swallowed

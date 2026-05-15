@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-14T22:12:36.873Z",
+  "generated": "2026-05-15T01:53:23.386Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -8,7 +8,7 @@
     "population-centers": "Manual, sourced from UN World Cities + World Population Review 2024-2025"
   },
   "notes": "Cities sorted by bbox area ascending. detectLocation() linear-scans this array and returns the first bbox that contains (lat, lon) — smallest match wins. Each city carries an institutional `source` (mawaqit | national-authority | inherited) so apps can attribute timetable provenance to users. Method overrides are city-level institutional decisions documented in scripts/data/city-method-overrides.json with citation strings.",
-  "total": 483,
+  "total": 484,
   "cities": [
     {"name":"Alburikent (Dagestan)","countryISO":"RU","lat":42.9234,"lon":47.5089,"bbox":[42.92,42.94,47.5,47.52],"timezone":"Europe/Moscow","adminRegion":"Dagestan","population":11000,"elevation":50,"source":{"type":"mawaqit","slug":"alburkent-dzhuma-mechet-alburikent-367026-russia"}},
     {"name":"Isa Town","countryISO":"BH","lat":26.1762,"lon":50.5495,"bbox":[26.16,26.19,50.53,50.56],"timezone":"Asia/Bahrain","population":38000,"elevation":21,"source":{"type":"mawaqit","slug":"masjid-madina-issa-south-810-issa-town-bahrain"}},
@@ -20,6 +20,7 @@
     {"name":"Geneva","countryISO":"CH","lat":46.2044,"lon":6.1432,"bbox":[46.177774,46.234248,6.110233,6.175845],"timezone":"Europe/Zurich","adminRegion":"Geneva Canton","population":203000,"elevation":375,"source":{"type":"mawaqit","slug":"fondation-culturelle-islamique-de-geneve-geneve-1209-switzerland"}},
     {"name":"Berrechid","countryISO":"MA","lat":33.2659,"lon":-7.5867,"bbox":[33.230306,33.299095,-7.613623,-7.545455],"timezone":"Africa/Casablanca","population":136000,"elevation":175,"source":{"type":"mawaqit","slug":"mosquee-brahimm-lkhlalil-berrchid-26100-morocco"}},
     {"name":"Mamoudzou","countryISO":"YT","lat":-12.7806,"lon":45.2278,"bbox":[-12.81,-12.74,45.2,45.27],"timezone":"Indian/Mayotte","population":71000,"elevation":14,"source":{"type":"inherited","from":"Mayotte"}},
+    {"name":"Al Buraimi","countryISO":"OM","lat":24.2509,"lon":55.7931,"bbox":[24.22,24.29,55.77,55.84],"timezone":"Asia/Muscat","adminRegion":"Al Buraimi Governorate","population":117000,"elevation":299,"source":{"type":"inherited","from":"Oman"}},
     {"name":"Mulhouse","countryISO":"FR","lat":47.7508,"lon":7.3359,"bbox":[47.721942,47.783092,7.282525,7.368264],"timezone":"Europe/Paris","population":109000,"elevation":240,"source":{"type":"mawaqit","slug":"association-des-musulmans-des-coteaux-mulhouse"}},
     {"name":"Samsun","countryISO":"TR","lat":41.2867,"lon":36.33,"bbox":[41.256092,41.314632,36.290671,36.3846],"timezone":"Europe/Istanbul","adminRegion":"Samsun Province","population":1356000,"elevation":4,"source":{"type":"inherited","from":"Turkey"}},
     {"name":"Basel","countryISO":"CH","lat":47.5596,"lon":7.5886,"bbox":[47.519297,47.589902,7.554659,7.634148],"timezone":"Europe/Zurich","population":173000,"elevation":260,"source":{"type":"mawaqit","slug":"masjid-arrahma-bale-4057-switzerland"}},
@@ -298,6 +299,7 @@
     {"name":"Johannesburg","countryISO":"ZA","lat":-26.2041,"lon":28.0473,"bbox":[-26.4,-25.95,27.95,28.2],"timezone":"Africa/Johannesburg","adminRegion":"Gauteng","population":5783000,"elevation":1753,"source":{"type":"inherited","from":"SouthAfrica"}},
     {"name":"Giza","countryISO":"EG","lat":30.0131,"lon":31.2089,"bbox":[29.6131,30.1,30.98,31.22],"timezone":"Africa/Cairo","nameLocal":"الجيزة","adminRegion":"Giza","population":9200000,"elevation":30,"source":{"type":"inherited","from":"Egypt"}},
     {"name":"Rawalpindi","countryISO":"PK","lat":33.5651,"lon":73.0169,"bbox":[33.3,33.6,72.8,73.2],"timezone":"Asia/Karachi","nameLocal":"راولپنڈی","adminRegion":"Punjab","population":2099000,"elevation":508,"source":{"type":"inherited","from":"Pakistan"}},
+    {"name":"Al Ain","countryISO":"AE","lat":24.2075,"lon":55.7447,"bbox":[24.013749,24.414416,55.464609,55.7699],"timezone":"Asia/Dubai","nameLocal":"العين","adminRegion":"Abu Dhabi Emirate","population":766000,"elevation":295,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Kinshasa","countryISO":"CD","lat":-4.4419,"lon":15.2663,"bbox":[-4.647148,-4.36,15.130611,15.566205],"timezone":"Africa/Kinshasa","elevation":280,"source":{"type":"inherited","from":"DRCongo"}},
     {"name":"Cairo","countryISO":"EG","lat":30.0444,"lon":31.2357,"bbox":[29.84,30.24,31.22,31.56],"timezone":"Africa/Cairo","nameLocal":"القاهرة","population":10100000,"elevation":23,"source":{"type":"mawaqit","slug":"msjd-l-lm-lnf-nouveau-caire-4710001-egypt"}},
     {"name":"Singapore","countryISO":"SG","lat":1.3521,"lon":103.8198,"bbox":[1.158699,1.4499,103.605701,104.088483],"timezone":"Asia/Singapore","population":5454000,"elevation":15,"source":{"type":"mawaqit","slug":"al-khair-mosque-darul-tafsir-choa-chu-kang-688847-singapore"}},
@@ -373,7 +375,6 @@
     {"name":"Rajshahi","countryISO":"BD","lat":24.3636,"lon":88.6241,"bbox":[24.1636,24.5636,88.4241,88.8241],"timezone":"Asia/Dhaka","nameLocal":"রাজশাহী","adminRegion":"Rajshahi Division","population":760000,"elevation":18,"source":{"type":"inherited","from":"Bangladesh"}},
     {"name":"Bahawalpur","countryISO":"PK","lat":29.3956,"lon":71.6722,"bbox":[29.1956,29.5956,71.4722,71.8722],"timezone":"Asia/Karachi","nameLocal":"بہاولپور","adminRegion":"Punjab","population":762000,"elevation":116,"source":{"type":"inherited","from":"Pakistan"}},
     {"name":"Dubai","countryISO":"AE","lat":25.2048,"lon":55.2708,"bbox":[24.9,25.3,55.05,55.5],"timezone":"Asia/Dubai","nameLocal":"دبي","adminRegion":"Dubai Emirate","population":3604000,"elevation":5,"source":{"type":"inherited","from":"UAE"}},
-    {"name":"Al Ain","countryISO":"AE","lat":24.2075,"lon":55.7447,"bbox":[24.013749,24.414416,55.464609,56.018126],"timezone":"Asia/Dubai","nameLocal":"العين","adminRegion":"Abu Dhabi Emirate","population":766000,"elevation":295,"source":{"type":"inherited","from":"UAE"}},
     {"name":"Hong Kong","countryISO":"HK","lat":22.3193,"lon":114.1694,"bbox":[22.16,22.55,113.85,114.43],"timezone":"Asia/Hong_Kong","population":7482000,"elevation":50,"source":{"type":"inherited","from":"HongKong"}},
     {"name":"Abu Dhabi","countryISO":"AE","lat":24.4539,"lon":54.3773,"bbox":[24.195888,24.590696,54.254076,54.841984],"timezone":"Asia/Dubai","elevation":27,"source":{"type":"national-authority","institution":"Umm al-Qura University"}},
     {"name":"Lahore","countryISO":"PK","lat":31.5497,"lon":74.3436,"bbox":[31.25,31.85,74.04,74.5],"timezone":"Asia/Karachi","nameLocal":"لاہور","adminRegion":"Punjab","population":13096000,"elevation":217,"source":{"type":"mawaqit","slug":"masjid-khatim-ul-nabiyyeen-lahore-54000-pakistan"}},

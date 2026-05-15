@@ -1,6 +1,6 @@
 # City Geometry Audit
 
-Last refreshed: 2026-05-14
+Last refreshed: 2026-05-15
 
 `detectLocation()` intentionally ships a compact offline bbox registry rather
 than raw municipal polygons. The bbox layer is fast and small enough for
@@ -34,14 +34,15 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-41 high-priority rows: 15 Morocco/Habous phase-1 rows, 5 UAE metro rows, 10
-Turkey large-city rows, 1 Detroit/Windsor border row, 3 Geneva border rows, 2
-Strasbourg/Kehl border rows, and 5 existing registry warning rows. It carries
-17 OSM relation rows plus 37 WOF
-rows across reviewed locality/county candidates. Morocco rows with WOF-backed
-runtime status are separated from OSM-only audit candidates; Jerusalem
-intentionally remains without a geometry candidate until a human routing
-decision is available.
+52 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+source-map rows, 5 UAE metro rows, 1 Oman/UAE border row, 10 Turkey large-city
+rows, 2 Singapore/Johor rows, 4 Klang Valley rows, 1 Pakistan overlap row, 1
+Detroit/Windsor border row, 3 Geneva border rows, 2 Strasbourg/Kehl border
+rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries 17
+OSM relation rows plus 52 WOF rows across reviewed locality/county candidates.
+Morocco rows with WOF-backed runtime status are separated from OSM-only audit
+candidates; Jerusalem intentionally remains without a geometry candidate until
+a human routing decision is available.
 
 ```json
 {
@@ -118,11 +119,17 @@ county/prefecture bboxes or OSM alone. Either find a reviewed WOF locality
 polygon, verify an official/commune-level source with compatible licensing, or
 leave the row as a documented audit gap.
 
-The first UAE pass shows a different pattern:
+The first UAE/Oman pass shows a different pattern:
 
-- Abu Dhabi and Al Ain have current WOF locality envelopes that expand the
-  shipped city lookup cells without colliding with neighboring fajr rows, so
-  they are runtime-ready.
+- Abu Dhabi has a current WOF locality envelope that expands the shipped city
+  lookup cell without colliding with neighboring fajr rows, so it is
+  runtime-ready as-is. Al Ain's WOF envelope is usable only after clipping its
+  east edge at the Oman seam.
+- Al Buraimi, Oman sits inside Al Ain's broad source envelope. Its WOF locality
+  row is point-like and deprecated, while the current WOF county row is too
+  broad for city routing. The runtime therefore uses a small city-centre
+  guardrail and an Oman-before-UAE country-detection check rather than copying
+  either raw envelope.
 - Dubai, Sharjah, and Ajman also have current WOF locality envelopes, but their
   rectangular envelopes overlap heavily. Dubai, Sharjah, and Ajman now use
   explicit clipped runtime cells: Dubai's northern edge meets Sharjah's

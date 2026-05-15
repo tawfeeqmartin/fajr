@@ -501,6 +501,9 @@ const MUSLIM_POPULATION_CENTERS = [
   { name: 'Fujairah',   nameLocal: 'الفجيرة', countryISO: 'AE', adminRegion: 'Fujairah Emirate', lat: 25.1288, lon: 56.3265, elevation: 18, timezone: 'Asia/Dubai', population: 86000 },
   { name: 'Al Ain',     nameLocal: 'العين', countryISO: 'AE', adminRegion: 'Abu Dhabi Emirate', lat: 24.2075, lon: 55.7447, elevation: 295, timezone: 'Asia/Dubai', population: 766000 },
 
+  // ─── v1.9.2 #118 — Oman/UAE border guardrail ───────────────────────────
+  { name: 'Al Buraimi', countryISO: 'OM', adminRegion: 'Al Buraimi Governorate', lat: 24.25088, lon: 55.79312, elevation: 299, timezone: 'Asia/Muscat', population: 117000 },
+
   // ─── v1.7.18 Tier A — Asia: Egypt additional cities ──────────────────────
   { name: 'Port Said',  nameLocal: 'بورسعيد', countryISO: 'EG', adminRegion: 'Port Said', lat: 31.2653, lon: 32.3019, elevation: 2, timezone: 'Africa/Cairo', population: 760000 },
   { name: 'Suez',       nameLocal: 'السويس', countryISO: 'EG', adminRegion: 'Suez', lat: 29.9737, lon: 32.5263, elevation: 9, timezone: 'Africa/Cairo', population: 744000 },
@@ -1008,12 +1011,17 @@ const BBOX_OVERRIDES = {
   'Sharjah|AE':         [25.30, 25.398821, 55.30, 55.678456],
   'Ajman|AE':           [25.398821, 25.45088, 55.423316, 55.630065],
 
-  // v1.8.0 #118: WOF current locality envelopes improve UAE city coverage
-  // without colliding with neighboring lookup cells. Dubai/Sharjah/Ajman use
-  // the clipped runtime cells above because their WOF envelopes overlap
-  // heavily.
+  // v1.8.0 #118: WOF current locality envelopes improve UAE city coverage.
+  // Dubai/Sharjah/Ajman use clipped runtime cells above because their WOF
+  // envelopes overlap heavily. Al Ain is clipped east of the Al Buraimi
+  // guardrail because the raw WOF envelope crosses the Oman/UAE twin-city seam.
   'Abu Dhabi|AE':       [24.195888, 24.590696, 54.254076, 54.841984],
-  'Al Ain|AE':          [24.013749, 24.414416, 55.464609, 56.018126],
+  'Al Ain|AE':          [24.013749, 24.414416, 55.464609, 55.7699],
+
+  // v1.9.2 #118: Al Buraimi OM is anchored by a point-like WOF locality row
+  // and a broader WOF county context row. Ship a small centre guardrail, not
+  // either raw WOF envelope, so Al Buraimi does not inherit UAE/Al Ain routing.
+  'Al Buraimi|OM':      [24.22, 24.29, 55.77, 55.84],
 
   // v1.8.0 #118: reviewed WOF current locality envelopes for large Turkish
   // city lookup cells. Ambiguous/point-like rows (Diyarbakir, Eskisehir,
