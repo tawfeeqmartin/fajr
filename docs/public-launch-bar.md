@@ -11,12 +11,13 @@ bar is about public confidence, downstream integration, and release discipline.
 ## Current Verdict
 
 fajr is ready for targeted tester sharing, including Morocco users who can
-compare against their local Habous/Mawaqit city timetable. It is not yet ready
-for a broad "please adopt this everywhere" announcement.
+compare against their local Habous/Mawaqit city timetable. It is also ready for
+a careful public-beta announcement that invites verification and caveat-aware
+use.
 
-The reason is not a known critical calculation bug. The reason is that the
-project still needs one more coherence pass: public docs, release framing,
-distribution shape, and open tracking issues should tell the same story.
+It is not yet a "please adopt this everywhere without local review" stable
+recommendation. That stronger claim needs a short post-announcement soak period
+and no unresolved downstream regressions.
 
 ## Passing Signals
 
@@ -31,14 +32,15 @@ distribution shape, and open tracking issues should tell the same story.
 | Downstream app | agiftoftime PR #53 merged; app is bumped to fajr v1.9.3 and issue #52 is closed after downstream compatibility validation. | Met |
 | Architecture framing | README now separates shipped Layer 1 / Layer 4 / settings surfaces from Layer 2/3/5 research tracks. | Met |
 | Morocco evidence boundary | `docs/morocco-evidence.md` defines what can be claimed now and keeps #92/#103 as post-launch calibration tracks. | Met |
+| Open-issue triage | Remaining issues have current status comments or roadmap scope; #114 was closed as superseded by #132. | Met |
 
 ## Public-Launch Blockers
 
-These are the items that should close before a broad social announcement.
+There are no known blockers for a careful public-beta announcement.
 
 | Blocker | Why it matters | Tracking |
 |---|---|---|
-| Open-issue triage | Advisory issues can stay open, but each should have a current owner/next action or a clear deferral note. | SCOREBOARD open issue list |
+| None | Remaining open issues are advisory, corpus-quality, roadmap, or credibility follow-up tracks. | SCOREBOARD open issue list |
 
 ## Non-Blockers
 
@@ -81,14 +83,18 @@ Use these states consistently:
 | State | Meaning | Allowed action |
 |---|---|---|
 | Targeted tester share | No critical bugs; downstream app validated; known caveats disclosed. | Share with specific users who can compare local timetables. |
-| Public announcement | Targeted tester share plus docs coherence, architecture framing, and distribution decision complete. | Broad social post / README announcement. |
+| Public announcement | Targeted tester share plus docs coherence, architecture framing, distribution decision, and issue-triage complete. | Broad public-beta social post / README announcement. |
 | Stable adoption recommendation | Public announcement plus at least one soak period and no unresolved downstream regressions. | Recommend other apps adopt by default. |
 
-For now, fajr is in targeted tester share.
+For now, fajr is in public announcement / public beta, not stable adoption
+recommendation.
 
 ## Next Actions
 
-1. Add current deferral/owner notes to the remaining advisory issues so the
-   tracker reads as managed, not abandoned.
-2. Keep #46 on the distribution roadmap, but do not block the public Morocco
-   tester path on UMD/IIFE.
+1. Share v1.9.3 with Morocco testers using the criteria above and ask for
+   city/date/prayer reports against local Habous or mosque tables.
+2. Keep #46, #43, and #44 on the distribution roadmap without blocking the
+   public-beta path.
+3. Continue #92/#103 monthly Habous capture and curated fixture promotion, but
+   do not tune Morocco again unless fresh evidence exceeds the documented
+   envelope.
