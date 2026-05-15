@@ -319,6 +319,35 @@ describe('detectLocation — Mawaqit institutional source', () => {
     expect(alBuraimi.source.from).toBe('Oman')
   })
 
+  it('Musandam and Madha Omani guardrails do not inherit UAE routing', () => {
+    const omaniCenters = [
+      ['Khasab', 26.1799, 56.2477],
+      ['Dibba Al-Baya', 25.6196, 56.2729],
+      ['Madha', 25.2889, 56.3325],
+    ]
+
+    for (const [name, lat, lon] of omaniCenters) {
+      const loc = detectLocation(lat, lon)
+      expect(loc.city, `${name} center should resolve`).not.toBeNull()
+      expect(loc.city.name).toBe(name)
+      expect(loc.city.countryISO).toBe('OM')
+      expect(loc.country).toBe('Oman')
+      expect(loc.timezone).toBe('Asia/Muscat')
+      expect(loc.recommendedMethod).toBe('Kuwait')
+      expect(loc.methodSource).toBe('country-default')
+    }
+
+    const fujairah = detectLocation(25.1288, 56.3265)
+    expect(fujairah.city).not.toBeNull()
+    expect(fujairah.city.name).toBe('Fujairah')
+    expect(fujairah.country).toBe('UAE')
+
+    const rasAlKhaimah = detectLocation(25.7895, 55.9432)
+    expect(rasAlKhaimah.city).not.toBeNull()
+    expect(rasAlKhaimah.city.name).toBe('Ras al-Khaimah')
+    expect(rasAlKhaimah.country).toBe('UAE')
+  })
+
   it('UAE clipped WOF cells expand Sharjah/Ajman eastward without stealing Dubai', () => {
     const rows = [
       ['Sharjah', 25.3463, 55.4209, 25.35, 55.65],

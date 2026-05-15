@@ -34,12 +34,12 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-52 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
-source-map rows, 5 UAE metro rows, 1 Oman/UAE border row, 10 Turkey large-city
+55 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
 rows, 2 Singapore/Johor rows, 4 Klang Valley rows, 1 Pakistan overlap row, 1
 Detroit/Windsor border row, 3 Geneva border rows, 2 Strasbourg/Kehl border
 rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries 17
-OSM relation rows plus 52 WOF rows across reviewed locality/county candidates.
+OSM relation rows plus 58 WOF rows across reviewed locality/county candidates.
 Morocco rows with WOF-backed runtime status are separated from OSM-only audit
 candidates; Jerusalem intentionally remains without a geometry candidate until
 a human routing decision is available.
@@ -130,6 +130,10 @@ The first UAE/Oman pass shows a different pattern:
   broad for city routing. The runtime therefore uses a small city-centre
   guardrail and an Oman-before-UAE country-detection check rather than copying
   either raw envelope.
+- Khasab, Dibba Al-Baya, and Madha are Omani Musandam/Madha enclave city
+  centres inside the broad UAE country rectangle. They follow the same rule:
+  point-like WOF locality rows plus current county context justify narrow
+  city-centre guardrails, not full county-envelope runtime bboxes.
 - Dubai, Sharjah, and Ajman also have current WOF locality envelopes, but their
   rectangular envelopes overlap heavily. Dubai, Sharjah, and Ajman now use
   explicit clipped runtime cells: Dubai's northern edge meets Sharjah's

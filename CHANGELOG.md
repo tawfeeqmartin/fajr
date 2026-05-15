@@ -30,11 +30,14 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 - Added a conservative `Al Buraimi|OM` city-centre guardrail so Al Buraimi no
   longer resolves to UAE / Al Ain city provenance.
+- Added conservative `Khasab|OM`, `Dibba Al-Baya|OM`, and `Madha|OM`
+  city-centre guardrails so Omani Musandam/Madha coordinates no longer inherit
+  UAE country provenance.
 - Added an Oman guardrail in country detection ahead of the broad UAE rectangle,
-  preserving Al Ain routing while returning Oman defaults and `Asia/Muscat` for
-  Al Buraimi centre coordinates.
+  preserving UAE city routing while returning Oman defaults and `Asia/Muscat`
+  for the Omani guardrail coordinates.
 - No prayer-time math, public API, or regional method policy changed beyond
-  correcting the country/city provenance for this border case.
+  correcting the country/city provenance for these border cases.
 
 ### Fixed — Geometry source-map status alignment
 

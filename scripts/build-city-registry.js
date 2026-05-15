@@ -503,6 +503,9 @@ const MUSLIM_POPULATION_CENTERS = [
 
   // ─── v1.9.2 #118 — Oman/UAE border guardrail ───────────────────────────
   { name: 'Al Buraimi', countryISO: 'OM', adminRegion: 'Al Buraimi Governorate', lat: 24.25088, lon: 55.79312, elevation: 299, timezone: 'Asia/Muscat', population: 117000 },
+  { name: 'Khasab', nameLocal: 'خصب', countryISO: 'OM', adminRegion: 'Musandam Governorate', lat: 26.17993, lon: 56.24774, elevation: 3, timezone: 'Asia/Muscat', population: 17904 },
+  { name: 'Dibba Al-Baya', nameLocal: 'دبا البيعة', countryISO: 'OM', adminRegion: 'Musandam Governorate', lat: 25.63643, lon: 56.26597, elevation: 20, timezone: 'Asia/Muscat' },
+  { name: 'Madha', nameLocal: 'مدحاء', countryISO: 'OM', adminRegion: 'Musandam Governorate', lat: 25.28345, lon: 56.3328, elevation: 90, timezone: 'Asia/Muscat', population: 2260 },
 
   // ─── v1.7.18 Tier A — Asia: Egypt additional cities ──────────────────────
   { name: 'Port Said',  nameLocal: 'بورسعيد', countryISO: 'EG', adminRegion: 'Port Said', lat: 31.2653, lon: 32.3019, elevation: 2, timezone: 'Africa/Cairo', population: 760000 },
@@ -1022,6 +1025,13 @@ const BBOX_OVERRIDES = {
   // and a broader WOF county context row. Ship a small centre guardrail, not
   // either raw WOF envelope, so Al Buraimi does not inherit UAE/Al Ain routing.
   'Al Buraimi|OM':      [24.22, 24.29, 55.77, 55.84],
+
+  // v1.9.2 #118: Musandam/Madha Omani exclave cities sit inside the broad UAE
+  // country rectangle. Use narrow city-centre guardrails backed by WOF
+  // point/county context; do not copy full county envelopes into runtime.
+  'Khasab|OM':          [26.15, 26.22, 56.21, 56.29],
+  'Dibba Al-Baya|OM':   [25.60, 25.67, 56.23, 56.31],
+  'Madha|OM':           [25.26, 25.31, 56.30, 56.36],
 
   // v1.8.0 #118: reviewed WOF current locality envelopes for large Turkish
   // city lookup cells. Ambiguous/point-like rows (Diyarbakir, Eskisehir,

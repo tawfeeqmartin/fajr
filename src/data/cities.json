@@ -1,6 +1,6 @@
 {
   "version": "1.7.0-alpha.0",
-  "generated": "2026-05-15T01:53:23.386Z",
+  "generated": "2026-05-15T02:01:11.493Z",
   "license": {
     "world-cities": "Capital data from UN Statistics Division and Wikipedia (public-domain reference, MIT-aligned)",
     "mawaqit-slugs": "Curated metadata derived from public Mawaqit profile pages (slugs only)",
@@ -8,7 +8,7 @@
     "population-centers": "Manual, sourced from UN World Cities + World Population Review 2024-2025"
   },
   "notes": "Cities sorted by bbox area ascending. detectLocation() linear-scans this array and returns the first bbox that contains (lat, lon) — smallest match wins. Each city carries an institutional `source` (mawaqit | national-authority | inherited) so apps can attribute timetable provenance to users. Method overrides are city-level institutional decisions documented in scripts/data/city-method-overrides.json with citation strings.",
-  "total": 484,
+  "total": 487,
   "cities": [
     {"name":"Alburikent (Dagestan)","countryISO":"RU","lat":42.9234,"lon":47.5089,"bbox":[42.92,42.94,47.5,47.52],"timezone":"Europe/Moscow","adminRegion":"Dagestan","population":11000,"elevation":50,"source":{"type":"mawaqit","slug":"alburkent-dzhuma-mechet-alburikent-367026-russia"}},
     {"name":"Isa Town","countryISO":"BH","lat":26.1762,"lon":50.5495,"bbox":[26.16,26.19,50.53,50.56],"timezone":"Asia/Bahrain","population":38000,"elevation":21,"source":{"type":"mawaqit","slug":"masjid-madina-issa-south-810-issa-town-bahrain"}},
@@ -16,6 +16,7 @@
     {"name":"Annemasse","countryISO":"FR","lat":46.184,"lon":6.2456,"bbox":[46.176411,46.201967,6.216619,6.278294],"timezone":"Europe/Paris","adminRegion":"Auvergne-Rhône-Alpes","population":37000,"elevation":435,"source":{"type":"inherited","from":"France"}},
     {"name":"Sefrou","countryISO":"MA","lat":33.8311,"lon":-4.8294,"bbox":[33.809375,33.844543,-4.853352,-4.804161],"timezone":"Africa/Casablanca","population":79000,"elevation":850,"source":{"type":"mawaqit","slug":"mosquee-ahel-sefrou-sefrou-31000-morocco"}},
     {"name":"Trabzon","countryISO":"TR","lat":41.0027,"lon":39.7168,"bbox":[40.985525,41.013493,39.649901,39.742612],"timezone":"Europe/Istanbul","adminRegion":"Trabzon Province","population":808000,"elevation":39,"source":{"type":"inherited","from":"Turkey"}},
+    {"name":"Madha","countryISO":"OM","lat":25.2834,"lon":56.3328,"bbox":[25.26,25.31,56.3,56.36],"timezone":"Asia/Muscat","nameLocal":"مدحاء","adminRegion":"Musandam Governorate","population":2260,"elevation":90,"source":{"type":"inherited","from":"Oman"}},
     {"name":"Jerusalem","countryISO":"PS","lat":31.7683,"lon":35.2137,"bbox":[31.74,31.8,35.55,35.6],"timezone":"Asia/Hebron","population":936000,"elevation":754,"source":{"type":"mawaqit","slug":"msjd-lsyd-zynb-jerusalem-97200-palestinian-territories"}},
     {"name":"Geneva","countryISO":"CH","lat":46.2044,"lon":6.1432,"bbox":[46.177774,46.234248,6.110233,6.175845],"timezone":"Europe/Zurich","adminRegion":"Geneva Canton","population":203000,"elevation":375,"source":{"type":"mawaqit","slug":"fondation-culturelle-islamique-de-geneve-geneve-1209-switzerland"}},
     {"name":"Berrechid","countryISO":"MA","lat":33.2659,"lon":-7.5867,"bbox":[33.230306,33.299095,-7.613623,-7.545455],"timezone":"Africa/Casablanca","population":136000,"elevation":175,"source":{"type":"mawaqit","slug":"mosquee-brahimm-lkhlalil-berrchid-26100-morocco"}},
@@ -23,6 +24,8 @@
     {"name":"Al Buraimi","countryISO":"OM","lat":24.2509,"lon":55.7931,"bbox":[24.22,24.29,55.77,55.84],"timezone":"Asia/Muscat","adminRegion":"Al Buraimi Governorate","population":117000,"elevation":299,"source":{"type":"inherited","from":"Oman"}},
     {"name":"Mulhouse","countryISO":"FR","lat":47.7508,"lon":7.3359,"bbox":[47.721942,47.783092,7.282525,7.368264],"timezone":"Europe/Paris","population":109000,"elevation":240,"source":{"type":"mawaqit","slug":"association-des-musulmans-des-coteaux-mulhouse"}},
     {"name":"Samsun","countryISO":"TR","lat":41.2867,"lon":36.33,"bbox":[41.256092,41.314632,36.290671,36.3846],"timezone":"Europe/Istanbul","adminRegion":"Samsun Province","population":1356000,"elevation":4,"source":{"type":"inherited","from":"Turkey"}},
+    {"name":"Khasab","countryISO":"OM","lat":26.1799,"lon":56.2477,"bbox":[26.15,26.22,56.21,56.29],"timezone":"Asia/Muscat","nameLocal":"خصب","adminRegion":"Musandam Governorate","population":17904,"elevation":3,"source":{"type":"inherited","from":"Oman"}},
+    {"name":"Dibba Al-Baya","countryISO":"OM","lat":25.6364,"lon":56.266,"bbox":[25.6,25.67,56.23,56.31],"timezone":"Asia/Muscat","nameLocal":"دبا البيعة","adminRegion":"Musandam Governorate","elevation":20,"source":{"type":"inherited","from":"Oman"}},
     {"name":"Basel","countryISO":"CH","lat":47.5596,"lon":7.5886,"bbox":[47.519297,47.589902,7.554659,7.634148],"timezone":"Europe/Zurich","population":173000,"elevation":260,"source":{"type":"mawaqit","slug":"masjid-arrahma-bale-4057-switzerland"}},
     {"name":"Inezgane","countryISO":"MA","lat":30.3552,"lon":-9.5378,"bbox":[30.32,30.39,-9.58,-9.49],"timezone":"Africa/Casablanca","population":130000,"elevation":33,"source":{"type":"mawaqit","slug":"msjd-lbrr-nzkn-86150-morocco"}},
     {"name":"Izmir","countryISO":"TR","lat":38.4237,"lon":27.1428,"bbox":[38.392484,38.44875,27.071401,27.184235],"timezone":"Europe/Istanbul","adminRegion":"Izmir Province","population":4367000,"elevation":25,"source":{"type":"inherited","from":"Turkey"}},
