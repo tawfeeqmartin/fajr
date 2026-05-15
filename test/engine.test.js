@@ -291,6 +291,32 @@ describe('Path A calibration regression', () => {
     const def = prayerTimes({ latitude: 33.57, longitude: -7.59, date: TEST_DATE })
     expect(def.method).toMatch(/Morocco.*19/i)
     expect(def.method).toMatch(/ihtiyati|Path A|\+5/i)
+    expect(def.location.elevationSource).toBe('country-uniform-timetable')
+    expect(def.location.elevation).toBe(0)
+    expect(def.corrections.elevation).toBe(false)
+  })
+
+  it('Morocco — explicit method override preserves canonical +5 buffers', () => {
+    const args = { latitude: 33.57, longitude: -7.59, date: TEST_DATE, elevation: 0 }
+    const auto = prayerTimes(args)
+    const explicit = prayerTimes({ ...args, method: 'Morocco' })
+
+    expect(explicit.location.methodSource).toBe('caller-explicit')
+    expect(explicit.method).toMatch(/Morocco.*\+5/i)
+    expect(explicit.dhuhr.getTime()).toBe(auto.dhuhr.getTime())
+    expect(explicit.maghrib.getTime()).toBe(auto.maghrib.getTime())
+  })
+
+  it('Morocco — country default follows uniform Habous city tables unless elevation is explicit', () => {
+    const args = { latitude: 33.9716, longitude: -6.8498, date: new Date('2026-05-15T12:00:00Z') }
+    const uniform = prayerTimes(args)
+    const elevated = prayerTimes({ ...args, elevation: 75 })
+
+    expect(uniform.location.elevationSource).toBe('country-uniform-timetable')
+    expect(uniform.corrections.elevation).toBe(false)
+    expect(uniform.maghrib.getTime()).toBeLessThan(elevated.maghrib.getTime())
+    expect(elevated.location.elevationSource).toBe('caller-explicit')
+    expect(elevated.corrections.elevation).toBe(true)
   })
 })
 

@@ -154,7 +154,7 @@ describe('public API — prayerTimes location field', () => {
     expect(typeof r.location.timezone).toBe('string')
     expect(typeof r.location.elevation).toBe('number')
     expect(r.location.methodSource).toBe('country-default')
-    expect(['caller-explicit', 'city-registry', 'default-zero']).toContain(r.location.elevationSource)
+    expect(['caller-explicit', 'country-uniform-timetable', 'city-registry', 'default-zero']).toContain(r.location.elevationSource)
   })
 
   it('prayerTimes location field reflects city-institutional override (Mosul)', () => {

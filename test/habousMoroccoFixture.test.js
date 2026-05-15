@@ -57,7 +57,6 @@ function summarizeDeltas(prayers = CORE_PRAYERS) {
       const calculated = prayerTimes({
         latitude: fixture.latitude,
         longitude: fixture.longitude,
-        elevation: fixture.elevation,
         date: new Date(`${day.date}T12:00:00Z`),
       })
 

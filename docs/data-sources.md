@@ -104,6 +104,13 @@ Morocco is the clearest example of how fajr should use multiple source layers.
 | Mawaqit Morocco train | Mosque-published local practice. | Anchored early Path A calibration. |
 | Mawaqit Morocco yearly corpus | Seasonal mosque data across many mosques. | Reinforces that a single canonical Morocco stance is better than separate semantic aliases. |
 
+Morocco's product default follows the official **uniform city/region**
+timetable stance. That means fajr does not auto-apply city-registry elevation
+for Morocco unless a caller explicitly passes a non-zero `elevation` or
+`override.elevation`. This keeps the no-options public path aligned with
+Habous/Mawaqit city tables; apps can still opt into observer-elevation horizon
+correction when a local mosque or use case requires it.
+
 Snapshot tooling:
 
 - [`scripts/fetch-habous-morocco-month.js`](../scripts/fetch-habous-morocco-month.js)
@@ -126,8 +133,11 @@ Fixture gate:
 - [`test/habousMoroccoFixture.test.js`](../test/habousMoroccoFixture.test.js)
   verifies that `eval/data/test/morocco-habous-monthly.json` covers every
   mapped Moroccan city, preserves Habous source metadata, and keeps the Morocco
-  default within the current official-month envelope for Fajr, Dhuhr, Asr,
-  Maghrib, and Isha.
+  public default within the current official-month envelope for Fajr, Dhuhr,
+  Asr, Maghrib, and Isha.
+- [`scripts/validate-habous-morocco.js`](../scripts/validate-habous-morocco.js)
+  compares the current public default against Habous's live current-day
+  endpoint. It gates the five prayer times separately from Shuruq.
 - Sunrise is intentionally excluded from the five-prayer accuracy gate and kept
   as a loose source-sanity check only. In Morocco comparisons it can behave like
   a mosque-practice end-of-Fajr marker rather than a pure astronomical sunrise

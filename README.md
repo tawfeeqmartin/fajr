@@ -77,22 +77,21 @@ console.log(features().map(featureInfo))
     city: City | null,
     country: 'Morocco',
     timezone: 'Africa/Casablanca',
-    elevation: 75,
+    elevation: 0,
     asrConvention: 'standard',
     methodSource: 'country-default',
     asrConventionSource: 'country-default',
-    elevationSource: 'city-registry',
+    elevationSource: 'country-uniform-timetable',
   },
 
   applied: {
-    method: 'Morocco (19°/17° community calibration)',
+    method: 'Morocco (19°/17° + +5min Dhuhr/+5min Maghrib ...)',
     asrSchool: 'standard',
-    elevationMin: 0.59,
+    elevationMin: 0,
   },
 
   corrections: {
-    elevation: true,
-    elevationCorrectionMin: 0.59,
+    elevation: false,
     refraction: 'standard (0.833°)',
     rounding: 'ihtiyat-aware per-prayer ...',
     imsak_offset_min: 10,
@@ -165,6 +164,12 @@ This is the same stance used by the reference downstream app, [A Gift of Time](h
 | Reference layers | Mawaqit, Diyanet, JAKIM, KEMENAG, MUIS, Habous, Aladhan, praytimes.org, Who's On First |
 | Hilal validation | 78 documented committee decisions across 15 Hijri month onsets |
 | Runtime dependency | `adhan` only |
+
+Morocco status: the default follows the official Habous/Mawaqit uniform
+city-timetable stance. On the May 15, 2026 live Habous check, all 33 mapped
+Moroccan cities were within 3 minutes for the five prayer times; Shuruq is
+tracked separately as a loose source-sanity signal because Moroccan tables can
+encode end-of-Fajr-window practice rather than pure astronomical sunrise.
 
 Live release health is generated in [SCOREBOARD.md](SCOREBOARD.md). Detailed
 eval charts are generated in [docs/progress.md](docs/progress.md).
