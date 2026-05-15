@@ -160,6 +160,7 @@ exists. A stronger position needs at least one of:
 - [Promotion log](promotion-log.md) — audit trail for confidence-grade changes
 - [CALIBRATION.md](../CALIBRATION.md)
 - [Data sources](data-sources.md)
+- [Morocco evidence boundary](morocco-evidence.md)
 - [Elevation correction](../knowledge/wiki/corrections/elevation.md)
 - [A Gift of Time integration guide](../examples/agiftoftime/INTEGRATION.md)
 

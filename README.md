@@ -25,6 +25,7 @@ Core docs:
 - [SCOREBOARD.md](SCOREBOARD.md) - generated release health, WMAE, coverage, and open-issue snapshot.
 - [docs/progress.md](docs/progress.md) - generated WMAE dashboard and trend charts.
 - [docs/data-sources.md](docs/data-sources.md) - source inventory and fixture-refresh status.
+- [docs/morocco-evidence.md](docs/morocco-evidence.md) - Morocco public-claim boundaries and Habous/Mawaqit evidence.
 - [docs/city-geometry-audit.md](docs/city-geometry-audit.md) - build-time QA plan for reverse-geolocation bboxes.
 - [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) - app-side integration guide for [A Gift of Time](https://agiftoftime.app).
 - [docs/downstream-apps.md](docs/downstream-apps.md) - downstream app UX, QA, and release-handoff patterns.
