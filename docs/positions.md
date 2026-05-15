@@ -1,6 +1,6 @@
 # fajr Position Registry
 
-Last refreshed: 2026-05-14
+Last refreshed: 2026-05-15
 
 This is the compact product-doctrine layer for fajr. It answers the question:
 when a user gives coordinates, what prayer-time position does fajr apply, and
@@ -123,6 +123,7 @@ the log entry's date + evidence-source SHA answer it mechanically.
 | UK | MoonsightingCommittee / local city overrides where present. | C | London Mawaqit residual remains an open Path A candidate (#70). | "UK defaults are practical but locally variable; show method and allow override." |
 | France | France/UOIF-style high-latitude accommodation where dispatched. | B | Mawaqit France yearly corpus improves support; regional practice is still mosque-specific. | "France default follows common local convention; confirm mosque if it differs." |
 | UAE | UAE/Dubai method plus elevation disclosure for high-rise contexts. | B | IACAD/Burj Khalifa precedent supports floor/elevation distinction; full automated source ingestion remains future work. | "UAE default; high-rise elevation may matter for Shuruq and Maghrib." |
+| Oman / Gulf fallback states | Kuwait/Gulf regional method where no stronger city authority is bundled. Al Buraimi is explicitly routed to Oman rather than neighboring UAE / Al Ain. | C | Regional method dispatch is documented; Al Buraimi routing is backed by reviewed WOF point/county context, but no Oman official timetable corpus is promoted yet. | "Gulf regional default. Verify local ministry or mosque timetable when exact local practice matters." |
 | Egypt | Egyptian method. | C | Formal method is established, but Cairo/Alexandria residuals remain open in #69 pending stronger local/institutional corpus. | "Egyptian method default; current validation gap is known." |
 | Iran / Shia Iraqi city overrides | Tehran/Jafari-style method where city/community override is documented. | B | Tehran Institute method and Sistani-aligned Iraqi city overrides are documented; broader fixture depth still needs work. | "Local Shia institutional method where known; country defaults may not represent every community." |
 | High latitudes | Established high-latitude adjustment rules plus validity warnings. | C | Fiqh necessity is clear, but local practice differs sharply by city/council. | "High-latitude rule applied; consult local mosque/council and show warnings." |
