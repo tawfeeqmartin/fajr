@@ -26,6 +26,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+## [1.9.3] — 2026-05-15
+
 ### Fixed — Morocco official-table default
 
 - Morocco country-default calls now follow the official Habous uniform

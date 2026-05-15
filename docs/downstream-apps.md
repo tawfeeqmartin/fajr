@@ -23,7 +23,7 @@ window._loadFajr = (function () {
   let promise = null
   return function loadFajr() {
     if (promise) return promise
-    promise = import('https://esm.sh/@tawfeeqmartin/fajr@1.9.2')
+    promise = import('https://esm.sh/@tawfeeqmartin/fajr@1.9.3')
       .catch(err => {
         promise = null
         throw err
