@@ -392,6 +392,19 @@ describe('city geometry source map', () => {
     }
   })
 
+  it('keeps Windsor source provenance aligned with the raw WOF record', () => {
+    const entry = sourceMap.cities.find(row => row.cityKey === 'Windsor|CA')
+    const geometry = entry?.geometries?.find(row => row.stableId === 'wof:locality:101735855')
+    expect(geometry).toBeTruthy()
+    expect(geometry.ids).toMatchObject({
+      repo: 'whosonfirst-data-admin-ca',
+      placetype: 'locality',
+      srcGeom: 'quattroshapes',
+      mzIsCurrent: 1,
+    })
+    expect(geometry.reviewStatus).toBe('runtime-bbox-shipped')
+  })
+
   it('keeps Detroit/Dearborn geometry source-map-only around the shipped Windsor seam', () => {
     const expected = new Map([
       ['Detroit|US', ['wof:locality:85951091', 'wof:localadmin:404506393']],

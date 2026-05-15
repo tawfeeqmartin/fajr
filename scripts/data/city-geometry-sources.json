@@ -1385,7 +1385,7 @@
         {
           "provider": "wof",
           "stableId": "wof:locality:101735855",
-          "ids": { "wofId": 101735855, "repo": "whosonfirst-data-admin-ca", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "ids": { "wofId": 101735855, "repo": "whosonfirst-data-admin-ca", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
           "cacheFile": "CA/windsor/wof-locality-101735855.geojson",
           "sourceConfidence": "high",
           "matchConfidence": "candidate",
