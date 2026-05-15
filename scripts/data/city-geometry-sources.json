@@ -1913,6 +1913,102 @@
       ]
     },
     {
+      "cityKey": "New York|US",
+      "priority": ["usa-large-metro", "source-map-only", "americas-p1"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. New York's runtime cell is a broad population-radius bbox; preserve current WOF locality evidence before any future borough/metro clipping review."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:85977539",
+          "ids": { "wofId": 85977539, "repo": "whosonfirst-data-admin-us", "placetype": "locality", "srcGeom": "whosonfirst", "mzIsCurrent": 1 },
+          "cacheFile": "US/new-york/wof-locality-85977539.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF locality row; not a runtime bbox input until NYC/nearby-city clipping is reviewed."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Los Angeles|US",
+      "priority": ["usa-large-metro", "source-map-only", "americas-p1"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Los Angeles's runtime cell is a broad population-radius bbox; preserve WOF locality evidence before any future LA-basin clipping review."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:85923517",
+          "ids": { "wofId": 85923517, "repo": "whosonfirst-data-admin-us", "placetype": "locality", "srcGeom": "mz", "mzIsCurrent": 1 },
+          "cacheFile": "US/los-angeles/wof-locality-85923517.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF locality row; not a runtime bbox input until LA-basin neighbor routing is reviewed."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Chicago|US",
+      "priority": ["usa-large-metro", "source-map-only", "americas-p1"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Chicago's runtime cell is a broad population-radius bbox; preserve WOF locality evidence before any future metro/lakefront clipping review."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:85940195",
+          "ids": { "wofId": 85940195, "repo": "whosonfirst-data-admin-us", "placetype": "locality", "srcGeom": "mz", "mzIsCurrent": 1 },
+          "cacheFile": "US/chicago/wof-locality-85940195.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF locality row; not a runtime bbox input until Chicago metro neighbor routing is reviewed."]
+        }
+      ]
+    },
+    {
+      "cityKey": "Houston|US",
+      "priority": ["usa-large-metro", "source-map-only", "americas-p1"],
+      "review": {
+        "status": "candidate",
+        "issue": 118,
+        "notes": [
+          "2026-05-15: source-map candidate only. Houston's runtime cell is a broad population-radius bbox; preserve current WOF locality evidence before any future metro clipping review."
+        ]
+      },
+      "geometries": [
+        {
+          "provider": "wof",
+          "stableId": "wof:locality:101725629",
+          "ids": { "wofId": 101725629, "repo": "whosonfirst-data-admin-us", "placetype": "locality", "srcGeom": "quattroshapes", "mzIsCurrent": 1 },
+          "cacheFile": "US/houston/wof-locality-101725629.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Current WOF locality row; not a runtime bbox input until Houston metro neighbor routing is reviewed."]
+        }
+      ]
+    },
+    {
       "cityKey": "Toronto|CA",
       "priority": ["canada-metro", "toronto-mississauga", "source-map-only", "americas-p0"],
       "review": {

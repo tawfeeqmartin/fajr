@@ -34,15 +34,15 @@ human review. It must not mutate the runtime registry automatically.
 
 Reviewed external IDs belong in `scripts/data/city-geometry-sources.json`.
 The source map stores metadata and cache pointers only. The current seed covers
-71 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
+75 high-priority rows: 15 Morocco/Habous phase-1 rows, 3 Egypt metro
 source-map rows, 5 UAE metro rows, 4 Oman/UAE border rows, 10 Turkey large-city
 rows, 1 Hong Kong/Shenzhen border row, 2 Singapore/Johor rows, 4 Klang Valley
 rows, 1 Pakistan overlap row, 8 South Asia large-city source-map rows,
 1 Jakarta/Jabodetabek source-map row,
 4 Toronto/Montreal Canada metro rows,
-3 Detroit/Dearborn/Windsor border rows, 3 Geneva border rows, 2 Strasbourg/Kehl border
+7 US/Canada large-metro and border rows, 3 Geneva border rows, 2 Strasbourg/Kehl border
 rows, 2 Congo River rows, and 3 carry-over registry-warning rows. It carries
-17 OSM relation rows plus 87 WOF rows and 20
+17 OSM relation rows plus 91 WOF rows and 20
 geoBoundaries rows across reviewed locality/county/admin candidates. Morocco rows with
 WOF-backed runtime status are separated from OSM-only audit candidates;
 Jerusalem intentionally remains without a geometry candidate until a human
@@ -183,6 +183,14 @@ The Detroit/Windsor border seam needs clipping rather than direct WOF copying:
 - Detroit and Dearborn now have US Census-backed WOF locality/localadmin rows
   preserved as source-map-only candidates. They document the evidence around
   the shipped seam but do not replace the current hand-clipped runtime cells.
+
+The US large-metro source-map pass is evidence-only:
+
+- New York, Los Angeles, Chicago, and Houston now have current WOF locality
+  rows recorded as source-map-only candidates.
+- Their runtime cells remain broad population-radius bboxes. Any later runtime
+  tightening should review paired neighbors and metro boundaries rather than
+  copy a raw WOF rectangle directly.
 
 The Geneva/French-border seam is cleaner with WOF locality rows:
 

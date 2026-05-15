@@ -47,6 +47,14 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
   `src/index.d.ts` comments so they no longer present the jama'ah-unity
   explanation as a retrieved primary Saudi policy.
 
+### Added — US large-metro geometry source-map candidates
+
+- Added source-map-only WOF locality rows for New York, Los Angeles, Chicago,
+  and Houston so broad US metro runtime cells have reviewed geometry evidence
+  before any future clipping review.
+- Kept all rows source-map-only; no runtime bbox, country/method dispatch,
+  public API, package data, or prayer-time behavior changed.
+
 ### Added — downstream app integration playbook
 
 - Added `docs/downstream-apps.md`, capturing agiftoftime-derived patterns for
