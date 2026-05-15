@@ -26,6 +26,11 @@ The path is based on the Gregorian date range in the official monthly table. If
 that range was already captured, the workflow exits without opening a duplicate
 PR.
 
+## Archived Snapshots
+
+- `monthly/2026-04-19_to_2026-05-18.json` — 33 mapped Moroccan cities x 30
+  days from the official Habous current Hijri-month table.
+
 ## Promotion Rule
 
 Do not move these snapshots into `eval/data/` mechanically. A curated fixture PR

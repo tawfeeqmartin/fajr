@@ -26,6 +26,17 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Added — Morocco Habous monthly source archive
+
+- Added the first archived Morocco Habous monthly source snapshot under
+  `fixtures/habous-morocco/monthly/`, covering 33 mapped Moroccan cities from
+  2026-04-19 through 2026-05-18.
+- Fixed the scheduled Habous capture workflow so untracked snapshot files are
+  detected and committed instead of being skipped by `git diff --quiet`.
+- Added source-archive tests that verify monthly snapshot filenames, city
+  coverage, source metadata, sorted dates, and HH:MM prayer rows before any
+  later promotion into `eval/data/`.
+
 ## [1.9.1] — 2026-05-14
 
 ### Fixed — Sialkot/Gujranwala city-geometry overlap
