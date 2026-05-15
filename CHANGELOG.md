@@ -26,6 +26,8 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+## [1.9.2] — 2026-05-15
+
 ### Fixed — Al Buraimi / Al Ain border routing
 
 - Added a conservative `Al Buraimi|OM` city-centre guardrail so Al Buraimi no
