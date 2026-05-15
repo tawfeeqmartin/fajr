@@ -26,6 +26,16 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Added — Egypt geoBoundaries source-map candidates
+
+- Added geoBoundaries gbOpen EGY ADM2 source-map rows for the Cairo/Giza/6th
+  of October metro cluster, using CAPMAS/OCHA/HDX metadata under CC BY 3.0 IGO.
+- Extended `scripts/fetch-city-geometry-cache.js` so reviewed geoBoundaries
+  rows can hydrate single-feature local cache files by `shapeID`, matching the
+  existing WOF cache workflow.
+- Kept all Egypt rows source-map-only; no runtime bbox, country/method
+  dispatch, prayer-time math, public API, or npm package data changed.
+
 ## [1.9.2] — 2026-05-15
 
 ### Fixed — Al Buraimi / Al Ain border routing

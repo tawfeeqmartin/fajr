@@ -24,6 +24,16 @@
         "Each WOF candidate must store ids.repo so fetch-city-geometry-cache.js can hydrate the local raw-geometry cache deterministically."
       ]
     },
+    "geoboundaries": {
+      "name": "geoBoundaries gbOpen administrative boundary",
+      "stableIdFormat": "geoboundaries:{boundaryId}:{shapeId}",
+      "license": "row-level boundaryLicense / licenseSource metadata",
+      "defaultUse": "audit-and-reviewed-bbox-proposal",
+      "notes": [
+        "Each geoBoundaries candidate must store boundaryId, shapeId, releaseType, and boundaryType so fetch-city-geometry-cache.js can hydrate one reviewed feature into the local raw-geometry cache.",
+        "Check boundarySource and boundaryLicense before deriving any runtime bbox; geoBoundaries republishes multiple source/license families."
+      ]
+    },
     "official": {
       "name": "Official local or national boundary source",
       "stableIdFormat": "provider-specific",
@@ -476,7 +486,8 @@
         "status": "candidate",
         "issue": 118,
         "notes": [
-          "2026-05-15: WOF source-map candidate only. Do not tighten runtime Cairo directly from the WOF locality envelope because the shipped Cairo row intentionally covers the New Cairo/east-Cairo corridor; direct WOF copying would drop existing city provenance."
+          "2026-05-15: WOF source-map candidate only. Do not tighten runtime Cairo directly from the WOF locality envelope because the shipped Cairo row intentionally covers the New Cairo/east-Cairo corridor; direct WOF copying would drop existing city provenance.",
+          "2026-05-15: added geoBoundaries gbOpen EGY ADM2 rows sourced to OCHA ROMENA/HDX and CAPMAS under CC BY 3.0 IGO. These official district rows are source-map-only until a Cairo/Giza/6th clipping design is reviewed."
         ]
       },
       "geometries": [
@@ -501,6 +512,57 @@
           "licenseUse": "audit-and-reviewed-bbox-proposal",
           "reviewStatus": "candidate",
           "notes": ["New Cairo is point-like in WOF and is recorded only as a source lead for the east-Cairo coverage question."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B52731964573716",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B52731964573716", "shapeName": "Qasr Al-Nile", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/cairo/geoboundaries-egy-adm2-qasr-al-nile.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["geoBoundaries EGY ADM2 metadata cites OCHA ROMENA/HDX and CAPMAS, CC BY 3.0 IGO. This row anchors central Cairo / Tahrir context."]
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B64528254011318",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B64528254011318", "shapeName": "Nasr City", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/cairo/geoboundaries-egy-adm2-nasr-city.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B99181648743437",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B99181648743437", "shapeName": "New Cairo-1", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/cairo/geoboundaries-egy-adm2-new-cairo-1.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B58056872224952",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B58056872224952", "shapeName": "New Cairo-2", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/cairo/geoboundaries-egy-adm2-new-cairo-2.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B49811870233448",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B49811870233448", "shapeName": "New Cairo-3", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/cairo/geoboundaries-egy-adm2-new-cairo-3.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
         }
       ]
     },
@@ -511,7 +573,8 @@
         "status": "candidate",
         "issue": 118,
         "notes": [
-          "2026-05-15: WOF source-map candidate only. Giza has a point-like WOF locality plus split county candidates; none is safe as a direct runtime replacement for the current clipped Giza row."
+          "2026-05-15: WOF source-map candidate only. Giza has a point-like WOF locality plus split county candidates; none is safe as a direct runtime replacement for the current clipped Giza row.",
+          "2026-05-15: added geoBoundaries gbOpen EGY ADM2 rows sourced to OCHA ROMENA/HDX and CAPMAS under CC BY 3.0 IGO. These official district rows are source-map-only until a Cairo/Giza/6th clipping design is reviewed."
         ]
       },
       "geometries": [
@@ -544,6 +607,56 @@
           "matchConfidence": "placetype-mismatch-candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
           "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B55829024150134",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B55829024150134", "shapeName": "Giza", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/giza/geoboundaries-egy-adm2-giza-1.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B59036266241246",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B59036266241246", "shapeName": "Giza", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/giza/geoboundaries-egy-adm2-giza-2.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B9687639154335",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B9687639154335", "shapeName": "Al-Ahram", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/giza/geoboundaries-egy-adm2-al-ahram.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B56780050438943",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B56780050438943", "shapeName": "Al-Aguza", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/giza/geoboundaries-egy-adm2-al-aguza.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B46347292779018",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B46347292779018", "shapeName": "DuqqI", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/giza/geoboundaries-egy-adm2-duqqi.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
         }
       ]
     },
@@ -554,7 +667,8 @@
         "status": "candidate",
         "issue": 118,
         "notes": [
-          "2026-05-15: WOF county candidate is promising for west/north undercoverage, but the geometry needs manual review before any runtime bbox change because it is county-level and may not contain the current registry center cleanly."
+          "2026-05-15: WOF county candidate is promising for west/north undercoverage, but the geometry needs manual review before any runtime bbox change because it is county-level and may not contain the current registry center cleanly.",
+          "2026-05-15: added geoBoundaries gbOpen EGY ADM2 rows sourced to OCHA ROMENA/HDX and CAPMAS under CC BY 3.0 IGO. These official district rows are source-map-only until a Cairo/Giza/6th clipping design is reviewed."
         ]
       },
       "geometries": [
@@ -567,6 +681,37 @@
           "matchConfidence": "placetype-mismatch-candidate",
           "licenseUse": "audit-and-reviewed-bbox-proposal",
           "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B48784531357995",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B48784531357995", "shapeName": "6 October-1", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/6th-of-october/geoboundaries-egy-adm2-6-october-1.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B57962000824705",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B57962000824705", "shapeName": "6 October-2", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/6th-of-october/geoboundaries-egy-adm2-6-october-2.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate"
+        },
+        {
+          "provider": "geoboundaries",
+          "stableId": "geoboundaries:EGY-ADM2-37247803:37247803B86158206640686",
+          "ids": { "boundaryId": "EGY-ADM2-37247803", "shapeId": "37247803B86158206640686", "shapeName": "Shaykh Zayed", "releaseType": "gbOpen", "boundaryType": "ADM2", "boundaryYearRepresented": "2020" },
+          "cacheFile": "EG/6th-of-october/geoboundaries-egy-adm2-shaykh-zayed.geojson",
+          "sourceConfidence": "high",
+          "matchConfidence": "split-adm2-related-candidate",
+          "licenseUse": "audit-and-reviewed-bbox-proposal",
+          "reviewStatus": "candidate",
+          "notes": ["Related west-Giza/6th-of-October metro geometry lead; not a direct city replacement by itself."]
         }
       ]
     },

@@ -50,6 +50,14 @@ describe('city geometry source map', () => {
             expect(geometry.matchConfidence).toContain('placetype-mismatch')
           }
         }
+        if (geometry.provider === 'geoboundaries') {
+          expect(geometry.stableId).toMatch(/^geoboundaries:[A-Z]{3}-ADM\d+-\d+:[A-Za-z0-9]+$/)
+          expect(geometry.ids?.boundaryId, geometry.stableId).toMatch(/^[A-Z]{3}-ADM\d+-\d+$/)
+          expect(geometry.ids?.shapeId, geometry.stableId).toBeTruthy()
+          expect(geometry.ids?.releaseType, geometry.stableId).toBeTruthy()
+          expect(geometry.ids?.boundaryType, geometry.stableId).toMatch(/^ADM\d+$/)
+          expect(geometry.licenseUse).toBe('audit-and-reviewed-bbox-proposal')
+        }
       }
     }
   })
@@ -301,9 +309,31 @@ describe('city geometry source map', () => {
 
   it('keeps Egypt metro geometry as source-map-only until clipping is reviewed', () => {
     const expected = new Map([
-      ['Cairo|EG', ['wof:locality:421174399', 'wof:locality:421175733']],
-      ['Giza|EG', ['wof:locality:421204393', 'wof:county:1092021173', 'wof:county:1092021203']],
-      ['6th of October|EG', ['wof:county:1092014009']],
+      ['Cairo|EG', [
+        'wof:locality:421174399',
+        'wof:locality:421175733',
+        'geoboundaries:EGY-ADM2-37247803:37247803B52731964573716',
+        'geoboundaries:EGY-ADM2-37247803:37247803B64528254011318',
+        'geoboundaries:EGY-ADM2-37247803:37247803B99181648743437',
+        'geoboundaries:EGY-ADM2-37247803:37247803B58056872224952',
+        'geoboundaries:EGY-ADM2-37247803:37247803B49811870233448',
+      ]],
+      ['Giza|EG', [
+        'wof:locality:421204393',
+        'wof:county:1092021173',
+        'wof:county:1092021203',
+        'geoboundaries:EGY-ADM2-37247803:37247803B55829024150134',
+        'geoboundaries:EGY-ADM2-37247803:37247803B59036266241246',
+        'geoboundaries:EGY-ADM2-37247803:37247803B9687639154335',
+        'geoboundaries:EGY-ADM2-37247803:37247803B56780050438943',
+        'geoboundaries:EGY-ADM2-37247803:37247803B46347292779018',
+      ]],
+      ['6th of October|EG', [
+        'wof:county:1092014009',
+        'geoboundaries:EGY-ADM2-37247803:37247803B48784531357995',
+        'geoboundaries:EGY-ADM2-37247803:37247803B57962000824705',
+        'geoboundaries:EGY-ADM2-37247803:37247803B86158206640686',
+      ]],
     ])
 
     for (const [cityKey, stableIds] of expected) {
@@ -317,6 +347,19 @@ describe('city geometry source map', () => {
         const geometry = entry.geometries.find(row => row.stableId === stableId)
         expect(geometry, `${cityKey} ${stableId}`).toBeTruthy()
         expect(geometry.reviewStatus, `${cityKey} ${stableId}`).toBe('candidate')
+      }
+
+      const officialRows = entry.geometries.filter(row => row.provider === 'geoboundaries')
+      expect(officialRows.length, cityKey).toBeGreaterThan(0)
+      for (const row of officialRows) {
+        expect(row.sourceConfidence, `${cityKey} ${row.stableId}`).toBe('high')
+        expect(row.matchConfidence, `${cityKey} ${row.stableId}`).toContain('adm2')
+        expect(row.ids).toMatchObject({
+          boundaryId: 'EGY-ADM2-37247803',
+          releaseType: 'gbOpen',
+          boundaryType: 'ADM2',
+          boundaryYearRepresented: '2020',
+        })
       }
     }
   })

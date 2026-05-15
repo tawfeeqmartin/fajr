@@ -10,6 +10,7 @@
  * Usage:
  *   node scripts/fetch-city-geometry-cache.js --provider wof --dry-run
  *   node scripts/fetch-city-geometry-cache.js --provider wof --city Rabat
+ *   node scripts/fetch-city-geometry-cache.js --provider geoboundaries --city Cairo
  *   node scripts/fetch-city-geometry-cache.js --provider wof --format json
  */
 
@@ -17,7 +18,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  geoboundariesApiUrl,
   geometryEntries,
+  geoBoundariesFeatureCollection,
+  parseGeoBoundariesStableId,
   safeCachePath,
   wofRawUrl,
 } from './lib/city-geometry-cache.js'
@@ -36,8 +40,8 @@ const format = args.format || 'text'
 const dryRun = Boolean(args.dryRun)
 const overwrite = Boolean(args.overwrite)
 
-if (provider !== 'wof') {
-  console.error('Usage error: only --provider wof is currently supported.')
+if (!['wof', 'geoboundaries'].includes(provider)) {
+  console.error('Usage error: --provider must be wof or geoboundaries.')
   process.exit(2)
 }
 
@@ -45,7 +49,7 @@ const rows = []
 const entries = geometryEntries(sourceMap, { provider, city: args.city })
 for (const { entry, geometry } of entries) {
   const target = safeCachePath(cacheDir, geometry.cacheFile)
-  const url = wofRawUrl(geometry, { branch })
+  const url = sourceUrl(geometry, { branch, provider })
   const row = {
     cityKey: entry.cityKey,
     provider: geometry.provider,
@@ -67,7 +71,9 @@ for (const { entry, geometry } of entries) {
   }
 
   try {
-    const geojson = await fetchGeojson(url)
+    const geojson = provider === 'geoboundaries'
+      ? await fetchGeoBoundariesFeature(geometry)
+      : await fetchGeojson(url)
     fs.mkdirSync(path.dirname(target), { recursive: true })
     fs.writeFileSync(target, `${JSON.stringify(geojson, null, 2)}\n`)
     rows.push({ ...row, status: 'fetched' })
@@ -101,7 +107,30 @@ if (format === 'json') {
 
 if (report.summary.errors) process.exit(1)
 
+function sourceUrl(geometry, { branch, provider }) {
+  if (provider === 'geoboundaries') return geoboundariesApiUrl(geometry)
+  return wofRawUrl(geometry, { branch })
+}
+
+async function fetchGeoBoundariesFeature(geometry) {
+  const parsed = parseGeoBoundariesStableId(geometry.stableId)
+  const metadataUrl = geoboundariesApiUrl(geometry)
+  const metadata = await fetchJson(metadataUrl)
+  const url = metadata.gjDownloadURL || metadata.simplifiedGeometryGeoJSON
+  if (!url) throw new Error(`geoBoundaries metadata lacks GeoJSON download URL: ${metadataUrl}`)
+  const geojson = await fetchGeojson(url)
+  return geoBoundariesFeatureCollection(geojson, geometry.ids?.shapeId || parsed.shapeId)
+}
+
 async function fetchGeojson(url) {
+  const geojson = await fetchJson(url)
+  if (!geojson || typeof geojson !== 'object' || !geojson.type) {
+    throw new Error(`Invalid GeoJSON from ${url}`)
+  }
+  return geojson
+}
+
+async function fetchJson(url) {
   const res = await fetch(url, {
     headers: {
       'User-Agent': 'fajr-city-geometry-cache/1.0 (https://github.com/tawfeeqmartin/fajr/issues/118)',
@@ -109,11 +138,7 @@ async function fetchGeojson(url) {
     },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`)
-  const geojson = await res.json()
-  if (!geojson || typeof geojson !== 'object' || !geojson.type) {
-    throw new Error(`Invalid GeoJSON from ${url}`)
-  }
-  return geojson
+  return res.json()
 }
 
 function parseArgs(argv) {

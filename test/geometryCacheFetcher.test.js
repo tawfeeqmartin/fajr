@@ -7,7 +7,9 @@ import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
+  geoboundariesApiUrl,
   geometryEntries,
+  geoBoundariesFeatureCollection,
   safeCachePath,
   wofDataPath,
   wofRawUrl,
@@ -35,6 +37,30 @@ describe('city geometry cache fetch helpers', () => {
       stableId: 'wof:locality:421190103',
       ids: { repo: 'whosonfirst-data-admin-ma' },
     })).toBe('https://raw.githubusercontent.com/whosonfirst-data/whosonfirst-data-admin-ma/master/data/421/190/103/421190103.geojson')
+  })
+
+  it('builds geoBoundaries API URLs from stable boundary metadata', () => {
+    expect(geoboundariesApiUrl({
+      stableId: 'geoboundaries:EGY-ADM2-37247803:37247803B52731964573716',
+      ids: { releaseType: 'gbOpen' },
+    })).toBe('https://www.geoboundaries.org/api/current/gbOpen/EGY/ADM2/')
+  })
+
+  it('extracts one geoBoundaries feature by shapeID', () => {
+    const collection = geoBoundariesFeatureCollection({
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', properties: { shapeID: 'keep' }, geometry: { type: 'Point', coordinates: [1, 2] } },
+        { type: 'Feature', properties: { shapeID: 'skip' }, geometry: { type: 'Point', coordinates: [3, 4] } },
+      ],
+    }, 'keep')
+
+    expect(collection).toEqual({
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', properties: { shapeID: 'keep' }, geometry: { type: 'Point', coordinates: [1, 2] } },
+      ],
+    })
   })
 
   it('filters source-map entries by provider and city', () => {
@@ -75,6 +101,32 @@ describe('city geometry cache fetch helpers', () => {
     expect(report.rows[0].url).toContain('/whosonfirst-data-admin-ma/master/data/421/190/103/421190103.geojson')
     expect(fs.existsSync(cacheDir)).toBe(false)
   })
+
+  it('prints geoBoundaries dry-run JSON without fetching network data', () => {
+    const dir = tempDir()
+    const sourcePath = path.join(dir, 'sources.json')
+    const cacheDir = path.join(dir, 'cache')
+    writeJson(sourcePath, sampleSourceMap())
+
+    const report = JSON.parse(execFileSync(process.execPath, [
+      SCRIPT,
+      '--sources', sourcePath,
+      '--cache-dir', cacheDir,
+      '--provider', 'geoboundaries',
+      '--dry-run',
+      '--format', 'json',
+    ], { cwd: ROOT, encoding: 'utf8' }))
+
+    expect(report.summary).toMatchObject({
+      rows: 1,
+      fetched: 0,
+      skippedExisting: 0,
+      wouldFetch: 1,
+      errors: 0,
+    })
+    expect(report.rows[0].url).toBe('https://www.geoboundaries.org/api/current/gbOpen/EGY/ADM2/')
+    expect(fs.existsSync(cacheDir)).toBe(false)
+  })
 })
 
 function sampleSourceMap() {
@@ -109,6 +161,23 @@ function sampleSourceMap() {
             stableId: 'osm:relation:2801066',
             cacheFile: 'MA/sale/osm-relation-2801066.geojson',
             licenseUse: 'audit-only-until-license-review',
+          },
+        ],
+      },
+      {
+        cityKey: 'Cairo|EG',
+        geometries: [
+          {
+            provider: 'geoboundaries',
+            stableId: 'geoboundaries:EGY-ADM2-37247803:37247803B52731964573716',
+            ids: {
+              boundaryId: 'EGY-ADM2-37247803',
+              shapeId: '37247803B52731964573716',
+              releaseType: 'gbOpen',
+              boundaryType: 'ADM2',
+            },
+            cacheFile: 'EG/cairo/geoboundaries-egy-adm2-qasr-al-nile.geojson',
+            licenseUse: 'audit-and-reviewed-bbox-proposal',
           },
         ],
       },
