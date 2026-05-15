@@ -26,6 +26,7 @@ Core docs:
 - [docs/data-sources.md](docs/data-sources.md) - source inventory and fixture-refresh status.
 - [docs/city-geometry-audit.md](docs/city-geometry-audit.md) - build-time QA plan for reverse-geolocation bboxes.
 - [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) - app-side integration guide for [A Gift of Time](https://agiftoftime.app).
+- [docs/downstream-apps.md](docs/downstream-apps.md) - downstream app UX, QA, and release-handoff patterns.
 
 ## Install
 
@@ -259,6 +260,11 @@ renderPrayerCard({
 })
 ```
 
+For a fuller app-side playbook, see
+[docs/downstream-apps.md](docs/downstream-apps.md). For A Gift of Time's
+specific implementation contract, see
+[examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md).
+
 ## Accuracy Model
 
 Accuracy changes are evaluated by `node eval/eval.js` and gated by `npm run compare`.
@@ -316,6 +322,7 @@ Hilal output is astronomical possibility, not a religious ruling. See [docs/hila
 | Current release health | [SCOREBOARD.md](SCOREBOARD.md) |
 | Generated eval dashboard | [docs/progress.md](docs/progress.md) |
 | Integration in A Gift of Time | [examples/agiftoftime/INTEGRATION.md](examples/agiftoftime/INTEGRATION.md) |
+| Downstream app playbook | [docs/downstream-apps.md](docs/downstream-apps.md) |
 | Source inventory | [docs/data-sources.md](docs/data-sources.md) |
 | City bbox geometry audit | [docs/city-geometry-audit.md](docs/city-geometry-audit.md) |
 | Scholarly review brief | [docs/scholar-review-brief.md](docs/scholar-review-brief.md) |
