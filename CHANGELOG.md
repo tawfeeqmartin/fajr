@@ -26,6 +26,48 @@ proposals live in [`autoresearch/proposals/`](autoresearch/proposals/).
 
 ## [Unreleased]
 
+### Added — public-beta launch framing
+
+- Added `docs/public-launch-bar.md` to separate targeted tester sharing,
+  careful public-beta announcement readiness, and stable adoption
+  recommendation.
+- Added `docs/morocco-evidence.md` to define the current Morocco public
+  evidence boundary: v1.9.3 follows the official uniform city/region timetable
+  stance by default, #92/#103 remain post-launch calibration tracks, and fresh
+  Morocco reports should include city/date/prayer evidence.
+- Refreshed the README, CALIBRATION.md, data-source docs, calibration recipe,
+  known-disagreements docs, and agiftoftime integration guide so the public
+  docs describe the v1.9.3 state rather than older v1.8.x framing.
+- Updated the v1.9.3 GitHub release notes with public-beta wording, Morocco
+  tester reporting criteria, and links to the launch bar / Morocco evidence /
+  scoreboard.
+
+### Added — Egypt ESA daily source snapshots
+
+- Recovered ESA daily source snapshots for 2026-05-15 through 2026-05-20 from
+  orphaned automation branches and archived them under
+  `fixtures/egypt-esa/daily/`.
+- Added `test/egyptEsaSnapshots.test.js` so Egypt ESA daily snapshots stay
+  structurally reviewable before any future curated promotion into
+  `eval/data/test`.
+- Updated `.github/workflows/egypt-esa-snapshot.yml` to push future captures to
+  a persistent `automation/egypt-esa-daily` review branch because GitHub
+  Actions can push branches here but cannot create pull requests.
+- Kept all recovered ESA rows as source evidence under `fixtures/`; no
+  `eval/data/`, runtime calculation, public API, or package-version behavior
+  changed.
+
+### Changed — release-health docs
+
+- Regenerated `SCOREBOARD.md` after tracker triage and the ESA snapshot test:
+  open advisory issues now reflect the closed #114 umbrella, and the visible
+  test count is 446/446.
+- Closed #114 as superseded by #132; the remaining Saudi citation gap is now
+  tracked directly instead of through a stale umbrella issue.
+- Marked UMD/IIFE, GitHub Packages, native ports, Mawaqit cleanup, full bbox
+  audit, and KB/wiki cleanup as non-blockers for public-beta sharing while
+  preserving them as explicit follow-up tracks.
+
 ## [1.9.3] — 2026-05-15
 
 ### Fixed — Morocco official-table default
