@@ -57,7 +57,7 @@
 
 ### Test corpus
 
-- Tests: **445/445 passing** ✅
+- Tests: **446/446 passing** ✅
 
 ---
 
@@ -75,7 +75,7 @@
 
 ## Trajectory verdict (rolling 30 days)
 
-**Rolling 30-day window (102 runs):**
+**Rolling 30-day window (101 runs):**
 - Train WMAE: 1.1667 → 0.9757 (-16.4%)
 - Direction: 📈 improving
 
