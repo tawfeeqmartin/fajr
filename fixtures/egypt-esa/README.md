@@ -4,9 +4,10 @@ Source: Egyptian General Authority for Survey
 URL: https://www.esa.gov.eg/praytimes.aspx
 
 This directory accumulates daily institutional Imsakiyya captures from
-ESA for the 27 mapped major Egyptian cities. The capture workflow at
+ESA for the mapped major Egyptian cities. The capture workflow at
 `.github/workflows/egypt-esa-snapshot.yml` fires daily at 03:17 UTC
-(~05:17 Cairo) and opens a review PR per snapshot.
+(~05:17 Cairo) and pushes new captures to the persistent
+`automation/egypt-esa-daily` review branch.
 
 ## Daily files
 
@@ -24,7 +25,8 @@ confidence-grade promotion per `docs/positions.md` Promotion Criteria.
 
 ## Promotion rules
 
-1. Captures land here via the automated workflow.
+1. Captures land here via the automated workflow and are reviewed from
+   the persistent `automation/egypt-esa-daily` branch.
 2. After a meaningful accumulation period (≥2 months covering ≥2
    seasons), a human curator opens a separate PR to promote a curated
    subset into `eval/data/test/egypt-esa-yearly.json` (or
