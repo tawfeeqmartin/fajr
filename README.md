@@ -250,6 +250,10 @@ Code that constructed a local-midnight Date should instead encode its
 intended calendar year/month/day with `Date.UTC(year, month - 1, day)`.
 This removes browser/server timezone differences and keeps next-day
 calculations consistent across daylight-saving transitions.
+For historical timezone changes that skipped a whole date (for example,
+Samoa in December 2011), the adhan adapter throws `RangeError` if the requested
+day or its following day cannot be represented on that host. Use a UTC host
+for those historical calculations; fajr does not silently substitute a date.
 
 Use `astronomical()` when an app needs the raw Layer 1 events behind a
 regional default:

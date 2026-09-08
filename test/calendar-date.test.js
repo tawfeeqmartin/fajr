@@ -30,4 +30,17 @@ describe('UTC calendar-date contract', () => {
     'Pacific/Honolulu', 'Australia/Lord_Howe', 'Europe/London'])('is identical on host TZ=%s', tz => {
     expect(run(tz)).toEqual(expected)
   })
+
+  it.each(['2011-12-29', '2011-12-30'])('fails explicitly for an unrepresentable Samoa date/night: %s', day => {
+    const code = `
+      import assert from 'node:assert/strict';
+      import { prayerTimes, astronomical } from './src/index.js';
+      const date = new Date('${day}T12:00:00Z');
+      assert.throws(() => prayerTimes({ latitude: 33.5769, longitude: -7.5473, date }), RangeError);
+      assert.throws(() => astronomical(33.5769, -7.5473, date), RangeError);
+    `
+    expect(() => execFileSync(process.execPath, ['--input-type=module', '-e', code], {
+      cwd: root, env: { ...process.env, TZ: 'Pacific/Apia' }, stdio: 'pipe',
+    })).not.toThrow()
+  })
 })

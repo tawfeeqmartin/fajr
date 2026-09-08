@@ -362,7 +362,9 @@ export interface PrayerTimesParams {
   longitude: number
   /** UTC year/month/day identify the requested civil date, independent of
    *  the host timezone. Encode a location-local calendar date using those
-   *  UTC fields; the time-of-day is ignored. Returned Dates are instants. */
+   *  UTC fields; the time-of-day is ignored. Returned Dates are instants.
+   *  Throws RangeError when a historical timezone skip makes the requested
+   *  or following date unrepresentable by adhan on the host; use a UTC host. */
   date: Date
   /** Meters above sea level. When omitted (or set to `undefined`), fajr
    *  auto-resolves elevation from the bundled city registry — apps that

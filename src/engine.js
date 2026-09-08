@@ -34,6 +34,17 @@ function adhanCalendarDate(date) {
   const calendar = new Date(0)
   calendar.setFullYear(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
   calendar.setHours(12, 0, 0, 0)
+  // Some historical timezone changes skipped an entire civil day. adhan also
+  // constructs tomorrow with local Date fields; reject an unrepresentable
+  // day rather than silently calculating another date or a two-day night.
+  const nextUTC = new Date(date.getTime())
+  nextUTC.setUTCDate(nextUTC.getUTCDate() + 1)
+  const nextLocal = new Date(calendar.getFullYear(), calendar.getMonth(), calendar.getDate() + 1, 12)
+  const sameDay = (local, utc) => local.getFullYear() === utc.getUTCFullYear() &&
+    local.getMonth() === utc.getUTCMonth() && local.getDate() === utc.getUTCDate()
+  if (!sameDay(calendar, date) || !sameDay(nextLocal, nextUTC)) {
+    throw new RangeError('Requested calendar date or next day cannot be represented by adhan in the host timezone')
+  }
   return calendar
 }
 
