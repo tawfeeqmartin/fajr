@@ -24,7 +24,6 @@
  * Dawud, Tirmidhi, Nasa'i); classical fiqh treatises.
  */
 
-import * as adhan from 'adhan'
 import { hijri } from './hijri.js'
 
 const MS_PER_MIN = 60_000
@@ -71,7 +70,7 @@ function isInRamadan(date) {
 // Layer 1 lint (angles only in src/engine.js or src/methods.js).
 
 function isInvalidDate(d) {
-  return !d || (d instanceof Date && Number.isNaN(d.getTime()))
+  return !(d instanceof Date) || !Number.isFinite(d.getTime())
 }
 
 function diffMin(applied, reference) {
@@ -94,9 +93,8 @@ function fmtTime(d) {
 export function computeValidityWarnings({ rawTimes, result, params, coords, date }) {
   const warnings = []
 
-  const highLatRuleApplied = !!(params && params.highLatitudeRule != null && params.highLatitudeRule !== adhan.HighLatitudeRule.MiddleOfTheNight)
-  // MiddleOfTheNight is the adhan default — the explicit check is for non-default rules.
-  // But for our purposes, ANY non-trivial highLat rule presence indicates synthesis.
+  // A configured rule is only an advisory signal; it does not prove that
+  // synthesis occurred or exempt a result from prayer-window checks.
   const anyHighLatRule = !!(params && params.highLatitudeRule != null)
 
   // ── Polar: degenerate cases where adhan returns Invalid Date for sunset/sunrise
@@ -116,6 +114,27 @@ export function computeValidityWarnings({ rawTimes, result, params, coords, date
     return warnings
   }
 
+  // A valid sunrise/sunset today does not guarantee valid twilight times:
+  // adhan's night-fraction calculation also depends on tomorrow's sunrise.
+  // At the transition into polar day that event can be unavailable. Report
+  // missing times before formatting them; Invalid Date.toISOString() throws.
+  // Classification: 🟢 Established — availability reporting only, no
+  // replacement prayer times or new high-latitude ruling is introduced.
+  // See knowledge/wiki/regions/high-latitude.md.
+  for (const prayer of ['fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+    if (isInvalidDate(result[prayer])) {
+      warnings.push({
+        severity: 'critical',
+        prayer,
+        code: 'PRAYER_TIME_UNAVAILABLE',
+        message: `The ${prayer} calculation did not return a valid time. A required astronomical event may be unavailable on this date or the following day. Show this prayer as unavailable and consult local high-latitude guidance.`,
+        astronomicalReference: null,
+        applied: null,
+        diffMinutes: null,
+      })
+    }
+  }
+
   // ── Fajr: did the high-latitude rule fire?
   // The signal: rawTimes.fajr exists but the parameter set has a highLatitudeRule.
   // We can't distinguish "rule applied" from "rule available but not needed" without
@@ -131,7 +150,7 @@ export function computeValidityWarnings({ rawTimes, result, params, coords, date
       code: 'FAJR_HIGH_LAT_RULE_APPLIED',
       message: `Latitude ${lat.toFixed(2)}° with method-configured high-latitude rule. Fajr may be derived from a night-fraction rule (MiddleOfTheNight, SeventhOfTheNight, or TwilightAngle) rather than from a strict astronomical depression angle.`,
       astronomicalReference: null,
-      applied: result.fajr ? result.fajr.toISOString() : null,
+      applied: isInvalidDate(result.fajr) ? null : result.fajr.toISOString(),
       diffMinutes: null,
     })
     warnings.push({
@@ -140,16 +159,10 @@ export function computeValidityWarnings({ rawTimes, result, params, coords, date
       code: 'ISHA_HIGH_LAT_RULE_APPLIED',
       message: `Latitude ${lat.toFixed(2)}° with method-configured high-latitude rule. Isha may be derived from a night-fraction rule rather than from a strict astronomical depression angle.`,
       astronomicalReference: null,
-      applied: result.isha ? result.isha.toISOString() : null,
+      applied: isInvalidDate(result.isha) ? null : result.isha.toISOString(),
       diffMinutes: null,
     })
   }
-
-  // Detect whether high-lat synthesis actually occurred by checking if rawTimes
-  // values exist when a baseline 18° calc would have returned NaN.
-  // For the FAJR_AFTER_SHURUQ guard: if high-lat rule fired, skip the strict
-  // ordering check (Fajr ≈ Shuruq is expected in extreme summer at high lat).
-  const skipFajrShuruqCheck = anyHighLatRule && absLat > 60
 
   // ── MAGHRIB_BEFORE_SUNSET (P0 critical, motivated by fajr#100)
   if (!isInvalidDate(rawTimes.sunset) && result.maghrib instanceof Date) {
@@ -167,8 +180,10 @@ export function computeValidityWarnings({ rawTimes, result, params, coords, date
     }
   }
 
-  // ── FAJR_AFTER_SHURUQ (P0 critical) — skip in polar high-lat regime
-  if (!skipFajrShuruqCheck && result.fajr instanceof Date && result.shuruq instanceof Date) {
+  // ── FAJR_AFTER_SHURUQ (P0 critical). The strict > comparison permits
+  // equality from rounding, but a configured high-latitude rule must not
+  // hide a Fajr time that actually falls after the returned sunrise.
+  if (!isInvalidDate(result.fajr) && !isInvalidDate(result.shuruq)) {
     if (result.fajr.getTime() > result.shuruq.getTime()) {
       const d = diffMin(result.fajr, result.shuruq)
       warnings.push({
@@ -184,16 +199,25 @@ export function computeValidityWarnings({ rawTimes, result, params, coords, date
   }
 
   // ── DHUHR_BEFORE_SOLAR_NOON (P1 critical)
-  if (rawTimes.dhuhr instanceof Date && result.dhuhr instanceof Date) {
-    if (result.dhuhr.getTime() < rawTimes.dhuhr.getTime() - 30_000) {
-      // 30-second tolerance for rounding artefacts; rawTimes.dhuhr IS solar noon (per adhan)
-      const d = diffMin(result.dhuhr, rawTimes.dhuhr)
+  // adhan's unrounded Dhuhr already includes both adjustment tables. Undo
+  // their sum to recover transit, otherwise an institutional buffer (e.g.
+  // Diyanet +5 min) is incorrectly described as astronomical solar noon.
+  // Classification: 🟢 Established — reference reconstruction only.
+  // See knowledge/wiki/astronomy/solar-position.md.
+  const dhuhrAdjustment = (params?.adjustments?.dhuhr || 0) + (params?.methodAdjustments?.dhuhr || 0)
+  const solarNoon = isInvalidDate(rawTimes.dhuhr)
+    ? null
+    : new Date(rawTimes.dhuhr.getTime() - dhuhrAdjustment * MS_PER_MIN)
+  if (!isInvalidDate(solarNoon) && !isInvalidDate(result.dhuhr)) {
+    if (result.dhuhr.getTime() < solarNoon.getTime() - 30_000) {
+      // Retain the existing 30-second tolerance for rounding artefacts.
+      const d = diffMin(result.dhuhr, solarNoon)
       warnings.push({
         severity: 'critical',
         prayer: 'dhuhr',
         code: 'DHUHR_BEFORE_SOLAR_NOON',
-        message: `Dhuhr (${fmtTime(result.dhuhr)} UTC) is ${Math.abs(d).toFixed(1)} min before astronomical solar noon (${fmtTime(rawTimes.dhuhr)} UTC). Dhuhr begins AT solar noon — a time before is not in any valid Dhuhr window.`,
-        astronomicalReference: rawTimes.dhuhr.toISOString(),
+        message: `Dhuhr (${fmtTime(result.dhuhr)} UTC) is ${Math.abs(d).toFixed(1)} min before astronomical solar noon (${fmtTime(solarNoon)} UTC). Dhuhr begins AT solar noon — a time before is not in any valid Dhuhr window.`,
+        astronomicalReference: solarNoon.toISOString(),
         applied: result.dhuhr.toISOString(),
         diffMinutes: d,
       })
