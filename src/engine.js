@@ -2774,7 +2774,10 @@ export function prayerTimes(params) {
     : null
 
   const callerExplicitElevation = (overrideElevation !== null) || (params.elevation !== undefined && params.elevation !== null)
-  const callerExplicitMethod    = Boolean(overrideMethod || (typeof params.method === 'string' && params.method.length > 0))
+  // 🟢 Established — settings dispatch only; Automatic restores the existing
+  // city/country policy, including when it overrides a legacy explicit method.
+  const selectedMethod = (overrideMethod ?? (typeof params.method === 'string' ? params.method : '')).trim()
+  const callerExplicitMethod = selectedMethod !== '' && selectedMethod !== 'auto'
   const callerExplicitAsrConvention = asrConventionOverride(params)
 
   const elevationParam = callerExplicitElevation
@@ -2800,7 +2803,7 @@ export function prayerTimes(params) {
   // `methodFromString()` helper so the override is honoured directly.
   let params_, methodName, methodSource
   if (callerExplicitMethod) {
-    const r = methodFromString(overrideMethod || params.method, country, latitude, coords)
+    const r = methodFromString(selectedMethod, country, latitude, coords)
     params_ = r.params
     methodName = r.methodName
     methodSource = 'caller-explicit'

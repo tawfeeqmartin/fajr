@@ -335,7 +335,8 @@ export function nearestCity(
 export interface PrayerTimesOverride {
   /** Override the auto-detected method. Same accepted method-name strings as
    *  legacy top-level `method`. Takes priority over `method` when both are
-   *  supplied. */
+   *  supplied. `'auto'` restores detected dispatch even when a legacy
+   *  top-level method is also supplied. */
   method?: string
   /** Override the effective elevation in metres. Pass 0 to opt out of
    *  city-registry elevation correction; pass a GPS/device altitude when the
@@ -375,7 +376,7 @@ export interface PrayerTimesParams {
    *  `'UmmAlQura'`, `'Diyanet'`, `'Karachi'`, `'Tehran'`, `'Egyptian'`,
    *  `'MoonsightingCommittee'`, `'JAKIM'`, `'MUIS'`, `'ISNA'`, `'MWL'`,
    *  `'UOIF'`, `'CIL'`, `'DUMR'`, `'Morocco'`, `'Tunisia'`, `'Algeria'`,
-   *  `'Jordan'`). When omitted, the engine resolves the method from the
+   *  `'Jordan'`). When omitted or set to `'auto'`, the engine resolves the method from the
    *  bundled city registry's `methodOverride` (if present), then falls
    *  through to the country default, then to ISNA. Caller-explicit method
    *  takes priority over both city-institutional and country-default
