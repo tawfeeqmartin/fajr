@@ -16,6 +16,16 @@ import * as adhan from 'adhan'
 import citiesRegistry from './data/cities.json' with { type: 'json' }
 import { computeValidityWarnings } from './validity.js'
 
+// 🟢 Established — ownership isolation only. Registry records are plain JSON;
+// callers may annotate their own copies without changing later calculations.
+function copyRegistryRecord(value) {
+  if (Array.isArray(value)) return value.map(copyRegistryRecord)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, copyRegistryRecord(item)]))
+  }
+  return value
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPERIMENT 1: Regional method auto-selection
 // 🟢 Established — selecting calculation methods by country/region
@@ -2412,7 +2422,7 @@ export function detectLocation(latitude, longitude, fallbackElevation = 0) {
     source,
   }
   if (altMethods) out.altMethods = altMethods
-  return out
+  return copyRegistryRecord(out)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2519,7 +2529,7 @@ export function nearestCity(latitude, longitude) {
       best = c
     }
   }
-  return { city: best, distanceKm: bestDist }
+  return { city: copyRegistryRecord(best), distanceKm: bestDist }
 }
 
 /**
