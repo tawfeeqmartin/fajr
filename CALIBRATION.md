@@ -1,6 +1,6 @@
 # fajr — accuracy + scholarly methodology
 
-Last refreshed: 2026-05-15 (v1.9.3)
+Last refreshed: 2026-09-08 (repository v1.9.3 audit)
 
 ## What this document is
 
@@ -25,15 +25,16 @@ For the compact product answer to "what does fajr do by default here?", read
 to users rather than hidden inside calibration prose, read
 [docs/known-disagreements.md](docs/known-disagreements.md).
 
-CALIBRATION.md is refreshed with every release. The "Last refreshed" line at
-the top of this file always reflects the most recent version on npm.
+The "Last refreshed" line identifies the documentation review date and
+repository version; it does not establish the latest published npm version.
 
 > **Important caveat about the holdout corpus.** The "Holdout WMAE" number
-> reported below (currently ~7.36 min) is heavily skewed by a small number of
-> calc-vs-calc comparison cells with known data-quality issues (date-format
-> drift, pre-fix Aladhan corruption surfaced in the v1.6.1 fix, high-latitude
-> outliers like Longyearbyen 78°N, Oslo 60°N, Reykjavík 64°N, plus the
-> muslimsalat.com aggregator at 26 min WMAE). The train-ratchet WMAE
+> reported below (currently ~7.36 min) combines source disagreement,
+> high-latitude cases, and known source-quality problems. The current
+> Mawaqit holdout contributes 45,916 of 54,639 rows and reports 8.41 min
+> WMAE; the muslimsalat.com aggregator reports 26.09 min across 32 rows.
+> Known clock/calendar defects require review, but they do not establish
+> that all remaining holdout error is a data artifact. The train-ratchet WMAE
 > (**0.98 min** as of v1.9.3, against Mawaqit / Diyanet / JAKIM plus bounded
 > Aladhan calc-consistency cells) is the headline number that drives the
 > ratchet; it first broke the 1-minute barrier in v1.7.16 via Morocco Dhuhr +5
@@ -43,24 +44,30 @@ the top of this file always reflects the most recent version on npm.
 > [Per-region accuracy](#per-region-accuracy-current-v193) for the
 > breakdown.
 
-> **🟢 Audit closure (2026-05-05) — Morocco Path A empirically validated
-> year-round.** A 2026-05-05 audit revealed that fajr's Mawaqit-anchored
+> **Historical seasonal audit (2026-05-05) — evidence with limits.**
+> A 2026-05-05 audit revealed that fajr's Mawaqit-anchored
 > train + test fixtures were single-day snapshots, leaving the v1.5.0
 > Morocco Maghrib +5 and v1.7.16 Morocco Dhuhr +5 calibrations
-> empirically presumed but unvalidated seasonally. **The audit-gap is
-> now closed for Morocco**: a yearly Mawaqit corpus was built (42
+> empirically presumed but unvalidated seasonally. A yearly Mawaqit corpus
+> was subsequently built (42
 > Moroccan mosques × 366 days = 15,372 rows; corrupt rows filtered to
 > 15,164) via the new `scripts/fetch-mawaqit-yearly.js` extracting each
 > mosque page's embedded full-year calendar. Re-validation result:
 >
 > | Prayer | Mean bias (full year) | MAE | Verdict |
 > |---|---|---|---|
-> | Fajr | +0.61 | 3.62 | within tolerance |
-> | Sunrise | -1.38 | 4.38 | within tolerance |
-> | **Dhuhr** | **-0.15** | **1.51** | **v1.7.16 +5 Path A empirically perfect year-round** |
-> | Asr | -1.16 | 2.92 | within tolerance |
-> | **Maghrib** | **+0.76** | **5.46** | **v1.5.0 +5 Path A empirically correct year-round** (mean near-zero; ±4-5 min seasonal swing within ihtiyat tolerance) |
-> | Isha | -1.06 | 3.52 | within tolerance |
+> | Fajr | +0.61 | 3.62 | Positive and negative errors partly cancel |
+> | Sunrise | -1.38 | 4.38 | Source convention requires separate review |
+> | **Dhuhr** | **-0.15** | **1.51** | Small aggregate bias; nonzero daily error |
+> | Asr | -1.16 | 2.92 | Residual daily disagreement |
+> | **Maghrib** | **+0.76** | **5.46** | Small aggregate bias does not establish daily agreement |
+> | Isha | -1.06 | 3.52 | Residual daily disagreement |
+>
+> These are historical audit figures, not a fresh evaluation of today's
+> engine. Near-zero signed bias can conceal substantial absolute errors;
+> it does not prove year-round accuracy or satisfy the ratchet's **change
+> in bias** tolerance. For the current Morocco evidence boundary, use
+> [docs/morocco-evidence.md](docs/morocco-evidence.md).
 >
 > **What remains audit-open**: same yearly-fetch + seasonal validation
 > still owes for the other Mawaqit-anchored corpora (France, Malaysia
@@ -140,16 +147,17 @@ Health verdict meanings:
 
 ## Per-region accuracy (current, v1.9.3)
 
-These numbers are from the most recent generated progress snapshot on master
-(2026-05-14T21:19:41Z). They
-are also live in [`eval/results/runs.jsonl`](eval/results/runs.jsonl) — the
-last record is always the current state.
+The overall and per-prayer numbers below were reproduced by the repository
+audit on 2026-09-08. Eval runs append records to
+[`eval/results/runs.jsonl`](eval/results/runs.jsonl). A record describes the
+checkout when that run executed; its presence alone does not prove that it
+describes a later checkout or the latest npm release.
 
 ### Overall
 
 | Corpus | WMAE (min) | Entries | Notes |
 |---|---|---|---|
-| **Train** (institutional ground truth) | **0.98** | 215 | Mawaqit / Diyanet / JAKIM — drives the ratchet. **Broke the 1-minute barrier in v1.7.16** via Morocco Dhuhr +5 + JAKIM Dhuhr +2 / Asr +1 Path A calibrations. |
+| **Train** (mixed references) | **0.98** | 215 | 130 Aladhan calculation-reference rows + 25 Mawaqit + 30 Diyanet + 30 JAKIM rows; drives the ratchet. This aggregate is not an exclusively independent institutional accuracy measure. |
 | Holdout (diagnostic only) | 7.36 | 54639 | Informational only — expanded yearly mosque/institutional/calc-vs-calc holdout includes noisy aggregators, seasonal mosque variance, degenerate yearly calendars, and high-latitude / source-quality outliers. See caveat at top of file and [SCOREBOARD.md](SCOREBOARD.md). |
 
 ### Per-source breakdown (v1.9.3)
@@ -177,10 +185,13 @@ data confirms they don't.
 | Maghrib | 0.66 | +0.49 | calc later — within prayer-validity ihtiyat tolerance |
 | Isha | 0.80 | +0.71 | calc later — within prayer-validity ihtiyat tolerance |
 
-The signed-bias directions matter for ihtiyat (precaution): Fajr and Shuruq
-drift "earlier" is the prayer-validity-unsafe direction; Maghrib and Isha
-drift "later" is prayer-validity-safe but iftar/fasting-unsafe. The current
-state passes the ratchet rules in `eval/compare.js`. See
+Signed bias is calculation minus reference: negative means earlier and
+positive means later. Under the project's prayer-validity convention,
+earlier Fajr/Maghrib/Isha and later Shuruq are the guarded drift directions.
+Fasting precaution has a different Fajr polarity, as documented in the
+project's dual-ihtiyat framework. The comparator checks **changes between
+two runs**, not whether one run's absolute bias is below a tolerance. An
+unchanged result is not a successful accuracy ratchet. See
 [CLAUDE.md → Islamic accuracy principles](CLAUDE.md#islamic-accuracy-principles)
 for the dual-ihtiyat framework.
 
@@ -349,14 +360,14 @@ Asr 30-60 minutes later in Hanafi-majority regions, but the ratchet check in
 Diyanet Türkiye and AlAdhan Karachi fixtures match the selected method's
 standard/adhan-default Asr behavior. fajr therefore reports Hanafi metadata
 for Hanafi-majority countries while leaving calculation-facing Asr tied to
-the selected method until source-specific 2× shadow support or caller
-override lands via [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
+the selected method by default. Since v1.9.0, callers can explicitly select
+either formula with `override.asrConvention`.
 
 | Country / region | `location.asrConvention` metadata | Current applied Asr school | Override status | Source |
 |---|---|---|---|---|
 | Maldives | Standard 1× | Standard / explicit Shafi composition | v1.7.1 fix (issue #26) | Maldives Islamic Ministry — Maldivian Sunni Shafi'i tradition |
 | Sri Lanka | Standard 1× | Standard / explicit Shafi composition | v1.7.1 fix (issue #26) | Sri Lankan Sunni Shafi'i (Mappila / Tamil Muslim) tradition |
-| Pakistan | Hanafi | Standard / adhan default | Metadata fixed in v1.7.22; calculation override deferred to #40 / source-specific validation | University of Islamic Sciences Karachi; current AlAdhan fixture default |
+| Pakistan | Hanafi | Standard / adhan default | Explicit Hanafi/standard override available since v1.9.0 | University of Islamic Sciences Karachi; current AlAdhan fixture default |
 | Bangladesh | Hanafi | Standard / adhan default | Same as Pakistan | Islamic Foundation Bangladesh; current AlAdhan default |
 | Türkiye | Hanafi | Standard / Diyanet preset default | Metadata fixed in v1.7.22; blanket 2× shadow rejected by ratchet | Diyanet; eval fixture via ezanvakti.emushaf.net |
 | Albania / Kosovo / Bosnia | Hanafi | Standard / Diyanet preset default | Same as Türkiye; city-level Diyanet method overrides still apply method provenance | National Islamic communities |
@@ -367,11 +378,12 @@ override lands via [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
 | Egypt / Saudi / UAE / Qatar / Kuwait / Bahrain / Oman | varies / mixed | Institution-specific selected method | No forced country madhab metadata | Country institution |
 | Morocco | method-implied standard 1× | Standard Asr | Aligned with selected Habous method; API does not encode Maliki as a `madhab` value | Habous |
 
-Caller-side Asr-convention override is still tracked in [#40](https://github.com/tawfeeqmartin/fajr/issues/40).
-Until that lands, downstream apps should use `location.asrConvention` as the
-local Asr-convention hint and `applied.asrSchool` to explain the time actually
-returned. When these differ, fajr surfaces an `Asr-convention advisory` in
-`notes[]`.
+Use `prayerTimes({ ...params, override: { asrConvention: 'hanafi' } })` for
+an explicit 2× shadow choice, or `'standard'` for 1×. Downstream apps should
+use `location.asrConvention` as the local convention hint and
+`applied.asrSchool` to explain the formula actually used. When the detected
+convention and applied formula differ, fajr surfaces an `Asr-convention
+advisory` in `notes[]`.
 
 ---
 
@@ -385,13 +397,20 @@ to the user.
 
 ### Elevation auto-application — diverges from AlAdhan / Saudi institutional stance
 
-| City | fajr Maghrib delta vs AlAdhan / Saudi | Why | How surfaced |
+| City | Geometric Maghrib shift before minute rounding | Why | How surfaced |
 |---|---|---|---|
-| Mecca (277 m) | +1.6 min later | UAE Burj Khalifa fatwa (IACAD Dulook DXB) + Malaysia/JAKIM-adjacent precedent support elevation correction; Saudi/Umm al-Qura published city timetables remain uniform. fajr's city-registry path applies the correction, with `elevation: 0` opt-out. | `notes[]` "Elevation auto-resolved from city registry: Mecca, 277m → Maghrib +1.6 min later, Shuruq -1.6 min earlier vs sea-level" |
-| Madinah (608 m) | +2.7 min | (same) | (same) |
-| Riyadh (612 m) | +2.7 min | (same) | (same) |
-| Tehran (~1200 m) | +5.4 min | (same) | (same) |
-| Toronto (76 m) | +0.8 min | (same) | (same) |
+| Mecca (277 m) | +2.30 min | UAE Burj Khalifa fatwa (IACAD Dulook DXB) + Malaysia/JAKIM-adjacent precedent support elevation correction; Saudi/Umm al-Qura published city timetables remain uniform. fajr's city-registry path applies the correction, with `elevation: 0` opt-out. | `applied.elevationMin` and the elevation note in `notes[]` |
+| Madinah (608 m) | +3.48 min | (same) | (same) |
+| Riyadh (612 m) | +3.50 min | (same) | (same) |
+| Tehran (1191 m) | +5.46 min | (same) | (same) |
+| Toronto (76 m) | +1.55 min | (same) | (same) |
+
+These magnitudes were checked against the public API at the city coordinates
+on 2026-09-08. They describe the geometric correction, not measured deltas
+against an external timetable. The returned clock times are rounded again
+after correction, so their shift can be larger. Morocco is exempt from
+automatic city elevation since v1.9.3; explicit observer elevation remains
+available.
 
 This is the v1.7.0 elevation auto-application case, surfaced explicitly per
 issue #50 (v1.7.6) so apps can render the institutional split to the user.
