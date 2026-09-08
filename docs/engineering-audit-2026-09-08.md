@@ -4,7 +4,7 @@ The most useful next work is improving runtime contracts and validation
 integrity before tuning more regional offsets. This audit found a public API
 crash, incorrect validity diagnostics, an ineffective CI registry gate, and
 several reproducible contract gaps. It does not establish worldwide accuracy
-or change any calculation method, angle, offset, or prayer time.
+or establish that every downstream integration remains compatible.
 
 Reviewed checkout: `1fb68a3`, package version `1.9.3`. Sources: the public API,
 engine, validity, calendar, lunar, location and method modules; tests; CI and
@@ -12,7 +12,49 @@ release scripts; the read-only eval and wiki; open fajr issues and the
 downstream agiftoftime documentation handoff. No remote review routines were
 executed or verified by this audit.
 
-## Implemented fixes
+## Repair follow-up — authorized 2026-09-08
+
+All five P0/P1 follow-ups below now have repairs in draft PR #191:
+
+- Ratchet: TRAIN-only institutional corroboration, no calculated/unknown
+  source escape, per-region enforcement, finite/complete matching metrics,
+  and fail-closed malformed-record handling. Sixteen acceptance tests pass.
+- Automatic settings: `auto` restores detected method dispatch; grouped
+  overrides take precedence over legacy values. Twelve tests pass.
+- Raw twilight: actual crossings are no longer night-fraction-clamped and
+  absent events remain Invalid Dates. Caller Date mutation cannot change
+  later accessors. All 14 astronomy tests pass.
+- Dates: UTC year/month/day now select the requested calendar date for
+  prayer, day/night, and raw-astronomy APIs. Seven host TZs, midnight edges,
+  DST, leap-day and year-end cases are covered. This requires downstream
+  review for callers that previously relied on host-local Date fields;
+  README documents how to encode a location's civil date. Historical timezone
+  skips that make a whole day unrepresentable fail explicitly with RangeError;
+  those calculations require a UTC host.
+- Registry: returned nested records are detached, with four mutation tests
+  proving later lookups and calculations remain unchanged.
+
+CI evaluates the base and candidate when runtime code changes. The default
+calibration path still requires a strict WMAE decrease. This human-approved
+repair track uses the maintainer `correctness-only` label and a separate
+**exact full-metric identity** gate; it cannot accept any train or holdout
+metric change. It is not an opt-out for calibration experiments.
+
+Final local release preflight passes: **503 tests**, registry validation
+with zero failures, generator sync, and package dry run. Required full docs
+regeneration completed, including both JPL reports. Train WMAE remains
+**0.9757475083056478 min** and holdout **7.36457344701456 min**. Every metric
+is identical after each runtime concern. The strict comparator still rejects
+the tie; no calibration improvement is claimed. See the append-only
+[repair log](../autoresearch/logs/2026-09-08-04-21.md).
+
+The reproductions below describe the original v1.9.3 defects. They are
+retained as evidence, not as claims that those P0/P1 defects remain unfixed
+on this draft. P2 source-policy and architectural follow-ups remain open.
+No release or merge has been performed; downstream app compatibility has
+not yet been verified.
+
+## Initial audit fixes
 
 ### Polar-transition crash and validity diagnostics
 
@@ -168,7 +210,7 @@ the wiki itself is not a freshly verified primary timetable. Explicit
 elevation and tayakkun helpers also retain pre-adjustment warning arrays,
 so diagnostics can become stale after post-processing.
 
-## Validation and limits
+## Initial audit validation and limits (before repair follow-up)
 
 - Baseline: 446 tests. After diagnostic fixes: 460 tests, all passing.
 - Extended runtime sweep: 62,050 calls at ±48° through ±90°, in half-degree
@@ -189,7 +231,7 @@ so diagnostics can become stale after post-processing.
   ground-truth fixtures, or the knowledge wiki. Eval execution appended two
   generated run records locally; those records are not hand-edited.
 
-The recommended order is to repair ratchet governance, fix the settings and
-raw-astronomy contracts, settle civil-date semantics, and isolate mutable
-registry data. Further regional calibration should follow source-quality
-and seasonal-evidence review rather than chase the mixed holdout aggregate.
+The initial recommended order has now been implemented in the repair
+follow-up above. Further regional calibration still needs source-quality
+and seasonal-evidence review rather than optimization of the mixed holdout
+aggregate.
