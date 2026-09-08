@@ -592,7 +592,8 @@ export interface AstronomicalPrimitives {
    *    - `fajrAt(19.5)` for Egyptian
    *    - `fajrAt(15)` for ISNA
    *  No institutional default is implied; this is the raw astronomical
-   *  event at the requested angle. */
+   *  event at the requested angle. Returns an Invalid Date when the sun
+   *  never reaches that depression; no high-latitude estimate is substituted. */
   fajrAt: (angleDeg: number) => Date
   /** Instant the sun reaches `angleDeg` below the horizon, post-twilight.
    *  Same shape as `fajrAt`. */

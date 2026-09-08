@@ -251,6 +251,10 @@ console.log(raw.apparentSunset)
 console.log(official.maghrib) // Morocco default includes institutional buffer/rounding
 ```
 
+Raw twilight accessors return an **Invalid Date** when the requested angle
+has no crossing that day. Check `Number.isFinite(time.getTime())` before
+formatting it. They do not substitute a high-latitude prayer-time estimate.
+
 ## App Integration Pattern
 
 For web/mobile apps:

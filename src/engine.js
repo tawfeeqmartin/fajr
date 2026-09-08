@@ -3352,14 +3352,28 @@ export function applyTayakkunBuffer(times, mins = 5) {
  *                           for stability across timezones)
  * @returns {object} Astronomical primitives — see jsdoc above for shape
  */
-export function astronomical(latitude, longitude, date) {
+export function astronomical(latitude, longitude, inputDate) {
   const coords = new adhan.Coordinates(latitude, longitude)
+  const date = new Date(inputDate.getTime())
+
+  // 🟢 Established — expose angle crossings, including their absence, without
+  // selecting a prayer-time estimation rule. See
+  // knowledge/wiki/regions/high-latitude.md (persistent twilight).
+  // adhan's public nightPortions hook otherwise clamps valid crossings and
+  // replaces missing ones. Invalid portions disable that fallback: comparisons
+  // against the resulting Invalid Date are false, and absent events stay absent.
+  const rawParameters = () => {
+    const p = adhan.CalculationMethod.Other()
+    p.rounding = adhan.Rounding.None
+    p.nightPortions = () => ({ fajr: NaN, isha: NaN })
+    return p
+  }
 
   // Use a baseline calc for the convenience times. Solar noon / apparent
   // sunrise / apparent sunset don't depend on Fajr or Isha angles, so any
   // baseline works. We pick 18°/17° (MWL) for the baseline because that's
   // the calc state most consumers will recognise.
-  const baseParams = adhan.CalculationMethod.Other()
+  const baseParams = rawParameters()
   baseParams.fajrAngle = 18
   baseParams.ishaAngle = 17
   baseParams.rounding = adhan.Rounding.None
@@ -3371,7 +3385,7 @@ export function astronomical(latitude, longitude, date) {
     apparentSunset: baseline.sunset,
 
     fajrAt(angleDeg) {
-      const p = adhan.CalculationMethod.Other()
+      const p = rawParameters()
       p.fajrAngle = angleDeg
       p.ishaAngle = 17  // unused by .fajr output
       p.rounding = adhan.Rounding.None
@@ -3379,7 +3393,7 @@ export function astronomical(latitude, longitude, date) {
     },
 
     ishaAt(angleDeg) {
-      const p = adhan.CalculationMethod.Other()
+      const p = rawParameters()
       p.fajrAngle = 18  // unused by .isha output
       p.ishaAngle = angleDeg
       p.rounding = adhan.Rounding.None
@@ -3387,7 +3401,7 @@ export function astronomical(latitude, longitude, date) {
     },
 
     asrAt(shadowFactor) {
-      const p = adhan.CalculationMethod.Other()
+      const p = rawParameters()
       p.fajrAngle = 18
       p.ishaAngle = 17
       p.madhab = shadowFactor === 2 ? adhan.Madhab.Hanafi : adhan.Madhab.Shafi
