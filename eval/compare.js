@@ -26,7 +26,7 @@
  */
 
 import { readFileSync, existsSync } from 'fs'
-import { join, dirname } from 'path'
+import { join, dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -35,6 +35,16 @@ const RUNS = join(__dirname, 'results', 'runs.jsonl')
 const CELL_TOLERANCE_MIN   = 0.10  // per (city, source) drift
 const SOURCE_TOLERANCE_MIN = 0.10  // per source-institution aggregate drift
 const BIAS_TOLERANCE_MIN   = 0.30  // signed bias drift in unsafe direction
+const PRAYERS = ['fajr', 'shuruq', 'dhuhr', 'asr', 'maghrib', 'isha']
+
+// Reviewed institutional identities in the current TRAIN corpus. Calculated
+// references and unknown labels cannot justify an ihtiyat exception. Adding
+// an institution requires source review, not a pattern/substring match.
+const CORROBORATING_SOURCES = new Set([
+  'Mawaqit (mosque-published)',
+  'Diyanet İşleri Başkanlığı (Türkiye)',
+  'JAKIM (via waktusolat.app)',
+])
 
 // Ihtiyat (precaution) demands errors be asymmetric. For these prayers the
 // listed direction of bias drift is unsafe even when MAE happens to improve.
@@ -47,25 +57,25 @@ const UNSAFE_DIRECTION = {
   shuruq:  'up',
 }
 
-function loadLastTwo() {
-  if (!existsSync(RUNS)) {
-    console.error(`No runs file at ${RUNS}`)
+function loadLastTwo(runsFile) {
+  if (!existsSync(runsFile)) {
+    console.error(`No runs file at ${runsFile}`)
     console.error(`Run \`node eval/eval.js\` at least twice before comparing.`)
     process.exit(2)
   }
-  const lines = readFileSync(RUNS, 'utf8').trim().split('\n').filter(Boolean)
+  const lines = readFileSync(runsFile, 'utf8').trim().split('\n').filter(Boolean)
   const recs = []
   for (const line of lines) {
     try {
       const rec = JSON.parse(line)
-      // Accept schema 3 (current). Older schemas lack perSource/perCell.
-      if (rec.schema === 3) recs.push(rec)
+      recs.push(rec)
     } catch {
-      // ignore malformed lines
+      console.error('Malformed run record; refusing to compare an older pair silently.')
+      process.exit(2)
     }
   }
-  if (recs.length < 2) {
-    console.error(`Need ≥2 schema-3 runs in ${RUNS}; found ${recs.length}.`)
+  if (recs.length < 2 || recs.slice(-2).some(rec => rec?.schema !== 3)) {
+    console.error(`Need two final schema-3 runs in ${runsFile}; refusing to skip incompatible records.`)
     console.error(`Run \`node eval/eval.js\` once before your change and once after.`)
     process.exit(2)
   }
@@ -82,7 +92,47 @@ function fmtBias(b) {
   return b >= 0 ? `+${b.toFixed(2)}` : b.toFixed(2)
 }
 
-function compare(prev, curr) {
+export function validateTrainingPair(prev, curr) {
+  const errors = []
+  const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
+  const metric = (value, path, countKey) => {
+    if (!object(value)) { errors.push(`${path} missing`); return }
+    if (!Number.isInteger(value[countKey]) || value[countKey] <= 0) errors.push(`${path}.${countKey} invalid`)
+    if (!Number.isFinite(value.wmae) || value.wmae < 0) errors.push(`${path}.wmae invalid`)
+    for (const prayer of PRAYERS) {
+      if (!Number.isFinite(value.perPrayer?.[prayer]) || value.perPrayer[prayer] < 0) errors.push(`${path}.perPrayer.${prayer} invalid`)
+      if (!Number.isFinite(value.perPrayerSigned?.[prayer])) errors.push(`${path}.perPrayerSigned.${prayer} invalid`)
+    }
+  }
+  for (const [label, run] of [['previous', prev], ['current', curr]]) {
+    if (run?.schema !== 3) errors.push(`${label} schema must be 3`)
+    metric(run?.train, `${label}.train`, 'entries')
+    for (const group of ['perSource', 'perCell', 'perRegion']) {
+      const values = run?.train?.[group]
+      if (!object(values) || !Object.keys(values).length) { errors.push(`${label}.train.${group} missing`); continue }
+      for (const [key, value] of Object.entries(values)) metric(value, `${label}.${group}[${key}]`, 'count')
+    }
+  }
+  if (errors.length) return errors
+  if (prev.train.entries !== curr.train.entries) errors.push('Training entry count changed; compare the same corpus.')
+  for (const group of ['perSource', 'perCell', 'perRegion']) {
+    const keys = new Set([...Object.keys(prev.train[group]), ...Object.keys(curr.train[group])])
+    for (const key of keys) {
+      const p = prev.train[group][key], c = curr.train[group][key]
+      if (!p || !c || p.count !== c.count) errors.push(`Training coverage changed: ${group}[${key}]`)
+    }
+  }
+  return errors
+}
+
+export function compare(prev, curr, { log = globalThis.console.log } = {}) {
+  const console = { log }
+  const invalid = validateTrainingPair(prev, curr)
+  if (invalid.length) {
+    console.log('FAIL — invalid or incomparable training metrics:')
+    for (const error of invalid) console.log(`  • ${error}`)
+    return 1
+  }
   const issues = []
 
   console.log()
@@ -95,7 +145,7 @@ function compare(prev, curr) {
   // ── Headline ──
   const dT = curr.train.wmae - prev.train.wmae
   console.log(`Train WMAE:    ${prev.train.wmae.toFixed(4)} → ${curr.train.wmae.toFixed(4)}  (${fmtDelta(dT)})`)
-  if (prev.test.entries > 0 && curr.test.entries > 0) {
+  if (prev.test?.entries > 0 && curr.test?.entries > 0 && Number.isFinite(prev.test.wmae) && Number.isFinite(curr.test.wmae)) {
     const dH = curr.test.wmae - prev.test.wmae
     console.log(`Holdout WMAE:  ${prev.test.wmae.toFixed(4)} → ${curr.test.wmae.toFixed(4)}  (${fmtDelta(dH)})  [diagnostic only]`)
   }
@@ -155,6 +205,11 @@ function compare(prev, curr) {
     }
   }
 
+  for (const name of Object.keys(prev.train.perRegion)) {
+    const delta = curr.train.perRegion[name].wmae - prev.train.perRegion[name].wmae
+    if (delta > CELL_TOLERANCE_MIN) issues.push(`Region "${name}": WMAE worsened by ${fmtDelta(delta)} min.`)
+  }
+
   // ── Per-prayer signed-bias drift (train) — with Path A cross-source check ──
   // Path A: an aggregate signed-bias drift in the prayer-only-unsafe direction
   // is OK if at least one independent source's per-source |signed bias| for
@@ -167,8 +222,8 @@ function compare(prev, curr) {
   console.log('Prayer   | Prev bias | Curr bias |   Δ    | Direction       |')
   console.log('---------|-----------|-----------|--------|-----------------|')
 
-  const allSourcesPrev = { ...(prev.train.perSource ?? {}), ...(prev.test.perSource ?? {}) }
-  const allSourcesCurr = { ...(curr.train.perSource ?? {}), ...(curr.test.perSource ?? {}) }
+  const allSourcesPrev = prev.train.perSource
+  const allSourcesCurr = curr.train.perSource
 
   for (const prayer of Object.keys(UNSAFE_DIRECTION)) {
     const p = prev.train.perPrayerSigned?.[prayer]
@@ -186,6 +241,7 @@ function compare(prev, curr) {
     if (isUnsafeAggregate) {
       requiredImprovement = Math.max(2 * Math.abs(d), 1.0)
       for (const srcName of Object.keys(allSourcesPrev)) {
+        if (!CORROBORATING_SOURCES.has(srcName)) continue
         const prevBias = allSourcesPrev[srcName]?.perPrayerSigned?.[prayer]
         const currBias = allSourcesCurr[srcName]?.perPrayerSigned?.[prayer]
         if (prevBias === undefined || currBias === undefined) continue
@@ -233,5 +289,12 @@ function compare(prev, curr) {
   return 1
 }
 
-const [prev, curr] = loadLastTwo()
-process.exit(compare(prev, curr))
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const args = process.argv.slice(2)
+  if (args.length && (args.length !== 2 || args[0] !== '--runs')) {
+    console.error('Usage: node eval/compare.js [--runs path/to/runs.jsonl]')
+    process.exit(2)
+  }
+  const [prev, curr] = loadLastTwo(args[1] || RUNS)
+  process.exit(compare(prev, curr))
+}

@@ -59,6 +59,34 @@ deltas, verdict, and scholarly classification. The preflight command is a
 release sanity gate; it is not an eval ratchet and should not be used as proof
 that a calculation change is better.
 
+## Calibration versus correctness repairs
+
+The PR `accuracy` job compares fresh runs of the base revision and candidate
+whenever `src/` changes. Calibration is the default: train WMAE must strictly
+decrease, with the region, source, cell, and signed-bias checks intact.
+Path A uses only the named, reviewed TRAIN institutions in
+`eval/compare.js`; holdout results and calculated references cannot supply
+corroboration. Missing, nonfinite, or mismatched training coverage fails.
+
+A maintainer may apply the `correctness-only` label to a human-approved
+engineering repair that is outside timetable calibration. This selects a
+separate check requiring **exact equality of the full train and holdout
+metric objects**, with no tolerance. It does not turn a ratchet tie into an
+accuracy improvement. Such a PR must include tests that reproduce its
+specific defect before the fix and pass afterward, plus a research log.
+Do not use this label for angle, buffer, regional-method, or other calibration
+experiments, including changes outside the existing fixture coverage.
+
+Local equivalent (each file must end with its fresh run):
+
+```bash
+node scripts/check-eval-change.js baseline.jsonl candidate.jsonl unchanged
+```
+
+PR #191 uses this explicitly authorized repair track. The calendar-date
+contract change also requires downstream integration review before release;
+unchanged timetable metrics alone cannot establish app compatibility.
+
 Downstream app validation is also separate. Before bumping fajr inside
 agiftoftime, the downstream agent should run its own app-level tests and UI
 provenance checks as described in
