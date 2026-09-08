@@ -1,6 +1,6 @@
 # QA Process
 
-Last refreshed: 2026-05-15
+Last refreshed: 2026-09-08
 
 This page documents the maintainer-side checks that should run before a fajr
 release is tagged or published. It complements the PR review layers in
@@ -30,6 +30,19 @@ The preflight currently checks:
 - `node scripts/build-city-registry.js --check` to prove the checked-in runtime
   city registry still matches its generator inputs.
 - `npm pack --dry-run` to show the package shape npm would publish.
+
+The PR lint workflow also runs the registry validator and generator sync
+check. It requires zero fail-class issues, matching release preflight;
+intentional warn-class exceptions remain visible without blocking a PR.
+The former 180-failure CI budget has been removed.
+
+The validity regression suite covers the last sunset before polar day,
+missing prayer times, Fajr/sunrise ordering above 60 degrees, and Dhuhr
+checks against solar noon with institutional and caller offsets removed.
+Unavailable twilight events must return a critical
+`PRAYER_TIME_UNAVAILABLE` warning instead of throwing while formatting a
+timestamp. Apps should check `validityWarnings` before displaying times;
+an unavailable event remains an invalid `Date`, not a synthesized time.
 
 ## What Preflight Does Not Replace
 
