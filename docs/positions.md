@@ -1,6 +1,6 @@
 # fajr Position Registry
 
-Last refreshed: 2026-05-15
+Last refreshed: 2026-09-08
 
 This is the compact product-doctrine layer for fajr. It answers the question:
 when a user gives coordinates, what prayer-time position does fajr apply, and
@@ -35,6 +35,25 @@ important doctrine remains unchanged: country Asr-convention metadata may
 suggest Hanafi or standard practice, but the actual returned Asr formula changes
 only when the selected method encodes it or the caller explicitly sets
 `override.asrConvention`.
+
+Draft correctness repairs in PR #191 restore the following API contracts:
+
+- `override.method: 'auto'` restores city/country/fallback dispatch, even
+  when a legacy top-level method is present. It does not select ISNA merely
+  because Automatic was chosen.
+- Raw `astronomical()` twilight accessors expose angle crossings, returning
+  Invalid Dates when absent. A community's high-latitude prayer-time estimate
+  belongs to the separate institutional calculation path.
+- UTC year/month/day identify the requested civil date. Apps must encode
+  their location's intended date accordingly; see the README migration note.
+  Historical whole-day timezone skips fail explicitly on affected hosts.
+- Location provenance records are caller-owned copies; consumer annotations
+  cannot change later method or elevation dispatch.
+
+No regional stance or confidence grade is promoted by these repairs. All
+existing train and holdout metrics remain exactly unchanged. The separate
+correctness gate and strict calibration ratchet are documented in
+[QA Process](qa-process.md#calibration-versus-correctness-repairs).
 
 ## Confidence Grades
 
