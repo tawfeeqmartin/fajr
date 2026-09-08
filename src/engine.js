@@ -26,6 +26,17 @@ function copyRegistryRecord(value) {
   return value
 }
 
+// 🟢 Established — calendar adapter only, no astronomical or fiqh correction.
+// adhan reads host-local date fields but emits UTC event instants. Supply the
+// requested UTC civil date at local noon so ordinary DST transitions cannot
+// select the preceding/following day. Never change the process timezone.
+function adhanCalendarDate(date) {
+  const calendar = new Date(0)
+  calendar.setFullYear(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  calendar.setHours(12, 0, 0, 0)
+  return calendar
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPERIMENT 1: Regional method auto-selection
 // 🟢 Established — selecting calculation methods by country/region
@@ -2905,7 +2916,7 @@ export function prayerTimes(params) {
   params_.rounding = adhan.Rounding.None
 
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
-  const times = new adhan.PrayerTimes(coords, date, params_)
+  const times = new adhan.PrayerTimes(coords, adhanCalendarDate(date), params_)
 
   // ── Effective elevation: caller-explicit > country-uniform-timetable > city-registry > default-zero
   //
@@ -3348,13 +3359,12 @@ export function applyTayakkunBuffer(times, mins = 5) {
  *
  * @param {number} latitude  Decimal degrees, [-90, 90]
  * @param {number} longitude Decimal degrees, [-180, 180]
- * @param {Date}   date      Any Date in the target day (UTC noon recommended
- *                           for stability across timezones)
+ * @param {Date}   date      UTC year/month/day identify the requested civil date.
  * @returns {object} Astronomical primitives — see jsdoc above for shape
  */
 export function astronomical(latitude, longitude, inputDate) {
   const coords = new adhan.Coordinates(latitude, longitude)
-  const date = new Date(inputDate.getTime())
+  const date = adhanCalendarDate(inputDate)
 
   // 🟢 Established — expose angle crossings, including their absence, without
   // selecting a prayer-time estimation rule. See

@@ -237,6 +237,20 @@ Use `fajr` when you want offline local computation plus:
 
 TypeScript declarations ship with the package.
 
+For `prayerTimes()`, `dayTimes()`, `nightThirds({ date, ... })`, and
+`astronomical()`, the input Date's **UTC year/month/day** select the requested
+calendar date. Its time-of-day is ignored; returned Dates are event instants.
+To request May 5 in a location, pass `new Date('2026-05-05T00:00:00Z')`.
+For “today,” first determine the calendar date in the location's timezone,
+then encode that date in UTC. `new Date()` selects today's UTC date, which
+can differ from the location's date near midnight.
+
+Migration from v1.9.3: calculations previously read host-local date fields.
+Code that constructed a local-midnight Date should instead encode its
+intended calendar year/month/day with `Date.UTC(year, month - 1, day)`.
+This removes browser/server timezone differences and keeps next-day
+calculations consistent across daylight-saving transitions.
+
 Use `astronomical()` when an app needs the raw Layer 1 events behind a
 regional default:
 

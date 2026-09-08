@@ -360,6 +360,9 @@ export interface PrayerTimesOverride {
 export interface PrayerTimesParams {
   latitude: number
   longitude: number
+  /** UTC year/month/day identify the requested civil date, independent of
+   *  the host timezone. Encode a location-local calendar date using those
+   *  UTC fields; the time-of-day is ignored. Returned Dates are instants. */
   date: Date
   /** Meters above sea level. When omitted (or set to `undefined`), fajr
    *  auto-resolves elevation from the bundled city registry — apps that
@@ -624,8 +627,8 @@ export interface AstronomicalPrimitives {
  *
  *  @param latitude  Decimal degrees, [-90, 90]
  *  @param longitude Decimal degrees, [-180, 180]
- *  @param date      Any Date in the target day (UTC noon recommended for
- *                   stability across timezones) */
+ *  @param date      UTC year/month/day identify the requested civil date;
+ *                   the time-of-day is ignored. */
 export function astronomical(
   latitude: number,
   longitude: number,
