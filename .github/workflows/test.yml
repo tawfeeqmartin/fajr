@@ -10,6 +10,7 @@ on:
   push:
     branches: [master]
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 jobs:
   test:
@@ -37,3 +38,49 @@ jobs:
 
       - name: Run eval (committed fixtures, no network)
         run: npm run eval
+
+  accuracy:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TZ: UTC
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      EVAL_POLICY: ${{ contains(github.event.pull_request.labels.*.name, 'correctness-only') && 'unchanged' || 'calibration' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect runtime changes
+        id: scope
+        run: |
+          if git diff --quiet "$BASE_SHA" HEAD -- src/; then
+            echo 'runtime=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'runtime=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.scope.outputs.runtime == 'true'
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Check out PR baseline
+        if: steps.scope.outputs.runtime == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .baseline
+      - name: Evaluate baseline
+        if: steps.scope.outputs.runtime == 'true'
+        working-directory: .baseline
+        run: |
+          npm ci
+          npm run eval
+      - name: Evaluate candidate
+        if: steps.scope.outputs.runtime == 'true'
+        run: |
+          npm ci
+          npm run eval
+      - name: Compare baseline and candidate
+        if: steps.scope.outputs.runtime == 'true'
+        run: node scripts/check-eval-change.js .baseline/eval/results/runs.jsonl eval/results/runs.jsonl "$EVAL_POLICY"

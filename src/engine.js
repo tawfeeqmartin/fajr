@@ -16,6 +16,38 @@ import * as adhan from 'adhan'
 import citiesRegistry from './data/cities.json' with { type: 'json' }
 import { computeValidityWarnings } from './validity.js'
 
+// 🟢 Established — ownership isolation only. Registry records are plain JSON;
+// callers may annotate their own copies without changing later calculations.
+function copyRegistryRecord(value) {
+  if (Array.isArray(value)) return value.map(copyRegistryRecord)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, copyRegistryRecord(item)]))
+  }
+  return value
+}
+
+// 🟢 Established — calendar adapter only, no astronomical or fiqh correction.
+// adhan reads host-local date fields but emits UTC event instants. Supply the
+// requested UTC civil date at local noon so ordinary DST transitions cannot
+// select the preceding/following day. Never change the process timezone.
+function adhanCalendarDate(date) {
+  const calendar = new Date(0)
+  calendar.setFullYear(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  calendar.setHours(12, 0, 0, 0)
+  // Some historical timezone changes skipped an entire civil day. adhan also
+  // constructs tomorrow with local Date fields; reject an unrepresentable
+  // day rather than silently calculating another date or a two-day night.
+  const nextUTC = new Date(date.getTime())
+  nextUTC.setUTCDate(nextUTC.getUTCDate() + 1)
+  const nextLocal = new Date(calendar.getFullYear(), calendar.getMonth(), calendar.getDate() + 1, 12)
+  const sameDay = (local, utc) => local.getFullYear() === utc.getUTCFullYear() &&
+    local.getMonth() === utc.getUTCMonth() && local.getDate() === utc.getUTCDate()
+  if (!sameDay(calendar, date) || !sameDay(nextLocal, nextUTC)) {
+    throw new RangeError('Requested calendar date or next day cannot be represented by adhan in the host timezone')
+  }
+  return calendar
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPERIMENT 1: Regional method auto-selection
 // 🟢 Established — selecting calculation methods by country/region
@@ -2412,7 +2444,7 @@ export function detectLocation(latitude, longitude, fallbackElevation = 0) {
     source,
   }
   if (altMethods) out.altMethods = altMethods
-  return out
+  return copyRegistryRecord(out)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2519,7 +2551,7 @@ export function nearestCity(latitude, longitude) {
       best = c
     }
   }
-  return { city: best, distanceKm: bestDist }
+  return { city: copyRegistryRecord(best), distanceKm: bestDist }
 }
 
 /**
@@ -2774,7 +2806,10 @@ export function prayerTimes(params) {
     : null
 
   const callerExplicitElevation = (overrideElevation !== null) || (params.elevation !== undefined && params.elevation !== null)
-  const callerExplicitMethod    = Boolean(overrideMethod || (typeof params.method === 'string' && params.method.length > 0))
+  // 🟢 Established — settings dispatch only; Automatic restores the existing
+  // city/country policy, including when it overrides a legacy explicit method.
+  const selectedMethod = (overrideMethod ?? (typeof params.method === 'string' ? params.method : '')).trim()
+  const callerExplicitMethod = selectedMethod !== '' && selectedMethod !== 'auto'
   const callerExplicitAsrConvention = asrConventionOverride(params)
 
   const elevationParam = callerExplicitElevation
@@ -2800,7 +2835,7 @@ export function prayerTimes(params) {
   // `methodFromString()` helper so the override is honoured directly.
   let params_, methodName, methodSource
   if (callerExplicitMethod) {
-    const r = methodFromString(overrideMethod || params.method, country, latitude, coords)
+    const r = methodFromString(selectedMethod, country, latitude, coords)
     params_ = r.params
     methodName = r.methodName
     methodSource = 'caller-explicit'
@@ -2892,7 +2927,7 @@ export function prayerTimes(params) {
   params_.rounding = adhan.Rounding.None
 
   // adhan v4+ takes a plain Date directly (DateComponents was removed)
-  const times = new adhan.PrayerTimes(coords, date, params_)
+  const times = new adhan.PrayerTimes(coords, adhanCalendarDate(date), params_)
 
   // ── Effective elevation: caller-explicit > country-uniform-timetable > city-registry > default-zero
   //
@@ -2921,8 +2956,8 @@ export function prayerTimes(params) {
   // Surface scholarly-grounded caveats specific to this location. Empty
   // array when no specific notes apply. Each entry is a complete sentence
   // with a wiki citation. Consumers may render none, all, or a curated
-  // subset depending on UX. Currently emits the high-latitude note when
-  // |lat| ≥ 48.6° per Odeh 2009 — see wiki/regions/iceland.md.
+  // subset depending on UX. The narrow-gap note describes finite results
+  // under MiddleOfTheNight only — see knowledge/wiki/regions/iceland.md.
   const notes = []
   if (callerExplicitAsrConvention) {
     const label = callerExplicitAsrConvention === 'hanafi'
@@ -2944,12 +2979,27 @@ export function prayerTimes(params) {
     )
   }
 
-  if (Math.abs(latitude) >= 48.6) {
+  // Classification: 🟢 Established — scope existing guidance to its method;
+  // no calculation change. See knowledge/wiki/regions/iceland.md.
+  if (Math.abs(latitude) >= 48.6 &&
+      params_.highLatitudeRule === adhan.HighLatitudeRule.MiddleOfTheNight &&
+      Number.isFinite(+times.fajr) && Number.isFinite(+times.isha)) {
     notes.push(
       'High-latitude regime: at latitudes ≥48.6°, calculated Isha and ' +
       'next-day Fajr may converge to within minutes during summer per ' +
       'Odeh (2009). This is expected behaviour of the middle-of-night ' +
       'rule, not a calculation error. See knowledge/wiki/regions/iceland.md.'
+    )
+  } else if (Math.abs(latitude) >= 48.6 &&
+      Number.isFinite(+times.fajr) && Number.isFinite(+times.isha)) {
+    // Classification: 🟢 Established — retain general high-latitude disclosure
+    // without attributing another method's behaviour to this calculation.
+    // See knowledge/wiki/regions/high-latitude.md.
+    notes.push(
+      'High-latitude regime: seasonal twilight may not reach the usual ' +
+      'depression angle. This calculation uses the selected method, ' +
+      methodName + '. Consult local high-latitude guidance for its ' +
+      'applicability. See knowledge/wiki/regions/high-latitude.md.'
     )
   }
 
@@ -3335,18 +3385,31 @@ export function applyTayakkunBuffer(times, mins = 5) {
  *
  * @param {number} latitude  Decimal degrees, [-90, 90]
  * @param {number} longitude Decimal degrees, [-180, 180]
- * @param {Date}   date      Any Date in the target day (UTC noon recommended
- *                           for stability across timezones)
+ * @param {Date}   date      UTC year/month/day identify the requested civil date.
  * @returns {object} Astronomical primitives — see jsdoc above for shape
  */
-export function astronomical(latitude, longitude, date) {
+export function astronomical(latitude, longitude, inputDate) {
   const coords = new adhan.Coordinates(latitude, longitude)
+  const date = adhanCalendarDate(inputDate)
+
+  // 🟢 Established — expose angle crossings, including their absence, without
+  // selecting a prayer-time estimation rule. See
+  // knowledge/wiki/regions/high-latitude.md (persistent twilight).
+  // adhan's public nightPortions hook otherwise clamps valid crossings and
+  // replaces missing ones. Invalid portions disable that fallback: comparisons
+  // against the resulting Invalid Date are false, and absent events stay absent.
+  const rawParameters = () => {
+    const p = adhan.CalculationMethod.Other()
+    p.rounding = adhan.Rounding.None
+    p.nightPortions = () => ({ fajr: NaN, isha: NaN })
+    return p
+  }
 
   // Use a baseline calc for the convenience times. Solar noon / apparent
   // sunrise / apparent sunset don't depend on Fajr or Isha angles, so any
   // baseline works. We pick 18°/17° (MWL) for the baseline because that's
   // the calc state most consumers will recognise.
-  const baseParams = adhan.CalculationMethod.Other()
+  const baseParams = rawParameters()
   baseParams.fajrAngle = 18
   baseParams.ishaAngle = 17
   baseParams.rounding = adhan.Rounding.None
@@ -3358,7 +3421,7 @@ export function astronomical(latitude, longitude, date) {
     apparentSunset: baseline.sunset,
 
     fajrAt(angleDeg) {
-      const p = adhan.CalculationMethod.Other()
+      const p = rawParameters()
       p.fajrAngle = angleDeg
       p.ishaAngle = 17  // unused by .fajr output
       p.rounding = adhan.Rounding.None
@@ -3366,7 +3429,7 @@ export function astronomical(latitude, longitude, date) {
     },
 
     ishaAt(angleDeg) {
-      const p = adhan.CalculationMethod.Other()
+      const p = rawParameters()
       p.fajrAngle = 18  // unused by .isha output
       p.ishaAngle = angleDeg
       p.rounding = adhan.Rounding.None
@@ -3374,7 +3437,7 @@ export function astronomical(latitude, longitude, date) {
     },
 
     asrAt(shadowFactor) {
-      const p = adhan.CalculationMethod.Other()
+      const p = rawParameters()
       p.fajrAngle = 18
       p.ishaAngle = 17
       p.madhab = shadowFactor === 2 ? adhan.Madhab.Hanafi : adhan.Madhab.Shafi

@@ -100,9 +100,35 @@ describe('astronomical() — Layer 1 primitives (fajr#101)', () => {
     // Invalid Date. astronomical() exposes this honestly rather than
     // synthesising. Caller is responsible for handling.
     const f18 = a.fajrAt(18)
-    // Either a valid Date or an Invalid Date — both are honest representations
-    // of "the astronomical event at this angle on this date at this latitude".
     expect(f18).toBeInstanceOf(Date)
+    expect(Number.isNaN(f18.getTime())).toBe(true)
+    expect(Number.isNaN(a.ishaAt(18).getTime())).toBe(true)
+    expect(Number.isFinite(a.apparentSunrise.getTime())).toBe(true)
+    expect(Number.isFinite(a.apparentSunset.getTime())).toBe(true)
+  })
+
+  it('preserves real shallow twilight while deeper crossings are absent', () => {
+    const a = astronomical(60, 20, new Date('2026-06-21T12:00:00Z'))
+    expect(Number.isFinite(a.fajrAt(6).getTime())).toBe(true)
+    expect(Number.isFinite(a.ishaAt(6).getTime())).toBe(true)
+    expect(Number.isNaN(a.fajrAt(18).getTime())).toBe(true)
+    expect(Number.isNaN(a.ishaAt(18).getTime())).toBe(true)
+  })
+
+  it('does not clamp real crossings to half the night', () => {
+    const a = astronomical(48, 20, new Date('2026-06-21T12:00:00Z'))
+    // Near the summer-solstice limit, these distinct crossings used to
+    // collapse onto the same night-fraction estimate.
+    expect(a.fajrAt(18).getTime()).toBeLessThan(a.fajrAt(17).getTime())
+    expect(a.ishaAt(18).getTime()).toBeGreaterThan(a.ishaAt(17).getTime())
+  })
+
+  it('captures the requested day instead of retaining a mutable caller Date', () => {
+    const date = new Date(MAY_5)
+    const a = astronomical(CASABLANCA.lat, CASABLANCA.lon, date)
+    const before = [a.fajrAt(18), a.ishaAt(17), a.asrAt(1)]
+    date.setUTCDate(15)
+    expect([a.fajrAt(18), a.ishaAt(17), a.asrAt(1)]).toEqual(before)
   })
 
   it('no institutional offsets applied — solar noon precedes Dhuhr if a method adds zawal-ihtiyati', () => {
