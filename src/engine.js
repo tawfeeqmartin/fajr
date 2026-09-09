@@ -2956,8 +2956,8 @@ export function prayerTimes(params) {
   // Surface scholarly-grounded caveats specific to this location. Empty
   // array when no specific notes apply. Each entry is a complete sentence
   // with a wiki citation. Consumers may render none, all, or a curated
-  // subset depending on UX. Currently emits the high-latitude note when
-  // |lat| ≥ 48.6° per Odeh 2009 — see wiki/regions/iceland.md.
+  // subset depending on UX. The narrow-gap note describes finite results
+  // under MiddleOfTheNight only — see knowledge/wiki/regions/iceland.md.
   const notes = []
   if (callerExplicitAsrConvention) {
     const label = callerExplicitAsrConvention === 'hanafi'
@@ -2979,7 +2979,11 @@ export function prayerTimes(params) {
     )
   }
 
-  if (Math.abs(latitude) >= 48.6) {
+  // Classification: 🟢 Established — scope existing guidance to its method;
+  // no calculation change. See knowledge/wiki/regions/iceland.md.
+  if (Math.abs(latitude) >= 48.6 &&
+      params_.highLatitudeRule === adhan.HighLatitudeRule.MiddleOfTheNight &&
+      Number.isFinite(+times.fajr) && Number.isFinite(+times.isha)) {
     notes.push(
       'High-latitude regime: at latitudes ≥48.6°, calculated Isha and ' +
       'next-day Fajr may converge to within minutes during summer per ' +

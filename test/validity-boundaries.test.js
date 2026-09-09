@@ -48,7 +48,21 @@ describe('validity at astronomical and polar boundaries', () => {
     expect(warnings).toContainEqual(expect.objectContaining({
       code: 'PRAYER_TIME_UNAVAILABLE', severity: 'critical', prayer, applied: null,
     }))
+    expect(warnings.filter(w => w.prayer === prayer && w.code.endsWith('_HIGH_LAT_RULE_APPLIED'))).toEqual([])
     expect(() => JSON.stringify(warnings)).not.toThrow()
+  })
+
+  it('does not describe a TwilightAngle calculation as the middle-of-night rule', () => {
+    const times = prayerTimes({ latitude: 66, longitude: 20, date: new Date('2026-06-12T12:00:00Z'), elevation: 0 })
+    expect(times.method).toContain('TwilightAngle')
+    expect(times.notes.join(' ')).not.toContain('middle-of-night')
+    expect(times.validityWarnings.filter(w => w.code.endsWith('_HIGH_LAT_RULE_APPLIED'))).toEqual([])
+  })
+
+  it('retains the narrow-gap note for finite middle-of-night results', () => {
+    const times = prayerTimes({ latitude: 64.1466, longitude: -21.9426, date: new Date('2026-07-12T12:00:00Z'), elevation: 0 })
+    expect(times.method).toContain('MiddleOfTheNight')
+    expect(times.notes.join(' ')).toContain('middle-of-night')
   })
 
   it.each([

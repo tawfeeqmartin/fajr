@@ -1,6 +1,6 @@
 # Calibration Recipe — Path A WMAE Improvements
 
-> **Last refreshed:** 2026-09-08 (v1.9.3 baseline; draft repairs leave metrics unchanged). This remains the Path A calibration
+> **Last refreshed:** 2026-09-09 (v1.9.3 baseline; draft repairs leave metrics unchanged). This remains the Path A calibration
 > methodology guide, not the live scoreboard. Current WMAE, corpus counts, and
 > per-source residuals live in [SCOREBOARD.md](../SCOREBOARD.md) and
 > [docs/progress.md](progress.md). v1.9.3 shipped Morocco uniform-timetable

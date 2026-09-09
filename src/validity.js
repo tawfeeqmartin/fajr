@@ -143,23 +143,27 @@ export function computeValidityWarnings({ rawTimes, result, params, coords, date
   // fired. Emit info for transparency.
   const lat = coords.latitude != null ? coords.latitude : (coords.latitude_ ?? 0)
   const absLat = Math.abs(lat)
-  if (anyHighLatRule && absLat > 48) {
+  // A missing result is already explained by PRAYER_TIME_UNAVAILABLE.
+  // Do not imply a rule produced a time when no time exists.
+  if (anyHighLatRule && absLat > 48 && !isInvalidDate(result.fajr)) {
     warnings.push({
       severity: 'info',
       prayer: 'fajr',
       code: 'FAJR_HIGH_LAT_RULE_APPLIED',
       message: `Latitude ${lat.toFixed(2)}° with method-configured high-latitude rule. Fajr may be derived from a night-fraction rule (MiddleOfTheNight, SeventhOfTheNight, or TwilightAngle) rather than from a strict astronomical depression angle.`,
       astronomicalReference: null,
-      applied: isInvalidDate(result.fajr) ? null : result.fajr.toISOString(),
+      applied: result.fajr.toISOString(),
       diffMinutes: null,
     })
+  }
+  if (anyHighLatRule && absLat > 48 && !isInvalidDate(result.isha)) {
     warnings.push({
       severity: 'info',
       prayer: 'isha',
       code: 'ISHA_HIGH_LAT_RULE_APPLIED',
       message: `Latitude ${lat.toFixed(2)}° with method-configured high-latitude rule. Isha may be derived from a night-fraction rule rather than from a strict astronomical depression angle.`,
       astronomicalReference: null,
-      applied: isInvalidDate(result.isha) ? null : result.isha.toISOString(),
+      applied: result.isha.toISOString(),
       diffMinutes: null,
     })
   }

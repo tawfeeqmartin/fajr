@@ -4,7 +4,7 @@
 
 *Independent Research, 2026*
 
-> **Last refreshed:** 2026-09-08 (draft correctness repairs against v1.9.3). This paper preserves the historical
+> **Last refreshed:** 2026-09-09 (draft correctness repairs against v1.9.3). This paper preserves the historical
 > Experiment 1-7 narrative and v1.0 milestone. The live current WMAE and corpus
 > counts are reported in [SCOREBOARD.md](../SCOREBOARD.md) and
 > [`docs/progress.md`](progress.md).

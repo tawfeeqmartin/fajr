@@ -1,6 +1,6 @@
 # Fajr Accuracy Dashboard
 
-Last refreshed: 2026-09-08 — historical figures retained; current train 0.9757 min and holdout 7.3646 min are unchanged by the draft correctness repairs.
+Last refreshed: 2026-09-09 — historical figures retained; current train 0.9757 min and holdout 7.3646 min are unchanged by the draft correctness repairs.
 
 An interactive HTML dashboard visualizing the autoresearch experiment trajectory through the v1.0 milestone.
 
