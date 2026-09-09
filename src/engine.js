@@ -2990,6 +2990,17 @@ export function prayerTimes(params) {
       'Odeh (2009). This is expected behaviour of the middle-of-night ' +
       'rule, not a calculation error. See knowledge/wiki/regions/iceland.md.'
     )
+  } else if (Math.abs(latitude) >= 48.6 &&
+      Number.isFinite(+times.fajr) && Number.isFinite(+times.isha)) {
+    // Classification: 🟢 Established — retain general high-latitude disclosure
+    // without attributing another method's behaviour to this calculation.
+    // See knowledge/wiki/regions/high-latitude.md.
+    notes.push(
+      'High-latitude regime: seasonal twilight may not reach the usual ' +
+      'depression angle. This calculation uses the selected method, ' +
+      methodName + '. Consult local high-latitude guidance for its ' +
+      'applicability. See knowledge/wiki/regions/high-latitude.md.'
+    )
   }
 
   // ── v1.7.0 phase 2: auto-resolution notes (caller-silent paths only)

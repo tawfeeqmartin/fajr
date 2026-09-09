@@ -235,3 +235,18 @@ The initial recommended order has now been implemented in the repair
 follow-up above. Further regional calibration still needs source-quality
 and seasonal-evidence review rather than optimization of the mixed holdout
 aggregate.
+
+
+## Downstream warning follow-up — 2026-09-09
+
+The rendered polar screen exposed misleading diagnostic combinations: an
+applied-rule advisory with no returned prayer time, and a MiddleOfTheNight note
+under TwilightAngle. Advisories now require a finite result for that prayer;
+the specific narrow-gap note requires MiddleOfTheNight. Finite results under
+other methods retain general high-latitude disclosure, preserving agiftoftime's
+existing Anchorage contract test. The critical unavailable state remains.
+
+Final upstream suite: 506 passing tests; train and holdout metrics remain exactly
+identical. See `autoresearch/logs/2026-09-09-01-21.md` and
+`autoresearch/logs/2026-09-09-01-34.md`. Downstream fixes and full CI evidence are
+in [agiftoftime#56](https://github.com/tawfeeqmartin/agiftoftime/pull/56).

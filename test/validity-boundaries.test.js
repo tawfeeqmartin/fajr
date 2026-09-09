@@ -59,6 +59,13 @@ describe('validity at astronomical and polar boundaries', () => {
     expect(times.validityWarnings.filter(w => w.code.endsWith('_HIGH_LAT_RULE_APPLIED'))).toEqual([])
   })
 
+  it('retains general high-latitude disclosure for finite results under other methods', () => {
+    const times = prayerTimes({ latitude: 61.2181, longitude: -149.9003, date, elevation: 0 })
+    expect(times.notes.join(' ')).toContain('High-latitude regime')
+    expect(times.notes.join(' ')).toContain(times.method)
+    expect(times.notes.join(' ')).not.toContain('middle-of-night')
+  })
+
   it('retains the narrow-gap note for finite middle-of-night results', () => {
     const times = prayerTimes({ latitude: 64.1466, longitude: -21.9426, date: new Date('2026-07-12T12:00:00Z'), elevation: 0 })
     expect(times.method).toContain('MiddleOfTheNight')
