@@ -1,0 +1,392 @@
+[
+  {
+    "city": "Alexandria",
+    "city_local": "الأسكندرية",
+    "country": "Egypt",
+    "latitude": 31.2001,
+    "longitude": 29.9187,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:14",
+        "sunrise": "05:59",
+        "dhuhr": "12:57",
+        "asr": "16:36",
+        "maghrib": "19:56",
+        "isha": "21:28"
+      }
+    ]
+  },
+  {
+    "city": "Tanta",
+    "city_local": "طنطــا",
+    "country": "Egypt",
+    "latitude": 30.7865,
+    "longitude": 31.0004,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:12",
+        "sunrise": "05:56",
+        "dhuhr": "12:53",
+        "asr": "16:31",
+        "maghrib": "19:51",
+        "isha": "21:23"
+      }
+    ]
+  },
+  {
+    "city": "Mansoura",
+    "city_local": "المنصورة",
+    "country": "Egypt",
+    "latitude": 31.0364,
+    "longitude": 31.3807,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:09",
+        "sunrise": "05:53",
+        "dhuhr": "12:51",
+        "asr": "16:30",
+        "maghrib": "19:50",
+        "isha": "21:22"
+      }
+    ]
+  },
+  {
+    "city": "Zagazig",
+    "city_local": "الزقـازيق",
+    "country": "Egypt",
+    "latitude": 30.5877,
+    "longitude": 31.5022,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:11",
+        "sunrise": "05:54",
+        "dhuhr": "12:51",
+        "asr": "16:29",
+        "maghrib": "19:48",
+        "isha": "21:20"
+      }
+    ]
+  },
+  {
+    "city": "Asyut",
+    "city_local": "أسيــوط",
+    "country": "Egypt",
+    "latitude": 27.1809,
+    "longitude": 31.1837,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:25",
+        "sunrise": "06:02",
+        "dhuhr": "12:52",
+        "asr": "16:22",
+        "maghrib": "19:43",
+        "isha": "21:09"
+      }
+    ]
+  },
+  {
+    "city": "Sohag",
+    "city_local": "سـوهاج",
+    "country": "Egypt",
+    "latitude": 26.5569,
+    "longitude": 31.6948,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:25",
+        "sunrise": "06:02",
+        "dhuhr": "12:50",
+        "asr": "16:18",
+        "maghrib": "19:39",
+        "isha": "21:05"
+      }
+    ]
+  },
+  {
+    "city": "Beni Suef",
+    "city_local": "بنى سويف",
+    "country": "Egypt",
+    "latitude": 29.0661,
+    "longitude": 31.0994,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:18",
+        "sunrise": "05:59",
+        "dhuhr": "12:53",
+        "asr": "16:27",
+        "maghrib": "19:47",
+        "isha": "21:16"
+      }
+    ]
+  },
+  {
+    "city": "Minya",
+    "city_local": "المنـيـا",
+    "country": "Egypt",
+    "latitude": 28.0871,
+    "longitude": 30.7618,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:23",
+        "sunrise": "06:02",
+        "dhuhr": "12:54",
+        "asr": "16:26",
+        "maghrib": "19:46",
+        "isha": "21:14"
+      }
+    ]
+  },
+  {
+    "city": "Qena",
+    "city_local": "قـــنا",
+    "country": "Egypt",
+    "latitude": 26.1551,
+    "longitude": 32.716,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:22",
+        "sunrise": "05:58",
+        "dhuhr": "12:46",
+        "asr": "16:13",
+        "maghrib": "19:34",
+        "isha": "21:00"
+      }
+    ]
+  },
+  {
+    "city": "Aswan",
+    "city_local": "أســوان",
+    "country": "Egypt",
+    "latitude": 24.0889,
+    "longitude": 32.8998,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.651Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:28",
+        "sunrise": "06:02",
+        "dhuhr": "12:45",
+        "asr": "16:07",
+        "maghrib": "19:29",
+        "isha": "20:52"
+      }
+    ]
+  },
+  {
+    "city": "Marsa Matruh",
+    "city_local": "مطـروح",
+    "country": "Egypt",
+    "latitude": 31.3543,
+    "longitude": 27.2373,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.652Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:24",
+        "sunrise": "06:09",
+        "dhuhr": "13:08",
+        "asr": "16:48",
+        "maghrib": "20:07",
+        "isha": "21:40"
+      }
+    ]
+  },
+  {
+    "city": "Hurghada",
+    "city_local": "الغردقـة",
+    "country": "Egypt",
+    "latitude": 27.2579,
+    "longitude": 33.8116,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.652Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:14",
+        "sunrise": "05:52",
+        "dhuhr": "12:42",
+        "asr": "16:11",
+        "maghrib": "19:32",
+        "isha": "20:58"
+      }
+    ]
+  },
+  {
+    "city": "Kharga Oasis",
+    "city_local": "الخارجـة",
+    "country": "Egypt",
+    "latitude": 25.4513,
+    "longitude": 30.5429,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.652Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:34",
+        "sunrise": "06:10",
+        "dhuhr": "12:56",
+        "asr": "16:21",
+        "maghrib": "19:43",
+        "isha": "21:07"
+      }
+    ]
+  },
+  {
+    "city": "Ismailia",
+    "city_local": "الإسماعيلية",
+    "country": "Egypt",
+    "latitude": 30.5965,
+    "longitude": 32.2715,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.652Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:08",
+        "sunrise": "05:51",
+        "dhuhr": "12:48",
+        "asr": "16:26",
+        "maghrib": "19:45",
+        "isha": "21:17"
+      }
+    ]
+  },
+  {
+    "city": "Damietta",
+    "city_local": "دميـاط",
+    "country": "Egypt",
+    "latitude": 31.4165,
+    "longitude": 31.8133,
+    "elevation": 0,
+    "timezone": "Africa/Cairo",
+    "method": "Egyptian (ESA — General Authority for Survey)",
+    "source": "Egyptian General Authority for Survey (esa.gov.eg/praytimes.aspx)",
+    "source_institution": "Egyptian General Authority for Survey (ESA)",
+    "source_method": "Egyptian (19.5°/17.5°) per ESA",
+    "source_url": "https://www.esa.gov.eg/praytimes.aspx",
+    "source_fetched": "2026-05-26T06:55:34.652Z",
+    "dates": [
+      {
+        "date": "2026-05-26",
+        "fajr": "04:06",
+        "sunrise": "05:51",
+        "dhuhr": "12:50",
+        "asr": "16:29",
+        "maghrib": "19:49",
+        "isha": "21:22"
+      }
+    ]
+  }
+]
